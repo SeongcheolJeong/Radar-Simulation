@@ -39,6 +39,10 @@ Onboard one public radar dataset with high conversion cost into this repository'
 
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_execution.py`
 
+### Stage 5: One-command Orchestration
+
+- `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py`
+
 ## Acceptance Criteria
 
 1. One public dataset sample directory converts to at least one valid measured pack

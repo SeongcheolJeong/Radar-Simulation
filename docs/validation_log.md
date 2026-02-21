@@ -332,3 +332,12 @@
   - 4D numeric variable auto-selection pass
   - explicit variable selection pass
   - invalid variable/error-path checks pass
+
+## Dataset Onboarding Pipeline
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_dataset_onboarding_pipeline.py`
+- Result: pass
+- Notes:
+  - One-command onboarding path pass (`adc_npz -> pack -> plan -> replay`)
+  - Work-root artifacts generated as expected (`onboarding_summary.json`, replay outputs)

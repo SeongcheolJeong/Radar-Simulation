@@ -47,6 +47,8 @@ Implemented baseline converters:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/extract_mat_adc_to_npz.py`
 - ADC NPZ -> measured pack:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_pack_from_adc_npz_dir.py`
+- one-command orchestration:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py`
 
 This phase is dataset-specific and should be added adapter-by-adapter.
 

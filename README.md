@@ -201,6 +201,12 @@ Run MAT ADC extractor core validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mat_adc_extractor_core.py
 ```
 
+Run one-command onboarding pipeline validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_dataset_onboarding_pipeline.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -388,6 +394,18 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_pac
   --output-pack-root /path/to/pack_out \
   --scenario-id my_scenario \
   --adc-order sctr
+```
+
+Run one-command onboarding (ADC NPZ input):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py \
+  --input-type adc_npz \
+  --input-root /path/to/adc_npz \
+  --scenario-id dataset_v1 \
+  --work-root /path/to/onboard_work \
+  --adc-order sctr \
+  --allow-unlocked
 ```
 
 Validate CLI integration with bundle:
