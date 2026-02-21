@@ -838,6 +838,24 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_const
   --output-summary-json /path/to/constrained_refit_drift_search_summary.json
 ```
 
+Run constrained refit consistency-gate validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_evaluate_constrained_refit_consistency_gate.py
+```
+
+Evaluate constrained refit multi-case consistency gate:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_constrained_refit_consistency_gate.py \
+  --constrained-summary-json /path/to/constrained_refit_drift_search_summary.json \
+  --output-json /path/to/constrained_refit_consistency_gate_summary.json \
+  --max-total-pass-rate-drop 0.0 \
+  --max-total-pass-count-drop-ratio 0.0 \
+  --max-total-fail-count-increase-ratio 0.0 \
+  --max-metric-drift-mean 0.1
+```
+
 Fetch reference repositories:
 
 ```bash

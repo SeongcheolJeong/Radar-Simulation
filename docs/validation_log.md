@@ -885,3 +885,28 @@
     - `flat`: `adopt_selected_fit_by_drift_objective` (score `0.0512`)
     - `balanced`: `exploratory_fit_candidate_selected_by_drift` (score `0.3435`)
     - `steep`: `exploratory_fit_candidate_selected_by_drift` (score `132.6327`)
+
+## Constrained Refit Consistency Gate
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_evaluate_constrained_refit_consistency_gate.py`
+- Result: pass
+- Notes:
+  - success path selects lowest-score adopt preset
+  - strict metric drift threshold triggers deterministic fallback `baseline_no_fit`
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_constrained_refit_drift_search.py --baseline-mode provided --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_00_bms1000_512/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --case bms1000_full897=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/packs/pack_xiangyu_2019_04_09_bms1000_v1_full897::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_01_bms1000_full897/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_full897/replay_report.json --case cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/packs/pack_xiangyu_2019_04_09_cms1000_v1_128::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_02_cms1000_128/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_cms1000_v1_128/replay_report.json --csv-case bms1000=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv --csv-case cms1000=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_targets_all_presets_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/constrained_refit_drift_search_xiangyu_targets_all_presets_2026_02_21.json`
+- Result: pass
+- Notes:
+  - preset count: `3`, case count: `3`, fit candidates per preset: `4`
+  - search-best preset by score: `flat` (`42.7271`)
+  - all presets remained exploratory (`exploratory_fit_candidate_selected_by_drift`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_constrained_refit_consistency_gate.py --constrained-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/constrained_refit_drift_search_xiangyu_targets_all_presets_2026_02_21.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/constrained_refit_consistency_gate_xiangyu_targets_2026_02_21.json`
+- Result: pass
+- Notes:
+  - `eligible_preset_count=0`, `gate_failed=true`
+  - final decision: `fallback_to_baseline_no_fit`
+  - rejection roots: non-zero degradation terms across all presets

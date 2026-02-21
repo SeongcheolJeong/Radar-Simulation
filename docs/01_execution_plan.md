@@ -60,6 +60,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.26: Fit-lock candidate search orchestrator with headroom short-circuit (efficiency gate)
 - [x] M10.27: Saturated-baseline drift objective and exploratory fit ranking path
 - [x] M10.28: Constrained refit loop (preset grids) + drift-objective search ranking
+- [x] M10.29: Multi-case constrained-refit consistency gate + Xiangyu target decision
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -72,7 +73,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.29: expand constrained refit search from 1-case probe to multi-case consistency gate.
+Start M10.30: targeted low-degradation search-space refinement around `flat` regime (multi-case).
 
 ## M10.19 Decision Gate
 
@@ -148,3 +149,10 @@ M10.28 outcome (2026-02-21):
 - default `flat` preset grid corrected to valid positive range exponents (`range_power_exponent > 0`)
 - synthetic end-to-end validation added (`validate_run_constrained_refit_drift_search.py`)
 - Xiangyu `bms1000_512` 3-preset probe selected `flat` as best (`adopt_selected_fit_by_drift_objective`, score `0.0512`)
+
+M10.29 outcome (2026-02-21):
+
+- multi-case constrained search executed on Xiangyu targets (`bms1000_512`, `bms1000_full897`, `cms1000_128`)
+- consistency gate added to convert preset-search results into deterministic adopt/fallback decision
+- gate diagnostics showed all presets violate non-degradation constraints on the 3-case set
+- final decision fixed as fallback `baseline_no_fit`
