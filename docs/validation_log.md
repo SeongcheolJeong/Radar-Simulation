@@ -741,3 +741,20 @@
   - `case_count=3`, `improved_case_count=3`
   - Best attempt in all cases was scattering mixed fit
   - Stop-gate remained armed but not triggered (`stop_reason=fit_list_exhausted` for all cases)
+
+## Fit-Aware Replay Saturation Gate
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_fit_aware_replay_saturation.py`
+- Result: pass
+- Notes:
+  - Saturation analyzer classification pass (saturated vs normal synthetic cases)
+  - Gate fail/pass boundary check pass via `max_allowed_saturated_cases` sweep (`0 -> fail`, `1 -> pass`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_fit_aware_replay_saturation.py --batch-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_2026_02_21.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_replay_saturation_gate_xiangyu_targets_2026_02_21.json --max-allowed-saturated-cases 0`
+- Result: pass
+- Notes:
+  - `case_count=3`, `saturated_case_count=2`
+  - gate failed with recommendation `proxy_strength_review_required`
+  - saturated cases: `bms1000_512`, `bms1000_full897`

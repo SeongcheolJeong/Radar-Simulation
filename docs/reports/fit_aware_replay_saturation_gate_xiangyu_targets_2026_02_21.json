@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "input_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_2026_02_21.json",
+  "thresholds": {
+    "min_baseline_candidate_count": 64,
+    "high_pass_rate_threshold": 0.98,
+    "large_pass_rate_delta_threshold": 0.5,
+    "pass_status_change_ratio_threshold": 0.8,
+    "max_allowed_saturated_cases": 0
+  },
+  "case_count": 3,
+  "saturated_case_count": 2,
+  "gate_failed": true,
+  "recommendation": "proxy_strength_review_required",
+  "cases": [
+    {
+      "label": "bms1000_512",
+      "candidate_count": 512,
+      "baseline_pass_rate": 0.001953125,
+      "fit_pass_rate": 1.0,
+      "pass_rate_delta": 0.998046875,
+      "candidate_pass_status_changed": 511,
+      "candidate_pass_status_change_ratio": 0.998046875,
+      "criteria": {
+        "enough_candidates": true,
+        "high_fit_pass_rate": true,
+        "large_pass_rate_delta": true,
+        "large_pass_status_change_ratio": true
+      },
+      "saturated": true,
+      "reasons": [
+        "fit_pass_rate_high",
+        "pass_rate_delta_large",
+        "candidate_status_change_ratio_large"
+      ]
+    },
+    {
+      "label": "bms1000_full897",
+      "candidate_count": 897,
+      "baseline_pass_rate": 0.0011148272017837235,
+      "fit_pass_rate": 1.0,
+      "pass_rate_delta": 0.9988851727982163,
+      "candidate_pass_status_changed": 896,
+      "candidate_pass_status_change_ratio": 0.9988851727982163,
+      "criteria": {
+        "enough_candidates": true,
+        "high_fit_pass_rate": true,
+        "large_pass_rate_delta": true,
+        "large_pass_status_change_ratio": true
+      },
+      "saturated": true,
+      "reasons": [
+        "fit_pass_rate_high",
+        "pass_rate_delta_large",
+        "candidate_status_change_ratio_large"
+      ]
+    },
+    {
+      "label": "cms1000_128",
+      "candidate_count": 128,
+      "baseline_pass_rate": 0.0859375,
+      "fit_pass_rate": 0.2265625,
+      "pass_rate_delta": 0.140625,
+      "candidate_pass_status_changed": 18,
+      "candidate_pass_status_change_ratio": 0.140625,
+      "criteria": {
+        "enough_candidates": true,
+        "high_fit_pass_rate": false,
+        "large_pass_rate_delta": false,
+        "large_pass_status_change_ratio": false
+      },
+      "saturated": false,
+      "reasons": []
+    }
+  ]
+}

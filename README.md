@@ -703,6 +703,21 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_fit_a
   --output-summary-json /path/to/fit_aware_batch_summary.json
 ```
 
+Run fit-aware replay saturation-gate validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_fit_aware_replay_saturation.py
+```
+
+Analyze saturation risk from fit-aware replay batch summary:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_fit_aware_replay_saturation.py \
+  --batch-summary-json /path/to/fit_aware_batch_summary.json \
+  --output-json /path/to/fit_aware_replay_saturation_summary.json \
+  --max-allowed-saturated-cases 0
+```
+
 Fetch reference repositories:
 
 ```bash

@@ -53,6 +53,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.19: Measured replay fit-change impact gate (dependency audit) + Xiangyu no-op skip decision
 - [x] M10.20: Fit-aware measured pack rebuild path + real-plan replay impact confirmation (`bms1000_run1`)
 - [x] M10.21: Fit-aware measured replay batch scaling to target plans + no-gain stop gate execution
+- [x] M10.22: Fit-aware replay saturation sanity gate and target-batch risk classification
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -65,7 +66,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.22: add fit-aware replay saturation sanity gate (proxy-strength check) and determine safe default policy before wider rollout.
+Start M10.23: introduce proxy-strength cap/tuning policy and re-run fit-aware batch to avoid pass-rate saturation on BMS1000 targets.
 
 ## M10.19 Decision Gate
 
@@ -94,3 +95,9 @@ M10.21 outcome (2026-02-21):
 - fit-aware measured replay batch runner executed on target plans (`bms1000_512`, `bms1000_full897`, `cms1000_128`)
 - all 3 cases improved over baseline (`improved_case_count=3`)
 - stop gate condition (`max_no_gain_attempts=2`) remained armed; no case hit no-gain streak in this run
+
+M10.22 outcome (2026-02-21):
+
+- saturation sanity gate added for fit-aware replay batch summaries
+- Xiangyu target batch analysis flagged `2/3` saturated cases (`bms1000_512`, `bms1000_full897`)
+- recommendation emitted: `proxy_strength_review_required`
