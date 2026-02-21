@@ -67,7 +67,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M11.1: Case-level family lock manifest materialization + replay verification
 - [x] M11.2: Native scene path generator interface + non-frame backend stub
 - [x] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
-- [ ] M11.4: Multi-backend parity harness on shared scenes
+- [x] M11.4: Multi-backend parity harness on shared scenes
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -80,7 +80,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M11.4: add multi-backend parity harness (`hybrid_frames` vs analytic/non-frame) on shared synthetic scenes.
+Start M12.0: define and implement first mesh/material-aware scene backend adapter candidate with acceptance criteria.
 
 ## M10.19 Decision Gate
 
@@ -206,3 +206,10 @@ M11.3 outcome (2026-02-21):
 - propagation metadata serialization wired in `path_list.json`
 - hybrid and analytic backends both emit path metadata
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/91_propagation_schema_expansion_contract.md`
+
+M11.4 outcome (2026-02-21):
+
+- multi-backend parity harness CLI added (`reference scene` vs `candidate scene`)
+- parity summary includes backend IDs, map paths, metrics/failures
+- validation added for `hybrid_frames` vs `analytic_targets` synthetic scene pair
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/92_multi_backend_parity_harness_contract.md`

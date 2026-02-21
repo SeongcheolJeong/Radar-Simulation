@@ -1009,3 +1009,12 @@
 - Result: pass
 - Notes:
   - `analytic_targets` backend path metadata emission validated
+
+## Multi-Backend Parity Harness (M11.4)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_backend_parity.py`
+- Result: pass
+- Notes:
+  - harness executes both scene backends (`hybrid_frames`, `analytic_targets`)
+  - parity summary JSON emitted with metrics/failures payload
