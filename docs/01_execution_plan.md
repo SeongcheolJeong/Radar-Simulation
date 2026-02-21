@@ -75,7 +75,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.4: Sidecar strict/non-strict compatibility matrix and bridge E2E regression lock
 - [x] M12.5: Real-scene asset onboarding pilot (`public glTF/OBJ sample -> scene pipeline`) and lockable fixture path
 - [x] M12.6: Public multi-object scene fixture pack and deterministic replay bundle lock
-- [ ] M12.7: Public OBJ sample parity onboarding and mixed-format fixture matrix lock
+- [x] M12.7: Public OBJ sample parity onboarding and mixed-format fixture matrix lock
+- [ ] M13.0: Mesh-geometry proxy extraction baseline (`centroid/area`) from OBJ/glTF metadata for auto-populated scene objects
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -88,7 +89,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M12.7: add OBJ public-sample onboarding path and mixed-format fixture regression matrix.
+Start M13.0: build mesh-geometry proxy extractor baseline and wire it to scene-object auto population.
 
 ## M10.19 Decision Gate
 
@@ -275,3 +276,10 @@ M12.6 outcome (2026-02-21):
 - real public `Box.glb` triple-lane run executed and summary locked
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/99_public_multi_object_fixture_bundle_contract.md`
 - summary evidence: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_triple_lane_v1_2026_02_21.json`
+
+M12.7 outcome (2026-02-21):
+
+- mixed-format fixture matrix validator added (`glTF + OBJ`)
+- public OBJ onboarding run added and summary locked (`WaltHead.obj`)
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/100_public_obj_mixed_format_matrix_contract.md`
+- summary evidence: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_walthead_obj_v1_2026_02_21.json`

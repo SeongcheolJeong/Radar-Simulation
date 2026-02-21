@@ -1119,3 +1119,19 @@
 - Notes:
   - real public sample multi-object run completed
   - replay bundle manifest generated with artifact hashes
+
+## Public OBJ Mixed-Format Matrix (M12.7)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_public_mixed_format_fixture_matrix.py`
+- Result: pass
+- Notes:
+  - local glTF/OBJ fixture matrix validates parser mesh-format mapping parity
+  - both formats produce canonical outputs
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_public_scene_asset_onboarding.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1 --asset-url https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/obj/walt/WaltHead.obj --asset-relative-path assets/WaltHead.obj --scene-id walthead_obj_v1 --object-layout-preset single --strict --summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_walthead_obj_v1_2026_02_21.json`
+- Result: pass
+- Notes:
+  - real public OBJ onboarding run completed
+  - summary locked with OBJ asset hash and output artifact paths

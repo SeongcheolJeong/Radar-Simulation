@@ -1,0 +1,31 @@
+{
+  "scene_id": "walthead_obj_v1",
+  "profile": "v1",
+  "expected_sidecar_version": 1,
+  "strict_mode": true,
+  "object_layout_preset": "single",
+  "asset_source": "url:https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/obj/walt/WaltHead.obj",
+  "asset_relative_path": "assets/WaltHead.obj",
+  "asset_sha256": "b8276ca88369af967a2329792c9c3df202ce8c02612790ff3842eba3d0dd44b5",
+  "sidecar_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1/scene_sidecar_public_asset.json",
+  "asset_manifest_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1/asset_manifest.json",
+  "scene_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1/scene.json",
+  "replay_bundle_manifest_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1/replay_bundle_manifest.json",
+  "run_result": {
+    "path_list_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1/scene_outputs/path_list.json",
+    "adc_cube_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1/scene_outputs/adc_cube.npz",
+    "radar_map_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/walthead_obj_v1/scene_outputs/radar_map.npz",
+    "tx_schedule": [
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1
+    ],
+    "frame_count": 8,
+    "hybrid_estimation_npz": null
+  }
+}
