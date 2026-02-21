@@ -537,3 +537,19 @@
 - Result: pass
 - Notes:
   - Label-derived real-data batch fit summary generated (`run_count=4`)
+
+## Xiangyu Label Fit Experiment Matrix
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_xiangyu_label_fit_experiment.py`
+- Result: pass
+- Notes:
+  - End-to-end matrix orchestration (`CSV build + fit batch`) validation pass
+  - Multi-case input and per-frame-count summary generation pass
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_xiangyu_label_fit_experiment.py --case bms1000=/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/radar_raw_frame::/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/text_labels --case cms1000=/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_cms1000/radar_raw_frame::/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_cms1000/text_labels --frame-counts 128,512 --models reflection,scattering --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/xiangyu_label_fit_experiment_128_512_2026_02_21.json --adc-type mat --adc-glob "*.mat" --adc-order scrt --nfft-range 128 --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --fit-top-k 10`
+- Result: pass
+- Notes:
+  - Real Xiangyu matrix run completed for frame-counts `128,512`
+  - Summary JSON emitted for case/model/frame-count comparison

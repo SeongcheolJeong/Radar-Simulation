@@ -43,6 +43,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.09: Cross-family parity shift evaluator (`baseline/tuned x familyA/familyB`) + Xiangyu report
 - [x] M10.10: Path-power fit batch runner (`multi CSV x multi model`) + demo summary
 - [x] M10.11: Xiangyu label+ADC -> path_power_samples converter + real 128-frame CSV runs
+- [x] M10.12: Xiangyu label-fit experiment matrix runner (`frame-count sweep`) + 128/512 report
 
 ## Iteration Rule (One-by-One Verification)
 

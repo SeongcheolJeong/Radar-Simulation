@@ -271,6 +271,12 @@ Run Xiangyu label->path-power CSV validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_samples_from_xiangyu_labels.py
 ```
 
+Run Xiangyu label fit experiment validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_xiangyu_label_fit_experiment.py
+```
+
 Fit path-power parameters from measured CSV:
 
 ```bash
@@ -329,6 +335,18 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_pat
   --scenario-id xiangyu_bms1000 \
   --adc-type mat \
   --adc-order scrt
+```
+
+Run Xiangyu label fit experiment matrix (CSV + fit batch):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_xiangyu_label_fit_experiment.py \
+  --case bms1000=/path/to/2019_04_09_bms1000/radar_raw_frame::/path/to/2019_04_09_bms1000/text_labels \
+  --case cms1000=/path/to/2019_04_09_cms1000/radar_raw_frame::/path/to/2019_04_09_cms1000/text_labels \
+  --frame-counts 128,512 \
+  --models reflection,scattering \
+  --output-root /path/to/xiangyu_label_fit_experiment \
+  --output-summary-json /path/to/xiangyu_label_fit_experiment_summary.json
 ```
 
 Analyze parity drift across replay reports:

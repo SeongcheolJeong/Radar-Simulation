@@ -1,0 +1,558 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "case_name": "bms1000",
+      "adc_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/radar_raw_frame",
+      "labels_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/text_labels"
+    },
+    {
+      "case_name": "cms1000",
+      "adc_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_cms1000/radar_raw_frame",
+      "labels_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_cms1000/text_labels"
+    }
+  ],
+  "frame_counts": [
+    128,
+    512
+  ],
+  "models": [
+    "reflection",
+    "scattering"
+  ],
+  "output_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix",
+  "experiments": [
+    {
+      "frame_count": 128,
+      "csv_rows": [
+        {
+          "case_name": "bms1000",
+          "scenario_id": "xiangyu_bms1000_128",
+          "csv_path": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv",
+          "meta_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.meta.json",
+          "selected_row_count": 128,
+          "processed_frame_count": 128,
+          "raw_label_count": 128
+        },
+        {
+          "case_name": "cms1000",
+          "scenario_id": "xiangyu_cms1000_128",
+          "csv_path": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv",
+          "meta_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.meta.json",
+          "selected_row_count": 127,
+          "processed_frame_count": 127,
+          "raw_label_count": 127
+        }
+      ],
+      "fit_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/path_power_fit_batch_summary_128.json",
+      "fit_summary": {
+        "version": 1,
+        "batch_id": "xiangyu_label_fit_128",
+        "models": [
+          "reflection",
+          "scattering"
+        ],
+        "cases": [
+          {
+            "label": "bms1000",
+            "csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv"
+          },
+          {
+            "label": "cms1000",
+            "csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv"
+          }
+        ],
+        "run_count": 4,
+        "fits_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits",
+        "runs": [
+          {
+            "case_label": "bms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv",
+            "model": "reflection",
+            "sample_count": 128,
+            "searched_candidates": 6,
+            "best_rmse_log": 0.11433907428879984,
+            "best_mae_log": 0.08531938522432304,
+            "best_params": {
+              "range_power_exponent": 2.5,
+              "gain_scale": 979630234.4332606
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_reflection.json"
+          },
+          {
+            "case_label": "bms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv",
+            "model": "scattering",
+            "sample_count": 128,
+            "searched_candidates": 864,
+            "best_rmse_log": 0.07318263591065133,
+            "best_mae_log": 0.0589592841007538,
+            "best_params": {
+              "range_power_exponent": 2.5,
+              "elevation_power": 0.5,
+              "azimuth_mix": 0.2,
+              "azimuth_power": 4.0,
+              "gain_scale": 1059028114.345838
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_scattering.json"
+          },
+          {
+            "case_label": "cms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv",
+            "model": "reflection",
+            "sample_count": 127,
+            "searched_candidates": 6,
+            "best_rmse_log": 0.23290592423141507,
+            "best_mae_log": 0.19130586253163942,
+            "best_params": {
+              "range_power_exponent": 5.0,
+              "gain_scale": 9246410177.57082
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_reflection.json"
+          },
+          {
+            "case_label": "cms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv",
+            "model": "scattering",
+            "sample_count": 127,
+            "searched_candidates": 864,
+            "best_rmse_log": 0.23199197504511837,
+            "best_mae_log": 0.18913955447279088,
+            "best_params": {
+              "range_power_exponent": 5.0,
+              "elevation_power": 0.5,
+              "azimuth_mix": 0.0,
+              "azimuth_power": 4.0,
+              "gain_scale": 15614432971.241262
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_scattering.json"
+          }
+        ],
+        "by_model": {
+          "reflection": {
+            "count": 2,
+            "ranked_by_rmse_log": [
+              {
+                "case_label": "bms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv",
+                "model": "reflection",
+                "sample_count": 128,
+                "searched_candidates": 6,
+                "best_rmse_log": 0.11433907428879984,
+                "best_mae_log": 0.08531938522432304,
+                "best_params": {
+                  "range_power_exponent": 2.5,
+                  "gain_scale": 979630234.4332606
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_reflection.json"
+              },
+              {
+                "case_label": "cms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv",
+                "model": "reflection",
+                "sample_count": 127,
+                "searched_candidates": 6,
+                "best_rmse_log": 0.23290592423141507,
+                "best_mae_log": 0.19130586253163942,
+                "best_params": {
+                  "range_power_exponent": 5.0,
+                  "gain_scale": 9246410177.57082
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_reflection.json"
+              }
+            ],
+            "best_case": {
+              "case_label": "bms1000",
+              "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv",
+              "model": "reflection",
+              "sample_count": 128,
+              "searched_candidates": 6,
+              "best_rmse_log": 0.11433907428879984,
+              "best_mae_log": 0.08531938522432304,
+              "best_params": {
+                "range_power_exponent": 2.5,
+                "gain_scale": 979630234.4332606
+              },
+              "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_reflection.json"
+            },
+            "param_stats": {
+              "range_power_exponent": {
+                "count": 2,
+                "mean": 3.75,
+                "std": 1.25,
+                "min": 2.5,
+                "max": 5.0
+              },
+              "gain_scale": {
+                "count": 2,
+                "mean": 5113020206.00204,
+                "std": 4133389971.5687795,
+                "min": 979630234.4332606,
+                "max": 9246410177.57082
+              }
+            }
+          },
+          "scattering": {
+            "count": 2,
+            "ranked_by_rmse_log": [
+              {
+                "case_label": "bms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv",
+                "model": "scattering",
+                "sample_count": 128,
+                "searched_candidates": 864,
+                "best_rmse_log": 0.07318263591065133,
+                "best_mae_log": 0.0589592841007538,
+                "best_params": {
+                  "range_power_exponent": 2.5,
+                  "elevation_power": 0.5,
+                  "azimuth_mix": 0.2,
+                  "azimuth_power": 4.0,
+                  "gain_scale": 1059028114.345838
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_scattering.json"
+              },
+              {
+                "case_label": "cms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv",
+                "model": "scattering",
+                "sample_count": 127,
+                "searched_candidates": 864,
+                "best_rmse_log": 0.23199197504511837,
+                "best_mae_log": 0.18913955447279088,
+                "best_params": {
+                  "range_power_exponent": 5.0,
+                  "elevation_power": 0.5,
+                  "azimuth_mix": 0.0,
+                  "azimuth_power": 4.0,
+                  "gain_scale": 15614432971.241262
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_scattering.json"
+              }
+            ],
+            "best_case": {
+              "case_label": "bms1000",
+              "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/bms1000_path_power_samples_128.csv",
+              "model": "scattering",
+              "sample_count": 128,
+              "searched_candidates": 864,
+              "best_rmse_log": 0.07318263591065133,
+              "best_mae_log": 0.0589592841007538,
+              "best_params": {
+                "range_power_exponent": 2.5,
+                "elevation_power": 0.5,
+                "azimuth_mix": 0.2,
+                "azimuth_power": 4.0,
+                "gain_scale": 1059028114.345838
+              },
+              "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_scattering.json"
+            },
+            "param_stats": {
+              "range_power_exponent": {
+                "count": 2,
+                "mean": 3.75,
+                "std": 1.25,
+                "min": 2.5,
+                "max": 5.0
+              },
+              "elevation_power": {
+                "count": 2,
+                "mean": 0.5,
+                "std": 0.0,
+                "min": 0.5,
+                "max": 0.5
+              },
+              "azimuth_mix": {
+                "count": 2,
+                "mean": 0.1,
+                "std": 0.1,
+                "min": 0.0,
+                "max": 0.2
+              },
+              "azimuth_power": {
+                "count": 2,
+                "mean": 4.0,
+                "std": 0.0,
+                "min": 4.0,
+                "max": 4.0
+              },
+              "gain_scale": {
+                "count": 2,
+                "mean": 8336730542.7935505,
+                "std": 7277702428.447712,
+                "min": 1059028114.345838,
+                "max": 15614432971.241262
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "frame_count": 512,
+      "csv_rows": [
+        {
+          "case_name": "bms1000",
+          "scenario_id": "xiangyu_bms1000_512",
+          "csv_path": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv",
+          "meta_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.meta.json",
+          "selected_row_count": 512,
+          "processed_frame_count": 512,
+          "raw_label_count": 512
+        },
+        {
+          "case_name": "cms1000",
+          "scenario_id": "xiangyu_cms1000_512",
+          "csv_path": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv",
+          "meta_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.meta.json",
+          "selected_row_count": 511,
+          "processed_frame_count": 511,
+          "raw_label_count": 511
+        }
+      ],
+      "fit_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/path_power_fit_batch_summary_512.json",
+      "fit_summary": {
+        "version": 1,
+        "batch_id": "xiangyu_label_fit_512",
+        "models": [
+          "reflection",
+          "scattering"
+        ],
+        "cases": [
+          {
+            "label": "bms1000",
+            "csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv"
+          },
+          {
+            "label": "cms1000",
+            "csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv"
+          }
+        ],
+        "run_count": 4,
+        "fits_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits",
+        "runs": [
+          {
+            "case_label": "bms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv",
+            "model": "reflection",
+            "sample_count": 512,
+            "searched_candidates": 6,
+            "best_rmse_log": 0.4820730028423362,
+            "best_mae_log": 0.4211562188736221,
+            "best_params": {
+              "range_power_exponent": 2.5,
+              "gain_scale": 729793263.684132
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_reflection.json"
+          },
+          {
+            "case_label": "bms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv",
+            "model": "scattering",
+            "sample_count": 512,
+            "searched_candidates": 864,
+            "best_rmse_log": 0.41774628298456495,
+            "best_mae_log": 0.3512331571856441,
+            "best_params": {
+              "range_power_exponent": 2.5,
+              "elevation_power": 0.5,
+              "azimuth_mix": 0.0,
+              "azimuth_power": 4.0,
+              "gain_scale": 837881838.0874013
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_scattering.json"
+          },
+          {
+            "case_label": "cms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv",
+            "model": "reflection",
+            "sample_count": 511,
+            "searched_candidates": 6,
+            "best_rmse_log": 0.2962858955486018,
+            "best_mae_log": 0.26531362873847475,
+            "best_params": {
+              "range_power_exponent": 5.0,
+              "gain_scale": 10553699891.68124
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_reflection.json"
+          },
+          {
+            "case_label": "cms1000",
+            "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv",
+            "model": "scattering",
+            "sample_count": 511,
+            "searched_candidates": 864,
+            "best_rmse_log": 0.21461515735917236,
+            "best_mae_log": 0.18536923132552302,
+            "best_params": {
+              "range_power_exponent": 5.0,
+              "elevation_power": 0.5,
+              "azimuth_mix": 0.0,
+              "azimuth_power": 4.0,
+              "gain_scale": 14965909323.830236
+            },
+            "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_scattering.json"
+          }
+        ],
+        "by_model": {
+          "reflection": {
+            "count": 2,
+            "ranked_by_rmse_log": [
+              {
+                "case_label": "cms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv",
+                "model": "reflection",
+                "sample_count": 511,
+                "searched_candidates": 6,
+                "best_rmse_log": 0.2962858955486018,
+                "best_mae_log": 0.26531362873847475,
+                "best_params": {
+                  "range_power_exponent": 5.0,
+                  "gain_scale": 10553699891.68124
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_reflection.json"
+              },
+              {
+                "case_label": "bms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv",
+                "model": "reflection",
+                "sample_count": 512,
+                "searched_candidates": 6,
+                "best_rmse_log": 0.4820730028423362,
+                "best_mae_log": 0.4211562188736221,
+                "best_params": {
+                  "range_power_exponent": 2.5,
+                  "gain_scale": 729793263.684132
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_reflection.json"
+              }
+            ],
+            "best_case": {
+              "case_label": "cms1000",
+              "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv",
+              "model": "reflection",
+              "sample_count": 511,
+              "searched_candidates": 6,
+              "best_rmse_log": 0.2962858955486018,
+              "best_mae_log": 0.26531362873847475,
+              "best_params": {
+                "range_power_exponent": 5.0,
+                "gain_scale": 10553699891.68124
+              },
+              "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_reflection.json"
+            },
+            "param_stats": {
+              "range_power_exponent": {
+                "count": 2,
+                "mean": 3.75,
+                "std": 1.25,
+                "min": 2.5,
+                "max": 5.0
+              },
+              "gain_scale": {
+                "count": 2,
+                "mean": 5641746577.682686,
+                "std": 4911953313.998554,
+                "min": 729793263.684132,
+                "max": 10553699891.68124
+              }
+            }
+          },
+          "scattering": {
+            "count": 2,
+            "ranked_by_rmse_log": [
+              {
+                "case_label": "cms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv",
+                "model": "scattering",
+                "sample_count": 511,
+                "searched_candidates": 864,
+                "best_rmse_log": 0.21461515735917236,
+                "best_mae_log": 0.18536923132552302,
+                "best_params": {
+                  "range_power_exponent": 5.0,
+                  "elevation_power": 0.5,
+                  "azimuth_mix": 0.0,
+                  "azimuth_power": 4.0,
+                  "gain_scale": 14965909323.830236
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_scattering.json"
+              },
+              {
+                "case_label": "bms1000",
+                "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv",
+                "model": "scattering",
+                "sample_count": 512,
+                "searched_candidates": 864,
+                "best_rmse_log": 0.41774628298456495,
+                "best_mae_log": 0.3512331571856441,
+                "best_params": {
+                  "range_power_exponent": 2.5,
+                  "elevation_power": 0.5,
+                  "azimuth_mix": 0.0,
+                  "azimuth_power": 4.0,
+                  "gain_scale": 837881838.0874013
+                },
+                "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_scattering.json"
+              }
+            ],
+            "best_case": {
+              "case_label": "cms1000",
+              "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/cms1000_path_power_samples_512.csv",
+              "model": "scattering",
+              "sample_count": 511,
+              "searched_candidates": 864,
+              "best_rmse_log": 0.21461515735917236,
+              "best_mae_log": 0.18536923132552302,
+              "best_params": {
+                "range_power_exponent": 5.0,
+                "elevation_power": 0.5,
+                "azimuth_mix": 0.0,
+                "azimuth_power": 4.0,
+                "gain_scale": 14965909323.830236
+              },
+              "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_scattering.json"
+            },
+            "param_stats": {
+              "range_power_exponent": {
+                "count": 2,
+                "mean": 3.75,
+                "std": 1.25,
+                "min": 2.5,
+                "max": 5.0
+              },
+              "elevation_power": {
+                "count": 2,
+                "mean": 0.5,
+                "std": 0.0,
+                "min": 0.5,
+                "max": 0.5
+              },
+              "azimuth_mix": {
+                "count": 2,
+                "mean": 0.0,
+                "std": 0.0,
+                "min": 0.0,
+                "max": 0.0
+              },
+              "azimuth_power": {
+                "count": 2,
+                "mean": 4.0,
+                "std": 0.0,
+                "min": 4.0,
+                "max": 4.0
+              },
+              "gain_scale": {
+                "count": 2,
+                "mean": 7901895580.958818,
+                "std": 7064013742.871417,
+                "min": 837881838.0874013,
+                "max": 14965909323.830236
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
