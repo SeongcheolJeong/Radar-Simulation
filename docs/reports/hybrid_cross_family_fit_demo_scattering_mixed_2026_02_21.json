@@ -1,0 +1,416 @@
+{
+  "version": 1,
+  "case_a_id": "case_a",
+  "case_b_id": "case_b",
+  "reference_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_a_baseline/hybrid_estimation.npz",
+  "path_power_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+  "selection": {
+    "mode": "scattering",
+    "path_power_apply_mode": "shape_only",
+    "frame_start": 1,
+    "frame_end": 4,
+    "camera_fov_deg": 90.0,
+    "amplitude_prefix": "AmplitudeOutput",
+    "distance_prefix": "DistanceOutput",
+    "distance_scale": 1.0
+  },
+  "outputs": {
+    "a_baseline": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_a_baseline",
+    "b_baseline": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_baseline",
+    "b_tuned": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_tuned"
+  },
+  "run_logs": {
+    "a_baseline": {
+      "returncode": 0,
+      "stdout": "Pipeline completed.\n  frames: 4\n  tx_schedule length: 4\n  paths/chirp (min,max): (2, 2)\n  adc shape: (4096, 4, 1, 1)\n  ffd enabled: False\n  path power fit enabled: False\n  path power apply mode: shape_only\n  jones polarization enabled: False\n  global jones enabled: False\n  scenario profile enabled: False\n  path_list: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_a_baseline/path_list.json\n  adc_cube: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_a_baseline/adc_cube.npz\n  hybrid_estimation: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_a_baseline/hybrid_estimation.npz\n  motion compensation enabled: False\n  motion compensation fd_hz: None\n  motion compensation chirp_interval_s: None\n",
+      "stderr": "",
+      "command": [
+        "python3",
+        "scripts/run_hybrid_ingest_to_adc.py",
+        "--frames-root",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames",
+        "--radar-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json",
+        "--frame-start",
+        "1",
+        "--frame-end",
+        "4",
+        "--camera-fov-deg",
+        "90.0",
+        "--mode",
+        "scattering",
+        "--file-ext",
+        ".npy",
+        "--amplitude-prefix",
+        "AmplitudeOutput",
+        "--fc-hz",
+        "77000000000.0",
+        "--slope-hz-per-s",
+        "20000000000000.0",
+        "--fs-hz",
+        "20000000.0",
+        "--samples-per-chirp",
+        "4096",
+        "--amplitude-threshold",
+        "0.01",
+        "--distance-min-m",
+        "0.0",
+        "--distance-max-m",
+        "100.0",
+        "--run-hybrid-estimation",
+        "--estimation-nfft",
+        "64",
+        "--estimation-range-bin-length",
+        "8",
+        "--estimation-doppler-window",
+        "hann",
+        "--output-dir",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_a_baseline",
+        "--distance-prefix",
+        "DistanceOutput",
+        "--distance-scale",
+        "1.0",
+        "--top-k-per-chirp",
+        "4"
+      ]
+    },
+    "b_baseline": {
+      "returncode": 0,
+      "stdout": "Pipeline completed.\n  frames: 4\n  tx_schedule length: 4\n  paths/chirp (min,max): (2, 2)\n  adc shape: (4096, 4, 1, 1)\n  ffd enabled: False\n  path power fit enabled: False\n  path power apply mode: shape_only\n  jones polarization enabled: False\n  global jones enabled: False\n  scenario profile enabled: False\n  path_list: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_baseline/path_list.json\n  adc_cube: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_baseline/adc_cube.npz\n  hybrid_estimation: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_baseline/hybrid_estimation.npz\n  motion compensation enabled: False\n  motion compensation fd_hz: None\n  motion compensation chirp_interval_s: None\n",
+      "stderr": "",
+      "command": [
+        "python3",
+        "scripts/run_hybrid_ingest_to_adc.py",
+        "--frames-root",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames",
+        "--radar-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json",
+        "--frame-start",
+        "1",
+        "--frame-end",
+        "4",
+        "--camera-fov-deg",
+        "90.0",
+        "--mode",
+        "scattering",
+        "--file-ext",
+        ".npy",
+        "--amplitude-prefix",
+        "AmplitudeOutput",
+        "--fc-hz",
+        "77000000000.0",
+        "--slope-hz-per-s",
+        "20000000000000.0",
+        "--fs-hz",
+        "20000000.0",
+        "--samples-per-chirp",
+        "4096",
+        "--amplitude-threshold",
+        "0.01",
+        "--distance-min-m",
+        "0.0",
+        "--distance-max-m",
+        "100.0",
+        "--run-hybrid-estimation",
+        "--estimation-nfft",
+        "64",
+        "--estimation-range-bin-length",
+        "8",
+        "--estimation-doppler-window",
+        "hann",
+        "--output-dir",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_baseline",
+        "--distance-prefix",
+        "DistanceOutput",
+        "--distance-scale",
+        "1.0",
+        "--top-k-per-chirp",
+        "4"
+      ]
+    },
+    "b_tuned": {
+      "returncode": 0,
+      "stdout": "Pipeline completed.\n  frames: 4\n  tx_schedule length: 4\n  paths/chirp (min,max): (2, 2)\n  adc shape: (4096, 4, 1, 1)\n  ffd enabled: False\n  path power fit enabled: True\n  path power apply mode: shape_only\n  path power fit model: scattering\n  jones polarization enabled: False\n  global jones enabled: False\n  scenario profile enabled: False\n  path_list: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_tuned/path_list.json\n  adc_cube: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_tuned/adc_cube.npz\n  hybrid_estimation: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_tuned/hybrid_estimation.npz\n  motion compensation enabled: False\n  motion compensation fd_hz: None\n  motion compensation chirp_interval_s: None\n",
+      "stderr": "",
+      "command": [
+        "python3",
+        "scripts/run_hybrid_ingest_to_adc.py",
+        "--frames-root",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames",
+        "--radar-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json",
+        "--frame-start",
+        "1",
+        "--frame-end",
+        "4",
+        "--camera-fov-deg",
+        "90.0",
+        "--mode",
+        "scattering",
+        "--file-ext",
+        ".npy",
+        "--amplitude-prefix",
+        "AmplitudeOutput",
+        "--fc-hz",
+        "77000000000.0",
+        "--slope-hz-per-s",
+        "20000000000000.0",
+        "--fs-hz",
+        "20000000.0",
+        "--samples-per-chirp",
+        "4096",
+        "--amplitude-threshold",
+        "0.01",
+        "--distance-min-m",
+        "0.0",
+        "--distance-max-m",
+        "100.0",
+        "--run-hybrid-estimation",
+        "--estimation-nfft",
+        "64",
+        "--estimation-range-bin-length",
+        "8",
+        "--estimation-doppler-window",
+        "hann",
+        "--output-dir",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed/case_b_tuned",
+        "--distance-prefix",
+        "DistanceOutput",
+        "--distance-scale",
+        "1.0",
+        "--top-k-per-chirp",
+        "4",
+        "--path-power-fit-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+        "--path-power-apply-mode",
+        "shape_only"
+      ]
+    }
+  },
+  "comparisons": {
+    "b_baseline_vs_a_baseline": {
+      "pass": true,
+      "metrics": {
+        "rd_peak_doppler_bin_abs_error": 0.0,
+        "rd_peak_range_bin_abs_error": 0.0,
+        "rd_peak_power_db_abs_error": 0.0,
+        "rd_centroid_doppler_bin_abs_error": 0.0,
+        "rd_centroid_range_bin_abs_error": 0.0,
+        "rd_spread_doppler_rel_error": 0.0,
+        "rd_spread_range_rel_error": 0.0,
+        "rd_shape_nmse": 0.0,
+        "ra_peak_angle_bin_abs_error": 0.0,
+        "ra_peak_range_bin_abs_error": 0.0,
+        "ra_peak_power_db_abs_error": 0.0,
+        "ra_centroid_angle_bin_abs_error": 0.0,
+        "ra_centroid_range_bin_abs_error": 0.0,
+        "ra_spread_angle_rel_error": 0.0,
+        "ra_spread_range_rel_error": 0.0,
+        "ra_shape_nmse": 0.0
+      },
+      "thresholds": {
+        "rd_peak_doppler_bin_abs_error_max": 1.0,
+        "rd_peak_range_bin_abs_error_max": 1.0,
+        "rd_peak_power_db_abs_error_max": 3.0,
+        "rd_centroid_doppler_bin_abs_error_max": 1.5,
+        "rd_centroid_range_bin_abs_error_max": 1.5,
+        "rd_spread_doppler_rel_error_max": 0.35,
+        "rd_spread_range_rel_error_max": 0.35,
+        "rd_shape_nmse_max": 0.25,
+        "ra_peak_angle_bin_abs_error_max": 1.0,
+        "ra_peak_range_bin_abs_error_max": 1.0,
+        "ra_peak_power_db_abs_error_max": 3.0,
+        "ra_centroid_angle_bin_abs_error_max": 1.5,
+        "ra_centroid_range_bin_abs_error_max": 1.5,
+        "ra_spread_angle_rel_error_max": 0.35,
+        "ra_spread_range_rel_error_max": 0.35,
+        "ra_shape_nmse_max": 0.25
+      },
+      "failures": [],
+      "rd_reference_key": "fx_dop_win",
+      "rd_candidate_key": "fx_dop_win",
+      "rd_shape": [
+        64,
+        4096
+      ],
+      "ra_shape": [
+        64,
+        4096
+      ]
+    },
+    "b_tuned_vs_a_baseline": {
+      "pass": false,
+      "metrics": {
+        "rd_peak_doppler_bin_abs_error": 0.0,
+        "rd_peak_range_bin_abs_error": 0.0,
+        "rd_peak_power_db_abs_error": 0.5638852035560138,
+        "rd_centroid_doppler_bin_abs_error": 0.00014460200903343434,
+        "rd_centroid_range_bin_abs_error": 0.4749893183561653,
+        "rd_spread_doppler_rel_error": 6.0896104762823736e-05,
+        "rd_spread_range_rel_error": 0.0002459757745653069,
+        "rd_shape_nmse": 0.05553129125080921,
+        "ra_peak_angle_bin_abs_error": 0.0,
+        "ra_peak_range_bin_abs_error": 150.0,
+        "ra_peak_power_db_abs_error": 0.563330259023914,
+        "ra_centroid_angle_bin_abs_error": 3.552713678800501e-15,
+        "ra_centroid_range_bin_abs_error": 1.9840147257232275,
+        "ra_spread_angle_rel_error": 0.0,
+        "ra_spread_range_rel_error": 0.001004823070937312,
+        "ra_shape_nmse": 0.05662441466008038
+      },
+      "thresholds": {
+        "rd_peak_doppler_bin_abs_error_max": 1.0,
+        "rd_peak_range_bin_abs_error_max": 1.0,
+        "rd_peak_power_db_abs_error_max": 3.0,
+        "rd_centroid_doppler_bin_abs_error_max": 1.5,
+        "rd_centroid_range_bin_abs_error_max": 1.5,
+        "rd_spread_doppler_rel_error_max": 0.35,
+        "rd_spread_range_rel_error_max": 0.35,
+        "rd_shape_nmse_max": 0.25,
+        "ra_peak_angle_bin_abs_error_max": 1.0,
+        "ra_peak_range_bin_abs_error_max": 1.0,
+        "ra_peak_power_db_abs_error_max": 3.0,
+        "ra_centroid_angle_bin_abs_error_max": 1.5,
+        "ra_centroid_range_bin_abs_error_max": 1.5,
+        "ra_spread_angle_rel_error_max": 0.35,
+        "ra_spread_range_rel_error_max": 0.35,
+        "ra_shape_nmse_max": 0.25
+      },
+      "failures": [
+        {
+          "metric": "ra_peak_range_bin_abs_error",
+          "value": 150.0,
+          "limit": 1.0
+        },
+        {
+          "metric": "ra_centroid_range_bin_abs_error",
+          "value": 1.9840147257232275,
+          "limit": 1.5
+        }
+      ],
+      "rd_reference_key": "fx_dop_win",
+      "rd_candidate_key": "fx_dop_win",
+      "rd_shape": [
+        64,
+        4096
+      ],
+      "ra_shape": [
+        64,
+        4096
+      ]
+    },
+    "a_tuned_vs_a_baseline": null
+  },
+  "cross_family_improvement": {
+    "metric_delta": {
+      "ra_centroid_angle_bin_abs_error": {
+        "before": 0.0,
+        "after": 3.552713678800501e-15,
+        "delta": 3.552713678800501e-15,
+        "improved": false
+      },
+      "ra_centroid_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 1.9840147257232275,
+        "delta": 1.9840147257232275,
+        "improved": false
+      },
+      "ra_peak_angle_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "ra_peak_power_db_abs_error": {
+        "before": 0.0,
+        "after": 0.563330259023914,
+        "delta": 0.563330259023914,
+        "improved": false
+      },
+      "ra_peak_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 150.0,
+        "delta": 150.0,
+        "improved": false
+      },
+      "ra_shape_nmse": {
+        "before": 0.0,
+        "after": 0.05662441466008038,
+        "delta": 0.05662441466008038,
+        "improved": false
+      },
+      "ra_spread_angle_rel_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "ra_spread_range_rel_error": {
+        "before": 0.0,
+        "after": 0.001004823070937312,
+        "delta": 0.001004823070937312,
+        "improved": false
+      },
+      "rd_centroid_doppler_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.00014460200903343434,
+        "delta": 0.00014460200903343434,
+        "improved": false
+      },
+      "rd_centroid_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.4749893183561653,
+        "delta": 0.4749893183561653,
+        "improved": false
+      },
+      "rd_peak_doppler_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "rd_peak_power_db_abs_error": {
+        "before": 0.0,
+        "after": 0.5638852035560138,
+        "delta": 0.5638852035560138,
+        "improved": false
+      },
+      "rd_peak_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "rd_shape_nmse": {
+        "before": 0.0,
+        "after": 0.05553129125080921,
+        "delta": 0.05553129125080921,
+        "improved": false
+      },
+      "rd_spread_doppler_rel_error": {
+        "before": 0.0,
+        "after": 6.0896104762823736e-05,
+        "delta": 6.0896104762823736e-05,
+        "improved": false
+      },
+      "rd_spread_range_rel_error": {
+        "before": 0.0,
+        "after": 0.0002459757745653069,
+        "delta": 0.0002459757745653069,
+        "improved": false
+      }
+    },
+    "ra_summary": {
+      "count": 8,
+      "improved_count": 0,
+      "improved_ratio": 0.0,
+      "mean_delta": 19.075621777809772
+    },
+    "rd_summary": {
+      "count": 8,
+      "improved_count": 0,
+      "improved_ratio": 0.0,
+      "mean_delta": 0.13685716088141872
+    }
+  }
+}

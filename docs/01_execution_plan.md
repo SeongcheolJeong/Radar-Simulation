@@ -49,6 +49,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.15: Cross-family fit ranking objective (`comparator-based score`) + Xiangyu reflection/scattering ranking reports
 - [x] M10.16: Cross-family ranking-based fit lock selection + Xiangyu RMSE-vs-cross-family selection delta report
 - [x] M10.17: RMSE-lock vs cross-family-lock A/B comparator replay report (reflection/scattering)
+- [x] M10.18: Mixed lock publish from A/B reports (`reflection keep`, `scattering cross-family`) + targeted comparator verification
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -61,4 +62,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.18: publish mixed lock recommendation (reflection keep, scattering cross-family) and run targeted replay verification.
+Start M10.19: run measured replay batch using mixed lock set and compare with prior strict-tuned outputs.

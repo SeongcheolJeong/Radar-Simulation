@@ -647,3 +647,33 @@
 - Notes:
   - Scattering cross-family lock score improved (`347.609311 -> 48.288101`)
   - RA summary mean delta improved, RD summary mean delta worsened slightly
+
+## Path Power Fit Selection (Mixed From A/B)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection_mixed_from_ab.py`
+- Result: pass
+- Notes:
+  - Tie-policy path (`keep_rmse`) validation pass
+  - Winner-based path (`cross_family_lock`) validation pass
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/select_path_power_fit_mixed_from_ab_reports.py --ab-report reflection=/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_lock_ab_comparison_reflection_2026_02_21.json --ab-report scattering=/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_lock_ab_comparison_scattering_2026_02_21.json --rmse-selected-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits --cross-selected-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family --tie-policy keep_rmse --output-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_selection_mixed_from_ab_xiangyu_labels_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Mixed lock emitted (`reflection <- rmse`, `scattering <- cross-family`)
+  - Per-model source traceability stored in fit selection metadata
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybrid_cross_family_fit_comparison.py --case-a-id case_a --case-a-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames --case-a-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json --case-b-id case_b --case-b-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames --case-b-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json --path-power-fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json --path-power-apply-mode shape_only --frame-start 1 --frame-end 4 --camera-fov-deg 90 --mode reflection --file-ext .npy --amplitude-threshold 0.01 --top-k-per-chirp 4 --estimation-nfft 64 --estimation-range-bin-length 8 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/hybrid_cross_family_fit_demo_reflection_mixed_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Mixed reflection fit comparator replay completed
+  - Score-equivalent value remained `86.268252` in demo
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybrid_cross_family_fit_comparison.py --case-a-id case_a --case-a-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames --case-a-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json --case-b-id case_b --case-b-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames --case-b-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json --path-power-fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json --path-power-apply-mode shape_only --frame-start 1 --frame-end 4 --camera-fov-deg 90 --mode scattering --file-ext .npy --amplitude-threshold 0.01 --top-k-per-chirp 4 --estimation-nfft 64 --estimation-range-bin-length 8 --distance-prefix DistanceOutput --distance-scale 1.0 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_scattering_mixed --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/hybrid_cross_family_fit_demo_scattering_mixed_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Mixed scattering fit comparator replay completed
+  - Score-equivalent value remained `48.288101` in demo

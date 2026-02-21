@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "selection_strategy": "mixed_from_ab_reports",
+  "tie_policy": "keep_rmse",
+  "rmse_selected_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits",
+  "cross_selected_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family",
+  "output_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed",
+  "models": [
+    {
+      "model": "reflection",
+      "report_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_lock_ab_comparison_reflection_2026_02_21.json",
+      "winner_run_id": "cross_family_lock",
+      "score_tie": true,
+      "rmse_score": 86.26825174554382,
+      "cross_family_score": 86.26825174554382,
+      "selected_source": "rmse_lock",
+      "selected_source_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_reflection_selected.json",
+      "output_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json"
+    },
+    {
+      "model": "scattering",
+      "report_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_lock_ab_comparison_scattering_2026_02_21.json",
+      "winner_run_id": "cross_family_lock",
+      "score_tie": false,
+      "rmse_score": 347.60931065560277,
+      "cross_family_score": 48.28810071650096,
+      "selected_source": "cross_family_lock",
+      "selected_source_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_scattering_selected.json",
+      "output_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+    }
+  ]
+}

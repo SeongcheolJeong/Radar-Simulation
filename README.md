@@ -664,6 +664,12 @@ Run fit-lock A/B comparison validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_lock_ab_comparison.py
 ```
 
+Run mixed-fit selection from A/B reports validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection_mixed_from_ab.py
+```
+
 Fetch reference repositories:
 
 ```bash

@@ -1,0 +1,404 @@
+{
+  "version": 1,
+  "case_a_id": "case_a",
+  "case_b_id": "case_b",
+  "reference_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_a_baseline/hybrid_estimation.npz",
+  "path_power_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+  "selection": {
+    "mode": "reflection",
+    "path_power_apply_mode": "shape_only",
+    "frame_start": 1,
+    "frame_end": 4,
+    "camera_fov_deg": 90.0,
+    "amplitude_prefix": "AmplitudeOutput",
+    "distance_prefix": null,
+    "distance_scale": null
+  },
+  "outputs": {
+    "a_baseline": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_a_baseline",
+    "b_baseline": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_baseline",
+    "b_tuned": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_tuned"
+  },
+  "run_logs": {
+    "a_baseline": {
+      "returncode": 0,
+      "stdout": "Pipeline completed.\n  frames: 4\n  tx_schedule length: 4\n  paths/chirp (min,max): (2, 2)\n  adc shape: (4096, 4, 1, 1)\n  ffd enabled: False\n  path power fit enabled: False\n  path power apply mode: shape_only\n  jones polarization enabled: False\n  global jones enabled: False\n  scenario profile enabled: False\n  path_list: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_a_baseline/path_list.json\n  adc_cube: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_a_baseline/adc_cube.npz\n  hybrid_estimation: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_a_baseline/hybrid_estimation.npz\n  motion compensation enabled: False\n  motion compensation fd_hz: None\n  motion compensation chirp_interval_s: None\n",
+      "stderr": "",
+      "command": [
+        "python3",
+        "scripts/run_hybrid_ingest_to_adc.py",
+        "--frames-root",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames",
+        "--radar-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json",
+        "--frame-start",
+        "1",
+        "--frame-end",
+        "4",
+        "--camera-fov-deg",
+        "90.0",
+        "--mode",
+        "reflection",
+        "--file-ext",
+        ".npy",
+        "--amplitude-prefix",
+        "AmplitudeOutput",
+        "--fc-hz",
+        "77000000000.0",
+        "--slope-hz-per-s",
+        "20000000000000.0",
+        "--fs-hz",
+        "20000000.0",
+        "--samples-per-chirp",
+        "4096",
+        "--amplitude-threshold",
+        "0.01",
+        "--distance-min-m",
+        "0.0",
+        "--distance-max-m",
+        "100.0",
+        "--run-hybrid-estimation",
+        "--estimation-nfft",
+        "64",
+        "--estimation-range-bin-length",
+        "8",
+        "--estimation-doppler-window",
+        "hann",
+        "--output-dir",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_a_baseline",
+        "--top-k-per-chirp",
+        "4"
+      ]
+    },
+    "b_baseline": {
+      "returncode": 0,
+      "stdout": "Pipeline completed.\n  frames: 4\n  tx_schedule length: 4\n  paths/chirp (min,max): (2, 2)\n  adc shape: (4096, 4, 1, 1)\n  ffd enabled: False\n  path power fit enabled: False\n  path power apply mode: shape_only\n  jones polarization enabled: False\n  global jones enabled: False\n  scenario profile enabled: False\n  path_list: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_baseline/path_list.json\n  adc_cube: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_baseline/adc_cube.npz\n  hybrid_estimation: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_baseline/hybrid_estimation.npz\n  motion compensation enabled: False\n  motion compensation fd_hz: None\n  motion compensation chirp_interval_s: None\n",
+      "stderr": "",
+      "command": [
+        "python3",
+        "scripts/run_hybrid_ingest_to_adc.py",
+        "--frames-root",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames",
+        "--radar-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json",
+        "--frame-start",
+        "1",
+        "--frame-end",
+        "4",
+        "--camera-fov-deg",
+        "90.0",
+        "--mode",
+        "reflection",
+        "--file-ext",
+        ".npy",
+        "--amplitude-prefix",
+        "AmplitudeOutput",
+        "--fc-hz",
+        "77000000000.0",
+        "--slope-hz-per-s",
+        "20000000000000.0",
+        "--fs-hz",
+        "20000000.0",
+        "--samples-per-chirp",
+        "4096",
+        "--amplitude-threshold",
+        "0.01",
+        "--distance-min-m",
+        "0.0",
+        "--distance-max-m",
+        "100.0",
+        "--run-hybrid-estimation",
+        "--estimation-nfft",
+        "64",
+        "--estimation-range-bin-length",
+        "8",
+        "--estimation-doppler-window",
+        "hann",
+        "--output-dir",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_baseline",
+        "--top-k-per-chirp",
+        "4"
+      ]
+    },
+    "b_tuned": {
+      "returncode": 0,
+      "stdout": "Pipeline completed.\n  frames: 4\n  tx_schedule length: 4\n  paths/chirp (min,max): (2, 2)\n  adc shape: (4096, 4, 1, 1)\n  ffd enabled: False\n  path power fit enabled: True\n  path power apply mode: shape_only\n  path power fit model: reflection\n  jones polarization enabled: False\n  global jones enabled: False\n  scenario profile enabled: False\n  path_list: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_tuned/path_list.json\n  adc_cube: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_tuned/adc_cube.npz\n  hybrid_estimation: /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_tuned/hybrid_estimation.npz\n  motion compensation enabled: False\n  motion compensation fd_hz: None\n  motion compensation chirp_interval_s: None\n",
+      "stderr": "",
+      "command": [
+        "python3",
+        "scripts/run_hybrid_ingest_to_adc.py",
+        "--frames-root",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames",
+        "--radar-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json",
+        "--frame-start",
+        "1",
+        "--frame-end",
+        "4",
+        "--camera-fov-deg",
+        "90.0",
+        "--mode",
+        "reflection",
+        "--file-ext",
+        ".npy",
+        "--amplitude-prefix",
+        "AmplitudeOutput",
+        "--fc-hz",
+        "77000000000.0",
+        "--slope-hz-per-s",
+        "20000000000000.0",
+        "--fs-hz",
+        "20000000.0",
+        "--samples-per-chirp",
+        "4096",
+        "--amplitude-threshold",
+        "0.01",
+        "--distance-min-m",
+        "0.0",
+        "--distance-max-m",
+        "100.0",
+        "--run-hybrid-estimation",
+        "--estimation-nfft",
+        "64",
+        "--estimation-range-bin-length",
+        "8",
+        "--estimation-doppler-window",
+        "hann",
+        "--output-dir",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/run_reflection_mixed/case_b_tuned",
+        "--top-k-per-chirp",
+        "4",
+        "--path-power-fit-json",
+        "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+        "--path-power-apply-mode",
+        "shape_only"
+      ]
+    }
+  },
+  "comparisons": {
+    "b_baseline_vs_a_baseline": {
+      "pass": true,
+      "metrics": {
+        "rd_peak_doppler_bin_abs_error": 0.0,
+        "rd_peak_range_bin_abs_error": 0.0,
+        "rd_peak_power_db_abs_error": 0.0,
+        "rd_centroid_doppler_bin_abs_error": 0.0,
+        "rd_centroid_range_bin_abs_error": 0.0,
+        "rd_spread_doppler_rel_error": 0.0,
+        "rd_spread_range_rel_error": 0.0,
+        "rd_shape_nmse": 0.0,
+        "ra_peak_angle_bin_abs_error": 0.0,
+        "ra_peak_range_bin_abs_error": 0.0,
+        "ra_peak_power_db_abs_error": 0.0,
+        "ra_centroid_angle_bin_abs_error": 0.0,
+        "ra_centroid_range_bin_abs_error": 0.0,
+        "ra_spread_angle_rel_error": 0.0,
+        "ra_spread_range_rel_error": 0.0,
+        "ra_shape_nmse": 0.0
+      },
+      "thresholds": {
+        "rd_peak_doppler_bin_abs_error_max": 1.0,
+        "rd_peak_range_bin_abs_error_max": 1.0,
+        "rd_peak_power_db_abs_error_max": 3.0,
+        "rd_centroid_doppler_bin_abs_error_max": 1.5,
+        "rd_centroid_range_bin_abs_error_max": 1.5,
+        "rd_spread_doppler_rel_error_max": 0.35,
+        "rd_spread_range_rel_error_max": 0.35,
+        "rd_shape_nmse_max": 0.25,
+        "ra_peak_angle_bin_abs_error_max": 1.0,
+        "ra_peak_range_bin_abs_error_max": 1.0,
+        "ra_peak_power_db_abs_error_max": 3.0,
+        "ra_centroid_angle_bin_abs_error_max": 1.5,
+        "ra_centroid_range_bin_abs_error_max": 1.5,
+        "ra_spread_angle_rel_error_max": 0.35,
+        "ra_spread_range_rel_error_max": 0.35,
+        "ra_shape_nmse_max": 0.25
+      },
+      "failures": [],
+      "rd_reference_key": "fx_dop_win",
+      "rd_candidate_key": "fx_dop_win",
+      "rd_shape": [
+        64,
+        4096
+      ],
+      "ra_shape": [
+        64,
+        4096
+      ]
+    },
+    "b_tuned_vs_a_baseline": {
+      "pass": false,
+      "metrics": {
+        "rd_peak_doppler_bin_abs_error": 0.0,
+        "rd_peak_range_bin_abs_error": 0.0,
+        "rd_peak_power_db_abs_error": 0.8600050244491015,
+        "rd_centroid_doppler_bin_abs_error": 0.00017525473409207848,
+        "rd_centroid_range_bin_abs_error": 0.7623309758341748,
+        "rd_spread_doppler_rel_error": 9.932974934419626e-05,
+        "rd_spread_range_rel_error": 0.0003948833981856766,
+        "rd_shape_nmse": 0.14293838132364697,
+        "ra_peak_angle_bin_abs_error": 0.0,
+        "ra_peak_range_bin_abs_error": 300.0,
+        "ra_peak_power_db_abs_error": 0.8619511176496824,
+        "ra_centroid_angle_bin_abs_error": 7.105427357601002e-15,
+        "ra_centroid_range_bin_abs_error": 3.1809711061632697,
+        "ra_spread_angle_rel_error": 0.0,
+        "ra_spread_range_rel_error": 0.00160695495507469,
+        "ra_shape_nmse": 0.14550587866293654
+      },
+      "thresholds": {
+        "rd_peak_doppler_bin_abs_error_max": 1.0,
+        "rd_peak_range_bin_abs_error_max": 1.0,
+        "rd_peak_power_db_abs_error_max": 3.0,
+        "rd_centroid_doppler_bin_abs_error_max": 1.5,
+        "rd_centroid_range_bin_abs_error_max": 1.5,
+        "rd_spread_doppler_rel_error_max": 0.35,
+        "rd_spread_range_rel_error_max": 0.35,
+        "rd_shape_nmse_max": 0.25,
+        "ra_peak_angle_bin_abs_error_max": 1.0,
+        "ra_peak_range_bin_abs_error_max": 1.0,
+        "ra_peak_power_db_abs_error_max": 3.0,
+        "ra_centroid_angle_bin_abs_error_max": 1.5,
+        "ra_centroid_range_bin_abs_error_max": 1.5,
+        "ra_spread_angle_rel_error_max": 0.35,
+        "ra_spread_range_rel_error_max": 0.35,
+        "ra_shape_nmse_max": 0.25
+      },
+      "failures": [
+        {
+          "metric": "ra_peak_range_bin_abs_error",
+          "value": 300.0,
+          "limit": 1.0
+        },
+        {
+          "metric": "ra_centroid_range_bin_abs_error",
+          "value": 3.1809711061632697,
+          "limit": 1.5
+        }
+      ],
+      "rd_reference_key": "fx_dop_win",
+      "rd_candidate_key": "fx_dop_win",
+      "rd_shape": [
+        64,
+        4096
+      ],
+      "ra_shape": [
+        64,
+        4096
+      ]
+    },
+    "a_tuned_vs_a_baseline": null
+  },
+  "cross_family_improvement": {
+    "metric_delta": {
+      "ra_centroid_angle_bin_abs_error": {
+        "before": 0.0,
+        "after": 7.105427357601002e-15,
+        "delta": 7.105427357601002e-15,
+        "improved": false
+      },
+      "ra_centroid_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 3.1809711061632697,
+        "delta": 3.1809711061632697,
+        "improved": false
+      },
+      "ra_peak_angle_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "ra_peak_power_db_abs_error": {
+        "before": 0.0,
+        "after": 0.8619511176496824,
+        "delta": 0.8619511176496824,
+        "improved": false
+      },
+      "ra_peak_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 300.0,
+        "delta": 300.0,
+        "improved": false
+      },
+      "ra_shape_nmse": {
+        "before": 0.0,
+        "after": 0.14550587866293654,
+        "delta": 0.14550587866293654,
+        "improved": false
+      },
+      "ra_spread_angle_rel_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "ra_spread_range_rel_error": {
+        "before": 0.0,
+        "after": 0.00160695495507469,
+        "delta": 0.00160695495507469,
+        "improved": false
+      },
+      "rd_centroid_doppler_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.00017525473409207848,
+        "delta": 0.00017525473409207848,
+        "improved": false
+      },
+      "rd_centroid_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.7623309758341748,
+        "delta": 0.7623309758341748,
+        "improved": false
+      },
+      "rd_peak_doppler_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "rd_peak_power_db_abs_error": {
+        "before": 0.0,
+        "after": 0.8600050244491015,
+        "delta": 0.8600050244491015,
+        "improved": false
+      },
+      "rd_peak_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "rd_shape_nmse": {
+        "before": 0.0,
+        "after": 0.14293838132364697,
+        "delta": 0.14293838132364697,
+        "improved": false
+      },
+      "rd_spread_doppler_rel_error": {
+        "before": 0.0,
+        "after": 9.932974934419626e-05,
+        "delta": 9.932974934419626e-05,
+        "improved": false
+      },
+      "rd_spread_range_rel_error": {
+        "before": 0.0,
+        "after": 0.0003948833981856766,
+        "delta": 0.0003948833981856766,
+        "improved": false
+      }
+    },
+    "ra_summary": {
+      "count": 8,
+      "improved_count": 0,
+      "improved_ratio": 0.0,
+      "mean_delta": 38.02375438217888
+    },
+    "rd_summary": {
+      "count": 8,
+      "improved_count": 0,
+      "improved_ratio": 0.0,
+      "mean_delta": 0.22074298118606814
+    }
+  }
+}
