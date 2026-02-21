@@ -186,6 +186,57 @@ def generate_concatenated_doppler(
     return fx_dop_max, fx_dop_ave
 
 
+def angle_estimation_from_channel(
+    h: np.ndarray,
+    np_chirps: int,
+    ns: int,
+    nfft: int,
+    num_tx: int,
+    num_rx: int,
+    angle_view_cali: Sequence[float],
+) -> Tuple[np.ndarray, np.ndarray, int]:
+    """
+    Python replacement candidate for fun_hybrid_Ang_estimation.
+
+    Input:
+      h: complex channel matrix with shape (num_tx*num_rx*np_chirps, ns)
+
+    Output:
+      fx_ang: (nfft, ns) range-angle power map
+      cap_range_azimuth: (ns, ncap) coarse map over virtual channels
+      ncap: number of coarse angle bins
+    """
+    _ = angle_view_cali  # axis calibration is used by caller for plotting.
+    h_arr = np.asarray(h)
+    if h_arr.ndim != 2:
+        raise ValueError("h must be 2D")
+    if ns <= 0 or nfft <= 0:
+        raise ValueError("ns and nfft must be positive")
+    if np_chirps <= 0:
+        raise ValueError("np_chirps must be positive")
+    if num_tx <= 0 or num_rx <= 0:
+        raise ValueError("num_tx and num_rx must be positive")
+    n_virtual = int(num_tx) * int(num_rx)
+    if h_arr.shape[0] != n_virtual * int(np_chirps):
+        raise ValueError("h first dimension must be num_tx*num_rx*np_chirps")
+    if h_arr.shape[1] != int(ns):
+        raise ValueError("h second dimension must equal ns")
+
+    cube = h_arr.reshape(n_virtual, int(np_chirps), int(ns))
+    # Coherent integration over chirps to form per-range spatial snapshots.
+    snapshots = np.mean(cube, axis=1)  # (n_virtual, ns)
+
+    # Fine angle grid
+    spec_fine = np.fft.fftshift(np.fft.fft(snapshots, n=int(nfft), axis=0), axes=0)
+    fx_ang = np.maximum(np.abs(spec_fine) ** 2, np.finfo(np.float64).tiny)
+
+    # Coarse grid equal to virtual array size
+    spec_coarse = np.fft.fftshift(np.fft.fft(snapshots, axis=0), axes=0)
+    cap_range_azimuth = np.maximum(np.abs(spec_coarse).T, np.finfo(np.float64).tiny)
+    ncap = n_virtual
+    return fx_ang, cap_range_azimuth, int(ncap)
+
+
 def _build_h_matrix(
     temp_v: np.ndarray,
     temp_range: np.ndarray,

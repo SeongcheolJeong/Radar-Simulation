@@ -63,6 +63,12 @@ Run P-code replacement step-3 validation (`generate_concatenated_Dop`):
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_concatenated_dop.py
 ```
 
+Run P-code replacement step-4 validation (`Ang_estimation`):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_angle_estimation.py
+```
+
 Run ingest pipeline (example):
 
 ```bash

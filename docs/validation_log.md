@@ -74,3 +74,13 @@
 - Notes:
   - Concatenated Doppler output shape check pass (`nfft`, `1`)
   - Range-window aggregation (`max` and `average`) behavior check pass
+
+## P-code Replacement P4
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_angle_estimation.py`
+- Result: pass
+- Notes:
+  - Angle map output shape check pass (`nfft`, `Ns`)
+  - Coarse map output shape check pass (`Ns`, `Ncap`)
+  - Known spatial-bin peak localization checks pass

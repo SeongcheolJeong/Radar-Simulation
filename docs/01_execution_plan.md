@@ -31,4 +31,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement Python equivalent of `fun_hybrid_Ang_estimation` and validate range-angle map behavior.
+Implement Python equivalents of `fun_hybrid_calculate_reflecting_path_power` and `fun_hybrid_calculate_scattering_path_power`.

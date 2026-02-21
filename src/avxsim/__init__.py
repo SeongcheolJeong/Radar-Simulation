@@ -7,6 +7,7 @@ from .adapters import (
 )
 from .constants import C0
 from .hybrid_pcode import (
+    angle_estimation_from_channel,
     doppler_estimation_from_channel,
     generate_channel_from_distances,
     generate_concatenated_doppler,
@@ -20,6 +21,7 @@ from .types import Path, RadarConfig
 __all__ = [
     "adapt_records_by_chirp",
     "C0",
+    "angle_estimation_from_channel",
     "doppler_estimation_from_channel",
     "generate_channel_from_distances",
     "generate_concatenated_doppler",
