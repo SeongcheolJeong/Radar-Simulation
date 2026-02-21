@@ -145,7 +145,7 @@
 - Result: pass
 - Notes:
   - `--tx-ffd-glob/--rx-ffd-glob` CLI wiring pass
-  - CLI reports `ffd enabled: True`
+  - CLI reports `ffd enabled: True` and `jones polarization enabled: True`
 
 ## FFD Real Sample Regression
 
@@ -155,3 +155,12 @@
 - Notes:
   - Locked reference artifact: `/Users/seongcheoljeong/Documents/Codex_test/tests/data/ffd/pyaedt_T04_test.ffd`
   - HFSS-style grid-header parser path exercised
+
+## Jones Polarization Flow
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_jones_polarization_flow.py`
+- Result: pass
+- Notes:
+  - Jones synthesis path check pass (`rx^H * J * tx`)
+  - Path-level `pol_matrix` handling pass

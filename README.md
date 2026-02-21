@@ -99,6 +99,12 @@ Run `.ffd` pipeline integration validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_pipeline_integration.py
 ```
 
+Run Jones polarization flow validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_jones_polarization_flow.py
+```
+
 Run ingest pipeline (example):
 
 ```bash
@@ -113,6 +119,7 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybri
   --tx-ffd-glob "/path/to/tx*.ffd" \
   --rx-ffd-glob "/path/to/rx*.ffd" \
   --ffd-field-format auto \
+  --use-jones-polarization \
   --run-hybrid-estimation \
   --estimation-nfft 144 \
   --estimation-range-bin-length 10 \

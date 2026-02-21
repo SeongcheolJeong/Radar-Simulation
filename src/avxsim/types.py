@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 
 
 @dataclass(frozen=True)
@@ -8,6 +8,7 @@ class Path:
     doppler_hz: float
     unit_direction: Tuple[float, float, float]
     amp: complex
+    pol_matrix: Optional[Tuple[complex, complex, complex, complex]] = None
 
 
 @dataclass(frozen=True)
@@ -17,4 +18,3 @@ class RadarConfig:
     fs_hz: float
     samples_per_chirp: int
     tx_schedule: Sequence[int]
-

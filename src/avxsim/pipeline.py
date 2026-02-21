@@ -31,6 +31,7 @@ def run_hybrid_frames_pipeline(
     tx_ffd_files: Optional[Sequence[str]] = None,
     rx_ffd_files: Optional[Sequence[str]] = None,
     ffd_field_format: FieldFormat = "auto",
+    use_jones_polarization: bool = False,
     run_hybrid_estimation: bool = False,
     estimation_nfft: int = 144,
     estimation_range_bin_length: int = 10,
@@ -80,6 +81,7 @@ def run_hybrid_frames_pipeline(
         rx_pos_m=rx_pos,
         radar=radar,
         antenna_model=antenna_model,
+        use_jones_polarization=use_jones_polarization,
     )
 
     result: Dict[str, object] = {
@@ -89,6 +91,7 @@ def run_hybrid_frames_pipeline(
         "rx_pos_m": rx_pos,
         "tx_schedule": tx_schedule,
         "ffd_enabled": antenna_model is not None,
+        "jones_polarization_enabled": bool(use_jones_polarization),
     }
 
     if run_hybrid_estimation:

@@ -14,6 +14,9 @@ Replace isotropic antenna gain with HFSS exported element patterns (`.ffd`).
 2. `FfdAntennaModel` implementation (Implemented)
 - `tx_gain(tx_idx, path) -> complex`
 - `rx_gain(path, n_rx) -> complex[n_rx]`
+- Jones-vector APIs:
+  - `tx_jones(tx_idx, path) -> complex[2]`
+  - `rx_jones(path, n_rx) -> complex[n_rx,2]`
 
 3. Validation scripts (Implemented)
 - parser/interpolation validation:
@@ -24,6 +27,8 @@ Replace isotropic antenna gain with HFSS exported element patterns (`.ffd`).
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_pipeline_integration.py`
 - CLI wiring validation:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_ffd.py`
+- Jones flow validation:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_jones_polarization_flow.py`
 
 ## Data Contract Extension
 
@@ -41,4 +46,4 @@ Each pattern query receives:
 
 ## Remaining Work
 
-- Extend polarization handling from fixed weights to full Jones-matrix flow.
+- Calibrate Jones/polarization transfer model against measured or trusted full-wave references.

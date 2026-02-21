@@ -60,8 +60,22 @@ class FfdPattern:
         el_deg: float,
         pol_weights: Tuple[complex, complex] = (1.0 + 0.0j, 0.0 + 0.0j),
     ) -> complex:
+        j = self.jones_from_azel(az_deg=az_deg, el_deg=el_deg)
+        w_t, w_p = pol_weights
+        return complex(w_t) * j[0] + complex(w_p) * j[1]
+
+    def gain_from_unit_direction(
+        self,
+        unit_direction: Sequence[float],
+        pol_weights: Tuple[complex, complex] = (1.0 + 0.0j, 0.0 + 0.0j),
+    ) -> complex:
+        j = self.jones_from_unit_direction(unit_direction)
+        w_t, w_p = pol_weights
+        return complex(w_t) * j[0] + complex(w_p) * j[1]
+
+    def jones_from_azel(self, az_deg: float, el_deg: float) -> np.ndarray:
         theta_deg = 90.0 - float(el_deg)
-        phi_deg = float(az_deg) % 360.0
+        phi_deg = float(az_deg)
         etheta = _interp2_periodic_phi(
             theta_grid=self.theta_deg,
             phi_grid=self.phi_deg,
@@ -76,14 +90,9 @@ class FfdPattern:
             theta_query=theta_deg,
             phi_query=phi_deg,
         )
-        w_t, w_p = pol_weights
-        return complex(w_t) * etheta + complex(w_p) * ephi
+        return np.asarray([etheta, ephi], dtype=np.complex128)
 
-    def gain_from_unit_direction(
-        self,
-        unit_direction: Sequence[float],
-        pol_weights: Tuple[complex, complex] = (1.0 + 0.0j, 0.0 + 0.0j),
-    ) -> complex:
+    def jones_from_unit_direction(self, unit_direction: Sequence[float]) -> np.ndarray:
         u = np.asarray(unit_direction, dtype=np.float64).reshape(-1)
         if u.size != 3:
             raise ValueError("unit_direction must have length 3")
@@ -94,7 +103,7 @@ class FfdPattern:
 
         az_deg = np.rad2deg(np.arctan2(u[1], u[0]))
         el_deg = np.rad2deg(np.arcsin(np.clip(u[2], -1.0, 1.0)))
-        return self.gain_from_azel(az_deg=az_deg, el_deg=el_deg, pol_weights=pol_weights)
+        return self.jones_from_azel(az_deg=az_deg, el_deg=el_deg)
 
 
 def _parse_ffd_rows(path: str) -> List[Tuple[float, float, float, float, float, float]]:

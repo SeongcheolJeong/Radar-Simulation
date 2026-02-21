@@ -40,6 +40,11 @@ def parse_args() -> argparse.Namespace:
         help="Field interpretation for .ffd columns",
     )
     p.add_argument(
+        "--use-jones-polarization",
+        action="store_true",
+        help="Use Jones-matrix polarization flow in synthesis (requires antenna model supporting Jones vectors)",
+    )
+    p.add_argument(
         "--run-hybrid-estimation",
         action="store_true",
         help="Run Hybrid-compatible post-processing bundle (doppler/angle summaries)",
@@ -77,6 +82,7 @@ def main() -> None:
         tx_ffd_files=tx_ffd_files,
         rx_ffd_files=rx_ffd_files,
         ffd_field_format=args.ffd_field_format,
+        use_jones_polarization=args.use_jones_polarization,
         run_hybrid_estimation=args.run_hybrid_estimation,
         estimation_nfft=args.estimation_nfft,
         estimation_range_bin_length=args.estimation_range_bin_length,
@@ -91,6 +97,7 @@ def main() -> None:
     print(f"  paths/chirp (min,max): ({min(n_paths) if n_paths else 0}, {max(n_paths) if n_paths else 0})")
     print(f"  adc shape: {result['adc'].shape}")
     print(f"  ffd enabled: {result['ffd_enabled']}")
+    print(f"  jones polarization enabled: {result['jones_polarization_enabled']}")
     print(f"  path_list: {result.get('path_list_json')}")
     print(f"  adc_cube: {result.get('adc_cube_npz')}")
     if args.run_hybrid_estimation:

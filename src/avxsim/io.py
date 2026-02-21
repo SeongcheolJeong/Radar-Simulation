@@ -13,14 +13,19 @@ def save_paths_by_chirp_json(paths_by_chirp: Sequence[Sequence[RadarPath]], out_
     for chirp_paths in paths_by_chirp:
         row: List[Dict[str, Any]] = []
         for p in chirp_paths:
-            row.append(
-                {
-                    "delay_s": float(p.delay_s),
-                    "doppler_hz": float(p.doppler_hz),
-                    "unit_direction": [float(x) for x in p.unit_direction],
-                    "amp_complex": {"re": float(np.real(p.amp)), "im": float(np.imag(p.amp))},
-                }
-            )
+            item = {
+                "delay_s": float(p.delay_s),
+                "doppler_hz": float(p.doppler_hz),
+                "unit_direction": [float(x) for x in p.unit_direction],
+                "amp_complex": {"re": float(np.real(p.amp)), "im": float(np.imag(p.amp))},
+            }
+            if p.pol_matrix is not None:
+                pm = np.asarray(list(p.pol_matrix), dtype=np.complex128).reshape(-1)
+                if pm.size == 4:
+                    item["pol_matrix"] = [
+                        {"re": float(np.real(x)), "im": float(np.imag(x))} for x in pm
+                    ]
+            row.append(item)
         out.append(row)
     Path(out_json).write_text(json.dumps(out, indent=2), encoding="utf-8")
 

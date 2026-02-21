@@ -75,6 +75,7 @@ def run() -> None:
             str(ffd_dir / "rx*.ffd"),
             "--ffd-field-format",
             "real_imag",
+            "--use-jones-polarization",
             "--output-dir",
             str(out_dir),
         ]
@@ -86,6 +87,7 @@ def run() -> None:
             check=True,
         )
         assert "ffd enabled: True" in proc.stdout, proc.stdout
+        assert "jones polarization enabled: True" in proc.stdout, proc.stdout
         assert (out_dir / "path_list.json").exists()
         assert (out_dir / "adc_cube.npz").exists()
         print("Hybrid ingest CLI with FFD validation passed.")
@@ -93,4 +95,3 @@ def run() -> None:
 
 if __name__ == "__main__":
     run()
-

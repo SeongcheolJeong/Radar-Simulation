@@ -17,6 +17,12 @@ def run():
                 "az_deg": 15.0,
                 "el_deg": 0.0,
                 "amp_complex": {"re": 1.0, "im": 0.2},
+                "pol_matrix": [
+                    {"re": 1.0, "im": 0.0},
+                    {"re": 0.1, "im": 0.2},
+                    {"re": -0.1, "im": 0.05},
+                    {"re": 0.9, "im": 0.0},
+                ],
             }
         ],
         [
@@ -30,6 +36,8 @@ def run():
     ]
 
     paths = adapt_records_by_chirp(records)
+    assert paths[0][0].pol_matrix is not None
+    assert len(paths[0][0].pol_matrix) == 4
 
     radar = RadarConfig(
         fc_hz=77e9,
@@ -55,4 +63,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-

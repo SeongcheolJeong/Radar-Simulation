@@ -15,7 +15,7 @@ Recommended optional fields:
 
 - `aod_az_deg`, `aod_el_deg`
 - `aoa_az_deg`, `aoa_el_deg`
-- `pol_matrix` (`2x2` complex, flattened in row-major)
+- `pol_matrix` (`2x2` complex, flattened in row-major `[m00,m01,m10,m11]`)
 - `path_id`
 - `material_tag`
 
@@ -58,4 +58,3 @@ Optional derived view:
 - `virtual[sample, chirp, channel]` where `channel = tx * n_rx + rx`
 
 Derived views must not replace canonical 4D storage.
-

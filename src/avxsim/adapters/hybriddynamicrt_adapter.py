@@ -68,6 +68,37 @@ def _direction_from_record(rec: Dict[str, Any]) -> Tuple[float, float, float]:
     raise ValueError("record must include unit_direction or az/el")
 
 
+def _pol_matrix_from_record(rec: Dict[str, Any]):
+    if "pol_matrix" not in rec:
+        return None
+    p = rec["pol_matrix"]
+    if isinstance(p, dict):
+        vals = [
+            p.get("m00", {"re": 1.0, "im": 0.0}),
+            p.get("m01", {"re": 0.0, "im": 0.0}),
+            p.get("m10", {"re": 0.0, "im": 0.0}),
+            p.get("m11", {"re": 1.0, "im": 0.0}),
+        ]
+        out = []
+        for v in vals:
+            if isinstance(v, dict):
+                out.append(complex(float(v.get("re", 0.0)), float(v.get("im", 0.0))))
+            else:
+                out.append(complex(v))
+        return tuple(out)
+    if isinstance(p, (list, tuple)) and len(p) == 4:
+        out = []
+        for v in p:
+            if isinstance(v, dict):
+                out.append(complex(float(v.get("re", 0.0)), float(v.get("im", 0.0))))
+            elif isinstance(v, (list, tuple)) and len(v) == 2:
+                out.append(complex(float(v[0]), float(v[1])))
+            else:
+                out.append(complex(v))
+        return tuple(out)
+    raise ValueError("pol_matrix must be length-4 list or dict with m00,m01,m10,m11")
+
+
 def adapt_records_by_chirp(
     records_by_chirp: Sequence[Iterable[Dict[str, Any]]],
     fc_hz: Optional[float] = None,
@@ -88,6 +119,7 @@ def adapt_records_by_chirp(
                     doppler_hz=_doppler_from_record(rec, fc_hz=fc_hz),
                     unit_direction=_direction_from_record(rec),
                     amp=_amp_from_record(rec),
+                    pol_matrix=_pol_matrix_from_record(rec),
                 )
             )
         out.append(row)
@@ -104,4 +136,3 @@ def load_records_by_chirp_json(json_path: str) -> List[List[Dict[str, Any]]]:
         if not isinstance(chirp, list):
             raise ValueError(f"payload[{idx}] must be list")
     return payload
-

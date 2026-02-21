@@ -20,6 +20,7 @@ def synth_fmcw_tdm(
     rx_pos_m: np.ndarray,
     radar: RadarConfig,
     antenna_model: Optional[AntennaModel] = None,
+    use_jones_polarization: bool = False,
     noise_sigma: float = 0.0,
     rng: Optional[np.random.Generator] = None,
 ) -> np.ndarray:
@@ -59,12 +60,22 @@ def synth_fmcw_tdm(
             ph_tx = np.exp(-1j * 2 * np.pi / lam * np.dot(u, tx_pos[tx_idx]))
             ph_rx = np.exp(-1j * 2 * np.pi / lam * (rx_pos @ u))
 
-            g_tx = complex(antenna_model.tx_gain(tx_idx, path))
-            g_rx = np.asarray(antenna_model.rx_gain(path, n_rx), dtype=np.complex128)
-            if g_rx.shape != (n_rx,):
-                raise ValueError("rx_gain must return shape (n_rx,)")
-
-            path_amp = complex(path.amp) * ph_tx * ph_rx * g_tx * g_rx
+            if use_jones_polarization:
+                tx_j = np.asarray(antenna_model.tx_jones(tx_idx, path), dtype=np.complex128).reshape(-1)
+                rx_j = np.asarray(antenna_model.rx_jones(path, n_rx), dtype=np.complex128)
+                if tx_j.shape != (2,):
+                    raise ValueError("tx_jones must return shape (2,)")
+                if rx_j.shape != (n_rx, 2):
+                    raise ValueError("rx_jones must return shape (n_rx, 2)")
+                j_path = _resolve_pol_matrix(path)
+                pol_gain = np.einsum("ri,ij,j->r", np.conj(rx_j), j_path, tx_j)
+                path_amp = complex(path.amp) * ph_tx * ph_rx * pol_gain
+            else:
+                g_tx = complex(antenna_model.tx_gain(tx_idx, path))
+                g_rx = np.asarray(antenna_model.rx_gain(path, n_rx), dtype=np.complex128)
+                if g_rx.shape != (n_rx,):
+                    raise ValueError("rx_gain must return shape (n_rx,)")
+                path_amp = complex(path.amp) * ph_tx * ph_rx * g_tx * g_rx
 
             beat_hz = float(radar.slope_hz_per_s) * float(path.delay_s) + float(path.doppler_hz)
             tone = np.exp(1j * 2 * np.pi * beat_hz * fast_time)
@@ -90,3 +101,17 @@ def reshape_virtual_channels(adc: np.ndarray) -> np.ndarray:
     n_samp, n_chirp, n_tx, n_rx = adc.shape
     return adc.reshape(n_samp, n_chirp, n_tx * n_rx)
 
+
+def _resolve_pol_matrix(path: Path) -> np.ndarray:
+    if path.pol_matrix is None:
+        return np.eye(2, dtype=np.complex128)
+    p = path.pol_matrix
+    if isinstance(p, np.ndarray):
+        arr = np.asarray(p, dtype=np.complex128)
+    else:
+        arr = np.asarray(list(p), dtype=np.complex128)
+    if arr.shape == (2, 2):
+        return arr
+    if arr.shape == (4,):
+        return arr.reshape(2, 2)
+    raise ValueError("path.pol_matrix must be shape (2,2) or length 4")

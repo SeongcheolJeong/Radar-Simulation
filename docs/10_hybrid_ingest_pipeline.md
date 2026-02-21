@@ -22,6 +22,7 @@ CLI options:
 - `--tx-ffd-glob "/path/to/tx*.ffd"`
 - `--rx-ffd-glob "/path/to/rx*.ffd"`
 - `--ffd-field-format {auto|real_imag|mag_phase_deg}`
+- `--use-jones-polarization`
 
 When set, the synthesizer uses `FfdAntennaModel` instead of isotropic gains.
 

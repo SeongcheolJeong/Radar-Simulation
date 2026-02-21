@@ -32,4 +32,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Extend `.ffd` handling from fixed polarization weights to configurable Jones-matrix flow.
+Calibrate polarization/Jones transfer parameters against reference data and define parity metrics.

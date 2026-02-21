@@ -14,6 +14,12 @@ class AntennaModel(Protocol):
     def rx_gain(self, path: RadarPath, n_rx: int) -> np.ndarray:
         ...
 
+    def tx_jones(self, tx_idx: int, path: RadarPath) -> np.ndarray:
+        ...
+
+    def rx_jones(self, path: RadarPath, n_rx: int) -> np.ndarray:
+        ...
+
 
 class IsotropicAntenna:
     def tx_gain(self, tx_idx: int, path: RadarPath) -> complex:
@@ -24,6 +30,17 @@ class IsotropicAntenna:
     def rx_gain(self, path: RadarPath, n_rx: int) -> np.ndarray:
         _ = path
         return np.ones((n_rx,), dtype=np.complex128)
+
+    def tx_jones(self, tx_idx: int, path: RadarPath) -> np.ndarray:
+        _ = tx_idx
+        _ = path
+        return np.asarray([1.0 + 0.0j, 0.0 + 0.0j], dtype=np.complex128)
+
+    def rx_jones(self, path: RadarPath, n_rx: int) -> np.ndarray:
+        _ = path
+        out = np.zeros((n_rx, 2), dtype=np.complex128)
+        out[:, 0] = 1.0 + 0.0j
+        return out
 
 
 class FfdAntennaModel:
@@ -79,6 +96,19 @@ class FfdAntennaModel:
                 path.unit_direction,
                 pol_weights=self._rx_pol,
             )
+        return out
+
+    def tx_jones(self, tx_idx: int, path: RadarPath) -> np.ndarray:
+        if tx_idx < 0 or tx_idx >= len(self._tx_patterns):
+            raise ValueError(f"tx_idx out of range: {tx_idx}")
+        return self._tx_patterns[tx_idx].jones_from_unit_direction(path.unit_direction)
+
+    def rx_jones(self, path: RadarPath, n_rx: int) -> np.ndarray:
+        if n_rx != len(self._rx_patterns):
+            raise ValueError(f"n_rx mismatch: {n_rx} != {len(self._rx_patterns)}")
+        out = np.zeros((n_rx, 2), dtype=np.complex128)
+        for i in range(n_rx):
+            out[i, :] = self._rx_patterns[i].jones_from_unit_direction(path.unit_direction)
         return out
 
 
