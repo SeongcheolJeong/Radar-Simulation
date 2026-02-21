@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MIMO Radar Simulation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+    :root {
+      color-scheme: light;
+      --bg: #0f1a1a;
+      --bg2: #0b1212;
+      --panel: rgba(16, 32, 32, 0.88);
+      --panel-strong: rgba(20, 46, 46, 0.95);
+      --text: #e7f3f1;
+      --muted: #a3b8b5;
+      --accent: #7df3c1;
+      --accent-2: #ffb454;
+      --accent-3: #6bd1ff;
+      --stroke: rgba(125, 243, 193, 0.2);
+      --warning: #ff6b6b;
+      --shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 15% 20%, #1a3530 0%, transparent 55%),
+                  radial-gradient(circle at 80% 10%, #2d1f1b 0%, transparent 40%),
+                  linear-gradient(130deg, var(--bg), var(--bg2));
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 620px;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .panel strong {
+      color: var(--accent);
+    }
+
+    .controls {
+      grid-row: 1 / span 2;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .control-group {
+      background: var(--panel-strong);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    input[type="range"],
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    input[type="number"], input[type="text"] {
+      background: rgba(12, 24, 24, 0.8);
+      border: 1px solid rgba(125, 243, 193, 0.25);
+      color: var(--text);
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(125, 243, 193, 0.2), rgba(107, 209, 255, 0.2));
+      border: 1px solid rgba(125, 243, 193, 0.4);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 12px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, rgba(255, 180, 84, 0.2), rgba(255, 107, 107, 0.2));
+      border-color: rgba(255, 180, 84, 0.4);
+    }
+
+    .metrics {
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--muted);
+      display: grid;
+      gap: 6px;
+    }
+
+    .targets-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 11px;
+    }
+
+    .targets-table th,
+    .targets-table td {
+      border-bottom: 1px solid rgba(125, 243, 193, 0.15);
+      padding: 6px 4px;
+      text-align: left;
+    }
+
+    .targets-table input {
+      width: 72px;
+    }
+
+    .targets-table button {
+      padding: 4px 6px;
+      font-size: 10px;
+    }
+
+    .canvas-wrap {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 8px;
+      min-height: 340px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      background: #081414;
+      border: 1px solid rgba(125, 243, 193, 0.2);
+    }
+
+    .legend {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    }
+
+    .bar {
+      height: 8px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #002bff, #00c7ff, #2dff8b, #f9f871, #ff6b6b);
+    }
+
+    .note {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-row: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>MIMO Radar Simulation</h1>
+      <p>다중 송신/수신 안테나를 이용한 가상 배열 기반의 간단한 MIMO 레이더 시뮬레이션입니다. 배열 구성, 대역폭, 타겟 분포를 바꾸면서 각도-거리 맵을 확인하세요.</p>
+    </div>
+  </header>
+
+  <main class="app">
+    <section class="panel controls">
+      <div>
+        <div class="section-title">Array</div>
+        <div class="control-group">
+          <div class="row">
+            <label>Tx 개수
+              <input id="txCount" type="number" min="1" max="8" value="4" />
+            </label>
+            <label>Rx 개수
+              <input id="rxCount" type="number" min="1" max="8" value="4" />
+            </label>
+          </div>
+          <label>안테나 간격 (λ)
+            <input id="spacing" type="range" min="0.4" max="1.5" step="0.05" value="0.5" />
+            <span id="spacingVal"></span>
+          </label>
+          <div class="row">
+            <label>주파수 (GHz)
+              <input id="freq" type="number" min="1" max="80" step="0.1" value="10" />
+            </label>
+            <label>대역폭 (MHz)
+              <input id="bw" type="number" min="20" max="1000" step="10" value="200" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Scene</div>
+        <div class="control-group">
+          <div class="row">
+            <label>최대 거리 (m)
+              <input id="maxRange" type="number" min="50" max="1000" step="10" value="200" />
+            </label>
+            <label>각도 범위 (deg)
+              <input id="angleSpan" type="number" min="30" max="80" step="5" value="60" />
+            </label>
+          </div>
+          <div class="row">
+            <label>거리 bin 수
+              <input id="rangeBins" type="number" min="50" max="200" step="10" value="120" />
+            </label>
+            <label>각도 bin 수
+              <input id="angleBins" type="number" min="61" max="181" step="10" value="121" />
+            </label>
+          </div>
+          <label>노이즈 전력 (dB)
+            <input id="noiseDb" type="range" min="-30" max="10" step="1" value="-10" />
+            <span id="noiseVal"></span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Targets</div>
+        <div class="control-group">
+          <div class="row">
+            <label>랜덤 타겟 수
+              <input id="targetCount" type="number" min="1" max="6" value="3" />
+            </label>
+            <label>진폭 스케일
+              <input id="ampScale" type="number" min="0.2" max="2" step="0.1" value="1" />
+            </label>
+          </div>
+          <div class="buttons">
+            <button id="btnRandom">랜덤 생성</button>
+            <button id="btnAdd" class="secondary">타겟 추가</button>
+          </div>
+          <button id="btnClear" class="secondary">타겟 초기화</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Metrics</div>
+        <div class="control-group metrics" id="metrics"></div>
+      </div>
+    </section>
+
+    <section class="panel canvas-wrap">
+      <div class="section-title">Scene View</div>
+      <canvas id="scene"></canvas>
+      <div class="legend">
+        <span>Tx: <strong style="color: var(--accent)">●</strong></span>
+        <span>Rx: <strong style="color: var(--accent-2)">■</strong></span>
+        <span>Target: <strong style="color: var(--accent-3)">◆</strong></span>
+      </div>
+    </section>
+
+    <section class="panel canvas-wrap">
+      <div class="section-title">Range-Angle Map</div>
+      <canvas id="heatmap"></canvas>
+      <div class="legend">
+        <span>Range (m) vs Angle (deg)</span>
+        <span class="bar" style="flex: 1; margin: 0 10px;"></span>
+        <span>0 dB</span>
+      </div>
+      <div class="note">표시는 최대값 기준 상대 dB 스케일입니다.</div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">Target List</div>
+      <table class="targets-table" id="targetsTable">
+        <thead>
+          <tr>
+            <th>거리 (m)</th>
+            <th>각도 (deg)</th>
+            <th>진폭</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const C = 299792458;
+    const deg2rad = (deg) => (deg * Math.PI) / 180;
+
+    const state = {
+      nTx: 4,
+      nRx: 4,
+      spacing: 0.5,
+      freqGHz: 10,
+      bandwidthMHz: 200,
+      maxRange: 200,
+      angleSpan: 60,
+      nRange: 120,
+      nAngles: 121,
+      noiseDb: -10,
+      ampScale: 1,
+      targets: [
+        { range: 60, angle: -20, amp: 1 },
+        { range: 110, angle: 10, amp: 0.9 },
+        { range: 150, angle: 35, amp: 0.7 }
+      ]
+    };
+
+    const elements = {
+      txCount: document.getElementById('txCount'),
+      rxCount: document.getElementById('rxCount'),
+      spacing: document.getElementById('spacing'),
+      spacingVal: document.getElementById('spacingVal'),
+      freq: document.getElementById('freq'),
+      bw: document.getElementById('bw'),
+      maxRange: document.getElementById('maxRange'),
+      angleSpan: document.getElementById('angleSpan'),
+      rangeBins: document.getElementById('rangeBins'),
+      angleBins: document.getElementById('angleBins'),
+      noiseDb: document.getElementById('noiseDb'),
+      noiseVal: document.getElementById('noiseVal'),
+      targetCount: document.getElementById('targetCount'),
+      ampScale: document.getElementById('ampScale'),
+      btnRandom: document.getElementById('btnRandom'),
+      btnAdd: document.getElementById('btnAdd'),
+      btnClear: document.getElementById('btnClear'),
+      metrics: document.getElementById('metrics'),
+      scene: document.getElementById('scene'),
+      heatmap: document.getElementById('heatmap'),
+      targetsTable: document.getElementById('targetsTable').querySelector('tbody')
+    };
+
+    function clamp(val, min, max) {
+      return Math.min(max, Math.max(min, val));
+    }
+
+    function getLambda() {
+      return 0.299792458 / state.freqGHz;
+    }
+
+    function computeArrayPositions() {
+      const tx = [];
+      const rx = [];
+      const txOffset = (state.nTx - 1) / 2;
+      const rxOffset = (state.nRx - 1) / 2;
+      for (let i = 0; i < state.nTx; i += 1) {
+        tx.push((i - txOffset) * state.spacing);
+      }
+      for (let i = 0; i < state.nRx; i += 1) {
+        rx.push((i - rxOffset) * state.spacing);
+      }
+      const virt = [];
+      for (const t of tx) {
+        for (const r of rx) {
+          virt.push(t + r);
+        }
+      }
+      return { tx, rx, virt };
+    }
+
+    function gaussian() {
+      let u = 0;
+      let v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function createColorLut() {
+      const colors = [
+        [0, 43, 255],
+        [0, 199, 255],
+        [45, 255, 139],
+        [249, 248, 113],
+        [255, 107, 107]
+      ];
+      const lut = [];
+      for (let i = 0; i < 256; i += 1) {
+        const t = i / 255;
+        const idx = Math.floor(t * (colors.length - 1));
+        const local = (t * (colors.length - 1)) - idx;
+        const c0 = colors[idx];
+        const c1 = colors[Math.min(idx + 1, colors.length - 1)];
+        const r = Math.round(c0[0] + (c1[0] - c0[0]) * local);
+        const g = Math.round(c0[1] + (c1[1] - c0[1]) * local);
+        const b = Math.round(c0[2] + (c1[2] - c0[2]) * local);
+        lut.push([r, g, b]);
+      }
+      return lut;
+    }
+
+    const colorLut = createColorLut();
+
+    function updateMetrics() {
+      const lambda = getLambda();
+      const { virt } = computeArrayPositions();
+      const virtMin = Math.min(...virt);
+      const virtMax = Math.max(...virt);
+      const aperture = (virtMax - virtMin) * lambda;
+      const bandwidthHz = state.bandwidthMHz * 1e6;
+      const rangeRes = C / (2 * bandwidthHz);
+      let beamwidth = 'N/A';
+      if (aperture > 0) {
+        const bwRad = 0.886 * lambda / aperture;
+        beamwidth = `${(bwRad * 180 / Math.PI).toFixed(2)} deg`;
+      }
+      const html = [
+        `λ: ${lambda.toFixed(4)} m`,
+        `가상 배열 요소 수: ${virt.length}`,
+        `가상 aperture: ${aperture.toFixed(3)} m`,
+        `각도 분해능(근사): ${beamwidth}`,
+        `거리 분해능: ${rangeRes.toFixed(2)} m`
+      ];
+      elements.metrics.innerHTML = html.map((line) => `<div>${line}</div>`).join('');
+    }
+
+    function resizeCanvas(canvas, { scale = true } = {}) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      if (scale) {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      } else {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
+      return {
+        ctx,
+        dpr,
+        cssWidth: rect.width,
+        cssHeight: rect.height,
+        width: canvas.width,
+        height: canvas.height
+      };
+    }
+
+    function drawScene() {
+      const { ctx, cssWidth: width, cssHeight: height } = resizeCanvas(elements.scene, { scale: true });
+      ctx.clearRect(0, 0, width, height);
+
+      const { tx, rx } = computeArrayPositions();
+      const lambda = getLambda();
+      const maxRange = state.maxRange;
+
+      const originX = width * 0.5;
+      const originY = height * 0.92;
+      const scale = (height * 0.75) / maxRange;
+
+      ctx.strokeStyle = 'rgba(125, 243, 193, 0.15)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= 4; i += 1) {
+        const y = originY - (maxRange * (i / 4)) * scale;
+        ctx.beginPath();
+        ctx.moveTo(width * 0.1, y);
+        ctx.lineTo(width * 0.9, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = 'rgba(125, 243, 193, 0.4)';
+      ctx.beginPath();
+      ctx.moveTo(width * 0.1, originY);
+      ctx.lineTo(width * 0.9, originY);
+      ctx.stroke();
+
+      const txColor = '#7df3c1';
+      const rxColor = '#ffb454';
+      const targetColor = '#6bd1ff';
+
+      for (const pos of tx) {
+        const x = originX + pos * lambda * scale;
+        ctx.fillStyle = txColor;
+        ctx.beginPath();
+        ctx.arc(x, originY, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      for (const pos of rx) {
+        const x = originX + pos * lambda * scale;
+        ctx.fillStyle = rxColor;
+        ctx.fillRect(x - 3, originY - 3, 6, 6);
+      }
+
+      ctx.font = '11px "IBM Plex Mono"';
+      for (const target of state.targets) {
+        const angleRad = deg2rad(target.angle);
+        const x = originX + Math.sin(angleRad) * target.range * scale;
+        const y = originY - Math.cos(angleRad) * target.range * scale;
+        ctx.fillStyle = targetColor;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 5);
+        ctx.lineTo(x + 5, y + 5);
+        ctx.lineTo(x - 5, y + 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(231, 243, 241, 0.7)';
+        ctx.fillText(`${target.range.toFixed(0)}m, ${target.angle.toFixed(0)}°`, x + 6, y - 6);
+      }
+    }
+
+    function simulate() {
+      const lambda = getLambda();
+      const { virt } = computeArrayPositions();
+      const Nvirt = virt.length;
+      const Nrange = state.nRange;
+      const Nangles = state.nAngles;
+      const angleSpan = state.angleSpan;
+      const maxRange = state.maxRange;
+
+      const angles = new Array(Nangles);
+      const steeringRe = new Array(Nangles);
+      const steeringIm = new Array(Nangles);
+
+      for (let i = 0; i < Nangles; i += 1) {
+        const angle = -angleSpan + (2 * angleSpan * i) / (Nangles - 1);
+        angles[i] = angle;
+        const sin = Math.sin(deg2rad(angle));
+        const re = new Float32Array(Nvirt);
+        const im = new Float32Array(Nvirt);
+        for (let v = 0; v < Nvirt; v += 1) {
+          const phase = 2 * Math.PI * virt[v] * sin;
+          re[v] = Math.cos(phase);
+          im[v] = Math.sin(phase);
+        }
+        steeringRe[i] = re;
+        steeringIm[i] = im;
+      }
+
+      const snapRe = Array.from({ length: Nrange }, () => new Float32Array(Nvirt));
+      const snapIm = Array.from({ length: Nrange }, () => new Float32Array(Nvirt));
+
+      const noisePower = Math.pow(10, state.noiseDb / 10);
+      const noiseStd = Math.sqrt(noisePower / 2);
+
+      for (let r = 0; r < Nrange; r += 1) {
+        const re = snapRe[r];
+        const im = snapIm[r];
+        for (let v = 0; v < Nvirt; v += 1) {
+          re[v] = gaussian() * noiseStd;
+          im[v] = gaussian() * noiseStd;
+        }
+      }
+
+      const bandwidthHz = state.bandwidthMHz * 1e6;
+      const rangeRes = C / (2 * bandwidthHz);
+      const binSize = maxRange / (Nrange - 1);
+
+      for (const target of state.targets) {
+        const angleRad = deg2rad(target.angle);
+        const sin = Math.sin(angleRad);
+        for (let r = 0; r < Nrange; r += 1) {
+          const range = r * binSize;
+          const dr = range - target.range;
+          const weight = Math.exp(-0.5 * (dr / rangeRes) ** 2);
+          if (weight < 0.01) continue;
+          const amp = target.amp * state.ampScale * weight;
+          const re = snapRe[r];
+          const im = snapIm[r];
+          for (let v = 0; v < Nvirt; v += 1) {
+            const phase = -2 * Math.PI * virt[v] * sin;
+            re[v] += amp * Math.cos(phase);
+            im[v] += amp * Math.sin(phase);
+          }
+        }
+      }
+
+      const power = new Float32Array(Nrange * Nangles);
+      let maxVal = 1e-9;
+
+      for (let r = 0; r < Nrange; r += 1) {
+        const re = snapRe[r];
+        const im = snapIm[r];
+        for (let a = 0; a < Nangles; a += 1) {
+          let sumRe = 0;
+          let sumIm = 0;
+          const steerRe = steeringRe[a];
+          const steerIm = steeringIm[a];
+          for (let v = 0; v < Nvirt; v += 1) {
+            const sr = steerRe[v];
+            const si = steerIm[v];
+            const rv = re[v];
+            const iv = im[v];
+            sumRe += rv * sr - iv * si;
+            sumIm += rv * si + iv * sr;
+          }
+          const p = sumRe * sumRe + sumIm * sumIm;
+          const idx = r * Nangles + a;
+          power[idx] = p;
+          if (p > maxVal) maxVal = p;
+        }
+      }
+
+      drawHeatmap(power, maxVal, angles);
+    }
+
+    function drawHeatmap(power, maxVal, angles) {
+      const { ctx, width, height, dpr, cssWidth, cssHeight } = resizeCanvas(elements.heatmap, { scale: false });
+      const Nrange = state.nRange;
+      const Nangles = state.nAngles;
+
+      const image = ctx.createImageData(width, height);
+      const data = image.data;
+
+      for (let y = 0; y < height; y += 1) {
+        const rangeIdx = Math.floor((y / height) * (Nrange - 1));
+        for (let x = 0; x < width; x += 1) {
+          const angleIdx = Math.floor((x / width) * (Nangles - 1));
+          const p = power[rangeIdx * Nangles + angleIdx];
+          const db = 10 * Math.log10(p / maxVal + 1e-12);
+          const norm = clamp((db + 30) / 30, 0, 1);
+          const lutIdx = Math.floor(norm * 255);
+          const [r, g, b] = colorLut[lutIdx];
+          const idx = (y * width + x) * 4;
+          data[idx] = r;
+          data[idx + 1] = g;
+          data[idx + 2] = b;
+          data[idx + 3] = 255;
+        }
+      }
+
+      ctx.putImageData(image, 0, 0);
+
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(0.5, 0.5, width - 1, height - 1);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = 'rgba(231, 243, 241, 0.7)';
+      ctx.font = '11px \"IBM Plex Mono\"';
+      ctx.fillText(`${state.maxRange}m`, 6, 12);
+      ctx.fillText('0m', 6, cssHeight - 6);
+      ctx.fillText(`${angles[0].toFixed(0)}°`, 6, cssHeight - 18);
+      ctx.fillText(`${angles[angles.length - 1].toFixed(0)}°`, cssWidth - 44, cssHeight - 18);
+      ctx.restore();
+    }
+
+    function renderTargets() {
+      elements.targetsTable.innerHTML = '';
+      state.targets.forEach((target, idx) => {
+        const row = document.createElement('tr');
+
+        const rangeCell = document.createElement('td');
+        const rangeInput = document.createElement('input');
+        rangeInput.type = 'number';
+        rangeInput.min = '1';
+        rangeInput.max = state.maxRange.toString();
+        rangeInput.step = '1';
+        rangeInput.value = target.range.toFixed(0);
+        rangeInput.addEventListener('change', () => {
+          target.range = clamp(parseFloat(rangeInput.value), 1, state.maxRange);
+          scheduleSim();
+        });
+        rangeCell.appendChild(rangeInput);
+
+        const angleCell = document.createElement('td');
+        const angleInput = document.createElement('input');
+        angleInput.type = 'number';
+        angleInput.min = (-state.angleSpan).toString();
+        angleInput.max = state.angleSpan.toString();
+        angleInput.step = '1';
+        angleInput.value = target.angle.toFixed(0);
+        angleInput.addEventListener('change', () => {
+          target.angle = clamp(parseFloat(angleInput.value), -state.angleSpan, state.angleSpan);
+          scheduleSim();
+        });
+        angleCell.appendChild(angleInput);
+
+        const ampCell = document.createElement('td');
+        const ampInput = document.createElement('input');
+        ampInput.type = 'number';
+        ampInput.min = '0.1';
+        ampInput.max = '2.0';
+        ampInput.step = '0.1';
+        ampInput.value = target.amp.toFixed(1);
+        ampInput.addEventListener('change', () => {
+          target.amp = clamp(parseFloat(ampInput.value), 0.1, 2.0);
+          scheduleSim();
+        });
+        ampCell.appendChild(ampInput);
+
+        const removeCell = document.createElement('td');
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '삭제';
+        removeBtn.addEventListener('click', () => {
+          state.targets.splice(idx, 1);
+          renderTargets();
+          scheduleSim();
+        });
+        removeCell.appendChild(removeBtn);
+
+        row.appendChild(rangeCell);
+        row.appendChild(angleCell);
+        row.appendChild(ampCell);
+        row.appendChild(removeCell);
+        elements.targetsTable.appendChild(row);
+      });
+    }
+
+    function randomTargets() {
+      const count = clamp(parseInt(elements.targetCount.value, 10), 1, 6);
+      const ampScale = clamp(parseFloat(elements.ampScale.value), 0.2, 2);
+      state.targets = [];
+      for (let i = 0; i < count; i += 1) {
+        const range = 0.2 * state.maxRange + Math.random() * state.maxRange * 0.7;
+        const angle = (Math.random() * 2 - 1) * state.angleSpan;
+        const amp = (0.5 + Math.random() * 0.6) * ampScale;
+        state.targets.push({ range, angle, amp });
+      }
+      renderTargets();
+    }
+
+    function bindControls() {
+      elements.txCount.addEventListener('change', (e) => {
+        state.nTx = clamp(parseInt(e.target.value, 10), 1, 8);
+        scheduleSim();
+      });
+      elements.rxCount.addEventListener('change', (e) => {
+        state.nRx = clamp(parseInt(e.target.value, 10), 1, 8);
+        scheduleSim();
+      });
+      elements.spacing.addEventListener('input', (e) => {
+        state.spacing = parseFloat(e.target.value);
+        elements.spacingVal.textContent = `${state.spacing.toFixed(2)} λ`;
+        scheduleSim();
+      });
+      elements.freq.addEventListener('change', (e) => {
+        state.freqGHz = clamp(parseFloat(e.target.value), 1, 80);
+        scheduleSim();
+      });
+      elements.bw.addEventListener('change', (e) => {
+        state.bandwidthMHz = clamp(parseFloat(e.target.value), 20, 1000);
+        scheduleSim();
+      });
+      elements.maxRange.addEventListener('change', (e) => {
+        state.maxRange = clamp(parseFloat(e.target.value), 50, 1000);
+        renderTargets();
+        scheduleSim();
+      });
+      elements.angleSpan.addEventListener('change', (e) => {
+        state.angleSpan = clamp(parseFloat(e.target.value), 30, 80);
+        renderTargets();
+        scheduleSim();
+      });
+      elements.rangeBins.addEventListener('change', (e) => {
+        state.nRange = clamp(parseInt(e.target.value, 10), 50, 200);
+        scheduleSim();
+      });
+      elements.angleBins.addEventListener('change', (e) => {
+        state.nAngles = clamp(parseInt(e.target.value, 10), 61, 181);
+        scheduleSim();
+      });
+      elements.noiseDb.addEventListener('input', (e) => {
+        state.noiseDb = parseFloat(e.target.value);
+        elements.noiseVal.textContent = `${state.noiseDb.toFixed(0)} dB`;
+        scheduleSim();
+      });
+      elements.ampScale.addEventListener('change', (e) => {
+        state.ampScale = clamp(parseFloat(e.target.value), 0.2, 2);
+        scheduleSim();
+      });
+      elements.btnRandom.addEventListener('click', () => {
+        randomTargets();
+        scheduleSim();
+      });
+      elements.btnAdd.addEventListener('click', () => {
+        state.targets.push({ range: state.maxRange * 0.4, angle: 0, amp: 0.8 });
+        renderTargets();
+        scheduleSim();
+      });
+      elements.btnClear.addEventListener('click', () => {
+        state.targets = [];
+        renderTargets();
+        scheduleSim();
+      });
+    }
+
+    let simTimer = null;
+    function scheduleSim() {
+      if (simTimer) window.clearTimeout(simTimer);
+      simTimer = window.setTimeout(() => {
+        updateMetrics();
+        drawScene();
+        simulate();
+      }, 80);
+    }
+
+    function init() {
+      elements.spacingVal.textContent = `${state.spacing.toFixed(2)} λ`;
+      elements.noiseVal.textContent = `${state.noiseDb.toFixed(0)} dB`;
+      renderTargets();
+      bindControls();
+      updateMetrics();
+      drawScene();
+      simulate();
+    }
+
+    window.addEventListener('resize', () => {
+      scheduleSim();
+    });
+
+    init();
+  </script>
+</body>
+</html>
