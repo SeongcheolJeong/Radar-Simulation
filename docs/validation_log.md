@@ -1211,3 +1211,24 @@
 - Result: pass
 - Notes:
   - existing parity harness regression remains stable with `po_sbr_rt` addition
+
+## RadarSimPy Periodic Parity Lock (M13.3)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_radarsimpy_periodic_parity_lock.py`
+- Result: pass
+- Notes:
+  - periodic lock manifest runner validated on pass-only and mixed(pass+fail) cases
+  - threshold gate and runtime diagnostics (`radarsimpy available/unavailable`) validated
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_po_sbr_backend.py`
+- Result: pass
+- Notes:
+  - `po_sbr_rt` regression remains stable after periodic lock module integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_sionna_backend.py`
+- Result: pass
+- Notes:
+  - `sionna_rt` regression remains stable after periodic lock module integration

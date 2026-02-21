@@ -105,6 +105,12 @@ from .profile_lock import (
     save_profile_lock_report_json,
     write_locked_profiles,
 )
+from .radarsimpy_periodic_lock import (
+    DEFAULT_RADARSIMPY_PERIODIC_THRESHOLDS,
+    evaluate_radarsimpy_periodic_manifest,
+    load_radarsimpy_periodic_manifest_json,
+    save_radarsimpy_periodic_summary_json,
+)
 from .replay_batch import (
     load_replay_manifest_json,
     run_replay_cases,
@@ -183,6 +189,7 @@ __all__ = [
     "DEFAULT_PROFILE_LOCK_POLICY",
     "DEFAULT_PARITY_THRESHOLDS",
     "DEFAULT_PATH_POWER_COLUMN_MAP",
+    "DEFAULT_RADARSIMPY_PERIODIC_THRESHOLDS",
     "DEFAULT_REFLECTION_GRID",
     "DEFAULT_SCATTERING_GRID",
     "RadarConfig",
@@ -225,6 +232,7 @@ __all__ = [
     "save_measured_replay_summary_json",
     "save_parity_drift_report_json",
     "save_path_power_fit_json",
+    "save_radarsimpy_periodic_summary_json",
     "save_profile_lock_report_json",
     "save_paths_by_chirp_json",
     "build_scenario_profile_payload",
@@ -232,6 +240,7 @@ __all__ = [
     "discover_measured_replay_packs",
     "discover_candidate_npz_paths",
     "estimate_rd_ra_from_adc",
+    "evaluate_radarsimpy_periodic_manifest",
     "evaluate_path_power_parameters",
     "evaluate_motion_tuning_candidates",
     "estimate_doppler_peak_hz",
@@ -246,6 +255,7 @@ __all__ = [
     "load_measured_replay_plan_json",
     "load_motion_tuning_manifest_json",
     "load_object_scene_json",
+    "load_radarsimpy_periodic_manifest_json",
     "load_scene_sidecar_json",
     "load_scene_asset_manifest_json",
     "make_static_paths",

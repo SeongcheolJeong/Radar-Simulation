@@ -47,4 +47,5 @@ Use references via local adapters, not by merging third-party internals into cor
 - RadarSimPy position:
   - useful as regression oracle
   - not required for core pipeline execution
-  - recommended as periodic parity gate, not as mandatory runtime dependency
+  - periodic parity-lock automation implemented (manifest + threshold gate)
+  - remains optional runtime dependency for core scene pipeline

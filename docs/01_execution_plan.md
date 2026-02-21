@@ -79,7 +79,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M13.0: Mesh-geometry proxy extraction baseline (`centroid/area`) from OBJ/glTF metadata for auto-populated scene objects
 - [x] M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) and canonical parity lock
 - [x] M13.2: PO-SBR backend adapter candidate for high-fidelity scattering path modeling
-- [ ] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
+- [x] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
+- [ ] M14.0: Direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -92,7 +93,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M13.3: implement RadarSimPy periodic parity-lock automation and define adoption gate thresholds.
+Start M14.0: prototype direct Sionna/PO-SBR runtime coupling path and define fallback policy.
 
 ## M10.19 Decision Gate
 
@@ -310,3 +311,11 @@ M13.2 outcome (2026-02-21):
 - parity lock added for `analytic_targets` vs `po_sbr_rt` matched synthetic scene pair
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/103_po_sbr_backend_contract.md`
 - validations added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_po_sbr_backend.py`, `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_parity_po_sbr_rt.py`
+
+M13.3 outcome (2026-02-21):
+
+- RadarSimPy periodic parity-lock core added (manifest-driven case checks + threshold gate)
+- periodic lock runner CLI added
+- gate summary now records RadarSimPy runtime availability diagnostics
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/104_radarsimpy_periodic_lock_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_radarsimpy_periodic_parity_lock.py`
