@@ -39,6 +39,26 @@ Run Hybrid frame adapter validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_frame_adapter.py
 ```
 
+Run Hybrid pipeline output validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_pipeline_output.py
+```
+
+Run ingest pipeline (example):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybrid_ingest_to_adc.py \
+  --frames-root /path/to/render \
+  --radar-json /path/to/radar_parameters_hybrid.json \
+  --frame-start 1 \
+  --frame-end 64 \
+  --camera-fov-deg 90 \
+  --mode reflection \
+  --file-ext .exr \
+  --output-dir /path/to/out
+```
+
 Fetch reference repositories:
 
 ```bash
@@ -56,3 +76,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/07_reference_repo_strategy.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/08_git_workflow.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/09_hybrid_frame_adapter.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/10_hybrid_ingest_pipeline.md`

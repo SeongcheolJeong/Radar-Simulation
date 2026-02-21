@@ -36,3 +36,13 @@
   - Hybrid frame folder naming parser pass (`Tx0Rx0/AmplitudeOutput####`, `DistanceOutput####`)
   - Frame maps converted to canonical path list pass
   - Parsed paths synthesize to expected beat frequency pass
+
+## Hybrid Pipeline Output
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_pipeline_output.py`
+- Result: pass
+- Notes:
+  - End-to-end frame ingest pipeline pass
+  - `path_list.json` + `adc_cube.npz` output generation pass
+  - Metadata serialization and ADC shape check pass

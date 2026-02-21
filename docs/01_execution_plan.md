@@ -15,6 +15,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M3.5: Reference adapter scaffolding + smoke validation
 - [ ] M4: `.ffd` parser + interpolation
 - [x] M5: RT adapter base (HybridDynamicRT frame ingestion, first version)
+- [x] M5.5: Hybrid ingest pipeline and canonical output writer
 - [ ] M6: Motion compensation for TDM virtual array
 
 ## Iteration Rule (One-by-One Verification)
