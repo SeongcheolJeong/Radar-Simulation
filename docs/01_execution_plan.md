@@ -56,6 +56,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.22: Fit-aware replay saturation sanity gate and target-batch risk classification
 - [x] M10.23: Current-code baseline rerun gate for fit-aware batch + stale-baseline correction report
 - [x] M10.24: Fit-aware replay adoption policy gate (non-degradation + min-improvement) + Xiangyu decision
+- [x] M10.25: Fit-lock policy selection with baseline fallback (candidate search on batch summary)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -68,7 +69,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.25: implement fallback fit-selection policy for measured replay (candidate lock set search under non-degradation gate).
+Start M10.26: search new fit candidate pool (or re-fit constraints) targeting non-degrading gain under policy gate.
 
 ## M10.19 Decision Gate
 
@@ -118,3 +119,9 @@ M10.24 outcome (2026-02-21):
 - policy gate added to formalize adoption decision using rerun-baseline batch summary
 - Xiangyu rerun-baseline policy result: `degrade_only_case_count=3`, `improved_case_count=0`
 - recommendation fixed as `reject_fit_lock_due_to_degradation`
+
+M10.25 outcome (2026-02-21):
+
+- fit-lock selector added to rank/accept/reject fit candidates from batch summary
+- Xiangyu rerun-baseline selection result: no eligible fit candidate
+- deterministic fallback selected: `baseline_no_fit`

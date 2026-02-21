@@ -746,6 +746,22 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_
   --min-improved-cases 1
 ```
 
+Run measured replay fit-lock selection validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_select_measured_replay_fit_lock_by_policy.py
+```
+
+Select measured replay fit lock with baseline fallback:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/select_measured_replay_fit_lock_by_policy.py \
+  --batch-summary-json /path/to/fit_aware_batch_summary.json \
+  --output-json /path/to/measured_replay_fit_lock_selection.json \
+  --min-improved-cases 1 \
+  --require-full-case-coverage
+```
+
 Fetch reference repositories:
 
 ```bash

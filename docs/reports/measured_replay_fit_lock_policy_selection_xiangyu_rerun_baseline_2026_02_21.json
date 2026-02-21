@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "input_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json",
+  "batch_metadata": {
+    "baseline_mode": "rerun",
+    "case_count": 3,
+    "fit_json_count": 2
+  },
+  "policy": {
+    "max_pass_rate_drop": 0.0,
+    "max_pass_count_drop": 0,
+    "max_fail_count_increase": 0,
+    "min_improved_cases": 1,
+    "require_full_case_coverage": true,
+    "fallback_mode": "baseline_no_fit"
+  },
+  "selection": {
+    "selection_mode": "baseline_no_fit",
+    "recommendation": "fallback_to_baseline_no_fit",
+    "selected_fit_json": null,
+    "selected_fit_summary": null
+  },
+  "fit_candidates": [
+    {
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+      "case_count": 3,
+      "coverage_count": 3,
+      "non_degrading_case_count": 0,
+      "improved_case_count": 0,
+      "total_pass_count_delta": -1529.0,
+      "total_pass_rate_delta": -2.99108138238573,
+      "eligible": false,
+      "rejected_reasons": [
+        "degradation_detected",
+        "insufficient_improved_cases"
+      ],
+      "cases": [
+        {
+          "label": "bms1000_512",
+          "evaluated": true,
+          "non_degrading": false,
+          "gain": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          }
+        },
+        {
+          "label": "bms1000_full897",
+          "evaluated": true,
+          "non_degrading": false,
+          "gain": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "delta": {
+            "pass_count_delta": -889.0,
+            "fail_count_delta": 889.0,
+            "pass_rate_delta": -0.9910813823857302
+          }
+        },
+        {
+          "label": "cms1000_128",
+          "evaluated": true,
+          "non_degrading": false,
+          "gain": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "delta": {
+            "pass_count_delta": -128.0,
+            "fail_count_delta": 128.0,
+            "pass_rate_delta": -1.0
+          }
+        }
+      ]
+    },
+    {
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+      "case_count": 3,
+      "coverage_count": 3,
+      "non_degrading_case_count": 0,
+      "improved_case_count": 0,
+      "total_pass_count_delta": -1510.0,
+      "total_pass_rate_delta": -2.9698996655518393,
+      "eligible": false,
+      "rejected_reasons": [
+        "degradation_detected",
+        "insufficient_improved_cases"
+      ],
+      "cases": [
+        {
+          "label": "bms1000_512",
+          "evaluated": true,
+          "non_degrading": false,
+          "gain": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          }
+        },
+        {
+          "label": "bms1000_full897",
+          "evaluated": true,
+          "non_degrading": false,
+          "gain": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "delta": {
+            "pass_count_delta": -870.0,
+            "fail_count_delta": 870.0,
+            "pass_rate_delta": -0.9698996655518395
+          }
+        },
+        {
+          "label": "cms1000_128",
+          "evaluated": true,
+          "non_degrading": false,
+          "gain": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "delta": {
+            "pass_count_delta": -128.0,
+            "fail_count_delta": 128.0,
+            "pass_rate_delta": -1.0
+          }
+        }
+      ]
+    }
+  ]
+}

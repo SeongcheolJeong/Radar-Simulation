@@ -805,3 +805,20 @@
 - Notes:
   - `case_count=3`, `degrade_only_case_count=3`, `improved_case_count=0`
   - gate failed with recommendation `reject_fit_lock_due_to_degradation`
+
+## Fit-Lock Policy Selection Fallback
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_select_measured_replay_fit_lock_by_policy.py`
+- Result: pass
+- Notes:
+  - Eligible fit selected in positive synthetic case
+  - Fallback selection (`baseline_no_fit`) triggered when policy cannot be satisfied
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/select_measured_replay_fit_lock_by_policy.py --batch-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/measured_replay_fit_lock_policy_selection_xiangyu_rerun_baseline_2026_02_21.json --min-improved-cases 1 --require-full-case-coverage`
+- Result: pass
+- Notes:
+  - fit candidates evaluated: `2`, eligible: `0`
+  - final selection mode: `baseline_no_fit`
+  - recommendation: `fallback_to_baseline_no_fit`
