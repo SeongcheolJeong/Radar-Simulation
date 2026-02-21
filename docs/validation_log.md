@@ -510,3 +510,30 @@
 - Notes:
   - Reflection/scattering batch fit summary generated (`run_count=4`)
   - Demonstrates batch experiment workflow before real measured CSV onboarding
+
+## Xiangyu Label -> Path-Power Samples
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_samples_from_xiangyu_labels.py`
+- Result: pass
+- Notes:
+  - `text_labels + ADC` to `path_power_samples.csv` conversion validation pass
+  - Numeric frame-index matching across different filename formats pass
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_path_power_samples_from_xiangyu_labels.py --adc-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/radar_raw_frame --labels-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/text_labels --output-csv /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/bms1000_path_power_samples_128.csv --output-meta-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/bms1000_path_power_samples_128.meta.json --scenario-id xiangyu_bms1000_label_128 --adc-type mat --adc-glob "*.mat" --adc-order scrt --max-frames 128 --range-max-m 30 --nfft-range 128 --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --bin-search-radius 1`
+- Result: pass
+- Notes:
+  - BMS1000 label-derived path-power CSV generated (`selected_rows=128`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_path_power_samples_from_xiangyu_labels.py --adc-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_cms1000/radar_raw_frame --labels-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_cms1000/text_labels --output-csv /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/cms1000_path_power_samples_128.csv --output-meta-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/cms1000_path_power_samples_128.meta.json --scenario-id xiangyu_cms1000_label_128 --adc-type mat --adc-glob "*.mat" --adc-order scrt --max-frames 128 --range-max-m 30 --nfft-range 128 --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --bin-search-radius 1`
+- Result: pass
+- Notes:
+  - CMS1000 label-derived path-power CSV generated (`selected_rows=127`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_batch.py --csv-case bms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/bms1000_path_power_samples_128.csv --csv-case cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/cms1000_path_power_samples_128.csv --model reflection --model scattering --batch-id xiangyu_label_128_batch_v1 --top-k 10 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/fit_batch_run --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_batch_xiangyu_labels_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Label-derived real-data batch fit summary generated (`run_count=4`)

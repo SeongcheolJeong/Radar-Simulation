@@ -123,6 +123,11 @@ from .scenario_profile import (
 from .scenarios import make_constant_velocity_paths, make_static_paths, make_two_path_multipath
 from .synth import reshape_virtual_channels, synth_fmcw_tdm
 from .types import Path, RadarConfig
+from .xiangyu_path_power import (
+    build_path_power_samples_from_xiangyu_sequence,
+    load_xiangyu_label_rows,
+    save_path_power_rows_csv,
+)
 
 __all__ = [
     "adapt_records_by_chirp",
@@ -223,4 +228,7 @@ __all__ = [
     "to_radarsimpy_view",
     "validate_radarsimpy_view_shape",
     "write_locked_profiles",
+    "load_xiangyu_label_rows",
+    "build_path_power_samples_from_xiangyu_sequence",
+    "save_path_power_rows_csv",
 ]

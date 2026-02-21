@@ -265,6 +265,12 @@ Run path-power fit batch validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_batch.py
 ```
 
+Run Xiangyu label->path-power CSV validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_samples_from_xiangyu_labels.py
+```
+
 Fit path-power parameters from measured CSV:
 
 ```bash
@@ -310,6 +316,19 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_
   --batch-id my_batch \
   --output-root /path/to/fit_batch_out \
   --output-summary-json /path/to/path_power_fit_batch_summary.json
+```
+
+Build path-power samples from Xiangyu labels + ADC:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_path_power_samples_from_xiangyu_labels.py \
+  --adc-root /path/to/Automotive/2019_04_09_bms1000/radar_raw_frame \
+  --labels-root /path/to/Automotive/2019_04_09_bms1000/text_labels \
+  --output-csv /path/to/path_power_samples.csv \
+  --output-meta-json /path/to/path_power_samples.meta.json \
+  --scenario-id xiangyu_bms1000 \
+  --adc-type mat \
+  --adc-order scrt
 ```
 
 Analyze parity drift across replay reports:
