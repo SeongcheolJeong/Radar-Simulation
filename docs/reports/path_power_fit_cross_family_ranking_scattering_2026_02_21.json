@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "model": "scattering",
+  "case_a_id": "case_a",
+  "case_b_id": "case_b",
+  "candidate_count": 4,
+  "evaluated_count": 4,
+  "ok_count": 4,
+  "ranked": [
+    {
+      "candidate_index": 0,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_000/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 19.075621777809772,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.13685716088141872,
+      "score": 48.28810071650096
+    },
+    {
+      "candidate_index": 1,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_001/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.77333575551648,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.06263914456978839,
+      "score": 347.60931065560277
+    },
+    {
+      "candidate_index": 3,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_003/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.77333575551648,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.06263914456978839,
+      "score": 347.60931065560277
+    },
+    {
+      "candidate_index": 2,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_002/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 187.43400641105387,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.03842617665829902,
+      "score": 384.906438998766
+    }
+  ],
+  "all_rows": [
+    {
+      "candidate_index": 0,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_000/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 19.075621777809772,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.13685716088141872,
+      "score": 48.28810071650096
+    },
+    {
+      "candidate_index": 1,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_001/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.77333575551648,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.06263914456978839,
+      "score": 347.60931065560277
+    },
+    {
+      "candidate_index": 2,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_002/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 187.43400641105387,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.03842617665829902,
+      "score": 384.906438998766
+    },
+    {
+      "candidate_index": 3,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_scattering.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_003/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.77333575551648,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.06263914456978839,
+      "score": 347.60931065560277
+    }
+  ],
+  "best": {
+    "candidate_index": 0,
+    "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_scattering.json",
+    "status": "ok",
+    "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering/candidate_000/hybrid_cross_family_fit_summary.json",
+    "b_baseline_pass": true,
+    "b_tuned_pass": false,
+    "ra_improved_ratio": 0.0,
+    "ra_mean_delta": 19.075621777809772,
+    "rd_improved_ratio": 0.0,
+    "rd_mean_delta": 0.13685716088141872,
+    "score": 48.28810071650096
+  }
+}

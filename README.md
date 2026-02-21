@@ -646,6 +646,12 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/compare_h
   --output-json /path/to/parity_report.json
 ```
 
+Run cross-family fit ranking validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_cross_family_ranking.py
+```
+
 Fetch reference repositories:
 
 ```bash

@@ -62,6 +62,9 @@ def load_hybrid_paths_from_frames(
     camera_rotate_deg: Tuple[float, float] = (0.0, 0.0),
     pair: Optional[Tuple[int, int]] = None,
     file_ext: str = ".exr",
+    amplitude_prefix: str = "AmplitudeOutput",
+    distance_prefix: Optional[str] = None,
+    distance_scale: Optional[float] = None,
     amplitude_threshold: float = 0.0,
     distance_limits_m: Tuple[float, float] = (0.0, 100.0),
     amplitude_scale: float = 1.0,
@@ -73,9 +76,8 @@ def load_hybrid_paths_from_frames(
     Parse HybridDynamicRT-style Blender frame outputs into paths_by_chirp.
 
     Expected per-pair directory:
-      Tx{tx}Rx{rx}/AmplitudeOutput####{file_ext}
-      Tx{tx}Rx{rx}/DistanceOutput####{file_ext}   (mode='reflection')
-      Tx{tx}Rx{rx}/Depth####{file_ext}            (mode='scattering')
+      Tx{tx}Rx{rx}/{amplitude_prefix}####{file_ext}
+      Tx{tx}Rx{rx}/{distance_prefix or mode-default}####{file_ext}
 
     Notes:
     - DistanceOutput is treated as round-trip distance in meters.
@@ -89,15 +91,29 @@ def load_hybrid_paths_from_frames(
         if not pair_dir.is_dir():
             raise FileNotFoundError(f"pair directory not found: {pair_dir}")
 
-    dist_prefix = "DistanceOutput"
-    dist_scale = 1.0
-    if mode == "scattering":
-        dist_prefix = "Depth"
-        dist_scale = 2.0
-    elif mode != "reflection":
+    if mode == "reflection":
+        default_dist_prefix = "DistanceOutput"
+        default_dist_scale = 1.0
+    elif mode == "scattering":
+        default_dist_prefix = "Depth"
+        default_dist_scale = 2.0
+    else:
         raise ValueError("mode must be 'reflection' or 'scattering'")
+    amp_prefix = str(amplitude_prefix).strip()
+    if amp_prefix == "":
+        raise ValueError("amplitude_prefix must be non-empty")
+    dist_prefix = (
+        default_dist_prefix if distance_prefix is None else str(distance_prefix).strip()
+    )
+    if dist_prefix == "":
+        raise ValueError("distance_prefix must be non-empty")
+    dist_scale = (
+        default_dist_scale if distance_scale is None else float(distance_scale)
+    )
+    if not np.isfinite(dist_scale) or dist_scale <= 0.0:
+        raise ValueError("distance_scale must be finite and > 0")
 
-    first_amp = _load_frame_2d(pair_dir / f"AmplitudeOutput{int(frame_indices[0]):04d}{file_ext}")
+    first_amp = _load_frame_2d(pair_dir / f"{amp_prefix}{int(frame_indices[0]):04d}{file_ext}")
     pixel_h, pixel_w = first_amp.shape
     dir_lut = _build_unit_directions(
         pixel_width=pixel_w,
@@ -124,7 +140,7 @@ def load_hybrid_paths_from_frames(
             )
 
     for frame_idx in frame_indices:
-        amp_map = _load_frame_2d(pair_dir / f"AmplitudeOutput{int(frame_idx):04d}{file_ext}")
+        amp_map = _load_frame_2d(pair_dir / f"{amp_prefix}{int(frame_idx):04d}{file_ext}")
         dist_map = _load_frame_2d(pair_dir / f"{dist_prefix}{int(frame_idx):04d}{file_ext}") * dist_scale
 
         if amp_map.shape != (pixel_h, pixel_w) or dist_map.shape != (pixel_h, pixel_w):

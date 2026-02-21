@@ -25,6 +25,22 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--camera-fov-deg", type=float, required=True, help="Camera FoV in degrees")
     p.add_argument("--mode", choices=["reflection", "scattering"], default="reflection")
     p.add_argument("--file-ext", default=".exr", help="Frame file extension, e.g. .exr or .npy")
+    p.add_argument(
+        "--amplitude-prefix",
+        default="AmplitudeOutput",
+        help="Amplitude frame prefix before frame index (default: AmplitudeOutput)",
+    )
+    p.add_argument(
+        "--distance-prefix",
+        default=None,
+        help="Optional distance/depth frame prefix override (default depends on --mode)",
+    )
+    p.add_argument(
+        "--distance-scale",
+        type=float,
+        default=None,
+        help="Optional multiplier for loaded distance map (default depends on --mode)",
+    )
     p.add_argument("--fc-hz", type=float, default=77e9)
     p.add_argument("--slope-hz-per-s", type=float, default=20e12)
     p.add_argument("--fs-hz", type=float, default=20e6)
@@ -157,6 +173,9 @@ def main() -> None:
         camera_fov_deg=args.camera_fov_deg,
         mode=args.mode,
         file_ext=args.file_ext,
+        amplitude_prefix=args.amplitude_prefix,
+        distance_prefix=args.distance_prefix,
+        distance_scale=args.distance_scale,
         amplitude_threshold=args.amplitude_threshold,
         distance_limits_m=(args.distance_min_m, args.distance_max_m),
         top_k_per_chirp=args.top_k_per_chirp,

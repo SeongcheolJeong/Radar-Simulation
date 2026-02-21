@@ -585,3 +585,26 @@
 - Notes:
   - Demo report generated
   - In this setup, tuned fit increased drift (`RA/RD improved_ratio=0.0`)
+
+## Path Power Fit Cross-Family Ranking
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_cross_family_ranking.py`
+- Result: pass
+- Notes:
+  - Reflection/scattering ranking CLI validation pass
+  - Scattering path validated with distance-prefix/scale override contract
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/rank_path_power_fits_by_cross_family.py --experiment-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/xiangyu_label_fit_experiment_128_512_2026_02_21.json --model reflection --case-a-id case_a --case-a-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames --case-a-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json --case-b-id case_b --case-b-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames --case-b-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json --path-power-apply-mode shape_only --frame-start 1 --frame-end 4 --camera-fov-deg 90 --file-ext .npy --amplitude-threshold 0.01 --top-k-per-chirp 4 --estimation-nfft 64 --estimation-range-bin-length 8 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_cross_family_ranking_reflection_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Reflection candidates evaluated: `4/4`
+  - Best fit: `cms1000_reflection (fit_128)`
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/rank_path_power_fits_by_cross_family.py --experiment-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/xiangyu_label_fit_experiment_128_512_2026_02_21.json --model scattering --case-a-id case_a --case-a-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames --case-a-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json --case-b-id case_b --case-b-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames --case-b-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json --path-power-apply-mode shape_only --frame-start 1 --frame-end 4 --camera-fov-deg 90 --file-ext .npy --amplitude-threshold 0.01 --top-k-per-chirp 4 --estimation-nfft 64 --estimation-range-bin-length 8 --distance-prefix DistanceOutput --distance-scale 1.0 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_scattering --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_cross_family_ranking_scattering_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Scattering candidates evaluated: `4/4`
+  - Best fit: `bms1000_scattering (fit_128)`

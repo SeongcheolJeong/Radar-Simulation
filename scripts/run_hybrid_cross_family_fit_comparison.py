@@ -31,6 +31,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--camera-fov-deg", type=float, required=True)
     p.add_argument("--mode", choices=["reflection", "scattering"], required=True)
     p.add_argument("--file-ext", default=".npy")
+    p.add_argument("--amplitude-prefix", default="AmplitudeOutput")
+    p.add_argument("--distance-prefix", default=None)
+    p.add_argument("--distance-scale", type=float, default=None)
 
     p.add_argument("--fc-hz", type=float, default=77e9)
     p.add_argument("--slope-hz-per-s", type=float, default=20e12)
@@ -83,6 +86,8 @@ def _ingest_cmd(args: argparse.Namespace, frames_root: str, radar_json: str, out
         str(args.mode),
         "--file-ext",
         str(args.file_ext),
+        "--amplitude-prefix",
+        str(args.amplitude_prefix),
         "--fc-hz",
         str(args.fc_hz),
         "--slope-hz-per-s",
@@ -107,6 +112,10 @@ def _ingest_cmd(args: argparse.Namespace, frames_root: str, radar_json: str, out
         "--output-dir",
         str(output_dir),
     ]
+    if args.distance_prefix is not None:
+        cmd += ["--distance-prefix", str(args.distance_prefix)]
+    if args.distance_scale is not None:
+        cmd += ["--distance-scale", str(args.distance_scale)]
     if args.top_k_per_chirp is not None:
         cmd += ["--top-k-per-chirp", str(args.top_k_per_chirp)]
     if fit_json is not None:
@@ -222,6 +231,9 @@ def main() -> None:
             "frame_start": int(args.frame_start),
             "frame_end": int(args.frame_end),
             "camera_fov_deg": float(args.camera_fov_deg),
+            "amplitude_prefix": str(args.amplitude_prefix),
+            "distance_prefix": None if args.distance_prefix is None else str(args.distance_prefix),
+            "distance_scale": None if args.distance_scale is None else float(args.distance_scale),
         },
         "outputs": {k: str(v) for k, v in paths.items()},
         "run_logs": run_logs,

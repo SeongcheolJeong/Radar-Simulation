@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "model": "reflection",
+  "case_a_id": "case_a",
+  "case_b_id": "case_b",
+  "candidate_count": 4,
+  "evaluated_count": 4,
+  "ok_count": 4,
+  "ranked": [
+    {
+      "candidate_index": 1,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_001/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 38.02375438217888,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.22074298118606814,
+      "score": 86.26825174554382
+    },
+    {
+      "candidate_index": 3,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_003/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 38.02375438217888,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.22074298118606814,
+      "score": 86.26825174554382
+    },
+    {
+      "candidate_index": 0,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_000/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.90792754649445,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.11917343519859361,
+      "score": 347.9350285281875
+    },
+    {
+      "candidate_index": 2,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_002/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.90792754649445,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.11917343519859361,
+      "score": 347.9350285281875
+    }
+  ],
+  "all_rows": [
+    {
+      "candidate_index": 0,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_000/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.90792754649445,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.11917343519859361,
+      "score": 347.9350285281875
+    },
+    {
+      "candidate_index": 1,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_001/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 38.02375438217888,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.22074298118606814,
+      "score": 86.26825174554382
+    },
+    {
+      "candidate_index": 2,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/bms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_002/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 168.90792754649445,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.11917343519859361,
+      "score": 347.9350285281875
+    },
+    {
+      "candidate_index": 3,
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_reflection.json",
+      "status": "ok",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_003/hybrid_cross_family_fit_summary.json",
+      "b_baseline_pass": true,
+      "b_tuned_pass": false,
+      "ra_improved_ratio": 0.0,
+      "ra_mean_delta": 38.02375438217888,
+      "rd_improved_ratio": 0.0,
+      "rd_mean_delta": 0.22074298118606814,
+      "score": 86.26825174554382
+    }
+  ],
+  "best": {
+    "candidate_index": 1,
+    "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_reflection.json",
+    "status": "ok",
+    "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ranking_reflection/candidate_001/hybrid_cross_family_fit_summary.json",
+    "b_baseline_pass": true,
+    "b_tuned_pass": false,
+    "ra_improved_ratio": 0.0,
+    "ra_mean_delta": 38.02375438217888,
+    "rd_improved_ratio": 0.0,
+    "rd_mean_delta": 0.22074298118606814,
+    "score": 86.26825174554382
+  }
+}

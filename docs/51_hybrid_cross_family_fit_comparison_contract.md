@@ -31,6 +31,12 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_h
   --output-summary-json /path/to/hybrid_cross_family_fit_summary.json
 ```
 
+When dataset frame naming differs from mode defaults, add:
+
+- `--amplitude-prefix`
+- `--distance-prefix`
+- `--distance-scale`
+
 ## Output
 
 Summary JSON contains:
