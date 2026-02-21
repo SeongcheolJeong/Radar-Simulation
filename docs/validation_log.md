@@ -269,4 +269,15 @@
   - Strict mode exit code pass (`unlocked exists -> 2`)
   - `--allow-unlocked` exit code pass (`0`)
   - `*.locked.json` output includes expected `profile_lock` metadata
+
+## Measured Replay Execution
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_execution.py`
+- Result: pass
+- Notes:
+  - Multi-pack plan parsing and execution pass
+  - Per-pack artifact generation pass (`replay_report.json`, `profile_lock_report.json`, `locked_profiles/*.locked.json`)
+  - Strict mode exit code pass (`unlocked pack exists -> 2`)
+  - `--allow-unlocked` exit code pass (`0`)
   - Report includes profile-derived motion defaults per case

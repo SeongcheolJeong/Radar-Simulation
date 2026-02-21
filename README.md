@@ -165,6 +165,12 @@ Run profile-lock finalization validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_profile_lock_finalization.py
 ```
 
+Run measured replay orchestration validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_execution.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -300,6 +306,15 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_
   --output-lock-json /path/to/profile_lock_report.json \
   --output-locked-profile-dir /path/to/locked_profiles \
   --require-motion-defaults-enabled
+```
+
+Run measured multi-pack replay execution (`replay + lock`) in one command:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_execution.py \
+  --plan-json /path/to/measured_replay_plan.json \
+  --output-root /path/to/measured_replay_outputs \
+  --output-summary-json /path/to/measured_replay_summary.json
 ```
 
 Validate CLI integration with bundle:

@@ -36,6 +36,13 @@ from .measurement_csv import (
     convert_measurement_csv_to_npz,
     load_column_map_json,
 )
+from .measured_replay import (
+    DEFAULT_MEASURED_REPLAY_LOCK_POLICY,
+    load_measured_replay_plan_json,
+    run_measured_replay_plan,
+    run_measured_replay_plan_json,
+    save_measured_replay_summary_json,
+)
 from .motion_compensation import (
     apply_tdm_motion_compensation_to_h,
     estimate_doppler_peak_hz,
@@ -98,6 +105,7 @@ __all__ = [
     "load_hybrid_paths_from_frames",
     "load_hybrid_radar_geometry",
     "Path",
+    "DEFAULT_MEASURED_REPLAY_LOCK_POLICY",
     "DEFAULT_MOTION_SCORE_WEIGHTS",
     "DEFAULT_PROFILE_LOCK_POLICY",
     "DEFAULT_PARITY_THRESHOLDS",
@@ -113,6 +121,8 @@ __all__ = [
     "load_replay_report_json",
     "load_scenario_profile_json",
     "run_hybrid_frames_pipeline",
+    "run_measured_replay_plan",
+    "run_measured_replay_plan_json",
     "run_replay_cases",
     "run_replay_manifest",
     "save_adc_npz",
@@ -120,6 +130,7 @@ __all__ = [
     "save_calibration_samples_npz",
     "save_scenario_profile_json",
     "save_replay_report_json",
+    "save_measured_replay_summary_json",
     "save_profile_lock_report_json",
     "save_paths_by_chirp_json",
     "build_scenario_profile_payload",
@@ -129,6 +140,7 @@ __all__ = [
     "load_calibration_samples_npz",
     "load_column_map_json",
     "load_global_jones_matrix_json",
+    "load_measured_replay_plan_json",
     "load_motion_tuning_manifest_json",
     "make_static_paths",
     "make_constant_velocity_paths",

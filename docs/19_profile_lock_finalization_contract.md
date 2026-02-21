@@ -64,3 +64,7 @@ When `--output-locked-profile-dir` is set:
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_profile_lock_finalization.py
 ```
+
+For multi-pack measured runs, use orchestration contract:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/20_measured_replay_execution_contract.md`
