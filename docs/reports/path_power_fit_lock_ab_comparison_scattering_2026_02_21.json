@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "mode": "scattering",
+  "selection": {
+    "case_a_id": "case_a",
+    "case_b_id": "case_b",
+    "frame_start": 1,
+    "frame_end": 4,
+    "camera_fov_deg": 90.0,
+    "file_ext": ".npy",
+    "amplitude_prefix": "AmplitudeOutput",
+    "distance_prefix": "DistanceOutput",
+    "distance_scale": 1.0,
+    "path_power_apply_mode": "shape_only"
+  },
+  "runs": {
+    "rmse_lock": {
+      "id": "rmse_lock",
+      "label": "rmse_lock",
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_scattering_selected.json",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ab_lock_scattering/rmse_lock/hybrid_cross_family_fit_summary.json",
+      "b_tuned_pass": false,
+      "b_tuned_metrics": {
+        "rd_peak_doppler_bin_abs_error": 0.0,
+        "rd_peak_range_bin_abs_error": 0.0,
+        "rd_peak_power_db_abs_error": 0.2832953079596532,
+        "rd_centroid_doppler_bin_abs_error": 0.00014493038650087442,
+        "rd_centroid_range_bin_abs_error": 0.20680361334439112,
+        "rd_spread_doppler_rel_error": 2.2045939543341893e-05,
+        "rd_spread_range_rel_error": 0.00010706777876106376,
+        "rd_shape_nmse": 0.010740191149457538,
+        "ra_peak_angle_bin_abs_error": 0.0,
+        "ra_peak_range_bin_abs_error": 1349.0,
+        "ra_peak_power_db_abs_error": 0.2780179779394585,
+        "ra_centroid_angle_bin_abs_error": 3.552713678800501e-15,
+        "ra_centroid_range_bin_abs_error": 0.896031617839526,
+        "ra_spread_angle_rel_error": 0.0,
+        "ra_spread_range_rel_error": 0.00048028868162443283,
+        "ra_shape_nmse": 0.012156159671069705
+      },
+      "ra_mean_delta": 168.77333575551648,
+      "rd_mean_delta": 0.06263914456978839,
+      "score": 347.60931065560277
+    },
+    "cross_family_lock": {
+      "id": "cross_family_lock",
+      "label": "cross_family_lock",
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_scattering_selected.json",
+      "summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ab_lock_scattering/cross_family_lock/hybrid_cross_family_fit_summary.json",
+      "b_tuned_pass": false,
+      "b_tuned_metrics": {
+        "rd_peak_doppler_bin_abs_error": 0.0,
+        "rd_peak_range_bin_abs_error": 0.0,
+        "rd_peak_power_db_abs_error": 0.5638852035560138,
+        "rd_centroid_doppler_bin_abs_error": 0.00014460200903343434,
+        "rd_centroid_range_bin_abs_error": 0.4749893183561653,
+        "rd_spread_doppler_rel_error": 6.0896104762823736e-05,
+        "rd_spread_range_rel_error": 0.0002459757745653069,
+        "rd_shape_nmse": 0.05553129125080921,
+        "ra_peak_angle_bin_abs_error": 0.0,
+        "ra_peak_range_bin_abs_error": 150.0,
+        "ra_peak_power_db_abs_error": 0.563330259023914,
+        "ra_centroid_angle_bin_abs_error": 3.552713678800501e-15,
+        "ra_centroid_range_bin_abs_error": 1.9840147257232275,
+        "ra_spread_angle_rel_error": 0.0,
+        "ra_spread_range_rel_error": 0.001004823070937312,
+        "ra_shape_nmse": 0.05662441466008038
+      },
+      "ra_mean_delta": 19.075621777809772,
+      "rd_mean_delta": 0.13685716088141872,
+      "score": 48.28810071650096
+    }
+  },
+  "ab_comparison": {
+    "metric_delta_cross_minus_rmse": {
+      "ra_centroid_angle_bin_abs_error": {
+        "before": 3.552713678800501e-15,
+        "after": 3.552713678800501e-15,
+        "delta": 0.0,
+        "improved": false
+      },
+      "ra_centroid_range_bin_abs_error": {
+        "before": 0.896031617839526,
+        "after": 1.9840147257232275,
+        "delta": 1.0879831078837015,
+        "improved": false
+      },
+      "ra_peak_angle_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "ra_peak_power_db_abs_error": {
+        "before": 0.2780179779394585,
+        "after": 0.563330259023914,
+        "delta": 0.2853122810844555,
+        "improved": false
+      },
+      "ra_peak_range_bin_abs_error": {
+        "before": 1349.0,
+        "after": 150.0,
+        "delta": -1199.0,
+        "improved": true
+      },
+      "ra_shape_nmse": {
+        "before": 0.012156159671069705,
+        "after": 0.05662441466008038,
+        "delta": 0.04446825498901067,
+        "improved": false
+      },
+      "ra_spread_angle_rel_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "ra_spread_range_rel_error": {
+        "before": 0.00048028868162443283,
+        "after": 0.001004823070937312,
+        "delta": 0.0005245343893128791,
+        "improved": false
+      },
+      "rd_centroid_doppler_bin_abs_error": {
+        "before": 0.00014493038650087442,
+        "after": 0.00014460200903343434,
+        "delta": -3.2837746744007745e-07,
+        "improved": true
+      },
+      "rd_centroid_range_bin_abs_error": {
+        "before": 0.20680361334439112,
+        "after": 0.4749893183561653,
+        "delta": 0.2681857050117742,
+        "improved": false
+      },
+      "rd_peak_doppler_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "rd_peak_power_db_abs_error": {
+        "before": 0.2832953079596532,
+        "after": 0.5638852035560138,
+        "delta": 0.2805898955963606,
+        "improved": false
+      },
+      "rd_peak_range_bin_abs_error": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "improved": false
+      },
+      "rd_shape_nmse": {
+        "before": 0.010740191149457538,
+        "after": 0.05553129125080921,
+        "delta": 0.04479110010135167,
+        "improved": false
+      },
+      "rd_spread_doppler_rel_error": {
+        "before": 2.2045939543341893e-05,
+        "after": 6.0896104762823736e-05,
+        "delta": 3.885016521948184e-05,
+        "improved": false
+      },
+      "rd_spread_range_rel_error": {
+        "before": 0.00010706777876106376,
+        "after": 0.0002459757745653069,
+        "delta": 0.00013890799580424317,
+        "improved": false
+      }
+    },
+    "ra_summary": {
+      "count": 8,
+      "improved_count": 1,
+      "improved_ratio": 0.125,
+      "mean_delta": -149.69771397770668
+    },
+    "rd_summary": {
+      "count": 8,
+      "improved_count": 1,
+      "improved_ratio": 0.125,
+      "mean_delta": 0.07421801631163034
+    },
+    "score_tie": false,
+    "winner_run_id": "cross_family_lock",
+    "winner_label": "cross_family_lock",
+    "winner_reason": "lower_score",
+    "cross_family_better": true
+  }
+}

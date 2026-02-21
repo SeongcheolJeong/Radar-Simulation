@@ -624,3 +624,26 @@
 - Notes:
   - Cross-family locked fit set emitted for both models
   - Selection differs from RMSE-only lock for reflection and scattering
+
+## Path Power Fit Lock A/B Comparison
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_lock_ab_comparison.py`
+- Result: pass
+- Notes:
+  - A/B orchestrator validation pass (`rmse_lock` vs `cross_family_lock`)
+  - Delta-consistency checks pass (`cross - rmse` per tuned metric)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_lock_ab_comparison.py --case-a-id case_a --case-a-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames --case-a-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json --case-b-id case_b --case-b-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames --case-b-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json --mode reflection --rmse-fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_reflection_selected.json --cross-family-fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_reflection_selected.json --path-power-apply-mode shape_only --frame-start 1 --frame-end 4 --camera-fov-deg 90 --file-ext .npy --amplitude-threshold 0.01 --top-k-per-chirp 4 --estimation-nfft 64 --estimation-range-bin-length 8 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ab_lock_reflection --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_lock_ab_comparison_reflection_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Reflection A/B scores tied (`86.268252` vs `86.268252`)
+  - Metric deltas (`cross - rmse`) are all zero in this demo
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_lock_ab_comparison.py --case-a-id case_a --case-a-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/frames --case-a-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_a/radar_parameters_hybrid.json --case-b-id case_b --case-b-frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/frames --case-b-radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/case_b/radar_parameters_hybrid.json --mode scattering --rmse-fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_scattering_selected.json --cross-family-fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_scattering_selected.json --path-power-apply-mode shape_only --frame-start 1 --frame-end 4 --camera-fov-deg 90 --file-ext .npy --amplitude-threshold 0.01 --top-k-per-chirp 4 --estimation-nfft 64 --estimation-range-bin-length 8 --distance-prefix DistanceOutput --distance-scale 1.0 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cross_family_demo/ab_lock_scattering --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_lock_ab_comparison_scattering_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Scattering cross-family lock score improved (`347.609311 -> 48.288101`)
+  - RA summary mean delta improved, RD summary mean delta worsened slightly

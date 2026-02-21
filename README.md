@@ -658,6 +658,12 @@ Run cross-family fit-selection lock validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection_cross_family.py
 ```
 
+Run fit-lock A/B comparison validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_lock_ab_comparison.py
+```
+
 Fetch reference repositories:
 
 ```bash
