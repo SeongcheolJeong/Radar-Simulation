@@ -17,6 +17,11 @@ You can auto-build this plan from pack folders via:
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_measured_replay_plan.py`
 - Contract: `/Users/seongcheoljeong/Documents/Codex_test/docs/21_measured_replay_plan_builder_contract.md`
 
+You can auto-build each pack's replay manifest via:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_replay_manifest_from_pack.py`
+- Contract: `/Users/seongcheoljeong/Documents/Codex_test/docs/23_replay_manifest_builder_contract.md`
+
 Each pack:
 
 - `pack_id`

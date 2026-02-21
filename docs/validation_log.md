@@ -291,4 +291,25 @@
   - Optional per-pack `lock_policy.json` merge pass
   - Empty-root failure pass (without `--allow-empty`)
   - Empty-root success pass (with `--allow-empty`)
+
+## Replay Manifest Builder
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_replay_manifest_builder.py`
+- Result: pass
+- Notes:
+  - Per-pack replay manifest generation pass
+  - Candidate discovery and naming pass
+  - Sidecar metadata injection pass
+  - Empty-candidate failure/success policy pass
+
+## Mock Measured Packs E2E
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mock_measured_packs_e2e.py`
+- Result: pass
+- Notes:
+  - Mock pack generation pass
+  - Plan build + execution pass (all-pack lock success case)
+  - Strict mode exit code pass (`failing-pack -> 2`)
   - Report includes profile-derived motion defaults per case

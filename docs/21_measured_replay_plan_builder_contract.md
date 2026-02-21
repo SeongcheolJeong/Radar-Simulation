@@ -51,6 +51,10 @@ This output is consumed by:
 
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_execution.py`
 
+If packs do not already have `replay_manifest.json`, generate them first:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_replay_manifest_from_pack.py`
+
 ## Validation
 
 ```bash

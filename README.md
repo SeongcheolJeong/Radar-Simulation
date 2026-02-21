@@ -177,6 +177,18 @@ Run measured replay plan builder validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_plan_builder.py
 ```
 
+Run replay manifest builder validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_replay_manifest_builder.py
+```
+
+Run mock measured packs end-to-end validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mock_measured_packs_e2e.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -329,6 +341,21 @@ Auto-build `measured_replay_plan.json` from pack folders:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_measured_replay_plan.py \
   --packs-root /path/to/packs_root \
   --output-plan-json /path/to/measured_replay_plan.json
+```
+
+Auto-build per-pack `replay_manifest.json`:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_replay_manifest_from_pack.py \
+  --pack-root /path/to/pack_root
+```
+
+Generate mock measured packs when real data is unavailable:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/generate_mock_measured_packs.py \
+  --output-root /tmp/mock_measured_packs \
+  --include-failing-pack
 ```
 
 Validate CLI integration with bundle:
