@@ -71,7 +71,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.0: First mesh/material-aware scene backend adapter candidate (`mesh_material_stub`)
 - [x] M12.1: Mesh scene import adapter contract (object/material manifest from external scene assets)
 - [x] M12.2: Scene asset parser candidate for glTF/OBJ sidecar extraction to bridge manifest
-- [ ] M12.3: Sidecar schema profile/version lock and parser strict-mode policy
+- [x] M12.3: Sidecar schema profile/version lock and parser strict-mode policy
+- [ ] M12.4: Sidecar strict/non-strict compatibility matrix and bridge E2E regression lock
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -84,7 +85,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M12.3: define sidecar schema profile/version lock and parser strict-mode policy contract.
+Start M12.4: lock strict/non-strict parser compatibility matrix and bridge end-to-end regression contract.
 
 ## M10.19 Decision Gate
 
@@ -238,3 +239,11 @@ M12.2 outcome (2026-02-21):
 - parser CLI added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_asset_manifest_from_sidecar.py`
 - parser contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/95_sidecar_asset_parser_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_asset_parser.py`
+
+M12.3 outcome (2026-02-21):
+
+- sidecar schema lock defaults defined (`schema_profile=v1`, `schema_version=1`)
+- strict-mode parse gate added for unknown keys and profile/version mismatch
+- strict/locked parser metadata emitted in manifest (`strict_mode`, `schema_profile`, `schema_version`)
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/96_sidecar_schema_lock_contract.md`
+- validations rerun: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_asset_parser.py`, `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_scene_import_bridge.py`

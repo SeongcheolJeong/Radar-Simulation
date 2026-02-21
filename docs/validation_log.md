@@ -1045,3 +1045,18 @@
 - Notes:
   - parser normalizes `glTF/OBJ` sidecar mesh references into `asset_manifest.json`
   - parser output is compatible with bridge and downstream scene pipeline
+
+## Sidecar Schema Lock + Strict Gate (M12.3)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_asset_parser.py`
+- Result: pass
+- Notes:
+  - strict-mode parser gate validated (`unknown top-level key -> reject`)
+  - schema lock metadata validated (`schema_profile=v1`, `schema_version=1`, `strict_mode=true`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_scene_import_bridge.py`
+- Result: pass
+- Notes:
+  - downstream bridge regression check pass after parser strict-gate integration

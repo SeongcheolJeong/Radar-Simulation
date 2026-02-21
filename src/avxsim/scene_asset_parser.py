@@ -3,6 +3,10 @@ from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Sequence
 
 
+DEFAULT_SIDECAR_PROFILE = "v1"
+DEFAULT_SIDECAR_VERSION = 1
+
+
 def load_scene_sidecar_json(path: str) -> Dict[str, Any]:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -20,7 +24,26 @@ def build_asset_manifest_from_sidecar(
     mesh_root: Optional[str] = None,
     allow_missing_meshes: bool = False,
     default_material_tag: str = "default_material",
+    profile: str = DEFAULT_SIDECAR_PROFILE,
+    expected_sidecar_version: Optional[int] = DEFAULT_SIDECAR_VERSION,
+    strict_mode: bool = True,
 ) -> Dict[str, Any]:
+    unknown_keys = _collect_unknown_top_level_keys(sidecar_payload)
+    if strict_mode and len(unknown_keys) > 0:
+        raise ValueError(f"unknown top-level keys in strict mode: {sorted(unknown_keys)}")
+
+    actual_profile = str(sidecar_payload.get("schema_profile", DEFAULT_SIDECAR_PROFILE))
+    if str(profile) != actual_profile:
+        raise ValueError(
+            f"schema_profile mismatch: expected '{profile}', got '{actual_profile}'"
+        )
+
+    actual_version = int(sidecar_payload.get("schema_version", DEFAULT_SIDECAR_VERSION))
+    if expected_sidecar_version is not None and int(expected_sidecar_version) != actual_version:
+        raise ValueError(
+            f"schema_version mismatch: expected {int(expected_sidecar_version)}, got {actual_version}"
+        )
+
     scene_id = str(sidecar_payload.get("scene_id", "scene_from_sidecar"))
     sensor_mount = _as_obj(sidecar_payload, "sensor_mount")
     _validate_sensor_mount(sensor_mount)
@@ -43,6 +66,7 @@ def build_asset_manifest_from_sidecar(
         mesh_root=mesh_root_path,
         allow_missing_meshes=bool(allow_missing_meshes),
         default_material_tag=str(default_material_tag),
+        strict_mode=bool(strict_mode),
     )
 
     out: Dict[str, Any] = {
@@ -59,6 +83,10 @@ def build_asset_manifest_from_sidecar(
             "material_count": int(len(materials)),
             "mesh_format_counts": parser_stats["mesh_format_counts"],
             "allow_missing_meshes": bool(allow_missing_meshes),
+            "strict_mode": bool(strict_mode),
+            "schema_profile": actual_profile,
+            "schema_version": int(actual_version),
+            "unknown_top_level_keys": sorted(unknown_keys),
         },
     }
     if len(map_config) > 0:
@@ -72,6 +100,7 @@ def _normalize_objects(
     mesh_root: Optional[Path],
     allow_missing_meshes: bool,
     default_material_tag: str,
+    strict_mode: bool,
 ) -> tuple:
     if not isinstance(raw_objects, Sequence) or isinstance(raw_objects, (str, bytes)):
         raise ValueError("objects must be non-empty list")
@@ -84,6 +113,12 @@ def _normalize_objects(
     for i, raw in enumerate(raw_objects):
         if not isinstance(raw, Mapping):
             raise ValueError(f"objects[{i}] must be object")
+        if strict_mode:
+            unknown = _collect_unknown_object_keys(raw)
+            if len(unknown) > 0:
+                raise ValueError(
+                    f"objects[{i}] has unknown keys in strict mode: {sorted(unknown)}"
+                )
         mesh_uri = str(raw.get("mesh_uri", raw.get("mesh_file", raw.get("uri", "")))).strip()
         if mesh_uri == "":
             raise ValueError(f"objects[{i}] missing mesh_uri/mesh_file/uri")
@@ -183,6 +218,44 @@ def _normalize_materials(raw_materials: Any) -> Dict[str, Dict[str, float]]:
         return out
 
     raise ValueError("materials must be object map or list")
+
+
+def _collect_unknown_top_level_keys(payload: Mapping[str, Any]) -> set:
+    known = {
+        "schema_profile",
+        "schema_version",
+        "scene_id",
+        "sensor_mount",
+        "simulation_defaults",
+        "radar",
+        "materials",
+        "objects",
+        "map_config",
+    }
+    return {str(k) for k in payload.keys() if str(k) not in known}
+
+
+def _collect_unknown_object_keys(payload: Mapping[str, Any]) -> set:
+    known = {
+        "mesh_uri",
+        "mesh_file",
+        "uri",
+        "object_id",
+        "id",
+        "centroid_m",
+        "bbox_center_m",
+        "material_tag",
+        "material",
+        "mesh_area_m2",
+        "mesh_area",
+        "rcs_scale",
+        "reflection_order",
+        "amp",
+        "velocity_mps",
+        "radial_velocity_mps",
+        "path_id",
+    }
+    return {str(k) for k in payload.keys() if str(k) not in known}
 
 
 def _validate_sensor_mount(sensor_mount: Mapping[str, Any]) -> None:

@@ -37,4 +37,5 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 - [x] M12.0: mesh/material-aware backend candidate (`mesh_material_stub`)
 - [x] M12.1: scene-asset import bridge to backend manifest (`objects/materials` extraction path)
 - [x] M12.2: scene-asset parser candidate (`glTF/OBJ sidecar -> asset manifest`)
-- [ ] M12.3: sidecar schema profile/version lock and strict-mode parse gate
+- [x] M12.3: sidecar schema profile/version lock and strict-mode parse gate
+- [ ] M12.4: strict/non-strict compatibility matrix and bridge E2E regression lock

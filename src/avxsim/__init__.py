@@ -121,6 +121,8 @@ from .scenario_profile import (
     save_scenario_profile_json,
 )
 from .scene_asset_parser import (
+    DEFAULT_SIDECAR_PROFILE,
+    DEFAULT_SIDECAR_VERSION,
     build_asset_manifest_from_sidecar,
     load_scene_sidecar_json,
     save_asset_manifest_json,
@@ -199,6 +201,8 @@ __all__ = [
     "run_replay_manifest",
     "run_object_scene_to_radar_map",
     "run_object_scene_to_radar_map_json",
+    "DEFAULT_SIDECAR_PROFILE",
+    "DEFAULT_SIDECAR_VERSION",
     "build_asset_manifest_from_sidecar",
     "build_mesh_scene_payload_from_asset_manifest",
     "save_adc_npz",

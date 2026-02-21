@@ -24,6 +24,8 @@ def run() -> None:
         sidecar_json.write_text(
             json.dumps(
                 {
+                    "schema_profile": "v1",
+                    "schema_version": 1,
                     "scene_id": "sidecar_scene_v1",
                     "sensor_mount": {
                         "tx_pos_m": [[0.0, 0.0, 0.0], [0.0, -0.0078, 0.0]],
@@ -87,6 +89,7 @@ def run() -> None:
                 str(sidecar_json),
                 "--output-asset-manifest-json",
                 str(asset_manifest_json),
+                "--strict",
             ],
             cwd=str(repo_root),
             env=env,
@@ -100,9 +103,35 @@ def run() -> None:
         parser_meta = manifest["asset_parser_metadata"]
         assert parser_meta["mesh_format_counts"]["gltf"] == 1
         assert parser_meta["mesh_format_counts"]["obj"] == 1
+        assert parser_meta["schema_profile"] == "v1"
+        assert parser_meta["schema_version"] == 1
+        assert parser_meta["strict_mode"] is True
         assert len(manifest["objects"]) == 2
         assert manifest["objects"][0]["source_mesh_format"] == "gltf"
         assert manifest["objects"][1]["source_mesh_format"] == "obj"
+
+        # strict mode rejects unknown top-level keys.
+        bad_sidecar = root / "scene_sidecar_bad.json"
+        bad_payload = json.loads(sidecar_json.read_text(encoding="utf-8"))
+        bad_payload["unexpected_field"] = 123
+        bad_sidecar.write_text(json.dumps(bad_payload, indent=2), encoding="utf-8")
+        proc_bad = subprocess.run(
+            [
+                "python3",
+                "scripts/build_asset_manifest_from_sidecar.py",
+                "--sidecar-json",
+                str(bad_sidecar),
+                "--output-asset-manifest-json",
+                str(root / "bad_asset_manifest.json"),
+                "--strict",
+            ],
+            cwd=str(repo_root),
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert proc_bad.returncode != 0
 
         scene_json = root / "scene_from_manifest.json"
         proc_scene = subprocess.run(
