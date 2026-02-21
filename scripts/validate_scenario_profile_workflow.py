@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import subprocess
 import tempfile
@@ -82,6 +83,61 @@ def run() -> None:
             np.roll(ra_ref, shift=-10, axis=0),
         )
 
+        motion_cand_best = tmp_path / "motion_cand_best.npz"
+        motion_cand_mid = tmp_path / "motion_cand_mid.npz"
+        motion_cand_bad = tmp_path / "motion_cand_bad.npz"
+        _make_estimation_npz(motion_cand_best, rd_ref, ra_ref)
+        _make_estimation_npz(
+            motion_cand_mid,
+            np.roll(rd_ref * 1.01, shift=1, axis=0),
+            np.roll(ra_ref * 0.99, shift=1, axis=0),
+        )
+        _make_estimation_npz(
+            motion_cand_bad,
+            np.roll(rd_ref, shift=8, axis=0),
+            np.roll(ra_ref, shift=-7, axis=0),
+        )
+        motion_manifest = tmp_path / "motion_manifest.json"
+        motion_manifest.write_text(
+            json.dumps(
+                {
+                    "candidates": [
+                        {
+                            "name": "best_motion",
+                            "estimation_npz": str(motion_cand_best),
+                            "motion_compensation": {
+                                "enabled": True,
+                                "fd_hz": 1120.0,
+                                "chirp_interval_s": 6e-5,
+                                "reference_tx": 0,
+                            },
+                        },
+                        {
+                            "name": "mid_motion",
+                            "estimation_npz": str(motion_cand_mid),
+                            "motion_compensation": {
+                                "enabled": True,
+                                "fd_hz": 980.0,
+                                "chirp_interval_s": 6e-5,
+                                "reference_tx": 0,
+                            },
+                        },
+                        {
+                            "name": "bad_motion",
+                            "estimation_npz": str(motion_cand_bad),
+                            "motion_compensation": {
+                                "enabled": True,
+                                "fd_hz": 300.0,
+                                "chirp_interval_s": 6e-5,
+                                "reference_tx": 0,
+                            },
+                        },
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+
         profile_json = tmp_path / "scenario_profile.json"
         cmd_build = [
             "python3",
@@ -96,6 +152,8 @@ def run() -> None:
             "0.95",
             "--threshold-margin",
             "2.0",
+            "--motion-tuning-manifest-json",
+            str(motion_manifest),
             "--output-profile-json",
             str(profile_json),
         ]
@@ -118,6 +176,10 @@ def run() -> None:
         assert "parity_thresholds" in profile
         assert len(profile["parity_thresholds"]) > 0
         assert "reference_estimation_npz" in profile
+        assert profile["motion_compensation_defaults"]["enabled"] is True
+        assert abs(float(profile["motion_compensation_defaults"]["fd_hz"]) - 1120.0) < 1e-9
+        assert "motion_tuning_summary" in profile
+        assert profile["motion_tuning_summary"]["selected_name"] == "best_motion"
 
         proc_good = subprocess.run(
             [
@@ -160,4 +222,3 @@ def run() -> None:
 
 if __name__ == "__main__":
     run()
-

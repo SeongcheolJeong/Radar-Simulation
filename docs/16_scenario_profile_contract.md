@@ -15,6 +15,7 @@ Lock per-scenario calibration and validation settings into one JSON profile:
 - `created_utc` (ISO-8601 UTC string)
 - `global_jones_matrix` (row-major 4 complex values as `{re,im}`)
 - `parity_thresholds` (object of `*_max` values)
+- `motion_compensation_defaults` (`enabled`, `fd_hz`, `chirp_interval_s`, `reference_tx`)
 
 Optional:
 
@@ -22,6 +23,7 @@ Optional:
 - `fit_metrics`
 - `train_estimation_npz`
 - `threshold_derivation`
+- `motion_tuning_summary`
 
 ## Build CLI
 
@@ -36,6 +38,27 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build
 ```
 
 If `--reference-estimation-npz` or `--train-estimation-npz` is missing, default parity thresholds are used.
+
+Motion tuning manifest mode:
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile.py \
+  --scenario-id moving_target_v1 \
+  --samples-npz /path/to/calibration_samples.npz \
+  --reference-estimation-npz /path/to/reference_hybrid_estimation.npz \
+  --motion-tuning-manifest-json /path/to/motion_tuning_manifest.json \
+  --output-profile-json /path/to/scenario_profile.json
+```
+
+Manifest format:
+
+- root object with `candidates` list (or list directly)
+- each candidate has:
+  - `name`
+  - `estimation_npz`
+  - `motion_compensation` (`enabled`, `fd_hz`, `chirp_interval_s`, `reference_tx`)
+
+When manifest is provided, the best motion candidate is selected from parity-metric weighted score and written to `motion_compensation_defaults`.
 
 ## Evaluate CLI
 
@@ -55,4 +78,3 @@ Exit codes:
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scenario_profile_workflow.py
 ```
-

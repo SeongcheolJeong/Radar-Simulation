@@ -219,6 +219,7 @@
 - Result: pass
 - Notes:
   - Scenario profile build pass (`global_jones + parity_thresholds`)
+  - Motion tuning manifest candidate selection pass (`motion_compensation_defaults` locked)
   - Profile evaluation path pass (`good -> pass`, `bad -> fail`)
   - Threshold derivation from train candidates and reference snapshot pass
 
@@ -239,3 +240,12 @@
 - Notes:
   - `--enable-motion-compensation` CLI wiring pass
   - Motion compensation metadata/prints present in CLI output
+
+## Ingest CLI + Scenario Profile Defaults
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_profile_defaults.py`
+- Result: pass
+- Notes:
+  - `--scenario-profile-json` path applies profile global Jones and motion defaults
+  - Explicit pipeline run works without extra calibration/motion flags

@@ -39,6 +39,7 @@ def main() -> None:
         "scenario_id": profile.get("scenario_id"),
         "reference_estimation_npz": str(reference),
         "candidate_estimation_npz": str(args.candidate_estimation_npz),
+        "motion_compensation_defaults": profile.get("motion_compensation_defaults"),
         "pass": bool(report["pass"]),
         "failures": report["failures"],
         "metrics": report["metrics"],
@@ -54,4 +55,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

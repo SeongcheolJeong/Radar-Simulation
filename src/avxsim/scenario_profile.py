@@ -47,6 +47,8 @@ def build_scenario_profile_payload(
     fit_metrics: Optional[Mapping[str, Any]] = None,
     train_estimation_npz: Optional[Sequence[str]] = None,
     threshold_derivation: Optional[Mapping[str, Any]] = None,
+    motion_compensation_defaults: Optional[Mapping[str, Any]] = None,
+    motion_tuning_summary: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     sid = str(scenario_id).strip()
     if sid == "":
@@ -67,6 +69,12 @@ def build_scenario_profile_payload(
         payload["train_estimation_npz"] = [str(x) for x in train_estimation_npz]
     if threshold_derivation is not None:
         payload["threshold_derivation"] = _to_jsonable(threshold_derivation)
+    if motion_compensation_defaults is not None:
+        payload["motion_compensation_defaults"] = _normalize_motion_defaults(
+            motion_compensation_defaults
+        )
+    if motion_tuning_summary is not None:
+        payload["motion_tuning_summary"] = _to_jsonable(motion_tuning_summary)
     return payload
 
 
@@ -89,7 +97,33 @@ def load_scenario_profile_json(path: str) -> Dict[str, Any]:
     out["parity_thresholds"] = {
         str(k): float(v) for k, v in out["parity_thresholds"].items()
     }
+    if "motion_compensation_defaults" in out:
+        out["motion_compensation_defaults"] = _normalize_motion_defaults(
+            out["motion_compensation_defaults"]
+        )
+    else:
+        out["motion_compensation_defaults"] = {
+            "enabled": False,
+            "fd_hz": None,
+            "chirp_interval_s": None,
+            "reference_tx": None,
+        }
     return out
+
+
+def _normalize_motion_defaults(value: Mapping[str, Any]) -> Dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ValueError("motion_compensation_defaults must be object")
+    return {
+        "enabled": bool(value.get("enabled", False)),
+        "fd_hz": None if value.get("fd_hz", None) is None else float(value["fd_hz"]),
+        "chirp_interval_s": None
+        if value.get("chirp_interval_s", None) is None
+        else float(value["chirp_interval_s"]),
+        "reference_tx": None
+        if value.get("reference_tx", None) is None
+        else int(value["reference_tx"]),
+    }
 
 
 def _encode_matrix(matrix: np.ndarray):
@@ -110,4 +144,3 @@ def _to_jsonable(value: Any) -> Any:
     if isinstance(value, (np.complexfloating, complex)):
         return {"re": float(np.real(value)), "im": float(np.imag(value))}
     return value
-

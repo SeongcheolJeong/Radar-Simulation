@@ -29,9 +29,16 @@ This correction is applied on Hybrid-compatible channel matrix `H` before angle 
 CLI options:
 
 - `--enable-motion-compensation`
+- `--disable-motion-compensation`
 - `--motion-comp-fd-hz`
 - `--motion-comp-chirp-interval-s`
 - `--motion-comp-reference-tx`
+- `--scenario-profile-json` (loads motion defaults from profile)
+
+Precedence:
+
+- explicit CLI values override scenario-profile defaults
+- `--disable-motion-compensation` forces off even when profile default is enabled
 
 ## Validation
 
@@ -43,3 +50,6 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/valid
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_motion_comp.py
 ```
 
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_profile_defaults.py
+```

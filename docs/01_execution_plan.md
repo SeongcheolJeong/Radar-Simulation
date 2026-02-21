@@ -26,7 +26,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M7.9: Measured CSV converter (`measurement.csv -> calibration_samples.npz`)
 - [x] M7.10: Scenario profile lock (`global_jones + parity thresholds + evaluator`)
 - [x] M8: Motion compensation baseline for TDM virtual array
-- [ ] M8.1: Motion compensation tuning on measured moving-target scenarios
+- [x] M8.1: Motion compensation tuning workflow and profile-default lock
+- [ ] M8.2: Motion compensation tuning on measured moving-target replays
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -39,4 +40,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Tune motion compensation with measured moving-target packs and lock scenario-specific settings in profile.
+Run measured moving-target replay batches and lock per-scenario motion defaults/thresholds from real captures.

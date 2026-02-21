@@ -24,6 +24,7 @@ CLI options:
 - `--ffd-field-format {auto|real_imag|mag_phase_deg}`
 - `--use-jones-polarization`
 - `--global-jones-json /path/to/global_jones.json`
+- `--scenario-profile-json /path/to/scenario_profile.json`
 
 When set, the synthesizer uses `FfdAntennaModel` instead of isotropic gains.
 
@@ -36,11 +37,13 @@ CLI options:
 - `--estimation-range-bin-length`
 - `--estimation-doppler-window`
 - `--enable-motion-compensation`
+- `--disable-motion-compensation`
 - `--motion-comp-fd-hz`
 - `--motion-comp-chirp-interval-s`
 - `--motion-comp-reference-tx`
 
 When motion compensation is enabled, angle estimation uses TDM slot phase compensation.
+If `--scenario-profile-json` is provided, global Jones and motion defaults are loaded from profile (CLI explicit options override profile values).
 
 ## Outputs
 
@@ -74,4 +77,8 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/valid
 
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_motion_comp.py
+```
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_profile_defaults.py
 ```

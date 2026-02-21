@@ -147,6 +147,12 @@ Run ingest CLI motion compensation validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_motion_comp.py
 ```
 
+Run ingest CLI scenario profile defaults validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_profile_defaults.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -176,6 +182,22 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybri
   --motion-comp-fd-hz 1200 \
   --motion-comp-chirp-interval-s 6e-5 \
   --motion-comp-reference-tx 0 \
+  --output-dir /path/to/out
+```
+
+Use scenario profile defaults in ingest:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybrid_ingest_to_adc.py \
+  --frames-root /path/to/render \
+  --radar-json /path/to/radar_parameters_hybrid.json \
+  --frame-start 1 \
+  --frame-end 64 \
+  --camera-fov-deg 90 \
+  --mode reflection \
+  --file-ext .exr \
+  --scenario-profile-json /path/to/scenario_profile.json \
+  --run-hybrid-estimation \
   --output-dir /path/to/out
 ```
 
@@ -237,6 +259,17 @@ Evaluate candidate with scenario profile:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_scenario_profile.py \
   --profile-json /path/to/scenario_profile.json \
   --candidate-estimation-npz /path/to/candidate_hybrid_estimation.npz
+```
+
+Build profile with motion tuning manifest:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile.py \
+  --scenario-id moving_target_v1 \
+  --samples-npz /path/to/calibration_samples.npz \
+  --reference-estimation-npz /path/to/reference_hybrid_estimation.npz \
+  --motion-tuning-manifest-json /path/to/motion_tuning_manifest.json \
+  --output-profile-json /path/to/scenario_profile.json
 ```
 
 Validate CLI integration with bundle:
