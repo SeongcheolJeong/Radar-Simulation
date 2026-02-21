@@ -24,6 +24,22 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument("--fit-json", action="append", required=True)
+    p.add_argument(
+        "--baseline-mode",
+        choices=["rerun", "provided"],
+        default="rerun",
+        help="Baseline source: rerun with current code, or use provided/auto report path.",
+    )
+    p.add_argument("--fit-proxy-max-range-exp", type=float, default=None)
+    p.add_argument("--fit-proxy-max-azimuth-power", type=float, default=None)
+    p.add_argument("--fit-proxy-min-weight", type=float, default=None)
+    p.add_argument("--fit-proxy-max-weight", type=float, default=None)
+    p.add_argument(
+        "--reference-anchor",
+        choices=["source", "rebuilt"],
+        default="source",
+        help="Reference NPZ anchor used in fit-aware pack rebuild.",
+    )
     p.add_argument("--max-no-gain-attempts", type=int, default=2)
     p.add_argument("--allow-unlocked", action="store_true")
     p.add_argument("--output-root", required=True)
@@ -81,6 +97,29 @@ def _auto_baseline_replay_report(source_pack_root: Path) -> Path:
     # <run_root>/packs/<pack_name>
     run_root = source_pack_root.parent.parent
     return run_root / "measured_replay_outputs" / source_pack_root.name / "replay_report.json"
+
+
+def _resolve_baseline_report_path_from_summary(
+    replay_summary_json: Path,
+    source_pack_root: Path,
+) -> Path:
+    summary = _load_json(replay_summary_json)
+    packs = summary.get("packs", [])
+    if not isinstance(packs, list) or len(packs) == 0:
+        raise ValueError(f"invalid measured replay summary: {replay_summary_json}")
+    target_name = str(source_pack_root.name)
+
+    for row in packs:
+        if not isinstance(row, Mapping):
+            continue
+        rr = Path(str(row.get("replay_report_json", "")))
+        if rr.exists() and target_name in str(rr):
+            return rr
+
+    rr0 = Path(str(packs[0].get("replay_report_json", "")))
+    if not rr0.exists():
+        raise FileNotFoundError(f"missing replay_report_json in summary: {replay_summary_json}")
+    return rr0
 
 
 def _replay_summary(report: Mapping[str, Any]) -> Dict[str, Any]:
@@ -154,6 +193,8 @@ def _build_fit_aware_case(
     fit_json: Path,
     attempt_root: Path,
     allow_unlocked: bool,
+    fit_proxy_policy: Optional[Mapping[str, float]],
+    reference_anchor: str,
 ) -> Dict[str, Any]:
     pack_out = attempt_root / "packs" / f"{source_pack_root.name}_fitaware"
     fit_pack_summary = attempt_root / "fit_aware_pack_summary.json"
@@ -166,9 +207,30 @@ def _build_fit_aware_case(
         str(pack_out),
         "--path-power-fit-json",
         str(fit_json),
+        "--reference-anchor",
+        str(reference_anchor),
         "--output-summary-json",
         str(fit_pack_summary),
     ]
+    if fit_proxy_policy is not None:
+        if "max_range_power_exponent" in fit_proxy_policy:
+            cmd1.extend(
+                [
+                    "--fit-proxy-max-range-exp",
+                    str(float(fit_proxy_policy["max_range_power_exponent"])),
+                ]
+            )
+        if "max_azimuth_power" in fit_proxy_policy:
+            cmd1.extend(
+                [
+                    "--fit-proxy-max-azimuth-power",
+                    str(float(fit_proxy_policy["max_azimuth_power"])),
+                ]
+            )
+        if "min_weight" in fit_proxy_policy:
+            cmd1.extend(["--fit-proxy-min-weight", str(float(fit_proxy_policy["min_weight"]))])
+        if "max_weight" in fit_proxy_policy:
+            cmd1.extend(["--fit-proxy-max-weight", str(float(fit_proxy_policy["max_weight"]))])
     proc1 = _run(cmd1, cwd=repo_root, env=env)
     if proc1.returncode != 0:
         raise RuntimeError(
@@ -227,6 +289,63 @@ def _build_fit_aware_case(
     }
 
 
+def _build_current_baseline_case(
+    repo_root: Path,
+    env: Mapping[str, str],
+    source_pack_root: Path,
+    case_out: Path,
+    allow_unlocked: bool,
+) -> Dict[str, Any]:
+    baseline_root = case_out / "baseline_current"
+    baseline_root.mkdir(parents=True, exist_ok=True)
+
+    plan_json = baseline_root / "measured_replay_plan.json"
+    cmd1 = [
+        "python3",
+        "scripts/build_measured_replay_plan.py",
+        "--packs-root",
+        str(source_pack_root.parent),
+        "--output-plan-json",
+        str(plan_json),
+    ]
+    proc1 = _run(cmd1, cwd=repo_root, env=env)
+    if proc1.returncode != 0:
+        raise RuntimeError(
+            f"baseline measured replay plan build failed:\nSTDOUT:\n{proc1.stdout}\nSTDERR:\n{proc1.stderr}"
+        )
+
+    replay_out = baseline_root / "measured_replay_outputs"
+    replay_summary_json = baseline_root / "measured_replay_summary.json"
+    cmd2 = [
+        "python3",
+        "scripts/run_measured_replay_execution.py",
+        "--plan-json",
+        str(plan_json),
+        "--output-root",
+        str(replay_out),
+        "--output-summary-json",
+        str(replay_summary_json),
+    ]
+    if allow_unlocked:
+        cmd2.append("--allow-unlocked")
+    proc2 = _run(cmd2, cwd=repo_root, env=env)
+    if proc2.returncode not in (0, 2):
+        raise RuntimeError(
+            f"baseline measured replay run failed:\nSTDOUT:\n{proc2.stdout}\nSTDERR:\n{proc2.stderr}"
+        )
+
+    replay_report_json = _resolve_baseline_report_path_from_summary(
+        replay_summary_json=replay_summary_json,
+        source_pack_root=source_pack_root,
+    )
+    return {
+        "baseline_replay_report_json": str(replay_report_json),
+        "baseline_plan_json": str(plan_json),
+        "baseline_measured_replay_summary_json": str(replay_summary_json),
+        "baseline_measured_replay_exit_code": int(proc2.returncode),
+    }
+
+
 def main() -> None:
     args = parse_args()
     if int(args.max_no_gain_attempts) <= 0:
@@ -247,6 +366,7 @@ def main() -> None:
             raise FileNotFoundError(f"fit json not found: {f}")
 
     case_specs = [_parse_case_spec(x) for x in args.case]
+    fit_proxy_policy = _build_fit_proxy_policy(args)
 
     case_rows: List[Dict[str, Any]] = []
     improved_case_count = 0
@@ -257,11 +377,27 @@ def main() -> None:
         if not source_pack_root.exists() or not source_pack_root.is_dir():
             raise FileNotFoundError(f"source pack root not found: {source_pack_root}")
 
-        baseline_report_json = (
-            Path(spec["baseline_replay_report_json"]).expanduser().resolve()
-            if str(spec["baseline_replay_report_json"]).strip() != ""
-            else _auto_baseline_replay_report(source_pack_root)
-        )
+        case_out = out_root / f"case_{ci:02d}_{_safe_name(label)}"
+        case_out.mkdir(parents=True, exist_ok=True)
+
+        baseline_meta: Dict[str, Any]
+        if str(args.baseline_mode) == "rerun":
+            baseline_meta = _build_current_baseline_case(
+                repo_root=repo_root,
+                env=env,
+                source_pack_root=source_pack_root,
+                case_out=case_out,
+                allow_unlocked=bool(args.allow_unlocked),
+            )
+            baseline_report_json = Path(baseline_meta["baseline_replay_report_json"]).expanduser().resolve()
+        else:
+            baseline_report_json = (
+                Path(spec["baseline_replay_report_json"]).expanduser().resolve()
+                if str(spec["baseline_replay_report_json"]).strip() != ""
+                else _auto_baseline_replay_report(source_pack_root)
+            )
+            baseline_meta = {"baseline_replay_report_json": str(baseline_report_json)}
+
         if not baseline_report_json.exists() or not baseline_report_json.is_file():
             raise FileNotFoundError(
                 f"baseline replay report not found for case '{label}': {baseline_report_json}"
@@ -269,9 +405,6 @@ def main() -> None:
 
         baseline_report = _load_json(baseline_report_json)
         baseline_sum = _replay_summary(baseline_report)
-
-        case_out = out_root / f"case_{ci:02d}_{_safe_name(label)}"
-        case_out.mkdir(parents=True, exist_ok=True)
 
         attempts: List[Dict[str, Any]] = []
         consecutive_no_gain = 0
@@ -291,6 +424,8 @@ def main() -> None:
                 fit_json=fit_json,
                 attempt_root=attempt_root,
                 allow_unlocked=bool(args.allow_unlocked),
+                fit_proxy_policy=fit_proxy_policy,
+                reference_anchor=str(args.reference_anchor),
             )
 
             new_report = _load_json(Path(run_out["replay_report_json"]))
@@ -336,6 +471,8 @@ def main() -> None:
                 "label": label,
                 "source_pack_root": str(source_pack_root),
                 "baseline_replay_report_json": str(baseline_report_json),
+                "baseline_mode": str(args.baseline_mode),
+                "baseline_meta": baseline_meta,
                 "baseline_summary": baseline_sum,
                 "fit_attempt_count": int(len(attempts)),
                 "stop_reason": stop_reason,
@@ -350,8 +487,11 @@ def main() -> None:
     summary = {
         "version": 1,
         "fit_jsons": [str(x) for x in fit_jsons],
+        "baseline_mode": str(args.baseline_mode),
         "max_no_gain_attempts": int(args.max_no_gain_attempts),
         "allow_unlocked": bool(args.allow_unlocked),
+        "fit_proxy_policy": fit_proxy_policy,
+        "reference_anchor": str(args.reference_anchor),
         "case_count": int(len(case_rows)),
         "improved_case_count": int(improved_case_count),
         "cases": case_rows,
@@ -369,6 +509,19 @@ def main() -> None:
     print(f"  case_count: {summary['case_count']}")
     print(f"  improved_case_count: {summary['improved_case_count']}")
     print(f"  output_summary_json: {out_summary}")
+
+
+def _build_fit_proxy_policy(args: argparse.Namespace) -> Optional[Dict[str, float]]:
+    policy: Dict[str, float] = {}
+    if args.fit_proxy_max_range_exp is not None:
+        policy["max_range_power_exponent"] = float(args.fit_proxy_max_range_exp)
+    if args.fit_proxy_max_azimuth_power is not None:
+        policy["max_azimuth_power"] = float(args.fit_proxy_max_azimuth_power)
+    if args.fit_proxy_min_weight is not None:
+        policy["min_weight"] = float(args.fit_proxy_min_weight)
+    if args.fit_proxy_max_weight is not None:
+        policy["max_weight"] = float(args.fit_proxy_max_weight)
+    return policy if policy else None
 
 
 if __name__ == "__main__":

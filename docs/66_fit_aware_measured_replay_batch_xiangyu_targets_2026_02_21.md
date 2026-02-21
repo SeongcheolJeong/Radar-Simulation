@@ -1,5 +1,10 @@
 # Fit-Aware Measured Replay Batch Report (Xiangyu Targets, 2026-02-21)
 
+Superseded note (2026-02-21):
+
+- This report used historical baseline replay reports generated before current replay execution updates.
+- Use `/Users/seongcheoljeong/Documents/Codex_test/docs/69_fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.md` as the corrected reference.
+
 ## Inputs
 
 - Source packs:

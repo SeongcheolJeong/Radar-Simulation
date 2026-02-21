@@ -1,5 +1,10 @@
 # Fit-Aware Replay Saturation Gate Report (Xiangyu Targets, 2026-02-21)
 
+Superseded note (2026-02-21):
+
+- This gate result depends on stale baseline-comparison inputs from report 66.
+- Use `/Users/seongcheoljeong/Documents/Codex_test/docs/70_fit_aware_replay_saturation_gate_xiangyu_targets_rerun_baseline_2026_02_21.md` as the corrected reference.
+
 ## Input
 
 - Batch summary:

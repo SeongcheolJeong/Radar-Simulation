@@ -54,6 +54,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.20: Fit-aware measured pack rebuild path + real-plan replay impact confirmation (`bms1000_run1`)
 - [x] M10.21: Fit-aware measured replay batch scaling to target plans + no-gain stop gate execution
 - [x] M10.22: Fit-aware replay saturation sanity gate and target-batch risk classification
+- [x] M10.23: Current-code baseline rerun gate for fit-aware batch + stale-baseline correction report
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -66,7 +67,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.23: introduce proxy-strength cap/tuning policy and re-run fit-aware batch to avoid pass-rate saturation on BMS1000 targets.
+Start M10.24: redefine measured replay fit objective/policy (avoid degradation vs rerun baseline) before further fit-lock rollout.
 
 ## M10.19 Decision Gate
 
@@ -95,9 +96,18 @@ M10.21 outcome (2026-02-21):
 - fit-aware measured replay batch runner executed on target plans (`bms1000_512`, `bms1000_full897`, `cms1000_128`)
 - all 3 cases improved over baseline (`improved_case_count=3`)
 - stop gate condition (`max_no_gain_attempts=2`) remained armed; no case hit no-gain streak in this run
+- superseded by M10.23 due stale historical baseline reports
 
 M10.22 outcome (2026-02-21):
 
 - saturation sanity gate added for fit-aware replay batch summaries
 - Xiangyu target batch analysis flagged `2/3` saturated cases (`bms1000_512`, `bms1000_full897`)
 - recommendation emitted: `proxy_strength_review_required`
+- superseded by M10.23 rerun-baseline analysis
+
+M10.23 outcome (2026-02-21):
+
+- fit-aware batch runner updated with `baseline-mode=rerun|provided` (default `rerun`) to remove stale baseline dependency
+- rerun-baseline Xiangyu target batch result: `improved_case_count=0` (`3/3` no-gain, stop gate triggered)
+- rerun-baseline saturation gate result: `saturated_case_count=0`, recommendation `proxy_strength_within_expected_range`
+- key conclusion corrected: current issue is not saturation uplift but fit-aware degradation vs current baseline

@@ -8,10 +8,16 @@ Scale fit-aware measured replay evaluation across multiple target packs with ord
 
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_fit_aware_measured_replay_batch.py \
+  --baseline-mode rerun \
   --case caseA=/path/to/source_pack_root \
   --case caseB=/path/to/source_pack_root::/path/to/baseline_replay_report.json \
   --fit-json /path/to/path_power_fit_a.json \
   --fit-json /path/to/path_power_fit_b.json \
+  --reference-anchor source \
+  --fit-proxy-max-range-exp 1.0 \
+  --fit-proxy-max-azimuth-power 2.0 \
+  --fit-proxy-min-weight 0.85 \
+  --fit-proxy-max-weight 1.15 \
   --max-no-gain-attempts 2 \
   --allow-unlocked \
   --output-root /path/to/fit_aware_batch_run \
@@ -27,6 +33,11 @@ If baseline replay report is omitted, script auto-resolves:
 
 - `<run_root>/measured_replay_outputs/<pack_name>/replay_report.json`
 
+Baseline mode:
+
+- `rerun` (default): rebuild baseline replay report with current code before fit attempts
+- `provided`: use provided/auto baseline replay report path as-is
+
 ## Behavior
 
 - for each fit attempt:
@@ -34,6 +45,7 @@ If baseline replay report is omitted, script auto-resolves:
   - build measured replay plan
   - run measured replay
   - compare replay summary vs baseline (`pass_count`, `pass_rate`)
+- baseline replay source is recorded in summary (`baseline_mode`, `baseline_meta`)
 - gain rule:
   - gain if `pass_count_delta > 0`, or tie-break by `pass_rate_delta > 0`
 - stop rule:
@@ -55,3 +67,4 @@ Validation checks:
 - stop-gate triggers at configured no-gain threshold
 - stop reason is `max_no_gain_reached`
 - summary schema fields (`case_count`, `fit_attempt_count`) are populated
+- baseline rerun mode is exercised (current-code baseline, no stale report dependency)

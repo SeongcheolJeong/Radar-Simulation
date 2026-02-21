@@ -147,6 +147,7 @@ def apply_path_power_fit_proxy_to_estimation(
     fx_dop_win: np.ndarray,
     fx_ang: np.ndarray,
     fit_payload: Mapping[str, Any],
+    fit_proxy_policy: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     rd = np.asarray(fx_dop_win, dtype=np.float64)
     ra = np.asarray(fx_ang, dtype=np.float64)
@@ -165,24 +166,40 @@ def apply_path_power_fit_proxy_to_estimation(
     if not isinstance(params, Mapping):
         raise ValueError("fit.best_params must be object")
 
+    policy_from_fit = fit_payload.get("fit_proxy_policy", None)
+    policy: Dict[str, Any] = {}
+    if isinstance(policy_from_fit, Mapping):
+        policy.update({str(k): policy_from_fit[k] for k in policy_from_fit})
+    if isinstance(fit_proxy_policy, Mapping):
+        policy.update({str(k): fit_proxy_policy[k] for k in fit_proxy_policy})
+
     n_range = int(rd.shape[1])
     n_angle = int(ra.shape[0])
     tiny = float(np.finfo(np.float64).tiny)
 
     # Range proxy: compact dynamic span [1, 2] to avoid numeric blow-ups on large exponents.
     r = 1.0 + np.linspace(0.0, 1.0, num=n_range, dtype=np.float64)
-    range_exp = max(float(params.get("range_power_exponent", 4.0)), 0.0)
+    range_exp_raw = max(float(params.get("range_power_exponent", 4.0)), 0.0)
+    max_range_exp = _policy_nonneg_float(policy, "max_range_power_exponent")
+    range_exp = range_exp_raw if max_range_exp is None else min(range_exp_raw, max_range_exp)
     wr = np.power(np.maximum(r, tiny), -range_exp)
     wr = _normalize_weight(wr)
+    wr = _apply_weight_clip_from_policy(wr, policy)
 
     wa = np.ones(n_angle, dtype=np.float64)
     if model == "scattering":
         az = np.linspace(-np.pi / 2.0, np.pi / 2.0, num=n_angle, dtype=np.float64)
         az_mix = float(np.clip(float(params.get("azimuth_mix", 0.6)), 0.0, 1.0))
-        az_pow = max(float(params.get("azimuth_power", 2.0)), 0.0)
+        az_pow_raw = max(float(params.get("azimuth_power", 2.0)), 0.0)
+        max_az_pow = _policy_nonneg_float(policy, "max_azimuth_power")
+        az_pow = az_pow_raw if max_az_pow is None else min(az_pow_raw, max_az_pow)
         front = np.power(np.maximum(np.abs(np.cos(az)), tiny), az_pow)
         side = np.power(np.maximum(np.abs(np.sin(az)), tiny), az_pow)
         wa = _normalize_weight((az_mix * front) + ((1.0 - az_mix) * side))
+        wa = _apply_weight_clip_from_policy(wa, policy)
+    else:
+        az_pow_raw = None
+        az_pow = None
 
     rd_out = np.maximum(rd * wr[None, :], tiny)
     ra_out = np.maximum(ra * (wa[:, None] * wr[None, :]), tiny)
@@ -193,6 +210,11 @@ def apply_path_power_fit_proxy_to_estimation(
             "enabled": True,
             "fit_model": model,
             "best_params": {str(k): float(v) for k, v in params.items()},
+            "fit_proxy_policy": _jsonable_dict(policy),
+            "effective_range_power_exponent": float(range_exp),
+            "raw_range_power_exponent": float(range_exp_raw),
+            "effective_azimuth_power": None if az_pow is None else float(az_pow),
+            "raw_azimuth_power": None if az_pow_raw is None else float(az_pow_raw),
             "range_weight_min": float(np.min(wr)),
             "range_weight_max": float(np.max(wr)),
             "angle_weight_min": float(np.min(wa)),
@@ -218,6 +240,7 @@ def build_measured_pack_from_adc_npz(
     range_bin_limit: Optional[int] = None,
     include_candidate_metadata: bool = True,
     path_power_fit_json: Optional[str] = None,
+    fit_proxy_policy: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     if len(adc_npz_files) == 0:
         raise ValueError("adc_npz_files must be non-empty")
@@ -254,6 +277,7 @@ def build_measured_pack_from_adc_npz(
                 fx_dop_win=est["fx_dop_win"],
                 fx_ang=est["fx_ang"],
                 fit_payload=fit_payload,
+                fit_proxy_policy=fit_proxy_policy,
             )
             est["fx_dop_win"] = np.asarray(shaped["fx_dop_win"], dtype=np.float64)
             est["fx_ang"] = np.asarray(shaped["fx_ang"], dtype=np.float64)
@@ -350,6 +374,7 @@ def build_measured_pack_from_adc_npz(
         "reference_index": int(ref_idx),
         "reference_estimation_npz": str(reference_npz),
         "path_power_fit_json": None if path_power_fit_json is None else str(path_power_fit_json),
+        "fit_proxy_policy": None if fit_proxy_policy is None else _jsonable_dict(fit_proxy_policy),
         "profile_json": str(profile_json),
         "replay_manifest_json": str(replay_manifest_json),
         "lock_policy_json": str(lock_policy_json),
@@ -378,3 +403,55 @@ def _normalize_weight(w: np.ndarray) -> np.ndarray:
     if not np.isfinite(norm) or norm <= 0.0:
         norm = 1.0
     return arr / norm
+
+
+def _policy_nonneg_float(policy: Mapping[str, Any], key: str) -> Optional[float]:
+    if key not in policy:
+        return None
+    try:
+        v = float(policy.get(key))
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(v) or v < 0.0:
+        return None
+    return float(v)
+
+
+def _policy_pos_float(policy: Mapping[str, Any], key: str) -> Optional[float]:
+    if key not in policy:
+        return None
+    try:
+        v = float(policy.get(key))
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(v) or v <= 0.0:
+        return None
+    return float(v)
+
+
+def _apply_weight_clip_from_policy(w: np.ndarray, policy: Mapping[str, Any]) -> np.ndarray:
+    w_floor = _policy_pos_float(policy, "min_weight")
+    w_ceil = _policy_pos_float(policy, "max_weight")
+    arr = np.asarray(w, dtype=np.float64)
+    if w_floor is None and w_ceil is None:
+        return arr
+    low = float(w_floor) if w_floor is not None else float(np.min(arr))
+    high = float(w_ceil) if w_ceil is not None else float(np.max(arr))
+    if high < low:
+        low, high = high, low
+    clipped = np.clip(arr, low, high)
+    return _normalize_weight(clipped)
+
+
+def _jsonable_dict(mapping: Mapping[str, Any]) -> Dict[str, Any]:
+    out: Dict[str, Any] = {}
+    for k, v in mapping.items():
+        key = str(k)
+        if isinstance(v, (str, bool)) or v is None:
+            out[key] = v
+        else:
+            try:
+                out[key] = float(v)
+            except (TypeError, ValueError):
+                out[key] = str(v)
+    return out

@@ -34,6 +34,16 @@ def parse_args() -> argparse.Namespace:
         help="adc key in source NPZ or auto",
     )
     p.add_argument("--reference-index", type=int, default=None)
+    p.add_argument(
+        "--reference-anchor",
+        choices=["source", "rebuilt"],
+        default="source",
+        help="Reference NPZ anchor in preserved profile (source keeps baseline reference).",
+    )
+    p.add_argument("--fit-proxy-max-range-exp", type=float, default=None)
+    p.add_argument("--fit-proxy-max-azimuth-power", type=float, default=None)
+    p.add_argument("--fit-proxy-min-weight", type=float, default=None)
+    p.add_argument("--fit-proxy-max-weight", type=float, default=None)
     p.add_argument("--output-summary-json", default=None)
     return p.parse_args()
 
@@ -273,6 +283,7 @@ def main() -> None:
         if args.scenario_id is not None
         else str(case.get("scenario_id", src_root.name))
     )
+    fit_proxy_policy = _build_fit_proxy_policy(args)
 
     summary = build_measured_pack_from_adc_npz(
         adc_npz_files=adc_files,
@@ -291,17 +302,24 @@ def main() -> None:
         if est_meta0.get("range_bin_limit", None) is None
         else int(est_meta0["range_bin_limit"]),
         path_power_fit_json=str(args.path_power_fit_json),
+        fit_proxy_policy=fit_proxy_policy,
     )
 
     # Preserve source profile thresholds/calibration defaults while updating reference path.
     new_profile_json = Path(summary["profile_json"])
     preserved_profile = dict(source_profile)
     preserved_profile["scenario_id"] = str(scenario_id)
-    preserved_profile["reference_estimation_npz"] = str(summary["reference_estimation_npz"])
+    source_reference = source_profile.get("reference_estimation_npz", None)
+    if args.reference_anchor == "source" and isinstance(source_reference, str) and source_reference.strip() != "":
+        preserved_profile["reference_estimation_npz"] = str(source_reference)
+    else:
+        preserved_profile["reference_estimation_npz"] = str(summary["reference_estimation_npz"])
     preserved_profile["fit_aware_rebuild"] = {
         "source_pack_root": str(src_root),
         "source_profile_json": str(source_profile_json),
         "path_power_fit_json": str(args.path_power_fit_json),
+        "reference_anchor": str(args.reference_anchor),
+        "fit_proxy_policy": fit_proxy_policy,
         "selected_candidate_count": int(len(adc_files)),
         "selected_original_indices": selected_original_indices,
         "adc_order": str(adc_order),
@@ -320,12 +338,14 @@ def main() -> None:
         "source_profile_json": str(source_profile_json),
         "output_pack_root": str(out_root),
         "path_power_fit_json": str(args.path_power_fit_json),
+        "fit_proxy_policy": fit_proxy_policy,
         "scenario_id": str(scenario_id),
         "selected_candidate_count": int(len(adc_files)),
         "selected_original_indices": selected_original_indices,
         "adc_order": str(adc_order),
         "adc_key": str(adc_key),
         "reference_index": int(reference_index),
+        "reference_anchor": str(args.reference_anchor),
         "build_summary": summary,
     }
 
@@ -344,8 +364,23 @@ def main() -> None:
     print(f"  adc_order: {adc_order}")
     print(f"  adc_key: {adc_key}")
     print(f"  reference_index: {reference_index}")
+    print(f"  reference_anchor: {args.reference_anchor}")
     print(f"  path_power_fit_json: {args.path_power_fit_json}")
+    print(f"  fit_proxy_policy: {fit_proxy_policy}")
     print(f"  output_summary_json: {out_summary_json}")
+
+
+def _build_fit_proxy_policy(args: argparse.Namespace) -> Optional[Dict[str, float]]:
+    policy: Dict[str, float] = {}
+    if args.fit_proxy_max_range_exp is not None:
+        policy["max_range_power_exponent"] = float(args.fit_proxy_max_range_exp)
+    if args.fit_proxy_max_azimuth_power is not None:
+        policy["max_azimuth_power"] = float(args.fit_proxy_max_azimuth_power)
+    if args.fit_proxy_min_weight is not None:
+        policy["min_weight"] = float(args.fit_proxy_min_weight)
+    if args.fit_proxy_max_weight is not None:
+        policy["max_weight"] = float(args.fit_proxy_max_weight)
+    return policy if policy else None
 
 
 if __name__ == "__main__":

@@ -758,3 +758,34 @@
   - `case_count=3`, `saturated_case_count=2`
   - gate failed with recommendation `proxy_strength_review_required`
   - saturated cases: `bms1000_512`, `bms1000_full897`
+
+## Fit-Aware Batch Baseline Rerun Correction
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_fit_proxy_policy_cap.py`
+- Result: pass
+- Notes:
+  - Proxy policy cap validation pass (`range/azimuth exponent caps`, `weight clip`)
+  - Range weight span reduction check pass
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_measured_replay_plan.py --packs-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs --output-plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_plan_rerun_2026_02_21.json && PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_execution.py --plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_plan_rerun_2026_02_21.json --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_outputs_rerun_2026_02_21 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_summary_rerun_2026_02_21.json --allow-unlocked`
+- Result: pass
+- Notes:
+  - Current-code rerun baseline for `bms1000_512` is `512/0` (pass_rate `1.0`)
+  - Confirms historical baseline report (`1/511`) was stale/incomparable
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_fit_aware_measured_replay_batch.py --baseline-mode rerun --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512 --case bms1000_full897=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/packs/pack_xiangyu_2019_04_09_bms1000_v1_full897 --case cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/packs/pack_xiangyu_2019_04_09_cms1000_v1_128 --fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json --fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json --max-no-gain-attempts 2 --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json`
+- Result: pass
+- Notes:
+  - `case_count=3`, `improved_case_count=0`
+  - all cases hit `max_no_gain_reached` after 2 attempts
+  - fit-aware attempts degraded vs rerun baseline on all target plans
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_fit_aware_replay_saturation.py --batch-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_replay_saturation_gate_xiangyu_targets_rerun_baseline_2026_02_21.json --max-allowed-saturated-cases 0`
+- Result: pass
+- Notes:
+  - `saturated_case_count=0`, `gate_failed=false`
+  - recommendation: `proxy_strength_within_expected_range`
