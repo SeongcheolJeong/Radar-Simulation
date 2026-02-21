@@ -9,6 +9,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 
 ## Milestones
 
+- [x] M0: Paper-to-code traceability matrix
 - [x] M1: Documentation baseline and contracts
 - [x] M2: Minimal path-to-ADC synthesis core
 - [x] M3: Deterministic validation script (3 scenarios)

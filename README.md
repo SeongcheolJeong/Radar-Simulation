@@ -123,3 +123,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/09_hybrid_frame_adapter.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/10_hybrid_ingest_pipeline.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/11_pcode_reimplementation_plan.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/12_paper_traceability_matrix.md`

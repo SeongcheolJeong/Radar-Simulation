@@ -111,3 +111,12 @@
 - Notes:
   - CLI option `--run-hybrid-estimation` wiring pass
   - Output artifacts include `hybrid_estimation.npz`
+
+## Paper Traceability
+
+- Date: 2026-02-21
+- Command: `manual review of /Users/seongcheoljeong/Documents/Codex_test/docs/12_paper_traceability_matrix.md`
+- Result: pass
+- Notes:
+  - Paper requirement to code/test mapping table added
+  - Coverage status classified as Implemented/Partial/Planned
