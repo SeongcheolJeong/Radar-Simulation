@@ -241,6 +241,12 @@ Run parity drift analysis validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_parity_drift_analysis.py
 ```
 
+Run cross-family parity shift validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_cross_family_parity_shift.py
+```
+
 Run ingest CLI path-power fit validation:
 
 ```bash
@@ -294,6 +300,19 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_p
   --report baseline=/path/to/baseline_replay_report.json \
   --report candidate=/path/to/candidate_replay_report.json \
   --output-json /path/to/parity_drift_report.json
+```
+
+Evaluate baseline/tuned cross-family parity shift:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_cross_family_parity_shift.py \
+  --baseline-a famA_base=/path/to/family_a_baseline_replay_report.json \
+  --baseline-b famB_base=/path/to/family_b_baseline_replay_report.json \
+  --tuned-a famA_tuned=/path/to/family_a_tuned_replay_report.json \
+  --tuned-b famB_tuned=/path/to/family_b_tuned_replay_report.json \
+  --metric ra_shape_nmse \
+  --metric rd_shape_nmse \
+  --output-json /path/to/cross_family_parity_shift.json
 ```
 
 Apply fitted path-power model during ingest:

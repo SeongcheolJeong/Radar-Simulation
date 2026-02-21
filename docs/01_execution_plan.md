@@ -40,6 +40,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.0: Path-power tuning tooling + parity drift quantification baseline
 - [x] M10.05: Path-power fit ingest integration (`--path-power-fit-json`) + CLI validation
 - [x] M10.08: Path-power fit cycle orchestration (`baseline->samples->fit->tuned`) + summary automation
+- [x] M10.09: Cross-family parity shift evaluator (`baseline/tuned x familyA/familyB`) + Xiangyu report
 
 ## Iteration Rule (One-by-One Verification)
 

@@ -478,3 +478,19 @@
 - Notes:
   - Drift report generated for same-family (`bms1000_512` vs `bms1000_897`) and cross-family (`cms1000_128`) comparison
   - Cross-family RA shape drift identified as dominant signal
+
+## Cross-Family Parity Shift Evaluation
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_cross_family_parity_shift.py`
+- Result: pass
+- Notes:
+  - Baseline/tuned x familyA/familyB evaluator validation pass
+  - Gap reduction and pass-rate alignment checks pass on synthetic reports
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_cross_family_parity_shift.py --baseline-a bms1000_512_base=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --baseline-b cms1000_128_base=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/measured_replay_outputs/pack_xiangyu_2019_04_09_cms1000_v1_128/replay_report.json --tuned-a bms1000_512_tuned=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_outputs_tuned_strict_v2/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --tuned-b cms1000_128_tuned=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/measured_replay_outputs_tuned_strict/pack_xiangyu_2019_04_09_cms1000_v1_128/replay_report.json --metric ra_shape_nmse --metric rd_shape_nmse --metric ra_peak_power_db_abs_error --metric rd_peak_power_db_abs_error --quantiles 0.5,0.9,0.99 --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/cross_family_parity_shift_xiangyu_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Pass-rate cross-family gap reduced from `0.083984` to `0.000000`
+  - Selected RA/RD metric quantile cross-family gaps unchanged in this replay set
