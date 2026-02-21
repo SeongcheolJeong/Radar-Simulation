@@ -69,3 +69,8 @@ Use mock pack generator to validate full workflow end-to-end before real dataset
 
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/generate_mock_measured_packs.py`
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mock_measured_packs_e2e.py`
+
+## Public Dataset Quickstart
+
+- Xiangyu Raw ADC example flow:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/28_xiangyu_raw_adc_quickstart.md`

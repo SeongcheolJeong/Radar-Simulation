@@ -22,11 +22,13 @@ clone_if_missing() {
 clone_if_missing "HybridDynamicRT" "https://github.com/liuy2022/HybridDynamicRT.git"
 clone_if_missing "sionna" "https://github.com/NVlabs/sionna.git"
 clone_if_missing "radarsimpy" "https://github.com/radarsimx/radarsimpy.git"
+clone_if_missing "Raw_ADC_radar_dataset_for_automotive_object_detection" "https://github.com/Xiangyu-Gao/Raw_ADC_radar_dataset_for_automotive_object_detection.git"
 
 date_str="$(date +%F)"
 hybrid_sha="$("$GIT_BIN" -C "$EXT_DIR/HybridDynamicRT" rev-parse HEAD)"
 sionna_sha="$("$GIT_BIN" -C "$EXT_DIR/sionna" rev-parse HEAD)"
 radarsimpy_sha="$("$GIT_BIN" -C "$EXT_DIR/radarsimpy" rev-parse HEAD)"
+raw_adc_sha="$("$GIT_BIN" -C "$EXT_DIR/Raw_ADC_radar_dataset_for_automotive_object_detection" rev-parse HEAD)"
 
 cat > "$EXT_DIR/reference-locks.md" <<EOF
 # Reference Locks
@@ -39,7 +41,7 @@ This file is updated by \`/Users/seongcheoljeong/Documents/Codex_test/scripts/fe
 - HybridDynamicRT: $hybrid_sha
 - sionna: $sionna_sha
 - radarsimpy: $radarsimpy_sha
+- Raw_ADC_radar_dataset_for_automotive_object_detection: $raw_adc_sha
 EOF
 
 echo "[done] Updated $EXT_DIR/reference-locks.md"
-

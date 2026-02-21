@@ -417,6 +417,14 @@ Fetch reference repositories:
 bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 ```
 
+This now also locks:
+
+- `external/Raw_ADC_radar_dataset_for_automotive_object_detection`
+
+Public dataset onboarding quickstart:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/28_xiangyu_raw_adc_quickstart.md`
+
 ## Working Docs
 
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/01_execution_plan.md`
