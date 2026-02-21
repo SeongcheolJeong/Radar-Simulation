@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "baseline_mode": "provided",
+  "objective_mode": "drift",
+  "objective_effective": "drift",
+  "case_count": 1,
+  "fit_json_count": 2,
+  "cases_with_improvement_headroom": 0,
+  "policy": {
+    "min_improved_cases": 1,
+    "max_pass_rate_drop": 0.0,
+    "max_pass_count_drop": 0,
+    "max_fail_count_increase": 0,
+    "require_full_case_coverage": false
+  },
+  "short_circuit": false,
+  "fit_jsons": [
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json"
+  ],
+  "baseline_cases": [
+    {
+      "case_index": 0,
+      "label": "bms1000_512",
+      "source_pack_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512",
+      "baseline_replay_report_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_00_bms1000_512/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json",
+      "baseline_summary": {
+        "case_count": 1,
+        "candidate_count": 512,
+        "pass_count": 512,
+        "fail_count": 0,
+        "pass_rate": 1.0
+      }
+    }
+  ],
+  "batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_drift_probe_v1/fit_aware_measured_replay_batch_summary.json",
+  "policy_gate_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_drift_probe_v1/fit_aware_policy_gate_summary.json",
+  "selection_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_drift_probe_v1/measured_replay_fit_lock_selection.json",
+  "policy_gate": {
+    "gate_failed": true,
+    "recommendation": "reject_fit_lock_due_to_degradation"
+  },
+  "selection": {
+    "selection_mode": "fit",
+    "recommendation": "exploratory_fit_candidate_selected_by_drift",
+    "selected_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+    "selected_fit_summary": {
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+      "case_count": 1,
+      "coverage_count": 1,
+      "eligible": true,
+      "rejected_reasons": [],
+      "aggregate_score": 140.54446222697283,
+      "total_pass_rate_drop": 1.0,
+      "total_pass_count_drop_ratio": 1.0,
+      "total_fail_count_increase_ratio": 1.0,
+      "metric_drift_mean": 0.5444622269728219,
+      "cases": [
+        {
+          "label": "bms1000_512",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          },
+          "penalties": {
+            "pass_rate_drop": 1.0,
+            "pass_count_drop_ratio": 1.0,
+            "fail_count_increase_ratio": 1.0,
+            "metric_drift": 0.5444622269728219,
+            "metric_penalties": {
+              "ra_shape_nmse": 0.32940194669873146,
+              "rd_shape_nmse": 0.7595225072469123
+            }
+          }
+        }
+      ]
+    }
+  }
+}

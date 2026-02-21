@@ -26,6 +26,12 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("--baseline-mode", choices=["rerun", "provided"], default="rerun")
     p.add_argument(
+        "--objective-mode",
+        choices=["auto", "improvement", "drift"],
+        default="auto",
+        help="Selection objective for fit-lock search. auto keeps legacy improvement objective.",
+    )
+    p.add_argument(
         "--disable-short-circuit-on-impossible",
         action="store_true",
         help="Disable short-circuit and force full fit-aware batch execution.",
@@ -36,6 +42,17 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-fail-count-increase", type=int, default=0)
     p.add_argument("--min-improved-cases", type=int, default=1)
     p.add_argument("--require-full-case-coverage", action="store_true")
+
+    p.add_argument("--drift-metric", action="append", default=[])
+    p.add_argument("--drift-quantile", type=float, default=0.9)
+    p.add_argument("--drift-weight-pass-rate-drop", type=float, default=100.0)
+    p.add_argument("--drift-weight-pass-count-drop-ratio", type=float, default=20.0)
+    p.add_argument("--drift-weight-fail-count-increase-ratio", type=float, default=20.0)
+    p.add_argument("--drift-weight-metric-drift", type=float, default=1.0)
+    p.add_argument("--drift-max-pass-rate-drop", type=float, default=1.0)
+    p.add_argument("--drift-max-pass-count-drop-ratio", type=float, default=1.0)
+    p.add_argument("--drift-max-fail-count-increase-ratio", type=float, default=1.0)
+    p.add_argument("--drift-max-metric-drift", type=float, default=1e9)
 
     p.add_argument("--fit-proxy-max-range-exp", type=float, default=None)
     p.add_argument("--fit-proxy-max-azimuth-power", type=float, default=None)
@@ -241,6 +258,16 @@ def main() -> None:
         raise ValueError("--max-fail-count-increase must be >= 0")
     if _as_int(args.min_improved_cases) < 0:
         raise ValueError("--min-improved-cases must be >= 0")
+    if not (0.0 < _as_float(args.drift_quantile) < 1.0):
+        raise ValueError("--drift-quantile must be in (0,1)")
+    if _as_float(args.drift_max_pass_rate_drop) < 0.0:
+        raise ValueError("--drift-max-pass-rate-drop must be >= 0")
+    if _as_float(args.drift_max_pass_count_drop_ratio) < 0.0:
+        raise ValueError("--drift-max-pass-count-drop-ratio must be >= 0")
+    if _as_float(args.drift_max_fail_count_increase_ratio) < 0.0:
+        raise ValueError("--drift-max-fail-count-increase-ratio must be >= 0")
+    if _as_float(args.drift_max_metric_drift) < 0.0:
+        raise ValueError("--drift-max-metric-drift must be >= 0")
 
     repo_root = Path(__file__).resolve().parents[1]
     out_root = Path(args.output_root).expanduser().resolve()
@@ -300,8 +327,12 @@ def main() -> None:
             }
         )
 
+    objective_effective = (
+        "improvement" if str(args.objective_mode) == "auto" else str(args.objective_mode)
+    )
     short_circuit = (
         (not bool(args.disable_short_circuit_on_impossible))
+        and (objective_effective == "improvement")
         and int(args.min_improved_cases) > int(cases_with_headroom)
     )
 
@@ -315,6 +346,8 @@ def main() -> None:
             "input_batch_summary_json": None,
             "batch_metadata": {
                 "baseline_mode": str(args.baseline_mode),
+                "objective_mode": str(args.objective_mode),
+                "objective_effective": objective_effective,
                 "case_count": int(len(case_specs)),
                 "fit_json_count": int(len(fit_jsons)),
                 "short_circuit": True,
@@ -348,6 +381,8 @@ def main() -> None:
         out = {
             "version": 1,
             "baseline_mode": str(args.baseline_mode),
+            "objective_mode": str(args.objective_mode),
+            "objective_effective": objective_effective,
             "case_count": int(len(case_specs)),
             "fit_json_count": int(len(fit_jsons)),
             "cases_with_improvement_headroom": int(cases_with_headroom),
@@ -425,24 +460,56 @@ def main() -> None:
         if p_gate.returncode != 0:
             raise RuntimeError(f"policy gate failed:\nSTDOUT:\n{p_gate.stdout}\nSTDERR:\n{p_gate.stderr}")
 
-        cmd_sel = [
-            "python3",
-            "scripts/select_measured_replay_fit_lock_by_policy.py",
-            "--batch-summary-json",
-            str(batch_summary_json),
-            "--output-json",
-            str(selection_json),
-            "--max-pass-rate-drop",
-            str(float(args.max_pass_rate_drop)),
-            "--max-pass-count-drop",
-            str(int(args.max_pass_count_drop)),
-            "--max-fail-count-increase",
-            str(int(args.max_fail_count_increase)),
-            "--min-improved-cases",
-            str(int(args.min_improved_cases)),
-        ]
-        if args.require_full_case_coverage:
-            cmd_sel.append("--require-full-case-coverage")
+        if objective_effective == "drift":
+            cmd_sel = [
+                "python3",
+                "scripts/select_measured_replay_fit_lock_by_drift_objective.py",
+                "--batch-summary-json",
+                str(batch_summary_json),
+                "--output-json",
+                str(selection_json),
+                "--drift-quantile",
+                str(float(args.drift_quantile)),
+                "--weight-pass-rate-drop",
+                str(float(args.drift_weight_pass_rate_drop)),
+                "--weight-pass-count-drop-ratio",
+                str(float(args.drift_weight_pass_count_drop_ratio)),
+                "--weight-fail-count-increase-ratio",
+                str(float(args.drift_weight_fail_count_increase_ratio)),
+                "--weight-metric-drift",
+                str(float(args.drift_weight_metric_drift)),
+                "--max-pass-rate-drop",
+                str(float(args.drift_max_pass_rate_drop)),
+                "--max-pass-count-drop-ratio",
+                str(float(args.drift_max_pass_count_drop_ratio)),
+                "--max-fail-count-increase-ratio",
+                str(float(args.drift_max_fail_count_increase_ratio)),
+                "--max-metric-drift",
+                str(float(args.drift_max_metric_drift)),
+            ]
+            for m in args.drift_metric:
+                cmd_sel.extend(["--metric", str(m)])
+            if args.require_full_case_coverage:
+                cmd_sel.append("--require-full-case-coverage")
+        else:
+            cmd_sel = [
+                "python3",
+                "scripts/select_measured_replay_fit_lock_by_policy.py",
+                "--batch-summary-json",
+                str(batch_summary_json),
+                "--output-json",
+                str(selection_json),
+                "--max-pass-rate-drop",
+                str(float(args.max_pass_rate_drop)),
+                "--max-pass-count-drop",
+                str(int(args.max_pass_count_drop)),
+                "--max-fail-count-increase",
+                str(int(args.max_fail_count_increase)),
+                "--min-improved-cases",
+                str(int(args.min_improved_cases)),
+            ]
+            if args.require_full_case_coverage:
+                cmd_sel.append("--require-full-case-coverage")
         p_sel = _run(cmd_sel, cwd=repo_root, env=env)
         if p_sel.returncode != 0:
             raise RuntimeError(f"policy selector failed:\nSTDOUT:\n{p_sel.stdout}\nSTDERR:\n{p_sel.stderr}")
@@ -452,6 +519,8 @@ def main() -> None:
         out = {
             "version": 1,
             "baseline_mode": str(args.baseline_mode),
+            "objective_mode": str(args.objective_mode),
+            "objective_effective": objective_effective,
             "case_count": int(len(case_specs)),
             "fit_json_count": int(len(fit_jsons)),
             "cases_with_improvement_headroom": int(cases_with_headroom),
@@ -487,6 +556,7 @@ def main() -> None:
     print(f"  case_count: {out['case_count']}")
     print(f"  fit_json_count: {out['fit_json_count']}")
     print(f"  cases_with_improvement_headroom: {out['cases_with_improvement_headroom']}")
+    print(f"  objective_effective: {out.get('objective_effective')}")
     print(f"  short_circuit: {out['short_circuit']}")
     print(f"  selection_mode: {out['selection'].get('selection_mode')}")
     print(f"  recommendation: {out['selection'].get('recommendation')}")

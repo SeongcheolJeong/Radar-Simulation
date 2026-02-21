@@ -58,6 +58,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.24: Fit-aware replay adoption policy gate (non-degradation + min-improvement) + Xiangyu decision
 - [x] M10.25: Fit-lock policy selection with baseline fallback (candidate search on batch summary)
 - [x] M10.26: Fit-lock candidate search orchestrator with headroom short-circuit (efficiency gate)
+- [x] M10.27: Saturated-baseline drift objective and exploratory fit ranking path
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -70,7 +71,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.27: define alternative optimization target when baseline pass is saturated (`pass_rate=1.0`) and implement drift-based fit objective.
+Start M10.28: add constrained refit experiment loop to search for non-degrading candidates under drift objective.
 
 ## M10.19 Decision Gate
 
@@ -132,3 +133,10 @@ M10.26 outcome (2026-02-21):
 - fit-lock search orchestrator added (`baseline -> feasibility -> batch/policy/selection`)
 - Xiangyu rerun-baseline search with 6 fit candidates detected `headroom=0`
 - search short-circuited before fit-aware batch rerun and emitted fallback `baseline_no_fit`
+
+M10.27 outcome (2026-02-21):
+
+- drift-objective fit selector implemented for saturated baseline use-cases
+- Xiangyu 3-case rerun-baseline drift ranking selected `reflection` as least-distorting candidate
+- recommendation explicitly marked exploratory because pass/fail degradation still exists
+- search orchestrator supports `--objective-mode drift` for non-short-circuited exploratory analysis

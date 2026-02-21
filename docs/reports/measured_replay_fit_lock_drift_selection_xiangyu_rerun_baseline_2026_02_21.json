@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "input_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json",
+  "batch_metadata": {
+    "baseline_mode": "rerun",
+    "case_count": 3,
+    "fit_json_count": 2
+  },
+  "objective": {
+    "type": "drift",
+    "metrics": [
+      "ra_shape_nmse",
+      "rd_shape_nmse"
+    ],
+    "drift_quantile": 0.9,
+    "weights": {
+      "pass_rate_drop": 100.0,
+      "pass_count_drop_ratio": 20.0,
+      "fail_count_increase_ratio": 20.0,
+      "metric_drift": 1.0
+    }
+  },
+  "constraints": {
+    "max_pass_rate_drop": 1.0,
+    "max_pass_count_drop_ratio": 1.0,
+    "max_fail_count_increase_ratio": 1.0,
+    "max_metric_drift": 1000000000.0,
+    "require_full_case_coverage": true,
+    "fallback_mode": "baseline_no_fit"
+  },
+  "selection": {
+    "selection_mode": "fit",
+    "recommendation": "exploratory_fit_candidate_selected_by_drift",
+    "selected_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+    "selected_fit_summary": {
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+      "case_count": 3,
+      "coverage_count": 3,
+      "eligible": true,
+      "rejected_reasons": [],
+      "aggregate_score": 139.39033052812928,
+      "total_pass_rate_drop": 2.9698996655518393,
+      "total_pass_count_drop_ratio": 2.9698996655518393,
+      "total_fail_count_increase_ratio": 2.9698996655518393,
+      "metric_drift_mean": 0.7950128023767986,
+      "cases": [
+        {
+          "label": "bms1000_512",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          },
+          "penalties": {
+            "pass_rate_drop": 1.0,
+            "pass_count_drop_ratio": 1.0,
+            "fail_count_increase_ratio": 1.0,
+            "metric_drift": 0.5444622269728219,
+            "metric_penalties": {
+              "ra_shape_nmse": 0.32940194669873146,
+              "rd_shape_nmse": 0.7595225072469123
+            }
+          }
+        },
+        {
+          "label": "bms1000_full897",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -870.0,
+            "fail_count_delta": 870.0,
+            "pass_rate_delta": -0.9698996655518395
+          },
+          "penalties": {
+            "pass_rate_drop": 0.9698996655518395,
+            "pass_count_drop_ratio": 0.9698996655518395,
+            "fail_count_increase_ratio": 0.9698996655518395,
+            "metric_drift": 0.5154037143006105,
+            "metric_penalties": {
+              "ra_shape_nmse": 0.29018056540209636,
+              "rd_shape_nmse": 0.7406268631991246
+            }
+          }
+        },
+        {
+          "label": "cms1000_128",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -128.0,
+            "fail_count_delta": 128.0,
+            "pass_rate_delta": -1.0
+          },
+          "penalties": {
+            "pass_rate_drop": 1.0,
+            "pass_count_drop_ratio": 1.0,
+            "fail_count_increase_ratio": 1.0,
+            "metric_drift": 1.3251724658569637,
+            "metric_penalties": {
+              "ra_shape_nmse": 0.2706676141439419,
+              "rd_shape_nmse": 2.3796773175699855
+            }
+          }
+        }
+      ]
+    }
+  },
+  "fit_candidates": [
+    {
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+      "case_count": 3,
+      "coverage_count": 3,
+      "eligible": true,
+      "rejected_reasons": [],
+      "aggregate_score": 141.38097784281132,
+      "total_pass_rate_drop": 2.99108138238573,
+      "total_pass_count_drop_ratio": 2.99108138238573,
+      "total_fail_count_increase_ratio": 2.99108138238573,
+      "metric_drift_mean": 1.7971799981439096,
+      "cases": [
+        {
+          "label": "bms1000_512",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          },
+          "penalties": {
+            "pass_rate_drop": 1.0,
+            "pass_count_drop_ratio": 1.0,
+            "fail_count_increase_ratio": 1.0,
+            "metric_drift": 2.097606956162931,
+            "metric_penalties": {
+              "ra_shape_nmse": 3.8074226131409805,
+              "rd_shape_nmse": 0.38779129918488175
+            }
+          }
+        },
+        {
+          "label": "bms1000_full897",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -889.0,
+            "fail_count_delta": 889.0,
+            "pass_rate_delta": -0.9910813823857302
+          },
+          "penalties": {
+            "pass_rate_drop": 0.9910813823857302,
+            "pass_count_drop_ratio": 0.9910813823857302,
+            "fail_count_increase_ratio": 0.9910813823857302,
+            "metric_drift": 1.9411742058373918,
+            "metric_penalties": {
+              "ra_shape_nmse": 3.4451714506538886,
+              "rd_shape_nmse": 0.43717696102089487
+            }
+          }
+        },
+        {
+          "label": "cms1000_128",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -128.0,
+            "fail_count_delta": 128.0,
+            "pass_rate_delta": -1.0
+          },
+          "penalties": {
+            "pass_rate_drop": 1.0,
+            "pass_count_drop_ratio": 1.0,
+            "fail_count_increase_ratio": 1.0,
+            "metric_drift": 1.3527588324314062,
+            "metric_penalties": {
+              "ra_shape_nmse": 1.4518700862895493,
+              "rd_shape_nmse": 1.253647578573263
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+      "case_count": 3,
+      "coverage_count": 3,
+      "eligible": true,
+      "rejected_reasons": [],
+      "aggregate_score": 139.39033052812928,
+      "total_pass_rate_drop": 2.9698996655518393,
+      "total_pass_count_drop_ratio": 2.9698996655518393,
+      "total_fail_count_increase_ratio": 2.9698996655518393,
+      "metric_drift_mean": 0.7950128023767986,
+      "cases": [
+        {
+          "label": "bms1000_512",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          },
+          "penalties": {
+            "pass_rate_drop": 1.0,
+            "pass_count_drop_ratio": 1.0,
+            "fail_count_increase_ratio": 1.0,
+            "metric_drift": 0.5444622269728219,
+            "metric_penalties": {
+              "ra_shape_nmse": 0.32940194669873146,
+              "rd_shape_nmse": 0.7595225072469123
+            }
+          }
+        },
+        {
+          "label": "bms1000_full897",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -870.0,
+            "fail_count_delta": 870.0,
+            "pass_rate_delta": -0.9698996655518395
+          },
+          "penalties": {
+            "pass_rate_drop": 0.9698996655518395,
+            "pass_count_drop_ratio": 0.9698996655518395,
+            "fail_count_increase_ratio": 0.9698996655518395,
+            "metric_drift": 0.5154037143006105,
+            "metric_penalties": {
+              "ra_shape_nmse": 0.29018056540209636,
+              "rd_shape_nmse": 0.7406268631991246
+            }
+          }
+        },
+        {
+          "label": "cms1000_128",
+          "evaluated": true,
+          "eligible": true,
+          "reasons": [],
+          "delta": {
+            "pass_count_delta": -128.0,
+            "fail_count_delta": 128.0,
+            "pass_rate_delta": -1.0
+          },
+          "penalties": {
+            "pass_rate_drop": 1.0,
+            "pass_count_drop_ratio": 1.0,
+            "fail_count_increase_ratio": 1.0,
+            "metric_drift": 1.3251724658569637,
+            "metric_penalties": {
+              "ra_shape_nmse": 0.2706676141439419,
+              "rd_shape_nmse": 2.3796773175699855
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

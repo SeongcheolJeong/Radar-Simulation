@@ -839,3 +839,28 @@
   - fit candidates discovered: `6`
   - `cases_with_improvement_headroom=0` (all rerun baselines `pass_rate=1.0`)
   - short-circuit executed and final selection set to `baseline_no_fit`
+
+## Saturated-Baseline Drift Objective
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_select_measured_replay_fit_lock_by_drift_objective.py`
+- Result: pass
+- Notes:
+  - lower-drift fit selected in synthetic non-degrading case
+  - strict drift bound forces fallback `baseline_no_fit`
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/select_measured_replay_fit_lock_by_drift_objective.py --batch-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/measured_replay_fit_lock_drift_selection_xiangyu_rerun_baseline_2026_02_21.json --require-full-case-coverage`
+- Result: pass
+- Notes:
+  - selected fit: `path_power_fit_reflection_selected.json`
+  - recommendation: `exploratory_fit_candidate_selected_by_drift`
+  - reflection score (`139.3903`) < scattering score (`141.3810`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_fit_lock_search.py --baseline-mode provided --objective-mode drift --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_00_bms1000_512/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json --fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_drift_probe_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/measured_replay_fit_lock_search_drift_probe_bms512_2026_02_21.json`
+- Result: pass
+- Notes:
+  - objective effective mode: `drift`
+  - no short-circuit despite zero improvement headroom
+  - policy gate fail retained; drift selector still emitted exploratory candidate ranking

@@ -785,6 +785,38 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measu
   --output-summary-json /path/to/fit_lock_search_summary.json
 ```
 
+Run saturated-baseline drift selector validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_select_measured_replay_fit_lock_by_drift_objective.py
+```
+
+Select fit lock by drift objective from batch summary:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/select_measured_replay_fit_lock_by_drift_objective.py \
+  --batch-summary-json /path/to/fit_aware_batch_summary.json \
+  --output-json /path/to/measured_replay_fit_lock_drift_selection.json \
+  --metric ra_shape_nmse \
+  --metric rd_shape_nmse \
+  --drift-quantile 0.9 \
+  --require-full-case-coverage
+```
+
+Run fit-lock search with drift objective (saturated baseline analysis mode):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_fit_lock_search.py \
+  --baseline-mode provided \
+  --objective-mode drift \
+  --case caseA=/path/to/source_pack_root::/path/to/baseline_replay_report.json \
+  --fit-json /path/to/path_power_fit_scattering_selected.json \
+  --fit-json /path/to/path_power_fit_reflection_selected.json \
+  --allow-unlocked \
+  --output-root /path/to/fit_lock_search_drift_run \
+  --output-summary-json /path/to/fit_lock_search_drift_summary.json
+```
+
 Fetch reference repositories:
 
 ```bash
