@@ -31,4 +31,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Integrate P-code replacement bundle into the frame-ingest CLI as an optional post-processing output path.
+Connect optional `.ffd` antenna pattern gain into ingest pipeline after P-code replacement baseline.

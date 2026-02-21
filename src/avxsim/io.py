@@ -43,3 +43,20 @@ def save_adc_npz(
     }
     np.savez_compressed(out_npz, adc=adc, metadata_json=json.dumps(metadata))
 
+
+def save_hybrid_estimation_npz(
+    estimation: Dict[str, Any],
+    out_npz: str,
+    metadata: Dict[str, Any],
+) -> None:
+    payload: Dict[str, Any] = {"metadata_json": json.dumps(metadata)}
+    for key, value in estimation.items():
+        if isinstance(value, np.ndarray):
+            payload[key] = value
+        elif isinstance(value, (int, float)):
+            payload[key] = np.asarray(value)
+        else:
+            # Non-array outputs are encoded into metadata.
+            metadata[key] = value
+    payload["metadata_json"] = json.dumps(metadata)
+    np.savez_compressed(out_npz, **payload)

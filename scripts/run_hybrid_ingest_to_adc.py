@@ -21,6 +21,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--distance-min-m", type=float, default=0.0)
     p.add_argument("--distance-max-m", type=float, default=100.0)
     p.add_argument("--top-k-per-chirp", type=int, default=None)
+    p.add_argument(
+        "--run-hybrid-estimation",
+        action="store_true",
+        help="Run Hybrid-compatible post-processing bundle (doppler/angle summaries)",
+    )
+    p.add_argument("--estimation-nfft", type=int, default=144)
+    p.add_argument("--estimation-range-bin-length", type=int, default=10)
+    p.add_argument("--estimation-doppler-window", default="hann")
     p.add_argument("--output-dir", required=True, help="Output directory for path_list.json and adc_cube.npz")
     return p.parse_args()
 
@@ -45,6 +53,10 @@ def main() -> None:
         amplitude_threshold=args.amplitude_threshold,
         distance_limits_m=(args.distance_min_m, args.distance_max_m),
         top_k_per_chirp=args.top_k_per_chirp,
+        run_hybrid_estimation=args.run_hybrid_estimation,
+        estimation_nfft=args.estimation_nfft,
+        estimation_range_bin_length=args.estimation_range_bin_length,
+        estimation_doppler_window=args.estimation_doppler_window,
         output_dir=args.output_dir,
     )
 
@@ -56,8 +68,9 @@ def main() -> None:
     print(f"  adc shape: {result['adc'].shape}")
     print(f"  path_list: {result.get('path_list_json')}")
     print(f"  adc_cube: {result.get('adc_cube_npz')}")
+    if args.run_hybrid_estimation:
+        print(f"  hybrid_estimation: {result.get('hybrid_estimation_npz')}")
 
 
 if __name__ == "__main__":
     main()
-

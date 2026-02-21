@@ -92,7 +92,16 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybri
   --camera-fov-deg 90 \
   --mode reflection \
   --file-ext .exr \
+  --run-hybrid-estimation \
+  --estimation-nfft 144 \
+  --estimation-range-bin-length 10 \
   --output-dir /path/to/out
+```
+
+Validate CLI integration with bundle:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_bundle.py
 ```
 
 Fetch reference repositories:

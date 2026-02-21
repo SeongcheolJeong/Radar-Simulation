@@ -102,3 +102,12 @@
 - Notes:
   - Integrated bundle path (`channel -> doppler -> concatenated -> angle`) pass
   - Output shape and finite-value checks pass for all bundle outputs
+
+## Ingest CLI + Bundle
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_bundle.py`
+- Result: pass
+- Notes:
+  - CLI option `--run-hybrid-estimation` wiring pass
+  - Output artifacts include `hybrid_estimation.npz`

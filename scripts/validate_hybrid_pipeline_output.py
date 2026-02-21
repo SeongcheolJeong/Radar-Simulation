@@ -53,13 +53,19 @@ def run() -> None:
             file_ext=".npy",
             amplitude_threshold=0.01,
             top_k_per_chirp=1,
+            run_hybrid_estimation=True,
+            estimation_nfft=96,
+            estimation_range_bin_length=8,
+            estimation_doppler_window="hann",
             output_dir=str(out_dir),
         )
 
         path_json = out_dir / "path_list.json"
         adc_npz = out_dir / "adc_cube.npz"
+        est_npz = out_dir / "hybrid_estimation.npz"
         assert path_json.exists(), str(path_json)
         assert adc_npz.exists(), str(adc_npz)
+        assert est_npz.exists(), str(est_npz)
 
         loaded = np.load(adc_npz)
         adc = loaded["adc"]
@@ -67,11 +73,16 @@ def run() -> None:
         meta = json.loads(str(loaded["metadata_json"]))
         assert meta["samples_per_chirp"] == 2048
 
+        est_loaded = np.load(est_npz)
+        assert est_loaded["fx_dop"].shape == (96, 2048)
+        assert est_loaded["fx_ang"].shape == (96, 2048)
+        assert est_loaded["fx_dop_max"].shape == (96, 1)
+
         assert "paths_by_chirp" in result
         assert len(result["paths_by_chirp"]) == 2
+        assert "hybrid_estimation" in result
         print("Hybrid pipeline output validation passed.")
 
 
 if __name__ == "__main__":
     run()
-
