@@ -26,3 +26,40 @@ Before moving to `.ffd` and RT integration:
 - verify canonical ADC shape remains `sample, chirp, tx, rx`
 - verify `paths_by_chirp` remains backend-agnostic
 
+## Value-Gate Rule
+
+Before starting each new checkpoint, define:
+
+- decision to make (`adopt/reject/hold`)
+- measurable signal that can change that decision
+
+If a task cannot change a decision, skip it.
+
+## Repetition Stop Rule
+
+Stop and re-plan when the same loop repeats without new signal:
+
+- two consecutive runs produce no meaningful metric change
+- or same failure class repeats with no interface/model change
+
+At stop point, propose one of:
+
+- narrower hypothesis test
+- data/metric change
+- plan downgrade (defer low-yield branch)
+
+## Efficiency Rule
+
+Prefer one orchestrator + one summary over multiple manual commands.
+
+- batch related validations together
+- avoid creating duplicate report types with identical decision value
+- keep one “decision report” per milestone
+
+## Replan Trigger Rule
+
+Update plan immediately when one of these happens:
+
+- required measured input is unavailable
+- target metric does not improve after two hypothesis changes
+- milestone output does not map to final goal artifacts (`path list`, `raw ADC`, replay lock quality)

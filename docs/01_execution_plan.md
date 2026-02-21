@@ -63,3 +63,15 @@ Each milestone is accepted only if:
 ## Immediate Next Step
 
 Start M10.19: run measured replay batch using mixed lock set and compare with prior strict-tuned outputs.
+
+## M10.19 Decision Gate
+
+Accept M10.19 only if at least one holds:
+
+1. mixed lock improves replay lock quality vs prior strict-tuned baseline
+2. mixed lock keeps quality within tolerance while reducing cross-family drift score
+
+Stop and re-plan M10.19 when:
+
+- two attempts show no improvement/no new failure signal
+- measured replay inputs are insufficient to evaluate lock quality
