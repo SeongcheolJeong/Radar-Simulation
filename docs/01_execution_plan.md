@@ -49,4 +49,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Expand cross-sequence measured replay runs with profile tuning policy governance (strict baseline vs tuned lock) and document default production lock policy per scenario family.
+Start high-fidelity physics phase: tune path-power/scattering parameters against measured scenarios and quantify parity drift across scenario families.

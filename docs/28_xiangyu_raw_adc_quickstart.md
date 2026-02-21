@@ -101,9 +101,8 @@ If baseline replay is unlocked, rebuild profile thresholds from pack candidates,
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py \
   --pack-root /tmp/xiangyu_onboarding_run1/packs/pack_xiangyu_2019_04_09_bms1000_v1 \
-  --threshold-quantile 1.0 \
-  --threshold-margin 1.05 \
-  --threshold-floor none \
+  --policy-json /Users/seongcheoljeong/Documents/Codex_test/configs/profile_tuning/xiangyu_raw_adc_v1.json \
+  --emit-policy-json /tmp/xiangyu_onboarding_run1/packs/pack_xiangyu_2019_04_09_bms1000_v1/profile_tuning_policy.json \
   --backup-original
 ```
 

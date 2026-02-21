@@ -361,6 +361,8 @@
 - Notes:
   - Pack manifest candidate scan pass
   - Threshold derivation from candidate metrics pass
+  - Policy JSON input + CLI override precedence pass
+  - `profile_tuning_policy` embedding + emitted policy JSON output pass
   - Rebuilt profile parity checks pass on selected candidates
 
 ## Public Dataset Onboarding (Xiangyu BMS1000 - 512 / full)
@@ -390,3 +392,20 @@
   - Candidate count: 128
   - Baseline replay summary: `pass=11`, `fail=117`, `overall_lock_pass=false`
   - Tuned profile strict replay summary: `locked=1`, `unlocked=0`, `overall_lock_pass=true`
+
+## Xiangyu Policy-Governed Strict Replay
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py --pack-root <pack> --policy-json /Users/seongcheoljeong/Documents/Codex_test/configs/profile_tuning/xiangyu_raw_adc_v1.json --emit-policy-json <pack>/profile_tuning_policy.json --backup-original`
+- Result: pass
+- Notes:
+  - Policy-driven profile rebuild pass on BMS1000 (`512`, `897`) and CMS1000 (`128`)
+  - Emitted `profile_tuning_policy.json` persisted per pack for replay reproducibility
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_execution.py --plan-json <run>/measured_replay_plan.json --output-root <run>/measured_replay_outputs_policy_strict --output-summary-json <run>/measured_replay_summary_policy_strict.json`
+- Result: pass
+- Notes:
+  - BMS1000 (`512`) strict replay lock pass (`locked=1`, `unlocked=0`)
+  - BMS1000 (`897`) strict replay lock pass (`locked=1`, `unlocked=0`)
+  - CMS1000 (`128`) strict replay lock pass (`locked=1`, `unlocked=0`)

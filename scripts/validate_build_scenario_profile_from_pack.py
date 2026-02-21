@@ -66,19 +66,45 @@ def main() -> None:
             ],
         }
         (pack / "replay_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        policy_json = pack / "profile_tuning_policy.json"
+        emitted_policy_json = pack / "profile_tuning_policy.emitted.json"
+        policy_json.write_text(
+            json.dumps(
+                {
+                    "version": 1,
+                    "name": "demo_profile_tuning_policy_v1",
+                    "profile_rebuild": {
+                        "case_index": 0,
+                        "reference_candidate_index": 0,
+                        "candidate_stride": 2,
+                        "max_candidates": 2,
+                        "threshold_quantile": 1.0,
+                        "threshold_margin": 1.04,
+                        "threshold_floor": "none",
+                    },
+                    "lock_policy": {
+                        "min_pass_rate": 1.0,
+                        "max_case_fail_count": 0,
+                        "require_motion_defaults_enabled": False,
+                    },
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
 
         cmd = [
             "python3",
             str(script),
             "--pack-root",
             str(pack),
+            "--policy-json",
+            str(policy_json),
+            "--emit-policy-json",
+            str(emitted_policy_json),
             "--backup-original",
-            "--threshold-quantile",
-            "1.0",
             "--threshold-margin",
             "1.05",
-            "--threshold-floor",
-            "none",
         ]
         proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, check=False)
         if proc.returncode != 0:
@@ -86,16 +112,26 @@ def main() -> None:
 
         rebuilt = json.loads((pack / "scenario_profile.json").read_text(encoding="utf-8"))
         assert rebuilt["threshold_derivation"]["method"] == "from_pack_candidates"
-        assert int(rebuilt["threshold_derivation"]["train_count"]) == 3
+        assert int(rebuilt["threshold_derivation"]["train_count"]) == 2
+        assert float(rebuilt["threshold_derivation"]["threshold_margin"]) == 1.05
         assert "scenario_id" in rebuilt
         assert "parity_thresholds" in rebuilt
+        assert "profile_tuning_policy" in rebuilt
+        assert rebuilt["profile_tuning_policy"]["name"] == "demo_profile_tuning_policy_v1"
+        assert int(rebuilt["profile_tuning_policy"]["profile_rebuild"]["candidate_stride"]) == 2
+        assert int(rebuilt["profile_tuning_policy"]["profile_rebuild"]["max_candidates"]) == 2
 
         th = rebuilt["parity_thresholds"]
         ref = str(rebuilt["reference_estimation_npz"])
-        for p in [str(c1), str(c2), str(c3)]:
+        selected = [str(x) for x in rebuilt["train_estimation_npz"]]
+        assert selected == [str(c1), str(c3)]
+        for p in selected:
             rep = compare_hybrid_estimation_npz(reference_npz=ref, candidate_npz=p, thresholds=th)
             if not bool(rep["pass"]):
                 raise AssertionError(f"expected candidate to pass with rebuilt thresholds: {p}")
+        emitted = json.loads(emitted_policy_json.read_text(encoding="utf-8"))
+        assert emitted["name"] == "demo_profile_tuning_policy_v1"
+        assert float(emitted["profile_rebuild"]["threshold_margin"]) == 1.05
 
         print("validate_build_scenario_profile_from_pack: pass")
 

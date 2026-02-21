@@ -213,6 +213,16 @@ Run profile-from-pack rebuild validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_build_scenario_profile_from_pack.py
 ```
 
+Rebuild scenario profile from a measured pack using versioned policy:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py \
+  --pack-root /path/to/pack_root \
+  --policy-json /Users/seongcheoljeong/Documents/Codex_test/configs/profile_tuning/xiangyu_raw_adc_v1.json \
+  --emit-policy-json /path/to/pack_root/profile_tuning_policy.json \
+  --backup-original
+```
+
 Run parity metrics contract validation:
 
 ```bash

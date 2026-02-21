@@ -16,9 +16,11 @@ to a tuned profile that can be re-checked in strict lock mode.
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py \
   --pack-root /path/to/pack_root \
+  --policy-json /Users/seongcheoljeong/Documents/Codex_test/configs/profile_tuning/xiangyu_raw_adc_v1.json \
   --threshold-quantile 1.0 \
   --threshold-margin 1.05 \
   --threshold-floor none \
+  --emit-policy-json /path/to/pack_root/profile_tuning_policy.json \
   --backup-original
 ```
 
@@ -39,11 +41,13 @@ Updated profile contains:
 - `reference_estimation_npz`
 - `train_estimation_npz`
 - `threshold_derivation` metadata
+- `profile_tuning_policy` metadata
 
 ## Notes
 
 - Use `threshold-floor=defaults` to clamp by baseline contract thresholds.
 - Use `threshold-floor=none` to rely only on measured candidate distribution.
+- If `--policy-json` is set, policy values are used and explicit CLI flags override them.
 - After rebuild, run strict replay execution (without `--allow-unlocked`) to verify lock pass.
 
 ## Validation

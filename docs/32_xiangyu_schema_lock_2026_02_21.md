@@ -37,10 +37,8 @@ Both sequences were checked on sampled frames and produced consistent shape/dtyp
 ## Tuning Method
 
 - script: `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py`
-- policy used:
-  - `threshold_quantile=1.0`
-  - `threshold_margin=1.05`
-  - `threshold_floor=none`
+- policy file:
+  - `/Users/seongcheoljeong/Documents/Codex_test/configs/profile_tuning/xiangyu_raw_adc_v1.json`
 
 ## Locking Interpretation
 
@@ -49,3 +47,9 @@ Both sequences were checked on sampled frames and produced consistent shape/dtyp
   - data extraction contract is stable
   - replay artifacts are reproducible
   - tuned profile can be finalized and pass strict lock checks.
+
+Policy-governed strict replay status:
+
+- BMS1000 (`512`): lock pass
+- BMS1000 (`897`): lock pass
+- CMS1000 (`128`): lock pass

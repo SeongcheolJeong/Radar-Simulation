@@ -2,7 +2,7 @@
 import argparse
 import json
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 
 from avxsim.calibration import load_global_jones_matrix_json
 from avxsim.parity import DEFAULT_PARITY_THRESHOLDS, compare_hybrid_estimation_npz
@@ -13,18 +13,45 @@ from avxsim.scenario_profile import (
 )
 
 
+DEFAULT_PROFILE_REBUILD_POLICY: Dict[str, Any] = {
+    "case_index": 0,
+    "reference_candidate_index": 0,
+    "candidate_stride": 1,
+    "max_candidates": None,
+    "threshold_quantile": 1.0,
+    "threshold_margin": 1.05,
+    "threshold_floor": "none",
+}
+
+DEFAULT_LOCK_POLICY: Dict[str, Any] = {
+    "min_pass_rate": 1.0,
+    "max_case_fail_count": 0,
+    "require_motion_defaults_enabled": False,
+}
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Rebuild scenario_profile.json from pack candidates by deriving parity thresholds"
     )
     p.add_argument("--pack-root", required=True)
-    p.add_argument("--case-index", type=int, default=0)
-    p.add_argument("--reference-candidate-index", type=int, default=0)
-    p.add_argument("--candidate-stride", type=int, default=1)
+    p.add_argument(
+        "--policy-json",
+        default=None,
+        help="Optional policy JSON. If set, unresolved flags use policy values.",
+    )
+    p.add_argument(
+        "--emit-policy-json",
+        default=None,
+        help="Optional output path to write resolved policy JSON used for this run.",
+    )
+    p.add_argument("--case-index", type=int, default=None)
+    p.add_argument("--reference-candidate-index", type=int, default=None)
+    p.add_argument("--candidate-stride", type=int, default=None)
     p.add_argument("--max-candidates", type=int, default=None)
-    p.add_argument("--threshold-quantile", type=float, default=1.0)
-    p.add_argument("--threshold-margin", type=float, default=1.05)
-    p.add_argument("--threshold-floor", choices=["defaults", "none"], default="none")
+    p.add_argument("--threshold-quantile", type=float, default=None)
+    p.add_argument("--threshold-margin", type=float, default=None)
+    p.add_argument("--threshold-floor", choices=["defaults", "none"], default=None)
     p.add_argument(
         "--output-profile-json",
         default=None,
@@ -36,6 +63,46 @@ def parse_args() -> argparse.Namespace:
         help="When overwriting default profile path, write scenario_profile.default.json once",
     )
     return p.parse_args()
+
+
+def _load_policy_json(path: Optional[str]) -> Dict[str, Any]:
+    if path is None:
+        return {
+            "version": 1,
+            "name": "profile_tuning_default_v1",
+            "profile_rebuild": dict(DEFAULT_PROFILE_REBUILD_POLICY),
+            "lock_policy": dict(DEFAULT_LOCK_POLICY),
+        }
+
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise ValueError("policy-json must be an object")
+
+    profile_part = payload.get("profile_rebuild", payload)
+    if not isinstance(profile_part, Mapping):
+        raise ValueError("policy profile_rebuild must be object")
+
+    lock_part = payload.get("lock_policy", DEFAULT_LOCK_POLICY)
+    if not isinstance(lock_part, Mapping):
+        raise ValueError("policy lock_policy must be object")
+
+    out = {
+        "version": int(payload.get("version", 1)),
+        "name": str(payload.get("name", "profile_tuning_policy")),
+        "profile_rebuild": dict(DEFAULT_PROFILE_REBUILD_POLICY),
+        "lock_policy": dict(DEFAULT_LOCK_POLICY),
+    }
+    for k in DEFAULT_PROFILE_REBUILD_POLICY:
+        if k in profile_part:
+            out["profile_rebuild"][k] = profile_part[k]
+    for k in DEFAULT_LOCK_POLICY:
+        if k in lock_part:
+            out["lock_policy"][k] = lock_part[k]
+    return out
+
+
+def _resolve_value(flag_value: Any, policy_value: Any) -> Any:
+    return policy_value if flag_value is None else flag_value
 
 
 def _load_manifest_case(pack_root: Path, case_index: int) -> dict:
@@ -82,14 +149,32 @@ def main() -> None:
     if not pack_root.exists() or not pack_root.is_dir():
         raise ValueError(f"pack-root must be existing directory: {pack_root}")
 
-    case = _load_manifest_case(pack_root, case_index=int(args.case_index))
+    policy = _load_policy_json(args.policy_json)
+    prof = policy["profile_rebuild"]
+
+    case_index = int(_resolve_value(args.case_index, prof["case_index"]))
+    ref_cand_index = int(
+        _resolve_value(args.reference_candidate_index, prof["reference_candidate_index"])
+    )
+    candidate_stride = int(_resolve_value(args.candidate_stride, prof["candidate_stride"]))
+    max_candidates = _resolve_value(args.max_candidates, prof["max_candidates"])
+    max_candidates = None if max_candidates is None else int(max_candidates)
+    threshold_quantile = float(
+        _resolve_value(args.threshold_quantile, prof["threshold_quantile"])
+    )
+    threshold_margin = float(_resolve_value(args.threshold_margin, prof["threshold_margin"]))
+    threshold_floor = str(_resolve_value(args.threshold_floor, prof["threshold_floor"]))
+    if threshold_floor not in {"defaults", "none"}:
+        raise ValueError("threshold-floor must be one of: defaults, none")
+
+    case = _load_manifest_case(pack_root, case_index=case_index)
     candidate_paths = _collect_candidate_paths(
         case=case,
-        stride=int(args.candidate_stride),
-        max_candidates=args.max_candidates,
+        stride=int(candidate_stride),
+        max_candidates=max_candidates,
     )
 
-    ref_idx = int(args.reference_candidate_index)
+    ref_idx = int(ref_cand_index)
     if ref_idx < 0 or ref_idx >= len(candidate_paths):
         raise ValueError("--reference-candidate-index out of selected candidate range")
     ref_npz = candidate_paths[ref_idx]
@@ -103,11 +188,11 @@ def main() -> None:
         )
         metric_reports.append(rep["metrics"])
 
-    floor = DEFAULT_PARITY_THRESHOLDS if args.threshold_floor == "defaults" else None
+    floor = DEFAULT_PARITY_THRESHOLDS if threshold_floor == "defaults" else None
     thresholds = derive_parity_thresholds(
         metric_reports=metric_reports,
-        quantile=float(args.threshold_quantile),
-        margin=float(args.threshold_margin),
+        quantile=float(threshold_quantile),
+        margin=float(threshold_margin),
         floor_thresholds=floor,
     )
 
@@ -139,13 +224,13 @@ def main() -> None:
         threshold_derivation={
             "method": "from_pack_candidates",
             "source_pack_root": str(pack_root),
-            "case_index": int(args.case_index),
+            "case_index": int(case_index),
             "reference_candidate_index": int(ref_idx),
-            "candidate_stride": int(args.candidate_stride),
-            "max_candidates": None if args.max_candidates is None else int(args.max_candidates),
-            "threshold_quantile": float(args.threshold_quantile),
-            "threshold_margin": float(args.threshold_margin),
-            "threshold_floor": str(args.threshold_floor),
+            "candidate_stride": int(candidate_stride),
+            "max_candidates": None if max_candidates is None else int(max_candidates),
+            "threshold_quantile": float(threshold_quantile),
+            "threshold_margin": float(threshold_margin),
+            "threshold_floor": str(threshold_floor),
             "train_count": int(len(candidate_paths)),
         },
         motion_compensation_defaults=base_profile.get(
@@ -158,8 +243,36 @@ def main() -> None:
             },
         ),
     )
+    payload["profile_tuning_policy"] = {
+        "version": int(policy["version"]),
+        "name": str(policy["name"]),
+        "profile_rebuild": {
+            "case_index": int(case_index),
+            "reference_candidate_index": int(ref_idx),
+            "candidate_stride": int(candidate_stride),
+            "max_candidates": None if max_candidates is None else int(max_candidates),
+            "threshold_quantile": float(threshold_quantile),
+            "threshold_margin": float(threshold_margin),
+            "threshold_floor": str(threshold_floor),
+        },
+        "lock_policy": {
+            "min_pass_rate": float(policy["lock_policy"]["min_pass_rate"]),
+            "max_case_fail_count": int(policy["lock_policy"]["max_case_fail_count"]),
+            "require_motion_defaults_enabled": bool(
+                policy["lock_policy"]["require_motion_defaults_enabled"]
+            ),
+        },
+    }
     output_profile_json.parent.mkdir(parents=True, exist_ok=True)
     save_scenario_profile_json(str(output_profile_json), payload)
+
+    if args.emit_policy_json is not None:
+        emit_path = Path(args.emit_policy_json)
+        emit_path.parent.mkdir(parents=True, exist_ok=True)
+        emit_path.write_text(
+            json.dumps(payload["profile_tuning_policy"], indent=2),
+            encoding="utf-8",
+        )
 
     print("Scenario profile rebuild from pack completed.")
     print(f"  pack_root: {pack_root}")
@@ -167,9 +280,12 @@ def main() -> None:
     print(f"  selected_candidates: {len(candidate_paths)}")
     print(f"  reference_estimation_npz: {ref_npz}")
     print(f"  threshold_keys: {len(thresholds)}")
-    print(f"  threshold_quantile: {args.threshold_quantile}")
-    print(f"  threshold_margin: {args.threshold_margin}")
-    print(f"  threshold_floor: {args.threshold_floor}")
+    print(f"  threshold_quantile: {threshold_quantile}")
+    print(f"  threshold_margin: {threshold_margin}")
+    print(f"  threshold_floor: {threshold_floor}")
+    print(f"  policy_name: {payload['profile_tuning_policy']['name']}")
+    if args.emit_policy_json is not None:
+        print(f"  emitted_policy_json: {args.emit_policy_json}")
 
 
 if __name__ == "__main__":

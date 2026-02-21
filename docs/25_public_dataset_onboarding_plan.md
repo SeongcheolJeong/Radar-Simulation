@@ -84,3 +84,5 @@ Onboard one public radar dataset with high conversion cost into this repository'
 Profile tuning CLI used:
 
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py`
+- policy baseline:
+  - `/Users/seongcheoljeong/Documents/Codex_test/configs/profile_tuning/xiangyu_raw_adc_v1.json`

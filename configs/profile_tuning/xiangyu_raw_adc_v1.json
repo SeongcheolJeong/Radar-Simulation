@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "name": "xiangyu_raw_adc_profile_tuning_v1",
+  "profile_rebuild": {
+    "case_index": 0,
+    "reference_candidate_index": 0,
+    "candidate_stride": 1,
+    "max_candidates": null,
+    "threshold_quantile": 1.0,
+    "threshold_margin": 1.05,
+    "threshold_floor": "none"
+  },
+  "lock_policy": {
+    "min_pass_rate": 1.0,
+    "max_case_fail_count": 0,
+    "require_motion_defaults_enabled": false
+  }
+}
