@@ -25,6 +25,7 @@ Optional:
 - `threshold_derivation`
 - `motion_tuning_summary`
 - `motion_tuning_summary.ranked[]` with candidate scores/metrics
+- `profile_lock` (added by replay lock finalization)
 
 ## Build CLI
 
@@ -78,4 +79,15 @@ Exit codes:
 
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scenario_profile_workflow.py
+```
+
+## Lock Finalization
+
+Use replay results to finalize lock status and write `*.locked.json` profiles:
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_scenario_profile_lock.py \
+  --replay-report-json /path/to/replay_report.json \
+  --output-lock-json /path/to/profile_lock_report.json \
+  --output-locked-profile-dir /path/to/locked_profiles
 ```

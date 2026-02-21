@@ -258,4 +258,15 @@
 - Notes:
   - Replay manifest batch evaluation pass
   - Exit code policy pass (`failures -> 2`, `--allow-failures -> 0`)
+
+## Profile Lock Finalization
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_profile_lock_finalization.py`
+- Result: pass
+- Notes:
+  - Replay report to lock-report policy evaluation pass
+  - Strict mode exit code pass (`unlocked exists -> 2`)
+  - `--allow-unlocked` exit code pass (`0`)
+  - `*.locked.json` output includes expected `profile_lock` metadata
   - Report includes profile-derived motion defaults per case

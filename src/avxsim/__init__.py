@@ -55,6 +55,13 @@ from .parity import (
     load_hybrid_estimation_npz,
 )
 from .pipeline import run_hybrid_frames_pipeline
+from .profile_lock import (
+    DEFAULT_PROFILE_LOCK_POLICY,
+    build_profile_lock_report,
+    load_replay_report_json,
+    save_profile_lock_report_json,
+    write_locked_profiles,
+)
 from .replay_batch import (
     load_replay_manifest_json,
     run_replay_cases,
@@ -92,6 +99,7 @@ __all__ = [
     "load_hybrid_radar_geometry",
     "Path",
     "DEFAULT_MOTION_SCORE_WEIGHTS",
+    "DEFAULT_PROFILE_LOCK_POLICY",
     "DEFAULT_PARITY_THRESHOLDS",
     "RadarConfig",
     "compare_hybrid_estimation_npz",
@@ -99,8 +107,10 @@ __all__ = [
     "convert_measurement_csv_to_npz",
     "DEFAULT_MEASUREMENT_COLUMN_MAP",
     "derive_parity_thresholds",
+    "build_profile_lock_report",
     "load_hybrid_estimation_npz",
     "load_replay_manifest_json",
+    "load_replay_report_json",
     "load_scenario_profile_json",
     "run_hybrid_frames_pipeline",
     "run_replay_cases",
@@ -110,6 +120,7 @@ __all__ = [
     "save_calibration_samples_npz",
     "save_scenario_profile_json",
     "save_replay_report_json",
+    "save_profile_lock_report_json",
     "save_paths_by_chirp_json",
     "build_scenario_profile_payload",
     "fit_global_jones_matrix",
@@ -130,4 +141,5 @@ __all__ = [
     "synth_fmcw_tdm",
     "to_radarsimpy_view",
     "validate_radarsimpy_view_shape",
+    "write_locked_profiles",
 ]

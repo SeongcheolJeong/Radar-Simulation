@@ -47,9 +47,13 @@ Exit codes:
   - per-candidate metrics/failures
   - profile-derived `motion_compensation_defaults` when profile is used
 
+This report is consumed by profile-lock finalization:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_scenario_profile_lock.py`
+- Contract: `/Users/seongcheoljeong/Documents/Codex_test/docs/19_profile_lock_finalization_contract.md`
+
 ## Validation
 
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_moving_target_replay_batch.py
 ```
-

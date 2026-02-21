@@ -159,6 +159,12 @@ Run moving-target replay batch validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_moving_target_replay_batch.py
 ```
 
+Run profile-lock finalization validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_profile_lock_finalization.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -284,6 +290,16 @@ Run moving-target replay batch:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_moving_target_replay_batch.py \
   --manifest-json /path/to/replay_manifest.json \
   --output-json /path/to/replay_report.json
+```
+
+Finalize scenario profile lock from replay report:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_scenario_profile_lock.py \
+  --replay-report-json /path/to/replay_report.json \
+  --output-lock-json /path/to/profile_lock_report.json \
+  --output-locked-profile-dir /path/to/locked_profiles \
+  --require-motion-defaults-enabled
 ```
 
 Validate CLI integration with bundle:

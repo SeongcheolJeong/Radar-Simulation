@@ -28,6 +28,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M8: Motion compensation baseline for TDM virtual array
 - [x] M8.1: Motion compensation tuning workflow and profile-default lock
 - [x] M8.2: Moving-target replay batch automation and reporting
+- [x] M8.25: Replay-based scenario profile lock finalization tooling
 - [ ] M8.3: Measured moving-target replay execution and profile lock finalization
 
 ## Iteration Rule (One-by-One Verification)
@@ -41,4 +42,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Execute measured replay datasets through batch runner and finalize per-scenario profile artifacts.
+Execute measured replay datasets through batch runner, run lock finalization CLI, and version locked per-scenario profiles.
