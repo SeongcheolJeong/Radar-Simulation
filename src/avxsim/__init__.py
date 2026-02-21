@@ -43,6 +43,11 @@ from .measured_replay import (
     run_measured_replay_plan_json,
     save_measured_replay_summary_json,
 )
+from .measured_pack_discovery import (
+    build_measured_replay_plan_payload,
+    discover_measured_replay_packs,
+    save_measured_replay_plan_json,
+)
 from .motion_compensation import (
     apply_tdm_motion_compensation_to_h,
     estimate_doppler_peak_hz,
@@ -115,6 +120,7 @@ __all__ = [
     "convert_measurement_csv_to_npz",
     "DEFAULT_MEASUREMENT_COLUMN_MAP",
     "derive_parity_thresholds",
+    "build_measured_replay_plan_payload",
     "build_profile_lock_report",
     "load_hybrid_estimation_npz",
     "load_replay_manifest_json",
@@ -129,12 +135,14 @@ __all__ = [
     "save_global_jones_matrix_json",
     "save_calibration_samples_npz",
     "save_scenario_profile_json",
+    "save_measured_replay_plan_json",
     "save_replay_report_json",
     "save_measured_replay_summary_json",
     "save_profile_lock_report_json",
     "save_paths_by_chirp_json",
     "build_scenario_profile_payload",
     "fit_global_jones_matrix",
+    "discover_measured_replay_packs",
     "evaluate_motion_tuning_candidates",
     "estimate_doppler_peak_hz",
     "load_calibration_samples_npz",

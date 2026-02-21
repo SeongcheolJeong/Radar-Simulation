@@ -280,4 +280,15 @@
   - Per-pack artifact generation pass (`replay_report.json`, `profile_lock_report.json`, `locked_profiles/*.locked.json`)
   - Strict mode exit code pass (`unlocked pack exists -> 2`)
   - `--allow-unlocked` exit code pass (`0`)
+
+## Measured Replay Plan Builder
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_plan_builder.py`
+- Result: pass
+- Notes:
+  - Pack directory discovery pass (`replay_manifest.json` scan)
+  - Optional per-pack `lock_policy.json` merge pass
+  - Empty-root failure pass (without `--allow-empty`)
+  - Empty-root success pass (with `--allow-empty`)
   - Report includes profile-derived motion defaults per case

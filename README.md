@@ -171,6 +171,12 @@ Run measured replay orchestration validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_execution.py
 ```
 
+Run measured replay plan builder validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_plan_builder.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -315,6 +321,14 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measu
   --plan-json /path/to/measured_replay_plan.json \
   --output-root /path/to/measured_replay_outputs \
   --output-summary-json /path/to/measured_replay_summary.json
+```
+
+Auto-build `measured_replay_plan.json` from pack folders:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_measured_replay_plan.py \
+  --packs-root /path/to/packs_root \
+  --output-plan-json /path/to/measured_replay_plan.json
 ```
 
 Validate CLI integration with bundle:

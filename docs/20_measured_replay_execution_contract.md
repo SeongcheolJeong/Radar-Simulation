@@ -12,6 +12,11 @@ Execute multiple measured scenario packs in one command:
 
 Root can be object with `packs` or list directly.
 
+You can auto-build this plan from pack folders via:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_measured_replay_plan.py`
+- Contract: `/Users/seongcheoljeong/Documents/Codex_test/docs/21_measured_replay_plan_builder_contract.md`
+
 Each pack:
 
 - `pack_id`
