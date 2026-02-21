@@ -34,6 +34,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M8.28: Per-pack replay manifest auto-builder
 - [x] M8.29: Mock measured packs generator for no-data bootstrap
 - [ ] M8.3: Measured moving-target replay execution and profile lock finalization
+- [x] M9.0: Public dataset conversion scaffolding (`MAT->ADC NPZ->pack`)
+- [ ] M9.1: First public dataset schema lock and real subset conversion run
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -46,4 +48,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-If real packs are unavailable, validate with mock packs first; then run real pack folders through plan/execution and version resulting `*.locked.json` profiles.
+Pin one public dataset schema (variable key + ADC order), convert a small real subset into pack format, then run replay lock and version `*.locked.json` outputs.

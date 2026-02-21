@@ -22,6 +22,11 @@ You can auto-build each pack's replay manifest via:
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_replay_manifest_from_pack.py`
 - Contract: `/Users/seongcheoljeong/Documents/Codex_test/docs/23_replay_manifest_builder_contract.md`
 
+If source data is ADC NPZ or MAT, build pack first:
+
+- ADC NPZ -> pack: `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_pack_from_adc_npz_dir.py`
+- MAT -> ADC NPZ: `/Users/seongcheoljeong/Documents/Codex_test/scripts/extract_mat_adc_to_npz.py`
+
 Each pack:
 
 - `pack_id`

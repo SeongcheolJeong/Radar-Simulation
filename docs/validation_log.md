@@ -312,4 +312,23 @@
   - Mock pack generation pass
   - Plan build + execution pass (all-pack lock success case)
   - Strict mode exit code pass (`failing-pack -> 2`)
-  - Report includes profile-derived motion defaults per case
+
+## ADC Pack Builder
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_adc_pack_builder.py`
+- Result: pass
+- Notes:
+  - ADC NPZ to measured-pack conversion pass
+  - Candidate estimation NPZ (`fx_dop_win`, `fx_ang`) generation pass
+  - Pack artifact generation pass (`scenario_profile.json`, `lock_policy.json`, `replay_manifest.json`)
+
+## MAT ADC Extractor Core
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mat_adc_extractor_core.py`
+- Result: pass
+- Notes:
+  - 4D numeric variable auto-selection pass
+  - explicit variable selection pass
+  - invalid variable/error-path checks pass

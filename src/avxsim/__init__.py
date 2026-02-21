@@ -5,6 +5,14 @@ from .adapters import (
     to_radarsimpy_view,
     validate_radarsimpy_view_shape,
 )
+from .adc_pack_builder import (
+    DEFAULT_ADC_KEY,
+    DEFAULT_ADC_ORDER,
+    build_measured_pack_from_adc_npz,
+    estimate_rd_ra_from_adc,
+    load_adc_from_npz,
+    reorder_adc_to_sctr,
+)
 from .antenna import FfdAntennaModel, IsotropicAntenna
 from .calibration import (
     apply_global_jones_matrix,
@@ -36,6 +44,7 @@ from .measurement_csv import (
     convert_measurement_csv_to_npz,
     load_column_map_json,
 )
+from .mat_adc_extract import load_adc_from_mat, select_4d_numeric_array
 from .measured_replay import (
     DEFAULT_MEASURED_REPLAY_LOCK_POLICY,
     load_measured_replay_plan_json,
@@ -118,6 +127,8 @@ __all__ = [
     "load_hybrid_paths_from_frames",
     "load_hybrid_radar_geometry",
     "Path",
+    "DEFAULT_ADC_KEY",
+    "DEFAULT_ADC_ORDER",
     "DEFAULT_MEASURED_REPLAY_LOCK_POLICY",
     "DEFAULT_CANDIDATE_GLOBS",
     "DEFAULT_MOTION_SCORE_WEIGHTS",
@@ -129,6 +140,7 @@ __all__ = [
     "convert_measurement_csv_to_npz",
     "DEFAULT_MEASUREMENT_COLUMN_MAP",
     "derive_parity_thresholds",
+    "build_measured_pack_from_adc_npz",
     "build_measured_replay_plan_payload",
     "build_replay_manifest_case",
     "build_replay_manifest_payload",
@@ -157,9 +169,12 @@ __all__ = [
     "fit_global_jones_matrix",
     "discover_measured_replay_packs",
     "discover_candidate_npz_paths",
+    "estimate_rd_ra_from_adc",
     "evaluate_motion_tuning_candidates",
     "estimate_doppler_peak_hz",
     "load_calibration_samples_npz",
+    "load_adc_from_mat",
+    "load_adc_from_npz",
     "load_column_map_json",
     "load_global_jones_matrix_json",
     "load_measured_replay_plan_json",
@@ -169,7 +184,9 @@ __all__ = [
     "make_two_path_multipath",
     "infer_tx_slot_offsets",
     "parse_jones_matrix",
+    "reorder_adc_to_sctr",
     "reshape_virtual_channels",
+    "select_4d_numeric_array",
     "score_motion_metrics",
     "select_best_motion_tuning_candidate",
     "synth_fmcw_tdm",

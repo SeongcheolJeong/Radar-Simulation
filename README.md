@@ -189,6 +189,18 @@ Run mock measured packs end-to-end validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mock_measured_packs_e2e.py
 ```
 
+Run ADC pack builder validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_adc_pack_builder.py
+```
+
+Run MAT ADC extractor core validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mat_adc_extractor_core.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -356,6 +368,26 @@ Generate mock measured packs when real data is unavailable:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/generate_mock_measured_packs.py \
   --output-root /tmp/mock_measured_packs \
   --include-failing-pack
+```
+
+Extract ADC NPZ from MAT files:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/extract_mat_adc_to_npz.py \
+  --input-root /path/to/mat_root \
+  --output-root /path/to/adc_npz \
+  --recursive
+```
+
+Build one measured pack from ADC NPZ:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_pack_from_adc_npz_dir.py \
+  --input-root /path/to/adc_npz \
+  --input-glob \"*.npz\" \
+  --output-pack-root /path/to/pack_out \
+  --scenario-id my_scenario \
+  --adc-order sctr
 ```
 
 Validate CLI integration with bundle:

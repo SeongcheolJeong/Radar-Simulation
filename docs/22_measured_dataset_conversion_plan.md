@@ -41,6 +41,13 @@ If source dataset does not provide `fx_dop_win`/`fx_ang` NPZ directly:
 2. derive estimation maps (`fx_dop_win`, `fx_ang`)
 3. write candidate NPZs into `candidates/`
 
+Implemented baseline converters:
+
+- source MAT -> ADC NPZ:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/extract_mat_adc_to_npz.py`
+- ADC NPZ -> measured pack:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_pack_from_adc_npz_dir.py`
+
 This phase is dataset-specific and should be added adapter-by-adapter.
 
 ## Priority Rule
@@ -54,6 +61,7 @@ This phase is dataset-specific and should be added adapter-by-adapter.
 - Phase A: implemented
 - Phase B: implemented
 - Phase C: planned per target dataset
+- Phase C: baseline converter implemented, dataset-specific schema lock pending
 
 ## Temporary Path Without Real Data
 
