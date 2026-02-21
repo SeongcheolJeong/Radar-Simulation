@@ -94,6 +94,26 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_d
   --allow-unlocked
 ```
 
+## Optional: Rebuild Profile From Pack and Re-run Strict Lock
+
+If baseline replay is unlocked, rebuild profile thresholds from pack candidates, then run replay without `--allow-unlocked`:
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py \
+  --pack-root /tmp/xiangyu_onboarding_run1/packs/pack_xiangyu_2019_04_09_bms1000_v1 \
+  --threshold-quantile 1.0 \
+  --threshold-margin 1.05 \
+  --threshold-floor none \
+  --backup-original
+```
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_execution.py \
+  --plan-json /tmp/xiangyu_onboarding_run1/measured_replay_plan.json \
+  --output-root /tmp/xiangyu_onboarding_run1/measured_replay_outputs_tuned_strict \
+  --output-summary-json /tmp/xiangyu_onboarding_run1/measured_replay_summary_tuned_strict.json
+```
+
 ## Notes
 
 - This is a baseline FFT conversion path for onboarding and parity workflow bring-up.

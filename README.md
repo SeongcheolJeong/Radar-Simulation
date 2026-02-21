@@ -207,6 +207,12 @@ Run one-command onboarding pipeline validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_dataset_onboarding_pipeline.py
 ```
 
+Run profile-from-pack rebuild validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_build_scenario_profile_from_pack.py
+```
+
 Run parity metrics contract validation:
 
 ```bash

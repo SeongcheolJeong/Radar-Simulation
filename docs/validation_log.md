@@ -352,3 +352,41 @@
   - Pack generated with 128 candidates for scenario `xiangyu_2019_04_09_bms1000_v1`
   - Replay artifacts generated (`replay_report.json`, `profile_lock_report.json`, `locked_profiles/*.locked.json`)
   - Lock summary indicates unlocked case remains (expected before profile lock finalization)
+
+## Profile Rebuild From Pack
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_build_scenario_profile_from_pack.py`
+- Result: pass
+- Notes:
+  - Pack manifest candidate scan pass
+  - Threshold derivation from candidate metrics pass
+  - Rebuilt profile parity checks pass on selected candidates
+
+## Public Dataset Onboarding (Xiangyu BMS1000 - 512 / full)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py --input-type mat --input-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/radar_raw_frame --scenario-id xiangyu_2019_04_09_bms1000_v1_512 --work-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512 --mat-glob "*.mat" --max-files 512 --adc-order scrt --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --allow-unlocked`
+- Result: pass (pipeline exit code `0`)
+- Notes:
+  - Candidate count: 512
+  - Baseline replay summary: `pass=1`, `fail=511`, `overall_lock_pass=false`
+  - Tuned profile strict replay summary: `locked=1`, `unlocked=0`, `overall_lock_pass=true`
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py --input-type mat --input-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/radar_raw_frame --scenario-id xiangyu_2019_04_09_bms1000_v1_full897 --work-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897 --mat-glob "*.mat" --adc-order scrt --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --allow-unlocked`
+- Result: pass (pipeline exit code `0`)
+- Notes:
+  - Candidate count: 897
+  - Baseline replay summary: `pass=1`, `fail=896`, `overall_lock_pass=false`
+  - Tuned profile strict replay summary: `locked=1`, `unlocked=0`, `overall_lock_pass=true`
+
+## Public Dataset Onboarding (Xiangyu CMS1000 - 128)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py --input-type mat --input-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_cms1000/radar_raw_frame --scenario-id xiangyu_2019_04_09_cms1000_v1_128 --work-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128 --mat-glob "*.mat" --max-files 128 --adc-order scrt --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --allow-unlocked`
+- Result: pass (pipeline exit code `0`)
+- Notes:
+  - Candidate count: 128
+  - Baseline replay summary: `pass=11`, `fail=117`, `overall_lock_pass=false`
+  - Tuned profile strict replay summary: `locked=1`, `unlocked=0`, `overall_lock_pass=true`

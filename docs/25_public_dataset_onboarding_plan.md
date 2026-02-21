@@ -72,3 +72,15 @@ Onboard one public radar dataset with high conversion cost into this repository'
   - candidate estimations generated: 128
   - replay execution: success (pipeline exit code `0`)
   - profile lock summary: unlocked 1 case (baseline profile not yet locked)
+
+## Extended Real Runs (2026-02-21)
+
+- Sequence: `2019_04_09_bms1000`
+  - `max-files=512`: baseline replay success + unlocked, tuned profile strict lock pass
+  - full (`897`): baseline replay success + unlocked, tuned profile strict lock pass
+- Sequence: `2019_04_09_cms1000`
+  - `max-files=128`: baseline replay success + unlocked, tuned profile strict lock pass
+
+Profile tuning CLI used:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py`

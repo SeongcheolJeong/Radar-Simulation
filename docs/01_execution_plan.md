@@ -17,7 +17,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M4: P-code replacement wave-1 (`generate_channel`, `Doppler`, `concatenated Dop`, `Angle`)
 - [x] M5: RT adapter base (HybridDynamicRT frame ingestion, first version)
 - [x] M5.5: Hybrid ingest pipeline and canonical output writer
-- [ ] M6: P-code replacement wave-2 (`path power` models and calibration)
+- [x] M6: P-code replacement wave-2 (`path power` models and calibration)
 - [x] M7: `.ffd` parser + interpolation
 - [x] M7.5: Jones polarization flow through path/antenna/synth
 - [x] M7.6: RD/RA parity metrics comparator baseline
@@ -33,10 +33,10 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M8.27: Measured replay plan auto-builder (pack discovery)
 - [x] M8.28: Per-pack replay manifest auto-builder
 - [x] M8.29: Mock measured packs generator for no-data bootstrap
-- [ ] M8.3: Measured moving-target replay execution and profile lock finalization
+- [x] M8.3: Measured moving-target replay execution and profile lock finalization
 - [x] M9.0: Public dataset conversion scaffolding (`MAT->ADC NPZ->pack`)
 - [x] M9.05: One-command onboarding pipeline (`input->pack->plan->replay`)
-- [ ] M9.1: First public dataset schema lock and real subset conversion run
+- [x] M9.1: First public dataset schema lock and real subset conversion run
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -49,4 +49,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Pin one public dataset schema (variable key + ADC order), convert a small real subset into pack format, then run replay lock and version `*.locked.json` outputs.
+Expand cross-sequence measured replay runs with profile tuning policy governance (strict baseline vs tuned lock) and document default production lock policy per scenario family.
