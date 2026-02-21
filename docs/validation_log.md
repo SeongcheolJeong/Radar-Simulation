@@ -910,3 +910,27 @@
   - `eligible_preset_count=0`, `gate_failed=true`
   - final decision: `fallback_to_baseline_no_fit`
   - rejection roots: non-zero degradation terms across all presets
+
+## Targeted Flat-Refine Search (M10.30)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_constrained_refit_drift_search.py`
+- Result: pass
+- Notes:
+  - constrained search validation still passes with new pass-through options
+  - argument wiring verified for `max-no-gain-attempts`, drift limits, fit-proxy caps
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_constrained_refit_drift_search.py --baseline-mode provided --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_00_bms1000_512/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --case bms1000_full897=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/packs/pack_xiangyu_2019_04_09_bms1000_v1_full897::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_01_bms1000_full897/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_full897/replay_report.json --case cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/packs/pack_xiangyu_2019_04_09_cms1000_v1_128::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_02_cms1000_128/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_cms1000_v1_128/replay_report.json --csv-case bms1000=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv --csv-case cms1000=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_128/cms1000_path_power_samples_128.csv --preset flat_fine_a --preset flat_fine_b --preset flat_fine_c --max-no-gain-attempts 8 --require-full-case-coverage --drift-max-pass-rate-drop 0.0 --drift-max-pass-count-drop-ratio 0.0 --drift-max-fail-count-increase-ratio 0.0 --drift-max-metric-drift 0.1 --fit-proxy-max-range-exp 1.25 --fit-proxy-max-azimuth-power 1.5 --fit-proxy-min-weight 0.9 --fit-proxy-max-weight 1.1 --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_targets_flat_refine_v2 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/constrained_refit_drift_search_xiangyu_targets_flat_refine_v2_2026_02_21.json`
+- Result: pass
+- Notes:
+  - preset count: `3`, case count: `3`, fit candidates per preset: `4`
+  - all presets returned `selection_mode=baseline_no_fit`
+  - no-gain truncation removed vs previous run (full fit-candidate evidence captured)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_constrained_refit_consistency_gate.py --constrained-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/constrained_refit_drift_search_xiangyu_targets_flat_refine_v2_2026_02_21.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/constrained_refit_consistency_gate_xiangyu_targets_flat_refine_v2_2026_02_21.json`
+- Result: pass
+- Notes:
+  - `eligible_preset_count=0`, decision `fallback_to_baseline_no_fit`
+  - gate output normalized to JSON-safe nullable diagnostics (no Infinity for missing selected-fit summaries)

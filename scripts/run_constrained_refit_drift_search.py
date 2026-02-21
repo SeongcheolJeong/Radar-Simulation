@@ -14,6 +14,24 @@ PRESET_GRIDS: Dict[str, Dict[str, str]] = {
         "azimuth_mix_grid": "0.0,0.5,1.0",
         "azimuth_power_grid": "0.0,1.0,2.0",
     },
+    "flat_fine_a": {
+        "range_power_grid": "0.5,0.75,1.0",
+        "elevation_power_grid": "0.0,0.25,0.5",
+        "azimuth_mix_grid": "0.5,0.75,1.0",
+        "azimuth_power_grid": "0.0,0.5,1.0",
+    },
+    "flat_fine_b": {
+        "range_power_grid": "0.75,1.0,1.25",
+        "elevation_power_grid": "0.0,0.25,0.5",
+        "azimuth_mix_grid": "0.25,0.5,0.75",
+        "azimuth_power_grid": "0.5,1.0,1.5",
+    },
+    "flat_fine_c": {
+        "range_power_grid": "1.0,1.25,1.5",
+        "elevation_power_grid": "0.25,0.5,0.75",
+        "azimuth_mix_grid": "0.0,0.25,0.5",
+        "azimuth_power_grid": "1.0,1.5,2.0",
+    },
     "balanced": {
         "range_power_grid": "1.0,1.5,2.0",
         "elevation_power_grid": "0.5,1.0,1.5",
@@ -42,10 +60,28 @@ def parse_args() -> argparse.Namespace:
         action="append",
         choices=sorted(PRESET_GRIDS.keys()),
         default=None,
-        help="Refit preset list. Default: flat,balanced,steep",
+        help="Refit preset list. Default: flat_fine_a,flat_fine_b,flat_fine_c",
     )
     p.add_argument("--stop-on-adopt", action="store_true", help="Stop loop when adopt recommendation is achieved")
     p.add_argument("--baseline-mode", choices=["rerun", "provided"], default="rerun")
+    p.add_argument("--require-full-case-coverage", action="store_true")
+    p.add_argument("--max-no-gain-attempts", type=int, default=2)
+
+    p.add_argument("--drift-metric", action="append", default=[])
+    p.add_argument("--drift-quantile", type=float, default=0.9)
+    p.add_argument("--drift-weight-pass-rate-drop", type=float, default=100.0)
+    p.add_argument("--drift-weight-pass-count-drop-ratio", type=float, default=20.0)
+    p.add_argument("--drift-weight-fail-count-increase-ratio", type=float, default=20.0)
+    p.add_argument("--drift-weight-metric-drift", type=float, default=1.0)
+    p.add_argument("--drift-max-pass-rate-drop", type=float, default=1.0)
+    p.add_argument("--drift-max-pass-count-drop-ratio", type=float, default=1.0)
+    p.add_argument("--drift-max-fail-count-increase-ratio", type=float, default=1.0)
+    p.add_argument("--drift-max-metric-drift", type=float, default=1e9)
+
+    p.add_argument("--fit-proxy-max-range-exp", type=float, default=None)
+    p.add_argument("--fit-proxy-max-azimuth-power", type=float, default=None)
+    p.add_argument("--fit-proxy-min-weight", type=float, default=None)
+    p.add_argument("--fit-proxy-max-weight", type=float, default=None)
     p.add_argument("--allow-unlocked", action="store_true")
     p.add_argument("--output-root", required=True)
     p.add_argument("--output-summary-json", default=None)
@@ -83,6 +119,19 @@ def _rank_key(row: Mapping[str, Any]) -> Tuple[float, float]:
 
 def main() -> None:
     args = parse_args()
+    if int(args.max_no_gain_attempts) < 0:
+        raise ValueError("--max-no-gain-attempts must be >= 0")
+    if not (0.0 < float(args.drift_quantile) < 1.0):
+        raise ValueError("--drift-quantile must be in (0,1)")
+    if float(args.drift_max_pass_rate_drop) < 0.0:
+        raise ValueError("--drift-max-pass-rate-drop must be >= 0")
+    if float(args.drift_max_pass_count_drop_ratio) < 0.0:
+        raise ValueError("--drift-max-pass-count-drop-ratio must be >= 0")
+    if float(args.drift_max_fail_count_increase_ratio) < 0.0:
+        raise ValueError("--drift-max-fail-count-increase-ratio must be >= 0")
+    if float(args.drift_max_metric_drift) < 0.0:
+        raise ValueError("--drift-max-metric-drift must be >= 0")
+
     repo_root = Path(__file__).resolve().parents[1]
     out_root = Path(args.output_root).expanduser().resolve()
     out_root.mkdir(parents=True, exist_ok=True)
@@ -90,7 +139,7 @@ def main() -> None:
     env = dict(os.environ)
     env["PYTHONPATH"] = str(repo_root / "src")
 
-    presets = args.preset if args.preset else ["flat", "balanced", "steep"]
+    presets = args.preset if args.preset else ["flat_fine_a", "flat_fine_b", "flat_fine_c"]
     rows: List[Dict[str, Any]] = []
 
     for pi, preset in enumerate(presets):
@@ -168,11 +217,43 @@ def main() -> None:
             str(args.baseline_mode),
             "--objective-mode",
             "drift",
+            "--max-no-gain-attempts",
+            str(int(args.max_no_gain_attempts)),
+            "--drift-quantile",
+            str(float(args.drift_quantile)),
+            "--drift-weight-pass-rate-drop",
+            str(float(args.drift_weight_pass_rate_drop)),
+            "--drift-weight-pass-count-drop-ratio",
+            str(float(args.drift_weight_pass_count_drop_ratio)),
+            "--drift-weight-fail-count-increase-ratio",
+            str(float(args.drift_weight_fail_count_increase_ratio)),
+            "--drift-weight-metric-drift",
+            str(float(args.drift_weight_metric_drift)),
+            "--drift-max-pass-rate-drop",
+            str(float(args.drift_max_pass_rate_drop)),
+            "--drift-max-pass-count-drop-ratio",
+            str(float(args.drift_max_pass_count_drop_ratio)),
+            "--drift-max-fail-count-increase-ratio",
+            str(float(args.drift_max_fail_count_increase_ratio)),
+            "--drift-max-metric-drift",
+            str(float(args.drift_max_metric_drift)),
             "--output-root",
             str(preset_root / "search_run"),
             "--output-summary-json",
             str(search_summary_json),
         ]
+        if args.require_full_case_coverage:
+            cmd_search.append("--require-full-case-coverage")
+        for m in args.drift_metric:
+            cmd_search.extend(["--drift-metric", str(m)])
+        if args.fit_proxy_max_range_exp is not None:
+            cmd_search.extend(["--fit-proxy-max-range-exp", str(float(args.fit_proxy_max_range_exp))])
+        if args.fit_proxy_max_azimuth_power is not None:
+            cmd_search.extend(["--fit-proxy-max-azimuth-power", str(float(args.fit_proxy_max_azimuth_power))])
+        if args.fit_proxy_min_weight is not None:
+            cmd_search.extend(["--fit-proxy-min-weight", str(float(args.fit_proxy_min_weight))])
+        if args.fit_proxy_max_weight is not None:
+            cmd_search.extend(["--fit-proxy-max-weight", str(float(args.fit_proxy_max_weight))])
         if args.allow_unlocked:
             cmd_search.append("--allow-unlocked")
         for c in args.case:

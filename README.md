@@ -830,9 +830,19 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_const
   --baseline-mode provided \
   --case caseA=/path/to/source_pack_root::/path/to/baseline_replay_report.json \
   --csv-case caseA=/path/to/path_power_samples.csv \
-  --preset flat \
-  --preset balanced \
-  --preset steep \
+  --preset flat_fine_a \
+  --preset flat_fine_b \
+  --preset flat_fine_c \
+  --max-no-gain-attempts 8 \
+  --require-full-case-coverage \
+  --drift-max-pass-rate-drop 0.0 \
+  --drift-max-pass-count-drop-ratio 0.0 \
+  --drift-max-fail-count-increase-ratio 0.0 \
+  --drift-max-metric-drift 0.1 \
+  --fit-proxy-max-range-exp 1.25 \
+  --fit-proxy-max-azimuth-power 1.5 \
+  --fit-proxy-min-weight 0.9 \
+  --fit-proxy-max-weight 1.1 \
   --allow-unlocked \
   --output-root /path/to/constrained_refit_drift_search_run \
   --output-summary-json /path/to/constrained_refit_drift_search_summary.json

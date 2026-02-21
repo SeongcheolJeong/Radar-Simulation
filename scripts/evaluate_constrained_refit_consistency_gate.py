@@ -82,7 +82,12 @@ def _gate_row(
     selection_mode = str(row.get("selection_mode", ""))
     search_summary_json = Path(str(row.get("search_summary_json", ""))).expanduser().resolve()
     selected_fit_json = row.get("selected_fit_json", None)
-    aggregate_score = _as_float(row.get("selected_aggregate_score", math.inf), default=math.inf)
+    raw_aggregate_score = row.get("selected_aggregate_score", None)
+    aggregate_score: Optional[float]
+    if isinstance(raw_aggregate_score, (int, float)) and math.isfinite(float(raw_aggregate_score)):
+        aggregate_score = float(raw_aggregate_score)
+    else:
+        aggregate_score = None
 
     if not search_ok:
         reasons.append("search_not_ok")
@@ -99,10 +104,10 @@ def _gate_row(
 
     case_count = 0
     coverage_count = 0
-    pass_rate_drop = math.inf
-    pass_count_drop_ratio = math.inf
-    fail_count_increase_ratio = math.inf
-    metric_drift_mean = math.inf
+    pass_rate_drop: Optional[float] = None
+    pass_count_drop_ratio: Optional[float] = None
+    fail_count_increase_ratio: Optional[float] = None
+    metric_drift_mean: Optional[float] = None
     policy_gate_failed = None
     policy_gate_recommendation = None
 
@@ -123,27 +128,57 @@ def _gate_row(
         selected = sel.get("selected_fit_summary", {})
         if not isinstance(selected, Mapping):
             selected = {}
-        coverage_count = _as_int(selected.get("coverage_count", 0), default=0)
-        pass_rate_drop = _as_float(selected.get("total_pass_rate_drop", math.inf), default=math.inf)
-        pass_count_drop_ratio = _as_float(
-            selected.get("total_pass_count_drop_ratio", math.inf), default=math.inf
-        )
-        fail_count_increase_ratio = _as_float(
-            selected.get("total_fail_count_increase_ratio", math.inf), default=math.inf
-        )
-        metric_drift_mean = _as_float(selected.get("metric_drift_mean", math.inf), default=math.inf)
+        if len(selected) == 0:
+            reasons.append("selected_fit_summary_missing")
+        else:
+            coverage_count = _as_int(selected.get("coverage_count", 0), default=0)
+            pass_rate_drop = _as_float(
+                selected.get("total_pass_rate_drop", None),
+                default=math.nan,
+            )
+            pass_count_drop_ratio = _as_float(
+                selected.get("total_pass_count_drop_ratio", None),
+                default=math.nan,
+            )
+            fail_count_increase_ratio = _as_float(
+                selected.get("total_fail_count_increase_ratio", None),
+                default=math.nan,
+            )
+            metric_drift_mean = _as_float(
+                selected.get("metric_drift_mean", None),
+                default=math.nan,
+            )
+
+            if not math.isfinite(pass_rate_drop):
+                pass_rate_drop = None
+                reasons.append("pass_rate_drop_missing")
+            if not math.isfinite(pass_count_drop_ratio):
+                pass_count_drop_ratio = None
+                reasons.append("pass_count_drop_ratio_missing")
+            if not math.isfinite(fail_count_increase_ratio):
+                fail_count_increase_ratio = None
+                reasons.append("fail_count_increase_ratio_missing")
+            if not math.isfinite(metric_drift_mean):
+                metric_drift_mean = None
+                reasons.append("metric_drift_mean_missing")
 
         if case_count <= 0:
             reasons.append("invalid_case_count")
         if coverage_count < case_count:
             reasons.append("incomplete_case_coverage")
-        if pass_rate_drop > float(max_total_pass_rate_drop):
+        if pass_rate_drop is not None and pass_rate_drop > float(max_total_pass_rate_drop):
             reasons.append("pass_rate_drop_exceeds_limit")
-        if pass_count_drop_ratio > float(max_total_pass_count_drop_ratio):
+        if (
+            pass_count_drop_ratio is not None
+            and pass_count_drop_ratio > float(max_total_pass_count_drop_ratio)
+        ):
             reasons.append("pass_count_drop_ratio_exceeds_limit")
-        if fail_count_increase_ratio > float(max_total_fail_count_increase_ratio):
+        if (
+            fail_count_increase_ratio is not None
+            and fail_count_increase_ratio > float(max_total_fail_count_increase_ratio)
+        ):
             reasons.append("fail_count_increase_ratio_exceeds_limit")
-        if metric_drift_mean > float(max_metric_drift_mean):
+        if metric_drift_mean is not None and metric_drift_mean > float(max_metric_drift_mean):
             reasons.append("metric_drift_mean_exceeds_limit")
 
     return {
@@ -156,10 +191,10 @@ def _gate_row(
         "selected_aggregate_score": aggregate_score,
         "case_count": int(case_count),
         "coverage_count": int(coverage_count),
-        "total_pass_rate_drop": float(pass_rate_drop),
-        "total_pass_count_drop_ratio": float(pass_count_drop_ratio),
-        "total_fail_count_increase_ratio": float(fail_count_increase_ratio),
-        "metric_drift_mean": float(metric_drift_mean),
+        "total_pass_rate_drop": pass_rate_drop,
+        "total_pass_count_drop_ratio": pass_count_drop_ratio,
+        "total_fail_count_increase_ratio": fail_count_increase_ratio,
+        "metric_drift_mean": metric_drift_mean,
         "policy_gate_failed": policy_gate_failed,
         "policy_gate_recommendation": policy_gate_recommendation,
         "eligible": bool(len(reasons) == 0),
