@@ -77,6 +77,9 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.6: Public multi-object scene fixture pack and deterministic replay bundle lock
 - [x] M12.7: Public OBJ sample parity onboarding and mixed-format fixture matrix lock
 - [ ] M13.0: Mesh-geometry proxy extraction baseline (`centroid/area`) from OBJ/glTF metadata for auto-populated scene objects
+- [ ] M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) and canonical parity lock
+- [ ] M13.2: PO-SBR backend adapter candidate for high-fidelity scattering path modeling
+- [ ] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
 
 ## Iteration Rule (One-by-One Verification)
 

@@ -15,6 +15,7 @@ Use references via local adapters, not by merging third-party internals into cor
 
 - HybridDynamicRT: path-generation reference
 - sionna: propagation/RT reference
+- PO-SBR-Python: high-fidelity scattering/SBR reference
 - radarsimpy: signal-chain cross-check reference
 - Raw_ADC_radar_dataset_for_automotive_object_detection: public measured raw-ADC schema reference
 
@@ -24,3 +25,25 @@ Use references via local adapters, not by merging third-party internals into cor
 2. Add/maintain adapters in `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/adapters/`.
 3. Keep contract tests local in `/Users/seongcheoljeong/Documents/Codex_test/scripts/`.
 4. For measured public datasets, keep conversion scripts in `/Users/seongcheoljeong/Documents/Codex_test/scripts/` and avoid hard-coupling external repo internals.
+
+## Planned Integration Order (M13+)
+
+1. M13.0: mesh-geometry proxy extractor baseline from OBJ/glTF metadata.
+2. M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) with canonical output parity gate.
+3. M13.2: PO-SBR backend adapter for higher-fidelity scattering/path-power behavior.
+4. M13.3: RadarSimPy parity-lock automation for periodic signal-chain drift checks (optional hard gate).
+
+## Current Readiness Assessment
+
+- Implemented strongly:
+  - HybridDynamicRT-based ingest and Python-native signal chain
+  - canonical outputs (`path list`, `raw ADC`, `radar_map`)
+  - `.ffd`/Jones calibration path
+  - public asset onboarding (`glTF`, `OBJ`) and deterministic fixture bundles
+- Remaining high-impact physics/backend work:
+  - Sionna RT integration
+  - PO-SBR high-fidelity scattering integration
+- RadarSimPy position:
+  - useful as regression oracle
+  - not required for core pipeline execution
+  - recommended as periodic parity gate, not as mandatory runtime dependency
