@@ -81,7 +81,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M13.2: PO-SBR backend adapter candidate for high-fidelity scattering path modeling
 - [x] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
 - [x] M14.0: Direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
-- [ ] M14.1: Real runtime engine binding pilot (`sionna`/`po-sbr` external env contract + first real scene run)
+- [x] M14.1: Runtime environment contract + readiness probe (`sionna`/`po-sbr`)
+- [ ] M14.2: Real runtime engine binding pilot (first real scene run on ready backend)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -94,7 +95,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M14.1: define external runtime environment contract and run first real scene pilot on available backend.
+Start M14.2: execute first real scene run on backend that passes M14.1 readiness gate.
 
 ## M10.19 Decision Gate
 
@@ -328,3 +329,10 @@ M14.0 outcome (2026-02-21):
 - deterministic runtime failure policy added (`error` vs `use_static`) with metadata trace (`runtime_resolution`)
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/105_scene_runtime_coupling_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_runtime_coupling.py`
+
+M14.1 outcome (2026-02-21):
+
+- runtime environment probe runner added (`required modules + external repo presence -> ready gate`)
+- runtime readiness summary schema locked for `sionna_runtime` and `po_sbr_runtime`
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/106_scene_runtime_env_probe_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_env_probe.py`

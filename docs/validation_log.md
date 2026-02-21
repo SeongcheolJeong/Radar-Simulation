@@ -1266,3 +1266,13 @@
 - Result: pass
 - Notes:
   - parity harness remains stable after runtime-coupling integration
+
+## Scene Runtime Environment Probe (M14.1)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_env_probe.py`
+- Result: pass
+- Notes:
+  - runtime readiness summary schema validated (`python`, `module_report`, `runtime_report`)
+  - `ready` rule consistency validated (`repo_found && missing_required_modules == 0`)
+  - both runtime tracks covered (`sionna_runtime`, `po_sbr_runtime`)

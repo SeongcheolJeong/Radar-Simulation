@@ -33,6 +33,8 @@ Use references via local adapters, not by merging third-party internals into cor
 3. M13.2: PO-SBR backend adapter for higher-fidelity scattering/path-power behavior.
 4. M13.3: RadarSimPy parity-lock automation for periodic signal-chain drift checks (optional hard gate).
 5. M14.0: runtime provider coupling path (`scene -> runtime provider -> canonical paths`) with deterministic fallback policy.
+6. M14.1: runtime environment readiness probe (`required modules + external repo presence`).
+7. M14.2: first real runtime scene pilot on a ready backend.
 
 ## Current Readiness Assessment
 
@@ -44,7 +46,7 @@ Use references via local adapters, not by merging third-party internals into cor
   - exported-path adapters: `sionna_rt`, `po_sbr_rt` + parity locks
   - direct runtime provider coupling path for `sionna_rt`/`po_sbr_rt` (no pre-exported path JSON required)
 - Remaining high-impact physics/backend work:
-  - real external runtime environment binding for `sionna` and `po-sbr` engines
+  - real external runtime scene execution on backend passing readiness gate
   - scattering-physics fidelity tuning against measured scenarios
 - RadarSimPy position:
   - useful as regression oracle
