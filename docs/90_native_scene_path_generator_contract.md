@@ -15,6 +15,12 @@ This backend uses analytic point-target kinematics to generate `paths_by_chirp`:
 - Doppler: `fd = 2v/lambda`
 - direction: from `az_deg`, `el_deg`
 
+Per-path metadata emitted:
+
+- `path_id` (default: `analytic_t{target_idx}_c{chirp_idx}`)
+- `material_tag` (default: `analytic_target`)
+- `reflection_order` (default: `1`)
+
 ## Required Input (`analytic_targets`)
 
 Backend keys:

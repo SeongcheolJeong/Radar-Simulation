@@ -989,3 +989,23 @@
 - Notes:
   - new non-frame backend `analytic_targets` emits canonical artifacts
   - map outputs validated (`fx_dop_win`, `fx_ang`) with expected shapes
+
+## Propagation Schema Expansion (M11.3)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_frame_adapter.py`
+- Result: pass
+- Notes:
+  - hybrid frame adapter remains stable with extended Path metadata fields
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_to_radar_map.py`
+- Result: pass
+- Notes:
+  - `path_list.json` includes metadata fields (`path_id`, `material_tag`, `reflection_order`) for `hybrid_frames`
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_analytic_backend.py`
+- Result: pass
+- Notes:
+  - `analytic_targets` backend path metadata emission validated

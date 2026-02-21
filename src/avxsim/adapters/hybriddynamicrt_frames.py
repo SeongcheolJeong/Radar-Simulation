@@ -186,6 +186,7 @@ def load_hybrid_paths_from_frames(
 
         chirp_paths: List[RadarPath] = []
         for j, i in enumerate(idx):
+            path_id = f"{mode}_f{int(frame_idx):04d}_p{int(i):06d}"
             chirp_paths.append(
                 RadarPath(
                     delay_s=float(dist_vec[i] / C0),
@@ -196,6 +197,9 @@ def load_hybrid_paths_from_frames(
                         float(dir_lut[i, 2]),
                     ),
                     amp=complex(float(amp_selected[j]), 0.0),
+                    path_id=path_id,
+                    material_tag=str(mode),
+                    reflection_order=1,
                 )
             )
         out.append(chirp_paths)

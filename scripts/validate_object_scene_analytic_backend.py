@@ -83,6 +83,13 @@ def run() -> None:
         adc = np.asarray(adc_payload["adc"])
         assert adc.shape == (1024, 8, 2, 4), adc.shape
 
+        paths_payload = json.loads((out_dir / "path_list.json").read_text(encoding="utf-8"))
+        assert isinstance(paths_payload, list) and len(paths_payload) == 8
+        first_path = paths_payload[0][0]
+        assert first_path["path_id"] == "analytic_t000_c0000"
+        assert first_path["material_tag"] == "analytic_target"
+        assert first_path["reflection_order"] == 1
+
         map_payload = np.load(out_dir / "radar_map.npz")
         rd = np.asarray(map_payload["fx_dop_win"])
         ra = np.asarray(map_payload["fx_ang"])

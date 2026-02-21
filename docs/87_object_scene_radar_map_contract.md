@@ -67,6 +67,12 @@ Under `--output-dir`:
 - `fx_ang` (RA power map)
 - `metadata_json`
 
+`path_list.json` path metadata (M11.3):
+
+- `path_id`
+- `material_tag`
+- `reflection_order`
+
 ## Validation
 
 ```bash

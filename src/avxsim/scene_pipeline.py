@@ -251,7 +251,7 @@ def _generate_analytic_paths(
     for k in range(int(n_chirps)):
         t = float(k) * float(chirp_interval_s)
         chirp_paths: List[RadarPath] = []
-        for target in targets:
+        for target_idx, target in enumerate(targets):
             range0 = float(target["range_m"])
             velocity = float(target.get("radial_velocity_mps", 0.0))
             range_k = max(float(min_range_m), range0 + velocity * t)
@@ -267,6 +267,13 @@ def _generate_analytic_paths(
             amp0 = _resolve_complex_scalar(target.get("amp", 1.0))
             range_amp_exp = float(target.get("range_amp_exponent", 2.0))
             amp = amp0 / (max(range_k, min_range_m) ** max(range_amp_exp, 0.0))
+            path_id = str(
+                target.get("path_id", f"analytic_t{int(target_idx):03d}_c{int(k):04d}")
+            )
+            material_tag = str(target.get("material_tag", "analytic_target"))
+            reflection_order = int(target.get("reflection_order", 1))
+            if reflection_order < 0:
+                raise ValueError("target.reflection_order must be >= 0")
 
             chirp_paths.append(
                 RadarPath(
@@ -274,6 +281,9 @@ def _generate_analytic_paths(
                     doppler_hz=float(2.0 * velocity / lam),
                     unit_direction=(ux, uy, uz),
                     amp=complex(amp),
+                    path_id=path_id,
+                    material_tag=material_tag,
+                    reflection_order=reflection_order,
                 )
             )
         out.append(chirp_paths)

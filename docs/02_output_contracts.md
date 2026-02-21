@@ -18,6 +18,7 @@ Recommended optional fields:
 - `pol_matrix` (`2x2` complex, flattened in row-major `[m00,m01,m10,m11]`)
 - `path_id`
 - `material_tag`
+- `reflection_order` (integer, bounce/order metadata)
 
 Container:
 

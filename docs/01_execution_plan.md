@@ -66,7 +66,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M11.0: Object-scene pipeline V0 (`scene_json -> path_list + adc + radar_map`)
 - [x] M11.1: Case-level family lock manifest materialization + replay verification
 - [x] M11.2: Native scene path generator interface + non-frame backend stub
-- [ ] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
+- [x] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
 - [ ] M11.4: Multi-backend parity harness on shared scenes
 
 ## Iteration Rule (One-by-One Verification)
@@ -80,7 +80,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M11.3: expand propagation output schema (`path_id`, `material_tag`, reflection order) and wire through output contracts.
+Start M11.4: add multi-backend parity harness (`hybrid_frames` vs analytic/non-frame) on shared synthetic scenes.
 
 ## M10.19 Decision Gate
 
@@ -199,3 +199,10 @@ M11.2 outcome (2026-02-21):
 - native non-frame path generator stub added (`analytic_targets`)
 - new validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_analytic_backend.py`
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/90_native_scene_path_generator_contract.md`
+
+M11.3 outcome (2026-02-21):
+
+- canonical path schema expanded with `path_id`, `material_tag`, `reflection_order`
+- propagation metadata serialization wired in `path_list.json`
+- hybrid and analytic backends both emit path metadata
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/91_propagation_schema_expansion_contract.md`

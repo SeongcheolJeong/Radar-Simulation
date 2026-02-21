@@ -9,6 +9,9 @@ class Path:
     unit_direction: Tuple[float, float, float]
     amp: complex
     pol_matrix: Optional[Tuple[complex, complex, complex, complex]] = None
+    path_id: Optional[str] = None
+    material_tag: Optional[str] = None
+    reflection_order: Optional[int] = None
 
 
 @dataclass(frozen=True)

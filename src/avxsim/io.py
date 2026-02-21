@@ -19,6 +19,12 @@ def save_paths_by_chirp_json(paths_by_chirp: Sequence[Sequence[RadarPath]], out_
                 "unit_direction": [float(x) for x in p.unit_direction],
                 "amp_complex": {"re": float(np.real(p.amp)), "im": float(np.imag(p.amp))},
             }
+            if p.path_id is not None and str(p.path_id).strip() != "":
+                item["path_id"] = str(p.path_id)
+            if p.material_tag is not None and str(p.material_tag).strip() != "":
+                item["material_tag"] = str(p.material_tag)
+            if p.reflection_order is not None:
+                item["reflection_order"] = int(p.reflection_order)
             if p.pol_matrix is not None:
                 pm = np.asarray(list(p.pol_matrix), dtype=np.complex128).reshape(-1)
                 if pm.size == 4:
