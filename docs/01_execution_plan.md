@@ -38,6 +38,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M9.05: One-command onboarding pipeline (`input->pack->plan->replay`)
 - [x] M9.1: First public dataset schema lock and real subset conversion run
 - [x] M10.0: Path-power tuning tooling + parity drift quantification baseline
+- [x] M10.05: Path-power fit ingest integration (`--path-power-fit-json`) + CLI validation
 
 ## Iteration Rule (One-by-One Verification)
 

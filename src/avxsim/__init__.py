@@ -88,6 +88,8 @@ from .path_power_tuning import (
     evaluate_path_power_parameters,
     fit_path_power_parameters,
     load_column_map_json as load_path_power_column_map_json,
+    load_path_power_fit_json,
+    predict_path_power_amplitude_from_fit,
     save_path_power_fit_json,
 )
 from .pipeline import run_hybrid_frames_pipeline
@@ -201,6 +203,7 @@ __all__ = [
     "load_column_map_json",
     "load_parity_drift_replay_report_json",
     "load_path_power_column_map_json",
+    "load_path_power_fit_json",
     "load_global_jones_matrix_json",
     "load_measured_replay_plan_json",
     "load_motion_tuning_manifest_json",
@@ -211,6 +214,7 @@ __all__ = [
     "infer_tx_slot_offsets",
     "parse_jones_matrix",
     "reorder_adc_to_sctr",
+    "predict_path_power_amplitude_from_fit",
     "reshape_virtual_channels",
     "select_4d_numeric_array",
     "score_motion_metrics",

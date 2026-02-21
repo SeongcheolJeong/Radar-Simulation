@@ -1,11 +1,12 @@
 import json
 import re
 from pathlib import Path
-from typing import List, Optional, Sequence, Tuple
+from typing import Any, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
 from ..constants import C0
+from ..path_power_tuning import predict_path_power_amplitude_from_fit
 from ..types import Path as RadarPath
 
 
@@ -65,6 +66,8 @@ def load_hybrid_paths_from_frames(
     distance_limits_m: Tuple[float, float] = (0.0, 100.0),
     amplitude_scale: float = 1.0,
     top_k_per_chirp: Optional[int] = None,
+    path_power_fit_payload: Optional[Mapping[str, Any]] = None,
+    path_power_apply_mode: str = "shape_only",
 ) -> List[List[RadarPath]]:
     """
     Parse HybridDynamicRT-style Blender frame outputs into paths_by_chirp.
@@ -105,6 +108,20 @@ def load_hybrid_paths_from_frames(
 
     dmin, dmax = float(distance_limits_m[0]), float(distance_limits_m[1])
     out: List[List[RadarPath]] = []
+    apply_mode = str(path_power_apply_mode).strip().lower()
+    if apply_mode not in {"shape_only", "replace"}:
+        raise ValueError("path_power_apply_mode must be one of: shape_only, replace")
+    if path_power_fit_payload is not None:
+        fit_obj = path_power_fit_payload.get("fit", None) if isinstance(path_power_fit_payload, Mapping) else None
+        if not isinstance(fit_obj, Mapping):
+            raise ValueError("path_power_fit_payload must include fit object")
+        fit_model = str(fit_obj.get("model", "")).strip().lower()
+        if fit_model not in {"reflection", "scattering"}:
+            raise ValueError("path_power_fit_payload fit.model must be reflection/scattering")
+        if fit_model != str(mode):
+            raise ValueError(
+                f"path power fit model '{fit_model}' does not match ingest mode '{mode}'"
+            )
 
     for frame_idx in frame_indices:
         amp_map = _load_frame_2d(pair_dir / f"AmplitudeOutput{int(frame_idx):04d}{file_ext}")
@@ -126,8 +143,33 @@ def load_hybrid_paths_from_frames(
             keep_rel = np.argpartition(strengths, -int(top_k_per_chirp))[-int(top_k_per_chirp) :]
             idx = idx[keep_rel]
 
+        amp_selected = float(amplitude_scale) * amp_vec[idx]
+        if path_power_fit_payload is not None and idx.size > 0:
+            dsel = dist_vec[idx]
+            r_oneway = np.maximum(dsel / 2.0, 1e-9)
+            u = dir_lut[idx]
+            az = np.arctan2(u[:, 1], u[:, 0])
+            el = np.arcsin(np.clip(u[:, 2], -1.0, 1.0))
+            model_amp = predict_path_power_amplitude_from_fit(
+                range_m=r_oneway,
+                az_rad=az,
+                el_rad=el,
+                fit_payload=path_power_fit_payload,
+            )
+            model_amp = np.maximum(np.asarray(model_amp, dtype=np.float64), np.finfo(np.float64).tiny)
+            if apply_mode == "replace":
+                sign = np.sign(amp_selected)
+                sign[sign == 0] = 1.0
+                amp_selected = sign * model_amp
+            else:
+                norm = float(np.median(np.abs(model_amp)))
+                if norm <= 0:
+                    norm = float(np.mean(np.abs(model_amp)))
+                norm = max(norm, float(np.finfo(np.float64).tiny))
+                amp_selected = amp_selected * (model_amp / norm)
+
         chirp_paths: List[RadarPath] = []
-        for i in idx:
+        for j, i in enumerate(idx):
             chirp_paths.append(
                 RadarPath(
                     delay_s=float(dist_vec[i] / C0),
@@ -137,7 +179,7 @@ def load_hybrid_paths_from_frames(
                         float(dir_lut[i, 1]),
                         float(dir_lut[i, 2]),
                     ),
-                    amp=complex(float(amplitude_scale) * float(amp_vec[i]), 0.0),
+                    amp=complex(float(amp_selected[j]), 0.0),
                 )
             )
         out.append(chirp_paths)
@@ -219,4 +261,3 @@ def _load_exr_or_image(path: Path) -> np.ndarray:
             "Install with: python3 -m pip install --user imageio"
         ) from exc
     return iio.imread(path)
-

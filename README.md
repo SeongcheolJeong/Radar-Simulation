@@ -241,6 +241,12 @@ Run parity drift analysis validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_parity_drift_analysis.py
 ```
 
+Run ingest CLI path-power fit validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_path_power_fit.py
+```
+
 Fit path-power parameters from measured CSV:
 
 ```bash
@@ -257,6 +263,22 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_p
   --report baseline=/path/to/baseline_replay_report.json \
   --report candidate=/path/to/candidate_replay_report.json \
   --output-json /path/to/parity_drift_report.json
+```
+
+Apply fitted path-power model during ingest:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybrid_ingest_to_adc.py \
+  --frames-root /path/to/render \
+  --radar-json /path/to/radar_parameters_hybrid.json \
+  --frame-start 1 \
+  --frame-end 64 \
+  --camera-fov-deg 90 \
+  --mode reflection \
+  --file-ext .exr \
+  --path-power-fit-json /path/to/path_power_fit.json \
+  --path-power-apply-mode shape_only \
+  --output-dir /path/to/out
 ```
 
 Run ingest pipeline (example):

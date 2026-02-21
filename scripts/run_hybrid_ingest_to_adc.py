@@ -33,6 +33,17 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--distance-min-m", type=float, default=0.0)
     p.add_argument("--distance-max-m", type=float, default=100.0)
     p.add_argument("--top-k-per-chirp", type=int, default=None)
+    p.add_argument(
+        "--path-power-fit-json",
+        default=None,
+        help="Optional path-power fit JSON from fit_path_power_model_from_csv.py",
+    )
+    p.add_argument(
+        "--path-power-apply-mode",
+        choices=["shape_only", "replace"],
+        default="shape_only",
+        help="How fitted path-power amplitude is applied to per-pixel amplitude",
+    )
     p.add_argument("--tx-ffd-glob", default=None, help="Glob pattern for Tx .ffd files")
     p.add_argument("--rx-ffd-glob", default=None, help="Glob pattern for Rx .ffd files")
     p.add_argument(
@@ -149,6 +160,8 @@ def main() -> None:
         amplitude_threshold=args.amplitude_threshold,
         distance_limits_m=(args.distance_min_m, args.distance_max_m),
         top_k_per_chirp=args.top_k_per_chirp,
+        path_power_fit_json=args.path_power_fit_json,
+        path_power_apply_mode=args.path_power_apply_mode,
         tx_ffd_files=tx_ffd_files,
         rx_ffd_files=rx_ffd_files,
         ffd_field_format=args.ffd_field_format,
@@ -172,6 +185,10 @@ def main() -> None:
     print(f"  paths/chirp (min,max): ({min(n_paths) if n_paths else 0}, {max(n_paths) if n_paths else 0})")
     print(f"  adc shape: {result['adc'].shape}")
     print(f"  ffd enabled: {result['ffd_enabled']}")
+    print(f"  path power fit enabled: {result['path_power_fit_enabled']}")
+    print(f"  path power apply mode: {result['path_power_apply_mode']}")
+    if result.get("path_power_fit_model", None) is not None:
+        print(f"  path power fit model: {result['path_power_fit_model']}")
     print(f"  jones polarization enabled: {result['jones_polarization_enabled']}")
     print(f"  global jones enabled: {result['global_jones_enabled']}")
     print(f"  scenario profile enabled: {args.scenario_profile_json is not None}")

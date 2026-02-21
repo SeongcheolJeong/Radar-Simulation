@@ -12,6 +12,7 @@ from .motion_compensation import (
     apply_tdm_motion_compensation_to_h,
     estimate_doppler_peak_hz,
 )
+from .path_power_tuning import load_path_power_fit_json
 from .synth import synth_fmcw_tdm
 from .types import RadarConfig
 
@@ -32,6 +33,8 @@ def run_hybrid_frames_pipeline(
     distance_limits_m: Tuple[float, float] = (0.0, 100.0),
     amplitude_scale: float = 1.0,
     top_k_per_chirp: Optional[int] = None,
+    path_power_fit_json: Optional[str] = None,
+    path_power_apply_mode: str = "shape_only",
     tx_ffd_files: Optional[Sequence[str]] = None,
     rx_ffd_files: Optional[Sequence[str]] = None,
     ffd_field_format: FieldFormat = "auto",
@@ -59,6 +62,10 @@ def run_hybrid_frames_pipeline(
         tx_schedule=tx_schedule,
     )
 
+    path_power_fit_payload = (
+        None if path_power_fit_json is None else load_path_power_fit_json(path_power_fit_json)
+    )
+
     paths_by_chirp = load_hybrid_paths_from_frames(
         root_dir=frames_root_dir,
         frame_indices=frame_indices,
@@ -70,6 +77,8 @@ def run_hybrid_frames_pipeline(
         distance_limits_m=distance_limits_m,
         amplitude_scale=amplitude_scale,
         top_k_per_chirp=top_k_per_chirp,
+        path_power_fit_payload=path_power_fit_payload,
+        path_power_apply_mode=path_power_apply_mode,
     )
 
     antenna_model = None
@@ -107,7 +116,14 @@ def run_hybrid_frames_pipeline(
         "motion_comp_fd_hz": None,
         "motion_comp_chirp_interval_s": None,
         "motion_comp_reference_tx": motion_comp_reference_tx,
+        "path_power_fit_enabled": path_power_fit_payload is not None,
+        "path_power_apply_mode": str(path_power_apply_mode),
     }
+    if path_power_fit_payload is not None:
+        fit = path_power_fit_payload.get("fit", {})
+        if isinstance(fit, dict):
+            result["path_power_fit_model"] = fit.get("model")
+            result["path_power_fit_best_params"] = fit.get("best_params")
     if global_jones_matrix is not None:
         result["global_jones_matrix"] = np.asarray(global_jones_matrix, dtype=np.complex128).reshape(2, 2)
 

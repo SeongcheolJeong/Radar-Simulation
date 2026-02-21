@@ -34,6 +34,66 @@ DEFAULT_SCATTERING_GRID: Dict[str, Sequence[float]] = {
 }
 
 
+def load_path_power_fit_json(path: str) -> Dict[str, Any]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise ValueError("path power fit JSON must be object")
+    if "fit" not in payload or not isinstance(payload["fit"], Mapping):
+        raise ValueError("path power fit JSON missing 'fit' object")
+    fit = payload["fit"]
+    if "model" not in fit or "best_params" not in fit:
+        raise ValueError("path power fit JSON fit object missing model/best_params")
+    if not isinstance(fit["best_params"], Mapping):
+        raise ValueError("path power fit JSON best_params must be object")
+    return dict(payload)
+
+
+def predict_path_power_amplitude_from_fit(
+    range_m: np.ndarray,
+    az_rad: np.ndarray,
+    el_rad: np.ndarray,
+    fit_payload: Mapping[str, Any],
+    p_t_dbm: Optional[float] = None,
+    fc_hz: Optional[float] = None,
+    pixel_width: Optional[int] = None,
+    pixel_height: Optional[int] = None,
+) -> np.ndarray:
+    if "fit" not in fit_payload or not isinstance(fit_payload["fit"], Mapping):
+        raise ValueError("fit_payload missing fit object")
+    fit = fit_payload["fit"]
+    model = str(fit.get("model", "")).strip().lower()
+    if model not in {"reflection", "scattering"}:
+        raise ValueError("fit_payload fit.model must be reflection or scattering")
+    params = fit.get("best_params", {})
+    if not isinstance(params, Mapping):
+        raise ValueError("fit_payload fit.best_params must be object")
+
+    pt = float(fit.get("p_t_dbm", 0.0) if p_t_dbm is None else p_t_dbm)
+    fchz = float(fit.get("fc_hz", 77e9) if fc_hz is None else fc_hz)
+    pw = int(fit.get("pixel_width", 1) if pixel_width is None else pixel_width)
+    ph = int(fit.get("pixel_height", 1) if pixel_height is None else pixel_height)
+    lam = C0 / float(fchz)
+
+    r = np.asarray(range_m, dtype=np.float64).reshape(-1)
+    az = np.asarray(az_rad, dtype=np.float64).reshape(-1)
+    el = np.asarray(el_rad, dtype=np.float64).reshape(-1)
+    if r.size != az.size or r.size != el.size:
+        raise ValueError("range/az/el size mismatch")
+
+    return _predict_with_params(
+        model=model,
+        params={str(k): float(v) for k, v in params.items()},
+        range_m=r,
+        az_rad=az,
+        el_rad=el,
+        p_t_dbm=pt,
+        lambda_m=lam,
+        pixel_width=pw,
+        pixel_height=ph,
+        gain_scale=float(params.get("gain_scale", 1.0)),
+    )
+
+
 def build_path_power_samples_from_csv(
     csv_path: str,
     column_map: Optional[Mapping[str, str]] = None,

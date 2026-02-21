@@ -419,6 +419,16 @@
   - Reflection/scattering synthetic recovery pass on grid-included ground-truth parameters
   - CLI path (`fit_path_power_model_from_csv.py`) pass with CSV input
 
+## Ingest CLI + Path Power Fit
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_path_power_fit.py`
+- Result: pass
+- Notes:
+  - `--path-power-fit-json` CLI wiring pass
+  - `shape_only` mode modifies relative path amplitudes by fitted range law
+  - CLI output metadata includes fit enabled/model fields
+
 ## Parity Drift Analysis
 
 - Date: 2026-02-21
