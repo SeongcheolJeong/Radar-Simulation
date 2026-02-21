@@ -39,4 +39,5 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 - [x] M12.2: scene-asset parser candidate (`glTF/OBJ sidecar -> asset manifest`)
 - [x] M12.3: sidecar schema profile/version lock and strict-mode parse gate
 - [x] M12.4: strict/non-strict compatibility matrix and bridge E2E regression lock
-- [ ] M12.5: real-scene asset onboarding pilot (`public glTF/OBJ sample`) and fixture-path lock
+- [x] M12.5: real-scene asset onboarding pilot (`public glTF/OBJ sample`) and fixture-path lock
+- [ ] M12.6: public multi-object scene fixture pack and deterministic replay-bundle lock

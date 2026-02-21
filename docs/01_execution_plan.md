@@ -73,7 +73,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.2: Scene asset parser candidate for glTF/OBJ sidecar extraction to bridge manifest
 - [x] M12.3: Sidecar schema profile/version lock and parser strict-mode policy
 - [x] M12.4: Sidecar strict/non-strict compatibility matrix and bridge E2E regression lock
-- [ ] M12.5: Real-scene asset onboarding pilot (`public glTF/OBJ sample -> scene pipeline`) and lockable fixture path
+- [x] M12.5: Real-scene asset onboarding pilot (`public glTF/OBJ sample -> scene pipeline`) and lockable fixture path
+- [ ] M12.6: Public multi-object scene fixture pack and deterministic replay bundle lock
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -86,7 +87,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M12.5: onboard one real scene-asset sample and lock reproducible fixture path for parser/bridge E2E.
+Start M12.6: lock a multi-object public-scene fixture pack and deterministic replay bundle for regression.
 
 ## M10.19 Decision Gate
 
@@ -256,3 +257,11 @@ M12.4 outcome (2026-02-21):
 - non-strict manifest bridge E2E path verified (`asset_manifest -> scene_json -> canonical artifacts`)
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/97_sidecar_compatibility_matrix_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_schema_compat_matrix.py`
+
+M12.5 outcome (2026-02-21):
+
+- public scene-asset onboarding runner added (`asset download/source -> sidecar -> manifest -> scene -> outputs`)
+- offline validator added for local-source fixture (no network dependency)
+- real public sample onboarding executed with Khronos `Box.glb` and summary locked
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/98_public_scene_asset_onboarding_contract.md`
+- summary evidence: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_v1_2026_02_21.json`

@@ -1082,3 +1082,19 @@
 - Result: pass
 - Notes:
   - bridge regression remains stable after sidecar diagnostics extension
+
+## Public Scene Asset Onboarding (M12.5)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_public_scene_asset_onboarding.py`
+- Result: pass
+- Notes:
+  - onboarding runner validated with local source-path fixture
+  - sidecar -> manifest -> scene -> canonical outputs path validated offline
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_public_scene_asset_onboarding.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/khronos_box_v1 --asset-url https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb --asset-relative-path assets/Box.glb --scene-id khronos_box_v1 --strict --summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_v1_2026_02_21.json`
+- Result: pass
+- Notes:
+  - public sample download + onboarding run completed
+  - summary locked with `asset_sha256` and output artifact paths
