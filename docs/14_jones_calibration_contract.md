@@ -29,6 +29,28 @@ Input to calibration script:
 - `observed_gain`: shape `(N,)`, complex
 - `path_matrices`: shape `(N,2,2)`, complex (optional, identity if omitted)
 
+Builder output can also include index traces:
+
+- `chirp_indices`, `tx_indices`, `rx_indices`, `path_indices`, `beat_hz`
+
+## Sample Builder CLI
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_calibration_samples_from_outputs.py \
+  --path-list-json /path/to/path_list.json \
+  --adc-npz /path/to/adc_cube.npz \
+  --tx-ffd-glob "/path/to/tx*.ffd" \
+  --rx-ffd-glob "/path/to/rx*.ffd" \
+  --observed-mode normalized \
+  --max-paths-per-chirp 1 \
+  --output-npz /path/to/calibration_samples.npz
+```
+
+`observed-mode`:
+
+- `normalized`: divide matched-filter gain by scalar path model (`amp * phase`) to isolate polarization response
+- `raw`: keep matched-filter gain as-is
+
 ## Calibration CLI
 
 ```bash
@@ -63,8 +85,9 @@ and applies:
   `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_global_jones_calibration.py`
 - Ingest CLI integration:  
   `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_global_jones.py`
+- Sample builder + fitter round-trip:  
+  `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_calibration_samples_builder.py`
 
 ## Next Step
 
 Populate `calibration_samples.npz` from measured chamber/corridor captures and lock scenario-wise calibration JSON snapshots.
-

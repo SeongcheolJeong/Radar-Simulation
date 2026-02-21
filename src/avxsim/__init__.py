@@ -13,6 +13,11 @@ from .calibration import (
     parse_jones_matrix,
     save_global_jones_matrix_json,
 )
+from .calibration_samples import (
+    build_calibration_samples,
+    load_calibration_samples_npz,
+    save_calibration_samples_npz,
+)
 from .constants import C0
 from .ffd import FfdPattern
 from .hybrid_pcode import (
@@ -39,6 +44,7 @@ from .types import Path, RadarConfig
 __all__ = [
     "adapt_records_by_chirp",
     "apply_global_jones_matrix",
+    "build_calibration_samples",
     "C0",
     "FfdAntennaModel",
     "FfdPattern",
@@ -61,8 +67,10 @@ __all__ = [
     "run_hybrid_frames_pipeline",
     "save_adc_npz",
     "save_global_jones_matrix_json",
+    "save_calibration_samples_npz",
     "save_paths_by_chirp_json",
     "fit_global_jones_matrix",
+    "load_calibration_samples_npz",
     "load_global_jones_matrix_json",
     "make_static_paths",
     "make_constant_velocity_paths",

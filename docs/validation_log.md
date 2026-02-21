@@ -192,3 +192,12 @@
 - Notes:
   - `--global-jones-json` option wiring pass
   - Global Jones gain scaling reflected in ADC amplitude as expected
+
+## Calibration Samples Builder
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_calibration_samples_builder.py`
+- Result: pass
+- Notes:
+  - `path_list.json + adc_cube.npz + .ffd` to `calibration_samples.npz` build pass
+  - Builder output used by fitter and recovers known global Jones matrix in round-trip test

@@ -22,6 +22,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M7.5: Jones polarization flow through path/antenna/synth
 - [x] M7.6: RD/RA parity metrics comparator baseline
 - [x] M7.7: Global Jones calibration bootstrap (LS fitter + ingest hook)
+- [x] M7.8: Calibration sample builder (`path_list + adc + ffd -> calibration_samples.npz`)
 - [ ] M8: Motion compensation for TDM virtual array
 
 ## Iteration Rule (One-by-One Verification)
@@ -35,4 +36,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Build measured-data ingest for calibration samples (`tx_jones`, `rx_jones`, `observed_gain`) and lock per-scenario calibration snapshots.
+Add measured-data converter that maps chamber/corridor captures to calibration sample NPZ contract.

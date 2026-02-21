@@ -117,6 +117,12 @@ Run ingest CLI global Jones integration validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_global_jones.py
 ```
 
+Run calibration samples builder validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_calibration_samples_builder.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -152,6 +158,19 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/fit_globa
   --samples-npz /path/to/calibration_samples.npz \
   --ridge 1e-6 \
   --output-json /path/to/global_jones.json
+```
+
+Build `calibration_samples.npz` from pipeline outputs:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_calibration_samples_from_outputs.py \
+  --path-list-json /path/to/path_list.json \
+  --adc-npz /path/to/adc_cube.npz \
+  --tx-ffd-glob "/path/to/tx*.ffd" \
+  --rx-ffd-glob "/path/to/rx*.ffd" \
+  --observed-mode normalized \
+  --max-paths-per-chirp 1 \
+  --output-npz /path/to/calibration_samples.npz
 ```
 
 Validate CLI integration with bundle:
