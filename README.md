@@ -105,6 +105,12 @@ Run Jones polarization flow validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_jones_polarization_flow.py
 ```
 
+Run parity metrics contract validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_parity_metrics_contract.py
+```
+
 Run ingest pipeline (example):
 
 ```bash
@@ -138,6 +144,15 @@ Validate CLI `.ffd` integration:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_ffd.py
 ```
 
+Compare two `hybrid_estimation.npz` outputs:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/compare_hybrid_estimation_parity.py \
+  --reference-npz /path/to/reference_hybrid_estimation.npz \
+  --candidate-npz /path/to/candidate_hybrid_estimation.npz \
+  --output-json /path/to/parity_report.json
+```
+
 Fetch reference repositories:
 
 ```bash
@@ -158,3 +173,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/10_hybrid_ingest_pipeline.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/11_pcode_reimplementation_plan.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/12_paper_traceability_matrix.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/13_parity_metrics_contract.md`

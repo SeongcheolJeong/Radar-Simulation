@@ -164,3 +164,13 @@
 - Notes:
   - Jones synthesis path check pass (`rx^H * J * tx`)
   - Path-level `pol_matrix` handling pass
+
+## Parity Metrics Contract
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_parity_metrics_contract.py`
+- Result: pass
+- Notes:
+  - RD/RA parity comparator computes peaks, centroid/spread, and normalized map NMSE
+  - Good candidate scenario passes default thresholds
+  - Bad candidate scenario fails thresholds with non-zero failure list

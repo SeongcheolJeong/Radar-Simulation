@@ -37,11 +37,11 @@ Paper reference:
 | R8 | Reflection/scattering path power modeling | Partial | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/hybrid_pcode.py` (`calculate_reflecting_path_power`, `calculate_scattering_path_power`) | `.../scripts/validate_hybrid_path_power_models.py` | Physics-consistent replacement model, not paper-parameter tuned yet |
 | R9 | End-to-end integrated estimation flow (channel -> RD/RA summaries) | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/hybrid_pcode.py` (`run_hybrid_estimation_bundle`), `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/pipeline.py` | `.../scripts/validate_hybrid_pcode_bundle.py`, `.../scripts/validate_hybrid_ingest_cli_with_bundle.py` | Optional CLI output `hybrid_estimation.npz` |
 | R10 | Antenna pattern-aware modeling (paper-level higher-fidelity scenario) | Partial | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/ffd.py`, `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/antenna.py`, `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/synth.py`, `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/pipeline.py` | `.../scripts/validate_ffd_parser.py`, `.../scripts/validate_ffd_real_sample_regression.py`, `.../scripts/validate_ffd_pipeline_integration.py`, `.../scripts/validate_hybrid_ingest_cli_with_ffd.py`, `.../scripts/validate_jones_polarization_flow.py` | `.ffd` baseline + real-sample regression + Jones-flow baseline integrated; measurement-level polarization calibration is pending |
-| R11 | Measurement-level parity checks vs chamber/corridor datasets | Planned | N/A | N/A | Needs measured dataset + fixed parity metrics |
+| R11 | Measurement-level parity checks vs chamber/corridor datasets | Partial | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/parity.py`, `/Users/seongcheoljeong/Documents/Codex_test/scripts/compare_hybrid_estimation_parity.py` | `.../scripts/validate_parity_metrics_contract.py` | RD/RA parity metrics baseline implemented; measured-dataset calibration loop is pending |
 | R12 | MoCap/AMASS-style human motion dataset driven scenario automation | Partial | Ingest supports frame sequences; no native MoCap import toolchain yet | Existing frame-based validations only | Dataset-level automation not yet included |
 
 ## Next Parity Steps
 
-1. Integrate `.ffd` antenna gain into ingest path and re-run P1-P6 regression.
-2. Add parity metrics script for RD/RA peaks and spread statistics against reference output snapshots.
+1. Calibrate Jones/polarization parameters with measured chamber or trusted full-wave references.
+2. Lock scenario-specific parity thresholds and archive reference `hybrid_estimation.npz` snapshots.
 3. Add scenario packs for motion classes to emulate paper-like evaluation tables.

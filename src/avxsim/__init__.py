@@ -18,6 +18,12 @@ from .hybrid_pcode import (
     run_hybrid_estimation_bundle,
 )
 from .io import save_adc_npz, save_paths_by_chirp_json
+from .parity import (
+    DEFAULT_PARITY_THRESHOLDS,
+    compare_hybrid_estimation_npz,
+    compare_hybrid_estimation_payloads,
+    load_hybrid_estimation_npz,
+)
 from .pipeline import run_hybrid_frames_pipeline
 from .scenarios import make_constant_velocity_paths, make_static_paths, make_two_path_multipath
 from .synth import reshape_virtual_channels, synth_fmcw_tdm
@@ -39,7 +45,11 @@ __all__ = [
     "load_hybrid_paths_from_frames",
     "load_hybrid_radar_geometry",
     "Path",
+    "DEFAULT_PARITY_THRESHOLDS",
     "RadarConfig",
+    "compare_hybrid_estimation_npz",
+    "compare_hybrid_estimation_payloads",
+    "load_hybrid_estimation_npz",
     "run_hybrid_frames_pipeline",
     "save_adc_npz",
     "save_paths_by_chirp_json",

@@ -14,11 +14,13 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M2: Minimal path-to-ADC synthesis core
 - [x] M3: Deterministic validation script (3 scenarios)
 - [x] M3.5: Reference adapter scaffolding + smoke validation
-- [ ] M4: P-code replacement wave-1 (`generate_channel`, `Doppler`, `concatenated Dop`, `Angle`)
+- [x] M4: P-code replacement wave-1 (`generate_channel`, `Doppler`, `concatenated Dop`, `Angle`)
 - [x] M5: RT adapter base (HybridDynamicRT frame ingestion, first version)
 - [x] M5.5: Hybrid ingest pipeline and canonical output writer
 - [ ] M6: P-code replacement wave-2 (`path power` models and calibration)
 - [x] M7: `.ffd` parser + interpolation
+- [x] M7.5: Jones polarization flow through path/antenna/synth
+- [x] M7.6: RD/RA parity metrics comparator baseline
 - [ ] M8: Motion compensation for TDM virtual array
 
 ## Iteration Rule (One-by-One Verification)
@@ -32,4 +34,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Calibrate polarization/Jones transfer parameters against reference data and define parity metrics.
+Calibrate Jones/polarization parameters against measured or trusted reference snapshots.
