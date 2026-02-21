@@ -27,6 +27,18 @@ Run step-1 validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_step1.py
 ```
 
+Run adapter smoke validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_adapter_smoke.py
+```
+
+Fetch reference repositories:
+
+```bash
+bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
+```
+
 ## Working Docs
 
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/01_execution_plan.md`
@@ -35,3 +47,5 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/04_validation_checkpoints.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/05_workflow_rules.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/06_ffd_integration_plan.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/07_reference_repo_strategy.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/08_git_workflow.md`

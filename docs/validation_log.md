@@ -17,3 +17,12 @@
   - CP-1 pass (static target beat peak within tolerance)
   - CP-2 pass (moving target beat+doppler peak within tolerance)
   - CP-3 pass (two-path top-2 peaks detected)
+
+## Adapter Smoke
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src /Library/Developer/CommandLineTools/usr/bin/python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_adapter_smoke.py`
+- Result: pass
+- Notes:
+  - Hybrid-style record mapping to canonical path contract pass
+  - Canonical ADC to RadarSimPy view reshape pass
