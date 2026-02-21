@@ -43,9 +43,15 @@ def run_object_scene_to_radar_map(
             radar=radar,
             output_dir=output_dir,
         )
+    elif backend_type == "mesh_material_stub":
+        result = _run_backend_mesh_material_stub(
+            backend=backend,
+            radar=radar,
+            output_dir=output_dir,
+        )
     else:
         raise ValueError(
-            "supported backend.type: hybrid_frames, analytic_targets"
+            "supported backend.type: hybrid_frames, analytic_targets, mesh_material_stub"
         )
 
     adc = np.asarray(result["adc"])
@@ -239,6 +245,84 @@ def _run_backend_analytic_targets(
     }
 
 
+def _run_backend_mesh_material_stub(
+    backend: Mapping[str, Any],
+    radar: Mapping[str, Any],
+    output_dir: str,
+) -> Dict[str, Any]:
+    tx_pos = _resolve_positions_3d(backend, "tx_pos_m")
+    rx_pos = _resolve_positions_3d(backend, "rx_pos_m")
+    n_tx = int(tx_pos.shape[0])
+
+    n_chirps = _resolve_required_int(backend.get("n_chirps"), "backend.n_chirps")
+    tx_schedule = _resolve_tx_schedule(
+        raw=backend.get("tx_schedule"),
+        n_chirps=n_chirps,
+        n_tx=n_tx,
+    )
+    radar_cfg = RadarConfig(
+        fc_hz=float(radar["fc_hz"]),
+        slope_hz_per_s=float(radar["slope_hz_per_s"]),
+        fs_hz=float(radar["fs_hz"]),
+        samples_per_chirp=int(radar["samples_per_chirp"]),
+        tx_schedule=tx_schedule,
+    )
+
+    chirp_interval_s = _opt_float(backend.get("chirp_interval_s"))
+    if chirp_interval_s is None:
+        chirp_interval_s = float(radar_cfg.samples_per_chirp) / float(radar_cfg.fs_hz)
+    ego_pos = _resolve_vector3(backend.get("ego_pos_m", [0.0, 0.0, 0.0]), "backend.ego_pos_m")
+    min_range_m = max(float(backend.get("min_range_m", 0.1)), 1e-6)
+    default_material_tag = str(backend.get("default_material_tag", "default_material"))
+
+    objects_raw = backend.get("objects")
+    if not isinstance(objects_raw, Sequence) or isinstance(objects_raw, (str, bytes)):
+        raise ValueError("backend.objects must be non-empty list")
+    objects = [dict(_as_obj({"item": x}, "item")) for x in objects_raw]
+    if len(objects) == 0:
+        raise ValueError("backend.objects must be non-empty list")
+
+    materials = _as_obj(backend, "materials", required=False)
+    range_amp_exp = max(float(backend.get("range_amp_exponent", 2.0)), 0.0)
+
+    paths_by_chirp = _generate_mesh_material_paths(
+        objects=objects,
+        materials=materials,
+        default_material_tag=default_material_tag,
+        fc_hz=float(radar_cfg.fc_hz),
+        n_chirps=n_chirps,
+        chirp_interval_s=float(chirp_interval_s),
+        min_range_m=float(min_range_m),
+        range_amp_exp=float(range_amp_exp),
+        ego_pos_m=ego_pos,
+    )
+
+    adc = synth_fmcw_tdm(
+        paths_by_chirp=paths_by_chirp,
+        tx_pos_m=tx_pos,
+        rx_pos_m=rx_pos,
+        radar=radar_cfg,
+        noise_sigma=float(backend.get("noise_sigma", 0.0)),
+    )
+
+    out_root = Path(output_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+    path_json = out_root / "path_list.json"
+    adc_npz = out_root / "adc_cube.npz"
+    save_paths_by_chirp_json(paths_by_chirp, str(path_json))
+    save_adc_npz(adc, radar_cfg, tx_pos, rx_pos, str(adc_npz))
+
+    return {
+        "paths_by_chirp": paths_by_chirp,
+        "adc": adc,
+        "tx_schedule": tx_schedule,
+        "path_list_json": str(path_json),
+        "adc_cube_npz": str(adc_npz),
+        "hybrid_estimation_npz": None,
+        "frame_count": int(n_chirps),
+    }
+
+
 def _generate_analytic_paths(
     targets: Sequence[Mapping[str, Any]],
     fc_hz: float,
@@ -290,6 +374,75 @@ def _generate_analytic_paths(
     return out
 
 
+def _generate_mesh_material_paths(
+    objects: Sequence[Mapping[str, Any]],
+    materials: Mapping[str, Any],
+    default_material_tag: str,
+    fc_hz: float,
+    n_chirps: int,
+    chirp_interval_s: float,
+    min_range_m: float,
+    range_amp_exp: float,
+    ego_pos_m: np.ndarray,
+) -> List[List[RadarPath]]:
+    lam = C0 / float(fc_hz)
+    out: List[List[RadarPath]] = []
+    for k in range(int(n_chirps)):
+        t = float(k) * float(chirp_interval_s)
+        chirp_paths: List[RadarPath] = []
+        for obj_idx, obj in enumerate(objects):
+            obj_id = str(obj.get("object_id", f"obj_{int(obj_idx):03d}"))
+            material_tag = str(obj.get("material_tag", default_material_tag))
+            mat = materials.get(material_tag, {})
+            if not isinstance(mat, Mapping):
+                mat = {}
+
+            pos0 = _resolve_vector3(obj.get("centroid_m"), f"object[{obj_idx}].centroid_m")
+            vel = _resolve_velocity_vector(obj, obj_idx, ego_pos_m=ego_pos_m, pos0=pos0)
+            pos_t = pos0 + vel * t
+            rel = pos_t - ego_pos_m
+            rng = float(np.linalg.norm(rel))
+            if not np.isfinite(rng) or rng <= float(min_range_m):
+                continue
+            u = rel / rng
+
+            radial_v = float(np.dot(vel, u))
+            amp0 = _resolve_complex_scalar(obj.get("amp", 1.0))
+            rcs_scale = max(float(obj.get("rcs_scale", 1.0)), 0.0)
+            mesh_area = max(float(obj.get("mesh_area_m2", 1.0)), 0.0)
+            reflectivity = max(float(mat.get("reflectivity", 1.0)), 0.0)
+            attenuation_db = float(mat.get("attenuation_db", 0.0))
+            attenuation_lin = 10.0 ** (-attenuation_db / 20.0)
+            reflection_order = int(obj.get("reflection_order", 1))
+            if reflection_order < 0:
+                raise ValueError(f"object[{obj_idx}].reflection_order must be >= 0")
+
+            order_gain = reflectivity ** max(reflection_order - 1, 0)
+            amp_scale = (
+                attenuation_lin
+                * np.sqrt(max(reflectivity, 0.0))
+                * np.sqrt(max(rcs_scale, 0.0))
+                * np.sqrt(max(mesh_area, 0.0))
+                * order_gain
+            )
+            amp = amp0 * amp_scale / (max(rng, min_range_m) ** float(range_amp_exp))
+            path_id = str(obj.get("path_id", f"mesh_{obj_id}_c{int(k):04d}"))
+
+            chirp_paths.append(
+                RadarPath(
+                    delay_s=float(2.0 * rng / C0),
+                    doppler_hz=float(2.0 * radial_v / lam),
+                    unit_direction=(float(u[0]), float(u[1]), float(u[2])),
+                    amp=complex(amp),
+                    path_id=path_id,
+                    material_tag=material_tag,
+                    reflection_order=reflection_order,
+                )
+            )
+        out.append(chirp_paths)
+    return out
+
+
 def _resolve_positions_3d(payload: Mapping[str, Any], key: str) -> np.ndarray:
     raw = payload.get(key)
     if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
@@ -298,6 +451,33 @@ def _resolve_positions_3d(payload: Mapping[str, Any], key: str) -> np.ndarray:
     if arr.ndim != 2 or arr.shape[1] != 3 or arr.shape[0] <= 0:
         raise ValueError(f"{key} must have shape (n,3)")
     return arr
+
+
+def _resolve_vector3(value: Any, key_name: str) -> np.ndarray:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        raise ValueError(f"{key_name} must be [x,y,z]")
+    if len(value) != 3:
+        raise ValueError(f"{key_name} must have length 3")
+    arr = np.asarray(value, dtype=np.float64).reshape(3)
+    if not np.all(np.isfinite(arr)):
+        raise ValueError(f"{key_name} must be finite")
+    return arr
+
+
+def _resolve_velocity_vector(
+    obj: Mapping[str, Any],
+    obj_idx: int,
+    ego_pos_m: np.ndarray,
+    pos0: np.ndarray,
+) -> np.ndarray:
+    if "velocity_mps" in obj:
+        return _resolve_vector3(obj.get("velocity_mps"), f"object[{obj_idx}].velocity_mps")
+    radial_v = float(obj.get("radial_velocity_mps", 0.0))
+    rel0 = pos0 - ego_pos_m
+    norm = float(np.linalg.norm(rel0))
+    if norm <= 0.0:
+        return np.zeros(3, dtype=np.float64)
+    return (radial_v * rel0 / norm).astype(np.float64)
 
 
 def _resolve_tx_schedule(raw: Any, n_chirps: int, n_tx: int) -> List[int]:

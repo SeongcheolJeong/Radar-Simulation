@@ -68,6 +68,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M11.2: Native scene path generator interface + non-frame backend stub
 - [x] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
 - [x] M11.4: Multi-backend parity harness on shared scenes
+- [x] M12.0: First mesh/material-aware scene backend adapter candidate (`mesh_material_stub`)
+- [ ] M12.1: Mesh scene import adapter contract (object/material manifest from external scene assets)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -80,7 +82,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M12.0: define and implement first mesh/material-aware scene backend adapter candidate with acceptance criteria.
+Start M12.1: define mesh-scene import adapter contract and bridge to `mesh_material_stub` input manifest.
 
 ## M10.19 Decision Gate
 
@@ -213,3 +215,10 @@ M11.4 outcome (2026-02-21):
 - parity summary includes backend IDs, map paths, metrics/failures
 - validation added for `hybrid_frames` vs `analytic_targets` synthetic scene pair
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/92_multi_backend_parity_harness_contract.md`
+
+M12.0 outcome (2026-02-21):
+
+- `mesh_material_stub` backend added to `scene_pipeline`
+- object/material scene inputs now map to canonical path/ADC/radar-map outputs
+- acceptance contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/93_mesh_material_backend_candidate_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_mesh_material_backend.py`

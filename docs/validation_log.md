@@ -1018,3 +1018,12 @@
 - Notes:
   - harness executes both scene backends (`hybrid_frames`, `analytic_targets`)
   - parity summary JSON emitted with metrics/failures payload
+
+## Mesh/Material Backend Candidate (M12.0)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_mesh_material_backend.py`
+- Result: pass
+- Notes:
+  - new backend `mesh_material_stub` emits canonical artifacts from object/material scene inputs
+  - path metadata includes `path_id/material_tag/reflection_order` for object-level traceability

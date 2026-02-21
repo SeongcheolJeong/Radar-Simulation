@@ -12,6 +12,7 @@ Current backend scope:
 
 - `hybrid_frames` (scene-level adapter over HybridDynamicRT frame outputs)
 - `analytic_targets` (native non-frame backend stub for M11.2)
+- `mesh_material_stub` (mesh/material-aware candidate backend for M12.0)
 
 ## Core Entry Points
 
@@ -86,4 +87,5 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/valid
 ## Known Limits (V0)
 
 - `analytic_targets` backend is a deterministic stub (point-target kinematics), not mesh/material RT.
+- `mesh_material_stub` uses simplified material weighting rules, not full geometric ray tracing.
 - Material-tagged propagation output columns are not finalized yet.
