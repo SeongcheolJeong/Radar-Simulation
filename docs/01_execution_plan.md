@@ -59,6 +59,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.25: Fit-lock policy selection with baseline fallback (candidate search on batch summary)
 - [x] M10.26: Fit-lock candidate search orchestrator with headroom short-circuit (efficiency gate)
 - [x] M10.27: Saturated-baseline drift objective and exploratory fit ranking path
+- [x] M10.28: Constrained refit loop (preset grids) + drift-objective search ranking
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -71,7 +72,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.28: add constrained refit experiment loop to search for non-degrading candidates under drift objective.
+Start M10.29: expand constrained refit search from 1-case probe to multi-case consistency gate.
 
 ## M10.19 Decision Gate
 
@@ -140,3 +141,10 @@ M10.27 outcome (2026-02-21):
 - Xiangyu 3-case rerun-baseline drift ranking selected `reflection` as least-distorting candidate
 - recommendation explicitly marked exploratory because pass/fail degradation still exists
 - search orchestrator supports `--objective-mode drift` for non-short-circuited exploratory analysis
+
+M10.28 outcome (2026-02-21):
+
+- constrained refit loop implemented (`run_path_power_fit_batch -> run_measured_replay_fit_lock_search[drift]`) with preset-wise ranking
+- default `flat` preset grid corrected to valid positive range exponents (`range_power_exponent > 0`)
+- synthetic end-to-end validation added (`validate_run_constrained_refit_drift_search.py`)
+- Xiangyu `bms1000_512` 3-preset probe selected `flat` as best (`adopt_selected_fit_by_drift_objective`, score `0.0512`)

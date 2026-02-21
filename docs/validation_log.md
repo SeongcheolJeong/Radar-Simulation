@@ -864,3 +864,24 @@
   - objective effective mode: `drift`
   - no short-circuit despite zero improvement headroom
   - policy gate fail retained; drift selector still emitted exploratory candidate ranking
+
+## Constrained Refit Drift Search
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_constrained_refit_drift_search.py`
+- Result: pass
+- Notes:
+  - synthetic pack + provided baseline end-to-end constrained loop pass
+  - emitted row contains drift-objective selection and valid artifact paths
+  - fixed default `flat` preset to use valid positive range exponents
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_constrained_refit_drift_search.py --baseline-mode provided --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_00_bms1000_512/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --csv-case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/csv_512/bms1000_path_power_samples_512.csv --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/constrained_refit_drift_search_xiangyu_bms512_all_presets_2026_02_21.json`
+- Result: pass
+- Notes:
+  - preset count: `3` (`flat`, `balanced`, `steep`)
+  - best preset: `flat`
+  - recommendations by preset:
+    - `flat`: `adopt_selected_fit_by_drift_objective` (score `0.0512`)
+    - `balanced`: `exploratory_fit_candidate_selected_by_drift` (score `0.3435`)
+    - `steep`: `exploratory_fit_candidate_selected_by_drift` (score `132.6327`)

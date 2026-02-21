@@ -817,6 +817,27 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measu
   --output-summary-json /path/to/fit_lock_search_drift_summary.json
 ```
 
+Run constrained refit drift-search validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_constrained_refit_drift_search.py
+```
+
+Run constrained refit drift-search loop (preset grid sweep):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_constrained_refit_drift_search.py \
+  --baseline-mode provided \
+  --case caseA=/path/to/source_pack_root::/path/to/baseline_replay_report.json \
+  --csv-case caseA=/path/to/path_power_samples.csv \
+  --preset flat \
+  --preset balanced \
+  --preset steep \
+  --allow-unlocked \
+  --output-root /path/to/constrained_refit_drift_search_run \
+  --output-summary-json /path/to/constrained_refit_drift_search_summary.json
+```
+
 Fetch reference repositories:
 
 ```bash

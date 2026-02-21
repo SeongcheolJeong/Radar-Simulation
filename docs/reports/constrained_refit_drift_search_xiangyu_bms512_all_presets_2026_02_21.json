@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "baseline_mode": "provided",
+  "preset_count": 3,
+  "case_count": 1,
+  "csv_case_count": 1,
+  "rows": [
+    {
+      "preset": "flat",
+      "fit_batch_ok": true,
+      "fit_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_00_flat/path_power_fit_batch_summary.json",
+      "fit_json_count": 2,
+      "search_ok": true,
+      "search_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_00_flat/fit_lock_search_summary.json",
+      "selection_mode": "fit",
+      "selection_recommendation": "adopt_selected_fit_by_drift_objective",
+      "selected_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_00_flat/fit_batch/fits/bms1000_512_reflection.json",
+      "selected_aggregate_score": 0.051168774445033594,
+      "objective_effective": "drift",
+      "short_circuit": false
+    },
+    {
+      "preset": "balanced",
+      "fit_batch_ok": true,
+      "fit_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_01_balanced/path_power_fit_batch_summary.json",
+      "fit_json_count": 2,
+      "search_ok": true,
+      "search_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_01_balanced/fit_lock_search_summary.json",
+      "selection_mode": "fit",
+      "selection_recommendation": "exploratory_fit_candidate_selected_by_drift",
+      "selected_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_01_balanced/fit_batch/fits/bms1000_512_reflection.json",
+      "selected_aggregate_score": 0.3434903116958553,
+      "objective_effective": "drift",
+      "short_circuit": false
+    },
+    {
+      "preset": "steep",
+      "fit_batch_ok": true,
+      "fit_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_02_steep/path_power_fit_batch_summary.json",
+      "fit_json_count": 2,
+      "search_ok": true,
+      "search_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_02_steep/fit_lock_search_summary.json",
+      "selection_mode": "fit",
+      "selection_recommendation": "exploratory_fit_candidate_selected_by_drift",
+      "selected_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_02_steep/fit_batch/fits/bms1000_512_reflection.json",
+      "selected_aggregate_score": 132.63267743171437,
+      "objective_effective": "drift",
+      "short_circuit": false
+    }
+  ],
+  "best": {
+    "preset": "flat",
+    "fit_batch_ok": true,
+    "fit_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_00_flat/path_power_fit_batch_summary.json",
+    "fit_json_count": 2,
+    "search_ok": true,
+    "search_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_00_flat/fit_lock_search_summary.json",
+    "selection_mode": "fit",
+    "selection_recommendation": "adopt_selected_fit_by_drift_objective",
+    "selected_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_bms512_all_presets_v1/preset_00_flat/fit_batch/fits/bms1000_512_reflection.json",
+    "selected_aggregate_score": 0.051168774445033594,
+    "objective_effective": "drift",
+    "short_circuit": false
+  }
+}
