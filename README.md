@@ -229,6 +229,36 @@ Run parity metrics contract validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_parity_metrics_contract.py
 ```
 
+Run path-power tuning validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_tuning.py
+```
+
+Run parity drift analysis validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_parity_drift_analysis.py
+```
+
+Fit path-power parameters from measured CSV:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/fit_path_power_model_from_csv.py \
+  --input-csv /path/to/path_power_samples.csv \
+  --model scattering \
+  --output-json /path/to/path_power_fit.json
+```
+
+Analyze parity drift across replay reports:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_parity_drift_from_replay_reports.py \
+  --report baseline=/path/to/baseline_replay_report.json \
+  --report candidate=/path/to/candidate_replay_report.json \
+  --output-json /path/to/parity_drift_report.json
+```
+
 Run ingest pipeline (example):
 
 ```bash

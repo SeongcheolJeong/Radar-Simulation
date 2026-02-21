@@ -409,3 +409,28 @@
   - BMS1000 (`512`) strict replay lock pass (`locked=1`, `unlocked=0`)
   - BMS1000 (`897`) strict replay lock pass (`locked=1`, `unlocked=0`)
   - CMS1000 (`128`) strict replay lock pass (`locked=1`, `unlocked=0`)
+
+## Path Power Tuning
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_tuning.py`
+- Result: pass
+- Notes:
+  - Reflection/scattering synthetic recovery pass on grid-included ground-truth parameters
+  - CLI path (`fit_path_power_model_from_csv.py`) pass with CSV input
+
+## Parity Drift Analysis
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_parity_drift_analysis.py`
+- Result: pass
+- Notes:
+  - Multi-report quantile summary pass
+  - Baseline-relative metric drift ratio computation pass
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_parity_drift_from_replay_reports.py --report bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_outputs_policy_strict/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --report bms1000_897=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/measured_replay_outputs_policy_strict/pack_xiangyu_2019_04_09_bms1000_v1_full897/replay_report.json --report cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/measured_replay_outputs_policy_strict/pack_xiangyu_2019_04_09_cms1000_v1_128/replay_report.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/parity_drift_xiangyu_policy_strict_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Drift report generated for same-family (`bms1000_512` vs `bms1000_897`) and cross-family (`cms1000_128`) comparison
+  - Cross-family RA shape drift identified as dominant signal

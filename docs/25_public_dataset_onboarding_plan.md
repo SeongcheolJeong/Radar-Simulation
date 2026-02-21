@@ -86,3 +86,7 @@ Profile tuning CLI used:
 - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile_from_pack.py`
 - policy baseline:
   - `/Users/seongcheoljeong/Documents/Codex_test/configs/profile_tuning/xiangyu_raw_adc_v1.json`
+
+Parity drift analysis output:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/parity_drift_xiangyu_policy_strict_2026_02_21.json`

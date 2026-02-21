@@ -244,6 +244,8 @@ def calculate_reflecting_path_power(
     reflecting_coefficient: float,
     lambda_m: float,
     temp_range_m: np.ndarray,
+    range_power_exponent: float = 4.0,
+    gain_scale: float = 1.0,
     epsilon: float = 1e-6,
 ) -> np.ndarray:
     """
@@ -255,14 +257,22 @@ def calculate_reflecting_path_power(
         raise ValueError("pixel dimensions must be positive")
     if lambda_m <= 0:
         raise ValueError("lambda_m must be positive")
+    if range_power_exponent <= 0:
+        raise ValueError("range_power_exponent must be positive")
+    if gain_scale < 0:
+        raise ValueError("gain_scale must be non-negative")
 
     r = np.maximum(np.asarray(temp_range_m, dtype=np.float64).reshape(-1), float(epsilon))
     n_pix = float(pixel_width * pixel_height)
     p_t_w = _dbm_to_w(float(p_t_dbm))
     coeff = max(0.0, float(reflecting_coefficient))
 
-    # Monostatic radar-equation style scaling (R^-4 power law).
-    power = (p_t_w * coeff * (lambda_m**2)) / (((4.0 * np.pi) ** 3) * (r**4))
+    # Monostatic radar-equation style scaling with configurable range power law.
+    power = (
+        float(gain_scale)
+        * (p_t_w * coeff * (lambda_m**2))
+        / (((4.0 * np.pi) ** 3) * (r ** float(range_power_exponent)))
+    )
     power /= max(n_pix, 1.0)
     return np.sqrt(np.maximum(power, 0.0))
 
@@ -275,6 +285,11 @@ def calculate_scattering_path_power(
     lambda_m: float,
     temp_range_m: np.ndarray,
     temp_angles_rad: np.ndarray,
+    range_power_exponent: float = 4.0,
+    gain_scale: float = 1.0,
+    elevation_power: float = 2.0,
+    azimuth_mix: float = 0.6,
+    azimuth_power: float = 2.0,
     epsilon: float = 1e-6,
 ) -> np.ndarray:
     """
@@ -289,6 +304,8 @@ def calculate_scattering_path_power(
         reflecting_coefficient=scattering_coefficient,
         lambda_m=lambda_m,
         temp_range_m=temp_range_m,
+        range_power_exponent=range_power_exponent,
+        gain_scale=gain_scale,
         epsilon=epsilon,
     )
 
@@ -297,11 +314,21 @@ def calculate_scattering_path_power(
         raise ValueError("temp_angles_rad must have shape (N, >=2) with [az, el]")
     if ang.shape[0] != base.shape[0]:
         raise ValueError("angle rows must match range vector length")
+    if elevation_power < 0:
+        raise ValueError("elevation_power must be non-negative")
+    if azimuth_power < 0:
+        raise ValueError("azimuth_power must be non-negative")
+    if azimuth_mix < 0 or azimuth_mix > 1:
+        raise ValueError("azimuth_mix must be in [0, 1]")
 
     # Diffuse-like directional attenuation.
     az = ang[:, 0]
     el = ang[:, 1]
-    directional = np.maximum(np.cos(el), 0.0) ** 2 * (0.6 + 0.4 * np.cos(az) ** 2)
+    el_term = np.maximum(np.cos(el), 0.0) ** float(elevation_power)
+    az_term = float(azimuth_mix) + (1.0 - float(azimuth_mix)) * (
+        np.abs(np.cos(az)) ** float(azimuth_power)
+    )
+    directional = el_term * az_term
     return base * directional
 
 
