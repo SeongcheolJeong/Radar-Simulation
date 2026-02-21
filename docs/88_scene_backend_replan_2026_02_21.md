@@ -21,8 +21,8 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 ## New Milestone Track
 
 - [x] M11.0: Object-scene pipeline V0 (`scene_json -> path_list + adc + radar_map`)
-- [ ] M11.1: Case-level family lock manifest materialization and replay verification
-- [ ] M11.2: Native scene path generator interface (`scene state -> paths_by_chirp`) and first non-frame backend stub
+- [x] M11.1: Case-level family lock manifest materialization and replay verification
+- [x] M11.2: Native scene path generator interface (`scene state -> paths_by_chirp`) and first non-frame backend stub
 - [ ] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
 - [ ] M11.4: Multi-backend parity harness (`hybrid_frames` vs next backend) on shared synthetic scenes
 

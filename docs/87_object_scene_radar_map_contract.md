@@ -8,7 +8,10 @@ Provide one entrypoint that turns object-scene input into:
 2. raw ADC cube
 3. radar map outputs (RD/RA)
 
-Current backend scope is `hybrid_frames` (scene-level adapter over HybridDynamicRT frame outputs).
+Current backend scope:
+
+- `hybrid_frames` (scene-level adapter over HybridDynamicRT frame outputs)
+- `analytic_targets` (native non-frame backend stub for M11.2)
 
 ## Core Entry Points
 
@@ -26,7 +29,7 @@ Required top-level keys:
 - `backend`
 - `radar`
 
-`backend` required keys:
+`backend` required keys (`hybrid_frames`):
 
 - `type`: currently must be `hybrid_frames`
 - `frames_root_dir`
@@ -70,7 +73,11 @@ Under `--output-dir`:
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_to_radar_map.py
 ```
 
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_analytic_backend.py
+```
+
 ## Known Limits (V0)
 
-- Scene backend is adapter-based (`hybrid_frames`), not native mesh/material RT generation.
+- `analytic_targets` backend is a deterministic stub (point-target kinematics), not mesh/material RT.
 - Material-tagged propagation output columns are not finalized yet.

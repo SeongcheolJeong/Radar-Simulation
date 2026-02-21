@@ -974,3 +974,18 @@
   - family-level fit selection is materialized to case-level resolved pack roots
   - mixed mode validated (`fit_aware_rebuilt_pack` + `baseline_source_pack`)
   - measured replay verification artifacts emitted (`case_level_lock_manifest.json`, measured replay plan/summary)
+
+## Native Scene Path Generator Stub (M11.2)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_to_radar_map.py`
+- Result: pass
+- Notes:
+  - regression check: `hybrid_frames` backend path remains valid after backend router refactor
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_analytic_backend.py`
+- Result: pass
+- Notes:
+  - new non-frame backend `analytic_targets` emits canonical artifacts
+  - map outputs validated (`fx_dop_win`, `fx_ang`) with expected shapes

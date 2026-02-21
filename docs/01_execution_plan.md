@@ -65,7 +65,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.31: Case-partitioned fit-lock strategy evaluation (global -> family fallback)
 - [x] M11.0: Object-scene pipeline V0 (`scene_json -> path_list + adc + radar_map`)
 - [x] M11.1: Case-level family lock manifest materialization + replay verification
-- [ ] M11.2: Native scene path generator interface + non-frame backend stub
+- [x] M11.2: Native scene path generator interface + non-frame backend stub
 - [ ] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
 - [ ] M11.4: Multi-backend parity harness on shared scenes
 
@@ -80,7 +80,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M11.2: add native scene path generator interface and first non-frame backend stub.
+Start M11.3: expand propagation output schema (`path_id`, `material_tag`, reflection order) and wire through output contracts.
 
 ## M10.19 Decision Gate
 
@@ -192,3 +192,10 @@ M11.1 outcome (2026-02-21):
 - new CLI added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_case_partitioned_lock_manifest_replay.py`
 - new contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/89_case_partitioned_lock_manifest_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_case_partitioned_lock_manifest_replay.py`
+
+M11.2 outcome (2026-02-21):
+
+- `scene_pipeline` backend routing expanded to `hybrid_frames` + `analytic_targets`
+- native non-frame path generator stub added (`analytic_targets`)
+- new validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_analytic_backend.py`
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/90_native_scene_path_generator_contract.md`
