@@ -7,6 +7,7 @@ Provide one command to compare radar-map parity between two object-scene backend
 Primary use:
 
 - `hybrid_frames` vs `analytic_targets` on shared synthetic scenarios.
+- `analytic_targets` vs `sionna_rt` on matched exported-path synthetic scenarios.
 
 ## CLI
 

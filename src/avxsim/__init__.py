@@ -1,7 +1,9 @@
 from .adapters import (
     adapt_records_by_chirp,
+    adapt_sionna_paths_payload_to_paths_by_chirp,
     load_hybrid_paths_from_frames,
     load_hybrid_radar_geometry,
+    load_sionna_paths_json,
     to_radarsimpy_view,
     validate_radarsimpy_view_shape,
 )
@@ -149,6 +151,7 @@ from .xiangyu_path_power import (
 
 __all__ = [
     "adapt_records_by_chirp",
+    "adapt_sionna_paths_payload_to_paths_by_chirp",
     "apply_global_jones_matrix",
     "apply_tdm_motion_compensation_to_h",
     "build_calibration_samples",
@@ -166,6 +169,7 @@ __all__ = [
     "run_hybrid_estimation_bundle",
     "load_hybrid_paths_from_frames",
     "load_hybrid_radar_geometry",
+    "load_sionna_paths_json",
     "Path",
     "DEFAULT_ADC_KEY",
     "DEFAULT_ADC_ORDER",

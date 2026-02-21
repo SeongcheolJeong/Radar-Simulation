@@ -77,7 +77,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.6: Public multi-object scene fixture pack and deterministic replay bundle lock
 - [x] M12.7: Public OBJ sample parity onboarding and mixed-format fixture matrix lock
 - [x] M13.0: Mesh-geometry proxy extraction baseline (`centroid/area`) from OBJ/glTF metadata for auto-populated scene objects
-- [ ] M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) and canonical parity lock
+- [x] M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) and canonical parity lock
 - [ ] M13.2: PO-SBR backend adapter candidate for high-fidelity scattering path modeling
 - [ ] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
 
@@ -92,7 +92,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M13.1: integrate Sionna RT backend adapter and lock canonical parity against existing backend outputs.
+Start M13.2: add PO-SBR backend adapter candidate and lock cross-backend parity on scattering-focused synthetic scenes.
 
 ## M10.19 Decision Gate
 
@@ -294,3 +294,11 @@ M13.0 outcome (2026-02-21):
 - parser metadata expanded with auto-geometry diagnostics
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/101_mesh_geometry_proxy_extractor_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_geometry_proxy_extractor.py`
+
+M13.1 outcome (2026-02-21):
+
+- `sionna_rt` backend added (`scene -> exported Sionna-style paths -> canonical outputs`)
+- Sionna path adapter added (supports `paths_by_chirp` and flat `paths` with chirp index)
+- parity lock added for `analytic_targets` vs `sionna_rt` matched scene pair
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/102_sionna_rt_backend_contract.md`
+- validations added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_sionna_backend.py`, `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_parity_sionna_rt.py`
