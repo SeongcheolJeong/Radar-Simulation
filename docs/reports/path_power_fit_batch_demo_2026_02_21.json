@@ -1,0 +1,242 @@
+{
+  "version": 1,
+  "batch_id": "path_power_demo_batch_v1",
+  "models": [
+    "reflection",
+    "scattering"
+  ],
+  "cases": [
+    {
+      "label": "demoA",
+      "csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv"
+    },
+    {
+      "label": "demoB",
+      "csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_samples.csv"
+    }
+  ],
+  "run_count": 4,
+  "fits_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits",
+  "runs": [
+    {
+      "case_label": "demoA",
+      "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv",
+      "model": "reflection",
+      "sample_count": 8,
+      "searched_candidates": 6,
+      "best_rmse_log": 0.24672820916057359,
+      "best_mae_log": 0.23091065459974514,
+      "best_params": {
+        "range_power_exponent": 2.5,
+        "gain_scale": 9595214.603703225
+      },
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoA_reflection.json"
+    },
+    {
+      "case_label": "demoA",
+      "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv",
+      "model": "scattering",
+      "sample_count": 8,
+      "searched_candidates": 864,
+      "best_rmse_log": 0.0879109475139826,
+      "best_mae_log": 0.061171279421665795,
+      "best_params": {
+        "range_power_exponent": 2.5,
+        "elevation_power": 0.5,
+        "azimuth_mix": 0.0,
+        "azimuth_power": 2.0,
+        "gain_scale": 187455398.4450587
+      },
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoA_scattering.json"
+    },
+    {
+      "case_label": "demoB",
+      "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_samples.csv",
+      "model": "reflection",
+      "sample_count": 8,
+      "searched_candidates": 6,
+      "best_rmse_log": 0.24672820916057359,
+      "best_mae_log": 0.23091065459974514,
+      "best_params": {
+        "range_power_exponent": 2.5,
+        "gain_scale": 9595214.603703225
+      },
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoB_reflection.json"
+    },
+    {
+      "case_label": "demoB",
+      "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_samples.csv",
+      "model": "scattering",
+      "sample_count": 8,
+      "searched_candidates": 864,
+      "best_rmse_log": 0.0879109475139826,
+      "best_mae_log": 0.061171279421665795,
+      "best_params": {
+        "range_power_exponent": 2.5,
+        "elevation_power": 0.5,
+        "azimuth_mix": 0.0,
+        "azimuth_power": 2.0,
+        "gain_scale": 187455398.4450587
+      },
+      "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoB_scattering.json"
+    }
+  ],
+  "by_model": {
+    "reflection": {
+      "count": 2,
+      "ranked_by_rmse_log": [
+        {
+          "case_label": "demoA",
+          "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv",
+          "model": "reflection",
+          "sample_count": 8,
+          "searched_candidates": 6,
+          "best_rmse_log": 0.24672820916057359,
+          "best_mae_log": 0.23091065459974514,
+          "best_params": {
+            "range_power_exponent": 2.5,
+            "gain_scale": 9595214.603703225
+          },
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoA_reflection.json"
+        },
+        {
+          "case_label": "demoB",
+          "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_samples.csv",
+          "model": "reflection",
+          "sample_count": 8,
+          "searched_candidates": 6,
+          "best_rmse_log": 0.24672820916057359,
+          "best_mae_log": 0.23091065459974514,
+          "best_params": {
+            "range_power_exponent": 2.5,
+            "gain_scale": 9595214.603703225
+          },
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoB_reflection.json"
+        }
+      ],
+      "best_case": {
+        "case_label": "demoA",
+        "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv",
+        "model": "reflection",
+        "sample_count": 8,
+        "searched_candidates": 6,
+        "best_rmse_log": 0.24672820916057359,
+        "best_mae_log": 0.23091065459974514,
+        "best_params": {
+          "range_power_exponent": 2.5,
+          "gain_scale": 9595214.603703225
+        },
+        "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoA_reflection.json"
+      },
+      "param_stats": {
+        "range_power_exponent": {
+          "count": 2,
+          "mean": 2.5,
+          "std": 0.0,
+          "min": 2.5,
+          "max": 2.5
+        },
+        "gain_scale": {
+          "count": 2,
+          "mean": 9595214.603703225,
+          "std": 0.0,
+          "min": 9595214.603703225,
+          "max": 9595214.603703225
+        }
+      }
+    },
+    "scattering": {
+      "count": 2,
+      "ranked_by_rmse_log": [
+        {
+          "case_label": "demoA",
+          "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv",
+          "model": "scattering",
+          "sample_count": 8,
+          "searched_candidates": 864,
+          "best_rmse_log": 0.0879109475139826,
+          "best_mae_log": 0.061171279421665795,
+          "best_params": {
+            "range_power_exponent": 2.5,
+            "elevation_power": 0.5,
+            "azimuth_mix": 0.0,
+            "azimuth_power": 2.0,
+            "gain_scale": 187455398.4450587
+          },
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoA_scattering.json"
+        },
+        {
+          "case_label": "demoB",
+          "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_samples.csv",
+          "model": "scattering",
+          "sample_count": 8,
+          "searched_candidates": 864,
+          "best_rmse_log": 0.0879109475139826,
+          "best_mae_log": 0.061171279421665795,
+          "best_params": {
+            "range_power_exponent": 2.5,
+            "elevation_power": 0.5,
+            "azimuth_mix": 0.0,
+            "azimuth_power": 2.0,
+            "gain_scale": 187455398.4450587
+          },
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoB_scattering.json"
+        }
+      ],
+      "best_case": {
+        "case_label": "demoA",
+        "input_csv": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv",
+        "model": "scattering",
+        "sample_count": 8,
+        "searched_candidates": 864,
+        "best_rmse_log": 0.0879109475139826,
+        "best_mae_log": 0.061171279421665795,
+        "best_params": {
+          "range_power_exponent": 2.5,
+          "elevation_power": 0.5,
+          "azimuth_mix": 0.0,
+          "azimuth_power": 2.0,
+          "gain_scale": 187455398.4450587
+        },
+        "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run/fits/demoA_scattering.json"
+      },
+      "param_stats": {
+        "range_power_exponent": {
+          "count": 2,
+          "mean": 2.5,
+          "std": 0.0,
+          "min": 2.5,
+          "max": 2.5
+        },
+        "elevation_power": {
+          "count": 2,
+          "mean": 0.5,
+          "std": 0.0,
+          "min": 0.5,
+          "max": 0.5
+        },
+        "azimuth_mix": {
+          "count": 2,
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "azimuth_power": {
+          "count": 2,
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0
+        },
+        "gain_scale": {
+          "count": 2,
+          "mean": 187455398.4450587,
+          "std": 0.0,
+          "min": 187455398.4450587,
+          "max": 187455398.4450587
+        }
+      }
+    }
+  }
+}

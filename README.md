@@ -259,6 +259,12 @@ Run end-to-end path-power fit cycle validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_cycle.py
 ```
 
+Run path-power fit batch validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_batch.py
+```
+
 Fit path-power parameters from measured CSV:
 
 ```bash
@@ -291,6 +297,19 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_
   --path-power-apply-mode replace \
   --work-root /path/to/cycle_work \
   --scenario-id cycle_demo
+```
+
+Run path-power fit batch (`multi-CSV x multi-model`):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_batch.py \
+  --csv-case caseA=/path/to/case_a_path_power_samples.csv \
+  --csv-case caseB=/path/to/case_b_path_power_samples.csv \
+  --model reflection \
+  --model scattering \
+  --batch-id my_batch \
+  --output-root /path/to/fit_batch_out \
+  --output-summary-json /path/to/path_power_fit_batch_summary.json
 ```
 
 Analyze parity drift across replay reports:

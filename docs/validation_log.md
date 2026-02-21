@@ -494,3 +494,19 @@
 - Notes:
   - Pass-rate cross-family gap reduced from `0.083984` to `0.000000`
   - Selected RA/RD metric quantile cross-family gaps unchanged in this replay set
+
+## Path Power Fit Batch
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_batch.py`
+- Result: pass
+- Notes:
+  - Multi-case, multi-model fit batch validation pass
+  - Per-case fit JSON emission and batch summary checks pass
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_batch.py --csv-case demoA=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/path_power_samples.csv --csv-case demoB=/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_samples.csv --model reflection --model scattering --batch-id path_power_demo_batch_v1 --top-k 10 --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/fit_batch_run --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_batch_demo_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Reflection/scattering batch fit summary generated (`run_count=4`)
+  - Demonstrates batch experiment workflow before real measured CSV onboarding
