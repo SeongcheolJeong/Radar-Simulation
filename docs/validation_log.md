@@ -1232,3 +1232,37 @@
 - Result: pass
 - Notes:
   - `sionna_rt` regression remains stable after periodic lock module integration
+
+## Scene Runtime Coupling Feasibility (M14.0)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_runtime_coupling.py`
+- Result: pass
+- Notes:
+  - runtime provider execution path validated for `sionna_rt` and `po_sbr_rt` without pre-exported path JSON
+  - runtime failure policy validated (`error`, `use_static`) including missing-module fallback
+  - `runtime_resolution` metadata emitted for runtime/debug triage
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_sionna_backend.py`
+- Result: pass
+- Notes:
+  - existing static payload regression remains stable after runtime-coupling integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_po_sbr_backend.py`
+- Result: pass
+- Notes:
+  - existing static payload regression remains stable after runtime-coupling integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_parity_sionna_rt.py`
+- Result: pass
+- Notes:
+  - parity harness remains stable after runtime-coupling integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_parity_po_sbr_rt.py`
+- Result: pass
+- Notes:
+  - parity harness remains stable after runtime-coupling integration

@@ -80,7 +80,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) and canonical parity lock
 - [x] M13.2: PO-SBR backend adapter candidate for high-fidelity scattering path modeling
 - [x] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
-- [ ] M14.0: Direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
+- [x] M14.0: Direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
+- [ ] M14.1: Real runtime engine binding pilot (`sionna`/`po-sbr` external env contract + first real scene run)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -93,7 +94,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M14.0: prototype direct Sionna/PO-SBR runtime coupling path and define fallback policy.
+Start M14.1: define external runtime environment contract and run first real scene pilot on available backend.
 
 ## M10.19 Decision Gate
 
@@ -319,3 +320,11 @@ M13.3 outcome (2026-02-21):
 - gate summary now records RadarSimPy runtime availability diagnostics
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/104_radarsimpy_periodic_lock_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_radarsimpy_periodic_parity_lock.py`
+
+M14.0 outcome (2026-02-21):
+
+- runtime-coupling utility added (`runtime_provider` dynamic import + required-module probe)
+- `sionna_rt` / `po_sbr_rt` backends now support runtime provider execution without pre-exported path JSON
+- deterministic runtime failure policy added (`error` vs `use_static`) with metadata trace (`runtime_resolution`)
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/105_scene_runtime_coupling_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_runtime_coupling.py`

@@ -32,6 +32,7 @@ Use references via local adapters, not by merging third-party internals into cor
 2. M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) with canonical output parity gate.
 3. M13.2: PO-SBR backend adapter for higher-fidelity scattering/path-power behavior.
 4. M13.3: RadarSimPy parity-lock automation for periodic signal-chain drift checks (optional hard gate).
+5. M14.0: runtime provider coupling path (`scene -> runtime provider -> canonical paths`) with deterministic fallback policy.
 
 ## Current Readiness Assessment
 
@@ -41,8 +42,9 @@ Use references via local adapters, not by merging third-party internals into cor
   - `.ffd`/Jones calibration path
   - public asset onboarding (`glTF`, `OBJ`) and deterministic fixture bundles
   - exported-path adapters: `sionna_rt`, `po_sbr_rt` + parity locks
+  - direct runtime provider coupling path for `sionna_rt`/`po_sbr_rt` (no pre-exported path JSON required)
 - Remaining high-impact physics/backend work:
-  - direct Sionna/PO-SBR runtime coupling (without pre-exported path payload)
+  - real external runtime environment binding for `sionna` and `po-sbr` engines
   - scattering-physics fidelity tuning against measured scenarios
 - RadarSimPy position:
   - useful as regression oracle

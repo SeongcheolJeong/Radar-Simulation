@@ -111,6 +111,11 @@ from .radarsimpy_periodic_lock import (
     load_radarsimpy_periodic_manifest_json,
     save_radarsimpy_periodic_summary_json,
 )
+from .runtime_coupling import (
+    detect_runtime_modules,
+    invoke_runtime_paths_provider,
+    load_runtime_provider_callable,
+)
 from .replay_batch import (
     load_replay_manifest_json,
     run_replay_cases,
@@ -218,6 +223,9 @@ __all__ = [
     "run_replay_manifest",
     "run_object_scene_to_radar_map",
     "run_object_scene_to_radar_map_json",
+    "detect_runtime_modules",
+    "invoke_runtime_paths_provider",
+    "load_runtime_provider_callable",
     "DEFAULT_SIDECAR_PROFILE",
     "DEFAULT_SIDECAR_VERSION",
     "build_asset_manifest_from_sidecar",

@@ -14,6 +14,7 @@ from .adc_pack_builder import estimate_rd_ra_from_adc
 from .constants import C0
 from .io import save_adc_npz, save_paths_by_chirp_json
 from .pipeline import run_hybrid_frames_pipeline
+from .runtime_coupling import invoke_runtime_paths_provider
 from .synth import synth_fmcw_tdm
 from .types import Path as RadarPath
 from .types import RadarConfig
@@ -94,6 +95,8 @@ def run_object_scene_to_radar_map(
         "tx_schedule": [int(x) for x in result["tx_schedule"]],
         "rd_ra_metadata": est["metadata"],
     }
+    if "runtime_resolution" in result:
+        meta["runtime_resolution"] = result["runtime_resolution"]
     np.savez_compressed(
         str(map_npz),
         fx_dop_win=np.asarray(est["fx_dop_win"], dtype=np.float64),
@@ -363,20 +366,22 @@ def _run_backend_sionna_rt(
         samples_per_chirp=int(radar["samples_per_chirp"]),
         tx_schedule=tx_schedule,
     )
-
-    raw_paths_payload = backend.get("paths_payload")
-    paths_json = _opt_str(backend.get("sionna_paths_json"))
-    if (raw_paths_payload is None) and (paths_json is None):
-        raise ValueError("sionna_rt backend requires one of: paths_payload, sionna_paths_json")
-    if (raw_paths_payload is not None) and (paths_json is not None):
-        raise ValueError("sionna_rt backend allows only one of: paths_payload, sionna_paths_json")
-
-    if paths_json is not None:
-        paths_payload = load_sionna_paths_json(paths_json)
-    else:
-        if not isinstance(raw_paths_payload, Mapping):
-            raise ValueError("backend.paths_payload must be object when provided")
-        paths_payload = dict(raw_paths_payload)
+    static_payload = _resolve_optional_static_paths_payload(
+        backend=backend,
+        backend_type="sionna_rt",
+        paths_json_key="sionna_paths_json",
+        json_loader=load_sionna_paths_json,
+    )
+    paths_payload, runtime_resolution = _resolve_paths_payload_with_runtime(
+        backend=backend,
+        radar=radar,
+        backend_type="sionna_rt",
+        n_chirps=int(n_chirps),
+        fc_hz=float(radar_cfg.fc_hz),
+        static_payload=static_payload,
+        static_requirement_label="paths_payload, sionna_paths_json",
+        default_runtime_required_modules=("sionna", "tensorflow"),
+    )
 
     paths_by_chirp = adapt_sionna_paths_payload_to_paths_by_chirp(
         payload=paths_payload,
@@ -406,6 +411,7 @@ def _run_backend_sionna_rt(
         "adc_cube_npz": str(adc_npz),
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
+        "runtime_resolution": runtime_resolution,
     }
 
 
@@ -431,20 +437,22 @@ def _run_backend_po_sbr_rt(
         samples_per_chirp=int(radar["samples_per_chirp"]),
         tx_schedule=tx_schedule,
     )
-
-    raw_paths_payload = backend.get("paths_payload")
-    paths_json = _opt_str(backend.get("po_sbr_paths_json"))
-    if (raw_paths_payload is None) and (paths_json is None):
-        raise ValueError("po_sbr_rt backend requires one of: paths_payload, po_sbr_paths_json")
-    if (raw_paths_payload is not None) and (paths_json is not None):
-        raise ValueError("po_sbr_rt backend allows only one of: paths_payload, po_sbr_paths_json")
-
-    if paths_json is not None:
-        paths_payload = load_po_sbr_paths_json(paths_json)
-    else:
-        if not isinstance(raw_paths_payload, Mapping):
-            raise ValueError("backend.paths_payload must be object when provided")
-        paths_payload = dict(raw_paths_payload)
+    static_payload = _resolve_optional_static_paths_payload(
+        backend=backend,
+        backend_type="po_sbr_rt",
+        paths_json_key="po_sbr_paths_json",
+        json_loader=load_po_sbr_paths_json,
+    )
+    paths_payload, runtime_resolution = _resolve_paths_payload_with_runtime(
+        backend=backend,
+        radar=radar,
+        backend_type="po_sbr_rt",
+        n_chirps=int(n_chirps),
+        fc_hz=float(radar_cfg.fc_hz),
+        static_payload=static_payload,
+        static_requirement_label="paths_payload, po_sbr_paths_json",
+        default_runtime_required_modules=(),
+    )
 
     paths_by_chirp = adapt_po_sbr_paths_payload_to_paths_by_chirp(
         payload=paths_payload,
@@ -475,7 +483,104 @@ def _run_backend_po_sbr_rt(
         "adc_cube_npz": str(adc_npz),
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
+        "runtime_resolution": runtime_resolution,
     }
+
+
+def _resolve_optional_static_paths_payload(
+    backend: Mapping[str, Any],
+    backend_type: str,
+    paths_json_key: str,
+    json_loader: Any,
+) -> Optional[Dict[str, Any]]:
+    raw_paths_payload = backend.get("paths_payload")
+    paths_json = _opt_str(backend.get(paths_json_key))
+    if (raw_paths_payload is not None) and (paths_json is not None):
+        raise ValueError(
+            f"{backend_type} backend allows only one of: paths_payload, {paths_json_key}"
+        )
+    if paths_json is not None:
+        payload = json_loader(paths_json)
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{paths_json_key} must resolve to object payload")
+        return dict(payload)
+    if raw_paths_payload is not None:
+        if not isinstance(raw_paths_payload, Mapping):
+            raise ValueError("backend.paths_payload must be object when provided")
+        return dict(raw_paths_payload)
+    return None
+
+
+def _resolve_paths_payload_with_runtime(
+    backend: Mapping[str, Any],
+    radar: Mapping[str, Any],
+    backend_type: str,
+    n_chirps: int,
+    fc_hz: float,
+    static_payload: Optional[Mapping[str, Any]],
+    static_requirement_label: str,
+    default_runtime_required_modules: Sequence[str],
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    runtime_provider = _opt_str(backend.get("runtime_provider"))
+    if runtime_provider is None:
+        if static_payload is None:
+            raise ValueError(
+                f"{backend_type} backend requires one of: {static_requirement_label}, runtime_provider"
+            )
+        return (
+            dict(static_payload),
+            {
+                "mode": "static_only",
+                "backend_type": backend_type,
+                "runtime_provider": None,
+            },
+        )
+
+    runtime_required_modules = _resolve_optional_string_list(
+        backend.get("runtime_required_modules"),
+        key_name="backend.runtime_required_modules",
+    )
+    if runtime_required_modules is None:
+        runtime_required_modules = tuple(str(x) for x in default_runtime_required_modules)
+    runtime_input = _as_obj(backend, "runtime_input", required=False)
+    runtime_context = {
+        "backend_type": backend_type,
+        "n_chirps": int(n_chirps),
+        "fc_hz": float(fc_hz),
+        "radar": dict(radar),
+        "backend": dict(backend),
+        "runtime_input": runtime_input,
+    }
+    try:
+        payload, runtime_info = invoke_runtime_paths_provider(
+            provider_spec=runtime_provider,
+            context=runtime_context,
+            required_modules=runtime_required_modules,
+        )
+        return (
+            dict(payload),
+            {
+                "mode": "runtime_provider",
+                "backend_type": backend_type,
+                "runtime_provider": runtime_provider,
+                "runtime_info": runtime_info,
+            },
+        )
+    except Exception as exc:
+        runtime_policy = str(backend.get("runtime_failure_policy", "error")).strip().lower()
+        if runtime_policy not in ("error", "use_static"):
+            raise ValueError("runtime_failure_policy must be one of: error, use_static")
+        if (runtime_policy == "use_static") and (static_payload is not None):
+            return (
+                dict(static_payload),
+                {
+                    "mode": "runtime_failed_fallback_static",
+                    "backend_type": backend_type,
+                    "runtime_provider": runtime_provider,
+                    "runtime_error": f"{type(exc).__name__}: {exc}",
+                },
+            )
+        raise ValueError(f"{backend_type} runtime provider failed: {exc}") from exc
 
 
 def _generate_analytic_paths(
@@ -692,6 +797,15 @@ def _resolve_float_pair(value: Any) -> Tuple[float, float]:
     if len(value) != 2:
         raise ValueError("expected exactly 2 values")
     return (float(value[0]), float(value[1]))
+
+
+def _resolve_optional_string_list(value: Any, key_name: str) -> Optional[Tuple[str, ...]]:
+    if value is None:
+        return None
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        raise ValueError(f"{key_name} must be list[str]")
+    out = tuple(str(x).strip() for x in value if str(x).strip() != "")
+    return out
 
 
 def _as_obj(payload: Mapping[str, Any], key: str, required: bool = True) -> Dict[str, Any]:
