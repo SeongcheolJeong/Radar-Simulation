@@ -20,6 +20,7 @@ Required keys:
 - one of:
   - `po_sbr_paths_json`
   - `paths_payload`
+  - `runtime_provider` (`module:function`, direct runtime coupling path)
 
 `po_sbr_paths_json` / `paths_payload` accepted forms:
 
@@ -40,6 +41,13 @@ Supported per-path forms:
 - amplitude:
   - `amp`, `amp_complex`, `complex_gain`, or
   - PO-SBR proxy tuple (`rcs_dbsm`, `path_loss_db`, `bounce_loss_db`, `phase_rad`)
+
+## Runtime Coupling Note
+
+`po_sbr_rt` backend supports direct runtime coupling via `runtime_provider` (M14.0+).
+Detailed runtime/fallback policy contract is documented in:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/105_scene_runtime_coupling_contract.md`
 
 ## Code Paths
 

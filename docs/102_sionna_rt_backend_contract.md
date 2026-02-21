@@ -20,6 +20,7 @@ Required keys:
 - one of:
   - `sionna_paths_json` (JSON file path)
   - `paths_payload` (inline JSON object)
+  - `runtime_provider` (`module:function`, direct runtime coupling path)
 
 `sionna_paths_json` / `paths_payload` accepted forms:
 
@@ -35,6 +36,13 @@ Per-path canonical fields:
 - `unit_direction` or `u` (`[ux,uy,uz]`)
 - `amp` / `amp_complex` / `complex_gain`
 - optional `path_id`, `material_tag`, `reflection_order`, `pol_matrix`
+
+## Runtime Coupling Note
+
+`sionna_rt` backend supports direct runtime coupling via `runtime_provider` (M14.0+).
+Detailed runtime/fallback policy contract is documented in:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/105_scene_runtime_coupling_contract.md`
 
 ## Code Paths
 
