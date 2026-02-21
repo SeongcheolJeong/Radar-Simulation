@@ -51,6 +51,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.17: RMSE-lock vs cross-family-lock A/B comparator replay report (reflection/scattering)
 - [x] M10.18: Mixed lock publish from A/B reports (`reflection keep`, `scattering cross-family`) + targeted comparator verification
 - [x] M10.19: Measured replay fit-change impact gate (dependency audit) + Xiangyu no-op skip decision
+- [x] M10.20: Fit-aware measured pack rebuild path + real-plan replay impact confirmation (`bms1000_run1`)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -63,7 +64,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.20: design fit-aware measured candidate generation path (or explicit scope split) if measured replay impact is required.
+Start M10.21: scale fit-aware replay comparison to target plans (`bms1000_512`, `bms1000_full897`, `cms1000_128`) with stop gate after 2 no-gain attempts.
 
 ## M10.19 Decision Gate
 
@@ -81,3 +82,8 @@ M10.19 outcome (2026-02-21):
 
 - measured replay plans show no dependency on selected fit JSON assets
 - rerun skipped as no-op per workflow Value-Gate/Repetition rules
+
+M10.20 outcome (2026-02-21):
+
+- fit-aware pack rebuild path implemented from existing packs
+- representative real plan (`bms1000_run1`) replay became fit-sensitive (`pass_count 1 -> 12`)

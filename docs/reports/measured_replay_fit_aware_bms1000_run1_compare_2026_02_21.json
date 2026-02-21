@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "baseline": {
+    "measured_replay_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run1/measured_replay_summary.json",
+    "overall_lock_pass": false,
+    "replay_summary": {
+      "case_count": 1,
+      "candidate_count": 128,
+      "pass_count": 1,
+      "fail_count": 127,
+      "pass_rate": 0.0078125
+    }
+  },
+  "fit_aware": {
+    "measured_replay_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/measured_replay_summary.json",
+    "overall_lock_pass": false,
+    "replay_summary": {
+      "case_count": 1,
+      "candidate_count": 128,
+      "pass_count": 12,
+      "fail_count": 116,
+      "pass_rate": 0.09375
+    }
+  },
+  "comparison": {
+    "pass_count_delta": 11,
+    "fail_count_delta": -11,
+    "pass_rate_delta": 0.0859375,
+    "candidate_pass_status_changed": 11,
+    "metric_mean_deltas_fit_minus_base": {
+      "ra_shape_nmse": {
+        "mean_delta": -0.09307796211059349,
+        "min_delta": -0.22225889392371603,
+        "max_delta": 0.0,
+        "count": 128
+      },
+      "rd_shape_nmse": {
+        "mean_delta": -0.14030936381780235,
+        "min_delta": -0.7128587134582138,
+        "max_delta": 0.0,
+        "count": 128
+      },
+      "ra_peak_power_db_abs_error": {
+        "mean_delta": 0.021622250148200628,
+        "min_delta": -1.4210854715202004e-14,
+        "max_delta": 0.05293537572681828,
+        "count": 128
+      },
+      "rd_peak_power_db_abs_error": {
+        "mean_delta": -0.016917965916382616,
+        "min_delta": -1.3075420281357424,
+        "max_delta": 1.4210854715202004e-14,
+        "count": 128
+      }
+    }
+  }
+}

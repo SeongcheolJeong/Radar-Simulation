@@ -693,3 +693,34 @@
 - Notes:
   - `plan_count=4`, `impacted_plan_count=0`
   - recommendation: `skip_measured_replay_rerun_due_to_no_fit_dependency`
+
+## Fit-Aware Measured Pack Rebuild
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_build_fit_aware_pack_from_existing_pack.py`
+- Result: pass
+- Notes:
+  - Fit-aware rebuild from existing pack validation pass
+  - Output candidate metadata includes `path_power_fit_proxy`
+  - Source profile parity thresholds preserved
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_fit_aware_pack_from_existing_pack.py --source-pack-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run1/packs/pack_xiangyu_2019_04_09_bms1000_v1 --output-pack-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/packs/pack_xiangyu_2019_04_09_bms1000_v1_fitaware --path-power-fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/fit_aware_pack_summary.json`
+- Result: pass
+- Notes:
+  - Real pack rebuild completed (`selected_candidate_count=128`, `adc_order=scrt`)
+  - Fit-aware proxy path bound to mixed scattering fit
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_measured_replay_plan.py --packs-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/packs --output-plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/measured_replay_plan.json && PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_execution.py --plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/measured_replay_plan.json --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/measured_replay_outputs --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/measured_replay_summary.json --allow-unlocked`
+- Result: pass
+- Notes:
+  - Baseline (`run1`) replay pass/fail: `1/127`
+  - Fit-aware replay pass/fail: `12/116` (pass_count `+11`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_measured_replay_fit_change_impact.py --plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/measured_replay_plan.json --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/measured_replay_fit_change_impact_fit_aware_bms1000_run1_2026_02_21.json`
+- Result: pass
+- Notes:
+  - `predicted_noop_all_plans=false`
+  - recommendation: `rerun_required_for_impacted_plans`

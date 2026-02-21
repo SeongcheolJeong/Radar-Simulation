@@ -676,6 +676,12 @@ Run measured-replay fit-change impact gate validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_fit_change_impact.py
 ```
 
+Run fit-aware measured-pack rebuild validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_build_fit_aware_pack_from_existing_pack.py
+```
+
 Fetch reference repositories:
 
 ```bash

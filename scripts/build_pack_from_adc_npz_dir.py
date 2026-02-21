@@ -26,6 +26,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--doppler-window", default="hann")
     p.add_argument("--angle-window", default="hann")
     p.add_argument("--range-bin-limit", type=int, default=None)
+    p.add_argument(
+        "--path-power-fit-json",
+        default=None,
+        help="Optional fit JSON for measured-pack RD/RA proxy weighting",
+    )
     return p.parse_args()
 
 
@@ -63,12 +68,14 @@ def main() -> None:
         doppler_window=args.doppler_window,
         angle_window=args.angle_window,
         range_bin_limit=args.range_bin_limit,
+        path_power_fit_json=args.path_power_fit_json,
     )
 
     print("ADC pack build completed.")
     print(f"  scenario_id: {summary['scenario_id']}")
     print(f"  adc_files: {len(files)}")
     print(f"  candidate_count: {summary['candidate_count']}")
+    print(f"  path_power_fit_json: {summary.get('path_power_fit_json')}")
     print(f"  output_pack_root: {summary['output_pack_root']}")
     print(f"  replay_manifest_json: {summary['replay_manifest_json']}")
 

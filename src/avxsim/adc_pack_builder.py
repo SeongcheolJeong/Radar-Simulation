@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 import numpy as np
 
 from .parity import DEFAULT_PARITY_THRESHOLDS
+from .path_power_tuning import load_path_power_fit_json
 from .replay_manifest_builder import (
     build_replay_manifest_case,
     build_replay_manifest_payload,
@@ -142,6 +143,65 @@ def estimate_rd_ra_from_adc(
     }
 
 
+def apply_path_power_fit_proxy_to_estimation(
+    fx_dop_win: np.ndarray,
+    fx_ang: np.ndarray,
+    fit_payload: Mapping[str, Any],
+) -> Dict[str, Any]:
+    rd = np.asarray(fx_dop_win, dtype=np.float64)
+    ra = np.asarray(fx_ang, dtype=np.float64)
+    if rd.ndim != 2 or ra.ndim != 2:
+        raise ValueError("fx_dop_win/fx_ang must be 2D")
+    if rd.shape[1] != ra.shape[1]:
+        raise ValueError("range-bin dimension must match between RD/RA")
+
+    fit = fit_payload.get("fit", None)
+    if not isinstance(fit, Mapping):
+        raise ValueError("fit payload missing fit object")
+    model = str(fit.get("model", "")).strip().lower()
+    if model not in {"reflection", "scattering"}:
+        raise ValueError("fit.model must be reflection or scattering")
+    params = fit.get("best_params", {})
+    if not isinstance(params, Mapping):
+        raise ValueError("fit.best_params must be object")
+
+    n_range = int(rd.shape[1])
+    n_angle = int(ra.shape[0])
+    tiny = float(np.finfo(np.float64).tiny)
+
+    # Range proxy: compact dynamic span [1, 2] to avoid numeric blow-ups on large exponents.
+    r = 1.0 + np.linspace(0.0, 1.0, num=n_range, dtype=np.float64)
+    range_exp = max(float(params.get("range_power_exponent", 4.0)), 0.0)
+    wr = np.power(np.maximum(r, tiny), -range_exp)
+    wr = _normalize_weight(wr)
+
+    wa = np.ones(n_angle, dtype=np.float64)
+    if model == "scattering":
+        az = np.linspace(-np.pi / 2.0, np.pi / 2.0, num=n_angle, dtype=np.float64)
+        az_mix = float(np.clip(float(params.get("azimuth_mix", 0.6)), 0.0, 1.0))
+        az_pow = max(float(params.get("azimuth_power", 2.0)), 0.0)
+        front = np.power(np.maximum(np.abs(np.cos(az)), tiny), az_pow)
+        side = np.power(np.maximum(np.abs(np.sin(az)), tiny), az_pow)
+        wa = _normalize_weight((az_mix * front) + ((1.0 - az_mix) * side))
+
+    rd_out = np.maximum(rd * wr[None, :], tiny)
+    ra_out = np.maximum(ra * (wa[:, None] * wr[None, :]), tiny)
+    return {
+        "fx_dop_win": rd_out,
+        "fx_ang": ra_out,
+        "metadata": {
+            "enabled": True,
+            "fit_model": model,
+            "best_params": {str(k): float(v) for k, v in params.items()},
+            "range_weight_min": float(np.min(wr)),
+            "range_weight_max": float(np.max(wr)),
+            "angle_weight_min": float(np.min(wa)),
+            "angle_weight_max": float(np.max(wa)),
+            "note": "proxy weighting on RD/RA maps for measured-pack fit sensitivity",
+        },
+    }
+
+
 def build_measured_pack_from_adc_npz(
     adc_npz_files: Sequence[str],
     output_pack_root: str,
@@ -157,6 +217,7 @@ def build_measured_pack_from_adc_npz(
     angle_window: str = "hann",
     range_bin_limit: Optional[int] = None,
     include_candidate_metadata: bool = True,
+    path_power_fit_json: Optional[str] = None,
 ) -> Dict[str, Any]:
     if len(adc_npz_files) == 0:
         raise ValueError("adc_npz_files must be non-empty")
@@ -168,6 +229,10 @@ def build_measured_pack_from_adc_npz(
 
     cand_dir = out_root / "candidates"
     cand_dir.mkdir(parents=True, exist_ok=True)
+
+    fit_payload = (
+        None if path_power_fit_json is None else load_path_power_fit_json(str(path_power_fit_json))
+    )
 
     candidate_rows: List[Dict[str, Any]] = []
     for i, src in enumerate(adc_npz_files):
@@ -183,22 +248,34 @@ def build_measured_pack_from_adc_npz(
             angle_window=angle_window,
             range_bin_limit=range_bin_limit,
         )
+        fit_proxy_meta = None
+        if fit_payload is not None:
+            shaped = apply_path_power_fit_proxy_to_estimation(
+                fx_dop_win=est["fx_dop_win"],
+                fx_ang=est["fx_ang"],
+                fit_payload=fit_payload,
+            )
+            est["fx_dop_win"] = np.asarray(shaped["fx_dop_win"], dtype=np.float64)
+            est["fx_ang"] = np.asarray(shaped["fx_ang"], dtype=np.float64)
+            fit_proxy_meta = dict(shaped["metadata"])
+            fit_proxy_meta["fit_json"] = str(path_power_fit_json)
 
         base = Path(src).stem
         out_npz = cand_dir / f"{i:04d}_{base}.npz"
+        meta_json = {
+            "source_adc_npz": str(src),
+            "adc_order": str(adc_order),
+            "adc_key": str(meta.get("adc_key")),
+            "adc_shape": list(np.asarray(adc_sctr).shape),
+            "estimation": est["metadata"],
+        }
+        if fit_proxy_meta is not None:
+            meta_json["path_power_fit_proxy"] = fit_proxy_meta
         np.savez_compressed(
             str(out_npz),
             fx_dop_win=est["fx_dop_win"],
             fx_ang=est["fx_ang"],
-            metadata_json=json.dumps(
-                {
-                    "source_adc_npz": str(src),
-                    "adc_order": str(adc_order),
-                    "adc_key": str(meta.get("adc_key")),
-                    "adc_shape": list(np.asarray(adc_sctr).shape),
-                    "estimation": est["metadata"],
-                }
-            ),
+            metadata_json=json.dumps(meta_json),
         )
 
         row = {
@@ -206,11 +283,14 @@ def build_measured_pack_from_adc_npz(
             "estimation_npz": str(out_npz),
         }
         if include_candidate_metadata:
-            row["metadata"] = {
+            row_meta = {
                 "source_adc_npz": str(src),
                 "adc_info": meta,
                 "estimation": est["metadata"],
             }
+            if fit_proxy_meta is not None:
+                row_meta["path_power_fit_proxy"] = fit_proxy_meta
+            row["metadata"] = row_meta
         candidate_rows.append(row)
 
     ref_idx = int(reference_index)
@@ -269,6 +349,7 @@ def build_measured_pack_from_adc_npz(
         "candidate_count": int(len(candidate_rows)),
         "reference_index": int(ref_idx),
         "reference_estimation_npz": str(reference_npz),
+        "path_power_fit_json": None if path_power_fit_json is None else str(path_power_fit_json),
         "profile_json": str(profile_json),
         "replay_manifest_json": str(replay_manifest_json),
         "lock_policy_json": str(lock_policy_json),
@@ -287,3 +368,13 @@ def _window(length: int, kind: str) -> np.ndarray:
     if k == "hamming":
         return np.hamming(n).astype(np.float64)
     raise ValueError(f"unsupported window kind: {kind}")
+
+
+def _normalize_weight(w: np.ndarray) -> np.ndarray:
+    arr = np.maximum(np.asarray(w, dtype=np.float64), np.finfo(np.float64).tiny)
+    norm = float(np.median(arr))
+    if not np.isfinite(norm) or norm <= 0.0:
+        norm = float(np.mean(arr))
+    if not np.isfinite(norm) or norm <= 0.0:
+        norm = 1.0
+    return arr / norm

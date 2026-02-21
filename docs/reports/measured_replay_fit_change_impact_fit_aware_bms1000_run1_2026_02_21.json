@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "fit_dirs": [
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed"
+  ],
+  "fit_tokens": [
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed",
+    "selected_fits_mixed"
+  ],
+  "plan_count": 1,
+  "impacted_plan_count": 1,
+  "predicted_noop_all_plans": false,
+  "plans": [
+    {
+      "plan_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/measured_replay_plan.json",
+      "pack_count": 1,
+      "candidate_count": 128,
+      "impacted_pack_count": 1,
+      "predicted_noop_for_fit_change": false,
+      "packs": [
+        {
+          "pack_index": 0,
+          "pack_id": "pack_xiangyu_2019_04_09_bms1000_v1_fitaware",
+          "replay_manifest_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/packs/pack_xiangyu_2019_04_09_bms1000_v1_fitaware/replay_manifest.json",
+          "profile_jsons": [
+            "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_bms1000_run1_scattering_mixed/packs/pack_xiangyu_2019_04_09_bms1000_v1_fitaware/scenario_profile.json"
+          ],
+          "candidate_count": 128,
+          "fit_dependency_detected": true,
+          "evidence_count": 258,
+          "evidence": [
+            {
+              "trail": "manifest.cases[0].candidates[0].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[0].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[1].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[1].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[2].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[2].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[3].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[3].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[4].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[4].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[5].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[5].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[6].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[6].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[7].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[7].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[8].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[8].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[9].metadata.path_power_fit_proxy",
+              "reason": "key_contains_path_power_fit",
+              "value": "<key>"
+            },
+            {
+              "trail": "manifest.cases[0].candidates[9].metadata.path_power_fit_proxy.fit_json",
+              "reason": "value_contains_path_power_fit",
+              "value": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "recommendation": "rerun_required_for_impacted_plans"
+}
