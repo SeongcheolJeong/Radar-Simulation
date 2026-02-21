@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "baseline_mode": "rerun",
+  "case_count": 3,
+  "fit_json_count": 6,
+  "cases_with_improvement_headroom": 0,
+  "policy": {
+    "min_improved_cases": 1,
+    "max_pass_rate_drop": 0.0,
+    "max_pass_count_drop": 0,
+    "max_fail_count_increase": 0,
+    "require_full_case_coverage": true
+  },
+  "short_circuit": true,
+  "short_circuit_reason": "insufficient_improvement_headroom",
+  "fit_jsons": [
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_reflection_selected.json",
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_scattering_selected.json",
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_reflection_selected.json",
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_scattering_selected.json",
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+    "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json"
+  ],
+  "baseline_cases": [
+    {
+      "case_index": 0,
+      "label": "bms1000_512",
+      "source_pack_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512",
+      "baseline_replay_report_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_00_bms1000_512/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json",
+      "baseline_plan_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_00_bms1000_512/baseline_current/measured_replay_plan.json",
+      "baseline_measured_replay_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_00_bms1000_512/baseline_current/measured_replay_summary.json",
+      "baseline_measured_replay_exit_code": 0,
+      "baseline_summary": {
+        "case_count": 1,
+        "candidate_count": 512,
+        "pass_count": 512,
+        "fail_count": 0,
+        "pass_rate": 1.0
+      }
+    },
+    {
+      "case_index": 1,
+      "label": "bms1000_full897",
+      "source_pack_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/packs/pack_xiangyu_2019_04_09_bms1000_v1_full897",
+      "baseline_replay_report_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_01_bms1000_full897/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_full897/replay_report.json",
+      "baseline_plan_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_01_bms1000_full897/baseline_current/measured_replay_plan.json",
+      "baseline_measured_replay_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_01_bms1000_full897/baseline_current/measured_replay_summary.json",
+      "baseline_measured_replay_exit_code": 0,
+      "baseline_summary": {
+        "case_count": 1,
+        "candidate_count": 897,
+        "pass_count": 897,
+        "fail_count": 0,
+        "pass_rate": 1.0
+      }
+    },
+    {
+      "case_index": 2,
+      "label": "cms1000_128",
+      "source_pack_root": "/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/packs/pack_xiangyu_2019_04_09_cms1000_v1_128",
+      "baseline_replay_report_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_02_cms1000_128/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_cms1000_v1_128/replay_report.json",
+      "baseline_plan_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_02_cms1000_128/baseline_current/measured_replay_plan.json",
+      "baseline_measured_replay_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/case_02_cms1000_128/baseline_current/measured_replay_summary.json",
+      "baseline_measured_replay_exit_code": 0,
+      "baseline_summary": {
+        "case_count": 1,
+        "candidate_count": 128,
+        "pass_count": 128,
+        "fail_count": 0,
+        "pass_rate": 1.0
+      }
+    }
+  ],
+  "batch_summary_json": null,
+  "policy_gate_json": null,
+  "selection_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1/measured_replay_fit_lock_selection.json",
+  "selection": {
+    "selection_mode": "baseline_no_fit",
+    "recommendation": "fallback_to_baseline_no_fit",
+    "selected_fit_json": null,
+    "selected_fit_summary": null,
+    "short_circuit_reason": "insufficient_improvement_headroom"
+  }
+}

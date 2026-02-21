@@ -822,3 +822,20 @@
   - fit candidates evaluated: `2`, eligible: `0`
   - final selection mode: `baseline_no_fit`
   - recommendation: `fallback_to_baseline_no_fit`
+
+## Fit-Lock Search Headroom Gate
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_fit_lock_search.py`
+- Result: pass
+- Notes:
+  - zero-headroom baseline synthetic case short-circuited before batch run
+  - fallback selection emitted as `baseline_no_fit`
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_fit_lock_search.py --baseline-mode rerun --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512 --case bms1000_full897=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/packs/pack_xiangyu_2019_04_09_bms1000_v1_full897 --case cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/packs/pack_xiangyu_2019_04_09_cms1000_v1_128 --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed --min-improved-cases 1 --require-full-case-coverage --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_fit_lock_search_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/measured_replay_fit_lock_search_xiangyu_rerun_baseline_2026_02_21.json`
+- Result: pass
+- Notes:
+  - fit candidates discovered: `6`
+  - `cases_with_improvement_headroom=0` (all rerun baselines `pass_rate=1.0`)
+  - short-circuit executed and final selection set to `baseline_no_fit`

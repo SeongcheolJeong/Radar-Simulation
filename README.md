@@ -762,6 +762,29 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/select_me
   --require-full-case-coverage
 ```
 
+Run measured replay fit-lock search validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_fit_lock_search.py
+```
+
+Run measured replay fit-lock candidate search with headroom short-circuit:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_measured_replay_fit_lock_search.py \
+  --baseline-mode rerun \
+  --case caseA=/path/to/source_pack_root \
+  --case caseB=/path/to/source_pack_root \
+  --fit-dir /path/to/selected_fits \
+  --fit-dir /path/to/selected_fits_cross_family \
+  --fit-dir /path/to/selected_fits_mixed \
+  --min-improved-cases 1 \
+  --require-full-case-coverage \
+  --allow-unlocked \
+  --output-root /path/to/fit_lock_search_run \
+  --output-summary-json /path/to/fit_lock_search_summary.json
+```
+
 Fetch reference repositories:
 
 ```bash
