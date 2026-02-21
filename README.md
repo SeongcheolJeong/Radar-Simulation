@@ -105,6 +105,18 @@ Run Jones polarization flow validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_jones_polarization_flow.py
 ```
 
+Run global Jones calibration validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_global_jones_calibration.py
+```
+
+Run ingest CLI global Jones integration validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_global_jones.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -126,10 +138,20 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybri
   --rx-ffd-glob "/path/to/rx*.ffd" \
   --ffd-field-format auto \
   --use-jones-polarization \
+  --global-jones-json /path/to/global_jones.json \
   --run-hybrid-estimation \
   --estimation-nfft 144 \
   --estimation-range-bin-length 10 \
   --output-dir /path/to/out
+```
+
+Fit global Jones matrix from calibration samples:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/fit_global_jones_matrix.py \
+  --samples-npz /path/to/calibration_samples.npz \
+  --ridge 1e-6 \
+  --output-json /path/to/global_jones.json
 ```
 
 Validate CLI integration with bundle:
@@ -174,3 +196,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/11_pcode_reimplementation_plan.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/12_paper_traceability_matrix.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/13_parity_metrics_contract.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/14_jones_calibration_contract.md`

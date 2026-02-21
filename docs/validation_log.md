@@ -174,3 +174,21 @@
   - RD/RA parity comparator computes peaks, centroid/spread, and normalized map NMSE
   - Good candidate scenario passes default thresholds
   - Bad candidate scenario fails thresholds with non-zero failure list
+
+## Global Jones Calibration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_global_jones_calibration.py`
+- Result: pass
+- Notes:
+  - LS-based global Jones matrix recovery pass on synthetic noisy samples
+  - CLI fitter output JSON contract (`global_jones_matrix`, `metrics`) pass
+
+## Ingest CLI + Global Jones
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_global_jones.py`
+- Result: pass
+- Notes:
+  - `--global-jones-json` option wiring pass
+  - Global Jones gain scaling reflected in ADC amplitude as expected

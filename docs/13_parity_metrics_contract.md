@@ -69,5 +69,4 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/valid
 
 ## Next Step
 
-Use measured scenarios to tune threshold values per use case (static target, constant velocity, multipath).
-
+Use measured scenarios to tune threshold values per use case (static target, constant velocity, multipath), after applying calibrated global Jones matrices.

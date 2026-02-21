@@ -21,6 +21,7 @@ def synth_fmcw_tdm(
     radar: RadarConfig,
     antenna_model: Optional[AntennaModel] = None,
     use_jones_polarization: bool = False,
+    global_jones_matrix: Optional[np.ndarray] = None,
     noise_sigma: float = 0.0,
     rng: Optional[np.random.Generator] = None,
 ) -> np.ndarray:
@@ -45,6 +46,9 @@ def synth_fmcw_tdm(
 
     if len(paths_by_chirp) != n_chirps:
         raise ValueError("paths_by_chirp length must match tx_schedule length")
+    if global_jones_matrix is not None and not use_jones_polarization:
+        raise ValueError("global_jones_matrix requires use_jones_polarization=True")
+    j_global = _resolve_jones_matrix(global_jones_matrix)
 
     lam = C0 / float(radar.fc_hz)
     fast_time = np.arange(n_samp, dtype=np.float64) / float(radar.fs_hz)
@@ -68,6 +72,8 @@ def synth_fmcw_tdm(
                 if rx_j.shape != (n_rx, 2):
                     raise ValueError("rx_jones must return shape (n_rx, 2)")
                 j_path = _resolve_pol_matrix(path)
+                if j_global is not None:
+                    j_path = j_global @ j_path
                 pol_gain = np.einsum("ri,ij,j->r", np.conj(rx_j), j_path, tx_j)
                 path_amp = complex(path.amp) * ph_tx * ph_rx * pol_gain
             else:
@@ -115,3 +121,14 @@ def _resolve_pol_matrix(path: Path) -> np.ndarray:
     if arr.shape == (4,):
         return arr.reshape(2, 2)
     raise ValueError("path.pol_matrix must be shape (2,2) or length 4")
+
+
+def _resolve_jones_matrix(value: Optional[np.ndarray]) -> Optional[np.ndarray]:
+    if value is None:
+        return None
+    arr = np.asarray(value, dtype=np.complex128)
+    if arr.shape == (2, 2):
+        return arr
+    if arr.shape == (4,):
+        return arr.reshape(2, 2)
+    raise ValueError("global_jones_matrix must be shape (2,2) or length 4")

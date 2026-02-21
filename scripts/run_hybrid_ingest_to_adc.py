@@ -2,6 +2,7 @@
 import argparse
 import glob
 
+from avxsim.calibration import load_global_jones_matrix_json
 from avxsim.pipeline import run_hybrid_frames_pipeline
 
 
@@ -45,6 +46,11 @@ def parse_args() -> argparse.Namespace:
         help="Use Jones-matrix polarization flow in synthesis (requires antenna model supporting Jones vectors)",
     )
     p.add_argument(
+        "--global-jones-json",
+        default=None,
+        help="Optional JSON file containing global_jones_matrix for polarization calibration",
+    )
+    p.add_argument(
         "--run-hybrid-estimation",
         action="store_true",
         help="Run Hybrid-compatible post-processing bundle (doppler/angle summaries)",
@@ -63,6 +69,12 @@ def main() -> None:
 
     tx_ffd_files = _resolve_optional_glob_list(args.tx_ffd_glob)
     rx_ffd_files = _resolve_optional_glob_list(args.rx_ffd_glob)
+    global_jones_matrix = (
+        load_global_jones_matrix_json(args.global_jones_json)
+        if args.global_jones_json is not None
+        else None
+    )
+    use_jones = bool(args.use_jones_polarization or (global_jones_matrix is not None))
 
     frames = list(range(args.frame_start, args.frame_end + 1))
     result = run_hybrid_frames_pipeline(
@@ -82,7 +94,8 @@ def main() -> None:
         tx_ffd_files=tx_ffd_files,
         rx_ffd_files=rx_ffd_files,
         ffd_field_format=args.ffd_field_format,
-        use_jones_polarization=args.use_jones_polarization,
+        use_jones_polarization=use_jones,
+        global_jones_matrix=global_jones_matrix,
         run_hybrid_estimation=args.run_hybrid_estimation,
         estimation_nfft=args.estimation_nfft,
         estimation_range_bin_length=args.estimation_range_bin_length,
@@ -98,6 +111,7 @@ def main() -> None:
     print(f"  adc shape: {result['adc'].shape}")
     print(f"  ffd enabled: {result['ffd_enabled']}")
     print(f"  jones polarization enabled: {result['jones_polarization_enabled']}")
+    print(f"  global jones enabled: {result['global_jones_enabled']}")
     print(f"  path_list: {result.get('path_list_json')}")
     print(f"  adc_cube: {result.get('adc_cube_npz')}")
     if args.run_hybrid_estimation:

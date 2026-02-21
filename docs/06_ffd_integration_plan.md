@@ -17,6 +17,9 @@ Replace isotropic antenna gain with HFSS exported element patterns (`.ffd`).
 - Jones-vector APIs:
   - `tx_jones(tx_idx, path) -> complex[2]`
   - `rx_jones(path, n_rx) -> complex[n_rx,2]`
+- Global calibration matrix hook:
+  - synthesis option `global_jones_matrix` (`2x2` complex)
+  - effective path matrix: `J_global * J_path`
 
 3. Validation scripts (Implemented)
 - parser/interpolation validation:
@@ -46,4 +49,4 @@ Each pattern query receives:
 
 ## Remaining Work
 
-- Calibrate Jones/polarization transfer model against measured or trusted full-wave references.
+- Generate real calibration sample sets and tune `global_jones_matrix` per scenario.

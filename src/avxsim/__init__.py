@@ -6,6 +6,13 @@ from .adapters import (
     validate_radarsimpy_view_shape,
 )
 from .antenna import FfdAntennaModel, IsotropicAntenna
+from .calibration import (
+    apply_global_jones_matrix,
+    fit_global_jones_matrix,
+    load_global_jones_matrix_json,
+    parse_jones_matrix,
+    save_global_jones_matrix_json,
+)
 from .constants import C0
 from .ffd import FfdPattern
 from .hybrid_pcode import (
@@ -31,6 +38,7 @@ from .types import Path, RadarConfig
 
 __all__ = [
     "adapt_records_by_chirp",
+    "apply_global_jones_matrix",
     "C0",
     "FfdAntennaModel",
     "FfdPattern",
@@ -52,10 +60,14 @@ __all__ = [
     "load_hybrid_estimation_npz",
     "run_hybrid_frames_pipeline",
     "save_adc_npz",
+    "save_global_jones_matrix_json",
     "save_paths_by_chirp_json",
+    "fit_global_jones_matrix",
+    "load_global_jones_matrix_json",
     "make_static_paths",
     "make_constant_velocity_paths",
     "make_two_path_multipath",
+    "parse_jones_matrix",
     "reshape_virtual_channels",
     "synth_fmcw_tdm",
     "to_radarsimpy_view",
