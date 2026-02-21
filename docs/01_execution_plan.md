@@ -76,7 +76,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.5: Real-scene asset onboarding pilot (`public glTF/OBJ sample -> scene pipeline`) and lockable fixture path
 - [x] M12.6: Public multi-object scene fixture pack and deterministic replay bundle lock
 - [x] M12.7: Public OBJ sample parity onboarding and mixed-format fixture matrix lock
-- [ ] M13.0: Mesh-geometry proxy extraction baseline (`centroid/area`) from OBJ/glTF metadata for auto-populated scene objects
+- [x] M13.0: Mesh-geometry proxy extraction baseline (`centroid/area`) from OBJ/glTF metadata for auto-populated scene objects
 - [ ] M13.1: Sionna RT backend adapter (`scene -> paths_by_chirp`) and canonical parity lock
 - [ ] M13.2: PO-SBR backend adapter candidate for high-fidelity scattering path modeling
 - [ ] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
@@ -92,7 +92,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M13.0: build mesh-geometry proxy extractor baseline and wire it to scene-object auto population.
+Start M13.1: integrate Sionna RT backend adapter and lock canonical parity against existing backend outputs.
 
 ## M10.19 Decision Gate
 
@@ -286,3 +286,11 @@ M12.7 outcome (2026-02-21):
 - public OBJ onboarding run added and summary locked (`WaltHead.obj`)
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/100_public_obj_mixed_format_matrix_contract.md`
 - summary evidence: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_walthead_obj_v1_2026_02_21.json`
+
+M13.0 outcome (2026-02-21):
+
+- mesh-geometry proxy extractor baseline added (`OBJ` + `glTF/GLB`)
+- sidecar parser now auto-fills missing `centroid_m` and `mesh_area_m2`
+- parser metadata expanded with auto-geometry diagnostics
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/101_mesh_geometry_proxy_extractor_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_geometry_proxy_extractor.py`

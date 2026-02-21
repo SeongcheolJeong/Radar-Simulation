@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Sequence
 
+from .mesh_geometry_proxy import infer_mesh_geometry_proxy
+
 
 DEFAULT_SIDECAR_PROFILE = "v1"
 DEFAULT_SIDECAR_VERSION = 1
@@ -88,6 +90,9 @@ def build_asset_manifest_from_sidecar(
             "schema_version": int(actual_version),
             "unknown_top_level_keys": sorted(unknown_keys),
             "unknown_object_keys": parser_stats["unknown_object_keys"],
+            "auto_geometry_object_count": parser_stats["auto_geometry_object_count"],
+            "auto_geometry_object_ids": parser_stats["auto_geometry_object_ids"],
+            "auto_geometry_fields": parser_stats["auto_geometry_fields"],
         },
     }
     if len(map_config) > 0:
@@ -111,6 +116,8 @@ def _normalize_objects(
     out = []
     format_counts = {"gltf": 0, "obj": 0}
     unknown_object_keys: Dict[str, Sequence[str]] = {}
+    auto_geometry_object_ids = []
+    auto_geometry_fields = {}
 
     for i, raw in enumerate(raw_objects):
         if not isinstance(raw, Mapping):
@@ -129,24 +136,49 @@ def _normalize_objects(
 
         mesh_fmt = _resolve_mesh_format(mesh_uri)
         format_counts[mesh_fmt] += 1
-        _validate_mesh_exists(
+        mesh_path = _resolve_mesh_path(
             mesh_uri=mesh_uri,
             sidecar_dir=sidecar_dir,
             mesh_root=mesh_root,
-            allow_missing_meshes=allow_missing_meshes,
         )
+        mesh_exists = bool(mesh_path.exists() and mesh_path.is_file())
+        if not mesh_exists and not allow_missing_meshes:
+            raise FileNotFoundError(f"mesh file not found: {mesh_uri} (resolved: {mesh_path})")
 
         object_id = str(raw.get("object_id", raw.get("id", Path(mesh_uri).stem)))
         centroid = raw.get("centroid_m", raw.get("bbox_center_m"))
+        mesh_area = raw.get("mesh_area_m2", raw.get("mesh_area"))
+
+        needs_centroid_proxy = not _is_vec3(centroid)
+        needs_area_proxy = ("mesh_area_m2" not in raw and "mesh_area" not in raw)
+        auto_fields = []
+        geometry_proxy: Dict[str, Any] = {}
+        if (needs_centroid_proxy or needs_area_proxy) and mesh_exists:
+            try:
+                geometry_proxy = infer_mesh_geometry_proxy(str(mesh_path), mesh_fmt)
+            except Exception as exc:
+                if needs_centroid_proxy:
+                    raise ValueError(
+                        f"objects[{i}] centroid missing and geometry proxy extraction failed: {exc}"
+                    ) from exc
+
+        if needs_centroid_proxy:
+            centroid = geometry_proxy.get("centroid_m")
+            if _is_vec3(centroid):
+                auto_fields.append("centroid_m")
         if not _is_vec3(centroid):
             raise ValueError(f"objects[{i}].centroid_m (or bbox_center_m) must be [x,y,z]")
+        if needs_area_proxy:
+            mesh_area = geometry_proxy.get("mesh_area_m2", 1.0)
+            if "mesh_area_m2" in geometry_proxy:
+                auto_fields.append("mesh_area_m2")
 
         material_tag = str(raw.get("material_tag", raw.get("material", default_material_tag)))
         row: Dict[str, Any] = {
             "object_id": object_id,
             "centroid_m": [float(x) for x in centroid],
             "material_tag": material_tag,
-            "mesh_area_m2": float(raw.get("mesh_area_m2", raw.get("mesh_area", 1.0))),
+            "mesh_area_m2": float(mesh_area),
             "rcs_scale": float(raw.get("rcs_scale", 1.0)),
             "reflection_order": int(raw.get("reflection_order", 1)),
             "amp": raw.get("amp", 1.0),
@@ -159,31 +191,31 @@ def _normalize_objects(
             row["radial_velocity_mps"] = float(raw["radial_velocity_mps"])
         if "path_id" in raw:
             row["path_id"] = str(raw["path_id"])
+        if len(auto_fields) > 0:
+            row["auto_geometry_fields"] = list(auto_fields)
+            auto_geometry_object_ids.append(object_id)
+            auto_geometry_fields[object_id] = list(auto_fields)
         out.append(row)
 
     return out, {
         "mesh_format_counts": format_counts,
         "unknown_object_keys": unknown_object_keys,
+        "auto_geometry_object_count": int(len(auto_geometry_object_ids)),
+        "auto_geometry_object_ids": list(auto_geometry_object_ids),
+        "auto_geometry_fields": dict(auto_geometry_fields),
     }
 
 
-def _validate_mesh_exists(
+def _resolve_mesh_path(
     mesh_uri: str,
     sidecar_dir: Optional[Path],
     mesh_root: Optional[Path],
-    allow_missing_meshes: bool,
-) -> None:
+) -> Path:
     if mesh_root is not None:
-        p = (mesh_root / mesh_uri).resolve()
-    elif sidecar_dir is not None:
-        p = (sidecar_dir / mesh_uri).resolve()
-    else:
-        p = Path(mesh_uri).expanduser().resolve()
-    if p.exists() and p.is_file():
-        return
-    if allow_missing_meshes:
-        return
-    raise FileNotFoundError(f"mesh file not found: {mesh_uri} (resolved: {p})")
+        return (mesh_root / mesh_uri).resolve()
+    if sidecar_dir is not None:
+        return (sidecar_dir / mesh_uri).resolve()
+    return Path(mesh_uri).expanduser().resolve()
 
 
 def _resolve_mesh_format(mesh_uri: str) -> str:

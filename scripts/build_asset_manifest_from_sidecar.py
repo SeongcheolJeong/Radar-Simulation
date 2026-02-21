@@ -71,6 +71,7 @@ def main() -> None:
     print(f"  schema_profile: {parser_meta.get('schema_profile')}")
     print(f"  schema_version: {parser_meta.get('schema_version')}")
     print(f"  strict_mode: {parser_meta.get('strict_mode')}")
+    print(f"  auto_geometry_object_count: {parser_meta.get('auto_geometry_object_count')}")
 
 
 if __name__ == "__main__":

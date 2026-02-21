@@ -1135,3 +1135,31 @@
 - Notes:
   - real public OBJ onboarding run completed
   - summary locked with OBJ asset hash and output artifact paths
+
+## Mesh Geometry Proxy Extractor (M13.0)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_geometry_proxy_extractor.py`
+- Result: pass
+- Notes:
+  - missing geometry fields are auto-filled from mesh assets (`OBJ`, `glTF`)
+  - parser metadata captures auto-geometry diagnostics
+  - bridge + scene pipeline compatibility confirmed
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_asset_parser.py`
+- Result: pass
+- Notes:
+  - sidecar parser regression remains stable after auto-geometry integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_schema_compat_matrix.py`
+- Result: pass
+- Notes:
+  - strict/non-strict schema lock and diagnostics remain stable after geometry integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_scene_import_bridge.py`
+- Result: pass
+- Notes:
+  - bridge regression remains stable with geometry auto-fill metadata expansion

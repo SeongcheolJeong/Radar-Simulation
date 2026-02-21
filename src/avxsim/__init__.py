@@ -44,6 +44,7 @@ from .measurement_csv import (
     convert_measurement_csv_to_npz,
     load_column_map_json,
 )
+from .mesh_geometry_proxy import infer_mesh_geometry_proxy
 from .mat_adc_extract import load_adc_from_mat, select_4d_numeric_array
 from .measured_replay import (
     DEFAULT_MEASURED_REPLAY_LOCK_POLICY,
@@ -177,6 +178,7 @@ __all__ = [
     "DEFAULT_REFLECTION_GRID",
     "DEFAULT_SCATTERING_GRID",
     "RadarConfig",
+    "infer_mesh_geometry_proxy",
     "build_parity_drift_report",
     "build_path_power_samples_from_csv",
     "compare_hybrid_estimation_npz",
