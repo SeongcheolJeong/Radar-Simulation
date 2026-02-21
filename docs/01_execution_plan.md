@@ -69,7 +69,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
 - [x] M11.4: Multi-backend parity harness on shared scenes
 - [x] M12.0: First mesh/material-aware scene backend adapter candidate (`mesh_material_stub`)
-- [ ] M12.1: Mesh scene import adapter contract (object/material manifest from external scene assets)
+- [x] M12.1: Mesh scene import adapter contract (object/material manifest from external scene assets)
+- [ ] M12.2: Scene asset parser candidate for glTF/OBJ sidecar extraction to bridge manifest
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -82,7 +83,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M12.1: define mesh-scene import adapter contract and bridge to `mesh_material_stub` input manifest.
+Start M12.2: add scene-asset parser candidate (`glTF/OBJ sidecar -> asset manifest`) and bridge integration check.
 
 ## M10.19 Decision Gate
 
@@ -222,3 +223,10 @@ M12.0 outcome (2026-02-21):
 - object/material scene inputs now map to canonical path/ADC/radar-map outputs
 - acceptance contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/93_mesh_material_backend_candidate_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_mesh_material_backend.py`
+
+M12.1 outcome (2026-02-21):
+
+- external asset-manifest to scene-json bridge module added
+- bridge CLI added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_mesh_scene_from_asset_manifest.py`
+- bridge contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/94_mesh_scene_import_bridge_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_scene_import_bridge.py`

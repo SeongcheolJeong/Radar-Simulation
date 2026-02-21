@@ -1027,3 +1027,12 @@
 - Notes:
   - new backend `mesh_material_stub` emits canonical artifacts from object/material scene inputs
   - path metadata includes `path_id/material_tag/reflection_order` for object-level traceability
+
+## Mesh Scene Import Bridge (M12.1)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_scene_import_bridge.py`
+- Result: pass
+- Notes:
+  - external asset manifest is normalized into `mesh_material_stub` scene JSON
+  - bridge output runs through scene pipeline and emits canonical artifacts

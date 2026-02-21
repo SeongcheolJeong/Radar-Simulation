@@ -35,4 +35,5 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 ## M12 Start
 
 - [x] M12.0: mesh/material-aware backend candidate (`mesh_material_stub`)
-- [ ] M12.1: scene-asset import bridge to backend manifest (`objects/materials` extraction path)
+- [x] M12.1: scene-asset import bridge to backend manifest (`objects/materials` extraction path)
+- [ ] M12.2: scene-asset parser candidate (`glTF/OBJ sidecar -> asset manifest`)
