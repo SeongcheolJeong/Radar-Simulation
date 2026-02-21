@@ -31,4 +31,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Run full pipeline parity checks by wiring all P1-P5 replacements into one Hybrid-compatible processing path.
+Integrate P-code replacement bundle into the frame-ingest CLI as an optional post-processing output path.

@@ -75,6 +75,12 @@ Run P-code replacement step-5 validation (`path_power` models):
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_path_power_models.py
 ```
 
+Run P-code replacement step-6 validation (integrated bundle):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_pcode_bundle.py
+```
+
 Run ingest pipeline (example):
 
 ```bash

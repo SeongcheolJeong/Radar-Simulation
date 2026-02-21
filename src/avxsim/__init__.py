@@ -13,6 +13,7 @@ from .hybrid_pcode import (
     doppler_estimation_from_channel,
     generate_channel_from_distances,
     generate_concatenated_doppler,
+    run_hybrid_estimation_bundle,
 )
 from .io import save_adc_npz, save_paths_by_chirp_json
 from .pipeline import run_hybrid_frames_pipeline
@@ -29,6 +30,7 @@ __all__ = [
     "doppler_estimation_from_channel",
     "generate_channel_from_distances",
     "generate_concatenated_doppler",
+    "run_hybrid_estimation_bundle",
     "load_hybrid_paths_from_frames",
     "load_hybrid_radar_geometry",
     "Path",

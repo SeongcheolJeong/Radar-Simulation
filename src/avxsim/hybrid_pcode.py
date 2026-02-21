@@ -305,6 +305,56 @@ def calculate_scattering_path_power(
     return base * directional
 
 
+def run_hybrid_estimation_bundle(
+    h: np.ndarray,
+    np_chirps: int,
+    ns: int,
+    nfft: int,
+    num_tx: int,
+    num_rx: int,
+    angle_view_cali: Sequence[float],
+    range_bin_length: int,
+    doppler_window: str = "hann",
+) -> dict:
+    """
+    Integrated compatibility path for HybridDynamicRT post-processing.
+    """
+    fx_dop, fx_dop_win = doppler_estimation_from_channel(
+        h=h,
+        np_chirps=np_chirps,
+        nfft=nfft,
+        window=doppler_window,
+    )
+    fx_dop_max, fx_dop_ave = generate_concatenated_doppler(
+        fx_dop=fx_dop,
+        range_bin_length=range_bin_length,
+    )
+    fx_dop_max_win, fx_dop_ave_win = generate_concatenated_doppler(
+        fx_dop=fx_dop_win,
+        range_bin_length=range_bin_length,
+    )
+    fx_ang, cap_range_azimuth, ncap = angle_estimation_from_channel(
+        h=h,
+        np_chirps=np_chirps,
+        ns=ns,
+        nfft=nfft,
+        num_tx=num_tx,
+        num_rx=num_rx,
+        angle_view_cali=angle_view_cali,
+    )
+    return {
+        "fx_dop": fx_dop,
+        "fx_dop_win": fx_dop_win,
+        "fx_dop_max": fx_dop_max,
+        "fx_dop_ave": fx_dop_ave,
+        "fx_dop_max_win": fx_dop_max_win,
+        "fx_dop_ave_win": fx_dop_ave_win,
+        "fx_ang": fx_ang,
+        "cap_range_azimuth": cap_range_azimuth,
+        "ncap": ncap,
+    }
+
+
 def _build_h_matrix(
     temp_v: np.ndarray,
     temp_range: np.ndarray,

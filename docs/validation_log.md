@@ -93,3 +93,12 @@
 - Notes:
   - Reflecting-path model monotonic range decay check pass
   - Scattering-path model angle attenuation check pass
+
+## P-code Replacement P6
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_pcode_bundle.py`
+- Result: pass
+- Notes:
+  - Integrated bundle path (`channel -> doppler -> concatenated -> angle`) pass
+  - Output shape and finite-value checks pass for all bundle outputs
