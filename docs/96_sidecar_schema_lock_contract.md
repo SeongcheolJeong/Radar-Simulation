@@ -20,6 +20,12 @@ When strict mode is on:
 
 This prevents silent schema drift in sidecar inputs.
 
+When strict mode is off:
+
+1. unknown top-level keys are accepted and recorded
+2. unknown object keys are accepted and recorded per object index
+3. schema profile/version lock still applies unless explicitly changed by CLI options
+
 ## CLI
 
 ```bash

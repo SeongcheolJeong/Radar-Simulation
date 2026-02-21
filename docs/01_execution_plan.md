@@ -72,7 +72,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.1: Mesh scene import adapter contract (object/material manifest from external scene assets)
 - [x] M12.2: Scene asset parser candidate for glTF/OBJ sidecar extraction to bridge manifest
 - [x] M12.3: Sidecar schema profile/version lock and parser strict-mode policy
-- [ ] M12.4: Sidecar strict/non-strict compatibility matrix and bridge E2E regression lock
+- [x] M12.4: Sidecar strict/non-strict compatibility matrix and bridge E2E regression lock
+- [ ] M12.5: Real-scene asset onboarding pilot (`public glTF/OBJ sample -> scene pipeline`) and lockable fixture path
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -85,7 +86,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M12.4: lock strict/non-strict parser compatibility matrix and bridge end-to-end regression contract.
+Start M12.5: onboard one real scene-asset sample and lock reproducible fixture path for parser/bridge E2E.
 
 ## M10.19 Decision Gate
 
@@ -247,3 +248,11 @@ M12.3 outcome (2026-02-21):
 - strict/locked parser metadata emitted in manifest (`strict_mode`, `schema_profile`, `schema_version`)
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/96_sidecar_schema_lock_contract.md`
 - validations rerun: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_asset_parser.py`, `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_scene_import_bridge.py`
+
+M12.4 outcome (2026-02-21):
+
+- strict/non-strict compatibility matrix validator added
+- non-strict parser diagnostics expanded (`unknown_top_level_keys`, `unknown_object_keys`)
+- non-strict manifest bridge E2E path verified (`asset_manifest -> scene_json -> canonical artifacts`)
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/97_sidecar_compatibility_matrix_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_schema_compat_matrix.py`

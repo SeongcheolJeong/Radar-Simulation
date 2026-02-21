@@ -87,6 +87,7 @@ def build_asset_manifest_from_sidecar(
             "schema_profile": actual_profile,
             "schema_version": int(actual_version),
             "unknown_top_level_keys": sorted(unknown_keys),
+            "unknown_object_keys": parser_stats["unknown_object_keys"],
         },
     }
     if len(map_config) > 0:
@@ -109,16 +110,19 @@ def _normalize_objects(
 
     out = []
     format_counts = {"gltf": 0, "obj": 0}
+    unknown_object_keys: Dict[str, Sequence[str]] = {}
 
     for i, raw in enumerate(raw_objects):
         if not isinstance(raw, Mapping):
             raise ValueError(f"objects[{i}] must be object")
+        unknown = _collect_unknown_object_keys(raw)
         if strict_mode:
-            unknown = _collect_unknown_object_keys(raw)
             if len(unknown) > 0:
                 raise ValueError(
                     f"objects[{i}] has unknown keys in strict mode: {sorted(unknown)}"
                 )
+        elif len(unknown) > 0:
+            unknown_object_keys[str(i)] = sorted(unknown)
         mesh_uri = str(raw.get("mesh_uri", raw.get("mesh_file", raw.get("uri", "")))).strip()
         if mesh_uri == "":
             raise ValueError(f"objects[{i}] missing mesh_uri/mesh_file/uri")
@@ -157,7 +161,10 @@ def _normalize_objects(
             row["path_id"] = str(raw["path_id"])
         out.append(row)
 
-    return out, {"mesh_format_counts": format_counts}
+    return out, {
+        "mesh_format_counts": format_counts,
+        "unknown_object_keys": unknown_object_keys,
+    }
 
 
 def _validate_mesh_exists(

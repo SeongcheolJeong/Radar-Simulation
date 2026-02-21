@@ -1060,3 +1060,25 @@
 - Result: pass
 - Notes:
   - downstream bridge regression check pass after parser strict-gate integration
+
+## Sidecar Strict/Non-Strict Matrix + Bridge E2E (M12.4)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_schema_compat_matrix.py`
+- Result: pass
+- Notes:
+  - strict mode rejects unknown sidecar fields
+  - non-strict mode accepts unknown fields and records parser diagnostics (`unknown_top_level_keys`, `unknown_object_keys`)
+  - non-strict manifest remains bridge-compatible and emits canonical scene artifacts
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_asset_parser.py`
+- Result: pass
+- Notes:
+  - strict schema-lock regression remains stable after diagnostics extension
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_mesh_scene_import_bridge.py`
+- Result: pass
+- Notes:
+  - bridge regression remains stable after sidecar diagnostics extension
