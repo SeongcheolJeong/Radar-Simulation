@@ -25,7 +25,7 @@ Target `.p` functions:
 ## Progress Tracking
 
 - [x] P1: `generate_channel` Python implementation + unit validation
-- [ ] P2: Doppler map estimation implementation + validation
+- [x] P2: Doppler map estimation implementation + validation
 - [ ] P3: Concatenated Doppler metrics implementation + validation
 - [ ] P4: Angle estimation implementation + validation
 - [ ] P5: Reflecting/scattering power models implementation + validation

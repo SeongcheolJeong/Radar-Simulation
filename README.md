@@ -51,6 +51,12 @@ Run P-code replacement step-1 validation (`generate_channel`):
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_generate_channel.py
 ```
 
+Run P-code replacement step-2 validation (`doppler_estimation`):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_doppler_estimation.py
+```
+
 Run ingest pipeline (example):
 
 ```bash

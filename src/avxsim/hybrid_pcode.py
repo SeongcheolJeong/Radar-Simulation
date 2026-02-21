@@ -111,6 +111,44 @@ def generate_channel_from_distances(
     return h_out, float(np.real(dop_mean)), float(np.real(dop_spread))
 
 
+def doppler_estimation_from_channel(
+    h: np.ndarray,
+    np_chirps: int,
+    nfft: int,
+    window: str = "hann",
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Python replacement candidate for fun_hybrid_Doppler_estimation.
+
+    Input:
+      h: complex channel matrix with shape (n_virtual*np_chirps, n_range_bins)
+      np_chirps: chirps per CPI
+      nfft: Doppler FFT size
+
+    Output:
+      fx_dop:     shape (nfft, n_range_bins), power map
+      fx_dop_win: shape (nfft, n_range_bins), power map with slow-time window
+    """
+    h_arr = np.asarray(h)
+    if h_arr.ndim != 2:
+        raise ValueError("h must be 2D with shape (n_virtual*np_chirps, n_range_bins)")
+    if np_chirps <= 0:
+        raise ValueError("np_chirps must be positive")
+    if nfft <= 0:
+        raise ValueError("nfft must be positive")
+    if h_arr.shape[0] % np_chirps != 0:
+        raise ValueError("h first dimension must be divisible by np_chirps")
+
+    n_virtual = h_arr.shape[0] // np_chirps
+    n_range = h_arr.shape[1]
+    cube = h_arr.reshape(n_virtual, np_chirps, n_range)
+
+    fx_dop = _doppler_power_map(cube, nfft=nfft, slow_window=None)
+    slow_window = _get_slow_time_window(np_chirps, window=window)
+    fx_dop_win = _doppler_power_map(cube, nfft=nfft, slow_window=slow_window)
+    return fx_dop, fx_dop_win
+
+
 def _build_h_matrix(
     temp_v: np.ndarray,
     temp_range: np.ndarray,
@@ -146,6 +184,33 @@ def _build_h_matrix(
     return slow_weighted @ fast_phase
 
 
+def _doppler_power_map(
+    cube: np.ndarray,
+    nfft: int,
+    slow_window: np.ndarray,
+) -> np.ndarray:
+    # cube: (n_virtual, np_chirps, n_range)
+    if slow_window is not None:
+        cube = cube * slow_window[None, :, None]
+
+    dop = np.fft.fftshift(np.fft.fft(cube, n=nfft, axis=1), axes=1)
+    power = np.sum(np.abs(dop) ** 2, axis=0)
+    power = np.real(power)
+    # Avoid exact zeros in downstream log-scale visualization.
+    return np.maximum(power, np.finfo(np.float64).tiny)
+
+
+def _get_slow_time_window(np_chirps: int, window: str) -> np.ndarray:
+    name = str(window).lower()
+    if name in {"hann", "hanning"}:
+        return np.hanning(np_chirps).astype(np.float64)
+    if name in {"hamming"}:
+        return np.hamming(np_chirps).astype(np.float64)
+    if name in {"rect", "rectangular", "none"}:
+        return np.ones(np_chirps, dtype=np.float64)
+    raise ValueError(f"unsupported window type: {window}")
+
+
 def _extract_distance_vector(
     distan_all_array: object,
     tx_idx: int,
@@ -178,4 +243,3 @@ def _slice_cell_frame(cell: object, frame_idx: int) -> np.ndarray:
             )
         return np.asarray(arr[:, frame_idx], dtype=np.float64)
     raise ValueError(f"unsupported cell data shape: {arr.shape}")
-
