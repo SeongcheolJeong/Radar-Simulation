@@ -1036,3 +1036,12 @@
 - Notes:
   - external asset manifest is normalized into `mesh_material_stub` scene JSON
   - bridge output runs through scene pipeline and emits canonical artifacts
+
+## Sidecar Asset Parser (M12.2)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sidecar_asset_parser.py`
+- Result: pass
+- Notes:
+  - parser normalizes `glTF/OBJ` sidecar mesh references into `asset_manifest.json`
+  - parser output is compatible with bridge and downstream scene pipeline

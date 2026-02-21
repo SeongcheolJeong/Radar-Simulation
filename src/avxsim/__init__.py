@@ -120,6 +120,11 @@ from .scenario_profile import (
     load_scenario_profile_json,
     save_scenario_profile_json,
 )
+from .scene_asset_parser import (
+    build_asset_manifest_from_sidecar,
+    load_scene_sidecar_json,
+    save_asset_manifest_json,
+)
 from .scene_asset_bridge import (
     build_mesh_scene_payload_from_asset_manifest,
     load_scene_asset_manifest_json,
@@ -194,6 +199,7 @@ __all__ = [
     "run_replay_manifest",
     "run_object_scene_to_radar_map",
     "run_object_scene_to_radar_map_json",
+    "build_asset_manifest_from_sidecar",
     "build_mesh_scene_payload_from_asset_manifest",
     "save_adc_npz",
     "save_global_jones_matrix_json",
@@ -226,6 +232,7 @@ __all__ = [
     "load_measured_replay_plan_json",
     "load_motion_tuning_manifest_json",
     "load_object_scene_json",
+    "load_scene_sidecar_json",
     "load_scene_asset_manifest_json",
     "make_static_paths",
     "make_constant_velocity_paths",
@@ -246,5 +253,6 @@ __all__ = [
     "load_xiangyu_label_rows",
     "build_path_power_samples_from_xiangyu_sequence",
     "save_path_power_rows_csv",
+    "save_asset_manifest_json",
     "save_scene_json",
 ]
