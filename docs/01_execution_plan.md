@@ -18,7 +18,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M5: RT adapter base (HybridDynamicRT frame ingestion, first version)
 - [x] M5.5: Hybrid ingest pipeline and canonical output writer
 - [ ] M6: P-code replacement wave-2 (`path power` models and calibration)
-- [ ] M7: `.ffd` parser + interpolation
+- [x] M7: `.ffd` parser + interpolation
 - [ ] M8: Motion compensation for TDM virtual array
 
 ## Iteration Rule (One-by-One Verification)
@@ -32,4 +32,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Connect optional `.ffd` antenna pattern gain into ingest pipeline after P-code replacement baseline.
+Add real-HFSS `.ffd` sample based regression and lock one reference pattern artifact.

@@ -1,7 +1,17 @@
 #!/Library/Developer/CommandLineTools/usr/bin/python3
 import argparse
+import glob
 
 from avxsim.pipeline import run_hybrid_frames_pipeline
+
+
+def _resolve_optional_glob_list(pattern: str):
+    if pattern is None:
+        return None
+    matches = sorted(glob.glob(pattern))
+    if not matches:
+        raise ValueError(f"no files matched pattern: {pattern}")
+    return matches
 
 
 def parse_args() -> argparse.Namespace:
@@ -21,6 +31,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--distance-min-m", type=float, default=0.0)
     p.add_argument("--distance-max-m", type=float, default=100.0)
     p.add_argument("--top-k-per-chirp", type=int, default=None)
+    p.add_argument("--tx-ffd-glob", default=None, help="Glob pattern for Tx .ffd files")
+    p.add_argument("--rx-ffd-glob", default=None, help="Glob pattern for Rx .ffd files")
+    p.add_argument(
+        "--ffd-field-format",
+        choices=["auto", "real_imag", "mag_phase_deg"],
+        default="auto",
+        help="Field interpretation for .ffd columns",
+    )
     p.add_argument(
         "--run-hybrid-estimation",
         action="store_true",
@@ -38,6 +56,9 @@ def main() -> None:
     if args.frame_end < args.frame_start:
         raise ValueError("frame-end must be >= frame-start")
 
+    tx_ffd_files = _resolve_optional_glob_list(args.tx_ffd_glob)
+    rx_ffd_files = _resolve_optional_glob_list(args.rx_ffd_glob)
+
     frames = list(range(args.frame_start, args.frame_end + 1))
     result = run_hybrid_frames_pipeline(
         frames_root_dir=args.frames_root,
@@ -53,6 +74,9 @@ def main() -> None:
         amplitude_threshold=args.amplitude_threshold,
         distance_limits_m=(args.distance_min_m, args.distance_max_m),
         top_k_per_chirp=args.top_k_per_chirp,
+        tx_ffd_files=tx_ffd_files,
+        rx_ffd_files=rx_ffd_files,
+        ffd_field_format=args.ffd_field_format,
         run_hybrid_estimation=args.run_hybrid_estimation,
         estimation_nfft=args.estimation_nfft,
         estimation_range_bin_length=args.estimation_range_bin_length,
@@ -66,6 +90,7 @@ def main() -> None:
     print(f"  tx_schedule length: {len(result['tx_schedule'])}")
     print(f"  paths/chirp (min,max): ({min(n_paths) if n_paths else 0}, {max(n_paths) if n_paths else 0})")
     print(f"  adc shape: {result['adc'].shape}")
+    print(f"  ffd enabled: {result['ffd_enabled']}")
     print(f"  path_list: {result.get('path_list_json')}")
     print(f"  adc_cube: {result.get('adc_cube_npz')}")
     if args.run_hybrid_estimation:

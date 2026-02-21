@@ -4,6 +4,8 @@ from typing import Dict, Optional, Sequence, Tuple
 import numpy as np
 
 from .adapters import load_hybrid_paths_from_frames, load_hybrid_radar_geometry
+from .antenna import FfdAntennaModel
+from .ffd import FieldFormat
 from .hybrid_pcode import run_hybrid_estimation_bundle
 from .io import save_adc_npz, save_hybrid_estimation_npz, save_paths_by_chirp_json
 from .synth import synth_fmcw_tdm
@@ -26,6 +28,9 @@ def run_hybrid_frames_pipeline(
     distance_limits_m: Tuple[float, float] = (0.0, 100.0),
     amplitude_scale: float = 1.0,
     top_k_per_chirp: Optional[int] = None,
+    tx_ffd_files: Optional[Sequence[str]] = None,
+    rx_ffd_files: Optional[Sequence[str]] = None,
+    ffd_field_format: FieldFormat = "auto",
     run_hybrid_estimation: bool = False,
     estimation_nfft: int = 144,
     estimation_range_bin_length: int = 10,
@@ -57,11 +62,24 @@ def run_hybrid_frames_pipeline(
         top_k_per_chirp=top_k_per_chirp,
     )
 
+    antenna_model = None
+    if tx_ffd_files is not None or rx_ffd_files is not None:
+        if tx_ffd_files is None or rx_ffd_files is None:
+            raise ValueError("both tx_ffd_files and rx_ffd_files must be provided together")
+        antenna_model = FfdAntennaModel.from_files(
+            tx_ffd_files=tx_ffd_files,
+            rx_ffd_files=rx_ffd_files,
+            n_tx=int(tx_pos.shape[0]),
+            n_rx=int(rx_pos.shape[0]),
+            field_format=ffd_field_format,
+        )
+
     adc = synth_fmcw_tdm(
         paths_by_chirp=paths_by_chirp,
         tx_pos_m=tx_pos,
         rx_pos_m=rx_pos,
         radar=radar,
+        antenna_model=antenna_model,
     )
 
     result: Dict[str, object] = {
@@ -70,6 +88,7 @@ def run_hybrid_frames_pipeline(
         "tx_pos_m": tx_pos,
         "rx_pos_m": rx_pos,
         "tx_schedule": tx_schedule,
+        "ffd_enabled": antenna_model is not None,
     }
 
     if run_hybrid_estimation:

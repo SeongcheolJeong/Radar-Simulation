@@ -15,6 +15,16 @@ Provide one command that converts HybridDynamicRT frame folders to:
 - CLI wrapper:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybrid_ingest_to_adc.py`
 
+## Optional `.ffd` Inputs
+
+CLI options:
+
+- `--tx-ffd-glob "/path/to/tx*.ffd"`
+- `--rx-ffd-glob "/path/to/rx*.ffd"`
+- `--ffd-field-format {auto|real_imag|mag_phase_deg}`
+
+When set, the synthesizer uses `FfdAntennaModel` instead of isotropic gains.
+
 ## Outputs
 
 - `path_list.json`

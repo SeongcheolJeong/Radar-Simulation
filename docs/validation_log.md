@@ -120,3 +120,29 @@
 - Notes:
   - Paper requirement to code/test mapping table added
   - Coverage status classified as Implemented/Partial/Planned
+
+## FFD Parser
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_parser.py`
+- Result: pass
+- Notes:
+  - `.ffd` parse pass for structured sample
+  - periodic-phi interpolation sanity check pass
+
+## FFD Pipeline Integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_pipeline_integration.py`
+- Result: pass
+- Notes:
+  - Antenna gain scaling reflected in ADC amplitude as expected
+
+## FFD CLI Integration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_ffd.py`
+- Result: pass
+- Notes:
+  - `--tx-ffd-glob/--rx-ffd-glob` CLI wiring pass
+  - CLI reports `ffd enabled: True`

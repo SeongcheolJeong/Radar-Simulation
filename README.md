@@ -81,6 +81,18 @@ Run P-code replacement step-6 validation (integrated bundle):
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_pcode_bundle.py
 ```
 
+Run `.ffd` parser/interpolation validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_parser.py
+```
+
+Run `.ffd` pipeline integration validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_pipeline_integration.py
+```
+
 Run ingest pipeline (example):
 
 ```bash
@@ -92,6 +104,9 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybri
   --camera-fov-deg 90 \
   --mode reflection \
   --file-ext .exr \
+  --tx-ffd-glob "/path/to/tx*.ffd" \
+  --rx-ffd-glob "/path/to/rx*.ffd" \
+  --ffd-field-format auto \
   --run-hybrid-estimation \
   --estimation-nfft 144 \
   --estimation-range-bin-length 10 \
@@ -102,6 +117,12 @@ Validate CLI integration with bundle:
 
 ```bash
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_bundle.py
+```
+
+Validate CLI `.ffd` integration:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_ffd.py
 ```
 
 Fetch reference repositories:

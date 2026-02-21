@@ -5,7 +5,9 @@ from .adapters import (
     to_radarsimpy_view,
     validate_radarsimpy_view_shape,
 )
+from .antenna import FfdAntennaModel, IsotropicAntenna
 from .constants import C0
+from .ffd import FfdPattern
 from .hybrid_pcode import (
     angle_estimation_from_channel,
     calculate_reflecting_path_power,
@@ -24,6 +26,9 @@ from .types import Path, RadarConfig
 __all__ = [
     "adapt_records_by_chirp",
     "C0",
+    "FfdAntennaModel",
+    "FfdPattern",
+    "IsotropicAntenna",
     "angle_estimation_from_channel",
     "calculate_reflecting_path_power",
     "calculate_scattering_path_power",
