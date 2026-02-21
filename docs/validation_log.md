@@ -934,3 +934,23 @@
 - Notes:
   - `eligible_preset_count=0`, decision `fallback_to_baseline_no_fit`
   - gate output normalized to JSON-safe nullable diagnostics (no Infinity for missing selected-fit summaries)
+
+## Case-Partitioned Fit-Lock Search (M10.31)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_case_partitioned_fit_lock_search.py`
+- Result: pass
+- Notes:
+  - global baseline fallback path validated
+  - family fallback searches executed and final strategy contract verified
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_case_partitioned_fit_lock_search.py --baseline-mode provided --objective-mode drift --global-search-summary-json /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_targets_flat_refine_v2/preset_00_flat_fine_a/fit_lock_search_summary.json --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_00_bms1000_512/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_512/replay_report.json --case bms1000_full897=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/packs/pack_xiangyu_2019_04_09_bms1000_v1_full897::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_01_bms1000_full897/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_bms1000_v1_full897/replay_report.json --case cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/packs/pack_xiangyu_2019_04_09_cms1000_v1_128::/Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v2_rerun_baseline/case_02_cms1000_128/baseline_current/measured_replay_outputs/pack_xiangyu_2019_04_09_cms1000_v1_128/replay_report.json --case-family bms1000_512=bms1000 --case-family bms1000_full897=bms1000 --case-family cms1000_128=cms1000 --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_constrained_refit_targets_flat_refine_v2/preset_00_flat_fine_a/fit_batch/fits --fit-glob '*.json' --max-no-gain-attempts 8 --require-full-case-coverage --drift-max-pass-rate-drop 0.0 --drift-max-pass-count-drop-ratio 0.0 --drift-max-fail-count-increase-ratio 0.0 --drift-max-metric-drift 0.1 --fit-proxy-max-range-exp 1.25 --fit-proxy-max-azimuth-power 1.5 --fit-proxy-min-weight 0.9 --fit-proxy-max-weight 1.1 --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_case_partitioned_fit_lock_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/case_partitioned_fit_lock_xiangyu_targets_flat_refine_v1_2026_02_21.json`
+- Result: pass
+- Notes:
+  - reused global summary (`reused_global_search_summary=true`)
+  - global remained `baseline_no_fit`
+  - family results:
+    - `bms1000`: `fit` (`adopt_selected_fit_by_drift_objective`, `bms1000_reflection.json`)
+    - `cms1000`: `baseline_no_fit`
+  - final strategy: `mixed_family_partitioned_lock`

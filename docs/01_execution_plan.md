@@ -62,6 +62,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.28: Constrained refit loop (preset grids) + drift-objective search ranking
 - [x] M10.29: Multi-case constrained-refit consistency gate + Xiangyu target decision
 - [x] M10.30: Targeted flat-refine constrained search + full-candidate evidence pass
+- [x] M10.31: Case-partitioned fit-lock strategy evaluation (global -> family fallback)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -74,7 +75,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.31: evaluate case-partitioned fit-lock strategy (global lock -> per-family lock fallback).
+Start M10.32: materialize family-partitioned lock policy into case-level lock manifest and replay verification.
 
 ## M10.19 Decision Gate
 
@@ -164,3 +165,10 @@ M10.30 outcome (2026-02-21):
 - targeted flat-refine sweep executed (`flat_fine_a/b/c`) under strict non-degradation limits
 - no-gain truncation inefficiency removed (all 4 fit candidates evaluated per preset)
 - all presets still fell back to `baseline_no_fit`; strict multi-case adoption remained unavailable
+
+M10.31 outcome (2026-02-21):
+
+- case-partitioned lock search orchestrator implemented with optional global-summary reuse
+- global Xiangyu target decision remained `baseline_no_fit` (reused from targeted flat refine)
+- family fallback recovered adoptable lock for `bms1000` (`bms1000_reflection.json`)
+- `cms1000` kept baseline fallback, yielding final strategy `mixed_family_partitioned_lock`

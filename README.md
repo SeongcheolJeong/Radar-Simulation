@@ -866,6 +866,29 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_
   --max-metric-drift-mean 0.1
 ```
 
+Run case-partitioned fit-lock search validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_case_partitioned_fit_lock_search.py
+```
+
+Run case-partitioned fit-lock search (global -> family fallback):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_case_partitioned_fit_lock_search.py \
+  --case caseA=/path/to/source_pack_root::/path/to/baseline_replay_report.json \
+  --case caseB=/path/to/source_pack_root::/path/to/baseline_replay_report.json \
+  --case-family caseA=family_a \
+  --case-family caseB=family_b \
+  --fit-dir /path/to/fits \
+  --fit-glob '*.json' \
+  --objective-mode drift \
+  --global-search-summary-json /path/to/existing_global_fit_lock_search_summary.json \
+  --allow-unlocked \
+  --output-root /path/to/case_partitioned_search_run \
+  --output-summary-json /path/to/case_partitioned_search_summary.json
+```
+
 Fetch reference repositories:
 
 ```bash
