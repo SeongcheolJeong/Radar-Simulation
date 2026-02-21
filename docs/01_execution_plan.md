@@ -39,6 +39,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M9.1: First public dataset schema lock and real subset conversion run
 - [x] M10.0: Path-power tuning tooling + parity drift quantification baseline
 - [x] M10.05: Path-power fit ingest integration (`--path-power-fit-json`) + CLI validation
+- [x] M10.08: Path-power fit cycle orchestration (`baseline->samples->fit->tuned`) + summary automation
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -51,4 +52,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.1: run measured path-power parameter fitting experiments (reflection/scattering) using real calibration CSVs and evaluate whether RA drift (cross-family) is reduced.
+Start M10.1: run measured path-power parameter fitting experiments (reflection/scattering) using real calibration CSVs and evaluate whether RA drift (cross-family) is reduced with tuned ingest outputs.

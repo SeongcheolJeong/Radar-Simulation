@@ -21,6 +21,22 @@ Verify executable cycle without external measured CSV:
 3. Fit:
    - `/Users/seongcheoljeong/Documents/Codex_test/scripts/fit_path_power_model_from_csv.py`
 
+## Automated Cycle (v2)
+
+Executed via:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_cycle.py`
+
+Output:
+
+- `/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_cycle_summary.json`
+
+Slope snapshot:
+
+- `baseline_log_slope = -0.504933`
+- `tuned_log_slope = -1.250000`
+- `delta_log_slope = -0.745067`
+
 ## Result Snapshot
 
 - Sample rows: `8`

@@ -247,6 +247,12 @@ Run ingest CLI path-power fit validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_path_power_fit.py
 ```
 
+Run end-to-end path-power fit cycle validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_cycle.py
+```
+
 Fit path-power parameters from measured CSV:
 
 ```bash
@@ -263,6 +269,22 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_pat
   --input-path-list-json /path/to/path_list.json \
   --output-csv /path/to/path_power_samples.csv \
   --scenario-id demo_scenario
+```
+
+Run one-command path-power fit cycle (`baseline -> samples -> fit -> tuned`):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_cycle.py \
+  --frames-root /path/to/frames_root \
+  --radar-json /path/to/radar_parameters_hybrid.json \
+  --frame-start 1 \
+  --frame-end 64 \
+  --camera-fov-deg 90 \
+  --mode reflection \
+  --file-ext .npy \
+  --path-power-apply-mode replace \
+  --work-root /path/to/cycle_work \
+  --scenario-id cycle_demo
 ```
 
 Analyze parity drift across replay reports:

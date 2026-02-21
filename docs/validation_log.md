@@ -447,6 +447,22 @@
   - End-to-end artifact chain generated successfully
   - Demo validates workflow connectivity before real measured CSV input
 
+## Path Power Fit Cycle Orchestration
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_cycle.py`
+- Result: pass
+- Notes:
+  - Baseline->samples->fit->tuned orchestration pass
+  - Summary JSON generation pass (`path_power_cycle_summary.json`)
+  - Tuned slope became more negative than baseline in validation scenario
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_path_power_fit_cycle.py --frames-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/frames --radar-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/radar_parameters_hybrid.json --frame-start 1 --frame-end 4 --camera-fov-deg 90 --mode reflection --file-ext .npy --amplitude-threshold 0.01 --top-k-per-chirp 4 --fit-model reflection --path-power-apply-mode replace --work-root /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run --scenario-id path_power_cycle_demo_v2 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo/cycle_run/path_power_cycle_summary.json`
+- Result: pass
+- Notes:
+  - Demo cycle summary generated with `delta_log_slope=-0.745067`
+
 ## Parity Drift Analysis
 
 - Date: 2026-02-21
