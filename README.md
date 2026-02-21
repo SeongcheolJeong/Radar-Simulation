@@ -129,6 +129,12 @@ Run measurement CSV converter validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measurement_csv_converter.py
 ```
 
+Run scenario profile workflow validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scenario_profile_workflow.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -196,6 +202,27 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_cal
   --output-npz /path/to/calibration_samples.npz
 ```
 
+Build scenario profile (`global_jones + parity thresholds`):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_scenario_profile.py \
+  --scenario-id chamber_static_v1 \
+  --samples-npz /path/to/calibration_samples.npz \
+  --reference-estimation-npz /path/to/reference_hybrid_estimation.npz \
+  --train-estimation-npz /path/to/train_candidate_1.npz \
+  --train-estimation-npz /path/to/train_candidate_2.npz \
+  --threshold-margin 1.5 \
+  --output-profile-json /path/to/scenario_profile.json
+```
+
+Evaluate candidate with scenario profile:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_scenario_profile.py \
+  --profile-json /path/to/scenario_profile.json \
+  --candidate-estimation-npz /path/to/candidate_hybrid_estimation.npz
+```
+
 Validate CLI integration with bundle:
 
 ```bash
@@ -240,3 +267,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/13_parity_metrics_contract.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/14_jones_calibration_contract.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/15_measurement_csv_converter_contract.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/16_scenario_profile_contract.md`

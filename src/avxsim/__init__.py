@@ -43,6 +43,12 @@ from .parity import (
     load_hybrid_estimation_npz,
 )
 from .pipeline import run_hybrid_frames_pipeline
+from .scenario_profile import (
+    build_scenario_profile_payload,
+    derive_parity_thresholds,
+    load_scenario_profile_json,
+    save_scenario_profile_json,
+)
 from .scenarios import make_constant_velocity_paths, make_static_paths, make_two_path_multipath
 from .synth import reshape_virtual_channels, synth_fmcw_tdm
 from .types import Path, RadarConfig
@@ -72,12 +78,16 @@ __all__ = [
     "compare_hybrid_estimation_payloads",
     "convert_measurement_csv_to_npz",
     "DEFAULT_MEASUREMENT_COLUMN_MAP",
+    "derive_parity_thresholds",
     "load_hybrid_estimation_npz",
+    "load_scenario_profile_json",
     "run_hybrid_frames_pipeline",
     "save_adc_npz",
     "save_global_jones_matrix_json",
     "save_calibration_samples_npz",
+    "save_scenario_profile_json",
     "save_paths_by_chirp_json",
+    "build_scenario_profile_payload",
     "fit_global_jones_matrix",
     "load_calibration_samples_npz",
     "load_column_map_json",

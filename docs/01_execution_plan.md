@@ -24,6 +24,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M7.7: Global Jones calibration bootstrap (LS fitter + ingest hook)
 - [x] M7.8: Calibration sample builder (`path_list + adc + ffd -> calibration_samples.npz`)
 - [x] M7.9: Measured CSV converter (`measurement.csv -> calibration_samples.npz`)
+- [x] M7.10: Scenario profile lock (`global_jones + parity thresholds + evaluator`)
 - [ ] M8: Motion compensation for TDM virtual array
 
 ## Iteration Rule (One-by-One Verification)
@@ -37,4 +38,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Lock scenario-specific parity thresholds with measured snapshots after applying calibrated Jones matrices.
+Start M8 baseline: timestamp-aware motion compensation for TDM virtual array phase alignment.

@@ -211,3 +211,13 @@
   - `measurement.csv` to `calibration_samples.npz` conversion pass
   - Column-map override path pass
   - Converted samples recover known global Jones matrix in fitting round-trip
+
+## Scenario Profile Workflow
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scenario_profile_workflow.py`
+- Result: pass
+- Notes:
+  - Scenario profile build pass (`global_jones + parity_thresholds`)
+  - Profile evaluation path pass (`good -> pass`, `bad -> fail`)
+  - Threshold derivation from train candidates and reference snapshot pass
