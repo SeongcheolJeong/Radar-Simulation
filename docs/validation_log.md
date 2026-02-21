@@ -1184,3 +1184,30 @@
 - Result: pass
 - Notes:
   - existing parity harness regression remains stable after `sionna_rt` backend routing addition
+
+## PO-SBR Backend Adapter Candidate (M13.2)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_po_sbr_backend.py`
+- Result: pass
+- Notes:
+  - `po_sbr_rt` backend emits canonical outputs from PO-SBR-style path payload JSON
+  - path metadata forwarding validated (`path_id`, `material_tag`, `reflection_order`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_backend_parity_po_sbr_rt.py`
+- Result: pass
+- Notes:
+  - parity harness pass confirmed on matched `analytic_targets` vs `po_sbr_rt` synthetic pair
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_sionna_backend.py`
+- Result: pass
+- Notes:
+  - `sionna_rt` regression remains stable after PO-SBR backend routing addition
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_backend_parity.py`
+- Result: pass
+- Notes:
+  - existing parity harness regression remains stable with `po_sbr_rt` addition

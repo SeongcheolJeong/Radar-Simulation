@@ -40,9 +40,10 @@ Use references via local adapters, not by merging third-party internals into cor
   - canonical outputs (`path list`, `raw ADC`, `radar_map`)
   - `.ffd`/Jones calibration path
   - public asset onboarding (`glTF`, `OBJ`) and deterministic fixture bundles
+  - exported-path adapters: `sionna_rt`, `po_sbr_rt` + parity locks
 - Remaining high-impact physics/backend work:
-  - Sionna RT integration
-  - PO-SBR high-fidelity scattering integration
+  - direct Sionna/PO-SBR runtime coupling (without pre-exported path payload)
+  - scattering-physics fidelity tuning against measured scenarios
 - RadarSimPy position:
   - useful as regression oracle
   - not required for core pipeline execution

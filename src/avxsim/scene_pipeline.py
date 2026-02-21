@@ -4,7 +4,12 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
-from .adapters import adapt_sionna_paths_payload_to_paths_by_chirp, load_sionna_paths_json
+from .adapters import (
+    adapt_po_sbr_paths_payload_to_paths_by_chirp,
+    adapt_sionna_paths_payload_to_paths_by_chirp,
+    load_po_sbr_paths_json,
+    load_sionna_paths_json,
+)
 from .adc_pack_builder import estimate_rd_ra_from_adc
 from .constants import C0
 from .io import save_adc_npz, save_paths_by_chirp_json
@@ -56,9 +61,15 @@ def run_object_scene_to_radar_map(
             radar=radar,
             output_dir=output_dir,
         )
+    elif backend_type == "po_sbr_rt":
+        result = _run_backend_po_sbr_rt(
+            backend=backend,
+            radar=radar,
+            output_dir=output_dir,
+        )
     else:
         raise ValueError(
-            "supported backend.type: hybrid_frames, analytic_targets, mesh_material_stub, sionna_rt"
+            "supported backend.type: hybrid_frames, analytic_targets, mesh_material_stub, sionna_rt, po_sbr_rt"
         )
 
     adc = np.asarray(result["adc"])
@@ -370,6 +381,75 @@ def _run_backend_sionna_rt(
     paths_by_chirp = adapt_sionna_paths_payload_to_paths_by_chirp(
         payload=paths_payload,
         n_chirps=int(n_chirps),
+    )
+
+    adc = synth_fmcw_tdm(
+        paths_by_chirp=paths_by_chirp,
+        tx_pos_m=tx_pos,
+        rx_pos_m=rx_pos,
+        radar=radar_cfg,
+        noise_sigma=float(backend.get("noise_sigma", 0.0)),
+    )
+
+    out_root = Path(output_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+    path_json = out_root / "path_list.json"
+    adc_npz = out_root / "adc_cube.npz"
+    save_paths_by_chirp_json(paths_by_chirp, str(path_json))
+    save_adc_npz(adc, radar_cfg, tx_pos, rx_pos, str(adc_npz))
+
+    return {
+        "paths_by_chirp": paths_by_chirp,
+        "adc": adc,
+        "tx_schedule": tx_schedule,
+        "path_list_json": str(path_json),
+        "adc_cube_npz": str(adc_npz),
+        "hybrid_estimation_npz": None,
+        "frame_count": int(n_chirps),
+    }
+
+
+def _run_backend_po_sbr_rt(
+    backend: Mapping[str, Any],
+    radar: Mapping[str, Any],
+    output_dir: str,
+) -> Dict[str, Any]:
+    tx_pos = _resolve_positions_3d(backend, "tx_pos_m")
+    rx_pos = _resolve_positions_3d(backend, "rx_pos_m")
+    n_tx = int(tx_pos.shape[0])
+
+    n_chirps = _resolve_required_int(backend.get("n_chirps"), "backend.n_chirps")
+    tx_schedule = _resolve_tx_schedule(
+        raw=backend.get("tx_schedule"),
+        n_chirps=n_chirps,
+        n_tx=n_tx,
+    )
+    radar_cfg = RadarConfig(
+        fc_hz=float(radar["fc_hz"]),
+        slope_hz_per_s=float(radar["slope_hz_per_s"]),
+        fs_hz=float(radar["fs_hz"]),
+        samples_per_chirp=int(radar["samples_per_chirp"]),
+        tx_schedule=tx_schedule,
+    )
+
+    raw_paths_payload = backend.get("paths_payload")
+    paths_json = _opt_str(backend.get("po_sbr_paths_json"))
+    if (raw_paths_payload is None) and (paths_json is None):
+        raise ValueError("po_sbr_rt backend requires one of: paths_payload, po_sbr_paths_json")
+    if (raw_paths_payload is not None) and (paths_json is not None):
+        raise ValueError("po_sbr_rt backend allows only one of: paths_payload, po_sbr_paths_json")
+
+    if paths_json is not None:
+        paths_payload = load_po_sbr_paths_json(paths_json)
+    else:
+        if not isinstance(raw_paths_payload, Mapping):
+            raise ValueError("backend.paths_payload must be object when provided")
+        paths_payload = dict(raw_paths_payload)
+
+    paths_by_chirp = adapt_po_sbr_paths_payload_to_paths_by_chirp(
+        payload=paths_payload,
+        n_chirps=int(n_chirps),
+        fc_hz=float(radar_cfg.fc_hz),
     )
 
     adc = synth_fmcw_tdm(

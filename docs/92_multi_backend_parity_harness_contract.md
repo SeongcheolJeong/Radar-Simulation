@@ -8,6 +8,7 @@ Primary use:
 
 - `hybrid_frames` vs `analytic_targets` on shared synthetic scenarios.
 - `analytic_targets` vs `sionna_rt` on matched exported-path synthetic scenarios.
+- `analytic_targets` vs `po_sbr_rt` on matched scattering-focused synthetic scenarios.
 
 ## CLI
 

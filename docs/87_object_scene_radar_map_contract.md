@@ -14,6 +14,7 @@ Current backend scope:
 - `analytic_targets` (native non-frame backend stub for M11.2)
 - `mesh_material_stub` (mesh/material-aware candidate backend for M12.0)
 - `sionna_rt` (Sionna-exported path adapter backend for M13.1)
+- `po_sbr_rt` (PO-SBR exported path adapter candidate backend for M13.2)
 
 ## Core Entry Points
 
@@ -33,7 +34,7 @@ Required top-level keys:
 
 `backend` required keys (`hybrid_frames`):
 
-- `type`: one of `hybrid_frames`, `analytic_targets`, `mesh_material_stub`, `sionna_rt`
+- `type`: one of `hybrid_frames`, `analytic_targets`, `mesh_material_stub`, `sionna_rt`, `po_sbr_rt`
 - `frames_root_dir`
 - `radar_json_path`
 - one of:
@@ -90,4 +91,5 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/valid
 - `analytic_targets` backend is a deterministic stub (point-target kinematics), not mesh/material RT.
 - `mesh_material_stub` uses simplified material weighting rules, not full geometric ray tracing.
 - `sionna_rt` backend currently consumes exported Sionna-style paths JSON and does not embed Sionna runtime directly.
+- `po_sbr_rt` backend currently consumes exported PO-SBR-style paths JSON and does not embed PO-SBR runtime directly.
 - Material-tagged propagation output columns are not finalized yet.

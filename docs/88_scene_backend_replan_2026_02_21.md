@@ -44,5 +44,5 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 - [x] M12.7: public OBJ sample parity onboarding and mixed-format fixture matrix lock
 - [x] M13.0: mesh-geometry proxy extraction baseline (`centroid/area`) for auto scene-object population
 - [x] M13.1: Sionna RT backend adapter and canonical parity lock
-- [ ] M13.2: PO-SBR backend adapter candidate (high-fidelity scattering)
+- [x] M13.2: PO-SBR backend adapter candidate (high-fidelity scattering)
 - [ ] M13.3: RadarSimPy periodic parity-lock automation (drift guard)
