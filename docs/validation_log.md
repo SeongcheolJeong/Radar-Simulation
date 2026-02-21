@@ -429,6 +429,24 @@
   - `shape_only` mode modifies relative path amplitudes by fitted range law
   - CLI output metadata includes fit enabled/model fields
 
+## Path Power Samples Builder
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_samples_builder.py`
+- Result: pass
+- Notes:
+  - `path_list.json` parsing and `range/az/el/observed_amp` conversion pass
+  - amplitude sort/filter and CSV row serialization pass
+
+## Path Power Cycle Demo
+
+- Date: 2026-02-21
+- Command: `run_hybrid_ingest_to_adc.py -> build_path_power_samples_from_path_list.py -> fit_path_power_model_from_csv.py` under `/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_cycle_demo`
+- Result: pass
+- Notes:
+  - End-to-end artifact chain generated successfully
+  - Demo validates workflow connectivity before real measured CSV input
+
 ## Parity Drift Analysis
 
 - Date: 2026-02-21

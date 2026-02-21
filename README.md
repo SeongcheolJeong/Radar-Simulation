@@ -256,6 +256,15 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/fit_path_
   --output-json /path/to/path_power_fit.json
 ```
 
+Build path-power samples CSV from path list:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_path_power_samples_from_path_list.py \
+  --input-path-list-json /path/to/path_list.json \
+  --output-csv /path/to/path_power_samples.csv \
+  --scenario-id demo_scenario
+```
+
 Analyze parity drift across replay reports:
 
 ```bash
