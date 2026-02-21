@@ -964,3 +964,13 @@
   - object-scene JSON contract wired (`backend + radar + map_config`)
   - artifacts generated: `path_list.json`, `adc_cube.npz`, `radar_map.npz`, `hybrid_estimation.npz`
   - map shape checks pass (`fx_dop_win=(64,128)`, `fx_ang=(32,128)`)
+
+## Case-Partitioned Lock Manifest Replay (M11.1)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_case_partitioned_lock_manifest_replay.py`
+- Result: pass
+- Notes:
+  - family-level fit selection is materialized to case-level resolved pack roots
+  - mixed mode validated (`fit_aware_rebuilt_pack` + `baseline_source_pack`)
+  - measured replay verification artifacts emitted (`case_level_lock_manifest.json`, measured replay plan/summary)

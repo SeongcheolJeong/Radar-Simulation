@@ -64,7 +64,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.30: Targeted flat-refine constrained search + full-candidate evidence pass
 - [x] M10.31: Case-partitioned fit-lock strategy evaluation (global -> family fallback)
 - [x] M11.0: Object-scene pipeline V0 (`scene_json -> path_list + adc + radar_map`)
-- [ ] M11.1: Case-level family lock manifest materialization + replay verification
+- [x] M11.1: Case-level family lock manifest materialization + replay verification
 - [ ] M11.2: Native scene path generator interface + non-frame backend stub
 - [ ] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
 - [ ] M11.4: Multi-backend parity harness on shared scenes
@@ -80,7 +80,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M11.1: materialize family-partitioned lock policy into case-level lock manifest and replay verification.
+Start M11.2: add native scene path generator interface and first non-frame backend stub.
 
 ## M10.19 Decision Gate
 
@@ -184,3 +184,11 @@ M11.0 outcome (2026-02-21):
 - new CLI added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_object_scene_to_radar_map.py`
 - new contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/87_object_scene_radar_map_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_to_radar_map.py`
+
+M11.1 outcome (2026-02-21):
+
+- case-partition summary to case-level manifest materializer added
+- replay verification path integrated in one command
+- new CLI added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_case_partitioned_lock_manifest_replay.py`
+- new contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/89_case_partitioned_lock_manifest_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_case_partitioned_lock_manifest_replay.py`
