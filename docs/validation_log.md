@@ -553,3 +553,19 @@
 - Notes:
   - Real Xiangyu matrix run completed for frame-counts `128,512`
   - Summary JSON emitted for case/model/frame-count comparison
+
+## Path Power Fit Selection (Lock)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection.py`
+- Result: pass
+- Notes:
+  - Model-wise fit selection logic validation pass
+  - `largest_frame_then_rmse` strategy behavior validated
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/select_path_power_fit_from_experiment.py --experiment-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/xiangyu_label_fit_experiment_128_512_2026_02_21.json --selection-strategy largest_frame_then_rmse --output-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_selection_xiangyu_labels_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Reflection/scattering selected fit JSONs emitted with selection metadata
+  - Selected source runs: `cms1000`, frame-count `512`

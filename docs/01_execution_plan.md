@@ -44,6 +44,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.10: Path-power fit batch runner (`multi CSV x multi model`) + demo summary
 - [x] M10.11: Xiangyu label+ADC -> path_power_samples converter + real 128-frame CSV runs
 - [x] M10.12: Xiangyu label-fit experiment matrix runner (`frame-count sweep`) + 128/512 report
+- [x] M10.13: Path-power fit selection/lock from experiment summary (`largest_frame_then_rmse`)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -56,4 +57,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.1: run measured path-power parameter fitting experiments (reflection/scattering) on Xiangyu label-derived CSV + chamber-style CSV (when available), then evaluate whether RA drift (cross-family) is reduced with tuned ingest outputs.
+Start M10.14: run tuned ingest/replay comparisons using selected fit JSONs and quantify whether cross-family RA drift decreases relative to current baseline.

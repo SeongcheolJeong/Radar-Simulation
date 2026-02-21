@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "experiment_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/xiangyu_label_fit_experiment_128_512_2026_02_21.json",
+  "selection_strategy": "largest_frame_then_rmse",
+  "models": [
+    {
+      "model": "reflection",
+      "strategy": "largest_frame_then_rmse",
+      "candidate_count": 4,
+      "selected": {
+        "case_label": "cms1000",
+        "frame_count": 512,
+        "best_rmse_log": 0.2962858955486018,
+        "best_mae_log": 0.26531362873847475,
+        "sample_count": 511,
+        "source_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_reflection.json",
+        "output_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_reflection_selected.json"
+      },
+      "selected_best_params": {
+        "range_power_exponent": 5.0,
+        "gain_scale": 10553699891.68124
+      }
+    },
+    {
+      "model": "scattering",
+      "strategy": "largest_frame_then_rmse",
+      "candidate_count": 4,
+      "selected": {
+        "case_label": "cms1000",
+        "frame_count": 512,
+        "best_rmse_log": 0.21461515735917236,
+        "best_mae_log": 0.18536923132552302,
+        "sample_count": 511,
+        "source_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_512/fits/cms1000_scattering.json",
+        "output_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits/path_power_fit_scattering_selected.json"
+      },
+      "selected_best_params": {
+        "range_power_exponent": 5.0,
+        "elevation_power": 0.5,
+        "azimuth_mix": 0.0,
+        "azimuth_power": 4.0,
+        "gain_scale": 14965909323.830236
+      }
+    }
+  ]
+}

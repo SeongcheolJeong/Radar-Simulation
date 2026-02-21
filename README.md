@@ -277,6 +277,12 @@ Run Xiangyu label fit experiment validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_xiangyu_label_fit_experiment.py
 ```
 
+Run path-power fit selection validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection.py
+```
+
 Fit path-power parameters from measured CSV:
 
 ```bash
@@ -347,6 +353,16 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_xiang
   --models reflection,scattering \
   --output-root /path/to/xiangyu_label_fit_experiment \
   --output-summary-json /path/to/xiangyu_label_fit_experiment_summary.json
+```
+
+Select/lock final fit JSONs from experiment summary:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/select_path_power_fit_from_experiment.py \
+  --experiment-summary-json /path/to/xiangyu_label_fit_experiment_summary.json \
+  --selection-strategy largest_frame_then_rmse \
+  --output-dir /path/to/selected_fits \
+  --output-summary-json /path/to/path_power_fit_selection_summary.json
 ```
 
 Analyze parity drift across replay reports:
