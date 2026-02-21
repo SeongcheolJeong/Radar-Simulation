@@ -33,6 +33,12 @@ Run adapter smoke validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_adapter_smoke.py
 ```
 
+Run Hybrid frame adapter validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_frame_adapter.py
+```
+
 Fetch reference repositories:
 
 ```bash
@@ -49,3 +55,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/06_ffd_integration_plan.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/07_reference_repo_strategy.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/08_git_workflow.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/09_hybrid_frame_adapter.md`
