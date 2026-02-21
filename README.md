@@ -283,6 +283,12 @@ Run path-power fit selection validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection.py
 ```
 
+Run Hybrid cross-family fit comparison validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_cross_family_fit_comparison.py
+```
+
 Fit path-power parameters from measured CSV:
 
 ```bash
@@ -363,6 +369,27 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/select_pa
   --selection-strategy largest_frame_then_rmse \
   --output-dir /path/to/selected_fits \
   --output-summary-json /path/to/path_power_fit_selection_summary.json
+```
+
+Run Hybrid cross-family baseline vs tuned comparison:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybrid_cross_family_fit_comparison.py \
+  --case-a-id case_a \
+  --case-a-frames-root /path/to/case_a/frames \
+  --case-a-radar-json /path/to/case_a/radar_parameters_hybrid.json \
+  --case-b-id case_b \
+  --case-b-frames-root /path/to/case_b/frames \
+  --case-b-radar-json /path/to/case_b/radar_parameters_hybrid.json \
+  --path-power-fit-json /path/to/path_power_fit_reflection_selected.json \
+  --path-power-apply-mode shape_only \
+  --frame-start 1 \
+  --frame-end 64 \
+  --camera-fov-deg 90 \
+  --mode reflection \
+  --file-ext .npy \
+  --output-root /path/to/hybrid_cross_family_run \
+  --output-summary-json /path/to/hybrid_cross_family_fit_summary.json
 ```
 
 Analyze parity drift across replay reports:
