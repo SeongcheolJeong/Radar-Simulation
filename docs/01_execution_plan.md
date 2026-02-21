@@ -63,6 +63,11 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.29: Multi-case constrained-refit consistency gate + Xiangyu target decision
 - [x] M10.30: Targeted flat-refine constrained search + full-candidate evidence pass
 - [x] M10.31: Case-partitioned fit-lock strategy evaluation (global -> family fallback)
+- [x] M11.0: Object-scene pipeline V0 (`scene_json -> path_list + adc + radar_map`)
+- [ ] M11.1: Case-level family lock manifest materialization + replay verification
+- [ ] M11.2: Native scene path generator interface + non-frame backend stub
+- [ ] M11.3: Propagation output schema expansion (`path_id`, `material_tag`, reflection order)
+- [ ] M11.4: Multi-backend parity harness on shared scenes
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -75,7 +80,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.32: materialize family-partitioned lock policy into case-level lock manifest and replay verification.
+Start M11.1: materialize family-partitioned lock policy into case-level lock manifest and replay verification.
 
 ## M10.19 Decision Gate
 
@@ -172,3 +177,10 @@ M10.31 outcome (2026-02-21):
 - global Xiangyu target decision remained `baseline_no_fit` (reused from targeted flat refine)
 - family fallback recovered adoptable lock for `bms1000` (`bms1000_reflection.json`)
 - `cms1000` kept baseline fallback, yielding final strategy `mixed_family_partitioned_lock`
+
+M11.0 outcome (2026-02-21):
+
+- object-scene pipeline V0 added (`scene_json -> path_list + adc + radar_map`)
+- new CLI added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_object_scene_to_radar_map.py`
+- new contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/87_object_scene_radar_map_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_to_radar_map.py`

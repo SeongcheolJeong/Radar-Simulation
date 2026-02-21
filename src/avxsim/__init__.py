@@ -120,6 +120,11 @@ from .scenario_profile import (
     load_scenario_profile_json,
     save_scenario_profile_json,
 )
+from .scene_pipeline import (
+    load_object_scene_json,
+    run_object_scene_to_radar_map,
+    run_object_scene_to_radar_map_json,
+)
 from .scenarios import make_constant_velocity_paths, make_static_paths, make_two_path_multipath
 from .synth import reshape_virtual_channels, synth_fmcw_tdm
 from .types import Path, RadarConfig
@@ -182,6 +187,8 @@ __all__ = [
     "run_measured_replay_plan_json",
     "run_replay_cases",
     "run_replay_manifest",
+    "run_object_scene_to_radar_map",
+    "run_object_scene_to_radar_map_json",
     "save_adc_npz",
     "save_global_jones_matrix_json",
     "save_calibration_samples_npz",
@@ -212,6 +219,7 @@ __all__ = [
     "load_global_jones_matrix_json",
     "load_measured_replay_plan_json",
     "load_motion_tuning_manifest_json",
+    "load_object_scene_json",
     "make_static_paths",
     "make_constant_velocity_paths",
     "make_two_path_multipath",

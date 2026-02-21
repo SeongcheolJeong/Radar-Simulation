@@ -954,3 +954,13 @@
     - `bms1000`: `fit` (`adopt_selected_fit_by_drift_objective`, `bms1000_reflection.json`)
     - `cms1000`: `baseline_no_fit`
   - final strategy: `mixed_family_partitioned_lock`
+
+## Object Scene to Radar Map (M11.0)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_object_scene_to_radar_map.py`
+- Result: pass
+- Notes:
+  - object-scene JSON contract wired (`backend + radar + map_config`)
+  - artifacts generated: `path_list.json`, `adc_cube.npz`, `radar_map.npz`, `hybrid_estimation.npz`
+  - map shape checks pass (`fx_dop_win=(64,128)`, `fx_ang=(32,128)`)
