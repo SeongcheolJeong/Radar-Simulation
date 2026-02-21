@@ -74,7 +74,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M12.3: Sidecar schema profile/version lock and parser strict-mode policy
 - [x] M12.4: Sidecar strict/non-strict compatibility matrix and bridge E2E regression lock
 - [x] M12.5: Real-scene asset onboarding pilot (`public glTF/OBJ sample -> scene pipeline`) and lockable fixture path
-- [ ] M12.6: Public multi-object scene fixture pack and deterministic replay bundle lock
+- [x] M12.6: Public multi-object scene fixture pack and deterministic replay bundle lock
+- [ ] M12.7: Public OBJ sample parity onboarding and mixed-format fixture matrix lock
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -87,7 +88,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M12.6: lock a multi-object public-scene fixture pack and deterministic replay bundle for regression.
+Start M12.7: add OBJ public-sample onboarding path and mixed-format fixture regression matrix.
 
 ## M10.19 Decision Gate
 
@@ -265,3 +266,12 @@ M12.5 outcome (2026-02-21):
 - real public sample onboarding executed with Khronos `Box.glb` and summary locked
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/98_public_scene_asset_onboarding_contract.md`
 - summary evidence: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_v1_2026_02_21.json`
+
+M12.6 outcome (2026-02-21):
+
+- onboarding runner extended with object layout presets (`single`, `triple_lane`)
+- deterministic replay-bundle manifest added (`artifact hashes + tx schedule + frame count`)
+- multi-object deterministic validator added (repeat-run hash consistency check)
+- real public `Box.glb` triple-lane run executed and summary locked
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/99_public_multi_object_fixture_bundle_contract.md`
+- summary evidence: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_triple_lane_v1_2026_02_21.json`

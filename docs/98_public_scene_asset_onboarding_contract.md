@@ -30,6 +30,7 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_p
   --asset-url https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb \
   --asset-relative-path assets/Box.glb \
   --scene-id khronos_box_v1 \
+  --object-layout-preset single \
   --strict \
   --summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_v1_2026_02_21.json
 ```

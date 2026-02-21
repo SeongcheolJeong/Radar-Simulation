@@ -35,6 +35,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--asset-source-path", default=None)
     p.add_argument("--asset-relative-path", default="assets/public_asset.glb")
     p.add_argument("--scene-id", default="public_scene_asset_v1")
+    p.add_argument(
+        "--object-layout-preset",
+        default="single",
+        choices=["single", "triple_lane"],
+        help="Object placement preset for sidecar generation.",
+    )
     p.add_argument("--force-refresh-asset", action="store_true")
     p.add_argument("--profile", default=DEFAULT_SIDECAR_PROFILE)
     p.add_argument("--expected-sidecar-version", type=int, default=DEFAULT_SIDECAR_VERSION)
@@ -66,6 +72,7 @@ def main() -> None:
         scene_id=str(args.scene_id),
         mesh_uri=args.asset_relative_path,
         object_id=asset_path.stem,
+        object_layout_preset=str(args.object_layout_preset),
     )
     sidecar_json = output_root / "scene_sidecar_public_asset.json"
     sidecar_json.write_text(json.dumps(sidecar_payload, indent=2), encoding="utf-8")
@@ -93,6 +100,33 @@ def main() -> None:
         output_dir=str(outputs_root),
         run_hybrid_estimation=False,
     )
+    artifact_hashes = {
+        "path_list_json_sha256": _sha256_hex(Path(run_result["path_list_json"])),
+        "adc_cube_npz_sha256": _sha256_hex(Path(run_result["adc_cube_npz"])),
+        "radar_map_npz_sha256": _sha256_hex(Path(run_result["radar_map_npz"])),
+    }
+    replay_bundle_manifest = {
+        "scene_id": str(args.scene_id),
+        "object_layout_preset": str(args.object_layout_preset),
+        "profile": str(args.profile),
+        "expected_sidecar_version": int(args.expected_sidecar_version),
+        "strict_mode": bool(args.strict_mode),
+        "asset_relative_path": args.asset_relative_path,
+        "asset_sha256": _sha256_hex(asset_path),
+        "object_count": int(len(sidecar_payload["objects"])),
+        "tx_schedule": [int(x) for x in run_result["tx_schedule"]],
+        "frame_count": int(run_result["frame_count"]),
+        "artifact_paths": {
+            "path_list_json": run_result["path_list_json"],
+            "adc_cube_npz": run_result["adc_cube_npz"],
+            "radar_map_npz": run_result["radar_map_npz"],
+        },
+        "artifact_hashes": artifact_hashes,
+    }
+    replay_bundle_manifest_json = output_root / "replay_bundle_manifest.json"
+    replay_bundle_manifest_json.write_text(
+        json.dumps(replay_bundle_manifest, indent=2), encoding="utf-8"
+    )
 
     summary_json = (
         Path(args.summary_json).expanduser().resolve()
@@ -104,12 +138,14 @@ def main() -> None:
         "profile": str(args.profile),
         "expected_sidecar_version": int(args.expected_sidecar_version),
         "strict_mode": bool(args.strict_mode),
+        "object_layout_preset": str(args.object_layout_preset),
         "asset_source": source,
         "asset_relative_path": args.asset_relative_path,
         "asset_sha256": _sha256_hex(asset_path),
         "sidecar_json": str(sidecar_json),
         "asset_manifest_json": str(asset_manifest_json),
         "scene_json": str(scene_json),
+        "replay_bundle_manifest_json": str(replay_bundle_manifest_json),
         "run_result": run_result,
     }
     summary_json.parent.mkdir(parents=True, exist_ok=True)
@@ -119,6 +155,7 @@ def main() -> None:
     print(f"  output_root: {output_root}")
     print(f"  asset_source: {source}")
     print(f"  asset_path: {asset_path}")
+    print(f"  replay_bundle_manifest_json: {replay_bundle_manifest_json}")
     print(f"  summary_json: {summary_json}")
     print(f"  radar_map_npz: {run_result['radar_map_npz']}")
 
@@ -146,7 +183,17 @@ def _materialize_asset(
     return f"url:{asset_url}"
 
 
-def _build_default_sidecar_payload(scene_id: str, mesh_uri: str, object_id: str) -> Dict[str, Any]:
+def _build_default_sidecar_payload(
+    scene_id: str,
+    mesh_uri: str,
+    object_id: str,
+    object_layout_preset: str,
+) -> Dict[str, Any]:
+    objects = _build_object_layout(
+        mesh_uri=mesh_uri,
+        object_id=object_id,
+        object_layout_preset=object_layout_preset,
+    )
     return {
         "schema_profile": DEFAULT_SIDECAR_PROFILE,
         "schema_version": DEFAULT_SIDECAR_VERSION,
@@ -179,17 +226,7 @@ def _build_default_sidecar_payload(scene_id: str, mesh_uri: str, object_id: str)
                 "attenuation_db": 2.0,
             }
         },
-        "objects": [
-            {
-                "mesh_uri": mesh_uri,
-                "object_id": object_id,
-                "centroid_m": [20.0, 0.0, 0.0],
-                "velocity_mps": [0.0, 0.0, 0.0],
-                "material_tag": "default_material",
-                "mesh_area_m2": 1.0,
-                "rcs_scale": 1.0,
-            }
-        ],
+        "objects": objects,
     }
 
 
@@ -202,6 +239,58 @@ def _sha256_hex(path: Path) -> str:
                 break
             h.update(chunk)
     return h.hexdigest()
+
+
+def _build_object_layout(
+    mesh_uri: str,
+    object_id: str,
+    object_layout_preset: str,
+) -> list:
+    if object_layout_preset == "single":
+        return [
+            {
+                "mesh_uri": mesh_uri,
+                "object_id": object_id,
+                "centroid_m": [20.0, 0.0, 0.0],
+                "velocity_mps": [0.0, 0.0, 0.0],
+                "material_tag": "default_material",
+                "mesh_area_m2": 1.0,
+                "rcs_scale": 1.0,
+            }
+        ]
+
+    if object_layout_preset == "triple_lane":
+        return [
+            {
+                "mesh_uri": mesh_uri,
+                "object_id": f"{object_id}_lead",
+                "centroid_m": [18.0, 0.0, 0.0],
+                "velocity_mps": [0.0, 0.0, 0.0],
+                "material_tag": "default_material",
+                "mesh_area_m2": 1.2,
+                "rcs_scale": 1.0,
+            },
+            {
+                "mesh_uri": mesh_uri,
+                "object_id": f"{object_id}_left",
+                "centroid_m": [25.0, 2.0, 0.0],
+                "velocity_mps": [-1.0, 0.0, 0.0],
+                "material_tag": "default_material",
+                "mesh_area_m2": 1.0,
+                "rcs_scale": 0.9,
+            },
+            {
+                "mesh_uri": mesh_uri,
+                "object_id": f"{object_id}_right",
+                "centroid_m": [30.0, -2.0, 0.0],
+                "velocity_mps": [1.0, 0.0, 0.0],
+                "material_tag": "default_material",
+                "mesh_area_m2": 0.9,
+                "rcs_scale": 0.8,
+            },
+        ]
+
+    raise ValueError(f"unsupported object layout preset: {object_layout_preset}")
 
 
 if __name__ == "__main__":

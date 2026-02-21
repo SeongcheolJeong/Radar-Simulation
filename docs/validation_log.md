@@ -1093,8 +1093,29 @@
   - sidecar -> manifest -> scene -> canonical outputs path validated offline
 
 - Date: 2026-02-21
-- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_public_scene_asset_onboarding.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/khronos_box_v1 --asset-url https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb --asset-relative-path assets/Box.glb --scene-id khronos_box_v1 --strict --summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_v1_2026_02_21.json`
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_public_scene_asset_onboarding.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/khronos_box_v1 --asset-url https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb --asset-relative-path assets/Box.glb --scene-id khronos_box_v1 --object-layout-preset single --strict --summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_v1_2026_02_21.json`
 - Result: pass
 - Notes:
   - public sample download + onboarding run completed
   - summary locked with `asset_sha256` and output artifact paths
+
+## Public Multi-Object Fixture Bundle (M12.6)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_public_scene_asset_onboarding.py`
+- Result: pass
+- Notes:
+  - single-object onboarding validator still passes after replay-bundle manifest extension
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_public_multi_object_fixture_bundle.py`
+- Result: pass
+- Notes:
+  - triple-lane multi-object preset emits deterministic artifact hash set across repeated runs
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_public_scene_asset_onboarding.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/scene_asset_onboarding/khronos_box_triple_lane_v1 --asset-url https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb --asset-relative-path assets/Box.glb --scene-id khronos_box_triple_lane_v1 --object-layout-preset triple_lane --strict --summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/public_scene_asset_onboarding_khronos_box_triple_lane_v1_2026_02_21.json`
+- Result: pass
+- Notes:
+  - real public sample multi-object run completed
+  - replay bundle manifest generated with artifact hashes

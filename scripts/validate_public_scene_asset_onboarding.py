@@ -46,6 +46,14 @@ def run() -> None:
         assert summary["scene_id"] == "public_scene_fixture_validation"
         assert summary["strict_mode"] is True
         assert summary["asset_source"].startswith("source_path:")
+        assert summary["object_layout_preset"] == "single"
+        bundle_manifest_json = Path(summary["replay_bundle_manifest_json"])
+        assert bundle_manifest_json.exists()
+        bundle = json.loads(bundle_manifest_json.read_text(encoding="utf-8"))
+        assert bundle["object_count"] == 1
+        assert bundle["artifact_hashes"]["path_list_json_sha256"]
+        assert bundle["artifact_hashes"]["adc_cube_npz_sha256"]
+        assert bundle["artifact_hashes"]["radar_map_npz_sha256"]
 
         run_result = summary["run_result"]
         assert Path(run_result["path_list_json"]).exists()
