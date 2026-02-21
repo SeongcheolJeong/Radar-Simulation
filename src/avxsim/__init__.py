@@ -55,6 +55,12 @@ from .parity import (
     load_hybrid_estimation_npz,
 )
 from .pipeline import run_hybrid_frames_pipeline
+from .replay_batch import (
+    load_replay_manifest_json,
+    run_replay_cases,
+    run_replay_manifest,
+    save_replay_report_json,
+)
 from .scenario_profile import (
     build_scenario_profile_payload,
     derive_parity_thresholds,
@@ -94,12 +100,16 @@ __all__ = [
     "DEFAULT_MEASUREMENT_COLUMN_MAP",
     "derive_parity_thresholds",
     "load_hybrid_estimation_npz",
+    "load_replay_manifest_json",
     "load_scenario_profile_json",
     "run_hybrid_frames_pipeline",
+    "run_replay_cases",
+    "run_replay_manifest",
     "save_adc_npz",
     "save_global_jones_matrix_json",
     "save_calibration_samples_npz",
     "save_scenario_profile_json",
+    "save_replay_report_json",
     "save_paths_by_chirp_json",
     "build_scenario_profile_payload",
     "fit_global_jones_matrix",

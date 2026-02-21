@@ -24,6 +24,7 @@ Optional:
 - `train_estimation_npz`
 - `threshold_derivation`
 - `motion_tuning_summary`
+- `motion_tuning_summary.ranked[]` with candidate scores/metrics
 
 ## Build CLI
 

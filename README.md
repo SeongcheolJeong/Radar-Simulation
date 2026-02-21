@@ -153,6 +153,12 @@ Run ingest CLI scenario profile defaults validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_profile_defaults.py
 ```
 
+Run moving-target replay batch validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_moving_target_replay_batch.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -272,6 +278,14 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_sce
   --output-profile-json /path/to/scenario_profile.json
 ```
 
+Run moving-target replay batch:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_moving_target_replay_batch.py \
+  --manifest-json /path/to/replay_manifest.json \
+  --output-json /path/to/replay_report.json
+```
+
 Validate CLI integration with bundle:
 
 ```bash
@@ -318,3 +332,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/15_measurement_csv_converter_contract.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/16_scenario_profile_contract.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/17_motion_compensation_contract.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/18_moving_target_replay_batch_contract.md`

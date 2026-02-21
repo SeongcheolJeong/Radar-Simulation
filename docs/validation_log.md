@@ -249,3 +249,13 @@
 - Notes:
   - `--scenario-profile-json` path applies profile global Jones and motion defaults
   - Explicit pipeline run works without extra calibration/motion flags
+
+## Moving-Target Replay Batch
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_moving_target_replay_batch.py`
+- Result: pass
+- Notes:
+  - Replay manifest batch evaluation pass
+  - Exit code policy pass (`failures -> 2`, `--allow-failures -> 0`)
+  - Report includes profile-derived motion defaults per case
