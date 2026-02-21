@@ -20,6 +20,21 @@ The reference repo provides links for full dataset download (Google Drive / IEEE
     text_labels/*
 ```
 
+Install required Python packages first:
+
+```bash
+python3 -m pip install --user scipy h5py gdown
+```
+
+If you only want a fast first validation run, extract one sequence only (instead of full unzip):
+
+```bash
+mkdir -p /tmp/xiangyu_subset && \
+unzip -q -n /your_data/xiangyu_raw_adc.zip \
+  "Automotive/2019_04_09_bms1000/radar_raw_frame/*" \
+  -d /tmp/xiangyu_subset
+```
+
 ## Step 1: Extract MAT -> ADC NPZ
 
 ```bash
@@ -59,6 +74,23 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m
   --plan-json /tmp/packs/measured_replay_plan.json \
   --output-root /tmp/measured_replay_outputs \
   --output-summary-json /tmp/measured_replay_summary.json \
+  --allow-unlocked
+```
+
+## Optional: One-command Pipeline
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py \
+  --input-type mat \
+  --input-root /tmp/xiangyu_subset/Automotive/2019_04_09_bms1000/radar_raw_frame \
+  --scenario-id xiangyu_2019_04_09_bms1000_v1 \
+  --work-root /tmp/xiangyu_onboarding_run1 \
+  --mat-glob "*.mat" \
+  --max-files 128 \
+  --adc-order scrt \
+  --nfft-doppler 256 \
+  --nfft-angle 64 \
+  --range-bin-limit 128 \
   --allow-unlocked
 ```
 

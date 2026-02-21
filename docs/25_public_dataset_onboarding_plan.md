@@ -51,8 +51,24 @@ Onboard one public radar dataset with high conversion cost into this repository'
 
 ## Current Status
 
-- Stage 1: scaffold implemented
-- Stage 2: baseline FFT converter implemented
-- Stage 3: implemented
-- Stage 4: implemented
-- Real public dataset run: pending input download and schema pin
+- Stage 1: implemented and validated with Xiangyu MAT input (`adcData`)
+- Stage 2: implemented and validated with `--adc-order scrt` baseline FFT conversion
+- Stage 3: implemented and validated (pack + replay plan generated)
+- Stage 4: implemented and validated (`run_measured_replay_execution.py` exit code `0`)
+- Stage 5: implemented and validated (`run_dataset_onboarding_pipeline.py`)
+- Real public dataset run: first execution complete on 2026-02-21
+
+## First Public Run Snapshot (2026-02-21)
+
+- Dataset: Xiangyu Raw ADC (public automotive dataset)
+- Source zip: `/Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc.zip` (~15 GB)
+- Subset used: `Automotive/2019_04_09_bms1000/radar_raw_frame` (897 MAT frames)
+- Onboarding command:
+  - `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py --input-type mat --input-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/radar_raw_frame --scenario-id xiangyu_2019_04_09_bms1000_v1 --work-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run1 --mat-glob "*.mat" --max-files 128 --adc-order scrt --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --allow-unlocked`
+- Output root:
+  - `/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run1`
+- Artifact summary:
+  - pack generated: 1
+  - candidate estimations generated: 128
+  - replay execution: success (pipeline exit code `0`)
+  - profile lock summary: unlocked 1 case (baseline profile not yet locked)

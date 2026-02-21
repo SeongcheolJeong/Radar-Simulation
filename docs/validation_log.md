@@ -341,3 +341,14 @@
 - Notes:
   - One-command onboarding path pass (`adc_npz -> pack -> plan -> replay`)
   - Work-root artifacts generated as expected (`onboarding_summary.json`, replay outputs)
+
+## Public Dataset Onboarding (Xiangyu BMS1000 subset)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_dataset_onboarding_pipeline.py --input-type mat --input-root /Users/seongcheoljeong/Documents/Codex_test/data/public/xiangyu_raw_adc_extracted/Automotive/2019_04_09_bms1000/radar_raw_frame --scenario-id xiangyu_2019_04_09_bms1000_v1 --work-root /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run1 --mat-glob "*.mat" --max-files 128 --adc-order scrt --nfft-doppler 256 --nfft-angle 64 --range-bin-limit 128 --allow-unlocked`
+- Result: pass (pipeline exit code `0`)
+- Notes:
+  - Public raw MAT input extracted from Xiangyu zip and converted end-to-end
+  - Pack generated with 128 candidates for scenario `xiangyu_2019_04_09_bms1000_v1`
+  - Replay artifacts generated (`replay_report.json`, `profile_lock_report.json`, `locked_profiles/*.locked.json`)
+  - Lock summary indicates unlocked case remains (expected before profile lock finalization)
