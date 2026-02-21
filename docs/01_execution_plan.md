@@ -52,6 +52,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.18: Mixed lock publish from A/B reports (`reflection keep`, `scattering cross-family`) + targeted comparator verification
 - [x] M10.19: Measured replay fit-change impact gate (dependency audit) + Xiangyu no-op skip decision
 - [x] M10.20: Fit-aware measured pack rebuild path + real-plan replay impact confirmation (`bms1000_run1`)
+- [x] M10.21: Fit-aware measured replay batch scaling to target plans + no-gain stop gate execution
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -64,7 +65,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.21: scale fit-aware replay comparison to target plans (`bms1000_512`, `bms1000_full897`, `cms1000_128`) with stop gate after 2 no-gain attempts.
+Start M10.22: add fit-aware replay saturation sanity gate (proxy-strength check) and determine safe default policy before wider rollout.
 
 ## M10.19 Decision Gate
 
@@ -87,3 +88,9 @@ M10.20 outcome (2026-02-21):
 
 - fit-aware pack rebuild path implemented from existing packs
 - representative real plan (`bms1000_run1`) replay became fit-sensitive (`pass_count 1 -> 12`)
+
+M10.21 outcome (2026-02-21):
+
+- fit-aware measured replay batch runner executed on target plans (`bms1000_512`, `bms1000_full897`, `cms1000_128`)
+- all 3 cases improved over baseline (`improved_case_count=3`)
+- stop gate condition (`max_no_gain_attempts=2`) remained armed; no case hit no-gain streak in this run

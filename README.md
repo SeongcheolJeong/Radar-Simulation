@@ -682,6 +682,27 @@ Run fit-aware measured-pack rebuild validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_build_fit_aware_pack_from_existing_pack.py
 ```
 
+Run fit-aware measured replay batch validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_fit_aware_measured_replay_batch.py
+```
+
+Run fit-aware measured replay batch on multiple target packs:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_fit_aware_measured_replay_batch.py \
+  --case bms1000_512=/path/to/pack_xiangyu_2019_04_09_bms1000_v1_512 \
+  --case bms1000_full897=/path/to/pack_xiangyu_2019_04_09_bms1000_v1_full897 \
+  --case cms1000_128=/path/to/pack_xiangyu_2019_04_09_cms1000_v1_128 \
+  --fit-json /path/to/path_power_fit_scattering_selected.json \
+  --fit-json /path/to/path_power_fit_reflection_selected.json \
+  --max-no-gain-attempts 2 \
+  --allow-unlocked \
+  --output-root /path/to/fit_aware_batch_run \
+  --output-summary-json /path/to/fit_aware_batch_summary.json
+```
+
 Fetch reference repositories:
 
 ```bash

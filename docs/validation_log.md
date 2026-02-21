@@ -724,3 +724,20 @@
 - Notes:
   - `predicted_noop_all_plans=false`
   - recommendation: `rerun_required_for_impacted_plans`
+
+## Fit-Aware Measured Replay Batch Scaling
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_fit_aware_measured_replay_batch.py`
+- Result: pass
+- Notes:
+  - No-gain stop-gate validation pass (`max_no_gain_attempts=1` synthetic case)
+  - Stop reason asserted as `max_no_gain_reached`
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_fit_aware_measured_replay_batch.py --case bms1000_512=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/packs/pack_xiangyu_2019_04_09_bms1000_v1_512 --case bms1000_full897=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/packs/pack_xiangyu_2019_04_09_bms1000_v1_full897 --case cms1000_128=/Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/packs/pack_xiangyu_2019_04_09_cms1000_v1_128 --fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json --fit-json /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json --max-no-gain-attempts 2 --allow-unlocked --output-root /Users/seongcheoljeong/Documents/Codex_test/data/public/fit_aware_runs/xiangyu_target_batch_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_2026_02_21.json`
+- Result: pass
+- Notes:
+  - `case_count=3`, `improved_case_count=3`
+  - Best attempt in all cases was scattering mixed fit
+  - Stop-gate remained armed but not triggered (`stop_reason=fit_list_exhausted` for all cases)
