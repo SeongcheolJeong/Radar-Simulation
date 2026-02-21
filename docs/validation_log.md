@@ -201,3 +201,13 @@
 - Notes:
   - `path_list.json + adc_cube.npz + .ffd` to `calibration_samples.npz` build pass
   - Builder output used by fitter and recovers known global Jones matrix in round-trip test
+
+## Measurement CSV Converter
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measurement_csv_converter.py`
+- Result: pass
+- Notes:
+  - `measurement.csv` to `calibration_samples.npz` conversion pass
+  - Column-map override path pass
+  - Converted samples recover known global Jones matrix in fitting round-trip

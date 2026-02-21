@@ -123,6 +123,12 @@ Run calibration samples builder validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_calibration_samples_builder.py
 ```
 
+Run measurement CSV converter validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measurement_csv_converter.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -173,6 +179,23 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_cal
   --output-npz /path/to/calibration_samples.npz
 ```
 
+Build `calibration_samples.npz` from measured CSV:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_calibration_samples_from_measurement_csv.py \
+  --input-csv /path/to/measurement.csv \
+  --output-npz /path/to/calibration_samples.npz
+```
+
+Use column remapping when CSV headers differ:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/build_calibration_samples_from_measurement_csv.py \
+  --input-csv /path/to/measurement.csv \
+  --column-map-json /path/to/column_map.json \
+  --output-npz /path/to/calibration_samples.npz
+```
+
 Validate CLI integration with bundle:
 
 ```bash
@@ -216,3 +239,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/12_paper_traceability_matrix.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/13_parity_metrics_contract.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/14_jones_calibration_contract.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/15_measurement_csv_converter_contract.md`

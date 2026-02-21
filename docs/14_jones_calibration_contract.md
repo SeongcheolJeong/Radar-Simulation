@@ -46,6 +46,14 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build
   --output-npz /path/to/calibration_samples.npz
 ```
 
+Measured CSV converter CLI:
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/build_calibration_samples_from_measurement_csv.py \
+  --input-csv /path/to/measurement.csv \
+  --output-npz /path/to/calibration_samples.npz
+```
+
 `observed-mode`:
 
 - `normalized`: divide matched-filter gain by scalar path model (`amp * phase`) to isolate polarization response

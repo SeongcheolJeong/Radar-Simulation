@@ -30,6 +30,12 @@ from .hybrid_pcode import (
     run_hybrid_estimation_bundle,
 )
 from .io import save_adc_npz, save_paths_by_chirp_json
+from .measurement_csv import (
+    DEFAULT_MEASUREMENT_COLUMN_MAP,
+    build_calibration_samples_from_measurement_csv,
+    convert_measurement_csv_to_npz,
+    load_column_map_json,
+)
 from .parity import (
     DEFAULT_PARITY_THRESHOLDS,
     compare_hybrid_estimation_npz,
@@ -45,6 +51,7 @@ __all__ = [
     "adapt_records_by_chirp",
     "apply_global_jones_matrix",
     "build_calibration_samples",
+    "build_calibration_samples_from_measurement_csv",
     "C0",
     "FfdAntennaModel",
     "FfdPattern",
@@ -63,6 +70,8 @@ __all__ = [
     "RadarConfig",
     "compare_hybrid_estimation_npz",
     "compare_hybrid_estimation_payloads",
+    "convert_measurement_csv_to_npz",
+    "DEFAULT_MEASUREMENT_COLUMN_MAP",
     "load_hybrid_estimation_npz",
     "run_hybrid_frames_pipeline",
     "save_adc_npz",
@@ -71,6 +80,7 @@ __all__ = [
     "save_paths_by_chirp_json",
     "fit_global_jones_matrix",
     "load_calibration_samples_npz",
+    "load_column_map_json",
     "load_global_jones_matrix_json",
     "make_static_paths",
     "make_constant_velocity_paths",
