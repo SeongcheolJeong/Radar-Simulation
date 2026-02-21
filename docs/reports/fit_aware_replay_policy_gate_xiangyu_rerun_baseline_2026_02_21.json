@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "input_batch_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json",
+  "batch_metadata": {
+    "baseline_mode": "rerun",
+    "fit_jsons": [
+      "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+      "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json"
+    ]
+  },
+  "policy": {
+    "require_non_degradation_all_cases": true,
+    "max_pass_rate_drop": 0.0,
+    "max_pass_count_drop": 0,
+    "max_fail_count_increase": 0,
+    "min_improved_cases": 1
+  },
+  "case_count": 3,
+  "non_degrading_case_count": 0,
+  "degrade_only_case_count": 3,
+  "improved_case_count": 0,
+  "gate_failed": true,
+  "gate_failed_non_degradation": true,
+  "gate_failed_min_improvement": true,
+  "recommendation": "reject_fit_lock_due_to_degradation",
+  "cases": [
+    {
+      "label": "bms1000_512",
+      "baseline_summary": {
+        "case_count": 1,
+        "candidate_count": 512,
+        "pass_count": 512,
+        "fail_count": 0,
+        "pass_rate": 1.0
+      },
+      "attempt_count": 2,
+      "eligible_attempt_count": 0,
+      "rejected_attempt_count": 2,
+      "status": "degrade_only",
+      "best_eligible_attempt": null,
+      "eligible_attempts": [],
+      "rejected_attempts": [
+        {
+          "attempt_index": 0,
+          "attempt_id": "attempt_00_path_power_fit_scattering_selected",
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          },
+          "non_degrading": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "gain": false
+        },
+        {
+          "attempt_index": 1,
+          "attempt_id": "attempt_01_path_power_fit_reflection_selected",
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+          "delta": {
+            "pass_count_delta": -512.0,
+            "fail_count_delta": 512.0,
+            "pass_rate_delta": -1.0
+          },
+          "non_degrading": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "gain": false
+        }
+      ]
+    },
+    {
+      "label": "bms1000_full897",
+      "baseline_summary": {
+        "case_count": 1,
+        "candidate_count": 897,
+        "pass_count": 897,
+        "fail_count": 0,
+        "pass_rate": 1.0
+      },
+      "attempt_count": 2,
+      "eligible_attempt_count": 0,
+      "rejected_attempt_count": 2,
+      "status": "degrade_only",
+      "best_eligible_attempt": null,
+      "eligible_attempts": [],
+      "rejected_attempts": [
+        {
+          "attempt_index": 0,
+          "attempt_id": "attempt_00_path_power_fit_scattering_selected",
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+          "delta": {
+            "pass_count_delta": -889.0,
+            "fail_count_delta": 889.0,
+            "pass_rate_delta": -0.9910813823857302
+          },
+          "non_degrading": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "gain": false
+        },
+        {
+          "attempt_index": 1,
+          "attempt_id": "attempt_01_path_power_fit_reflection_selected",
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+          "delta": {
+            "pass_count_delta": -870.0,
+            "fail_count_delta": 870.0,
+            "pass_rate_delta": -0.9698996655518395
+          },
+          "non_degrading": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "gain": false
+        }
+      ]
+    },
+    {
+      "label": "cms1000_128",
+      "baseline_summary": {
+        "case_count": 1,
+        "candidate_count": 128,
+        "pass_count": 128,
+        "fail_count": 0,
+        "pass_rate": 1.0
+      },
+      "attempt_count": 2,
+      "eligible_attempt_count": 0,
+      "rejected_attempt_count": 2,
+      "status": "degrade_only",
+      "best_eligible_attempt": null,
+      "eligible_attempts": [],
+      "rejected_attempts": [
+        {
+          "attempt_index": 0,
+          "attempt_id": "attempt_00_path_power_fit_scattering_selected",
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_scattering_selected.json",
+          "delta": {
+            "pass_count_delta": -128.0,
+            "fail_count_delta": 128.0,
+            "pass_rate_delta": -1.0
+          },
+          "non_degrading": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "gain": false
+        },
+        {
+          "attempt_index": 1,
+          "attempt_id": "attempt_01_path_power_fit_reflection_selected",
+          "fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed/path_power_fit_reflection_selected.json",
+          "delta": {
+            "pass_count_delta": -128.0,
+            "fail_count_delta": 128.0,
+            "pass_rate_delta": -1.0
+          },
+          "non_degrading": false,
+          "reasons": [
+            "pass_rate_drop_exceeds_limit",
+            "pass_count_drop_exceeds_limit",
+            "fail_count_increase_exceeds_limit"
+          ],
+          "gain": false
+        }
+      ]
+    }
+  ]
+}

@@ -730,6 +730,22 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_f
   --max-allowed-saturated-cases 0
 ```
 
+Run fit-aware replay policy-gate validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_fit_aware_replay_policy_gate.py
+```
+
+Evaluate fit-aware replay adoption policy on batch summary:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_fit_aware_replay_policy_gate.py \
+  --batch-summary-json /path/to/fit_aware_batch_summary.json \
+  --output-json /path/to/fit_aware_replay_policy_gate_summary.json \
+  --require-non-degradation-all-cases \
+  --min-improved-cases 1
+```
+
 Fetch reference repositories:
 
 ```bash

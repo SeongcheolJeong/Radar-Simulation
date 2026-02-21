@@ -789,3 +789,19 @@
 - Notes:
   - `saturated_case_count=0`, `gate_failed=false`
   - recommendation: `proxy_strength_within_expected_range`
+
+## Fit-Aware Replay Policy Gate
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_fit_aware_replay_policy_gate.py`
+- Result: pass
+- Notes:
+  - Synthetic non-degrading improved batch accepted (`accept_fit_lock`)
+  - Synthetic degradation-only batch rejected (`reject_fit_lock_due_to_degradation`)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/evaluate_fit_aware_replay_policy_gate.py --batch-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_measured_replay_batch_xiangyu_targets_rerun_baseline_2026_02_21.json --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/fit_aware_replay_policy_gate_xiangyu_rerun_baseline_2026_02_21.json --require-non-degradation-all-cases --min-improved-cases 1`
+- Result: pass
+- Notes:
+  - `case_count=3`, `degrade_only_case_count=3`, `improved_case_count=0`
+  - gate failed with recommendation `reject_fit_lock_due_to_degradation`
