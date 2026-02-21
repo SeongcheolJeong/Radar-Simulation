@@ -36,6 +36,11 @@ from .measurement_csv import (
     convert_measurement_csv_to_npz,
     load_column_map_json,
 )
+from .motion_compensation import (
+    apply_tdm_motion_compensation_to_h,
+    estimate_doppler_peak_hz,
+    infer_tx_slot_offsets,
+)
 from .parity import (
     DEFAULT_PARITY_THRESHOLDS,
     compare_hybrid_estimation_npz,
@@ -56,6 +61,7 @@ from .types import Path, RadarConfig
 __all__ = [
     "adapt_records_by_chirp",
     "apply_global_jones_matrix",
+    "apply_tdm_motion_compensation_to_h",
     "build_calibration_samples",
     "build_calibration_samples_from_measurement_csv",
     "C0",
@@ -89,12 +95,14 @@ __all__ = [
     "save_paths_by_chirp_json",
     "build_scenario_profile_payload",
     "fit_global_jones_matrix",
+    "estimate_doppler_peak_hz",
     "load_calibration_samples_npz",
     "load_column_map_json",
     "load_global_jones_matrix_json",
     "make_static_paths",
     "make_constant_velocity_paths",
     "make_two_path_multipath",
+    "infer_tx_slot_offsets",
     "parse_jones_matrix",
     "reshape_virtual_channels",
     "synth_fmcw_tdm",

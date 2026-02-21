@@ -58,6 +58,29 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--estimation-nfft", type=int, default=144)
     p.add_argument("--estimation-range-bin-length", type=int, default=10)
     p.add_argument("--estimation-doppler-window", default="hann")
+    p.add_argument(
+        "--enable-motion-compensation",
+        action="store_true",
+        help="Enable TDM motion compensation for angle estimation in hybrid bundle",
+    )
+    p.add_argument(
+        "--motion-comp-fd-hz",
+        type=float,
+        default=None,
+        help="Optional Doppler override for motion compensation (Hz). If omitted, estimated from RD peak.",
+    )
+    p.add_argument(
+        "--motion-comp-chirp-interval-s",
+        type=float,
+        default=None,
+        help="Optional chirp interval for motion compensation. Default: samples_per_chirp/fs_hz",
+    )
+    p.add_argument(
+        "--motion-comp-reference-tx",
+        type=int,
+        default=None,
+        help="Reference Tx index for compensation phase (default: first tx in schedule)",
+    )
     p.add_argument("--output-dir", required=True, help="Output directory for path_list.json and adc_cube.npz")
     return p.parse_args()
 
@@ -100,6 +123,10 @@ def main() -> None:
         estimation_nfft=args.estimation_nfft,
         estimation_range_bin_length=args.estimation_range_bin_length,
         estimation_doppler_window=args.estimation_doppler_window,
+        enable_motion_compensation=args.enable_motion_compensation,
+        motion_comp_fd_hz=args.motion_comp_fd_hz,
+        motion_comp_chirp_interval_s=args.motion_comp_chirp_interval_s,
+        motion_comp_reference_tx=args.motion_comp_reference_tx,
         output_dir=args.output_dir,
     )
 
@@ -116,6 +143,9 @@ def main() -> None:
     print(f"  adc_cube: {result.get('adc_cube_npz')}")
     if args.run_hybrid_estimation:
         print(f"  hybrid_estimation: {result.get('hybrid_estimation_npz')}")
+        print(f"  motion compensation enabled: {result['motion_compensation_enabled']}")
+        print(f"  motion compensation fd_hz: {result['motion_comp_fd_hz']}")
+        print(f"  motion compensation chirp_interval_s: {result['motion_comp_chirp_interval_s']}")
 
 
 if __name__ == "__main__":

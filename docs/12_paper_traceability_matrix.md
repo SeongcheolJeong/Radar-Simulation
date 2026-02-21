@@ -29,7 +29,7 @@ Paper reference:
 |---|---|---|---|---|---|
 | R1 | Dynamic RT/Blender frame ingestion for scenario rendering outputs | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/adapters/hybriddynamicrt_frames.py`, `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/pipeline.py` | `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_frame_adapter.py`, `.../scripts/validate_hybrid_pipeline_output.py` | Supports `AmplitudeOutput####` + `DistanceOutput####`/`Depth####` |
 | R2 | FMCW beat-signal generation from path/range information | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/synth.py` | `.../scripts/validate_step1.py` | Canonical ADC output `adc[sample, chirp, tx, rx]` |
-| R3 | TDM-MIMO handling and virtual array compatible processing | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/synth.py`, `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/pipeline.py` | `.../scripts/validate_step1.py`, `.../scripts/validate_adapter_smoke.py` | TDM schedule explicit via `tx_schedule` |
+| R3 | TDM-MIMO handling and virtual array compatible processing | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/synth.py`, `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/pipeline.py`, `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/motion_compensation.py` | `.../scripts/validate_step1.py`, `.../scripts/validate_adapter_smoke.py`, `.../scripts/validate_motion_compensation_core.py`, `.../scripts/validate_hybrid_ingest_cli_with_motion_comp.py` | TDM schedule explicit via `tx_schedule`, baseline motion compensation added |
 | R4 | Range-Doppler image generation | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/hybrid_pcode.py` (`doppler_estimation_from_channel`) | `.../scripts/validate_hybrid_doppler_estimation.py` | P-code replacement P2 |
 | R5 | Doppler summary descriptors/concatenation over range | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/hybrid_pcode.py` (`generate_concatenated_doppler`) | `.../scripts/validate_hybrid_concatenated_dop.py` | P-code replacement P3 |
 | R6 | Range-Angle / angle estimation from MIMO channel | Implemented | `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/hybrid_pcode.py` (`angle_estimation_from_channel`) | `.../scripts/validate_hybrid_angle_estimation.py` | P-code replacement P4 |
@@ -42,6 +42,6 @@ Paper reference:
 
 ## Next Parity Steps
 
-1. Add motion-compensated TDM virtual array baseline and evaluate effect on angle parity.
+1. Tune motion compensation on measured moving-target scenarios and lock per-profile defaults.
 2. Fit and version global Jones matrices per measured scenario pack.
 3. Add scenario packs for motion classes to emulate paper-like evaluation tables.

@@ -8,6 +8,10 @@ from .antenna import FfdAntennaModel
 from .ffd import FieldFormat
 from .hybrid_pcode import run_hybrid_estimation_bundle
 from .io import save_adc_npz, save_hybrid_estimation_npz, save_paths_by_chirp_json
+from .motion_compensation import (
+    apply_tdm_motion_compensation_to_h,
+    estimate_doppler_peak_hz,
+)
 from .synth import synth_fmcw_tdm
 from .types import RadarConfig
 
@@ -37,6 +41,10 @@ def run_hybrid_frames_pipeline(
     estimation_nfft: int = 144,
     estimation_range_bin_length: int = 10,
     estimation_doppler_window: str = "hann",
+    enable_motion_compensation: bool = False,
+    motion_comp_fd_hz: Optional[float] = None,
+    motion_comp_chirp_interval_s: Optional[float] = None,
+    motion_comp_reference_tx: Optional[int] = None,
     output_dir: Optional[str] = None,
 ) -> Dict[str, object]:
     tx_pos, rx_pos = load_hybrid_radar_geometry(radar_json_path)
@@ -95,12 +103,50 @@ def run_hybrid_frames_pipeline(
         "ffd_enabled": antenna_model is not None,
         "jones_polarization_enabled": bool(use_jones_polarization),
         "global_jones_enabled": global_jones_matrix is not None,
+        "motion_compensation_enabled": False,
+        "motion_comp_fd_hz": None,
+        "motion_comp_chirp_interval_s": None,
+        "motion_comp_reference_tx": motion_comp_reference_tx,
     }
     if global_jones_matrix is not None:
         result["global_jones_matrix"] = np.asarray(global_jones_matrix, dtype=np.complex128).reshape(2, 2)
 
     if run_hybrid_estimation:
         h = _build_h_from_adc_tdm(adc, tx_schedule)
+        h_for_angle = h
+        used_fd_hz = None
+        used_chirp_interval = None
+        if enable_motion_compensation:
+            used_chirp_interval = (
+                float(motion_comp_chirp_interval_s)
+                if motion_comp_chirp_interval_s is not None
+                else float(samples_per_chirp) / float(fs_hz)
+            )
+            used_fd_hz = (
+                float(motion_comp_fd_hz)
+                if motion_comp_fd_hz is not None
+                else estimate_doppler_peak_hz(
+                    h=h,
+                    np_chirps=len(tx_schedule),
+                    nfft=int(estimation_nfft),
+                    chirp_interval_s=used_chirp_interval,
+                    window=estimation_doppler_window,
+                )
+            )
+            h_for_angle = apply_tdm_motion_compensation_to_h(
+                h=h,
+                np_chirps=len(tx_schedule),
+                num_tx=int(tx_pos.shape[0]),
+                num_rx=int(rx_pos.shape[0]),
+                tx_schedule=tx_schedule,
+                doppler_hz=used_fd_hz,
+                chirp_interval_s=used_chirp_interval,
+                reference_tx=motion_comp_reference_tx,
+            )
+            result["motion_compensation_enabled"] = True
+            result["motion_comp_fd_hz"] = float(used_fd_hz)
+            result["motion_comp_chirp_interval_s"] = float(used_chirp_interval)
+
         angle_view_cali = _compute_angle_view_cali(
             camera_fov_deg=camera_fov_deg,
             camera_rotate_deg=camera_rotate_deg,
@@ -115,6 +161,7 @@ def run_hybrid_frames_pipeline(
             angle_view_cali=angle_view_cali,
             range_bin_length=int(estimation_range_bin_length),
             doppler_window=estimation_doppler_window,
+            h_for_angle=h_for_angle,
         )
         result["hybrid_estimation"] = estimation
 
@@ -134,6 +181,10 @@ def run_hybrid_frames_pipeline(
                 "range_bin_length": int(estimation_range_bin_length),
                 "doppler_window": str(estimation_doppler_window),
                 "angle_view_cali": list(_compute_angle_view_cali(camera_fov_deg, camera_rotate_deg)),
+                "motion_compensation_enabled": bool(result["motion_compensation_enabled"]),
+                "motion_comp_fd_hz": result["motion_comp_fd_hz"],
+                "motion_comp_chirp_interval_s": result["motion_comp_chirp_interval_s"],
+                "motion_comp_reference_tx": motion_comp_reference_tx,
             }
             save_hybrid_estimation_npz(
                 estimation=result["hybrid_estimation"],

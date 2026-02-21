@@ -221,3 +221,21 @@
   - Scenario profile build pass (`global_jones + parity_thresholds`)
   - Profile evaluation path pass (`good -> pass`, `bad -> fail`)
   - Threshold derivation from train candidates and reference snapshot pass
+
+## Motion Compensation Core
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_motion_compensation_core.py`
+- Result: pass
+- Notes:
+  - Doppler peak estimation from Hybrid `H` pass
+  - TDM slot phase compensation restores reference angle peak in synthetic scenario
+
+## Ingest CLI + Motion Compensation
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_motion_comp.py`
+- Result: pass
+- Notes:
+  - `--enable-motion-compensation` CLI wiring pass
+  - Motion compensation metadata/prints present in CLI output

@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -315,6 +315,7 @@ def run_hybrid_estimation_bundle(
     angle_view_cali: Sequence[float],
     range_bin_length: int,
     doppler_window: str = "hann",
+    h_for_angle: Optional[np.ndarray] = None,
 ) -> dict:
     """
     Integrated compatibility path for HybridDynamicRT post-processing.
@@ -333,8 +334,9 @@ def run_hybrid_estimation_bundle(
         fx_dop=fx_dop_win,
         range_bin_length=range_bin_length,
     )
+    h_ang = h if h_for_angle is None else np.asarray(h_for_angle)
     fx_ang, cap_range_azimuth, ncap = angle_estimation_from_channel(
-        h=h,
+        h=h_ang,
         np_chirps=np_chirps,
         ns=ns,
         nfft=nfft,

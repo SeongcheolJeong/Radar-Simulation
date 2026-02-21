@@ -27,6 +27,21 @@ CLI options:
 
 When set, the synthesizer uses `FfdAntennaModel` instead of isotropic gains.
 
+## Optional Estimation/Motion Compensation Inputs
+
+CLI options:
+
+- `--run-hybrid-estimation`
+- `--estimation-nfft`
+- `--estimation-range-bin-length`
+- `--estimation-doppler-window`
+- `--enable-motion-compensation`
+- `--motion-comp-fd-hz`
+- `--motion-comp-chirp-interval-s`
+- `--motion-comp-reference-tx`
+
+When motion compensation is enabled, angle estimation uses TDM slot phase compensation.
+
 ## Outputs
 
 - `path_list.json`
@@ -55,4 +70,8 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/valid
 
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_bundle.py
+```
+
+```bash
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_motion_comp.py
 ```

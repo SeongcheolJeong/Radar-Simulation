@@ -135,6 +135,18 @@ Run scenario profile workflow validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scenario_profile_workflow.py
 ```
 
+Run motion compensation core validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_motion_compensation_core.py
+```
+
+Run ingest CLI motion compensation validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_ingest_cli_with_motion_comp.py
+```
+
 Run parity metrics contract validation:
 
 ```bash
@@ -160,6 +172,10 @@ PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/run_hybri
   --run-hybrid-estimation \
   --estimation-nfft 144 \
   --estimation-range-bin-length 10 \
+  --enable-motion-compensation \
+  --motion-comp-fd-hz 1200 \
+  --motion-comp-chirp-interval-s 6e-5 \
+  --motion-comp-reference-tx 0 \
   --output-dir /path/to/out
 ```
 
@@ -268,3 +284,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/14_jones_calibration_contract.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/15_measurement_csv_converter_contract.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/16_scenario_profile_contract.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/17_motion_compensation_contract.md`
