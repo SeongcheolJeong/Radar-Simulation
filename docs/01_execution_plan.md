@@ -13,10 +13,12 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M2: Minimal path-to-ADC synthesis core
 - [x] M3: Deterministic validation script (3 scenarios)
 - [x] M3.5: Reference adapter scaffolding + smoke validation
-- [ ] M4: `.ffd` parser + interpolation
+- [ ] M4: P-code replacement wave-1 (`generate_channel`, `Doppler`, `concatenated Dop`, `Angle`)
 - [x] M5: RT adapter base (HybridDynamicRT frame ingestion, first version)
 - [x] M5.5: Hybrid ingest pipeline and canonical output writer
-- [ ] M6: Motion compensation for TDM virtual array
+- [ ] M6: P-code replacement wave-2 (`path power` models and calibration)
+- [ ] M7: `.ffd` parser + interpolation
+- [ ] M8: Motion compensation for TDM virtual array
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -29,4 +31,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement `.ffd` ingestion and validate with isotropic fallback comparison.
+Implement Python equivalent of `fun_hybrid_Doppler_estimation` and validate with deterministic FFT-based scenarios.

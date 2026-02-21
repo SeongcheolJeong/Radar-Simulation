@@ -46,3 +46,13 @@
   - End-to-end frame ingest pipeline pass
   - `path_list.json` + `adc_cube.npz` output generation pass
   - Metadata serialization and ADC shape check pass
+
+## P-code Replacement P1
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_generate_channel.py`
+- Result: pass
+- Notes:
+  - Python `generate_channel` replacement matches independent reference expression
+  - Output shape check pass (`num_tx*num_rx*Np`, `Ns`)
+  - Doppler mean/spread scalar equivalence pass

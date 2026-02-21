@@ -45,6 +45,12 @@ Run Hybrid pipeline output validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_pipeline_output.py
 ```
 
+Run P-code replacement step-1 validation (`generate_channel`):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_generate_channel.py
+```
+
 Run ingest pipeline (example):
 
 ```bash
@@ -77,3 +83,4 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/fetch_references.sh
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/08_git_workflow.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/09_hybrid_frame_adapter.md`
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/10_hybrid_ingest_pipeline.md`
+- `/Users/seongcheoljeong/Documents/Codex_test/docs/11_pcode_reimplementation_plan.md`

@@ -6,6 +6,7 @@ from .adapters import (
     validate_radarsimpy_view_shape,
 )
 from .constants import C0
+from .hybrid_pcode import generate_channel_from_distances
 from .io import save_adc_npz, save_paths_by_chirp_json
 from .pipeline import run_hybrid_frames_pipeline
 from .scenarios import make_constant_velocity_paths, make_static_paths, make_two_path_multipath
@@ -15,6 +16,7 @@ from .types import Path, RadarConfig
 __all__ = [
     "adapt_records_by_chirp",
     "C0",
+    "generate_channel_from_distances",
     "load_hybrid_paths_from_frames",
     "load_hybrid_radar_geometry",
     "Path",
