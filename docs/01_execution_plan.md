@@ -50,6 +50,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.16: Cross-family ranking-based fit lock selection + Xiangyu RMSE-vs-cross-family selection delta report
 - [x] M10.17: RMSE-lock vs cross-family-lock A/B comparator replay report (reflection/scattering)
 - [x] M10.18: Mixed lock publish from A/B reports (`reflection keep`, `scattering cross-family`) + targeted comparator verification
+- [x] M10.19: Measured replay fit-change impact gate (dependency audit) + Xiangyu no-op skip decision
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -62,7 +63,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.19: run measured replay batch using mixed lock set and compare with prior strict-tuned outputs.
+Start M10.20: design fit-aware measured candidate generation path (or explicit scope split) if measured replay impact is required.
 
 ## M10.19 Decision Gate
 
@@ -75,3 +76,8 @@ Stop and re-plan M10.19 when:
 
 - two attempts show no improvement/no new failure signal
 - measured replay inputs are insufficient to evaluate lock quality
+
+M10.19 outcome (2026-02-21):
+
+- measured replay plans show no dependency on selected fit JSON assets
+- rerun skipped as no-op per workflow Value-Gate/Repetition rules

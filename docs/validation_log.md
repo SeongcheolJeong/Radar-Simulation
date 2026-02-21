@@ -677,3 +677,19 @@
 - Notes:
   - Mixed scattering fit comparator replay completed
   - Score-equivalent value remained `48.288101` in demo
+
+## Measured Replay Fit-Change Impact Gate
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_fit_change_impact.py`
+- Result: pass
+- Notes:
+  - Impact analyzer validation pass (`noop` and `impacted` synthetic plans)
+  - Evidence detection for fit-reference metadata pass
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/analyze_measured_replay_fit_change_impact.py --plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run1/measured_replay_plan.json --plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run2_512/measured_replay_plan.json --plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_bms1000_run3_full897/measured_replay_plan.json --plan-json /Users/seongcheoljeong/Documents/Codex_test/data/public/onboarding_runs/xiangyu_cms1000_run1_128/measured_replay_plan.json --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family --fit-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_mixed --output-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/measured_replay_fit_change_impact_xiangyu_2026_02_21.json`
+- Result: pass
+- Notes:
+  - `plan_count=4`, `impacted_plan_count=0`
+  - recommendation: `skip_measured_replay_rerun_due_to_no_fit_dependency`

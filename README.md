@@ -670,6 +670,12 @@ Run mixed-fit selection from A/B reports validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection_mixed_from_ab.py
 ```
 
+Run measured-replay fit-change impact gate validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_measured_replay_fit_change_impact.py
+```
+
 Fetch reference repositories:
 
 ```bash
