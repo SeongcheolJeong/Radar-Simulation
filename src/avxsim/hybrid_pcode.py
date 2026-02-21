@@ -149,6 +149,43 @@ def doppler_estimation_from_channel(
     return fx_dop, fx_dop_win
 
 
+def generate_concatenated_doppler(
+    fx_dop: np.ndarray,
+    range_bin_length: int,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Python replacement candidate for fun_hybrid_generate_concatenated_Dop.
+
+    Input:
+      fx_dop: Doppler-range power map, shape (nfft, n_range_bins)
+      range_bin_length: aggregation width around dominant range bin
+
+    Output:
+      fx_dop_max: (nfft, 1) max over selected range window
+      fx_dop_ave: (nfft, 1) mean over selected range window
+    """
+    dop = np.asarray(fx_dop, dtype=np.float64)
+    if dop.ndim != 2:
+        raise ValueError("fx_dop must be 2D with shape (nfft, n_range_bins)")
+    if range_bin_length <= 0:
+        raise ValueError("range_bin_length must be positive")
+
+    _, n_range = dop.shape
+    power_by_range = np.sum(dop, axis=0)
+    center = int(np.argmax(power_by_range))
+    half = int(range_bin_length // 2)
+    start = max(0, center - half)
+    end = min(n_range, start + int(range_bin_length))
+    start = max(0, end - int(range_bin_length))
+    sel = dop[:, start:end]
+    if sel.shape[1] == 0:
+        raise ValueError("empty range selection in concatenated Doppler")
+
+    fx_dop_max = np.max(sel, axis=1, keepdims=True)
+    fx_dop_ave = np.mean(sel, axis=1, keepdims=True)
+    return fx_dop_max, fx_dop_ave
+
+
 def _build_h_matrix(
     temp_v: np.ndarray,
     temp_range: np.ndarray,

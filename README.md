@@ -57,6 +57,12 @@ Run P-code replacement step-2 validation (`doppler_estimation`):
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_doppler_estimation.py
 ```
 
+Run P-code replacement step-3 validation (`generate_concatenated_Dop`):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_concatenated_dop.py
+```
+
 Run ingest pipeline (example):
 
 ```bash

@@ -65,3 +65,12 @@
 - Notes:
   - Doppler map output shape check pass (`nfft`, `Ns`)
   - Non-window and windowed outputs both pass known-bin peak localization checks
+
+## P-code Replacement P3
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_concatenated_dop.py`
+- Result: pass
+- Notes:
+  - Concatenated Doppler output shape check pass (`nfft`, `1`)
+  - Range-window aggregation (`max` and `average`) behavior check pass

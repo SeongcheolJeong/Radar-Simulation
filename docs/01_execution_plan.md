@@ -31,4 +31,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement Python equivalent of `fun_hybrid_generate_concatenated_Dop` and validate the Doppler summary metrics.
+Implement Python equivalent of `fun_hybrid_Ang_estimation` and validate range-angle map behavior.
