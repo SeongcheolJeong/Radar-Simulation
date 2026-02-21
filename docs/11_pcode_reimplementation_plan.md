@@ -28,7 +28,7 @@ Target `.p` functions:
 - [x] P2: Doppler map estimation implementation + validation
 - [x] P3: Concatenated Doppler metrics implementation + validation
 - [x] P4: Angle estimation implementation + validation
-- [ ] P5: Reflecting/scattering power models implementation + validation
+- [x] P5: Reflecting/scattering power models implementation + validation
 - [ ] P6: Full pipeline parity check on Hybrid frame ingest path
 
 ## Validation Rule

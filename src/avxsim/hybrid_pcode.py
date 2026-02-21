@@ -237,6 +237,74 @@ def angle_estimation_from_channel(
     return fx_ang, cap_range_azimuth, int(ncap)
 
 
+def calculate_reflecting_path_power(
+    p_t_dbm: float,
+    pixel_width: int,
+    pixel_height: int,
+    reflecting_coefficient: float,
+    lambda_m: float,
+    temp_range_m: np.ndarray,
+    epsilon: float = 1e-6,
+) -> np.ndarray:
+    """
+    Python replacement candidate for fun_hybrid_calculate_reflecting_path_power.
+
+    Returns linear amplitude-like weights per path/pixel.
+    """
+    if pixel_width <= 0 or pixel_height <= 0:
+        raise ValueError("pixel dimensions must be positive")
+    if lambda_m <= 0:
+        raise ValueError("lambda_m must be positive")
+
+    r = np.maximum(np.asarray(temp_range_m, dtype=np.float64).reshape(-1), float(epsilon))
+    n_pix = float(pixel_width * pixel_height)
+    p_t_w = _dbm_to_w(float(p_t_dbm))
+    coeff = max(0.0, float(reflecting_coefficient))
+
+    # Monostatic radar-equation style scaling (R^-4 power law).
+    power = (p_t_w * coeff * (lambda_m**2)) / (((4.0 * np.pi) ** 3) * (r**4))
+    power /= max(n_pix, 1.0)
+    return np.sqrt(np.maximum(power, 0.0))
+
+
+def calculate_scattering_path_power(
+    p_t_dbm: float,
+    pixel_width: int,
+    pixel_height: int,
+    scattering_coefficient: float,
+    lambda_m: float,
+    temp_range_m: np.ndarray,
+    temp_angles_rad: np.ndarray,
+    epsilon: float = 1e-6,
+) -> np.ndarray:
+    """
+    Python replacement candidate for fun_hybrid_calculate_scattering_path_power.
+
+    Applies a diffuse-like angular term over the reflecting baseline.
+    """
+    base = calculate_reflecting_path_power(
+        p_t_dbm=p_t_dbm,
+        pixel_width=pixel_width,
+        pixel_height=pixel_height,
+        reflecting_coefficient=scattering_coefficient,
+        lambda_m=lambda_m,
+        temp_range_m=temp_range_m,
+        epsilon=epsilon,
+    )
+
+    ang = np.asarray(temp_angles_rad, dtype=np.float64)
+    if ang.ndim != 2 or ang.shape[1] < 2:
+        raise ValueError("temp_angles_rad must have shape (N, >=2) with [az, el]")
+    if ang.shape[0] != base.shape[0]:
+        raise ValueError("angle rows must match range vector length")
+
+    # Diffuse-like directional attenuation.
+    az = ang[:, 0]
+    el = ang[:, 1]
+    directional = np.maximum(np.cos(el), 0.0) ** 2 * (0.6 + 0.4 * np.cos(az) ** 2)
+    return base * directional
+
+
 def _build_h_matrix(
     temp_v: np.ndarray,
     temp_range: np.ndarray,
@@ -297,6 +365,10 @@ def _get_slow_time_window(np_chirps: int, window: str) -> np.ndarray:
     if name in {"rect", "rectangular", "none"}:
         return np.ones(np_chirps, dtype=np.float64)
     raise ValueError(f"unsupported window type: {window}")
+
+
+def _dbm_to_w(p_dbm: float) -> float:
+    return 10.0 ** ((p_dbm - 30.0) / 10.0)
 
 
 def _extract_distance_vector(

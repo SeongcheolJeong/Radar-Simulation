@@ -31,4 +31,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement Python equivalents of `fun_hybrid_calculate_reflecting_path_power` and `fun_hybrid_calculate_scattering_path_power`.
+Run full pipeline parity checks by wiring all P1-P5 replacements into one Hybrid-compatible processing path.

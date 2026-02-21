@@ -69,6 +69,12 @@ Run P-code replacement step-4 validation (`Ang_estimation`):
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_angle_estimation.py
 ```
 
+Run P-code replacement step-5 validation (`path_power` models):
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_path_power_models.py
+```
+
 Run ingest pipeline (example):
 
 ```bash

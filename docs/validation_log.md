@@ -84,3 +84,12 @@
   - Angle map output shape check pass (`nfft`, `Ns`)
   - Coarse map output shape check pass (`Ns`, `Ncap`)
   - Known spatial-bin peak localization checks pass
+
+## P-code Replacement P5
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_hybrid_path_power_models.py`
+- Result: pass
+- Notes:
+  - Reflecting-path model monotonic range decay check pass
+  - Scattering-path model angle attenuation check pass
