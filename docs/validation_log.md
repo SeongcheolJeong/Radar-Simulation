@@ -608,3 +608,19 @@
 - Notes:
   - Scattering candidates evaluated: `4/4`
   - Best fit: `bms1000_scattering (fit_128)`
+
+## Path Power Fit Selection (Cross-Family Ranking)
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection_cross_family.py`
+- Result: pass
+- Notes:
+  - Ranking-summary to selected-fit lock conversion validation pass
+  - Selected fit metadata includes cross-family score/pass metrics
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/select_path_power_fit_from_cross_family_ranking.py --ranking-summary reflection=/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_cross_family_ranking_reflection_2026_02_21.json --ranking-summary scattering=/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_cross_family_ranking_scattering_2026_02_21.json --output-dir /Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_selection_cross_family_xiangyu_labels_2026_02_21.json`
+- Result: pass
+- Notes:
+  - Cross-family locked fit set emitted for both models
+  - Selection differs from RMSE-only lock for reflection and scattering

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "selection_strategy": "cross_family_ranking_best_score",
+  "output_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family",
+  "models": [
+    {
+      "model": "reflection",
+      "ranking_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_cross_family_ranking_reflection_2026_02_21.json",
+      "source_label": "reflection",
+      "candidate_count": 4,
+      "ok_count": 4,
+      "selected": {
+        "source_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/cms1000_reflection.json",
+        "output_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_reflection_selected.json",
+        "score": 86.26825174554382,
+        "b_tuned_pass": false,
+        "ra_mean_delta": 38.02375438217888,
+        "rd_mean_delta": 0.22074298118606814
+      }
+    },
+    {
+      "model": "scattering",
+      "ranking_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/path_power_fit_cross_family_ranking_scattering_2026_02_21.json",
+      "source_label": "scattering",
+      "candidate_count": 4,
+      "ok_count": 4,
+      "selected": {
+        "source_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/experiment_matrix/fit_128/fits/bms1000_scattering.json",
+        "output_fit_json": "/Users/seongcheoljeong/Documents/Codex_test/data/public/path_power_from_xiangyu_labels/selected_fits_cross_family/path_power_fit_scattering_selected.json",
+        "score": 48.28810071650096,
+        "b_tuned_pass": false,
+        "ra_mean_delta": 19.075621777809772,
+        "rd_mean_delta": 0.13685716088141872
+      }
+    }
+  ]
+}

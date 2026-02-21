@@ -47,6 +47,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M10.13: Path-power fit selection/lock from experiment summary (`largest_frame_then_rmse`)
 - [x] M10.14: Hybrid cross-family fit comparator (`caseA ref`, `caseB baseline/tuned`) + first demo run
 - [x] M10.15: Cross-family fit ranking objective (`comparator-based score`) + Xiangyu reflection/scattering ranking reports
+- [x] M10.16: Cross-family ranking-based fit lock selection + Xiangyu RMSE-vs-cross-family selection delta report
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -59,4 +60,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M10.16: apply cross-family ranking outputs to locked-fit selection flow and compare against current RMSE-only lock.
+Start M10.17: run A/B replay comparison using RMSE-only locked fits vs cross-family locked fits.

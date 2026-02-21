@@ -652,6 +652,12 @@ Run cross-family fit ranking validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_cross_family_ranking.py
 ```
 
+Run cross-family fit-selection lock validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_path_power_fit_selection_cross_family.py
+```
+
 Fetch reference repositories:
 
 ```bash
