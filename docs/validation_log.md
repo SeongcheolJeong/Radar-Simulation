@@ -146,3 +146,12 @@
 - Notes:
   - `--tx-ffd-glob/--rx-ffd-glob` CLI wiring pass
   - CLI reports `ffd enabled: True`
+
+## FFD Real Sample Regression
+
+- Date: 2026-02-21
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_real_sample_regression.py`
+- Result: pass
+- Notes:
+  - Locked reference artifact: `/Users/seongcheoljeong/Documents/Codex_test/tests/data/ffd/pyaedt_T04_test.ffd`
+  - HFSS-style grid-header parser path exercised

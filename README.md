@@ -87,6 +87,12 @@ Run `.ffd` parser/interpolation validation:
 PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_parser.py
 ```
 
+Run real-sample `.ffd` regression validation:
+
+```bash
+PYTHONPATH=src $PY /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_real_sample_regression.py
+```
+
 Run `.ffd` pipeline integration validation:
 
 ```bash

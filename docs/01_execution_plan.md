@@ -32,4 +32,4 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Add real-HFSS `.ffd` sample based regression and lock one reference pattern artifact.
+Extend `.ffd` handling from fixed polarization weights to configurable Jones-matrix flow.

@@ -18,6 +18,8 @@ Replace isotropic antenna gain with HFSS exported element patterns (`.ffd`).
 3. Validation scripts (Implemented)
 - parser/interpolation validation:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_parser.py`
+- real-sample regression validation:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_real_sample_regression.py`
 - isotropic vs constant-pattern gain scaling integration:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_ffd_pipeline_integration.py`
 - CLI wiring validation:
@@ -39,5 +41,4 @@ Each pattern query receives:
 
 ## Remaining Work
 
-- Add tests against a real HFSS-exported `.ffd` file artifact.
 - Extend polarization handling from fixed weights to full Jones-matrix flow.

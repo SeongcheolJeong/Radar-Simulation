@@ -108,7 +108,9 @@ def _parse_ffd_rows(path: str) -> List[Tuple[float, float, float, float, float, 
             theta, phi = nums[0], nums[1]
             if -1e-6 <= theta <= 180.0 + 1e-6 and -720.0 <= phi <= 720.0:
                 rows.append((theta, phi, nums[2], nums[3], nums[4], nums[5]))
-    return rows
+    if rows:
+        return rows
+    return _parse_hfss_grid_format(text)
 
 
 def _extract_floats(line: str) -> List[float]:
@@ -142,6 +144,87 @@ def _resolve_field_format(
     return "real_imag"
 
 
+def _parse_hfss_grid_format(text: str) -> List[Tuple[float, float, float, float, float, float]]:
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    triples = []
+    for i, ln in enumerate(lines):
+        nums = _extract_floats(ln)
+        if len(nums) == 3:
+            triples.append((i, nums))
+
+    if len(triples) < 2:
+        return []
+
+    # Use the first two triple lines as angular ranges.
+    i0, r0 = triples[0]
+    i1, r1 = triples[1]
+    if i1 != i0 + 1:
+        return []
+
+    theta_range, phi_range = _resolve_theta_phi_ranges(r0, r1)
+    n_theta = int(round(theta_range[2]))
+    n_phi = int(round(phi_range[2]))
+    if n_theta <= 0 or n_phi <= 0:
+        return []
+    n_total = n_theta * n_phi
+
+    data_lines = []
+    start = i1 + 1
+    for ln in lines[start:]:
+        # Skip non-data markers like "Frequencies 5", "Frequency ...".
+        if ln.lower().startswith("frequenc"):
+            continue
+        nums = _extract_floats(ln)
+        if len(nums) == 4:
+            data_lines.append(nums)
+        elif len(data_lines) > 0:
+            # Stop at first non-data line after data started.
+            break
+
+    if len(data_lines) < n_total:
+        return []
+
+    data = np.asarray(data_lines[:n_total], dtype=np.float64)
+    theta_vals = np.linspace(theta_range[0], theta_range[1], n_theta, dtype=np.float64)
+    phi_vals = np.linspace(phi_range[0], phi_range[1], n_phi, dtype=np.float64)
+
+    # HFSS export commonly iterates theta fastest inside each phi sweep.
+    rows: List[Tuple[float, float, float, float, float, float]] = []
+    idx = 0
+    for phi in phi_vals:
+        for theta in theta_vals:
+            c = data[idx]
+            rows.append((float(theta), float(phi), float(c[0]), float(c[1]), float(c[2]), float(c[3])))
+            idx += 1
+    return rows
+
+
+def _resolve_theta_phi_ranges(
+    r0: Sequence[float],
+    r1: Sequence[float],
+) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
+    a0, b0, n0 = float(r0[0]), float(r0[1]), float(r0[2])
+    a1, b1, n1 = float(r1[0]), float(r1[1]), float(r1[2])
+
+    def is_theta(a: float, b: float) -> bool:
+        lo, hi = min(a, b), max(a, b)
+        return lo >= -1e-6 and hi <= 180.0 + 1e-6
+
+    t0 = is_theta(a0, b0)
+    t1 = is_theta(a1, b1)
+    if t0 and not t1:
+        return (a0, b0, n0), (a1, b1, n1)
+    if t1 and not t0:
+        return (a1, b1, n1), (a0, b0, n0)
+
+    # fallback: prefer smaller angular span as theta candidate
+    span0 = abs(b0 - a0)
+    span1 = abs(b1 - a1)
+    if span0 <= span1:
+        return (a0, b0, n0), (a1, b1, n1)
+    return (a1, b1, n1), (a0, b0, n0)
+
+
 def _build_grids(
     theta: np.ndarray,
     phi: np.ndarray,
@@ -149,8 +232,7 @@ def _build_grids(
     ephi: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     theta_grid = np.unique(np.round(theta, decimals=9))
-    phi_mod = np.mod(phi, 360.0)
-    phi_grid = np.unique(np.round(phi_mod, decimals=9))
+    phi_grid = np.unique(np.round(phi, decimals=9))
 
     etheta_grid = np.full((theta_grid.size, phi_grid.size), np.nan + 1j * np.nan, dtype=np.complex128)
     ephi_grid = np.full((theta_grid.size, phi_grid.size), np.nan + 1j * np.nan, dtype=np.complex128)
@@ -158,7 +240,7 @@ def _build_grids(
     theta_idx = {float(v): i for i, v in enumerate(theta_grid)}
     phi_idx = {float(v): i for i, v in enumerate(phi_grid)}
 
-    for th, ph, et, ep in zip(theta, phi_mod, etheta, ephi):
+    for th, ph, et, ep in zip(theta, phi, etheta, ephi):
         i = theta_idx[float(np.round(th, 9))]
         j = phi_idx[float(np.round(ph, 9))]
         etheta_grid[i, j] = et
@@ -217,4 +299,3 @@ def _find_interval(grid: np.ndarray, x: float) -> Tuple[int, int, float]:
         return lo, hi, 0.0
     w = (x - x0) / (x1 - x0)
     return lo, hi, float(w)
-
