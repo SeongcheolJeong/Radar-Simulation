@@ -94,7 +94,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.3b: Baseline pinning and regression policy verdict payload (`/api/baselines`, `/api/compare/policy`)
 - [x] M15.4: Regression session API (`/api/regression-sessions`, baseline + candidate set + batched policy verdicts`)
 - [x] M15.5: Regression artifacts export API (`/api/regression-exports`, session CSV/JSON package + summary index)
-- [ ] M15.6: Regression history dashboard wiring (session/export browse + download actions)
+- [x] M15.6: Regression history dashboard wiring (session/export browse + download actions)
+- [ ] M15.7: Regression gate overview panel (latest verdict KPIs + quick adopt/hold cues)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -107,7 +108,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.6 regression history dashboard wiring while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.7 regression gate overview panel while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -523,3 +524,17 @@ M15.5 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/data/web_e2e/regression_exports/<export_id>.json`
   - `/Users/seongcheoljeong/Documents/Codex_test/data/web_e2e/regression_exports/<export_id>/...`
 - validator expanded to assert export manifest endpoints and artifact file integrity
+
+M15.6 outcome (2026-02-22):
+
+- dashboard regression history wiring added in:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- new UI controls added:
+  - `Refresh History` (`/api/regression-sessions`, `/api/regression-exports`)
+  - session/export history selectors
+  - export action (`POST /api/regression-exports`) and artifact download links
+- dashboard bootstrap/query handling expanded:
+  - query support: `regression_export_id`
+  - startup history refresh + selector state restore
+- local launcher default URL expanded with regression export query:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_web_e2e_dashboard_local.sh`

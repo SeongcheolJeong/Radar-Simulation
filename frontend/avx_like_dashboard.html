@@ -107,6 +107,28 @@
             <i data-lucide="list-checks" class="w-4 h-4"></i>
             Run Regression Session
           </button>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="refreshRegressionHistoryBtn" class="w-full py-2 rounded bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="history" class="w-4 h-4"></i>
+              Refresh History
+            </button>
+            <button id="exportRegressionBtn" class="w-full py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="file-down" class="w-4 h-4"></i>
+              Export Session
+            </button>
+          </div>
+          <label class="text-xs text-slate-400 block">Session History</label>
+          <select id="regressionSessionSelect" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none">
+            <option value="">(none)</option>
+          </select>
+          <label class="text-xs text-slate-400 block">Export ID (optional)</label>
+          <input id="regressionExportIdInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
+          <label class="text-xs text-slate-400 block">Export History</label>
+          <select id="regressionExportSelect" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none">
+            <option value="">(none)</option>
+          </select>
+          <div id="regressionHistoryStatus" class="text-[11px] text-slate-500">history idle</div>
+          <div id="regressionDownloads" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 break-all">-</div>
           <div id="regressionStatus" class="text-[11px] text-slate-500">regression idle</div>
           <div id="compareStatus" class="text-[11px] text-slate-500">compare idle</div>
           <pre id="compareResultBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
@@ -373,6 +395,9 @@
       lastComparison: null,
       lastPolicyEval: null,
       lastRegressionSession: null,
+      lastRegressionExport: null,
+      regressionSessions: [],
+      regressionExports: [],
     };
 
     const el = {
@@ -392,6 +417,13 @@
       regressionSessionIdInput: document.getElementById("regressionSessionIdInput"),
       regressionCandidatesInput: document.getElementById("regressionCandidatesInput"),
       runRegressionSessionBtn: document.getElementById("runRegressionSessionBtn"),
+      refreshRegressionHistoryBtn: document.getElementById("refreshRegressionHistoryBtn"),
+      exportRegressionBtn: document.getElementById("exportRegressionBtn"),
+      regressionSessionSelect: document.getElementById("regressionSessionSelect"),
+      regressionExportIdInput: document.getElementById("regressionExportIdInput"),
+      regressionExportSelect: document.getElementById("regressionExportSelect"),
+      regressionHistoryStatus: document.getElementById("regressionHistoryStatus"),
+      regressionDownloads: document.getElementById("regressionDownloads"),
       regressionStatus: document.getElementById("regressionStatus"),
       compareStatus: document.getElementById("compareStatus"),
       compareResultBox: document.getElementById("compareResultBox"),
@@ -517,6 +549,19 @@
       }
     }
 
+    function setRegressionHistoryStatus(text, tone) {
+      el.regressionHistoryStatus.textContent = text || "history idle";
+      if (tone === "ok") {
+        el.regressionHistoryStatus.className = "text-[11px] text-emerald-400";
+      } else if (tone === "warn") {
+        el.regressionHistoryStatus.className = "text-[11px] text-amber-400";
+      } else if (tone === "error") {
+        el.regressionHistoryStatus.className = "text-[11px] text-red-400";
+      } else {
+        el.regressionHistoryStatus.className = "text-[11px] text-slate-500";
+      }
+    }
+
     function renderComparison(comparison) {
       if (!comparison) {
         el.compareResultBox.textContent = "-";
@@ -588,6 +633,52 @@
         );
       });
       el.compareResultBox.textContent = lines.join("\n");
+    }
+
+    function renderRegressionDownloads(exportPayload) {
+      if (!exportPayload || !exportPayload.artifacts) {
+        el.regressionDownloads.textContent = "-";
+        return;
+      }
+      const artifacts = exportPayload.artifacts;
+      const entries = [
+        ["session_json", artifacts.session_json],
+        ["rows_csv", artifacts.rows_csv],
+        ["summary_index_json", artifacts.summary_index_json],
+        ["package_json", artifacts.package_json],
+      ]
+        .map(([name, v]) => [name, normalizeRepoPath(v)])
+        .filter(([, v]) => Boolean(v));
+
+      if (entries.length === 0) {
+        el.regressionDownloads.textContent = "-";
+        return;
+      }
+      const links = entries
+        .map(([name, href]) => `<a class="text-cyan-300 hover:text-cyan-200 underline" href="${href}" target="_blank" rel="noopener noreferrer">${name}</a>`)
+        .join(" | ");
+      el.regressionDownloads.innerHTML = links;
+    }
+
+    function fillSelectFromRows(selectEl, rows, idKey, labelBuilder) {
+      if (!selectEl) return;
+      const prev = String(selectEl.value || "");
+      selectEl.innerHTML = "";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "(none)";
+      selectEl.appendChild(empty);
+      (rows || []).forEach((row) => {
+        const id = String((row && row[idKey]) || "").trim();
+        if (!id) return;
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = labelBuilder(row);
+        selectEl.appendChild(opt);
+      });
+      if (prev && Array.from(selectEl.options).some((o) => o.value === prev)) {
+        selectEl.value = prev;
+      }
     }
 
     function setStatus(text, tone, note) {
@@ -1256,6 +1347,101 @@
           throw new Error("regression session response missing payload");
         }
         state.lastRegressionSession = session;
+        el.regressionSessionIdInput.value = String(session.session_id || "");
+        renderRegressionSession(session);
+        if (Boolean(session.all_pass)) {
+          setRegressionStatus(`all pass: ${session.session_id}`, "ok");
+        } else {
+          setRegressionStatus(`holds detected: ${session.session_id}`, "warn");
+        }
+        await refreshRegressionHistoryViaApi(String(session.session_id || ""), "");
+      } catch (err) {
+        setRegressionStatus(`regression failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.runRegressionSessionBtn.disabled = false;
+        el.runRegressionSessionBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      }
+    }
+
+    async function refreshRegressionHistoryViaApi(preferredSessionId, preferredExportId) {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      if (!apiBase) {
+        setRegressionHistoryStatus("api base URL required", "error");
+        return;
+      }
+      setRegressionHistoryStatus("loading history...", "warn");
+      try {
+        const [sessionsResp, exportsResp] = await Promise.all([
+          fetchApiJson(`${apiBase}/api/regression-sessions`),
+          fetchApiJson(`${apiBase}/api/regression-exports`),
+        ]);
+        const sessions = Array.isArray(sessionsResp?.regression_sessions)
+          ? sessionsResp.regression_sessions
+          : [];
+        const exports = Array.isArray(exportsResp?.regression_exports)
+          ? exportsResp.regression_exports
+          : [];
+        state.regressionSessions = sessions;
+        state.regressionExports = exports;
+
+        fillSelectFromRows(
+          el.regressionSessionSelect,
+          sessions,
+          "session_id",
+          (r) =>
+            `${r.session_id || "-"} | held=${Number(r.held_count || 0)} | rec=${
+              r.recommendation || "-"
+            }`
+        );
+        fillSelectFromRows(
+          el.regressionExportSelect,
+          exports,
+          "export_id",
+          (r) =>
+            `${r.export_id || "-"} | session=${r.session_id || "-"} | rows=${Number(
+              r.row_count || 0
+            )}`
+        );
+
+        const selectSessionId = String(
+          preferredSessionId || el.regressionSessionIdInput.value || ""
+        ).trim();
+        if (
+          selectSessionId &&
+          Array.from(el.regressionSessionSelect.options).some((o) => o.value === selectSessionId)
+        ) {
+          el.regressionSessionSelect.value = selectSessionId;
+        }
+
+        const selectExportId = String(
+          preferredExportId || el.regressionExportIdInput.value || ""
+        ).trim();
+        if (
+          selectExportId &&
+          Array.from(el.regressionExportSelect.options).some((o) => o.value === selectExportId)
+        ) {
+          el.regressionExportSelect.value = selectExportId;
+        }
+
+        setRegressionHistoryStatus(
+          `history loaded: sessions=${sessions.length}, exports=${exports.length}`,
+          "ok"
+        );
+      } catch (err) {
+        setRegressionHistoryStatus(`history load failed: ${String(err.message || err)}`, "error");
+      }
+    }
+
+    async function loadSelectedRegressionSessionViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const sessionId = String(el.regressionSessionSelect.value || "").trim();
+      if (!apiBase || !sessionId) return;
+      try {
+        const session = await fetchApiJson(
+          `${apiBase}/api/regression-sessions/${encodeURIComponent(sessionId)}`
+        );
+        state.lastRegressionSession = session;
+        el.regressionSessionIdInput.value = String(session.session_id || sessionId);
         renderRegressionSession(session);
         if (Boolean(session.all_pass)) {
           setRegressionStatus(`all pass: ${session.session_id}`, "ok");
@@ -1263,10 +1449,75 @@
           setRegressionStatus(`holds detected: ${session.session_id}`, "warn");
         }
       } catch (err) {
-        setRegressionStatus(`regression failed: ${String(err.message || err)}`, "error");
+        setRegressionStatus(`session load failed: ${String(err.message || err)}`, "error");
+      }
+    }
+
+    async function loadSelectedRegressionExportViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const exportId = String(el.regressionExportSelect.value || "").trim();
+      if (!apiBase || !exportId) return;
+      try {
+        const payload = await fetchApiJson(
+          `${apiBase}/api/regression-exports/${encodeURIComponent(exportId)}`
+        );
+        state.lastRegressionExport = payload;
+        el.regressionExportIdInput.value = String(payload.export_id || exportId);
+        renderRegressionDownloads(payload);
+        setRegressionHistoryStatus(`export loaded: ${payload.export_id}`, "ok");
+      } catch (err) {
+        setRegressionHistoryStatus(`export load failed: ${String(err.message || err)}`, "error");
+      }
+    }
+
+    async function exportRegressionSessionViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const exportId = String(el.regressionExportIdInput.value || "").trim();
+      const inputSessionId = String(el.regressionSessionIdInput.value || "").trim();
+      const selectedSessionId = String(el.regressionSessionSelect.value || "").trim();
+      const sessionId = inputSessionId || selectedSessionId;
+
+      if (!apiBase) {
+        setRegressionHistoryStatus("api base URL required", "error");
+        return;
+      }
+      if (!sessionId) {
+        setRegressionHistoryStatus("session id required for export", "error");
+        return;
+      }
+
+      el.exportRegressionBtn.disabled = true;
+      el.exportRegressionBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setRegressionHistoryStatus("exporting regression session...", "warn");
+      try {
+        const body = {
+          session_id: sessionId,
+          include_policy_payload: false,
+          tag: "dashboard_regression_export",
+        };
+        if (exportId) {
+          body.export_id = exportId;
+          body.overwrite = true;
+        }
+        const resp = await fetchApiJson(`${apiBase}/api/regression-exports`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const payload = resp && resp.regression_export ? resp.regression_export : null;
+        if (!payload) {
+          throw new Error("regression export response missing payload");
+        }
+        state.lastRegressionExport = payload;
+        el.regressionExportIdInput.value = String(payload.export_id || "");
+        renderRegressionDownloads(payload);
+        setRegressionHistoryStatus(`export ready: ${payload.export_id}`, "ok");
+        await refreshRegressionHistoryViaApi(sessionId, String(payload.export_id || ""));
+      } catch (err) {
+        setRegressionHistoryStatus(`export failed: ${String(err.message || err)}`, "error");
       } finally {
-        el.runRegressionSessionBtn.disabled = false;
-        el.runRegressionSessionBtn.classList.remove("opacity-60", "cursor-not-allowed");
+        el.exportRegressionBtn.disabled = false;
+        el.exportRegressionBtn.classList.remove("opacity-60", "cursor-not-allowed");
       }
     }
 
@@ -1312,6 +1563,12 @@
       el.compareApiBtn.addEventListener("click", () => compareRunsViaApi());
       el.policyCompareBtn.addEventListener("click", () => evaluatePolicyViaApi());
       el.runRegressionSessionBtn.addEventListener("click", () => runRegressionSessionViaApi());
+      el.refreshRegressionHistoryBtn.addEventListener("click", () =>
+        refreshRegressionHistoryViaApi("", "")
+      );
+      el.exportRegressionBtn.addEventListener("click", () => exportRegressionSessionViaApi());
+      el.regressionSessionSelect.addEventListener("change", () => loadSelectedRegressionSessionViaApi());
+      el.regressionExportSelect.addEventListener("change", () => loadSelectedRegressionExportViaApi());
 
       el.loadJsonBtn.addEventListener("click", () => {
         el.summaryFileInput.click();
@@ -1384,6 +1641,7 @@
       const queryCompareCand = params.get("compare_cand");
       const queryRegressionSessionId = params.get("regression_session_id");
       const queryRegressionCandidates = params.get("regression_candidates");
+      const queryRegressionExportId = params.get("regression_export_id");
       el.summaryPathInput.value = querySummary && querySummary.trim() ? querySummary.trim() : DEFAULT_SUMMARY_PATH;
       el.apiBaseInput.value = queryApi && queryApi.trim() ? queryApi.trim() : DEFAULT_API_BASE;
       el.sceneJsonInput.value = queryScene && queryScene.trim() ? queryScene.trim() : DEFAULT_SCENE_JSON_PATH;
@@ -1395,6 +1653,8 @@
         queryRegressionSessionId && queryRegressionSessionId.trim() ? queryRegressionSessionId.trim() : "";
       el.regressionCandidatesInput.value =
         queryRegressionCandidates && queryRegressionCandidates.trim() ? queryRegressionCandidates.trim() : "";
+      el.regressionExportIdInput.value =
+        queryRegressionExportId && queryRegressionExportId.trim() ? queryRegressionExportId.trim() : "";
       el.fovInput.value = 120;
       el.rangeInput.value = 100;
       el.freqInput.value = 77;
@@ -1418,9 +1678,12 @@
       setApiRunStatus("api run idle", "neutral");
       setCompareStatus("compare idle", "neutral");
       setRegressionStatus("regression idle", "neutral");
+      setRegressionHistoryStatus("history idle", "neutral");
+      renderRegressionDownloads(null);
       renderComparison(null);
       setStatus("idle", "neutral", "viewer is waiting for summary json");
       await refreshSummary();
+      await refreshRegressionHistoryViaApi(el.regressionSessionIdInput.value, el.regressionExportIdInput.value);
     }
 
     bootstrap();

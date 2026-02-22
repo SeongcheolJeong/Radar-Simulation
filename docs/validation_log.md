@@ -1530,3 +1530,13 @@
   - export artifacts validated: `regression_session.json`, `regression_rows.csv`, `regression_summary_index.json`, `regression_package.json`
   - summary index and package schema checks pass (`version`, row count, policy payload inclusion when enabled)
   - health payload includes `regression_export_count`
+
+## Web E2E Regression History Dashboard Wiring (M15.6)
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8094 8114` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`)
+- Result: pass
+- Notes:
+  - dashboard HTML includes regression history controls (`refreshRegressionHistoryBtn`, `exportRegressionBtn`, `regressionSessionSelect`, `regressionExportSelect`)
+  - dashboard JS includes history/export handlers (`refreshRegressionHistoryViaApi`, `exportRegressionSessionViaApi`)
+  - API health includes `regression_export_count`
