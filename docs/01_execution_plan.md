@@ -97,7 +97,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.6: Regression history dashboard wiring (session/export browse + download actions)
 - [x] M15.7: Regression gate overview panel (latest verdict KPIs + quick adopt/hold cues)
 - [x] M15.8: Regression policy tuning controls (dashboard thresholds/policy presets)
-- [ ] M15.9: Regression decision audit panel (per-rule failure histogram + recent trend)
+- [x] M15.9: Regression decision audit panel (per-rule failure histogram + recent trend)
+- [ ] M15.10: Regression review bundle export hook (dashboard one-click package copy path)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -110,7 +111,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.9 regression decision audit panel while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.10 regression review bundle export hook while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -568,3 +569,16 @@ M15.8 outcome (2026-02-22):
   - `POST /api/regression-sessions` receives `policy + thresholds + stop_on_first_fail`
 - launcher URL defaults include policy preset query:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_web_e2e_dashboard_local.sh`
+
+M15.9 outcome (2026-02-22):
+
+- dashboard decision-audit panel added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- audit panel summarizes latest decision quality signals:
+  - selected/latest session summary (`evaluated`, `held`, export linked)
+  - recent hold-rate trend across last sessions
+  - per-rule gate-failure histogram (`gate_failures.rule`)
+  - hot candidate line (max gate-failure count row)
+- history fetch path expanded:
+  - `GET /api/policy-evals` joined with sessions/exports to build rule histogram
+- panel auto-updates on bootstrap/history refresh/session selection

@@ -175,6 +175,16 @@
             <div id="gateLatestExportLine" class="text-[11px] text-slate-400">linked export: -</div>
             <div id="gateCueLine" class="text-[11px] text-slate-400">cue: refresh history</div>
           </div>
+          <div class="rounded border border-slate-800 bg-slate-900/60 p-2 space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400">Decision Audit</span>
+              <span id="decisionAuditBadge" class="text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">NO DATA</span>
+            </div>
+            <div id="auditSummaryLine" class="text-[11px] text-slate-400">session: -</div>
+            <div id="auditTrendLine" class="text-[11px] text-slate-400">trend: -</div>
+            <div id="auditRuleHistogram" class="text-[11px] text-slate-400">rule histogram: -</div>
+            <div id="auditHotCandidateLine" class="text-[11px] text-slate-400">hot candidate: -</div>
+          </div>
           <div id="regressionStatus" class="text-[11px] text-slate-500">regression idle</div>
           <div id="compareStatus" class="text-[11px] text-slate-500">compare idle</div>
           <pre id="compareResultBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
@@ -467,6 +477,7 @@
       lastRegressionExport: null,
       regressionSessions: [],
       regressionExports: [],
+      policyEvals: [],
     };
 
     const el = {
@@ -505,6 +516,11 @@
       gateLatestSessionLine: document.getElementById("gateLatestSessionLine"),
       gateLatestExportLine: document.getElementById("gateLatestExportLine"),
       gateCueLine: document.getElementById("gateCueLine"),
+      decisionAuditBadge: document.getElementById("decisionAuditBadge"),
+      auditSummaryLine: document.getElementById("auditSummaryLine"),
+      auditTrendLine: document.getElementById("auditTrendLine"),
+      auditRuleHistogram: document.getElementById("auditRuleHistogram"),
+      auditHotCandidateLine: document.getElementById("auditHotCandidateLine"),
       regressionStatus: document.getElementById("regressionStatus"),
       compareStatus: document.getElementById("compareStatus"),
       compareResultBox: document.getElementById("compareResultBox"),
@@ -769,6 +785,134 @@
       }
       el.gateCueLine.textContent = cue;
       setRegressionGateBadge(label, tone);
+    }
+
+    function setDecisionAuditBadge(label, tone) {
+      el.decisionAuditBadge.textContent = label || "NO DATA";
+      if (tone === "ok") {
+        el.decisionAuditBadge.className = "text-[10px] px-2 py-0.5 rounded border border-emerald-500/40 text-emerald-200 bg-emerald-500/10";
+      } else if (tone === "warn") {
+        el.decisionAuditBadge.className = "text-[10px] px-2 py-0.5 rounded border border-amber-500/40 text-amber-200 bg-amber-500/10";
+      } else if (tone === "error") {
+        el.decisionAuditBadge.className = "text-[10px] px-2 py-0.5 rounded border border-rose-500/40 text-rose-200 bg-rose-500/10";
+      } else {
+        el.decisionAuditBadge.className = "text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300";
+      }
+    }
+
+    function updateRegressionDecisionAudit() {
+      const sessions = Array.isArray(state.regressionSessions) ? state.regressionSessions : [];
+      const exports = Array.isArray(state.regressionExports) ? state.regressionExports : [];
+      const evals = Array.isArray(state.policyEvals) ? state.policyEvals : [];
+
+      if (sessions.length === 0) {
+        setDecisionAuditBadge("NO DATA", "neutral");
+        el.auditSummaryLine.textContent = "session: -";
+        el.auditTrendLine.textContent = "trend: -";
+        el.auditRuleHistogram.textContent = "rule histogram: -";
+        el.auditHotCandidateLine.textContent = "hot candidate: -";
+        return;
+      }
+
+      const selectedId = String(
+        el.regressionSessionSelect.value || el.regressionSessionIdInput.value || ""
+      ).trim();
+      const focusSession =
+        sessions.find((x) => String((x && x.session_id) || "") === selectedId) || sessions[0] || {};
+
+      const focusId = String(focusSession.session_id || "-");
+      const focusWhen = formatIsoShort(focusSession.created_at);
+      const focusEvalCount = Number(focusSession.evaluated_candidate_count || 0);
+      const focusHeldCount = Number(focusSession.held_count || 0);
+      const focusRows = Array.isArray(focusSession.rows) ? focusSession.rows : [];
+      const focusExport =
+        exports.find((x) => String((x && x.session_id) || "") === focusId) || null;
+      el.auditSummaryLine.textContent =
+        `session: ${focusId} @ ${focusWhen} | evaluated=${focusEvalCount}, held=${focusHeldCount}, export=${
+          focusExport ? "yes" : "no"
+        }`;
+
+      const recentSessions = sessions.slice(0, Math.min(5, sessions.length));
+      const holdRates = recentSessions.map((s) => {
+        const ev = Number(s?.evaluated_candidate_count || 0);
+        const hd = Number(s?.held_count || 0);
+        return ev > 0 ? hd / ev : 0;
+      });
+      const newestRate = holdRates.length > 0 ? holdRates[0] : 0;
+      const oldestRate = holdRates.length > 0 ? holdRates[holdRates.length - 1] : 0;
+      const avgRate =
+        holdRates.length > 0
+          ? holdRates.reduce((acc, x) => acc + x, 0) / holdRates.length
+          : 0;
+      const trendDelta = newestRate - oldestRate;
+      let trendLabel = "stable";
+      if (trendDelta <= -0.05) trendLabel = "improving";
+      else if (trendDelta >= 0.05) trendLabel = "worsening";
+      el.auditTrendLine.textContent = `trend(last ${recentSessions.length}): avg_hold=${(
+        avgRate * 100.0
+      ).toFixed(1)}%, newest=${(newestRate * 100.0).toFixed(1)}%, oldest=${(
+        oldestRate * 100.0
+      ).toFixed(1)}%, ${trendLabel}`;
+
+      const evalById = new Map();
+      evals.forEach((row) => {
+        const id = String((row && row.policy_eval_id) || "").trim();
+        if (id) evalById.set(id, row);
+      });
+      const hist = {};
+      focusRows.forEach((row) => {
+        const policyEvalId = String((row && row.policy_eval_id) || "").trim();
+        const evalPayload = policyEvalId ? evalById.get(policyEvalId) : null;
+        const gateFailures = Array.isArray(evalPayload?.gate_failures) ? evalPayload.gate_failures : [];
+        if (gateFailures.length === 0) {
+          if (Boolean(row?.gate_failed)) {
+            hist.unknown_rule = Number(hist.unknown_rule || 0) + 1;
+          }
+          return;
+        }
+        gateFailures.forEach((g) => {
+          const rule = String((g && g.rule) || "unknown_rule");
+          hist[rule] = Number(hist[rule] || 0) + 1;
+        });
+      });
+      const histRows = Object.entries(hist).sort((a, b) => Number(b[1]) - Number(a[1]));
+      if (histRows.length === 0) {
+        el.auditRuleHistogram.textContent = "rule histogram: no gate failures";
+      } else {
+        el.auditRuleHistogram.textContent = `rule histogram: ${histRows
+          .slice(0, 5)
+          .map(([k, v]) => `${k}:${v}`)
+          .join(" | ")}`;
+      }
+
+      const hotCandidate = focusRows
+        .slice()
+        .sort(
+          (a, b) =>
+            Number((b && b.gate_failure_count) || 0) -
+            Number((a && a.gate_failure_count) || 0)
+        )[0];
+      if (hotCandidate) {
+        const cid = hotCandidate.candidate_run_id || hotCandidate.candidate_summary_json || "-";
+        el.auditHotCandidateLine.textContent =
+          `hot candidate: ${cid} | failures=${Number(hotCandidate.gate_failure_count || 0)} | rec=${hotCandidate.recommendation || "-"}`;
+      } else {
+        el.auditHotCandidateLine.textContent = "hot candidate: -";
+      }
+
+      let tone = "warn";
+      let label = "REVIEW";
+      if (focusEvalCount <= 0) {
+        tone = "warn";
+        label = "EMPTY";
+      } else if (focusHeldCount > 0 || trendLabel === "worsening") {
+        tone = "error";
+        label = "RISK";
+      } else if (focusHeldCount === 0 && trendLabel !== "worsening") {
+        tone = "ok";
+        label = "STABLE";
+      }
+      setDecisionAuditBadge(label, tone);
     }
 
     function renderComparison(comparison) {
@@ -1588,9 +1732,10 @@
       }
       setRegressionHistoryStatus("loading history...", "warn");
       try {
-        const [sessionsResp, exportsResp] = await Promise.all([
+        const [sessionsResp, exportsResp, policyResp] = await Promise.all([
           fetchApiJson(`${apiBase}/api/regression-sessions`),
           fetchApiJson(`${apiBase}/api/regression-exports`),
+          fetchApiJson(`${apiBase}/api/policy-evals`),
         ]);
         const sessions = Array.isArray(sessionsResp?.regression_sessions)
           ? sessionsResp.regression_sessions
@@ -1598,8 +1743,12 @@
         const exports = Array.isArray(exportsResp?.regression_exports)
           ? exportsResp.regression_exports
           : [];
+        const policyEvals = Array.isArray(policyResp?.policy_evals)
+          ? policyResp.policy_evals
+          : [];
         state.regressionSessions = sessions;
         state.regressionExports = exports;
+        state.policyEvals = policyEvals;
 
         fillSelectFromRows(
           el.regressionSessionSelect,
@@ -1641,13 +1790,15 @@
         }
 
         setRegressionHistoryStatus(
-          `history loaded: sessions=${sessions.length}, exports=${exports.length}`,
+          `history loaded: sessions=${sessions.length}, exports=${exports.length}, evals=${policyEvals.length}`,
           "ok"
         );
         updateRegressionGateOverview();
+        updateRegressionDecisionAudit();
       } catch (err) {
         setRegressionHistoryStatus(`history load failed: ${String(err.message || err)}`, "error");
         updateRegressionGateOverview();
+        updateRegressionDecisionAudit();
       }
     }
 
@@ -1667,6 +1818,7 @@
         } else {
           setRegressionStatus(`holds detected: ${session.session_id}`, "warn");
         }
+        updateRegressionDecisionAudit();
       } catch (err) {
         setRegressionStatus(`session load failed: ${String(err.message || err)}`, "error");
       }
@@ -1927,6 +2079,7 @@
       setRegressionHistoryStatus("history idle", "neutral");
       renderRegressionDownloads(null);
       updateRegressionGateOverview();
+      updateRegressionDecisionAudit();
       renderComparison(null);
       setStatus("idle", "neutral", "viewer is waiting for summary json");
       await refreshSummary();

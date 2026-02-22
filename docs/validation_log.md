@@ -1560,3 +1560,13 @@
   - dashboard HTML includes policy-tuning controls (`regressionPolicyPresetSelect`, `requireParityPassCheck`, `stopOnFirstFailCheck`, `maxFailureCountInput`, `rdShapeNmseMaxInput`, `raShapeNmseMaxInput`)
   - dashboard JS includes tuning collector/applier (`collectPolicyTuningConfig`, `applyPolicyPresetToInputs`)
   - compare/policy/regression-session requests include tuned policy/threshold payload fields
+
+## Web E2E Regression Decision Audit Panel (M15.9)
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8097 8117` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`) + `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - dashboard HTML includes decision-audit elements (`decisionAuditBadge`, `auditRuleHistogram`, `auditHotCandidateLine`)
+  - dashboard JS includes audit evaluator (`updateRegressionDecisionAudit`, `setDecisionAuditBadge`)
+  - history refresh now joins `policy-evals` with session rows for rule histogram/trend summary
