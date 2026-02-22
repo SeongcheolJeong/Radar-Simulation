@@ -18,7 +18,7 @@ PYTHONPATH="${ROOT_DIR}/src" "${PYTHON_BIN}" "${ROOT_DIR}/scripts/build_frontend
   --output-root "${ROOT_DIR}/data/demo/frontend_quickstart_v1" \
   --summary-json "${ROOT_DIR}/${SUMMARY_REL}"
 
-URL="http://localhost:${PORT}/frontend/avx_like_dashboard.html?summary=${SUMMARY_REL}"
+URL="http://localhost:${PORT}/frontend/avx_like_dashboard.html?summary=/${SUMMARY_REL}"
 
 echo "[2/2] Starting static server..."
 echo "  URL: ${URL}"

@@ -41,11 +41,11 @@ The script does:
 2. Writes summary:
    - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/frontend_quickstart_v1.json`
 3. Starts local web server and serves:
-   - `http://localhost:8080/frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`
+   - `http://localhost:8080/frontend/avx_like_dashboard.html?summary=/docs/reports/frontend_quickstart_v1.json`
 
 You can switch summary source by changing query:
 
-- `?summary=docs/reports/avx_like_showcase_macos_2026_02_22.json`
+- `?summary=/docs/reports/avx_like_showcase_macos_2026_02_22.json`
 
 ## What The Dashboard Reads
 

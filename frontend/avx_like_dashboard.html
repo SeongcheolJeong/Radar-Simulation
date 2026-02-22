@@ -290,7 +290,7 @@
 
   <script>
     const C0 = 299792458.0;
-    const DEFAULT_SUMMARY_PATH = "docs/reports/avx_like_showcase_macos_2026_02_22.json";
+    const DEFAULT_SUMMARY_PATH = "/docs/reports/avx_like_showcase_macos_2026_02_22.json";
 
     const state = {
       summary: null,
@@ -350,13 +350,25 @@
 
     function normalizeRepoPath(pathValue) {
       if (!pathValue || typeof pathValue !== "string") return null;
-      if (pathValue.startsWith("http://") || pathValue.startsWith("https://")) return pathValue;
+      const raw = pathValue.trim();
+      if (!raw) return null;
+      if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
       const marker = "/Codex_test/";
-      const idx = pathValue.indexOf(marker);
+      const idx = raw.indexOf(marker);
+      let candidate = raw;
       if (idx >= 0) {
-        return pathValue.slice(idx + marker.length);
+        candidate = raw.slice(idx + marker.length);
       }
-      return pathValue.replace(/^\/+/, "");
+      if (candidate.startsWith("/")) return candidate;
+      try {
+        const u = new URL(candidate, `${window.location.origin}/`);
+        if (u.origin === window.location.origin) {
+          return `${u.pathname}${u.search}${u.hash}`;
+        }
+        return u.href;
+      } catch (_) {
+        return `/${candidate.replace(/^\/+/, "")}`;
+      }
     }
 
     function dirname(pathValue) {
