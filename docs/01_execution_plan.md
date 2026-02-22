@@ -107,7 +107,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M16.2: Graph executor API bridge (`/api/graph/*` validation/run/status)
 - [x] M16.3: Artifact inspector panels (Path/ADC/RD/RA + node-output trace)
 - [x] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
-- [ ] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
+- [x] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -120,7 +120,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M16.5 performance/reliability hardening (partial rerun cache/cancel/failure recovery) while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Freeze M16 baseline and start M17 modularization track: split `graph_lab_reactflow.html` into componentized frontend build + add true async run monitor (polling/progress) on top of M16.5 cache/cancel/retry APIs, while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -720,3 +720,22 @@ M16.4 outcome (2026-02-22):
   - `_resolve_target_with_optional_prefix` now treats `None/null` run-id tokens as empty and falls back to summary path resolution
 - validator expanded to cover graph-summary baseline + policy gate path:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+
+M16.5 outcome (2026-02-22):
+
+- graph run hardening completed on orchestrator:
+  - `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/web_e2e_api.py`
+- performance/reliability additions:
+  - cache keying (`scene revision + graph payload`) and full cache reuse on repeated runs
+  - partial rerun cache path (RadarMap node): reuse cached Path/ADC and recompute only RD/RA map
+  - cooperative cancel handling (`POST /api/graph/runs/{id}/cancel`) and retry endpoint (`POST /api/graph/runs/{id}/retry`)
+  - stale active-run recovery on startup (`queued/running/cancel_requested -> failed-recoverable`)
+  - failure surface payload (`failure.type/message/traceback`) + structured `recovery` hints
+- frontend hardening hooks in Graph Lab:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+  - run panel now shows cache hit/scope/source
+  - failure/recovery details rendered when summary fetch fails or run status is non-completed
+  - new controls: `Retry Last Run`, `Cancel Last Run`
+- validator coverage extended:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+  - covers full-cache hit, partial rerun hit, async cancel, retry from canceled run, failure guidance, retry from failed run

@@ -349,6 +349,7 @@
       const [validationText, setValidationText] = React.useState("-");
       const [graphRunText, setGraphRunText] = React.useState("-");
       const [graphRunSummary, setGraphRunSummary] = React.useState(null);
+      const [lastGraphRunId, setLastGraphRunId] = React.useState("");
       const [gateResultText, setGateResultText] = React.useState("-");
       const [lastPolicyEval, setLastPolicyEval] = React.useState(null);
       const [selectedNodeId, setSelectedNodeId] = React.useState("");
@@ -517,18 +518,74 @@
           if (!graphRunId) {
             throw new Error("graph run id missing in response");
           }
+          setLastGraphRunId(graphRunId);
+          const rowStatus = String(row.status || "").trim().toLowerCase();
+          if (rowStatus && rowStatus !== "completed") {
+            const recovery = row.recovery || {};
+            const hints = Array.isArray(recovery?.hints) ? recovery.hints : [];
+            const lines = [
+              `graph_run_id: ${graphRunId}`,
+              `status: ${String(row.status || "-")}`,
+              `error: ${String(row.error || "-")}`,
+              `recoverable: ${Boolean(recovery?.recoverable)}`,
+              `retry_endpoint: ${String(recovery?.retry_endpoint || "-")}`,
+            ];
+            if (hints.length > 0) {
+              lines.push("recovery_hints:");
+              hints.slice(0, 8).forEach((x) => lines.push(`- ${String(x)}`));
+            }
+            setGraphRunText(lines.join("\n"));
+            setGraphRunSummary(null);
+            setGateResultText("-");
+            setLastPolicyEval(null);
+            const tone = rowStatus === "canceled" ? "status-warn" : "status-err";
+            setStatus(`graph run ${rowStatus}: ${graphRunId}`, tone);
+            return;
+          }
           const sumRes = await fetch(
             `${apiBase.replace(/\\/$/, "")}/api/graph/runs/${encodeURIComponent(graphRunId)}/summary`
           );
-          if (!sumRes.ok) throw new Error(`graph summary request failed (${sumRes.status})`);
+          if (!sumRes.ok) {
+            const recRes = await fetch(
+              `${apiBase.replace(/\\/$/, "")}/api/graph/runs/${encodeURIComponent(graphRunId)}`
+            );
+            if (recRes.ok) {
+              const rec = await recRes.json();
+              const recovery = rec.recovery || {};
+              const hints = Array.isArray(recovery?.hints) ? recovery.hints : [];
+              const lines = [
+                `graph_run_id: ${graphRunId}`,
+                `status: ${String(rec.status || "-")}`,
+                `error: ${String(rec.error || "-")}`,
+                `summary_fetch_error: graph summary request failed (${sumRes.status})`,
+                `recoverable: ${Boolean(recovery?.recoverable)}`,
+                `retry_endpoint: ${String(recovery?.retry_endpoint || "-")}`,
+              ];
+              if (hints.length > 0) {
+                lines.push("recovery_hints:");
+                hints.slice(0, 8).forEach((x) => lines.push(`- ${String(x)}`));
+              }
+              setGraphRunText(lines.join("\n"));
+              setGraphRunSummary(null);
+              setGateResultText("-");
+              setLastPolicyEval(null);
+              setStatus(`graph run failed: ${graphRunId}`, "status-err");
+              return;
+            }
+            throw new Error(`graph summary request failed (${sumRes.status})`);
+          }
           const summary = await sumRes.json();
           const quick = summary.quicklook || {};
+          const cacheInfo = summary?.execution?.cache || {};
           const lines = [
             `graph_run_id: ${graphRunId}`,
             `status: ${summary.status || row.status || "-"}`,
             `graph_id: ${summary?.graph?.graph_id || "-"}`,
             `profile: ${summary.profile || profile}`,
             `nodes/edges: ${Number(summary?.graph?.node_count || 0)}/${Number(summary?.graph?.edge_count || 0)}`,
+            `cache_hit: ${Boolean(cacheInfo?.hit)}`,
+            `cache_scope: ${String(cacheInfo?.hit_scope || "-")}`,
+            `cache_source_graph_run_id: ${String(cacheInfo?.source_graph_run_id || "-")}`,
             `path_count_total: ${Number(quick.path_count_total || 0)}`,
             `adc_shape: ${Array.isArray(quick.adc_shape) ? quick.adc_shape.join("x") : "-"}`,
             `rd_shape: ${Array.isArray(quick.rd_shape) ? quick.rd_shape.join("x") : "-"}`,
@@ -553,6 +610,110 @@
           setStatus(`graph run failed: ${String(err.message || err)}`, "status-err");
         }
       }, [apiBase, edges, graphId, nodes, profile, sceneJsonPath, setStatus]);
+
+      const cancelLastGraphRun = React.useCallback(async () => {
+        const graphRunId = String(lastGraphRunId || "").trim();
+        if (!graphRunId) {
+          setStatus("no graph run id to cancel", "status-warn");
+          return;
+        }
+        setStatus(`canceling graph run: ${graphRunId}`, "status-warn");
+        try {
+          const res = await fetch(
+            `${apiBase.replace(/\\/$/, "")}/api/graph/runs/${encodeURIComponent(graphRunId)}/cancel`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ reason: "graph_lab_manual_cancel" }),
+            }
+          );
+          if (!res.ok) throw new Error(`cancel request failed (${res.status})`);
+          const payload = await res.json();
+          const row = payload.graph_run || {};
+          const recovery = row.recovery || {};
+          const lines = [
+            `graph_run_id: ${graphRunId}`,
+            `status: ${String(row.status || "-")}`,
+            `error: ${String(row.error || "-")}`,
+            `recoverable: ${Boolean(recovery?.recoverable)}`,
+            `retry_endpoint: ${String(recovery?.retry_endpoint || "-")}`,
+          ];
+          setGraphRunText(lines.join("\n"));
+          setGraphRunSummary(null);
+          setGateResultText("-");
+          setLastPolicyEval(null);
+          setStatus(`cancel requested: ${graphRunId}`, "status-warn");
+        } catch (err) {
+          setStatus(`cancel failed: ${String(err.message || err)}`, "status-err");
+        }
+      }, [apiBase, lastGraphRunId, setStatus]);
+
+      const retryLastGraphRun = React.useCallback(async () => {
+        const graphRunId = String(lastGraphRunId || "").trim();
+        if (!graphRunId) {
+          setStatus("no graph run id to retry", "status-warn");
+          return;
+        }
+        setStatus(`retrying graph run: ${graphRunId}`, "status-warn");
+        try {
+          const res = await fetch(
+            `${apiBase.replace(/\\/$/, "")}/api/graph/runs/${encodeURIComponent(graphRunId)}/retry?async=0`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                cache: { enable: false, mode: "off" },
+                tag: "graph_lab_retry",
+              }),
+            }
+          );
+          if (!res.ok) throw new Error(`retry request failed (${res.status})`);
+          const payload = await res.json();
+          const row = payload.graph_run || {};
+          const newGraphRunId = String(row.graph_run_id || "").trim();
+          if (!newGraphRunId) throw new Error("retry response missing graph_run_id");
+          setLastGraphRunId(newGraphRunId);
+
+          const rowStatus = String(row.status || "").trim().toLowerCase();
+          if (rowStatus !== "completed") {
+            const recovery = row.recovery || {};
+            const lines = [
+              `graph_run_id: ${newGraphRunId}`,
+              `status: ${String(row.status || "-")}`,
+              `error: ${String(row.error || "-")}`,
+              `recoverable: ${Boolean(recovery?.recoverable)}`,
+              `retry_endpoint: ${String(recovery?.retry_endpoint || "-")}`,
+            ];
+            setGraphRunText(lines.join("\n"));
+            setGraphRunSummary(null);
+            setGateResultText("-");
+            setLastPolicyEval(null);
+            setStatus(`retry ended with status: ${String(row.status || "-")}`, "status-warn");
+            return;
+          }
+
+          const sumRes = await fetch(
+            `${apiBase.replace(/\\/$/, "")}/api/graph/runs/${encodeURIComponent(newGraphRunId)}/summary`
+          );
+          if (!sumRes.ok) throw new Error(`retry summary request failed (${sumRes.status})`);
+          const summary = await sumRes.json();
+          setGraphRunSummary(summary);
+          setGateResultText("-");
+          setLastPolicyEval(null);
+          setGraphRunText(
+            [
+              `graph_run_id: ${newGraphRunId}`,
+              `status: ${String(summary.status || "completed")}`,
+              `cache_hit: ${Boolean(summary?.execution?.cache?.hit)}`,
+              `cache_scope: ${String(summary?.execution?.cache?.hit_scope || "-")}`,
+              `path_count_total: ${Number(summary?.path_summary?.path_count_total || 0)}`,
+            ].join("\n")
+          );
+          setStatus(`retry completed: ${newGraphRunId}`, "status-ok");
+        } catch (err) {
+          setStatus(`retry failed: ${String(err.message || err)}`, "status-err");
+        }
+      }, [apiBase, lastGraphRunId, setStatus]);
 
       const pinBaselineFromGraphRun = React.useCallback(async () => {
         const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
@@ -810,6 +971,11 @@
               ]),
               h("button", { className: "btn", onClick: runGraphValidation, key: "validate" }, "Validate Graph Contract"),
               h("button", { className: "btn", onClick: runGraphViaApi, key: "rungraph" }, "Run Graph (API)"),
+              h("div", { className: "btn-row", key: "hardeningbtns" }, [
+                h("button", { className: "btn", onClick: retryLastGraphRun, key: "retryrun" }, "Retry Last Run"),
+                h("button", { className: "btn", onClick: cancelLastGraphRun, key: "cancelrun" }, "Cancel Last Run"),
+              ]),
+              h("div", { className: "hint", key: "lastrunhint" }, `last_graph_run_id: ${String(lastGraphRunId || "-")}`),
               h("div", { className: "btn-row", key: "gatebtns" }, [
                 h("button", { className: "btn", onClick: pinBaselineFromGraphRun, key: "pinb" }, "Pin Baseline"),
                 h("button", { className: "btn", onClick: runPolicyGateForGraphRun, key: "runpg" }, "Policy Gate"),

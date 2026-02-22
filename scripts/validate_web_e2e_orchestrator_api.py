@@ -3,6 +3,7 @@ import csv
 import json
 import tempfile
 import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -116,6 +117,42 @@ def _build_shifted_scene(path: Path) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _build_invalid_scene(path: Path) -> None:
+    payload = {
+        "scene_id": "web_e2e_validate_invalid_scene_v1",
+        "backend": {
+            "type": "invalid_backend_type_for_recovery_test",
+            "n_chirps": 4,
+            "chirp_interval_s": 4.0e-5,
+            "tx_pos_m": [[0.0, 0.0, 0.0], [0.0, -0.0078, 0.0]],
+            "rx_pos_m": [[0.0, 0.00185, 0.0], [0.0, 0.0037, 0.0]],
+            "targets": [
+                {
+                    "path_id": "invalid_case_target",
+                    "range_m": 20.0,
+                    "radial_velocity_mps": 0.0,
+                    "az_deg": 5.0,
+                    "amp": 1.0,
+                }
+            ],
+            "noise_sigma": 0.0,
+        },
+        "radar": {
+            "fc_hz": 77e9,
+            "slope_hz_per_s": 20e12,
+            "fs_hz": 20e6,
+            "samples_per_chirp": 256,
+        },
+        "map_config": {
+            "nfft_range": 256,
+            "nfft_doppler": 16,
+            "nfft_angle": 8,
+            "range_bin_limit": 64,
+        },
+    }
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
 def run() -> None:
     repo_root = Path(__file__).resolve().parents[1]
 
@@ -123,8 +160,10 @@ def run() -> None:
         root = Path(td)
         scene_json = root / "scene.json"
         scene_json_shifted = root / "scene_shifted.json"
+        scene_json_invalid = root / "scene_invalid.json"
         _build_min_scene(scene_json)
         _build_shifted_scene(scene_json_shifted)
+        _build_invalid_scene(scene_json_invalid)
 
         store_root = root / "store"
         orchestrator = WebE2EOrchestrator(repo_root=str(repo_root), store_root=str(store_root))
@@ -247,6 +286,181 @@ def run() -> None:
             assert Path(str(graph_run_summary["outputs"]["radar_map_npz"])).exists()
             graph_run_summary_json = str(graph_run_summary["outputs"]["graph_run_summary_json"])
             assert Path(graph_run_summary_json).exists()
+            assert graph_run_summary["execution"]["cache"]["hit"] is False
+
+            graph_nodes = first_template["graph"].get("nodes", [])
+            map_node_id = None
+            if isinstance(graph_nodes, list):
+                for node in graph_nodes:
+                    if isinstance(node, dict) and str(node.get("type", "")) == "RadarMap":
+                        map_node_id = str(node.get("id", "")).strip() or None
+                        break
+            assert map_node_id is not None
+
+            # M16.5 full-cache hit path.
+            status, graph_run_cached_created = _http_json(
+                "POST",
+                f"{base}/api/graph/runs?async=0",
+                payload={
+                    **graph_run_payload,
+                    "tag": "validate_graph_run_cache_full",
+                    "cache": {"enable": True, "mode": "required"},
+                },
+            )
+            assert status == 200
+            assert graph_run_cached_created["ok"] is True
+            graph_run_cached = graph_run_cached_created["graph_run"]
+            assert graph_run_cached["status"] == "completed"
+            assert graph_run_cached["cache"]["hit"] is True
+            assert graph_run_cached["cache"]["hit_scope"] == "full"
+            graph_run_cached_id = str(graph_run_cached["graph_run_id"])
+            assert str(graph_run_cached["cache"]["source_graph_run_id"]) == graph_run_id
+
+            status, graph_run_cached_summary = _http_json(
+                "GET",
+                f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_cached_id)}/summary",
+            )
+            assert status == 200
+            assert graph_run_cached_summary["execution"]["cache"]["hit"] is True
+            assert graph_run_cached_summary["execution"]["cache"]["hit_scope"] == "full"
+            assert graph_run_cached_summary["execution"]["bridge_mode"] == "scene_pipeline_cache_full_reuse_v1"
+
+            # M16.5 partial rerun from RadarMap node using cached upstream artifacts.
+            status, graph_run_partial_created = _http_json(
+                "POST",
+                f"{base}/api/graph/runs?async=0",
+                payload={
+                    **graph_run_payload,
+                    "tag": "validate_graph_run_cache_partial_map",
+                    "rerun_from_node_id": map_node_id,
+                    "cache": {
+                        "enable": True,
+                        "mode": "required",
+                        "reuse_graph_run_id": graph_run_id,
+                    },
+                },
+            )
+            assert status == 200
+            assert graph_run_partial_created["ok"] is True
+            graph_run_partial = graph_run_partial_created["graph_run"]
+            assert graph_run_partial["status"] == "completed"
+            assert graph_run_partial["cache"]["hit"] is True
+            assert graph_run_partial["cache"]["hit_scope"] == "partial"
+            graph_run_partial_id = str(graph_run_partial["graph_run_id"])
+
+            status, graph_run_partial_summary = _http_json(
+                "GET",
+                f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_partial_id)}/summary",
+            )
+            assert status == 200
+            assert graph_run_partial_summary["execution"]["cache"]["hit"] is True
+            assert graph_run_partial_summary["execution"]["cache"]["hit_scope"] == "partial"
+            assert (
+                graph_run_partial_summary["execution"]["bridge_mode"]
+                == "scene_pipeline_partial_rerun_radar_map_v1"
+            )
+            assert any(
+                str(row.get("status")) == "cached"
+                for row in graph_run_partial_summary["execution"]["node_results"]
+            )
+
+            # M16.5 cancel handling on async run.
+            status, graph_run_async_created = _http_json(
+                "POST",
+                f"{base}/api/graph/runs?async=1",
+                payload={
+                    **graph_run_payload,
+                    "tag": "validate_graph_run_cancel",
+                    "cache": {"enable": False, "mode": "off"},
+                    "execution_options": {"debug_delay_s": 0.6},
+                },
+            )
+            assert status == 202
+            assert graph_run_async_created["ok"] is True
+            graph_run_async_id = str(graph_run_async_created["graph_run"]["graph_run_id"])
+
+            status, graph_run_cancel_resp = _http_json(
+                "POST",
+                f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_async_id)}/cancel",
+                payload={"reason": "validator_cancel"},
+            )
+            assert status == 200
+            assert graph_run_cancel_resp["ok"] is True
+
+            async_row = graph_run_cancel_resp["graph_run"]
+            for _ in range(40):
+                status, async_row = _http_json(
+                    "GET",
+                    f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_async_id)}",
+                )
+                assert status == 200
+                if str(async_row.get("status", "")).strip().lower() in {
+                    "canceled",
+                    "failed",
+                    "completed",
+                }:
+                    break
+                time.sleep(0.05)
+            assert str(async_row.get("status", "")).strip().lower() == "canceled"
+            assert bool((async_row.get("recovery") or {}).get("recoverable", False)) is True
+
+            # M16.5 retry handling from canceled run.
+            status, graph_retry_from_cancel_resp = _http_json(
+                "POST",
+                f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_async_id)}/retry?async=0",
+                payload={
+                    "cache": {"enable": False, "mode": "off"},
+                    "tag": "validate_retry_from_canceled",
+                },
+            )
+            assert status == 200
+            assert graph_retry_from_cancel_resp["ok"] is True
+            graph_retry_from_cancel = graph_retry_from_cancel_resp["graph_run"]
+            assert graph_retry_from_cancel["status"] == "completed"
+            assert (
+                str(graph_retry_from_cancel["request"]["retry_of_graph_run_id"])
+                == graph_run_async_id
+            )
+
+            # M16.5 failure surfacing + recovery guidance.
+            status, graph_run_fail_created = _http_json(
+                "POST",
+                f"{base}/api/graph/runs?async=0",
+                payload={
+                    **graph_run_payload,
+                    "scene_json_path": str(scene_json_invalid),
+                    "tag": "validate_graph_run_failure",
+                    "cache": {"enable": False, "mode": "off"},
+                },
+            )
+            assert status == 200
+            assert graph_run_fail_created["ok"] is True
+            graph_run_failed = graph_run_fail_created["graph_run"]
+            assert graph_run_failed["status"] == "failed"
+            assert "ValueError" in str(graph_run_failed.get("error", ""))
+            failed_recovery = graph_run_failed.get("recovery", {})
+            assert bool(failed_recovery.get("recoverable", False)) is True
+            assert isinstance(failed_recovery.get("hints"), list)
+            assert len(failed_recovery.get("hints", [])) >= 1
+            graph_run_failed_id = str(graph_run_failed["graph_run_id"])
+
+            status, graph_retry_from_failed_resp = _http_json(
+                "POST",
+                f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_failed_id)}/retry?async=0",
+                payload={
+                    "scene_json_path": str(scene_json),
+                    "cache": {"enable": False, "mode": "off"},
+                    "tag": "validate_retry_from_failed",
+                },
+            )
+            assert status == 200
+            assert graph_retry_from_failed_resp["ok"] is True
+            graph_retry_from_failed = graph_retry_from_failed_resp["graph_run"]
+            assert graph_retry_from_failed["status"] == "completed"
+            assert (
+                str(graph_retry_from_failed["request"]["retry_of_graph_run_id"])
+                == graph_run_failed_id
+            )
 
             status, graph_baseline_created = _http_json(
                 "POST",

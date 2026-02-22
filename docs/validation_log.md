@@ -1704,3 +1704,28 @@
   - Graph Lab UI includes graph-run gate controls (`Pin Baseline`, `Policy Gate`, `Export Gate Report (.md)`)
   - `Policy Gate Result` panel is present
   - frontend includes baseline/policy API integration tokens (`/api/baselines`, `/api/compare/policy`)
+
+## Web E2E Graph Hardening (M16.5)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - validator now covers cache/cancel/recovery hardening cases:
+    - full cache hit (`cache.mode=required`) on repeated graph run
+    - partial rerun cache hit from `RadarMap` node (`rerun_from_node_id`)
+    - async cancel (`POST /api/graph/runs/{id}/cancel`)
+    - retry from canceled run (`POST /api/graph/runs/{id}/retry`)
+    - forced execution failure with structured recovery hints and retry-from-failed override
+  - 기존 run/compare/baseline/policy/regression/export regression checks remain pass
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8110 8130` + smoke (`curl /frontend/graph_lab_reactflow.html?api=...` token grep)
+- Result: pass
+- Notes:
+  - Graph Lab page contains M16.5 controls/tokens:
+    - `Retry Last Run`
+    - `Cancel Last Run`
+    - `/api/graph/runs/{id}/retry`
+    - `/api/graph/runs/{id}/cancel`
+    - `cache_hit` run-result field

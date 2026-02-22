@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import datetime as _dt
 import csv
+import hashlib
 import json
 import re
 import shutil
 import threading
+import time
+import traceback
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -16,6 +19,7 @@ import numpy as np
 
 from .graph_contract import build_default_graph_templates, validate_graph_contract_payload
 from .parity import compare_hybrid_estimation_payloads
+from .adc_pack_builder import estimate_rd_ra_from_adc
 from .scene_pipeline import run_object_scene_to_radar_map_json
 
 
@@ -47,6 +51,10 @@ DEFAULT_COMPARE_POLICY: Dict[str, Any] = {
 }
 
 C0 = 299_792_458.0
+
+
+class _GraphRunCanceled(RuntimeError):
+    pass
 
 
 def _now_iso() -> str:
@@ -276,6 +284,7 @@ class WebE2EOrchestrator:
         self.regression_sessions_root = self.store_root / "regression_sessions"
         self.regression_exports_root = self.store_root / "regression_exports"
         self.graph_runs_root = self.store_root / "graph_runs"
+        self.graph_cache_root = self.store_root / "graph_cache"
         self.runs_root.mkdir(parents=True, exist_ok=True)
         self.comparisons_root.mkdir(parents=True, exist_ok=True)
         self.baselines_root.mkdir(parents=True, exist_ok=True)
@@ -283,7 +292,9 @@ class WebE2EOrchestrator:
         self.regression_sessions_root.mkdir(parents=True, exist_ok=True)
         self.regression_exports_root.mkdir(parents=True, exist_ok=True)
         self.graph_runs_root.mkdir(parents=True, exist_ok=True)
+        self.graph_cache_root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
+        self._recover_stale_graph_runs()
 
     def get_profiles(self) -> Dict[str, Dict[str, Any]]:
         return dict(PROFILE_PRESETS)
@@ -317,12 +328,100 @@ class WebE2EOrchestrator:
             raise FileNotFoundError(f"graph run summary not found: {summary_path}")
         return json.loads(summary_path.read_text(encoding="utf-8"))
 
+    def cancel_graph_run(
+        self,
+        graph_run_id: str,
+        reason: Optional[str] = None,
+    ) -> dict[str, Any]:
+        clean_reason = str(reason or "").strip() or None
+
+        def _mut(rec: dict[str, Any]) -> None:
+            status = str(rec.get("status", "")).strip().lower()
+            ctrl = rec.get("control")
+            if not isinstance(ctrl, Mapping):
+                ctrl = {}
+            ctrl_out = dict(ctrl)
+            ctrl_out["cancel_requested"] = True
+            ctrl_out["cancel_requested_at"] = _now_iso()
+            ctrl_out["cancel_reason"] = clean_reason
+            rec["control"] = ctrl_out
+
+            if status in {"queued", "cancel_requested"}:
+                rec["status"] = "canceled"
+                rec["error"] = (
+                    f"CanceledByUser: {clean_reason}" if clean_reason is not None else "CanceledByUser"
+                )
+                rec["result"] = None
+                rec["recovery"] = {
+                    "recoverable": True,
+                    "reason": "run canceled before execution",
+                    "retry_endpoint": f"/api/graph/runs/{graph_run_id}/retry",
+                }
+            elif status in {"running"}:
+                rec["status"] = "cancel_requested"
+
+        return self._mutate_graph_record(graph_run_id, _mut)
+
+    def retry_graph_run(
+        self,
+        graph_run_id: str,
+        request_payload: Mapping[str, Any],
+        *,
+        run_async: bool = True,
+    ) -> dict[str, Any]:
+        source = self.get_graph_run(graph_run_id)
+        source_req = source.get("request")
+        if not isinstance(source_req, Mapping):
+            raise ValueError("source graph run request payload is invalid")
+
+        if not isinstance(request_payload, Mapping):
+            raise ValueError("request payload must be object")
+
+        payload: dict[str, Any] = {
+            "graph": source_req.get("graph"),
+            "scene_json_path": request_payload.get(
+                "scene_json_path",
+                source_req.get("scene_json_path"),
+            ),
+            "profile": request_payload.get("profile", source_req.get("profile")),
+            "run_hybrid_estimation": request_payload.get(
+                "run_hybrid_estimation",
+                source_req.get("run_hybrid_estimation", False),
+            ),
+            "output_subdir": request_payload.get(
+                "output_subdir",
+                source_req.get("output_subdir", "output"),
+            ),
+            "tag": (
+                str(request_payload.get("tag", "")).strip()
+                or f"retry_{graph_run_id}"
+            ),
+            "rerun_from_node_id": request_payload.get(
+                "rerun_from_node_id",
+                source_req.get("rerun_from_node_id"),
+            ),
+            "retry_of_graph_run_id": graph_run_id,
+        }
+
+        cache_cfg = request_payload.get("cache")
+        if isinstance(cache_cfg, Mapping):
+            payload["cache"] = dict(cache_cfg)
+        else:
+            default_cache: dict[str, Any] = {"enable": True, "mode": "auto"}
+            if str(source.get("status", "")).strip().lower() == "completed":
+                default_cache["reuse_graph_run_id"] = graph_run_id
+            payload["cache"] = default_cache
+
+        return self.submit_graph_run(payload, run_async=run_async)
+
     def submit_graph_run(
         self,
         request_payload: Mapping[str, Any],
         run_async: bool = True,
     ) -> dict[str, Any]:
         req = self._normalize_graph_run_request(request_payload)
+        cache_key = self._build_graph_cache_key(req)
+        req["cache_key"] = cache_key
         graph_run_id = self._new_graph_run_id()
         graph_run_dir = self.graph_runs_root / graph_run_id
         output_dir = graph_run_dir / str(req["output_subdir"])
@@ -369,6 +468,26 @@ class WebE2EOrchestrator:
             },
             "result": None,
             "error": None,
+            "cache": {
+                "enabled": bool(req.get("cache", {}).get("enable", True)),
+                "mode": str(req.get("cache", {}).get("mode", "auto")),
+                "cache_key": cache_key,
+                "requested_rerun_from_node_id": req.get("rerun_from_node_id"),
+                "requested_reuse_graph_run_id": req.get("cache", {}).get("reuse_graph_run_id"),
+                "hit": False,
+                "hit_scope": "none",
+                "source_graph_run_id": None,
+            },
+            "control": {
+                "cancel_requested": False,
+                "cancel_requested_at": None,
+                "cancel_reason": None,
+            },
+            "recovery": {
+                "recoverable": True,
+                "reason": None,
+                "retry_endpoint": f"/api/graph/runs/{graph_run_id}/retry",
+            },
         }
         self._save_graph_record(record)
 
@@ -1121,6 +1240,67 @@ class WebE2EOrchestrator:
         if out_path.is_absolute() or any(part == ".." for part in out_path.parts):
             raise ValueError("output_subdir must be a safe relative path")
 
+        graph_node_ids = {
+            str(node.get("id", "")).strip()
+            for node in normalized_graph.get("nodes", [])
+            if isinstance(node, Mapping)
+        }
+        rerun_raw = request_payload.get("rerun_from_node_id", "")
+        if rerun_raw is None:
+            rerun_from_node_id_raw = ""
+        else:
+            rerun_from_node_id_raw = str(rerun_raw).strip()
+            if rerun_from_node_id_raw.lower() in {"none", "null"}:
+                rerun_from_node_id_raw = ""
+        rerun_from_node_id = rerun_from_node_id_raw or None
+        if rerun_from_node_id is not None and rerun_from_node_id not in graph_node_ids:
+            raise ValueError(f"rerun_from_node_id not found in graph nodes: {rerun_from_node_id}")
+
+        cache_raw = request_payload.get("cache")
+        if cache_raw is None:
+            cache_cfg: dict[str, Any] = {}
+        elif isinstance(cache_raw, Mapping):
+            cache_cfg = dict(cache_raw)
+        else:
+            raise ValueError("cache must be object when provided")
+        cache_enable = bool(cache_cfg.get("enable", True))
+        cache_mode = str(cache_cfg.get("mode", "auto")).strip().lower() or "auto"
+        if cache_mode not in {"auto", "required", "off"}:
+            raise ValueError("cache.mode must be one of: auto, required, off")
+        if not cache_enable:
+            cache_mode = "off"
+        reuse_raw = str(
+            cache_cfg.get(
+                "reuse_graph_run_id",
+                request_payload.get("reuse_graph_run_id", ""),
+            )
+        ).strip()
+        reuse_graph_run_id = (
+            self._normalize_identifier_token(reuse_raw, field_name="reuse_graph_run_id")
+            if reuse_raw != ""
+            else None
+        )
+
+        retry_of_raw = str(request_payload.get("retry_of_graph_run_id", "")).strip()
+        retry_of_graph_run_id = (
+            self._normalize_identifier_token(retry_of_raw, field_name="retry_of_graph_run_id")
+            if retry_of_raw != ""
+            else None
+        )
+
+        exec_raw = request_payload.get("execution_options")
+        if exec_raw is None:
+            execution_options: dict[str, Any] = {}
+        elif isinstance(exec_raw, Mapping):
+            execution_options = dict(exec_raw)
+        else:
+            raise ValueError("execution_options must be object when provided")
+        debug_delay_s = float(execution_options.get("debug_delay_s", 0.0))
+        if debug_delay_s < 0.0:
+            raise ValueError("execution_options.debug_delay_s must be >= 0")
+        if debug_delay_s > 60.0:
+            raise ValueError("execution_options.debug_delay_s must be <= 60")
+
         scene_json_raw = str(request_payload.get("scene_json_path", "")).strip()
         if scene_json_raw == "":
             for node in normalized_graph.get("nodes", []):
@@ -1148,8 +1328,273 @@ class WebE2EOrchestrator:
             "run_hybrid_estimation": bool(request_payload.get("run_hybrid_estimation", False)),
             "output_subdir": output_subdir,
             "tag": str(request_payload.get("tag", "")).strip() or None,
+            "rerun_from_node_id": rerun_from_node_id,
+            "cache": {
+                "enable": cache_enable,
+                "mode": cache_mode,
+                "reuse_graph_run_id": reuse_graph_run_id,
+            },
+            "retry_of_graph_run_id": retry_of_graph_run_id,
+            "execution_options": {
+                "debug_delay_s": debug_delay_s,
+            },
             "requested_at": _now_iso(),
         }
+
+    def _recover_stale_graph_runs(self) -> None:
+        """Mark interrupted active graph runs as failed-recoverable on startup."""
+        for path in sorted(self.graph_runs_root.glob("*/graph_run_record.json")):
+            try:
+                rec = self._load_graph_record_path(path)
+            except Exception:
+                continue
+            status = str(rec.get("status", "")).strip().lower()
+            if status not in {"queued", "running", "cancel_requested"}:
+                continue
+            rec["status"] = "failed"
+            rec["updated_at"] = _now_iso()
+            rec["error"] = (
+                "RecoveredInterruptedRun: previous orchestrator instance exited before graph run finished"
+            )
+            rec["recovery"] = {
+                "recoverable": True,
+                "reason": "run was interrupted before completion",
+                "retry_endpoint": f"/api/graph/runs/{rec.get('graph_run_id')}/retry",
+                "hints": [
+                    "retry the run from the latest request",
+                    "if scene/config changed, pass overrides in retry payload",
+                ],
+            }
+            self._save_graph_record(rec)
+
+    def _scene_revision_token(self, scene_json_path: str) -> str:
+        path = Path(str(scene_json_path)).expanduser().resolve()
+        stat = path.stat()
+        return f"{path}::{int(stat.st_size)}::{int(stat.st_mtime_ns)}"
+
+    def _build_graph_cache_key(self, req: Mapping[str, Any]) -> str:
+        payload = {
+            "version": "graph_cache_key_v1",
+            "graph": req.get("graph"),
+            "graph_topological_order": req.get("graph_topological_order"),
+            "scene_json_path": str(req.get("scene_json_path", "")),
+            "scene_revision": self._scene_revision_token(str(req.get("scene_json_path", ""))),
+            "profile": str(req.get("profile", "")),
+            "run_hybrid_estimation": bool(req.get("run_hybrid_estimation", False)),
+        }
+        raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=_json_default)
+        digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+        return f"gcache_v1_{digest}"
+
+    def _load_graph_summary_from_record(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        paths = record.get("paths")
+        if not isinstance(paths, Mapping):
+            raise ValueError("graph record paths missing")
+        summary_path = Path(str(paths.get("graph_run_summary_json", ""))).expanduser().resolve()
+        if not summary_path.exists() or not summary_path.is_file():
+            raise FileNotFoundError(f"graph run summary not found: {summary_path}")
+        return json.loads(summary_path.read_text(encoding="utf-8"))
+
+    def _resolve_graph_cache_candidate(
+        self,
+        req: Mapping[str, Any],
+        *,
+        current_graph_run_id: str,
+    ) -> Optional[dict[str, Any]]:
+        cache_req = req.get("cache")
+        if not isinstance(cache_req, Mapping):
+            return None
+        if not bool(cache_req.get("enable", True)):
+            return None
+        mode = str(cache_req.get("mode", "auto")).strip().lower() or "auto"
+        if mode == "off":
+            return None
+
+        requested_raw = cache_req.get("reuse_graph_run_id", "")
+        if requested_raw is None:
+            requested_source = ""
+        else:
+            requested_source = str(requested_raw).strip()
+            if requested_source.lower() in {"none", "null"}:
+                requested_source = ""
+        if requested_source != "":
+            src = self.get_graph_run(requested_source)
+            if str(src.get("status", "")).strip().lower() != "completed":
+                if mode == "required":
+                    raise ValueError(f"requested cache source is not completed: {requested_source}")
+                return None
+            self._load_graph_summary_from_record(src)
+            return src
+
+        cache_key = str(req.get("cache_key", "")).strip() or self._build_graph_cache_key(req)
+        candidates = self.list_graph_runs()
+        for rec in candidates:
+            rid = str(rec.get("graph_run_id", "")).strip()
+            if rid == "" or rid == current_graph_run_id:
+                continue
+            if str(rec.get("status", "")).strip().lower() != "completed":
+                continue
+            cache_meta = rec.get("cache")
+            if not isinstance(cache_meta, Mapping):
+                continue
+            if str(cache_meta.get("cache_key", "")).strip() != cache_key:
+                continue
+            try:
+                self._load_graph_summary_from_record(rec)
+            except Exception:
+                continue
+            return rec
+
+        if mode == "required":
+            raise ValueError("graph cache miss while cache.mode=required")
+        return None
+
+    def _materialize_cached_graph_artifacts(
+        self,
+        *,
+        source_summary: Mapping[str, Any],
+        output_dir: Path,
+        include_radar_map: bool,
+    ) -> dict[str, str]:
+        outputs = source_summary.get("outputs")
+        if not isinstance(outputs, Mapping):
+            raise ValueError("source summary outputs missing for cache materialization")
+
+        required = [
+            ("path_list_json", "path_list.json"),
+            ("adc_cube_npz", "adc_cube.npz"),
+        ]
+        if include_radar_map:
+            required.append(("radar_map_npz", "radar_map.npz"))
+
+        copied: dict[str, str] = {}
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for src_key, dst_name in required:
+            src = Path(str(outputs.get(src_key, ""))).expanduser().resolve()
+            if not src.exists() or not src.is_file():
+                raise FileNotFoundError(f"cache source artifact not found: {src_key} -> {src}")
+            dst = (output_dir / dst_name).resolve()
+            shutil.copy2(src, dst)
+            copied[src_key] = str(dst)
+        return copied
+
+    def _recompute_radar_map_from_cached_adc(
+        self,
+        *,
+        scene_json_path: str,
+        adc_cube_npz: str,
+        output_dir: Path,
+    ) -> str:
+        scene_payload = json.loads(Path(scene_json_path).read_text(encoding="utf-8"))
+        if not isinstance(scene_payload, Mapping):
+            raise ValueError("scene json must be object")
+        map_cfg = scene_payload.get("map_config")
+        if not isinstance(map_cfg, Mapping):
+            map_cfg = {}
+
+        with np.load(str(adc_cube_npz), allow_pickle=False) as adc_payload:
+            if "adc" not in adc_payload:
+                raise ValueError("adc_cube_npz must contain 'adc' array")
+            adc = np.asarray(adc_payload["adc"])
+            adc_meta = _decode_npz_metadata(adc_payload)
+
+        est = estimate_rd_ra_from_adc(
+            adc_sctr=adc,
+            nfft_range=self._opt_int_or_none(map_cfg.get("nfft_range")),
+            nfft_doppler=self._opt_int_or_none(map_cfg.get("nfft_doppler")),
+            nfft_angle=self._opt_int_or_none(map_cfg.get("nfft_angle")),
+            range_window=str(map_cfg.get("range_window", "hann")),
+            doppler_window=str(map_cfg.get("doppler_window", "hann")),
+            angle_window=str(map_cfg.get("angle_window", "hann")),
+            range_bin_limit=self._opt_int_or_none(map_cfg.get("range_bin_limit")),
+        )
+
+        backend = scene_payload.get("backend")
+        backend_type = (
+            str(backend.get("type", "")).strip()
+            if isinstance(backend, Mapping)
+            else "unknown"
+        )
+
+        tx_schedule: list[int] = []
+        if isinstance(adc_meta, Mapping):
+            raw_tx = adc_meta.get("tx_schedule")
+            if isinstance(raw_tx, list):
+                tx_schedule = [int(x) for x in raw_tx]
+        if len(tx_schedule) == 0 and adc.ndim >= 2:
+            tx_schedule = [0 for _ in range(int(adc.shape[1]))]
+
+        out_map = (output_dir / "radar_map.npz").resolve()
+        metadata = {
+            "scene_id": scene_payload.get("scene_id"),
+            "backend_type": backend_type,
+            "frame_count": int(adc.shape[1]) if adc.ndim >= 2 else 0,
+            "tx_schedule": tx_schedule,
+            "rd_ra_metadata": est["metadata"],
+            "recomputed_from_cached_adc": True,
+        }
+        np.savez_compressed(
+            str(out_map),
+            fx_dop_win=np.asarray(est["fx_dop_win"], dtype=np.float64),
+            fx_ang=np.asarray(est["fx_ang"], dtype=np.float64),
+            metadata_json=json.dumps(metadata),
+        )
+        return str(out_map)
+
+    def _check_graph_run_cancel_requested(self, graph_run_id: str) -> bool:
+        rec = self.get_graph_run(graph_run_id)
+        status = str(rec.get("status", "")).strip().lower()
+        if status in {"canceled", "cancel_requested"}:
+            return True
+        ctrl = rec.get("control")
+        if isinstance(ctrl, Mapping) and bool(ctrl.get("cancel_requested", False)):
+            return True
+        return False
+
+    def _raise_if_graph_run_canceled(self, graph_run_id: str, stage: str) -> None:
+        if self._check_graph_run_cancel_requested(graph_run_id):
+            raise _GraphRunCanceled(f"graph run canceled at stage: {stage}")
+
+    def _sleep_with_cancel_checks(self, graph_run_id: str, delay_s: float) -> None:
+        remain = max(float(delay_s), 0.0)
+        while remain > 0.0:
+            self._raise_if_graph_run_canceled(graph_run_id, "delay")
+            dt = min(0.1, remain)
+            time.sleep(dt)
+            remain -= dt
+
+    def _build_graph_failure_recovery(
+        self,
+        *,
+        graph_run_id: str,
+        req: Mapping[str, Any],
+        exc: BaseException,
+    ) -> dict[str, Any]:
+        exc_type = type(exc).__name__
+        msg = str(exc)
+        hints: list[str] = []
+        if isinstance(exc, FileNotFoundError):
+            hints.append("check scene_json_path and referenced artifact paths")
+        if isinstance(exc, ValueError):
+            hints.append("validate graph contract and scene payload fields")
+        if "cache" in msg.lower():
+            hints.append("retry with cache.mode=off when cache source is stale")
+        if len(hints) == 0:
+            hints.append("retry the same run once to rule out transient failures")
+        hints.append("use /api/graph/runs/{graph_run_id}/retry with overrides when needed")
+        return {
+            "recoverable": True,
+            "reason": f"{exc_type}: {msg}",
+            "hints": hints,
+            "retry_endpoint": f"/api/graph/runs/{graph_run_id}/retry",
+            "request_scene_json_path": req.get("scene_json_path"),
+        }
+
+    @staticmethod
+    def _opt_int_or_none(value: Any) -> Optional[int]:
+        if value is None:
+            return None
+        return int(value)
 
     def _resolve_scene_path(self, path_text: str) -> Path:
         path = Path(path_text).expanduser()
@@ -1467,6 +1912,16 @@ class WebE2EOrchestrator:
             self._mutate_record(run_id, _fail)
 
     def _execute_graph_run(self, graph_run_id: str) -> None:
+        req: dict[str, Any] = {}
+        cache_meta: dict[str, Any] = {}
+
+        try:
+            init_rec = self.get_graph_run(graph_run_id)
+            if str(init_rec.get("status", "")).strip().lower() == "canceled":
+                return
+        except Exception:
+            return
+
         self._mutate_graph_record(
             graph_run_id,
             lambda rec: rec.update(
@@ -1484,25 +1939,135 @@ class WebE2EOrchestrator:
             out_dir = Path(str(record["paths"]["output_dir"]))
             out_dir.mkdir(parents=True, exist_ok=True)
 
-            run_out = run_object_scene_to_radar_map_json(
-                scene_json_path=str(req["scene_json_path"]),
-                output_dir=str(out_dir),
-                run_hybrid_estimation=bool(req.get("run_hybrid_estimation", False)),
+            self._raise_if_graph_run_canceled(graph_run_id, "before_execution")
+            exec_opts = req.get("execution_options")
+            if isinstance(exec_opts, Mapping):
+                debug_delay_s = float(exec_opts.get("debug_delay_s", 0.0))
+                if debug_delay_s > 0.0:
+                    self._sleep_with_cancel_checks(graph_run_id, debug_delay_s)
+
+            graph_obj = req.get("graph", {})
+            nodes = graph_obj.get("nodes", []) if isinstance(graph_obj, Mapping) else []
+            topological_order = req.get("graph_topological_order", [])
+            node_by_id: dict[str, Mapping[str, Any]] = {}
+            if isinstance(nodes, list):
+                for node in nodes:
+                    if isinstance(node, Mapping):
+                        node_id = str(node.get("id", "")).strip()
+                        if node_id != "":
+                            node_by_id[node_id] = node
+
+            rerun_from_node_id = str(req.get("rerun_from_node_id") or "").strip() or None
+            rerun_idx: Optional[int] = None
+            if rerun_from_node_id is not None and isinstance(topological_order, list):
+                try:
+                    rerun_idx = list(topological_order).index(rerun_from_node_id)
+                except ValueError:
+                    rerun_idx = None
+
+            cache_req = req.get("cache")
+            cache_meta = {
+                "enabled": bool((cache_req or {}).get("enable", True)) if isinstance(cache_req, Mapping) else True,
+                "mode": str((cache_req or {}).get("mode", "auto")) if isinstance(cache_req, Mapping) else "auto",
+                "cache_key": str(req.get("cache_key", "")),
+                "requested_rerun_from_node_id": rerun_from_node_id,
+                "requested_reuse_graph_run_id": (
+                    (cache_req or {}).get("reuse_graph_run_id")
+                    if isinstance(cache_req, Mapping)
+                    else None
+                ),
+                "hit": False,
+                "hit_scope": "none",
+                "source_graph_run_id": None,
+                "note": None,
+            }
+
+            run_out: Optional[dict[str, Any]] = None
+            bridge_mode = "scene_pipeline_single_pass_v1"
+            cache_source = self._resolve_graph_cache_candidate(
+                req,
+                current_graph_run_id=graph_run_id,
             )
+            if cache_source is not None:
+                cache_source_id = str(cache_source.get("graph_run_id", "")).strip()
+                cache_summary = self._load_graph_summary_from_record(cache_source)
+                cache_meta["source_graph_run_id"] = cache_source_id
+
+                source_quicklook = cache_summary.get("quicklook")
+                source_adc_summary = cache_summary.get("adc_summary")
+                source_frame_count = 0
+                if isinstance(source_quicklook, Mapping):
+                    source_frame_count = int(source_quicklook.get("n_chirps", 0))
+                source_tx_schedule: list[int] = []
+                if isinstance(source_adc_summary, Mapping):
+                    source_adc_meta = source_adc_summary.get("metadata")
+                    if isinstance(source_adc_meta, Mapping):
+                        raw_tx = source_adc_meta.get("tx_schedule")
+                        if isinstance(raw_tx, list):
+                            source_tx_schedule = [int(x) for x in raw_tx]
+
+                rerun_node_type = None
+                if rerun_from_node_id is not None:
+                    rerun_node = node_by_id.get(rerun_from_node_id, {})
+                    rerun_node_type = str(rerun_node.get("type", "")).strip() or None
+
+                if rerun_from_node_id is not None and rerun_node_type == "RadarMap":
+                    copied = self._materialize_cached_graph_artifacts(
+                        source_summary=cache_summary,
+                        output_dir=out_dir,
+                        include_radar_map=False,
+                    )
+                    out_map = self._recompute_radar_map_from_cached_adc(
+                        scene_json_path=str(req["scene_json_path"]),
+                        adc_cube_npz=str(copied["adc_cube_npz"]),
+                        output_dir=out_dir,
+                    )
+                    run_out = {
+                        "path_list_json": str(copied["path_list_json"]),
+                        "adc_cube_npz": str(copied["adc_cube_npz"]),
+                        "radar_map_npz": str(out_map),
+                        "frame_count": source_frame_count,
+                        "tx_schedule": source_tx_schedule,
+                    }
+                    bridge_mode = "scene_pipeline_partial_rerun_radar_map_v1"
+                    cache_meta["hit"] = True
+                    cache_meta["hit_scope"] = "partial"
+                elif rerun_from_node_id is not None:
+                    cache_meta["note"] = (
+                        f"partial rerun requested from {rerun_from_node_id}, "
+                        "but only RadarMap node is cache-rerunnable in bridge v1; falling back to full run"
+                    )
+                else:
+                    copied = self._materialize_cached_graph_artifacts(
+                        source_summary=cache_summary,
+                        output_dir=out_dir,
+                        include_radar_map=True,
+                    )
+                    run_out = {
+                        "path_list_json": str(copied["path_list_json"]),
+                        "adc_cube_npz": str(copied["adc_cube_npz"]),
+                        "radar_map_npz": str(copied["radar_map_npz"]),
+                        "frame_count": source_frame_count,
+                        "tx_schedule": source_tx_schedule,
+                    }
+                    bridge_mode = "scene_pipeline_cache_full_reuse_v1"
+                    cache_meta["hit"] = True
+                    cache_meta["hit_scope"] = "full"
+
+            if run_out is None:
+                run_out = run_object_scene_to_radar_map_json(
+                    scene_json_path=str(req["scene_json_path"]),
+                    output_dir=str(out_dir),
+                    run_hybrid_estimation=bool(req.get("run_hybrid_estimation", False)),
+                )
+
+            self._raise_if_graph_run_canceled(graph_run_id, "after_execution")
+
             summary_body = self._build_summary_payload(
                 scene_json_path=str(req["scene_json_path"]),
                 output_dir=out_dir,
                 run_out=run_out,
             )
-
-            graph_obj = req.get("graph", {})
-            nodes = graph_obj.get("nodes", []) if isinstance(graph_obj, Mapping) else []
-            topological_order = req.get("graph_topological_order", [])
-            node_by_id = {}
-            if isinstance(nodes, list):
-                for node in nodes:
-                    if isinstance(node, Mapping):
-                        node_by_id[str(node.get("id", "")).strip()] = node
 
             node_results: list[dict[str, Any]] = []
             now_iso = _now_iso()
@@ -1523,12 +2088,26 @@ class WebE2EOrchestrator:
                 elif node_type == "RadarMap":
                     out_contract = "radar_map"
                     out_artifacts["radar_map_npz"] = summary_body["outputs"]["radar_map_npz"]
+
+                node_status = "completed"
+                cache_hit_node = False
+                if bool(cache_meta.get("hit", False)):
+                    scope = str(cache_meta.get("hit_scope", "none"))
+                    if scope == "full":
+                        node_status = "cached"
+                        cache_hit_node = True
+                    elif scope == "partial" and rerun_idx is not None and idx < int(rerun_idx):
+                        node_status = "cached"
+                        cache_hit_node = True
+
                 node_results.append(
                     {
                         "index": int(idx),
                         "node_id": str(node_id),
                         "node_type": node_type,
-                        "status": "completed",
+                        "status": node_status,
+                        "cache_hit": cache_hit_node,
+                        "cache_source_graph_run_id": cache_meta.get("source_graph_run_id"),
                         "started_at": now_iso,
                         "completed_at": now_iso,
                         "output_contract": out_contract,
@@ -1561,7 +2140,8 @@ class WebE2EOrchestrator:
                     else [],
                 },
                 "execution": {
-                    "bridge_mode": "scene_pipeline_single_pass_v1",
+                    "bridge_mode": bridge_mode,
+                    "cache": cache_meta,
                     "node_results": node_results,
                 },
             }
@@ -1577,26 +2157,81 @@ class WebE2EOrchestrator:
             )
 
             def _ok(rec: dict[str, Any]) -> None:
-                rec["status"] = "completed"
-                rec["updated_at"] = _now_iso()
-                rec["result"] = {
-                    "graph_id": graph_summary["graph"]["graph_id"],
-                    "node_count": int(graph_summary["graph"]["node_count"]),
-                    "edge_count": int(graph_summary["graph"]["edge_count"]),
-                    "path_count_total": int(graph_summary["path_summary"]["path_count_total"]),
-                    "quicklook": graph_summary["quicklook"],
-                    "graph_run_summary_json": str(graph_summary_path),
-                    "summary_version": str(graph_summary["version"]),
-                }
-                rec["error"] = None
+                ctrl = rec.get("control")
+                cancel_requested = bool(ctrl.get("cancel_requested")) if isinstance(ctrl, Mapping) else False
+                if cancel_requested:
+                    reason = None
+                    if isinstance(ctrl, Mapping):
+                        reason = str(ctrl.get("cancel_reason", "")).strip() or None
+                    rec["status"] = "canceled"
+                    rec["result"] = None
+                    rec["error"] = (
+                        f"CanceledByUser: {reason}" if reason is not None else "CanceledByUser"
+                    )
+                    rec["recovery"] = {
+                        "recoverable": True,
+                        "reason": "run canceled during execution finalization",
+                        "retry_endpoint": f"/api/graph/runs/{graph_run_id}/retry",
+                    }
+                else:
+                    rec["status"] = "completed"
+                    rec["result"] = {
+                        "graph_id": graph_summary["graph"]["graph_id"],
+                        "node_count": int(graph_summary["graph"]["node_count"]),
+                        "edge_count": int(graph_summary["graph"]["edge_count"]),
+                        "path_count_total": int(graph_summary["path_summary"]["path_count_total"]),
+                        "quicklook": graph_summary["quicklook"],
+                        "graph_run_summary_json": str(graph_summary_path),
+                        "summary_version": str(graph_summary["version"]),
+                    }
+                    rec["error"] = None
+                    rec["recovery"] = {
+                        "recoverable": True,
+                        "reason": None,
+                        "retry_endpoint": f"/api/graph/runs/{graph_run_id}/retry",
+                    }
+                rec["cache"] = dict(cache_meta)
 
             self._mutate_graph_record(graph_run_id, _ok)
 
+        except _GraphRunCanceled as exc:
+            def _cancel(rec: dict[str, Any]) -> None:
+                rec["status"] = "canceled"
+                rec["error"] = f"{type(exc).__name__}: {exc}"
+                rec["result"] = None
+                if len(cache_meta) > 0:
+                    rec["cache"] = dict(cache_meta)
+                rec["recovery"] = {
+                    "recoverable": True,
+                    "reason": "run canceled by user request",
+                    "retry_endpoint": f"/api/graph/runs/{graph_run_id}/retry",
+                    "hints": [
+                        "submit retry to continue from latest request",
+                    ],
+                }
+
+            self._mutate_graph_record(graph_run_id, _cancel)
+
         except Exception as exc:
+            recovery = self._build_graph_failure_recovery(
+                graph_run_id=graph_run_id,
+                req=req,
+                exc=exc,
+            )
+            tb = traceback.format_exc(limit=10)
+
             def _fail(rec: dict[str, Any]) -> None:
                 rec["status"] = "failed"
-                rec["updated_at"] = _now_iso()
                 rec["error"] = f"{type(exc).__name__}: {exc}"
+                rec["result"] = None
+                rec["failure"] = {
+                    "type": type(exc).__name__,
+                    "message": str(exc),
+                    "traceback": tb,
+                }
+                if len(cache_meta) > 0:
+                    rec["cache"] = dict(cache_meta)
+                rec["recovery"] = recovery
 
             self._mutate_graph_record(graph_run_id, _fail)
 
@@ -1914,18 +2549,37 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
             path = parsed.path
             query = parse_qs(parsed.query)
 
-            if path not in {
-                "/api/runs",
-                "/api/compare",
-                "/api/baselines",
-                "/api/compare/policy",
-                "/api/regression-sessions",
-                "/api/regression-exports",
-                "/api/graph/validate",
-                "/api/graph/runs",
-            }:
+            is_graph_run_cancel = path.startswith("/api/graph/runs/") and path.endswith("/cancel")
+            is_graph_run_retry = path.startswith("/api/graph/runs/") and path.endswith("/retry")
+
+            if (
+                path
+                not in {
+                    "/api/runs",
+                    "/api/compare",
+                    "/api/baselines",
+                    "/api/compare/policy",
+                    "/api/regression-sessions",
+                    "/api/regression-exports",
+                    "/api/graph/validate",
+                    "/api/graph/runs",
+                }
+                and (not is_graph_run_cancel)
+                and (not is_graph_run_retry)
+            ):
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
                 return
+
+            if is_graph_run_cancel:
+                suffix = path[len("/api/graph/runs/") : -len("/cancel")]
+                if str(suffix).strip().strip("/") == "":
+                    self._send_json(400, {"ok": False, "error": "graph_run_id is required"})
+                    return
+            if is_graph_run_retry:
+                suffix = path[len("/api/graph/runs/") : -len("/retry")]
+                if str(suffix).strip().strip("/") == "":
+                    self._send_json(400, {"ok": False, "error": "graph_run_id is required"})
+                    return
 
             try:
                 content_length = int(self.headers.get("Content-Length", "0"))
@@ -1940,6 +2594,33 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 return
 
             try:
+                if is_graph_run_cancel:
+                    graph_run_id = str(
+                        path[len("/api/graph/runs/") : -len("/cancel")]
+                    ).strip().strip("/")
+                    reason = None
+                    if isinstance(body, Mapping):
+                        reason_raw = body.get("reason", None)
+                        if reason_raw is not None:
+                            reason = str(reason_raw).strip() or None
+                    payload = orchestrator.cancel_graph_run(graph_run_id=graph_run_id, reason=reason)
+                    self._send_json(200, {"ok": True, "graph_run": payload})
+                    return
+
+                if is_graph_run_retry:
+                    graph_run_id = str(
+                        path[len("/api/graph/runs/") : -len("/retry")]
+                    ).strip().strip("/")
+                    run_async = _parse_bool_query(query, "async", default=True)
+                    payload = body if isinstance(body, Mapping) else {}
+                    record = orchestrator.retry_graph_run(
+                        graph_run_id=graph_run_id,
+                        request_payload=payload,
+                        run_async=run_async,
+                    )
+                    self._send_json(202 if run_async else 200, {"ok": True, "graph_run": record})
+                    return
+
                 if path == "/api/runs":
                     run_async = _parse_bool_query(query, "async", default=True)
                     record = orchestrator.submit_run(body, run_async=run_async)
