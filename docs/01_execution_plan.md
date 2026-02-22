@@ -84,8 +84,9 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M14.1: Runtime environment contract + readiness probe (`sionna`/`po-sbr`)
 - [x] M14.2: Real runtime engine binding pilot (Mitsuba-backed `sionna_rt` first scene run)
 - [x] M14.3: Runtime blocker gate + `sionna` PHY runtime sanity enablement
-- [ ] M14.4: `sionna.rt` full runtime enablement (LLVM backend provisioning on target host)
-- [ ] M14.5: `po-sbr` runtime pilot on Linux+NVIDIA environment
+- [x] M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock
+- [ ] M14.5: `sionna.rt` full runtime enablement (working LLVM backend on target host)
+- [ ] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -98,7 +99,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M14.4: close `sionna.rt` LLVM backend blocker and run first full RT provider pilot.
+Start M14.5: provision a compatible macOS LLVM shared library and unlock `sionna.rt` import path.
 
 ## M10.19 Decision Gate
 
@@ -360,3 +361,15 @@ M14.3 outcome (2026-02-22):
 - validations added:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_blocker_report.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sionna_phy_runtime_minimal.py`
+
+M14.4 outcome (2026-02-22):
+
+- `sionna.rt` LLVM probe runner added to test baseline + candidate `DRJIT_LIBLLVM_PATH` imports
+- candidate set includes environment override, llvmlite library, and discovered Xcode SDK paths
+- real probe report archived:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/sionna_rt_llvm_probe_m14_4_2026_02_22.json`
+- current host result locked as blocked (`success=false`):
+  - llvmlite candidate rejected due LLVM API mismatch
+  - Xcode SDK candidates rejected due non-macOS target binaries
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/110_sionna_rt_llvm_probe_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_sionna_rt_llvm_probe.py`

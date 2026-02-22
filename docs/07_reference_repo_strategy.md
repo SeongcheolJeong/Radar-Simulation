@@ -36,8 +36,9 @@ Use references via local adapters, not by merging third-party internals into cor
 6. M14.1: runtime environment readiness probe (`required modules + external repo presence`).
 7. M14.2: first real runtime scene pilot on a ready backend (Mitsuba-backed `sionna_rt`).
 8. M14.3: runtime blocker report gate + `sionna` PHY runtime sanity enablement.
-9. M14.4: `sionna.rt` full runtime enablement (LLVM backend).
-10. M14.5: `po-sbr` runtime pilot on Linux+NVIDIA target.
+9. M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock.
+10. M14.5: `sionna.rt` full runtime enablement (working LLVM backend).
+11. M14.6: `po-sbr` runtime pilot on Linux+NVIDIA target.
 
 ## Current Readiness Assessment
 
@@ -52,7 +53,7 @@ Use references via local adapters, not by merging third-party internals into cor
   - `sionna + tensorflow` runtime installed and minimal PHY sanity lock added
   - blocker report automation to prevent repeated unsupported-runtime attempts
 - Remaining high-impact physics/backend work:
-  - `sionna.rt` full runtime enablement on this host/toolchain (LLVM backend still blocked)
+  - `sionna.rt` full runtime enablement on this host/toolchain (probe confirms LLVM blocker)
   - PO-SBR runtime enablement (`po_sbr`, `pyoptix`, `optix`) and first real pilot
   - scattering-physics fidelity tuning against measured scenarios
 - RadarSimPy position:

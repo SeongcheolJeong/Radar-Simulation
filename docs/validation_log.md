@@ -1335,3 +1335,21 @@
 - Result: pass
 - Notes:
   - blocker report archived with next recommended runtime selection
+
+## Sionna RT LLVM Probe (M14.4)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_sionna_rt_llvm_probe.py`
+- Result: pass
+- Notes:
+  - LLVM probe summary schema validated (`success`, `working_libllvm_path`, per-probe diagnostics)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_sionna_rt_llvm_probe.py --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/sionna_rt_llvm_probe_m14_4_2026_02_22.json`
+- Result: pass
+- Notes:
+  - probe executed on baseline + 17 candidates (`probe_count=18`)
+  - host remains blocked (`success=false`, `working_libllvm_path=null`)
+  - blockers observed:
+    - llvmlite candidate API mismatch
+    - Xcode SDK `libLLVM` candidates are non-macOS target binaries
