@@ -140,6 +140,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.29: Filter preset import guardrails (merge/replace mode + conflict preview)
 - [x] M17.30: Selective filter preset import + dry-run conflict visibility
 - [x] M17.31: Replace-mode confirmation + one-click undo recovery
+- [x] M17.32: Import audit trail + multi-level undo/redo stacks
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -152,7 +153,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.31 frontend hardening track: add import audit trail (`what changed`) and multi-level undo/redo for transfer operations while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.32 frontend hardening track: add audit-detail drilldown (added/removed names full list export) and bounded history persistence while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1240,3 +1241,18 @@ M17.31 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - replace confirmation automatically resets on payload change
   - undo restores preset map + active preset + draft name from captured snapshot
+
+M17.32 outcome (2026-02-22):
+
+- import operation audit trail added with change metrics:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - audit state: `filterImportAuditTrail`
+  - per-entry summary: `selected`, `added`, `changed`, `removed`, `mode`, `note`
+- import history upgraded from single snapshot to multi-level stacks:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - stacks: `filterImportUndoStack`, `filterImportRedoStack`
+  - actions: `Undo Import`, `Redo Import`
+- snapshot/diff scaffolding hardened:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - helpers: `buildFilterPresetStateSnapshot`, `compactNameList`
+  - import status now reports `+added/~changed/-removed` counts

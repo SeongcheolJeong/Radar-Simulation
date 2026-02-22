@@ -2539,3 +2539,34 @@
     - `co_filter_import_undo_hint`
     - `confirm required: enable replace confirmation for replace custom`
     - `undo restored snapshot`
+
+## Web E2E Graph Import Audit Trail + Multi-Level Undo/Redo (M17.32)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - import-audit/undo-redo frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8163/8143)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - audit/stack model tokens confirmed:
+    - `buildFilterPresetStateSnapshot`
+    - `compactNameList`
+    - `filterImportUndoStack`
+    - `filterImportRedoStack`
+    - `filterImportAuditTrail`
+    - `redoLastFilterImport`
+  - UI/status/audit tokens confirmed:
+    - `co_filter_import_undo`
+    - `co_filter_import_redo`
+    - `co_filter_import_audit`
+    - `co_filter_import_audit_row_`
+    - `undo/redo depth`
+    - `redo restored snapshot`
+    - `kind: "import"`
+    - `kind: "undo"`
+    - `kind: "redo"`

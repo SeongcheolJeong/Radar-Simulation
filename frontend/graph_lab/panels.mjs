@@ -215,6 +215,7 @@ const DEFAULT_SHORTCUT_PROFILES = {
     preset_reset: "9",
   },
 };
+const FILTER_IMPORT_HISTORY_LIMIT = 16;
 
 function clampInteger(raw, minValue, maxValue, fallback) {
   const n = Number(raw);
@@ -454,6 +455,21 @@ function cloneNormalizedFilterPresets(presets) {
     out[pname] = normalizeFilterPresetConfig(rows[pname], fallback);
   });
   return out;
+}
+
+function buildFilterPresetStateSnapshot(presets, activeFilterPreset, filterPresetDraft) {
+  return {
+    presets: cloneNormalizedFilterPresets(presets),
+    activeFilterPreset: String(activeFilterPreset || "default"),
+    filterPresetDraft: String(filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft),
+    captured_at_iso: new Date().toISOString(),
+  };
+}
+
+function compactNameList(names, maxItems = 6) {
+  const rows = Array.isArray(names) ? names.map((x) => String(x || "").trim()).filter(Boolean) : [];
+  if (rows.length <= maxItems) return rows;
+  return [...rows.slice(0, maxItems), `...(+${rows.length - maxItems})`];
 }
 
 function buildFilterPresetExportBundle(presets) {
@@ -1012,7 +1028,9 @@ export function ContractWarningOverlay({
   const [filterTransferStatus, setFilterTransferStatus] = React.useState("");
   const [filterImportSelection, setFilterImportSelection] = React.useState({});
   const [filterReplaceConfirmChecked, setFilterReplaceConfirmChecked] = React.useState(false);
-  const [filterImportUndoSnapshot, setFilterImportUndoSnapshot] = React.useState(null);
+  const [filterImportUndoStack, setFilterImportUndoStack] = React.useState([]);
+  const [filterImportRedoStack, setFilterImportRedoStack] = React.useState([]);
+  const [filterImportAuditTrail, setFilterImportAuditTrail] = React.useState([]);
   const [shortcutTransferText, setShortcutTransferText] = React.useState("");
   const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
   const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
@@ -1907,25 +1925,107 @@ export function ContractWarningOverlay({
       setFilterTransferStatus("clipboard write failed; copy from text buffer");
     }
   }, [filterPresets]);
+  const restoreFilterPresetSnapshot = React.useCallback((snapshot) => {
+    const row = snapshot && typeof snapshot === "object" ? snapshot : null;
+    if (!row || !row.presets || typeof row.presets !== "object") return false;
+    const restored = cloneNormalizedFilterPresets(row.presets);
+    setFilterPresets(restored);
+    setActiveFilterPreset(String(row.activeFilterPreset || "default"));
+    setFilterPresetDraft(
+      String(row.filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft)
+    );
+    return true;
+  }, []);
   const undoLastFilterImport = React.useCallback(() => {
-    const snapshot =
-      filterImportUndoSnapshot && typeof filterImportUndoSnapshot === "object"
-        ? filterImportUndoSnapshot
-        : null;
-    if (!snapshot || !snapshot.presets || typeof snapshot.presets !== "object") {
+    const stack = Array.isArray(filterImportUndoStack) ? filterImportUndoStack : [];
+    if (stack.length === 0) {
       setFilterTransferStatus("undo skipped: no snapshot");
       return;
     }
-    const restored = cloneNormalizedFilterPresets(snapshot.presets);
-    setFilterPresets(restored);
-    setActiveFilterPreset(String(snapshot.activeFilterPreset || "default"));
-    setFilterPresetDraft(
-      String(snapshot.filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft)
+    const snapshot = stack[stack.length - 1];
+    const currentSnapshot = buildFilterPresetStateSnapshot(
+      filterPresets,
+      activeFilterPreset,
+      filterPresetDraft
     );
+    const ok = restoreFilterPresetSnapshot(snapshot);
+    if (!ok) {
+      setFilterTransferStatus("undo failed: invalid snapshot");
+      return;
+    }
+    setFilterImportUndoStack((prev) => prev.slice(0, -1));
+    setFilterImportRedoStack((prev) => [...prev, currentSnapshot].slice(-FILTER_IMPORT_HISTORY_LIMIT));
+    setFilterImportAuditTrail((prev) => [
+      {
+        id: `fia_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+        kind: "undo",
+        timestamp_iso: new Date().toISOString(),
+        mode: "undo",
+        selected_count: 0,
+        added_count: 0,
+        changed_count: 0,
+        removed_count: 0,
+        note: `restored ${String(snapshot.captured_at_iso || "-")}`,
+        selected_names: [],
+        added_names: [],
+        removed_names: [],
+      },
+      ...prev,
+    ].slice(0, FILTER_IMPORT_HISTORY_LIMIT));
     setFilterReplaceConfirmChecked(false);
-    setFilterImportUndoSnapshot(null);
     setFilterTransferStatus(`undo restored snapshot (${String(snapshot.captured_at_iso || "-")})`);
-  }, [filterImportUndoSnapshot]);
+  }, [
+    activeFilterPreset,
+    filterImportUndoStack,
+    filterPresetDraft,
+    filterPresets,
+    restoreFilterPresetSnapshot,
+  ]);
+  const redoLastFilterImport = React.useCallback(() => {
+    const stack = Array.isArray(filterImportRedoStack) ? filterImportRedoStack : [];
+    if (stack.length === 0) {
+      setFilterTransferStatus("redo skipped: no snapshot");
+      return;
+    }
+    const snapshot = stack[stack.length - 1];
+    const currentSnapshot = buildFilterPresetStateSnapshot(
+      filterPresets,
+      activeFilterPreset,
+      filterPresetDraft
+    );
+    const ok = restoreFilterPresetSnapshot(snapshot);
+    if (!ok) {
+      setFilterTransferStatus("redo failed: invalid snapshot");
+      return;
+    }
+    setFilterImportRedoStack((prev) => prev.slice(0, -1));
+    setFilterImportUndoStack((prev) => [...prev, currentSnapshot].slice(-FILTER_IMPORT_HISTORY_LIMIT));
+    setFilterImportAuditTrail((prev) => [
+      {
+        id: `fia_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+        kind: "redo",
+        timestamp_iso: new Date().toISOString(),
+        mode: "redo",
+        selected_count: 0,
+        added_count: 0,
+        changed_count: 0,
+        removed_count: 0,
+        note: `restored ${String(snapshot.captured_at_iso || "-")}`,
+        selected_names: [],
+        added_names: [],
+        removed_names: [],
+      },
+      ...prev,
+    ].slice(0, FILTER_IMPORT_HISTORY_LIMIT));
+    setFilterReplaceConfirmChecked(false);
+    setFilterTransferStatus(`redo restored snapshot (${String(snapshot.captured_at_iso || "-")})`);
+  }, [
+    activeFilterPreset,
+    filterImportRedoStack,
+    filterPresetDraft,
+    filterPresets,
+    restoreFilterPresetSnapshot,
+  ]);
   const importFilterPresetsFromText = React.useCallback(() => {
     if (parsedFilterImportPayload.empty) {
       setFilterTransferStatus("import failed: empty import payload");
@@ -1953,36 +2053,86 @@ export function ContractWarningOverlay({
     }
     const imported = {};
     names.forEach((name) => {
-      imported[name] = importedAll[name];
+      const fallback = DEFAULT_FILTER_PRESETS[name] || DEFAULT_FILTER_PRESETS.default;
+      imported[name] = normalizeFilterPresetConfig(importedAll[name], fallback);
     });
-    setFilterImportUndoSnapshot({
-      presets: cloneNormalizedFilterPresets(filterPresets),
-      activeFilterPreset: String(activeFilterPreset || "default"),
-      filterPresetDraft: String(filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft),
-      captured_at_iso: new Date().toISOString(),
-    });
-    setFilterPresets((prev) => {
-      if (filterImportMode !== "replace_custom") {
-        return {
-          ...prev,
-          ...imported,
-        };
-      }
-      const next = {};
-      Object.keys(prev).forEach((name) => {
-        if (!Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) return;
-        const fallback = DEFAULT_FILTER_PRESETS[name] || DEFAULT_FILTER_PRESETS.default;
-        next[name] = normalizeFilterPresetConfig(prev[name], fallback);
-      });
-      return {
-        ...next,
+    const beforeSnapshot = buildFilterPresetStateSnapshot(
+      filterPresets,
+      activeFilterPreset,
+      filterPresetDraft
+    );
+    const beforePresets = beforeSnapshot.presets;
+    let afterPresets = {};
+    if (filterImportMode !== "replace_custom") {
+      afterPresets = {
+        ...beforePresets,
         ...imported,
       };
-    });
-    if (filterImportMode === "replace_custom") {
-      setFilterTransferStatus(`imported ${names.length} preset(s); replaced existing custom presets`);
     } else {
-      setFilterTransferStatus(`imported ${names.length} preset(s)`);
+      const keptBuiltins = {};
+      Object.keys(beforePresets).forEach((name) => {
+        if (!Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) return;
+        const fallback = DEFAULT_FILTER_PRESETS[name] || DEFAULT_FILTER_PRESETS.default;
+        keptBuiltins[name] = normalizeFilterPresetConfig(beforePresets[name], fallback);
+      });
+      afterPresets = {
+        ...keptBuiltins,
+        ...imported,
+      };
+    }
+    const beforeNames = Object.keys(beforePresets);
+    const afterNames = Object.keys(afterPresets);
+    const beforeSet = new Set(beforeNames);
+    const afterSet = new Set(afterNames);
+    const addedNames = afterNames.filter((name) => !beforeSet.has(name));
+    const removedNames = beforeNames.filter((name) => !afterSet.has(name));
+    const changedNames = afterNames.filter((name) => {
+      if (!beforeSet.has(name)) return false;
+      const a = JSON.stringify(beforePresets[name] || {});
+      const b = JSON.stringify(afterPresets[name] || {});
+      return a !== b;
+    });
+    const selectedSet = new Set(names);
+    let selectedNewCount = 0;
+    let selectedOverwriteBuiltinCount = 0;
+    let selectedOverwriteCustomCount = 0;
+    filterImportRows.forEach((row) => {
+      const name = String(row?.name || "");
+      if (!selectedSet.has(name)) return;
+      if (row.conflict === "new") selectedNewCount += 1;
+      if (row.conflict === "overwrite_builtin") selectedOverwriteBuiltinCount += 1;
+      if (row.conflict === "overwrite_custom") selectedOverwriteCustomCount += 1;
+    });
+    const timestampIso = new Date().toISOString();
+    const auditEntry = {
+      id: `fia_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+      kind: "import",
+      timestamp_iso: timestampIso,
+      mode: filterImportMode,
+      selected_count: names.length,
+      added_count: addedNames.length,
+      changed_count: changedNames.length,
+      removed_count: removedNames.length,
+      new_count: selectedNewCount,
+      overwrite_builtin_count: selectedOverwriteBuiltinCount,
+      overwrite_custom_count: selectedOverwriteCustomCount,
+      selected_names: compactNameList(names),
+      added_names: compactNameList(addedNames),
+      removed_names: compactNameList(removedNames),
+      note: filterImportMode === "replace_custom" ? "replace custom apply" : "merge apply",
+    };
+    setFilterImportUndoStack((prev) => [...prev, beforeSnapshot].slice(-FILTER_IMPORT_HISTORY_LIMIT));
+    setFilterImportRedoStack([]);
+    setFilterImportAuditTrail((prev) => [auditEntry, ...prev].slice(0, FILTER_IMPORT_HISTORY_LIMIT));
+    setFilterPresets(afterPresets);
+    if (filterImportMode === "replace_custom") {
+      setFilterTransferStatus(
+        `imported ${names.length} preset(s); +${addedNames.length}/~${changedNames.length}/-${removedNames.length} (replace custom)`
+      );
+    } else {
+      setFilterTransferStatus(
+        `imported ${names.length} preset(s); +${addedNames.length}/~${changedNames.length}/-${removedNames.length}`
+      );
     }
     const firstImported = String(names[0] || "");
     if (firstImported) {
@@ -1993,6 +2143,7 @@ export function ContractWarningOverlay({
   }, [
     activeFilterPreset,
     filterImportMode,
+    filterImportRows,
     filterPresetDraft,
     filterPresets,
     filterReplaceConfirmChecked,
@@ -2459,8 +2610,14 @@ export function ContractWarningOverlay({
         className: "btn",
         key: "co_filter_import_undo",
         onClick: undoLastFilterImport,
-        disabled: !filterImportUndoSnapshot,
-      }, "Undo Last Import"),
+        disabled: filterImportUndoStack.length === 0,
+      }, "Undo Import"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_import_redo",
+        onClick: redoLastFilterImport,
+        disabled: filterImportRedoStack.length === 0,
+      }, "Redo Import"),
       h("input", {
         type: "file",
         key: "co_filter_import_file",
@@ -2492,13 +2649,11 @@ export function ContractWarningOverlay({
             : "#8eb6ca",
         },
       }, filterImportPreview),
-      filterImportUndoSnapshot
-        ? h("span", {
-          key: "co_filter_import_undo_hint",
-          className: "hint",
-          style: { color: "#8eb6ca" },
-        }, `undo snapshot: ${String(filterImportUndoSnapshot.captured_at_iso || "-")}`)
-        : null,
+      h("span", {
+        key: "co_filter_import_history_depth",
+        className: "hint",
+        style: { color: "#8eb6ca" },
+      }, `undo/redo depth: ${filterImportUndoStack.length}/${filterImportRedoStack.length}`),
       filterImportRows.length > 0
         ? h("div", {
           key: "co_filter_import_rows",
@@ -2530,6 +2685,29 @@ export function ContractWarningOverlay({
             }),
             `${row.name}:${row.conflict}`,
           ])
+        ))
+        : null,
+      filterImportAuditTrail.length > 0
+        ? h("div", {
+          key: "co_filter_import_audit",
+          style: {
+            flexBasis: "100%",
+            borderTop: "1px dashed #27485a",
+            paddingTop: "6px",
+            display: "grid",
+            rowGap: "3px",
+          },
+        }, filterImportAuditTrail.slice(0, 6).map((entry, idx) =>
+          h("span", {
+            key: `co_filter_import_audit_row_${idx}`,
+            className: "hint",
+            style: { color: "#8eb6ca" },
+          }, [
+            `${String(entry?.timestamp_iso || "-")} | ${String(entry?.kind || "import")} | mode:${String(entry?.mode || "-")} | `,
+            `sel:${Number(entry?.selected_count || 0)} +${Number(entry?.added_count || 0)} `,
+            `~${Number(entry?.changed_count || 0)} -${Number(entry?.removed_count || 0)} `,
+            entry?.note ? `| ${String(entry.note)}` : "",
+          ].join(""))
         ))
         : null,
       filterTransferStatus
