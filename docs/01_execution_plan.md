@@ -112,6 +112,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.1: Graph Lab frontend modularization (inline script -> ES modules, helper/runtime split)
 - [x] M17.2: Graph Lab component/API split (`app` orchestration + panel components + api client)
 - [x] M17.3: Graph Lab action hooks split (`useGraphRunOps`, `useGateOps`)
+- [x] M17.4: Graph input panel model grouping (reduce action/state fan-out)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -124,7 +125,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue M17 frontend hardening track after hook split closure: reduce prop fan-out via grouped action factories and typed contracts while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
+Continue M17 frontend hardening track after input-model grouping closure: introduce typed interface guards and minimal runtime contract checks for panel/hook bindings while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -800,3 +801,13 @@ M17.3 outcome (2026-02-22):
   - `app.mjs`: state + orchestration wiring
 - behavioral parity preserved for existing operator controls:
   - run mode (`sync|async`), auto-poll, poll-last, retry/cancel actions remain wired to same backend endpoints
+
+M17.4 outcome (2026-02-22):
+
+- Graph input panel binding interface grouped to reduce fan-out:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+- new panel binding contract shape:
+  - `model.values`, `model.setters`, `model.templateActions`, `model.graphActions`, `model.runActions`, `model.gateActions`
+- behavior parity maintained:
+  - existing run/gate/operator controls preserved with same hook and API route wiring

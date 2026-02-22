@@ -120,7 +120,15 @@ export function TopBar({ statusTone, statusText, nodeCount, edgeCount }) {
   ]);
 }
 
-export function GraphInputsPanel({ state, actions }) {
+export function GraphInputsPanel({ model }) {
+  const {
+    values,
+    setters,
+    templateActions,
+    graphActions,
+    runActions,
+    gateActions,
+  } = model;
   const {
     apiBase,
     graphId,
@@ -134,7 +142,7 @@ export function GraphInputsPanel({ state, actions }) {
     pollingActive,
     templates,
     lastGraphRunId,
-  } = state;
+  } = values;
   const {
     setApiBase,
     setGraphId,
@@ -144,19 +152,27 @@ export function GraphInputsPanel({ state, actions }) {
     setRunMode,
     setAutoPollAsyncRun,
     setPollIntervalMsText,
+  } = setters;
+  const {
     fetchTemplates,
     exportGraph,
     loadTemplateByIndex,
+  } = templateActions;
+  const {
     addNodeByType,
     runGraphValidation,
+  } = graphActions;
+  const {
     runGraphViaApi,
     retryLastGraphRun,
     cancelLastGraphRun,
     pollLastGraphRunOnce,
+  } = runActions;
+  const {
     pinBaselineFromGraphRun,
     runPolicyGateForGraphRun,
     exportGateReport,
-  } = actions;
+  } = gateActions;
 
   return h("section", { className: "panel", key: "left" }, [
     h("div", { className: "panel-hd", key: "lhd" }, "Graph Inputs"),

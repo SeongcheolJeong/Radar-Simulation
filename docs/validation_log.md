@@ -1802,3 +1802,20 @@
   - `app.mjs` now wires hook entry points (`useGraphRunOps`, `useGateOps`)
   - run hook includes existing run-control API paths (`runGraph`, `retryGraphRun`, `cancelGraphRun`, summary poll path)
   - gate hook includes baseline/policy/report actions (`createBaseline`, `evaluatePolicyGate`, report filename prefix `graph_gate_report_`)
+
+## Web E2E Graph Input Model Grouping (M17.4)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - panel binding shape refactor 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8115 8135` + smoke (`curl /frontend/graph_lab/app.mjs`, `curl /frontend/graph_lab/panels.mjs` token grep)
+- Result: pass
+- Notes:
+  - `app.mjs` exports grouped panel model (`inputPanelModel`) with section keys (`values`, `templateActions`, `runActions`, `gateActions`)
+  - `GraphInputsPanel` now consumes grouped `model` contract (`{ model }` + grouped destructuring)
+  - existing operator UI tokens remain present (`Run Mode`, `Auto Poll`, `Poll Last Run`)

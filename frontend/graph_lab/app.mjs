@@ -255,7 +255,52 @@ export function App() {
     setStatus("graph exported", "status-ok");
   }, [edges, graphId, nodes, profile, setStatus]);
 
-  const inputState = {
+  const inputPanelModel = React.useMemo(() => ({
+    values: {
+      apiBase,
+      graphId,
+      sceneJsonPath,
+      baselineId,
+      profile,
+      runMode,
+      autoPollAsyncRun,
+      pollIntervalMsText,
+      pollStateText,
+      pollingActive,
+      templates,
+      lastGraphRunId,
+    },
+    setters: {
+      setApiBase,
+      setGraphId,
+      setSceneJsonPath,
+      setBaselineId,
+      setProfile,
+      setRunMode,
+      setAutoPollAsyncRun,
+      setPollIntervalMsText,
+    },
+    templateActions: {
+      fetchTemplates,
+      exportGraph,
+      loadTemplateByIndex,
+    },
+    graphActions: {
+      addNodeByType,
+      runGraphValidation,
+    },
+    runActions: {
+      runGraphViaApi,
+      retryLastGraphRun,
+      cancelLastGraphRun,
+      pollLastGraphRunOnce: () => pollLastGraphRunOnce(pollingActive),
+    },
+    gateActions: {
+      pinBaselineFromGraphRun,
+      runPolicyGateForGraphRun,
+      exportGateReport,
+    },
+  }), [
     apiBase,
     graphId,
     sceneJsonPath,
@@ -268,17 +313,6 @@ export function App() {
     pollingActive,
     templates,
     lastGraphRunId,
-  };
-
-  const inputActions = {
-    setApiBase,
-    setGraphId,
-    setSceneJsonPath,
-    setBaselineId,
-    setProfile,
-    setRunMode,
-    setAutoPollAsyncRun,
-    setPollIntervalMsText,
     fetchTemplates,
     exportGraph,
     loadTemplateByIndex,
@@ -287,11 +321,11 @@ export function App() {
     runGraphViaApi,
     retryLastGraphRun,
     cancelLastGraphRun,
-    pollLastGraphRunOnce: () => pollLastGraphRunOnce(pollingActive),
+    pollLastGraphRunOnce,
     pinBaselineFromGraphRun,
     runPolicyGateForGraphRun,
     exportGateReport,
-  };
+  ]);
 
   return h("div", { className: "page" }, [
     h(TopBar, {
@@ -304,8 +338,7 @@ export function App() {
     h("main", { className: "content", key: "ct" }, [
       h(GraphInputsPanel, {
         key: "left",
-        state: inputState,
-        actions: inputActions,
+        model: inputPanelModel,
       }),
       h(GraphCanvasPanel, {
         key: "center",
