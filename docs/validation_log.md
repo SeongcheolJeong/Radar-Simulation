@@ -2401,3 +2401,34 @@
     - `policy/severity/scoped/all`
     - `["all", "high", "med", "low"]`
     - `["all", "hold", "adopt", "none"]`
+
+## Web E2E Graph Filter Preset Profiles (M17.27)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - filter preset profile frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8158/8138)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - filter preset storage/normalization tokens confirmed:
+    - `CONTRACT_OVERLAY_FILTER_PRESETS_KEY`
+    - `DEFAULT_FILTER_PRESETS`
+    - `normalizeFilterPresetName`
+    - `normalizeFilterPresetConfig`
+    - `loadFilterPresets`
+    - `saveFilterPresets`
+  - filter preset runtime/UI tokens confirmed:
+    - `activeFilterPreset`
+    - `filterPresetDraft`
+    - `co_filter_preset_cfg`
+    - `co_filter_preset_select`
+    - `Load Filter Preset`
+    - `Save Filter Preset`
+    - `Delete Filter Preset`
+    - `preset: built-in`
+    - `preset: custom`

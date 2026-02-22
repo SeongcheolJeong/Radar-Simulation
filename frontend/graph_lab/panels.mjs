@@ -100,6 +100,7 @@ function buildContractRowKey(row) {
 
 const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
 const CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY = "graph_lab_contract_overlay_shortcut_profiles_v1";
+const CONTRACT_OVERLAY_FILTER_PRESETS_KEY = "graph_lab_contract_overlay_filter_presets_v1";
 const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   sourceFilter: "all",
   severityFilter: "all",
@@ -113,6 +114,8 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   showShortcutHelp: false,
   activeShortcutProfile: "default",
   shortcutProfileDraft: "custom_profile",
+  activeFilterPreset: "default",
+  filterPresetDraft: "custom_filter",
   detailFieldStates: null,
 };
 const SEVERITY_FILTER_OPTIONS = [
@@ -127,6 +130,28 @@ const POLICY_FILTER_OPTIONS = [
   { id: "adopt", label: "adopt" },
   { id: "none", label: "none" },
 ];
+const DEFAULT_FILTER_PRESETS = {
+  default: {
+    sourceFilter: "all",
+    severityFilter: "all",
+    policyFilter: "all",
+    pinnedRunId: "all",
+    nonZeroOnly: false,
+    gateHistoryLimit: "256",
+    gateHistoryPages: "2",
+    rowWindowSizeText: "120",
+  },
+  triage_hold_high: {
+    sourceFilter: "all",
+    severityFilter: "high",
+    policyFilter: "hold",
+    pinnedRunId: "all",
+    nonZeroOnly: true,
+    gateHistoryLimit: "128",
+    gateHistoryPages: "2",
+    rowWindowSizeText: "80",
+  },
+};
 const DETAIL_FIELD_DEFS = [
   { id: "timestamp_iso", label: "time" },
   { id: "event_meta", label: "event/run" },
@@ -232,6 +257,16 @@ function normalizeShortcutProfileName(raw) {
   return compact.slice(0, 32);
 }
 
+function normalizeFilterPresetName(raw) {
+  const text = String(raw || "").trim().toLowerCase();
+  if (!text) return "";
+  const compact = text
+    .replace(/[^a-z0-9_-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return compact.slice(0, 32);
+}
+
 function normalizeShortcutBindings(raw, fallback) {
   const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const base = fallback && typeof fallback === "object" && !Array.isArray(fallback)
@@ -271,6 +306,49 @@ function normalizeDetailFieldStates(raw, fallback) {
   return out;
 }
 
+function normalizeFilterPresetConfig(raw, fallback) {
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const base = fallback && typeof fallback === "object" && !Array.isArray(fallback)
+    ? fallback
+    : DEFAULT_FILTER_PRESETS.default;
+  const allowedSev = new Set(SEVERITY_FILTER_OPTIONS.map((x) => String(x.id || "")));
+  const allowedPol = new Set(POLICY_FILTER_OPTIONS.map((x) => String(x.id || "")));
+  const sourceFilter = String(source.sourceFilter ?? base.sourceFilter ?? CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
+  const severityRaw = String(source.severityFilter ?? base.severityFilter ?? CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
+  const policyRaw = String(source.policyFilter ?? base.policyFilter ?? CONTRACT_OVERLAY_DEFAULT_PREFS.policyFilter);
+  return {
+    sourceFilter,
+    severityFilter: allowedSev.has(severityRaw) ? severityRaw : CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter,
+    policyFilter: allowedPol.has(policyRaw) ? policyRaw : CONTRACT_OVERLAY_DEFAULT_PREFS.policyFilter,
+    pinnedRunId: String(source.pinnedRunId ?? base.pinnedRunId ?? CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId),
+    nonZeroOnly: Boolean(source.nonZeroOnly ?? base.nonZeroOnly ?? CONTRACT_OVERLAY_DEFAULT_PREFS.nonZeroOnly),
+    gateHistoryLimit: String(
+      clampInteger(
+        source.gateHistoryLimit ?? base.gateHistoryLimit ?? CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit,
+        32,
+        4096,
+        CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit
+      )
+    ),
+    gateHistoryPages: String(
+      clampInteger(
+        source.gateHistoryPages ?? base.gateHistoryPages ?? CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages,
+        1,
+        8,
+        CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages
+      )
+    ),
+    rowWindowSizeText: String(
+      clampInteger(
+        source.rowWindowSizeText ?? source.rowWindowSize ?? base.rowWindowSizeText ?? base.rowWindowSize ?? CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize,
+        20,
+        500,
+        CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize
+      )
+    ),
+  };
+}
+
 function loadShortcutProfiles() {
   const normalizedDefaults = {};
   Object.keys(DEFAULT_SHORTCUT_PROFILES).forEach((name) => {
@@ -308,6 +386,48 @@ function saveShortcutProfiles(profiles) {
       payload[pname] = normalizeShortcutBindings(rows[pname], DEFAULT_SHORTCUT_BINDINGS);
     });
     window.localStorage.setItem(CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY, JSON.stringify(payload));
+  } catch (_) {
+    // localStorage may be blocked; ignore and continue with in-memory state
+  }
+}
+
+function loadFilterPresets() {
+  const normalizedDefaults = {};
+  Object.keys(DEFAULT_FILTER_PRESETS).forEach((name) => {
+    normalizedDefaults[String(name)] = normalizeFilterPresetConfig(
+      DEFAULT_FILTER_PRESETS[name],
+      DEFAULT_FILTER_PRESETS.default
+    );
+  });
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return normalizedDefaults;
+    const raw = String(window.localStorage.getItem(CONTRACT_OVERLAY_FILTER_PRESETS_KEY) || "").trim();
+    if (!raw) return normalizedDefaults;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return normalizedDefaults;
+    const merged = { ...normalizedDefaults };
+    Object.keys(parsed).forEach((name) => {
+      const pname = normalizeFilterPresetName(name);
+      if (!pname) return;
+      merged[pname] = normalizeFilterPresetConfig(parsed[name], normalizedDefaults.default);
+    });
+    return merged;
+  } catch (_) {
+    return normalizedDefaults;
+  }
+}
+
+function saveFilterPresets(presets) {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    const rows = presets && typeof presets === "object" && !Array.isArray(presets) ? presets : {};
+    const payload = {};
+    Object.keys(rows).forEach((name) => {
+      const pname = normalizeFilterPresetName(name);
+      if (!pname) return;
+      payload[pname] = normalizeFilterPresetConfig(rows[name], DEFAULT_FILTER_PRESETS.default);
+    });
+    window.localStorage.setItem(CONTRACT_OVERLAY_FILTER_PRESETS_KEY, JSON.stringify(payload));
   } catch (_) {
     // localStorage may be blocked; ignore and continue with in-memory state
   }
@@ -720,6 +840,16 @@ export function ContractWarningOverlay({
   const runOpenHandler = typeof onOpenRun === "function" ? onOpenRun : () => {};
   const gateOpenHandler = typeof onOpenGateEvidence === "function" ? onOpenGateEvidence : () => {};
   const initialPrefs = React.useMemo(() => loadContractOverlayPrefs(), []);
+  const initialFilterPresets = React.useMemo(() => loadFilterPresets(), []);
+  const initialActiveFilterPreset = React.useMemo(() => {
+    const preferred = String(
+      initialPrefs.activeFilterPreset || CONTRACT_OVERLAY_DEFAULT_PREFS.activeFilterPreset
+    ).trim();
+    if (preferred && initialFilterPresets[preferred]) return preferred;
+    if (initialFilterPresets.default) return "default";
+    const names = Object.keys(initialFilterPresets);
+    return names.length > 0 ? String(names[0]) : "default";
+  }, [initialFilterPresets, initialPrefs.activeFilterPreset]);
   const initialShortcutProfiles = React.useMemo(() => loadShortcutProfiles(), []);
   const initialActiveShortcutProfile = React.useMemo(() => {
     const preferred = String(
@@ -775,6 +905,13 @@ export function ContractWarningOverlay({
         ? initialPrefs.showShortcutHelp
         : CONTRACT_OVERLAY_DEFAULT_PREFS.showShortcutHelp
     )
+  );
+  const [filterPresets, setFilterPresets] = React.useState(() => initialFilterPresets);
+  const [activeFilterPreset, setActiveFilterPreset] = React.useState(
+    String(initialActiveFilterPreset || "default")
+  );
+  const [filterPresetDraft, setFilterPresetDraft] = React.useState(
+    String(initialPrefs.filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft)
   );
   const [shortcutProfiles, setShortcutProfiles] = React.useState(() => initialShortcutProfiles);
   const [activeShortcutProfile, setActiveShortcutProfile] = React.useState(
@@ -909,6 +1046,21 @@ export function ContractWarningOverlay({
   }, [pinnedRunId, runOptions]);
 
   React.useEffect(() => {
+    const names = Object.keys(filterPresets);
+    if (names.length === 0) {
+      setFilterPresets(loadFilterPresets());
+      return;
+    }
+    if (filterPresets[activeFilterPreset]) return;
+    const fallbackName = filterPresets.default ? "default" : String(names[0] || "default");
+    setActiveFilterPreset(fallbackName);
+  }, [activeFilterPreset, filterPresets]);
+
+  React.useEffect(() => {
+    saveFilterPresets(filterPresets);
+  }, [filterPresets]);
+
+  React.useEffect(() => {
     const names = Object.keys(shortcutProfiles);
     if (names.length === 0) {
       setShortcutProfiles(loadShortcutProfiles());
@@ -940,12 +1092,16 @@ export function ContractWarningOverlay({
       gateHistoryPages,
       rowWindowSize,
       showShortcutHelp,
+      activeFilterPreset,
+      filterPresetDraft,
       activeShortcutProfile,
       shortcutProfileDraft,
       shortcutBindings,
       detailFieldStates,
     });
   }, [
+    activeFilterPreset,
+    filterPresetDraft,
     activeShortcutProfile,
     compactMode,
     detailFieldStates,
@@ -1366,6 +1522,81 @@ export function ContractWarningOverlay({
     const payload = [header, formatRowDetailText(row)].join("\n");
     await copyTextToClipboard(payload, `row:${Number(idx) + 1}`);
   }, [copyTextToClipboard, formatRowDetailText]);
+  const applyFilterPresetConfig = React.useCallback((rawConfig) => {
+    const cfg = normalizeFilterPresetConfig(rawConfig, DEFAULT_FILTER_PRESETS.default);
+    setSourceFilter(cfg.sourceFilter);
+    setSeverityFilter(cfg.severityFilter);
+    setPolicyFilter(cfg.policyFilter);
+    setPinnedRunId(cfg.pinnedRunId);
+    setNonZeroOnly(Boolean(cfg.nonZeroOnly));
+    setGateHistoryLimit(String(cfg.gateHistoryLimit));
+    setGateHistoryPages(String(cfg.gateHistoryPages));
+    setRowWindowSizeText(String(cfg.rowWindowSizeText));
+    setRowWindowOffset(0);
+  }, []);
+  const filterPresetOptions = React.useMemo(() => {
+    const names = Object.keys(filterPresets).map((name) => String(name || "").trim()).filter(Boolean);
+    names.sort((a, b) => a.localeCompare(b));
+    if (!names.includes("default")) return names;
+    return ["default", ...names.filter((name) => name !== "default")];
+  }, [filterPresets]);
+  const normalizedFilterPresetDraft = React.useMemo(
+    () => normalizeFilterPresetName(filterPresetDraft),
+    [filterPresetDraft]
+  );
+  const activeFilterPresetIsBuiltin = React.useMemo(
+    () => Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, activeFilterPreset),
+    [activeFilterPreset]
+  );
+  const applyActiveFilterPreset = React.useCallback(() => {
+    const profileName = String(activeFilterPreset || "").trim();
+    const cfg = filterPresets[profileName] || DEFAULT_FILTER_PRESETS.default;
+    applyFilterPresetConfig(cfg);
+  }, [activeFilterPreset, applyFilterPresetConfig, filterPresets]);
+  const saveCurrentFilterPreset = React.useCallback(() => {
+    const nextName = normalizeFilterPresetName(filterPresetDraft);
+    if (!nextName) return;
+    const cfg = normalizeFilterPresetConfig(
+      {
+        sourceFilter,
+        severityFilter,
+        policyFilter,
+        pinnedRunId,
+        nonZeroOnly,
+        gateHistoryLimit,
+        gateHistoryPages,
+        rowWindowSizeText,
+      },
+      DEFAULT_FILTER_PRESETS.default
+    );
+    setFilterPresets((prev) => ({
+      ...prev,
+      [nextName]: cfg,
+    }));
+    setActiveFilterPreset(nextName);
+    setFilterPresetDraft(nextName);
+  }, [
+    filterPresetDraft,
+    gateHistoryLimit,
+    gateHistoryPages,
+    nonZeroOnly,
+    pinnedRunId,
+    policyFilter,
+    rowWindowSizeText,
+    severityFilter,
+    sourceFilter,
+  ]);
+  const deleteActiveFilterPreset = React.useCallback(() => {
+    const profileName = String(activeFilterPreset || "").trim();
+    if (!profileName) return;
+    if (Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, profileName)) return;
+    setFilterPresets((prev) => {
+      if (!Object.prototype.hasOwnProperty.call(prev, profileName)) return prev;
+      const next = { ...prev };
+      delete next[profileName];
+      return next;
+    });
+  }, [activeFilterPreset]);
   const resetOverlayFilters = React.useCallback(() => {
     setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
     setSeverityFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
@@ -1707,6 +1938,52 @@ export function ContractWarningOverlay({
         `showing ${filteredRows.length}/${severityScopedRows.length}/${scopedRows.length}/${rows.length} (policy/severity/scoped/all) | `,
         `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
       ]),
+    ]),
+    h("div", {
+      className: "contract-overlay-filter",
+      key: "co_filter_preset_cfg",
+      style: { flexWrap: "wrap", rowGap: "6px" },
+    }, [
+      h("label", { key: "co_filter_preset_label" }, "filter preset:"),
+      h("select", {
+        className: "select",
+        key: "co_filter_preset_select",
+        value: activeFilterPreset,
+        onChange: (e) => setActiveFilterPreset(String(e.target.value || "default")),
+      }, filterPresetOptions.map((name) =>
+        h("option", { value: name, key: `co_filter_preset_opt_${name}` }, name)
+      )),
+      h("button", {
+        className: "btn",
+        key: "co_filter_preset_apply",
+        onClick: applyActiveFilterPreset,
+      }, "Load Filter Preset"),
+      h("label", { key: "co_filter_preset_save_label", style: { marginLeft: "8px" } }, "save as:"),
+      h("input", {
+        className: "input",
+        key: "co_filter_preset_draft",
+        value: filterPresetDraft,
+        onChange: (e) => setFilterPresetDraft(String(e.target.value || "")),
+        placeholder: "custom_filter",
+        style: { minWidth: "140px", maxWidth: "180px", padding: "5px 7px", fontSize: "11px" },
+      }),
+      h("button", {
+        className: "btn",
+        key: "co_filter_preset_save",
+        onClick: saveCurrentFilterPreset,
+        disabled: !normalizedFilterPresetDraft,
+      }, "Save Filter Preset"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_preset_delete",
+        onClick: deleteActiveFilterPreset,
+        disabled: activeFilterPresetIsBuiltin,
+      }, "Delete Filter Preset"),
+      h("span", {
+        key: "co_filter_preset_builtin_tag",
+        className: "hint",
+        style: { marginLeft: "auto", color: activeFilterPresetIsBuiltin ? "#8eb6ca" : "#f0b33a" },
+      }, activeFilterPresetIsBuiltin ? "preset: built-in" : "preset: custom"),
     ]),
     h("div", {
       className: "contract-overlay-filter",

@@ -135,6 +135,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.24: Severity-first triage filter (all/high/med/low with scoped counts)
 - [x] M17.25: Policy-first triage filter (all/hold/adopt/none with scoped counts)
 - [x] M17.26: Active filter summary chips + filter-only reset action
+- [x] M17.27: Filter preset profiles (load/save/delete with persistence)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -147,7 +148,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.26 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.27 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1158,3 +1159,19 @@ M17.26 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - severity quick map now includes `all` alongside `high/med/low`
   - policy quick map now includes `all` alongside `hold/adopt/none`
+
+M17.27 outcome (2026-02-22):
+
+- filter preset profiles added for repeatable triage scopes:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - storage key: `graph_lab_contract_overlay_filter_presets_v1`
+  - built-ins: `default`, `triage_hold_high`
+- filter preset lifecycle controls added in overlay:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Load Filter Preset`, `Save Filter Preset`, `Delete Filter Preset`
+  - profile UI keys: `co_filter_preset_select`, `co_filter_preset_draft`
+- persistence/normalization hardening:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - profile name sanitizer: `normalizeFilterPresetName`
+  - payload normalizer: `normalizeFilterPresetConfig`
+  - active preset/draft persisted in overlay prefs and restored on reload
