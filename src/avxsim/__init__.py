@@ -116,6 +116,12 @@ from .runtime_coupling import (
     invoke_runtime_paths_provider,
     load_runtime_provider_callable,
 )
+from .runtime_blockers import (
+    DEFAULT_RUNTIME_PRIORITY,
+    build_runtime_blocker_report,
+    load_runtime_probe_summary_json,
+    save_runtime_blocker_report_json,
+)
 from .runtime_providers import generate_sionna_like_paths_from_mitsuba
 from .replay_batch import (
     load_replay_manifest_json,
@@ -224,10 +230,14 @@ __all__ = [
     "run_replay_manifest",
     "run_object_scene_to_radar_map",
     "run_object_scene_to_radar_map_json",
+    "DEFAULT_RUNTIME_PRIORITY",
+    "build_runtime_blocker_report",
     "detect_runtime_modules",
     "generate_sionna_like_paths_from_mitsuba",
     "invoke_runtime_paths_provider",
+    "load_runtime_probe_summary_json",
     "load_runtime_provider_callable",
+    "save_runtime_blocker_report_json",
     "DEFAULT_SIDECAR_PROFILE",
     "DEFAULT_SIDECAR_VERSION",
     "build_asset_manifest_from_sidecar",

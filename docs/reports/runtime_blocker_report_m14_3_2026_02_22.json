@@ -1,0 +1,53 @@
+{
+  "ready_count": 2,
+  "blocked_count": 2,
+  "next_recommended_runtime": "sionna_rt_mitsuba_runtime",
+  "entries": [
+    {
+      "runtime_name": "sionna_rt_mitsuba_runtime",
+      "status": "ready",
+      "ready": true,
+      "blockers": [],
+      "recommended_actions": [
+        "runtime is ready; proceed to real scene pilot"
+      ]
+    },
+    {
+      "runtime_name": "sionna_runtime",
+      "status": "ready",
+      "ready": true,
+      "blockers": [],
+      "recommended_actions": [
+        "runtime is ready; proceed to real scene pilot"
+      ]
+    },
+    {
+      "runtime_name": "sionna_rt_full_runtime",
+      "status": "blocked",
+      "ready": false,
+      "blockers": [
+        "missing_required_modules"
+      ],
+      "recommended_actions": [
+        "install missing Python modules: sionna.rt",
+        "ensure Dr.Jit LLVM backend is configured (set DRJIT_LIBLLVM_PATH if needed)"
+      ]
+    },
+    {
+      "runtime_name": "po_sbr_runtime",
+      "status": "blocked",
+      "ready": false,
+      "blockers": [
+        "missing_required_modules",
+        "unsupported_platform:Darwin",
+        "missing_nvidia_runtime"
+      ],
+      "recommended_actions": [
+        "install missing Python modules: rtxpy igl",
+        "run on supported platform ['Linux'] (current: Darwin)",
+        "requires NVIDIA GPU runtime (`nvidia-smi` unavailable)",
+        "install modified `rtxpy` and libigl bindings from PO-SBR reference docs"
+      ]
+    }
+  ]
+}

@@ -49,4 +49,6 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 - [x] M14.0: direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
 - [x] M14.1: runtime environment contract + readiness probe automation
 - [x] M14.2: external runtime binding pilot (Mitsuba-backed `sionna_rt` first real scene run)
-- [ ] M14.3: full `sionna`/`po-sbr` runtime enablement (`tensorflow`, `optix`, LLVM backend)
+- [x] M14.3: runtime blocker gate + `sionna` PHY runtime sanity enablement
+- [ ] M14.4: `sionna.rt` full runtime enablement (LLVM backend)
+- [ ] M14.5: `po-sbr` runtime pilot (Linux+NVIDIA target)

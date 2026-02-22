@@ -1299,3 +1299,39 @@
 - Result: pass
 - Notes:
   - first real runtime scene pilot executed and report archived
+
+## Runtime Blocker Gate + Sionna PHY Sanity (M14.3)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_env_probe.py`
+- Result: pass
+- Notes:
+  - probe expanded with blocker/status/platform/NVIDIA diagnostics
+  - runtime tracks covered: `sionna_rt_mitsuba_runtime`, `sionna_runtime`, `sionna_rt_full_runtime`, `po_sbr_runtime`
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_blocker_report.py`
+- Result: pass
+- Notes:
+  - blocker report emits deterministic `ready_count`, `blocked_count`, and `next_recommended_runtime`
+  - blocked tracks include actionable recommendations
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sionna_phy_runtime_minimal.py`
+- Result: pass
+- Notes:
+  - `sionna 1.2.1` + `tensorflow 2.20.0` runtime sanity confirmed (`tf matmul`, `ebnodb2no`)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_env_probe.py --workspace-root /Users/seongcheoljeong/Documents/Codex_test --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_probe_m14_3_2026_02_22.json`
+- Result: pass
+- Notes:
+  - `sionna_runtime` and `sionna_rt_mitsuba_runtime` are ready
+  - `sionna_rt_full_runtime` blocked on `sionna.rt` import (LLVM backend)
+  - `po_sbr_runtime` blocked on missing modules + unsupported platform + missing NVIDIA runtime
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_blocker_report.py --probe-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_probe_m14_3_2026_02_22.json --output-report-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_blocker_report_m14_3_2026_02_22.json`
+- Result: pass
+- Notes:
+  - blocker report archived with next recommended runtime selection

@@ -34,13 +34,20 @@ def run() -> None:
         payload = json.loads(out_json.read_text(encoding="utf-8"))
         assert isinstance(payload.get("python"), dict)
         assert isinstance(payload.get("module_report"), dict)
+        assert isinstance(payload.get("nvidia_runtime"), dict)
         runtime_report = payload.get("runtime_report")
         assert isinstance(runtime_report, dict)
         assert "sionna_rt_mitsuba_runtime" in runtime_report
         assert "sionna_runtime" in runtime_report
+        assert "sionna_rt_full_runtime" in runtime_report
         assert "po_sbr_runtime" in runtime_report
 
-        for runtime_name in ("sionna_rt_mitsuba_runtime", "sionna_runtime", "po_sbr_runtime"):
+        for runtime_name in (
+            "sionna_rt_mitsuba_runtime",
+            "sionna_runtime",
+            "sionna_rt_full_runtime",
+            "po_sbr_runtime",
+        ):
             info = runtime_report[runtime_name]
             assert isinstance(info, dict)
             assert isinstance(info.get("required_modules"), list)
@@ -48,8 +55,20 @@ def run() -> None:
             assert isinstance(info.get("repo_candidates"), list)
             assert isinstance(info.get("found_repo_paths"), list)
             assert isinstance(info.get("missing_repo_paths"), list)
-            expected_ready = bool(info.get("repo_found")) and len(info["missing_required_modules"]) == 0
+            assert isinstance(info.get("supported_systems"), list)
+            assert isinstance(info.get("blockers"), list)
+            assert info.get("status") in ("ready", "blocked")
+            platform_supported = bool(info.get("platform_supported"))
+            requires_nvidia = bool(info.get("requires_nvidia"))
+            nvidia_available = bool(info.get("nvidia_available"))
+            expected_ready = (
+                bool(info.get("repo_found"))
+                and len(info["missing_required_modules"]) == 0
+                and platform_supported
+                and ((not requires_nvidia) or nvidia_available)
+            )
             assert bool(info["ready"]) is expected_ready
+            assert (info["status"] == "ready") is expected_ready
 
     print("validate_run_scene_runtime_env_probe: pass")
 

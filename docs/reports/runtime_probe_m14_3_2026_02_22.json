@@ -1,0 +1,176 @@
+{
+  "workspace_root": "/Users/seongcheoljeong/Documents/Codex_test",
+  "python": {
+    "version": "3.11.14 (main, Feb 12 2026, 00:41:29) [Clang 21.1.4 ]",
+    "version_info": {
+      "major": 3,
+      "minor": 11,
+      "micro": 14
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "system": "Darwin"
+  },
+  "module_report": {
+    "mitsuba": {
+      "available": true,
+      "module_name": "mitsuba",
+      "module_version": "3.7.1"
+    },
+    "drjit": {
+      "available": true,
+      "module_name": "drjit",
+      "module_version": "1.2.0"
+    },
+    "sionna": {
+      "available": true,
+      "module_name": "sionna",
+      "module_version": "1.2.1"
+    },
+    "tensorflow": {
+      "available": true,
+      "module_name": "tensorflow",
+      "module_version": "2.20.0"
+    },
+    "sionna.rt": {
+      "available": false,
+      "module_name": "sionna.rt",
+      "error": "ImportError: jit_init_thread_state(): the LLVM backend is inactive because the LLVM shared library (\"libLLVM.dylib\") could not be found! Set the DRJIT_LIBLLVM_PATH environment variable to specify its path."
+    },
+    "rtxpy": {
+      "available": false,
+      "module_name": "rtxpy",
+      "error": "ModuleNotFoundError: No module named 'rtxpy'"
+    },
+    "igl": {
+      "available": false,
+      "module_name": "igl",
+      "error": "ModuleNotFoundError: No module named 'igl'"
+    }
+  },
+  "nvidia_runtime": {
+    "available": false,
+    "executable": null,
+    "driver_info": null
+  },
+  "runtime_report": {
+    "sionna_rt_mitsuba_runtime": {
+      "ready": true,
+      "required_modules": [
+        "mitsuba",
+        "drjit"
+      ],
+      "missing_required_modules": [],
+      "repo_candidates": [
+        "external/sionna"
+      ],
+      "found_repo_paths": [
+        "/Users/seongcheoljeong/Documents/Codex_test/external/sionna"
+      ],
+      "missing_repo_paths": [],
+      "repo_found": true,
+      "supported_systems": [
+        "Darwin",
+        "Linux",
+        "Windows"
+      ],
+      "platform_supported": true,
+      "requires_nvidia": false,
+      "nvidia_available": false,
+      "blockers": [],
+      "status": "ready"
+    },
+    "sionna_runtime": {
+      "ready": true,
+      "required_modules": [
+        "sionna",
+        "tensorflow"
+      ],
+      "missing_required_modules": [],
+      "repo_candidates": [
+        "external/sionna"
+      ],
+      "found_repo_paths": [
+        "/Users/seongcheoljeong/Documents/Codex_test/external/sionna"
+      ],
+      "missing_repo_paths": [],
+      "repo_found": true,
+      "supported_systems": [
+        "Darwin",
+        "Linux",
+        "Windows"
+      ],
+      "platform_supported": true,
+      "requires_nvidia": false,
+      "nvidia_available": false,
+      "blockers": [],
+      "status": "ready"
+    },
+    "sionna_rt_full_runtime": {
+      "ready": false,
+      "required_modules": [
+        "sionna.rt",
+        "mitsuba",
+        "drjit"
+      ],
+      "missing_required_modules": [
+        "sionna.rt"
+      ],
+      "repo_candidates": [
+        "external/sionna"
+      ],
+      "found_repo_paths": [
+        "/Users/seongcheoljeong/Documents/Codex_test/external/sionna"
+      ],
+      "missing_repo_paths": [],
+      "repo_found": true,
+      "supported_systems": [
+        "Darwin",
+        "Linux",
+        "Windows"
+      ],
+      "platform_supported": true,
+      "requires_nvidia": false,
+      "nvidia_available": false,
+      "blockers": [
+        "missing_required_modules"
+      ],
+      "status": "blocked"
+    },
+    "po_sbr_runtime": {
+      "ready": false,
+      "required_modules": [
+        "rtxpy",
+        "igl"
+      ],
+      "missing_required_modules": [
+        "rtxpy",
+        "igl"
+      ],
+      "repo_candidates": [
+        "external/PO-SBR-Python",
+        "external/po-sbr-python",
+        "external/po_sbr_python"
+      ],
+      "found_repo_paths": [
+        "/Users/seongcheoljeong/Documents/Codex_test/external/PO-SBR-Python",
+        "/Users/seongcheoljeong/Documents/Codex_test/external/po-sbr-python"
+      ],
+      "missing_repo_paths": [
+        "/Users/seongcheoljeong/Documents/Codex_test/external/po_sbr_python"
+      ],
+      "repo_found": true,
+      "supported_systems": [
+        "Linux"
+      ],
+      "platform_supported": false,
+      "requires_nvidia": true,
+      "nvidia_available": false,
+      "blockers": [
+        "missing_required_modules",
+        "unsupported_platform:Darwin",
+        "missing_nvidia_runtime"
+      ],
+      "status": "blocked"
+    }
+  }
+}

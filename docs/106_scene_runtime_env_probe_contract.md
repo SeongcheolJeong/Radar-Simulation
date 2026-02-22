@@ -17,6 +17,7 @@ Runtimes covered:
 
 - `sionna_rt_mitsuba_runtime`
 - `sionna_runtime`
+- `sionna_rt_full_runtime`
 - `po_sbr_runtime`
 
 ## Ready Rule
@@ -25,6 +26,14 @@ Runtime is `ready=true` only when both hold:
 
 1. at least one configured external repo path exists
 2. all required Python modules are available
+3. current platform is supported by the runtime track
+4. if runtime requires NVIDIA stack, `nvidia-smi` is available
+
+Probe output includes:
+
+- `status` (`ready|blocked`)
+- `blockers` (deterministic reason list)
+- platform and NVIDIA diagnostics
 
 ## Code Paths
 

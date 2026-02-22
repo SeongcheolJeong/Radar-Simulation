@@ -83,7 +83,9 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M14.0: Direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
 - [x] M14.1: Runtime environment contract + readiness probe (`sionna`/`po-sbr`)
 - [x] M14.2: Real runtime engine binding pilot (Mitsuba-backed `sionna_rt` first scene run)
-- [ ] M14.3: Full `sionna`/`po-sbr` runtime track enablement (`tensorflow`, `optix`, LLVM backend provisioning)
+- [x] M14.3: Runtime blocker gate + `sionna` PHY runtime sanity enablement
+- [ ] M14.4: `sionna.rt` full runtime enablement (LLVM backend provisioning on target host)
+- [ ] M14.5: `po-sbr` runtime pilot on Linux+NVIDIA environment
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -96,7 +98,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M14.3: close remaining full-runtime blockers (`sionna+tensorflow`, `po-sbr+optix`) and run first physics-grade pilot.
+Start M14.4: close `sionna.rt` LLVM backend blocker and run first full RT provider pilot.
 
 ## M10.19 Decision Gate
 
@@ -345,3 +347,16 @@ M14.2 outcome (2026-02-22):
 - real pilot report locked: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_mitsuba_pilot_v1_2026_02_22.json`
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/107_scene_runtime_mitsuba_pilot_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_mitsuba_pilot.py`
+
+M14.3 outcome (2026-02-22):
+
+- runtime probe expanded with deterministic blocker reasoning (`status`, `blockers`, platform/NVIDIA diagnostics)
+- blocker report generator added to convert probe summary into actionable next steps
+- `sionna` + `tensorflow` installed in `.venv-sionna311`; `sionna` PHY minimal sanity check passes
+- real blocker report locked: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_blocker_report_m14_3_2026_02_22.json`
+- contracts added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/108_scene_runtime_blocker_report_contract.md`
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/109_sionna_phy_runtime_sanity_contract.md`
+- validations added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_blocker_report.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_sionna_phy_runtime_minimal.py`

@@ -2,6 +2,8 @@
 import argparse
 import json
 import platform
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence, Tuple
@@ -13,18 +15,30 @@ DEFAULT_RUNTIME_SPECS: Dict[str, Dict[str, Any]] = {
     "sionna_rt_mitsuba_runtime": {
         "required_modules": ("mitsuba", "drjit"),
         "repo_candidates": ("external/sionna",),
+        "supported_systems": ("Darwin", "Linux", "Windows"),
+        "requires_nvidia": False,
     },
     "sionna_runtime": {
         "required_modules": ("sionna", "tensorflow"),
         "repo_candidates": ("external/sionna",),
+        "supported_systems": ("Darwin", "Linux", "Windows"),
+        "requires_nvidia": False,
+    },
+    "sionna_rt_full_runtime": {
+        "required_modules": ("sionna.rt", "mitsuba", "drjit"),
+        "repo_candidates": ("external/sionna",),
+        "supported_systems": ("Darwin", "Linux", "Windows"),
+        "requires_nvidia": False,
     },
     "po_sbr_runtime": {
-        "required_modules": ("po_sbr", "pyoptix", "optix"),
+        "required_modules": ("rtxpy", "igl"),
         "repo_candidates": (
             "external/PO-SBR-Python",
             "external/po-sbr-python",
             "external/po_sbr_python",
         ),
+        "supported_systems": ("Linux",),
+        "requires_nvidia": True,
     },
 }
 
@@ -63,8 +77,39 @@ def _missing_required_modules(
     return missing
 
 
+def _detect_nvidia_runtime() -> Dict[str, Any]:
+    exe = shutil.which("nvidia-smi")
+    if exe is None:
+        return {
+            "available": False,
+            "executable": None,
+            "driver_info": None,
+        }
+    try:
+        proc = subprocess.run(
+            [exe, "--query-gpu=name,driver_version", "--format=csv,noheader"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        lines = [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+        return {
+            "available": True,
+            "executable": exe,
+            "driver_info": lines,
+        }
+    except Exception as exc:  # pragma: no cover - env-dependent
+        return {
+            "available": False,
+            "executable": exe,
+            "driver_info": None,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+
 def build_runtime_probe_summary(workspace_root: str) -> Dict[str, Any]:
     root = Path(workspace_root).resolve()
+    system = platform.system()
     all_modules: List[str] = []
     for spec in DEFAULT_RUNTIME_SPECS.values():
         for module_name in spec["required_modules"]:
@@ -73,14 +118,28 @@ def build_runtime_probe_summary(workspace_root: str) -> Dict[str, Any]:
                 all_modules.append(text)
 
     module_report = detect_runtime_modules(all_modules)
+    nvidia_report = _detect_nvidia_runtime()
     runtime_report: Dict[str, Any] = {}
     for runtime_name, spec in DEFAULT_RUNTIME_SPECS.items():
         required_modules = tuple(str(x) for x in spec["required_modules"])
         repo_candidates = tuple(str(x) for x in spec["repo_candidates"])
+        supported_systems = tuple(str(x) for x in spec.get("supported_systems", ()))
+        requires_nvidia = bool(spec.get("requires_nvidia", False))
         found_paths, missing_paths = _resolve_existing_paths(root, repo_candidates)
         missing_modules = _missing_required_modules(module_report, required_modules=required_modules)
         repo_found = len(found_paths) > 0
-        ready = repo_found and (len(missing_modules) == 0)
+        platform_supported = (len(supported_systems) == 0) or (system in supported_systems)
+        nvidia_available = bool(nvidia_report.get("available", False))
+        blockers: List[str] = []
+        if not repo_found:
+            blockers.append("missing_repo")
+        if len(missing_modules) > 0:
+            blockers.append("missing_required_modules")
+        if not platform_supported:
+            blockers.append(f"unsupported_platform:{system}")
+        if requires_nvidia and (not nvidia_available):
+            blockers.append("missing_nvidia_runtime")
+        ready = len(blockers) == 0
         runtime_report[runtime_name] = {
             "ready": bool(ready),
             "required_modules": list(required_modules),
@@ -89,6 +148,12 @@ def build_runtime_probe_summary(workspace_root: str) -> Dict[str, Any]:
             "found_repo_paths": found_paths,
             "missing_repo_paths": missing_paths,
             "repo_found": bool(repo_found),
+            "supported_systems": list(supported_systems),
+            "platform_supported": bool(platform_supported),
+            "requires_nvidia": bool(requires_nvidia),
+            "nvidia_available": bool(nvidia_available),
+            "blockers": blockers,
+            "status": "ready" if ready else "blocked",
         }
 
     return {
@@ -101,8 +166,10 @@ def build_runtime_probe_summary(workspace_root: str) -> Dict[str, Any]:
                 "micro": int(sys.version_info.micro),
             },
             "platform": platform.platform(),
+            "system": system,
         },
         "module_report": module_report,
+        "nvidia_runtime": nvidia_report,
         "runtime_report": runtime_report,
     }
 
@@ -119,6 +186,7 @@ def main() -> None:
     for runtime_name, runtime_info in summary["runtime_report"].items():
         print(f"  {runtime_name}_ready: {runtime_info['ready']}")
         print(f"  {runtime_name}_missing_required_modules: {runtime_info['missing_required_modules']}")
+        print(f"  {runtime_name}_blockers: {runtime_info['blockers']}")
         print(f"  {runtime_name}_repo_found: {runtime_info['repo_found']}")
     print(f"  output_summary_json: {out}")
 
