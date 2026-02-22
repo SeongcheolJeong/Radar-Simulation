@@ -69,6 +69,38 @@ function getFailureRuleTags(row, policyByRun) {
     .slice(0, 3);
 }
 
+const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
+
+function clampInteger(raw, minValue, maxValue, fallback) {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return Number(fallback);
+  const iv = Math.floor(n);
+  return Math.max(Number(minValue), Math.min(Number(maxValue), iv));
+}
+
+function loadContractOverlayPrefs() {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return {};
+    const raw = String(window.localStorage.getItem(CONTRACT_OVERLAY_PREFS_KEY) || "").trim();
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return parsed;
+  } catch (_) {
+    return {};
+  }
+}
+
+function saveContractOverlayPrefs(prefs) {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    const payload = prefs && typeof prefs === "object" ? prefs : {};
+    window.localStorage.setItem(CONTRACT_OVERLAY_PREFS_KEY, JSON.stringify(payload));
+  } catch (_) {
+    // localStorage may be blocked; ignore and continue with in-memory state
+  }
+}
+
 function renderArtifactInspector(graphRunSummary) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
@@ -414,12 +446,21 @@ export function ContractWarningOverlay({
   const rows = Array.isArray(timeline) ? timeline : [];
   const runOpenHandler = typeof onOpenRun === "function" ? onOpenRun : () => {};
   const gateOpenHandler = typeof onOpenGateEvidence === "function" ? onOpenGateEvidence : () => {};
-  const [sourceFilter, setSourceFilter] = React.useState("all");
-  const [pinnedRunId, setPinnedRunId] = React.useState("all");
-  const [nonZeroOnly, setNonZeroOnly] = React.useState(false);
-  const [compactMode, setCompactMode] = React.useState(false);
-  const [gateHistoryLimit, setGateHistoryLimit] = React.useState("256");
-  const [gateHistoryPages, setGateHistoryPages] = React.useState("2");
+  const initialPrefs = React.useMemo(() => loadContractOverlayPrefs(), []);
+  const [sourceFilter, setSourceFilter] = React.useState(String(initialPrefs.sourceFilter || "all"));
+  const [pinnedRunId, setPinnedRunId] = React.useState(String(initialPrefs.pinnedRunId || "all"));
+  const [nonZeroOnly, setNonZeroOnly] = React.useState(Boolean(initialPrefs.nonZeroOnly));
+  const [compactMode, setCompactMode] = React.useState(Boolean(initialPrefs.compactMode));
+  const [gateHistoryLimit, setGateHistoryLimit] = React.useState(
+    String(initialPrefs.gateHistoryLimit || "256")
+  );
+  const [gateHistoryPages, setGateHistoryPages] = React.useState(
+    String(initialPrefs.gateHistoryPages || "2")
+  );
+  const [rowWindowSizeText, setRowWindowSizeText] = React.useState(
+    String(initialPrefs.rowWindowSize || "120")
+  );
+  const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
   const gateLookupOptions = React.useMemo(() => {
     const limitRaw = Number(gateHistoryLimit || 0);
     const pagesRaw = Number(gateHistoryPages || 0);
@@ -444,6 +485,43 @@ export function ContractWarningOverlay({
     });
     return ["all", ...Array.from(set.values()).sort((a, b) => a.localeCompare(b))];
   }, [rows]);
+  const rowWindowSize = React.useMemo(
+    () => clampInteger(rowWindowSizeText, 20, 500, 120),
+    [rowWindowSizeText]
+  );
+
+  React.useEffect(() => {
+    if (!sourceOptions.includes(sourceFilter)) {
+      setSourceFilter("all");
+    }
+  }, [sourceFilter, sourceOptions]);
+
+  React.useEffect(() => {
+    if (!runOptions.includes(pinnedRunId)) {
+      setPinnedRunId("all");
+    }
+  }, [pinnedRunId, runOptions]);
+
+  React.useEffect(() => {
+    saveContractOverlayPrefs({
+      sourceFilter,
+      pinnedRunId,
+      nonZeroOnly,
+      compactMode,
+      gateHistoryLimit,
+      gateHistoryPages,
+      rowWindowSize,
+    });
+  }, [
+    compactMode,
+    gateHistoryLimit,
+    gateHistoryPages,
+    nonZeroOnly,
+    pinnedRunId,
+    rowWindowSize,
+    sourceFilter,
+  ]);
+
   const filteredRows = React.useMemo(() => rows.filter((row) => {
     const source = String(row?.event_source || "-");
     if (sourceFilter !== "all" && source !== sourceFilter) return false;
@@ -454,6 +532,23 @@ export function ContractWarningOverlay({
     const da = Number(row?.delta?.attempt_count_total || 0);
     return du !== 0 || da !== 0;
   }), [nonZeroOnly, pinnedRunId, rows, sourceFilter]);
+  const maxRowWindowOffset = React.useMemo(
+    () => Math.max(0, Number(filteredRows.length || 0) - rowWindowSize),
+    [filteredRows.length, rowWindowSize]
+  );
+  React.useEffect(() => {
+    setRowWindowOffset(0);
+  }, [nonZeroOnly, pinnedRunId, sourceFilter, rowWindowSize]);
+  React.useEffect(() => {
+    if (rowWindowOffset > maxRowWindowOffset) {
+      setRowWindowOffset(maxRowWindowOffset);
+    }
+  }, [maxRowWindowOffset, rowWindowOffset]);
+  const rowWindowEnd = Math.min(filteredRows.length, rowWindowOffset + rowWindowSize);
+  const visibleRows = React.useMemo(
+    () => filteredRows.slice(rowWindowOffset, rowWindowEnd),
+    [filteredRows, rowWindowEnd, rowWindowOffset]
+  );
   const policyByRun = React.useMemo(() => {
     const map = new Map();
     rows.forEach((row) => {
@@ -552,12 +647,45 @@ export function ContractWarningOverlay({
             }),
         }, "+page"),
       ]),
-      h("span", { key: "co_filter_count", style: { marginLeft: "auto", color: "#8eb6ca" } }, `showing ${filteredRows.length}/${rows.length}`),
+      h("label", { key: "co_row_window_label", style: { marginLeft: "8px" } }, "rows/window:"),
+      h("select", {
+        className: "select",
+        key: "co_row_window_select",
+        value: rowWindowSizeText,
+        onChange: (e) => setRowWindowSizeText(String(e.target.value || "120")),
+      }, ["50", "80", "120", "200", "320", "500"].map((opt) =>
+        h("option", { value: opt, key: `co_row_window_${opt}` }, opt)
+      )),
+      h("div", { className: "btn-row", key: "co_row_window_nav", style: { gap: "4px" } }, [
+        h("button", {
+          className: "btn",
+          key: "co_row_window_top",
+          disabled: rowWindowOffset <= 0,
+          onClick: () => setRowWindowOffset(0),
+        }, "Top"),
+        h("button", {
+          className: "btn",
+          key: "co_row_window_prev",
+          disabled: rowWindowOffset <= 0,
+          onClick: () => setRowWindowOffset((prev) => Math.max(0, Number(prev || 0) - rowWindowSize)),
+        }, "Prev"),
+        h("button", {
+          className: "btn",
+          key: "co_row_window_next",
+          disabled: rowWindowOffset >= maxRowWindowOffset,
+          onClick: () => setRowWindowOffset((prev) => Math.min(maxRowWindowOffset, Number(prev || 0) + rowWindowSize)),
+        }, "Next"),
+      ]),
+      h("span", { key: "co_filter_count", style: { marginLeft: "auto", color: "#8eb6ca" } }, [
+        `showing ${filteredRows.length}/${rows.length} | `,
+        `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
+      ]),
     ]),
     h("div", { className: "contract-overlay-bd", key: "co_bd" }, filteredRows.length === 0
       ? h("pre", { className: "result-box", key: "co_empty" }, "no contract events yet")
-      : filteredRows.map((row, idx) =>
+      : visibleRows.map((row, localIdx) =>
         (() => {
+          const idx = rowWindowOffset + localIdx;
           const runId = String(row?.graph_run_id || "").trim();
           const severity = classifyContractSeverity(row);
           const badgeText = severityLabel(severity);

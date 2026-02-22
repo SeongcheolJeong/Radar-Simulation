@@ -2124,3 +2124,28 @@
     - `co_gate_pages_select`
     - `+page`
     - `gateOpenHandler(row, gateLookupOptions)`
+
+## Web E2E Graph Timeline Row-Window Virtualization + Pref Persistence (M17.17)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - row-window/persistence frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8148/8128)` + token grep (`curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - persistence tokens confirmed:
+    - `CONTRACT_OVERLAY_PREFS_KEY`
+    - `loadContractOverlayPrefs`
+    - `saveContractOverlayPrefs`
+  - row-window tokens confirmed:
+    - `rows/window`
+    - `co_row_window_select`
+    - `co_row_window_top`
+    - `co_row_window_prev`
+    - `co_row_window_next`
+    - `visibleRows`

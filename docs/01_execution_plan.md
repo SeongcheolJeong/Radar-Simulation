@@ -125,6 +125,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.14: Historical policy-eval fetch fallback (`policy_eval_id -> run_id/summary`) for persisted gate evidence
 - [x] M17.15: Policy-eval filtered pagination + frontend evidence cache (large-history scan control)
 - [x] M17.16: Overlay gate-history window controls + incremental page-budget lookup UX
+- [x] M17.17: Timeline row-window virtualization + overlay preference persistence
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -137,7 +138,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.16 frontend hardening track: add timeline row virtualization and persisted user-preference memory for overlay lookup knobs while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.17 frontend hardening track: add keyboard shortcuts/reset presets for overlay operations and lightweight row detail lazy-expansion while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -996,3 +997,17 @@ M17.16 outcome (2026-02-22):
 - operator traceability fields expanded for tuning/diagnostics:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
   - `policy_eval_history_limit`, `policy_eval_page_budget`, `policy_eval_page_count_used`
+
+M17.17 outcome (2026-02-22):
+
+- timeline row rendering now uses windowed view instead of full filtered render:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - render path switched to `visibleRows` from `filteredRows`
+  - row-window controls added: `rows/window`, `Top`, `Prev`, `Next`
+- overlay preference persistence added via browser localStorage:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - key: `graph_lab_contract_overlay_prefs_v1`
+  - persisted options: filters, compact mode, gate lookup knobs, row-window size
+- operator context indicator improved:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - filter bar now displays window coverage (`window start-end/filtered_count`)
