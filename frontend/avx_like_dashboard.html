@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AVX-Like Radar Simulation Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@0.477.0/dist/umd/lucide.min.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-300 font-sans flex flex-col overflow-hidden">
+  <header class="bg-slate-900 border-b border-slate-800 h-16 flex items-center justify-between px-6 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-amber-500 rounded flex items-center justify-center shadow-lg shadow-amber-500/20">
+        <i data-lucide="waves" class="text-slate-950 w-5 h-5"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-slate-100 tracking-wide">Ansys AVX-Like</h1>
+        <p class="text-xs text-slate-500 font-medium tracking-wider">RADAR SIMULATION VIEWER</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 text-xs text-slate-400">
+      <span id="runtimeBadge" class="px-2 py-1 rounded border border-slate-700 bg-slate-800">runtime: unknown</span>
+      <button id="refreshBtn" class="p-2 text-slate-400 hover:text-slate-100 transition-colors" title="Reload summary">
+        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <aside class="w-80 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto custom-scrollbar">
+      <div class="p-5 border-b border-slate-800/50">
+        <h2 class="text-sm font-bold text-slate-100 flex items-center gap-2 mb-1">
+          <i data-lucide="cpu" class="w-4 h-4 text-cyan-500"></i>
+          Inputs and Contracts
+        </h2>
+        <p class="text-xs text-slate-500">Use generated outputs from simulation pipeline.</p>
+
+        <div class="mt-4 space-y-2">
+          <label class="text-xs text-slate-400 block">Summary JSON path (served from repo root)</label>
+          <input id="summaryPathInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
+          <div class="flex gap-2">
+            <button id="runBtn" class="flex-1 py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              Refresh Outputs
+            </button>
+            <button id="loadJsonBtn" class="py-2 px-3 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm font-semibold hover:border-cyan-500/50" title="Load summary from local file">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <input id="summaryFileInput" type="file" accept="application/json,.json" class="hidden" />
+        </div>
+
+        <div class="mt-4">
+          <label class="flex flex-col items-center justify-center w-full py-3 px-4 border-2 border-dashed border-slate-700 rounded-lg hover:border-cyan-500/50 hover:bg-slate-800/50 cursor-pointer transition-all group">
+            <div class="flex items-center gap-2 text-slate-400 group-hover:text-cyan-400 transition-colors">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span class="text-sm font-medium">Upload .ffd (display only)</span>
+            </div>
+            <input id="ffdFileInput" type="file" accept=".ffd" class="hidden" />
+          </label>
+          <div id="ffdBadge" class="hidden mt-2 flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 py-1.5 px-2 rounded border border-emerald-500/20">
+            <i data-lucide="check-circle-2" class="w-3 h-3"></i>
+            <span id="ffdName" class="truncate flex-1"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-5 space-y-6">
+        <div class="space-y-4">
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Radar Parameters</h3>
+
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400 flex justify-between">
+              <span>Frequency</span>
+              <span id="freqVal" class="text-cyan-400">- GHz</span>
+            </label>
+            <input id="freqInput" type="range" min="76" max="81" step="0.1" class="w-full accent-cyan-500" />
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400 flex justify-between">
+              <span>Bandwidth</span>
+              <span id="bwVal" class="text-cyan-400">- MHz</span>
+            </label>
+            <input id="bwInput" type="range" min="200" max="4000" step="50" class="w-full accent-cyan-500" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="text-xs text-slate-400">Tx count</label>
+              <input id="txInput" type="number" min="1" max="16" class="w-full bg-slate-800 border border-slate-700 text-sm rounded px-2 py-1.5" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-xs text-slate-400">Rx count</label>
+              <input id="rxInput" type="number" min="1" max="32" class="w-full bg-slate-800 border border-slate-700 text-sm rounded px-2 py-1.5" />
+            </div>
+          </div>
+        </div>
+
+        <div class="h-px bg-slate-800/50"></div>
+
+        <div class="space-y-4">
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Frame and FOV</h3>
+
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400 flex justify-between">
+              <span>FOV Azimuth</span>
+              <span id="fovVal" class="text-amber-400">120°</span>
+            </label>
+            <input id="fovInput" type="range" min="30" max="180" step="5" class="w-full accent-amber-500" />
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400 flex justify-between">
+              <span>Display Max Range</span>
+              <span id="rangeVal" class="text-amber-400">100 m</span>
+            </label>
+            <input id="rangeInput" type="range" min="20" max="300" step="5" class="w-full accent-amber-500" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="text-xs text-slate-400">Chirps/frame</label>
+              <input id="chirpsInput" type="number" min="1" max="2048" class="w-full bg-slate-800 border border-slate-700 text-sm rounded px-2 py-1.5" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-xs text-slate-400">Samples/chirp</label>
+              <input id="samplesInput" type="number" min="32" max="32768" class="w-full bg-slate-800 border border-slate-700 text-sm rounded px-2 py-1.5" />
+            </div>
+          </div>
+        </div>
+
+        <div class="h-px bg-slate-800/50"></div>
+
+        <div class="space-y-3">
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Output Artifacts</h3>
+          <div id="artifactLinks" class="space-y-2 text-xs"></div>
+        </div>
+      </div>
+
+      <div class="mt-auto p-5 border-t border-slate-800 bg-slate-900/80 backdrop-blur sticky bottom-0">
+        <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+          <span>Viewer Status</span>
+          <span id="statusLabel" class="text-slate-400">idle</span>
+        </div>
+        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div id="progressBar" class="h-full bg-cyan-500 transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+        <div id="statusNote" class="mt-2 text-[11px] text-slate-500"></div>
+      </div>
+    </aside>
+
+    <main class="flex-1 bg-slate-950 p-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-96">
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-lg flex flex-col relative overflow-hidden">
+          <div class="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 absolute top-0 left-0 right-0 z-10 backdrop-blur-sm">
+            <h3 class="text-sm font-semibold flex items-center gap-2 text-slate-200">
+              <i data-lucide="map" class="w-4 h-4 text-cyan-500"></i>
+              Top-Down Scene Viewer
+            </h3>
+          </div>
+
+          <div class="flex-1 relative flex items-center justify-center bg-[#0B1120]">
+            <svg id="sceneSvg" viewBox="0 0 400 300" class="w-full h-full opacity-90">
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"></path>
+                </pattern>
+                <radialGradient id="radarGradient" cx="50%" cy="100%" r="100%">
+                  <stop offset="0%" stop-color="rgba(6, 182, 212, 0.38)"></stop>
+                  <stop offset="50%" stop-color="rgba(6, 182, 212, 0.12)"></stop>
+                  <stop offset="100%" stop-color="rgba(6, 182, 212, 0)"></stop>
+                </radialGradient>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)"></rect>
+
+              <g id="ego" transform="translate(200, 260)">
+                <rect x="-10" y="-20" width="20" height="40" fill="#334155" rx="3"></rect>
+                <circle cx="0" cy="-20" r="3" fill="#06b6d4"></circle>
+              </g>
+
+              <path id="fovCone" fill="url(#radarGradient)"></path>
+
+              <g id="rangeRings" opacity="0.25" stroke="#06b6d4" fill="none">
+                <circle cx="200" cy="260" r="50"></circle>
+                <circle cx="200" cy="260" r="100"></circle>
+                <circle cx="200" cy="260" r="150"></circle>
+              </g>
+
+              <g id="pathLayer"></g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-lg flex flex-col">
+          <div class="p-3 border-b border-slate-800">
+            <h3 class="text-sm font-semibold flex items-center gap-2 text-slate-200">
+              <i data-lucide="activity" class="w-4 h-4 text-amber-500"></i>
+              Metrics
+            </h3>
+          </div>
+
+          <div class="p-4 flex-1 flex flex-col gap-4">
+            <div class="bg-slate-950 p-3 rounded border border-slate-800">
+              <div class="text-xs text-slate-500 mb-1">Range Resolution</div>
+              <div id="rangeResMetric" class="text-xl font-mono text-cyan-400">- m</div>
+            </div>
+            <div class="bg-slate-950 p-3 rounded border border-slate-800">
+              <div class="text-xs text-slate-500 mb-1">Max Velocity (approx)</div>
+              <div id="maxVelMetric" class="text-xl font-mono text-amber-400">- m/s</div>
+            </div>
+            <div class="bg-slate-950 p-3 rounded border border-slate-800">
+              <div class="text-xs text-slate-500 mb-1">Path Count (frame)</div>
+              <div id="pathCountMetric" class="text-xl font-mono text-emerald-400">-</div>
+            </div>
+
+            <div class="mt-auto">
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+                <span>Data Loaded</span>
+                <span id="loadedSummaryLabel" class="text-slate-400">no</span>
+              </div>
+              <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div id="loadedSummaryBar" class="h-full bg-slate-700" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[320px]">
+        <div class="bg-slate-900 border border-slate-800 rounded-lg flex flex-col">
+          <div class="p-3 border-b border-slate-800 flex justify-between items-center">
+            <h3 class="text-sm font-semibold flex items-center gap-2 text-slate-200">
+              <i data-lucide="waves" class="w-4 h-4 text-purple-500"></i>
+              Radar Maps
+            </h3>
+            <div class="flex gap-1">
+              <button class="mapTabBtn text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 hover:border-cyan-500" data-map="rd">RD</button>
+              <button class="mapTabBtn text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 hover:border-cyan-500" data-map="ra">RA</button>
+              <button class="mapTabBtn text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 hover:border-cyan-500" data-map="adc">ADC</button>
+              <button class="mapTabBtn text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 hover:border-cyan-500" data-map="path">PATH</button>
+            </div>
+          </div>
+
+          <div class="flex-1 p-4 flex flex-col gap-3 bg-black/20">
+            <div class="relative flex-1 border border-slate-800 rounded overflow-hidden bg-slate-950/40 min-h-[190px]">
+              <img id="mapImage" alt="radar map" class="w-full h-full object-contain" />
+              <div id="mapFallback" class="hidden absolute inset-0 items-center justify-center text-slate-500 text-sm">Map image not found</div>
+            </div>
+
+            <div>
+              <div class="text-xs text-slate-500 mb-2">Top Peaks</div>
+              <div id="peakList" class="text-xs grid gap-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-lg flex flex-col">
+          <div class="p-3 border-b border-slate-800">
+            <h3 class="text-sm font-semibold flex items-center gap-2 text-slate-200">
+              <i data-lucide="list" class="w-4 h-4 text-emerald-500"></i>
+              Detection List (first chirp paths)
+            </h3>
+          </div>
+          <div class="flex-1 p-0 overflow-auto custom-scrollbar">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs text-slate-400 uppercase bg-slate-950/50 sticky top-0">
+                <tr>
+                  <th class="px-4 py-3 font-medium">Path</th>
+                  <th class="px-4 py-3 font-medium">Class</th>
+                  <th class="px-4 py-3 font-medium">Range</th>
+                  <th class="px-4 py-3 font-medium">Velocity</th>
+                  <th class="px-4 py-3 font-medium">Amp(dB)</th>
+                </tr>
+              </thead>
+              <tbody id="detectionTableBody" class="divide-y divide-slate-800/50"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgb(15 23 42); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgb(51 65 85); border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgb(71 85 105); }
+  </style>
+
+  <script>
+    const C0 = 299792458.0;
+    const DEFAULT_SUMMARY_PATH = "docs/reports/avx_like_showcase_macos_2026_02_22.json";
+
+    const state = {
+      summary: null,
+      mapKey: "rd",
+      ffdName: null,
+      loading: false,
+      progressTimer: null,
+      progress: 0,
+      visualPaths: {
+        rd: null,
+        ra: null,
+        adc: null,
+        path: null,
+      },
+    };
+
+    const el = {
+      summaryPathInput: document.getElementById("summaryPathInput"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      runBtn: document.getElementById("runBtn"),
+      loadJsonBtn: document.getElementById("loadJsonBtn"),
+      summaryFileInput: document.getElementById("summaryFileInput"),
+      ffdFileInput: document.getElementById("ffdFileInput"),
+      ffdBadge: document.getElementById("ffdBadge"),
+      ffdName: document.getElementById("ffdName"),
+      runtimeBadge: document.getElementById("runtimeBadge"),
+      statusLabel: document.getElementById("statusLabel"),
+      statusNote: document.getElementById("statusNote"),
+      progressBar: document.getElementById("progressBar"),
+      freqInput: document.getElementById("freqInput"),
+      bwInput: document.getElementById("bwInput"),
+      txInput: document.getElementById("txInput"),
+      rxInput: document.getElementById("rxInput"),
+      fovInput: document.getElementById("fovInput"),
+      rangeInput: document.getElementById("rangeInput"),
+      chirpsInput: document.getElementById("chirpsInput"),
+      samplesInput: document.getElementById("samplesInput"),
+      freqVal: document.getElementById("freqVal"),
+      bwVal: document.getElementById("bwVal"),
+      fovVal: document.getElementById("fovVal"),
+      rangeVal: document.getElementById("rangeVal"),
+      artifactLinks: document.getElementById("artifactLinks"),
+      rangeResMetric: document.getElementById("rangeResMetric"),
+      maxVelMetric: document.getElementById("maxVelMetric"),
+      pathCountMetric: document.getElementById("pathCountMetric"),
+      loadedSummaryLabel: document.getElementById("loadedSummaryLabel"),
+      loadedSummaryBar: document.getElementById("loadedSummaryBar"),
+      sceneSvg: document.getElementById("sceneSvg"),
+      fovCone: document.getElementById("fovCone"),
+      pathLayer: document.getElementById("pathLayer"),
+      mapImage: document.getElementById("mapImage"),
+      mapFallback: document.getElementById("mapFallback"),
+      peakList: document.getElementById("peakList"),
+      detectionTableBody: document.getElementById("detectionTableBody"),
+      mapTabBtns: Array.from(document.querySelectorAll(".mapTabBtn")),
+    };
+
+    function normalizeRepoPath(pathValue) {
+      if (!pathValue || typeof pathValue !== "string") return null;
+      if (pathValue.startsWith("http://") || pathValue.startsWith("https://")) return pathValue;
+      const marker = "/Codex_test/";
+      const idx = pathValue.indexOf(marker);
+      if (idx >= 0) {
+        return pathValue.slice(idx + marker.length);
+      }
+      return pathValue.replace(/^\/+/, "");
+    }
+
+    function dirname(pathValue) {
+      if (!pathValue || typeof pathValue !== "string") return null;
+      const i = pathValue.lastIndexOf("/");
+      return i > 0 ? pathValue.slice(0, i) : null;
+    }
+
+    function formatDb(value) {
+      if (!Number.isFinite(value)) return "-";
+      return `${value.toFixed(2)} dB`;
+    }
+
+    function setStatus(text, tone, note) {
+      el.statusLabel.textContent = text;
+      el.statusNote.textContent = note || "";
+      el.statusLabel.className = "";
+      if (tone === "ok") {
+        el.statusLabel.className = "text-emerald-400";
+      } else if (tone === "warn") {
+        el.statusLabel.className = "text-amber-400";
+      } else if (tone === "error") {
+        el.statusLabel.className = "text-red-400";
+      } else {
+        el.statusLabel.className = "text-slate-400";
+      }
+    }
+
+    function setProgress(value) {
+      state.progress = Math.max(0, Math.min(100, Number(value) || 0));
+      el.progressBar.style.width = `${state.progress.toFixed(0)}%`;
+    }
+
+    function stopProgress() {
+      if (state.progressTimer) {
+        window.clearInterval(state.progressTimer);
+        state.progressTimer = null;
+      }
+      state.loading = false;
+    }
+
+    function startProgress() {
+      stopProgress();
+      state.loading = true;
+      setProgress(0);
+      state.progressTimer = window.setInterval(() => {
+        if (state.progress < 92) {
+          setProgress(state.progress + Math.random() * 9 + 2);
+        }
+      }, 180);
+    }
+
+    function updateRuntimeBadge(summary) {
+      const runtimeInfo = summary?.radar_map_summary?.metadata?.runtime_resolution || null;
+      if (!runtimeInfo) {
+        el.runtimeBadge.textContent = "runtime: unavailable";
+        return;
+      }
+      const mode = runtimeInfo.mode || "unknown";
+      const backend = runtimeInfo.backend_type || "unknown";
+      el.runtimeBadge.textContent = `runtime: ${backend} (${mode})`;
+    }
+
+    function updateArtifacts(summary) {
+      const outputs = summary?.outputs || {};
+      const entries = [
+        ["path_list.json", normalizeRepoPath(outputs.path_list_json)],
+        ["adc_cube.npz", normalizeRepoPath(outputs.adc_cube_npz)],
+        ["radar_map.npz", normalizeRepoPath(outputs.radar_map_npz)],
+        ["summary.json", normalizeRepoPath(el.summaryPathInput.value)],
+      ];
+      el.artifactLinks.innerHTML = "";
+      for (const [name, href] of entries) {
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between gap-2";
+        const label = document.createElement("span");
+        label.className = "text-slate-500";
+        label.textContent = name;
+        row.appendChild(label);
+
+        if (href) {
+          const a = document.createElement("a");
+          a.href = href;
+          a.target = "_blank";
+          a.className = "text-cyan-400 hover:text-cyan-300 truncate";
+          a.textContent = href;
+          row.appendChild(a);
+        } else {
+          const span = document.createElement("span");
+          span.className = "text-slate-600";
+          span.textContent = "-";
+          row.appendChild(span);
+        }
+        el.artifactLinks.appendChild(row);
+      }
+    }
+
+    function updateParamControls(summary) {
+      const md = summary?.adc_summary?.metadata || {};
+      const fc = Number(md.fc_hz || 77e9) / 1e9;
+      const slope = Number(md.slope_hz_per_s || 20e12);
+      const fs = Number(md.fs_hz || 20e6);
+      const samples = Number(md.samples_per_chirp || 1024);
+      const chirps = Number(summary?.path_summary?.n_chirps || 16);
+      const tx = Array.isArray(md.tx_pos_m) ? md.tx_pos_m.length : 2;
+      const rx = Array.isArray(md.rx_pos_m) ? md.rx_pos_m.length : 4;
+      const chirpDur = samples / fs;
+      const bwMHz = (slope * chirpDur) / 1e6;
+
+      let suggestedRange = Number(el.rangeInput.value || 100);
+      const firstPaths = summary?.path_summary?.first_chirp_paths || [];
+      if (firstPaths.length > 0) {
+        const maxPathRange = Math.max(...firstPaths.map((p) => Number(p.delay_s || 0) * C0 * 0.5));
+        if (Number.isFinite(maxPathRange) && maxPathRange > 1) {
+          suggestedRange = Math.min(300, Math.max(40, Math.ceil(maxPathRange * 1.8 / 5) * 5));
+        }
+      }
+
+      el.freqInput.value = fc.toFixed(1);
+      el.bwInput.value = Math.min(4000, Math.max(200, bwMHz)).toFixed(0);
+      el.txInput.value = tx;
+      el.rxInput.value = rx;
+      if (!el.fovInput.value) el.fovInput.value = 120;
+      el.rangeInput.value = suggestedRange;
+      el.chirpsInput.value = chirps;
+      el.samplesInput.value = samples;
+
+      el.freqVal.textContent = `${Number(el.freqInput.value).toFixed(1)} GHz`;
+      el.bwVal.textContent = `${Number(el.bwInput.value).toFixed(0)} MHz`;
+      el.fovVal.textContent = `${Number(el.fovInput.value).toFixed(0)}°`;
+      el.rangeVal.textContent = `${Number(el.rangeInput.value).toFixed(0)} m`;
+
+      const lambda = C0 / (Number(el.freqInput.value) * 1e9);
+      const bwHz = Number(el.bwInput.value) * 1e6;
+      const chirpTime = Number(el.samplesInput.value) / fs;
+      const rangeRes = C0 / (2.0 * bwHz);
+      const maxVel = lambda / (4.0 * chirpTime);
+
+      el.rangeResMetric.textContent = `${rangeRes.toFixed(3)} m`;
+      el.maxVelMetric.textContent = `${maxVel.toFixed(2)} m/s`;
+      el.pathCountMetric.textContent = `${summary?.path_summary?.path_count_total ?? 0}`;
+    }
+
+    function mapColorForVelocity(velocityMps) {
+      return Math.abs(velocityMps) > 0.5 ? "#ef4444" : "#14b8a6";
+    }
+
+    function updateScenePaths(summary) {
+      const paths = summary?.path_summary?.first_chirp_paths || [];
+      const maxRange = Number(el.rangeInput.value || 100);
+      const fovAz = Number(el.fovInput.value || 120);
+      const radarX = 200;
+      const radarY = 260;
+      const radius = 170;
+      const half = (fovAz * Math.PI / 180.0) * 0.5;
+      const x1 = radarX + Math.sin(half) * radius;
+      const y1 = radarY - Math.cos(half) * radius;
+      const x2 = radarX - Math.sin(half) * radius;
+      const y2 = radarY - Math.cos(half) * radius;
+      el.fovCone.setAttribute("d", `M ${radarX} ${radarY} L ${x1} ${y1} A ${radius} ${radius} 0 0 0 ${x2} ${y2} Z`);
+
+      while (el.pathLayer.firstChild) {
+        el.pathLayer.removeChild(el.pathLayer.firstChild);
+      }
+
+      const fcHz = Number(summary?.adc_summary?.metadata?.fc_hz || 77e9);
+      const lambda = C0 / fcHz;
+
+      for (const p of paths) {
+        const delay = Number(p.delay_s || 0);
+        const doppler = Number(p.doppler_hz || 0);
+        const u = Array.isArray(p.unit_direction) ? p.unit_direction : [1, 0, 0];
+        const rangeM = delay * C0 * 0.5;
+        const velMps = doppler * lambda * 0.5;
+
+        const forward = Number(u[0] || 0);
+        const lateral = Number(u[1] || 0);
+
+        const y = radarY - (Math.max(0.0, forward * rangeM) / maxRange) * radius;
+        const x = radarX + (lateral * rangeM / maxRange) * radius * 1.4;
+
+        const color = mapColorForVelocity(velMps);
+
+        const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        dot.setAttribute("cx", x.toFixed(2));
+        dot.setAttribute("cy", y.toFixed(2));
+        dot.setAttribute("r", "4.5");
+        dot.setAttribute("fill", color);
+        dot.setAttribute("opacity", "0.9");
+        el.pathLayer.appendChild(dot);
+
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", (x + 7).toFixed(2));
+        label.setAttribute("y", (y - 5).toFixed(2));
+        label.setAttribute("fill", color);
+        label.setAttribute("font-size", "9");
+        label.textContent = `${(p.path_id || "path").slice(0, 12)} ${rangeM.toFixed(1)}m`;
+        el.pathLayer.appendChild(label);
+      }
+    }
+
+    function updateDetectionTable(summary) {
+      const rows = summary?.path_summary?.first_chirp_paths || [];
+      const fcHz = Number(summary?.adc_summary?.metadata?.fc_hz || 77e9);
+      const lambda = C0 / fcHz;
+
+      el.detectionTableBody.innerHTML = "";
+      if (!rows.length) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="5" class="px-4 py-6 text-center text-slate-500">No first-chirp path records</td>`;
+        el.detectionTableBody.appendChild(tr);
+        return;
+      }
+
+      rows.forEach((p, idx) => {
+        const delay = Number(p.delay_s || 0);
+        const doppler = Number(p.doppler_hz || 0);
+        const rangeM = delay * C0 * 0.5;
+        const velMps = doppler * lambda * 0.5;
+        const re = Number(p?.amp_complex?.re || 0);
+        const im = Number(p?.amp_complex?.im || 0);
+        const amp = Math.sqrt((re * re) + (im * im));
+        const ampDb = 20 * Math.log10(Math.max(amp, 1e-12));
+        const cls = Math.abs(velMps) > 0.5 ? "Moving Obj" : "Static Obj";
+        const dotClass = Math.abs(velMps) > 0.5 ? "bg-red-500" : "bg-emerald-500";
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition-colors";
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-cyan-400 font-mono">#${String(idx + 1).padStart(2, "0")}</td>
+          <td class="px-4 py-3 flex items-center gap-2"><div class="w-2 h-2 rounded-full ${dotClass}"></div>${cls}</td>
+          <td class="px-4 py-3">${rangeM.toFixed(2)} m</td>
+          <td class="px-4 py-3 ${velMps >= 0 ? "text-emerald-400" : "text-red-400"}">${velMps >= 0 ? "+" : ""}${velMps.toFixed(2)} m/s</td>
+          <td class="px-4 py-3">${ampDb.toFixed(2)}</td>
+        `;
+        el.detectionTableBody.appendChild(tr);
+      });
+    }
+
+    function updatePeakList(summary) {
+      const rm = summary?.radar_map_summary || {};
+      const rd = Array.isArray(rm.rd_top_peaks) ? rm.rd_top_peaks : [];
+      const ra = Array.isArray(rm.ra_top_peaks) ? rm.ra_top_peaks : [];
+
+      let peaks = [];
+      if (state.mapKey === "rd") {
+        peaks = rd.slice(0, 6).map((p) => `dop:${p.doppler_bin}, rng:${p.range_bin}, rel:${Number(p.rel_db).toFixed(2)} dB`);
+      } else if (state.mapKey === "ra") {
+        peaks = ra.slice(0, 6).map((p) => `ang:${p.angle_bin}, rng:${p.range_bin}, rel:${Number(p.rel_db).toFixed(2)} dB`);
+      } else {
+        peaks = rd.slice(0, 3).map((p) => `rng:${p.range_bin}, rel:${Number(p.rel_db).toFixed(2)} dB`);
+      }
+
+      el.peakList.innerHTML = "";
+      if (!peaks.length) {
+        el.peakList.innerHTML = '<div class="text-slate-500">No peak metadata</div>';
+        return;
+      }
+      peaks.forEach((t) => {
+        const row = document.createElement("div");
+        row.className = "text-slate-300 font-mono";
+        row.textContent = t;
+        el.peakList.appendChild(row);
+      });
+    }
+
+    function updateMapImage() {
+      const key = state.mapKey;
+      const mapPath = state.visualPaths[key] || null;
+      el.mapFallback.classList.add("hidden");
+      el.mapFallback.classList.remove("flex");
+
+      if (!mapPath) {
+        el.mapImage.removeAttribute("src");
+        el.mapFallback.textContent = "Map image path unavailable";
+        el.mapFallback.classList.remove("hidden");
+        el.mapFallback.classList.add("flex");
+        return;
+      }
+
+      const src = `${mapPath}${mapPath.includes("?") ? "&" : "?"}t=${Date.now()}`;
+      el.mapImage.onload = () => {
+        el.mapFallback.classList.add("hidden");
+        el.mapFallback.classList.remove("flex");
+      };
+      el.mapImage.onerror = () => {
+        el.mapImage.removeAttribute("src");
+        el.mapFallback.textContent = `Map image not found: ${mapPath}`;
+        el.mapFallback.classList.remove("hidden");
+        el.mapFallback.classList.add("flex");
+      };
+      el.mapImage.src = src;
+      el.mapImage.alt = `${key} map`;
+    }
+
+    function updateLoadedSummaryFlag(loaded) {
+      if (loaded) {
+        el.loadedSummaryLabel.textContent = "yes";
+        el.loadedSummaryLabel.className = "text-emerald-400";
+        el.loadedSummaryBar.className = "h-full bg-emerald-500";
+        el.loadedSummaryBar.style.width = "100%";
+      } else {
+        el.loadedSummaryLabel.textContent = "no";
+        el.loadedSummaryLabel.className = "text-slate-400";
+        el.loadedSummaryBar.className = "h-full bg-slate-700";
+        el.loadedSummaryBar.style.width = "0%";
+      }
+    }
+
+    function deriveVisualPaths(summary) {
+      const pathListRel = normalizeRepoPath(summary?.outputs?.path_list_json);
+      const outDir = dirname(pathListRel);
+      const base = outDir && outDir.endsWith("/output") ? outDir.slice(0, -"/output".length) : dirname(pathListRel);
+      const visBase = base ? `${base}/visuals` : null;
+      return {
+        rd: visBase ? `${visBase}/rd_map.png` : null,
+        ra: visBase ? `${visBase}/ra_map.png` : null,
+        adc: visBase ? `${visBase}/adc_tx0_rx0.png` : null,
+        path: visBase ? `${visBase}/path_scatter_chirp0.png` : null,
+      };
+    }
+
+    function applySummary(summary, sourceLabel) {
+      state.summary = summary;
+      state.visualPaths = deriveVisualPaths(summary);
+      updateRuntimeBadge(summary);
+      updateArtifacts(summary);
+      updateParamControls(summary);
+      updateScenePaths(summary);
+      updateDetectionTable(summary);
+      updatePeakList(summary);
+      updateMapImage();
+      updateLoadedSummaryFlag(true);
+      setStatus("loaded", "ok", sourceLabel ? `source: ${sourceLabel}` : "summary loaded");
+    }
+
+    async function fetchSummaryFromPath(pathValue) {
+      const target = (pathValue || "").trim();
+      if (!target) {
+        throw new Error("Summary path is empty.");
+      }
+      const res = await fetch(`${target}${target.includes("?") ? "&" : "?"}t=${Date.now()}`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch summary (${res.status} ${res.statusText})`);
+      }
+      return await res.json();
+    }
+
+    async function refreshSummary(pathOverride) {
+      const pathValue = pathOverride || el.summaryPathInput.value;
+      startProgress();
+      setStatus("loading", "warn", "fetching latest summary");
+      try {
+        const summary = await fetchSummaryFromPath(pathValue);
+        setProgress(100);
+        applySummary(summary, pathValue);
+      } catch (err) {
+        updateLoadedSummaryFlag(false);
+        setStatus("error", "error", String(err.message || err));
+      } finally {
+        window.setTimeout(() => {
+          stopProgress();
+          if (state.progress > 0 && state.progress < 100) {
+            setProgress(100);
+          }
+        }, 180);
+      }
+    }
+
+    function bindEvents() {
+      el.refreshBtn.addEventListener("click", () => refreshSummary());
+      el.runBtn.addEventListener("click", () => refreshSummary());
+
+      el.loadJsonBtn.addEventListener("click", () => {
+        el.summaryFileInput.click();
+      });
+
+      el.summaryFileInput.addEventListener("change", async (ev) => {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        setStatus("loading", "warn", `reading ${file.name}`);
+        try {
+          const text = await file.text();
+          const summary = JSON.parse(text);
+          applySummary(summary, file.name);
+          setProgress(100);
+        } catch (err) {
+          setStatus("error", "error", `invalid json: ${String(err.message || err)}`);
+        }
+      });
+
+      el.ffdFileInput.addEventListener("change", (ev) => {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        state.ffdName = file.name;
+        el.ffdName.textContent = `${file.name} attached`;
+        el.ffdBadge.classList.remove("hidden");
+        setStatus("loaded", "ok", ".ffd file attached for UI context only");
+      });
+
+      [el.fovInput, el.rangeInput].forEach((node) => {
+        node.addEventListener("input", () => {
+          el.fovVal.textContent = `${Number(el.fovInput.value).toFixed(0)}°`;
+          el.rangeVal.textContent = `${Number(el.rangeInput.value).toFixed(0)} m`;
+          if (state.summary) updateScenePaths(state.summary);
+        });
+      });
+
+      el.freqInput.addEventListener("input", () => {
+        el.freqVal.textContent = `${Number(el.freqInput.value).toFixed(1)} GHz`;
+      });
+
+      el.bwInput.addEventListener("input", () => {
+        el.bwVal.textContent = `${Number(el.bwInput.value).toFixed(0)} MHz`;
+      });
+
+      el.mapTabBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.mapKey = btn.dataset.map || "rd";
+          el.mapTabBtns.forEach((b) => {
+            b.classList.remove("border-cyan-500", "text-cyan-300");
+            b.classList.add("border-slate-700");
+          });
+          btn.classList.add("border-cyan-500", "text-cyan-300");
+          updateMapImage();
+          if (state.summary) updatePeakList(state.summary);
+        });
+      });
+    }
+
+    async function bootstrap() {
+      lucide.createIcons();
+      bindEvents();
+
+      el.summaryPathInput.value = DEFAULT_SUMMARY_PATH;
+      el.fovInput.value = 120;
+      el.rangeInput.value = 100;
+      el.freqInput.value = 77;
+      el.bwInput.value = 1000;
+      el.txInput.value = 2;
+      el.rxInput.value = 4;
+      el.chirpsInput.value = 16;
+      el.samplesInput.value = 1024;
+
+      el.freqVal.textContent = `${Number(el.freqInput.value).toFixed(1)} GHz`;
+      el.bwVal.textContent = `${Number(el.bwInput.value).toFixed(0)} MHz`;
+      el.fovVal.textContent = `${Number(el.fovInput.value).toFixed(0)}°`;
+      el.rangeVal.textContent = `${Number(el.rangeInput.value).toFixed(0)} m`;
+
+      const defaultMapBtn = el.mapTabBtns.find((b) => b.dataset.map === state.mapKey);
+      if (defaultMapBtn) {
+        defaultMapBtn.classList.add("border-cyan-500", "text-cyan-300");
+      }
+
+      updateLoadedSummaryFlag(false);
+      setStatus("idle", "neutral", "viewer is waiting for summary json");
+      await refreshSummary();
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
