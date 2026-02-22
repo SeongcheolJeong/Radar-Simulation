@@ -406,6 +406,8 @@ M14.6 progress (2026-02-22):
 - closure readiness gate added:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_closure_readiness.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_m14_6_closure_readiness.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_m14_6_from_linux_report.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_finalize_m14_6_from_linux_report.py`
 - validations added:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_po_sbr_runtime_provider_stubbed.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_provider_integration_stubbed.py`

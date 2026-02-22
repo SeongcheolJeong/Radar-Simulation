@@ -1438,6 +1438,13 @@
   - missing Linux executed report path is deterministically surfaced
 
 - Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_finalize_m14_6_from_linux_report.py`
+- Result: pass
+- Notes:
+  - finalize helper not-ready behavior validated (`exit code 2`)
+  - readiness JSON is still emitted with `linux_executed_report_missing`
+
+- Date: 2026-02-22
 - Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_po_sbr_pilot.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/po_sbr_runtime_pilot_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json --allow-blocked`
 - Result: pass
 - Notes:

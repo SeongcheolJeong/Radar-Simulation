@@ -69,3 +69,5 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_
 3. closure gate:
    - `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_closure_readiness.py --linux-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_linux.json`
    - output must include `ready=true`
+4. optional finalization helper:
+   - `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_m14_6_from_linux_report.py --linux-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json --closure-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_linux.json --apply`

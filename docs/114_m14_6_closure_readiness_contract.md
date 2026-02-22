@@ -13,17 +13,27 @@ Readiness checker:
 3. validates Linux summary with executed-report validator
 4. emits machine-readable readiness JSON (`ready`, `missing_items`)
 
+Finalize helper:
+
+1. runs readiness checker + executed-report validator
+2. returns non-zero on not-ready state
+3. optionally updates M14.6 markdown checklists/log sections when `--apply` is used
+
 ## Code Paths
 
 - checker:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_closure_readiness.py`
+- finalize helper:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_m14_6_from_linux_report.py`
 - validation:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_m14_6_closure_readiness.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_finalize_m14_6_from_linux_report.py`
 
 ## Validation
 
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_m14_6_closure_readiness.py
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_finalize_m14_6_from_linux_report.py
 ```
 
 ## Acceptance
