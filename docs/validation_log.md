@@ -1431,9 +1431,23 @@
   - hard gate now available for Linux strict completion evidence
 
 - Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_m14_6_closure_readiness.py`
+- Result: pass
+- Notes:
+  - closure readiness checker schema validated
+  - missing Linux executed report path is deterministically surfaced
+
+- Date: 2026-02-22
 - Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_po_sbr_pilot.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/po_sbr_runtime_pilot_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json --allow-blocked`
 - Result: pass
 - Notes:
   - current Darwin host is deterministically blocked
   - blockers: `missing_required_modules`, `unsupported_platform:Darwin`, `missing_nvidia_runtime`
   - report archived with Linux strict rerun command hint
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_closure_readiness.py --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_2026_02_22.json`
+- Result: pass
+- Notes:
+  - readiness report archived (`ready=false`)
+  - only remaining missing item: `linux_executed_report_missing`

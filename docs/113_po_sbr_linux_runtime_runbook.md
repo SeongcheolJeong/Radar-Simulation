@@ -49,3 +49,6 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_
    - `path_list.json`
    - `adc_cube.npz`
    - `radar_map.npz`
+3. closure gate:
+   - `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_closure_readiness.py --linux-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_linux.json`
+   - output must include `ready=true`

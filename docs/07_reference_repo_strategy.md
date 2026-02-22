@@ -55,6 +55,7 @@ Use references via local adapters, not by merging third-party internals into cor
   - `sionna.rt` full runtime unlocked on macOS host via validated `DRJIT_LIBLLVM_PATH` candidate
   - PO-SBR runtime provider and pilot runner added with deterministic preflight/blocked reporting
   - PO-SBR strict executed-report gate added for Linux evidence lock
+  - M14.6 closure readiness checker added (`ready`/`missing_items` JSON gate)
 - Remaining high-impact physics/backend work:
   - PO-SBR strict runtime pilot execution on Linux+NVIDIA host (`pilot_status=executed` evidence pending)
   - scattering-physics fidelity tuning against measured scenarios

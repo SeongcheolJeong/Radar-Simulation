@@ -1,0 +1,12 @@
+{
+  "repo_root": "/Users/seongcheoljeong/Documents/Codex_test",
+  "linux_summary_json": "/Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json",
+  "ready": false,
+  "missing_items": [
+    "linux_executed_report_missing"
+  ],
+  "required_files_count": 8,
+  "missing_required_files": [],
+  "report_exists": false,
+  "report_validation": null
+}

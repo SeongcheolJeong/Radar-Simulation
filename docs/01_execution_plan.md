@@ -401,6 +401,9 @@ M14.6 progress (2026-02-22):
 - strict completion gate added:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_executed_report.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_strict.sh`
+- closure readiness gate added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_closure_readiness.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_m14_6_closure_readiness.py`
 - validations added:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_po_sbr_runtime_provider_stubbed.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_provider_integration_stubbed.py`
@@ -409,8 +412,12 @@ M14.6 progress (2026-02-22):
 - contracts/docs added:
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/112_scene_runtime_po_sbr_pilot_contract.md`
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/113_po_sbr_linux_runtime_runbook.md`
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/114_m14_6_closure_readiness_contract.md`
 - current host evidence (Darwin) locked as blocked:
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json`
   - blockers: missing modules (`rtxpy`, `igl`), unsupported platform, missing NVIDIA runtime
+- closure readiness report:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_2026_02_22.json`
+  - current state: `ready=false`, missing only `linux_executed_report_missing`
 - remaining to close M14.6:
   - execute strict pilot on Linux+NVIDIA host and archive `pilot_status=executed` report

@@ -65,3 +65,4 @@ M14.6 is accepted only if:
 3. blocked state includes deterministic blocker reasons and Linux rerun command
 4. executed state records `runtime_resolution.mode=runtime_provider` with non-zero path count
 5. executed report passes hard-gate validator (`validate_scene_runtime_po_sbr_executed_report.py`)
+6. M14.6 closure readiness checker returns `ready=true`

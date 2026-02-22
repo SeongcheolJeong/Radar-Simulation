@@ -58,4 +58,5 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 
 - runtime provider + pilot runner + validation stack added in repo
 - Darwin host preflight is deterministically blocked (`rtxpy`, `igl`, Linux+NVIDIA requirements)
+- closure readiness gate now reports a single remaining blocker: Linux executed report evidence
 - next closure action remains unchanged: strict pilot execution on Linux+NVIDIA host
