@@ -1,0 +1,281 @@
+{
+  "scene_json": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/avx_like_showcase_2026_02_22/scene_avx_like_runtime.json",
+  "outputs": {
+    "path_list_json": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/avx_like_showcase_2026_02_22/output/path_list.json",
+    "adc_cube_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/avx_like_showcase_2026_02_22/output/adc_cube.npz",
+    "radar_map_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/avx_like_showcase_2026_02_22/output/radar_map.npz"
+  },
+  "path_summary": {
+    "n_chirps": 16,
+    "path_count_total": 32,
+    "path_count_per_chirp": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "first_chirp_paths": [
+      {
+        "path_id": "static_sphere_c0000",
+        "delay_s": 1.569743134465247e-07,
+        "doppler_hz": 0.0,
+        "unit_direction": [
+          0.9946184088907778,
+          0.10360608425945601,
+          0.0
+        ],
+        "amp_complex": {
+          "re": 0.001806181546845677,
+          "im": 0.0
+        },
+        "material_tag": "metal_static",
+        "reflection_order": 1
+      },
+      {
+        "path_id": "moving_sphere_c0000",
+        "delay_s": 2.3503752932201954e-07,
+        "doppler_hz": -4105.947008345946,
+        "unit_direction": [
+          0.999133073092352,
+          -0.04163054471218133,
+          0.0
+        ],
+        "amp_complex": {
+          "re": 0.0003556322065080866,
+          "im": 7.902937922401926e-05
+        },
+        "material_tag": "metal_moving",
+        "reflection_order": 1
+      }
+    ]
+  },
+  "adc_summary": {
+    "shape": [
+      1024,
+      16,
+      2,
+      4
+    ],
+    "dtype": "complex64",
+    "abs_mean": 0.0009120730101130903,
+    "abs_max": 0.0021704891696572304,
+    "metadata": {
+      "fc_hz": 77000000000.0,
+      "slope_hz_per_s": 20000000000000.0,
+      "fs_hz": 20000000.0,
+      "samples_per_chirp": 1024,
+      "tx_schedule": [
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1
+      ],
+      "tx_pos_m": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.0078,
+          0.0
+        ]
+      ],
+      "rx_pos_m": [
+        [
+          0.0,
+          0.00185,
+          0.0
+        ],
+        [
+          0.0,
+          0.0037,
+          0.0
+        ],
+        [
+          0.0,
+          0.00555,
+          0.0
+        ],
+        [
+          0.0,
+          0.0074,
+          0.0
+        ]
+      ]
+    }
+  },
+  "radar_map_summary": {
+    "rd_shape": [
+      64,
+      256
+    ],
+    "ra_shape": [
+      32,
+      256
+    ],
+    "rd_top_peaks": [
+      {
+        "doppler_bin": 0,
+        "range_bin": 161,
+        "power": 11.010675053544668,
+        "rel_db": 0.0
+      },
+      {
+        "doppler_bin": 32,
+        "range_bin": 161,
+        "power": 11.010675053544668,
+        "rel_db": 0.0
+      },
+      {
+        "doppler_bin": 33,
+        "range_bin": 161,
+        "power": 10.25508602113173,
+        "rel_db": -0.3087463830702341
+      },
+      {
+        "doppler_bin": 1,
+        "range_bin": 161,
+        "power": 10.25508602113173,
+        "rel_db": -0.3087463830702341
+      },
+      {
+        "doppler_bin": 31,
+        "range_bin": 161,
+        "power": 10.25508602045873,
+        "rel_db": -0.30874638335524385
+      },
+      {
+        "doppler_bin": 63,
+        "range_bin": 161,
+        "power": 10.25508602045873,
+        "rel_db": -0.30874638335524385
+      }
+    ],
+    "ra_top_peaks": [
+      {
+        "angle_bin": 19,
+        "range_bin": 161,
+        "power": 1.453409512540773,
+        "rel_db": 0.0
+      },
+      {
+        "angle_bin": 18,
+        "range_bin": 161,
+        "power": 1.4048332401906172,
+        "rel_db": -0.14763223657933447
+      },
+      {
+        "angle_bin": 20,
+        "range_bin": 161,
+        "power": 1.3267888596077981,
+        "rel_db": -0.39586182010597337
+      },
+      {
+        "angle_bin": 17,
+        "range_bin": 161,
+        "power": 1.165826387737106,
+        "rel_db": -0.9575411724318718
+      },
+      {
+        "angle_bin": 21,
+        "range_bin": 161,
+        "power": 1.091112640677939,
+        "rel_db": -1.2451841115659184
+      },
+      {
+        "angle_bin": 22,
+        "range_bin": 161,
+        "power": 0.826067566147332,
+        "rel_db": -2.4537242750364547
+      }
+    ],
+    "metadata": {
+      "scene_id": "avx_like_showcase_v1_2026_02_22",
+      "backend_type": "sionna_rt",
+      "frame_count": 16,
+      "tx_schedule": [
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1
+      ],
+      "rd_ra_metadata": {
+        "input_shape_sctr": [
+          1024,
+          16,
+          2,
+          4
+        ],
+        "nfft_range": 1024,
+        "nfft_doppler": 64,
+        "nfft_angle": 32,
+        "range_window": "hann",
+        "doppler_window": "hann",
+        "angle_window": "hann",
+        "range_bin_limit": 256
+      },
+      "runtime_resolution": {
+        "mode": "runtime_provider",
+        "backend_type": "sionna_rt",
+        "runtime_provider": "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba",
+        "runtime_info": {
+          "provider_spec": "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba",
+          "required_modules": [
+            "mitsuba",
+            "drjit"
+          ],
+          "module_report": {
+            "mitsuba": {
+              "available": true,
+              "module_name": "mitsuba",
+              "module_version": "3.7.1"
+            },
+            "drjit": {
+              "available": true,
+              "module_name": "drjit",
+              "module_version": "1.2.0"
+            }
+          }
+        }
+      }
+    }
+  }
+}
