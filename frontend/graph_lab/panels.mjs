@@ -103,6 +103,23 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   showShortcutHelp: false,
   activeShortcutProfile: "default",
   shortcutProfileDraft: "custom_profile",
+  detailFieldStates: null,
+};
+const DETAIL_FIELD_DEFS = [
+  { id: "timestamp_iso", label: "time" },
+  { id: "event_meta", label: "event/run" },
+  { id: "delta", label: "delta" },
+  { id: "snapshot", label: "snapshot" },
+  { id: "baseline", label: "baseline" },
+  { id: "note_json", label: "note_json" },
+];
+const DEFAULT_DETAIL_FIELD_STATES = {
+  timestamp_iso: true,
+  event_meta: true,
+  delta: true,
+  snapshot: false,
+  baseline: false,
+  note_json: false,
 };
 const SHORTCUT_ACTION_DEFS = [
   { id: "toggle_help", label: "help" },
@@ -208,6 +225,27 @@ function normalizeShortcutBindings(raw, fallback) {
     }
     out[k] = normalizeShortcutToken(base[k]);
   });
+  return out;
+}
+
+function normalizeDetailFieldStates(raw, fallback) {
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const base = fallback && typeof fallback === "object" && !Array.isArray(fallback)
+    ? fallback
+    : DEFAULT_DETAIL_FIELD_STATES;
+  const out = {};
+  DETAIL_FIELD_DEFS.forEach((def) => {
+    const k = String(def.id || "");
+    if (!k) return;
+    if (source[k] !== undefined) {
+      out[k] = Boolean(source[k]);
+      return;
+    }
+    out[k] = Boolean(base[k]);
+  });
+  if (!Object.values(out).some(Boolean)) {
+    out.timestamp_iso = true;
+  }
   return out;
 }
 
@@ -665,6 +703,12 @@ export function ContractWarningOverlay({
     String(initialPrefs.shortcutProfileDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.shortcutProfileDraft)
   );
   const [shortcutBindings, setShortcutBindings] = React.useState(() => initialShortcutBindings);
+  const [detailFieldStates, setDetailFieldStates] = React.useState(() =>
+    normalizeDetailFieldStates(
+      initialPrefs.detailFieldStates,
+      DEFAULT_DETAIL_FIELD_STATES
+    )
+  );
   const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
   const [expandedRowKeys, setExpandedRowKeys] = React.useState(() => new Set());
   const applyOverlayPreset = React.useCallback((presetName) => {
@@ -678,6 +722,7 @@ export function ContractWarningOverlay({
       setGateHistoryPages(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages));
       setRowWindowSizeText(String(CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize));
       setShowShortcutHelp(false);
+      setDetailFieldStates(normalizeDetailFieldStates(DEFAULT_DETAIL_FIELD_STATES, DEFAULT_DETAIL_FIELD_STATES));
       setRowWindowOffset(0);
       return;
     }
@@ -688,6 +733,14 @@ export function ContractWarningOverlay({
       setGateHistoryPages("2");
       setRowWindowSizeText("80");
       setShowShortcutHelp(false);
+      setDetailFieldStates(normalizeDetailFieldStates({
+        timestamp_iso: true,
+        event_meta: true,
+        delta: true,
+        snapshot: false,
+        baseline: false,
+        note_json: false,
+      }, DEFAULT_DETAIL_FIELD_STATES));
       setRowWindowOffset(0);
       return;
     }
@@ -698,6 +751,14 @@ export function ContractWarningOverlay({
       setGateHistoryPages("4");
       setRowWindowSizeText("200");
       setShowShortcutHelp(false);
+      setDetailFieldStates(normalizeDetailFieldStates({
+        timestamp_iso: true,
+        event_meta: true,
+        delta: true,
+        snapshot: true,
+        baseline: true,
+        note_json: true,
+      }, DEFAULT_DETAIL_FIELD_STATES));
       setRowWindowOffset(0);
     }
   }, []);
@@ -775,10 +836,12 @@ export function ContractWarningOverlay({
       activeShortcutProfile,
       shortcutProfileDraft,
       shortcutBindings,
+      detailFieldStates,
     });
   }, [
     activeShortcutProfile,
     compactMode,
+    detailFieldStates,
     gateHistoryLimit,
     gateHistoryPages,
     nonZeroOnly,
@@ -969,28 +1032,85 @@ export function ContractWarningOverlay({
         .join(", "),
     [shortcutBindings]
   );
+  const detailFieldSelectedCount = React.useMemo(
+    () => DETAIL_FIELD_DEFS.filter((def) => Boolean(detailFieldStates[String(def.id || "")])).length,
+    [detailFieldStates]
+  );
+  const applyDetailFieldPreset = React.useCallback((presetName) => {
+    const name = String(presetName || "").trim();
+    if (name === "all") {
+      setDetailFieldStates(normalizeDetailFieldStates({
+        timestamp_iso: true,
+        event_meta: true,
+        delta: true,
+        snapshot: true,
+        baseline: true,
+        note_json: true,
+      }, DEFAULT_DETAIL_FIELD_STATES));
+      return;
+    }
+    if (name === "core") {
+      setDetailFieldStates(normalizeDetailFieldStates({
+        timestamp_iso: true,
+        event_meta: true,
+        delta: true,
+        snapshot: false,
+        baseline: false,
+        note_json: false,
+      }, DEFAULT_DETAIL_FIELD_STATES));
+    }
+  }, []);
+  const toggleDetailField = React.useCallback((fieldId) => {
+    const id = String(fieldId || "");
+    if (!id) return;
+    setDetailFieldStates((prev) => {
+      const next = normalizeDetailFieldStates(
+        {
+          ...prev,
+          [id]: !Boolean(prev[id]),
+        },
+        prev
+      );
+      return next;
+    });
+  }, []);
   const formatRowDetailText = React.useCallback((row) => {
     const snapshot = row?.snapshot && typeof row.snapshot === "object" ? row.snapshot : {};
     const baseline = row?.baseline && typeof row.baseline === "object" ? row.baseline : {};
     const delta = row?.delta && typeof row.delta === "object" ? row.delta : {};
     const note = row?.note && typeof row.note === "object" ? row.note : {};
-    let noteJson = "{}";
-    try {
-      noteJson = JSON.stringify(note, null, 2);
-    } catch (_) {
-      noteJson = String(note);
+    const lines = [];
+    if (detailFieldStates.timestamp_iso) {
+      lines.push(`timestamp_iso: ${formatTimestampIso(row?.timestamp_ms)}`);
     }
-    return [
-      `timestamp_iso: ${formatTimestampIso(row?.timestamp_ms)}`,
-      `event_source: ${String(row?.event_source || "-")}`,
-      `graph_run_id: ${String(row?.graph_run_id || "-")}`,
-      `delta(unique/attempt): ${formatSigned(delta.unique_warning_count)}/${formatSigned(delta.attempt_count_total)}`,
-      `snapshot(unique/attempt): ${Number(snapshot.unique_warning_count || 0)}/${Number(snapshot.attempt_count_total || 0)}`,
-      `baseline(unique/attempt): ${Number(baseline.unique_warning_count || 0)}/${Number(baseline.attempt_count_total || 0)}`,
-      "note_json:",
-      noteJson,
-    ].join("\n");
-  }, []);
+    if (detailFieldStates.event_meta) {
+      lines.push(`event_source: ${String(row?.event_source || "-")}`);
+      lines.push(`graph_run_id: ${String(row?.graph_run_id || "-")}`);
+    }
+    if (detailFieldStates.delta) {
+      lines.push(`delta(unique/attempt): ${formatSigned(delta.unique_warning_count)}/${formatSigned(delta.attempt_count_total)}`);
+    }
+    if (detailFieldStates.snapshot) {
+      lines.push(`snapshot(unique/attempt): ${Number(snapshot.unique_warning_count || 0)}/${Number(snapshot.attempt_count_total || 0)}`);
+    }
+    if (detailFieldStates.baseline) {
+      lines.push(`baseline(unique/attempt): ${Number(baseline.unique_warning_count || 0)}/${Number(baseline.attempt_count_total || 0)}`);
+    }
+    if (detailFieldStates.note_json) {
+      let noteJson = "{}";
+      try {
+        noteJson = JSON.stringify(note, null, 2);
+      } catch (_) {
+        noteJson = String(note);
+      }
+      lines.push("note_json:");
+      lines.push(noteJson);
+    }
+    if (lines.length === 0) {
+      lines.push("(no detail fields selected)");
+    }
+    return lines.join("\n");
+  }, [detailFieldStates]);
   const triggerShortcutAction = React.useCallback((actionId) => {
     const id = String(actionId || "");
     if (id === "toggle_help") {
@@ -1332,6 +1452,52 @@ export function ContractWarningOverlay({
         style: { margin: "4px 2px 2px 2px", color: "#ffd08b" },
       }, `Shortcut conflict: ${shortcutConflictText} (first mapping wins).`)
       : null,
+    h("div", {
+      className: "contract-overlay-filter",
+      key: "co_detail_fields_cfg",
+      style: { flexWrap: "wrap", rowGap: "6px" },
+    }, [
+      h("label", { key: "co_detail_fields_label" }, "detail fields:"),
+      ...DETAIL_FIELD_DEFS.map((def) => {
+        const fieldId = String(def.id || "");
+        if (!fieldId) return null;
+        const checked = Boolean(detailFieldStates[fieldId]);
+        return h("label", {
+          key: `co_detail_field_toggle_${fieldId}`,
+          style: {
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+            border: checked ? "1px solid #3a6277" : "1px solid #27485a",
+            borderRadius: "6px",
+            padding: "3px 6px",
+            background: checked ? "rgba(34, 68, 86, 0.35)" : "rgba(9, 18, 24, 0.72)",
+          },
+        }, [
+          h("input", {
+            type: "checkbox",
+            checked,
+            onChange: () => toggleDetailField(fieldId),
+          }),
+          String(def.label || fieldId),
+        ]);
+      }).filter(Boolean),
+      h("button", {
+        className: "btn",
+        key: "co_detail_fields_core",
+        onClick: () => applyDetailFieldPreset("core"),
+      }, "Core Fields"),
+      h("button", {
+        className: "btn",
+        key: "co_detail_fields_all",
+        onClick: () => applyDetailFieldPreset("all"),
+      }, "All Fields"),
+      h("span", {
+        key: "co_detail_fields_count",
+        className: "hint",
+        style: { marginLeft: "auto", color: "#8eb6ca" },
+      }, `selected ${detailFieldSelectedCount}/${DETAIL_FIELD_DEFS.length}`),
+    ]),
     showShortcutHelp
       ? h(
         "div",

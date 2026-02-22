@@ -1059,3 +1059,19 @@ M17.20 outcome (2026-02-22):
   - per-action inline key editor for all overlay actions
   - duplicate key detection + conflict hint (`first mapping wins`)
   - prefs now persist active profile/draft/bindings in overlay localStorage
+
+M17.21 outcome (2026-02-22):
+
+- row detail payload is now field-selectable at runtime:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - detail fields: `time`, `event/run`, `delta`, `snapshot`, `baseline`, `note_json`
+  - per-field checkbox toggles + selection counter (`selected n/6`)
+- detail field presets added for faster triage/deep workflows:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Core Fields`, `All Fields`
+  - overlay presets now align detail scope (`triage -> core`, `deep -> all`)
+- detail rendering and persistence hardened:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `formatRowDetailText` now emits only selected sections
+  - `note_json` serialization runs only when selected
+  - field-state selection persisted via overlay prefs (`detailFieldStates`)

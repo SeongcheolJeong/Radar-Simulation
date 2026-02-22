@@ -2232,3 +2232,36 @@
     - `Save Profile`
     - `Delete Profile`
     - `Shortcut conflict`
+
+## Web E2E Graph Row Detail Field-Level Toggles (M17.21)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - row-detail field-toggle frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8152/8132)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - field-toggle state/preset tokens confirmed:
+    - `DETAIL_FIELD_DEFS`
+    - `DEFAULT_DETAIL_FIELD_STATES`
+    - `detailFieldStates`
+    - `applyDetailFieldPreset`
+    - `toggleDetailField`
+  - field-toggle UI tokens confirmed:
+    - `co_detail_fields_cfg`
+    - `Core Fields`
+    - `All Fields`
+    - `selected`
+  - detail renderer gating tokens confirmed:
+    - `formatRowDetailText`
+    - `detailFieldStates.timestamp_iso`
+    - `detailFieldStates.event_meta`
+    - `detailFieldStates.delta`
+    - `detailFieldStates.snapshot`
+    - `detailFieldStates.baseline`
+    - `detailFieldStates.note_json`
