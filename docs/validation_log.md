@@ -2149,3 +2149,30 @@
     - `co_row_window_prev`
     - `co_row_window_next`
     - `visibleRows`
+
+## Web E2E Graph Overlay Shortcuts + Presets (M17.18)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - shortcut/preset frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8149/8129)` + token grep (`curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - preset/reset tokens confirmed:
+    - `Preset: Triage`
+    - `Preset: Deep`
+    - `Reset Preset`
+    - `applyOverlayPreset`
+  - shortcut tokens confirmed:
+    - `Shortcuts: on`
+    - `Shortcuts: off`
+    - `Shortcuts: h(`
+    - `isEditableElementTarget`
+    - `key === "1"`
+    - `key === "2"`
+    - `key === "0"`

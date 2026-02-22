@@ -70,6 +70,16 @@ function getFailureRuleTags(row, policyByRun) {
 }
 
 const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
+const CONTRACT_OVERLAY_DEFAULT_PREFS = {
+  sourceFilter: "all",
+  pinnedRunId: "all",
+  nonZeroOnly: false,
+  compactMode: false,
+  gateHistoryLimit: "256",
+  gateHistoryPages: "2",
+  rowWindowSize: "120",
+  showShortcutHelp: false,
+};
 
 function clampInteger(raw, minValue, maxValue, fallback) {
   const n = Number(raw);
@@ -99,6 +109,14 @@ function saveContractOverlayPrefs(prefs) {
   } catch (_) {
     // localStorage may be blocked; ignore and continue with in-memory state
   }
+}
+
+function isEditableElementTarget(target) {
+  const t = target && typeof target === "object" ? target : null;
+  if (!t) return false;
+  if (Boolean(t.isContentEditable)) return true;
+  const tag = String(t.tagName || "").toLowerCase();
+  return tag === "input" || tag === "textarea" || tag === "select";
 }
 
 function renderArtifactInspector(graphRunSummary) {
@@ -447,20 +465,77 @@ export function ContractWarningOverlay({
   const runOpenHandler = typeof onOpenRun === "function" ? onOpenRun : () => {};
   const gateOpenHandler = typeof onOpenGateEvidence === "function" ? onOpenGateEvidence : () => {};
   const initialPrefs = React.useMemo(() => loadContractOverlayPrefs(), []);
-  const [sourceFilter, setSourceFilter] = React.useState(String(initialPrefs.sourceFilter || "all"));
-  const [pinnedRunId, setPinnedRunId] = React.useState(String(initialPrefs.pinnedRunId || "all"));
-  const [nonZeroOnly, setNonZeroOnly] = React.useState(Boolean(initialPrefs.nonZeroOnly));
-  const [compactMode, setCompactMode] = React.useState(Boolean(initialPrefs.compactMode));
+  const [sourceFilter, setSourceFilter] = React.useState(
+    String(initialPrefs.sourceFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter)
+  );
+  const [pinnedRunId, setPinnedRunId] = React.useState(
+    String(initialPrefs.pinnedRunId || CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId)
+  );
+  const [nonZeroOnly, setNonZeroOnly] = React.useState(
+    Boolean(
+      initialPrefs.nonZeroOnly !== undefined
+        ? initialPrefs.nonZeroOnly
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.nonZeroOnly
+    )
+  );
+  const [compactMode, setCompactMode] = React.useState(
+    Boolean(
+      initialPrefs.compactMode !== undefined
+        ? initialPrefs.compactMode
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.compactMode
+    )
+  );
   const [gateHistoryLimit, setGateHistoryLimit] = React.useState(
-    String(initialPrefs.gateHistoryLimit || "256")
+    String(initialPrefs.gateHistoryLimit || CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit)
   );
   const [gateHistoryPages, setGateHistoryPages] = React.useState(
-    String(initialPrefs.gateHistoryPages || "2")
+    String(initialPrefs.gateHistoryPages || CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages)
   );
   const [rowWindowSizeText, setRowWindowSizeText] = React.useState(
-    String(initialPrefs.rowWindowSize || "120")
+    String(initialPrefs.rowWindowSize || CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize)
+  );
+  const [showShortcutHelp, setShowShortcutHelp] = React.useState(
+    Boolean(
+      initialPrefs.showShortcutHelp !== undefined
+        ? initialPrefs.showShortcutHelp
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.showShortcutHelp
+    )
   );
   const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
+  const applyOverlayPreset = React.useCallback((presetName) => {
+    const name = String(presetName || "").trim();
+    if (name === "reset_all") {
+      setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
+      setPinnedRunId(CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId);
+      setNonZeroOnly(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.nonZeroOnly));
+      setCompactMode(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.compactMode));
+      setGateHistoryLimit(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit));
+      setGateHistoryPages(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages));
+      setRowWindowSizeText(String(CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize));
+      setShowShortcutHelp(false);
+      setRowWindowOffset(0);
+      return;
+    }
+    if (name === "triage") {
+      setNonZeroOnly(true);
+      setCompactMode(true);
+      setGateHistoryLimit("128");
+      setGateHistoryPages("2");
+      setRowWindowSizeText("80");
+      setShowShortcutHelp(false);
+      setRowWindowOffset(0);
+      return;
+    }
+    if (name === "deep_gate") {
+      setNonZeroOnly(false);
+      setCompactMode(false);
+      setGateHistoryLimit("512");
+      setGateHistoryPages("4");
+      setRowWindowSizeText("200");
+      setShowShortcutHelp(false);
+      setRowWindowOffset(0);
+    }
+  }, []);
   const gateLookupOptions = React.useMemo(() => {
     const limitRaw = Number(gateHistoryLimit || 0);
     const pagesRaw = Number(gateHistoryPages || 0);
@@ -511,6 +586,7 @@ export function ContractWarningOverlay({
       gateHistoryLimit,
       gateHistoryPages,
       rowWindowSize,
+      showShortcutHelp,
     });
   }, [
     compactMode,
@@ -519,6 +595,7 @@ export function ContractWarningOverlay({
     nonZeroOnly,
     pinnedRunId,
     rowWindowSize,
+    showShortcutHelp,
     sourceFilter,
   ]);
 
@@ -549,6 +626,60 @@ export function ContractWarningOverlay({
     () => filteredRows.slice(rowWindowOffset, rowWindowEnd),
     [filteredRows, rowWindowEnd, rowWindowOffset]
   );
+  React.useEffect(() => {
+    const onKeyDown = (evt) => {
+      if (!evt || evt.defaultPrevented) return;
+      if (evt.metaKey || evt.ctrlKey || evt.altKey) return;
+      if (isEditableElementTarget(evt.target)) return;
+      const key = String(evt.key || "").toLowerCase();
+      if (key === "h") {
+        evt.preventDefault();
+        setShowShortcutHelp((x) => !x);
+        return;
+      }
+      if (key === "c") {
+        evt.preventDefault();
+        setCompactMode((x) => !x);
+        return;
+      }
+      if (key === "n") {
+        evt.preventDefault();
+        setNonZeroOnly((x) => !x);
+        return;
+      }
+      if (key === "g") {
+        evt.preventDefault();
+        setRowWindowOffset(0);
+        return;
+      }
+      if (key === "j") {
+        evt.preventDefault();
+        setRowWindowOffset((prev) => Math.min(maxRowWindowOffset, Number(prev || 0) + rowWindowSize));
+        return;
+      }
+      if (key === "k") {
+        evt.preventDefault();
+        setRowWindowOffset((prev) => Math.max(0, Number(prev || 0) - rowWindowSize));
+        return;
+      }
+      if (key === "1") {
+        evt.preventDefault();
+        applyOverlayPreset("triage");
+        return;
+      }
+      if (key === "2") {
+        evt.preventDefault();
+        applyOverlayPreset("deep_gate");
+        return;
+      }
+      if (key === "0") {
+        evt.preventDefault();
+        applyOverlayPreset("reset_all");
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [applyOverlayPreset, maxRowWindowOffset, rowWindowSize]);
   const policyByRun = React.useMemo(() => {
     const map = new Map();
     rows.forEach((row) => {
@@ -586,6 +717,26 @@ export function ContractWarningOverlay({
           onClick: () => setCompactMode((x) => !x),
           key: "co_compact",
         }, compactMode ? "Compact: on" : "Compact: off"),
+        h("button", {
+          className: "btn",
+          onClick: () => applyOverlayPreset("triage"),
+          key: "co_preset_triage",
+        }, "Preset: Triage"),
+        h("button", {
+          className: "btn",
+          onClick: () => applyOverlayPreset("deep_gate"),
+          key: "co_preset_deep",
+        }, "Preset: Deep"),
+        h("button", {
+          className: "btn",
+          onClick: () => applyOverlayPreset("reset_all"),
+          key: "co_preset_reset",
+        }, "Reset Preset"),
+        h("button", {
+          className: "btn",
+          onClick: () => setShowShortcutHelp((x) => !x),
+          key: "co_shortcuts_toggle",
+        }, showShortcutHelp ? "Shortcuts: on" : "Shortcuts: off"),
         h("button", { className: "btn", onClick: onExport, key: "co_export" }, "Export JSON"),
         h("button", { className: "btn", onClick: onClear, key: "co_clear" }, "Clear"),
         h("button", { className: "btn", onClick: onClose, key: "co_hide" }, "Hide"),
@@ -681,6 +832,17 @@ export function ContractWarningOverlay({
         `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
       ]),
     ]),
+    showShortcutHelp
+      ? h(
+        "div",
+        {
+          className: "hint",
+          key: "co_shortcuts_hint",
+          style: { margin: "6px 2px 8px 2px", color: "#8eb6ca" },
+        },
+        "Shortcuts: h(help), c(compact), n(non-zero), j(next), k(prev), g(top), 1(triage), 2(deep), 0(reset)."
+      )
+      : null,
     h("div", { className: "contract-overlay-bd", key: "co_bd" }, filteredRows.length === 0
       ? h("pre", { className: "result-box", key: "co_empty" }, "no contract events yet")
       : visibleRows.map((row, localIdx) =>

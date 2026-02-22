@@ -126,6 +126,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.15: Policy-eval filtered pagination + frontend evidence cache (large-history scan control)
 - [x] M17.16: Overlay gate-history window controls + incremental page-budget lookup UX
 - [x] M17.17: Timeline row-window virtualization + overlay preference persistence
+- [x] M17.18: Overlay shortcut keys + preset/reset operations
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -138,7 +139,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.17 frontend hardening track: add keyboard shortcuts/reset presets for overlay operations and lightweight row detail lazy-expansion while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.18 frontend hardening track: add lightweight row detail lazy-expansion and optional keyboard shortcut remap/profile save while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1011,3 +1012,18 @@ M17.17 outcome (2026-02-22):
 - operator context indicator improved:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - filter bar now displays window coverage (`window start-end/filtered_count`)
+
+M17.18 outcome (2026-02-22):
+
+- overlay preset operations added for quick mode switching:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Preset: Triage`, `Preset: Deep`, `Reset Preset`
+  - preset applier: `applyOverlayPreset("triage"|"deep_gate"|"reset_all")`
+- keyboard shortcut layer added for overlay operators:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - shortcuts: `h`, `c`, `n`, `j`, `k`, `g`, `1`, `2`, `0`
+  - editable target guard: `isEditableElementTarget` (input/textarea/select/contenteditable 제외)
+- shortcut discoverability exposed in UI:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - toggle: `Shortcuts: on/off`
+  - inline hint line with key map summary
