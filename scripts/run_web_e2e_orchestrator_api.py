@@ -50,6 +50,9 @@ def main() -> None:
     print("    GET  /api/policy-evals")
     print("    GET  /api/policy-evals/{policy_eval_id}")
     print("    POST /api/compare/policy")
+    print("    GET  /api/regression-sessions")
+    print("    GET  /api/regression-sessions/{session_id}")
+    print("    POST /api/regression-sessions")
 
     serve_web_e2e_http_api(host=args.host, port=args.port, orchestrator=orchestrator)
 

@@ -72,13 +72,58 @@ def _build_min_scene(path: Path) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _build_shifted_scene(path: Path) -> None:
+    payload = {
+        "scene_id": "web_e2e_validate_scene_shifted_v1",
+        "backend": {
+            "type": "analytic_targets",
+            "n_chirps": 4,
+            "chirp_interval_s": 4.0e-5,
+            "tx_pos_m": [[0.0, 0.0, 0.0], [0.0, -0.0078, 0.0]],
+            "rx_pos_m": [[0.0, 0.00185, 0.0], [0.0, 0.0037, 0.0]],
+            "targets": [
+                {
+                    "path_id": "validate_far_static",
+                    "range_m": 55.0,
+                    "radial_velocity_mps": 0.0,
+                    "az_deg": 18.0,
+                    "amp": 1.2,
+                },
+                {
+                    "path_id": "validate_far_moving",
+                    "range_m": 70.0,
+                    "radial_velocity_mps": 10.0,
+                    "az_deg": -16.0,
+                    "amp": {"re": 0.5, "im": -0.2},
+                },
+            ],
+            "noise_sigma": 0.0,
+        },
+        "radar": {
+            "fc_hz": 77e9,
+            "slope_hz_per_s": 20e12,
+            "fs_hz": 20e6,
+            "samples_per_chirp": 256,
+        },
+        "map_config": {
+            "nfft_range": 256,
+            "nfft_doppler": 16,
+            "nfft_angle": 8,
+            "range_bin_limit": 64,
+        },
+    }
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
 def run() -> None:
     repo_root = Path(__file__).resolve().parents[1]
 
     with tempfile.TemporaryDirectory(prefix="validate_web_e2e_api_") as td:
         root = Path(td)
         scene_json = root / "scene.json"
+        scene_json_shifted = root / "scene_shifted.json"
         _build_min_scene(scene_json)
+        _build_shifted_scene(scene_json_shifted)
 
         store_root = root / "store"
         orchestrator = WebE2EOrchestrator(repo_root=str(repo_root), store_root=str(store_root))
@@ -98,6 +143,7 @@ def run() -> None:
             assert "comparison_count" in health
             assert "baseline_count" in health
             assert "policy_eval_count" in health
+            assert "regression_session_count" in health
 
             status, prof = _http_json("GET", f"{base}/api/profiles")
             assert status == 200
@@ -261,6 +307,72 @@ def run() -> None:
             )
             assert status == 200
             assert str(policy_row["policy_eval_id"]) == policy_eval_id
+
+            # Build a shifted candidate run to force policy hold.
+            post_payload_shifted = {
+                "scene_json_path": str(scene_json_shifted),
+                "profile": "fast_debug",
+                "run_hybrid_estimation": False,
+                "tag": "validate_web_e2e_shifted",
+            }
+            status, created_bad = _http_json(
+                "POST", f"{base}/api/runs?async=0", payload=post_payload_shifted
+            )
+            assert status == 200
+            run_id_bad = str(created_bad["run"]["run_id"])
+
+            status, policy_bad_resp = _http_json(
+                "POST",
+                f"{base}/api/compare/policy",
+                payload={
+                    "baseline_id": "validate_baseline",
+                    "candidate_run_id": run_id_bad,
+                },
+            )
+            assert status == 200
+            assert policy_bad_resp["ok"] is True
+            policy_bad = policy_bad_resp["policy_eval"]
+            assert policy_bad["gate_failed"] is True
+            assert policy_bad["recommendation"] == "hold_candidate"
+
+            # Regression session (batch policy verdicts) with stop-on-first-fail.
+            session_payload = {
+                "session_id": "validate_session",
+                "baseline_id": "validate_baseline",
+                "candidate_run_ids": [run_id_bad, run_id_2],
+                "stop_on_first_fail": True,
+                "tag": "validate_batch",
+            }
+            status, session_resp = _http_json(
+                "POST", f"{base}/api/regression-sessions", payload=session_payload
+            )
+            assert status == 200
+            assert session_resp["ok"] is True
+            session = session_resp["regression_session"]
+            assert session["version"] == "web_e2e_regression_session_v1"
+            assert session["session_id"] == "validate_session"
+            assert session["requested_candidate_count"] == 2
+            assert session["evaluated_candidate_count"] == 1
+            assert session["held_count"] == 1
+            assert session["adopted_count"] == 0
+            assert session["truncated"] is True
+            assert session["all_pass"] is False
+            assert session["recommendation"] == "stopped_on_first_failure"
+            assert len(session["rows"]) == 1
+            assert session["rows"][0]["candidate_run_id"] == run_id_bad
+
+            status, sess_list = _http_json("GET", f"{base}/api/regression-sessions")
+            assert status == 200
+            assert any(
+                str(x.get("session_id")) == "validate_session"
+                for x in sess_list["regression_sessions"]
+            )
+
+            status, sess_row = _http_json(
+                "GET", f"{base}/api/regression-sessions/{urllib.parse.quote('validate_session')}"
+            )
+            assert status == 200
+            assert str(sess_row["session_id"]) == "validate_session"
 
         finally:
             server.shutdown()

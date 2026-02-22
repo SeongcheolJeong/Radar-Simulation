@@ -99,6 +99,15 @@
             <i data-lucide="shield-check" class="w-4 h-4"></i>
             Policy Verdict
           </button>
+          <label class="text-xs text-slate-400 block">Regression Session ID (optional)</label>
+          <input id="regressionSessionIdInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
+          <label class="text-xs text-slate-400 block">Candidate run_ids (comma/newline)</label>
+          <textarea id="regressionCandidatesInput" rows="3" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none"></textarea>
+          <button id="runRegressionSessionBtn" class="w-full py-2 rounded bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+            <i data-lucide="list-checks" class="w-4 h-4"></i>
+            Run Regression Session
+          </button>
+          <div id="regressionStatus" class="text-[11px] text-slate-500">regression idle</div>
           <div id="compareStatus" class="text-[11px] text-slate-500">compare idle</div>
           <pre id="compareResultBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
         </div>
@@ -363,6 +372,7 @@
       activeRunId: null,
       lastComparison: null,
       lastPolicyEval: null,
+      lastRegressionSession: null,
     };
 
     const el = {
@@ -379,6 +389,10 @@
       pinBaselineBtn: document.getElementById("pinBaselineBtn"),
       compareApiBtn: document.getElementById("compareApiBtn"),
       policyCompareBtn: document.getElementById("policyCompareBtn"),
+      regressionSessionIdInput: document.getElementById("regressionSessionIdInput"),
+      regressionCandidatesInput: document.getElementById("regressionCandidatesInput"),
+      runRegressionSessionBtn: document.getElementById("runRegressionSessionBtn"),
+      regressionStatus: document.getElementById("regressionStatus"),
       compareStatus: document.getElementById("compareStatus"),
       compareResultBox: document.getElementById("compareResultBox"),
       refreshBtn: document.getElementById("refreshBtn"),
@@ -490,6 +504,19 @@
       }
     }
 
+    function setRegressionStatus(text, tone) {
+      el.regressionStatus.textContent = text || "regression idle";
+      if (tone === "ok") {
+        el.regressionStatus.className = "text-[11px] text-emerald-400";
+      } else if (tone === "warn") {
+        el.regressionStatus.className = "text-[11px] text-amber-400";
+      } else if (tone === "error") {
+        el.regressionStatus.className = "text-[11px] text-red-400";
+      } else {
+        el.regressionStatus.className = "text-[11px] text-slate-500";
+      }
+    }
+
     function renderComparison(comparison) {
       if (!comparison) {
         el.compareResultBox.textContent = "-";
@@ -538,6 +565,28 @@
           lines.push(`- ${f.rule}${metric}: ${String(f.value)} > ${String(f.limit)}`);
         });
       }
+      el.compareResultBox.textContent = lines.join("\n");
+    }
+
+    function renderRegressionSession(session) {
+      if (!session) {
+        el.compareResultBox.textContent = "-";
+        return;
+      }
+      const rows = Array.isArray(session.rows) ? session.rows : [];
+      const lines = [
+        `session_id: ${session.session_id || "-"}`,
+        `baseline_id: ${session?.baseline?.baseline_id || "-"}`,
+        `requested/evaluated: ${Number(session.requested_candidate_count || 0)}/${Number(session.evaluated_candidate_count || 0)}`,
+        `adopted/held: ${Number(session.adopted_count || 0)}/${Number(session.held_count || 0)}`,
+        `truncated: ${Boolean(session.truncated)}`,
+        `recommendation: ${session.recommendation || "-"}`,
+      ];
+      rows.slice(0, 8).forEach((r) => {
+        lines.push(
+          `- #${Number(r.index || 0)} ${r.candidate_run_id || r.candidate_summary_json || "-"} | gate_failed=${Boolean(r.gate_failed)} | rec=${r.recommendation || "-"}`
+        );
+      });
       el.compareResultBox.textContent = lines.join("\n");
     }
 
@@ -979,6 +1028,12 @@
           el.compareRefRunInput.value = prevCandidate;
         }
         el.compareCandRunInput.value = String(finalRun.run_id);
+
+        const existing = parseCandidateRunIdsText(el.regressionCandidatesInput.value);
+        if (!existing.includes(String(finalRun.run_id))) {
+          existing.push(String(finalRun.run_id));
+          el.regressionCandidatesInput.value = existing.join("\n");
+        }
       } catch (err) {
         updateLoadedSummaryFlag(false);
         setStatus("error", "error", String(err.message || err));
@@ -1135,11 +1190,92 @@
       }
     }
 
+    function parseCandidateRunIdsText(text) {
+      const raw = String(text || "");
+      const tokens = raw
+        .split(/[\n,]/g)
+        .map((x) => x.trim())
+        .filter((x) => x.length > 0);
+      const out = [];
+      const seen = new Set();
+      tokens.forEach((x) => {
+        if (seen.has(x)) return;
+        seen.add(x);
+        out.push(x);
+      });
+      return out;
+    }
+
+    async function runRegressionSessionViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const baselineId = (el.baselineIdInput.value || "").trim();
+      const sessionId = (el.regressionSessionIdInput.value || "").trim();
+      let candidateRunIds = parseCandidateRunIdsText(el.regressionCandidatesInput.value);
+
+      if (candidateRunIds.length === 0) {
+        const a = (el.compareRefRunInput.value || "").trim();
+        const b = (el.compareCandRunInput.value || "").trim();
+        candidateRunIds = [a, b].filter((x) => x);
+      }
+
+      if (!apiBase) {
+        setRegressionStatus("api base URL required", "error");
+        return;
+      }
+      if (!baselineId) {
+        setRegressionStatus("baseline id required", "error");
+        return;
+      }
+      if (candidateRunIds.length === 0) {
+        setRegressionStatus("candidate run_ids required", "error");
+        return;
+      }
+
+      el.runRegressionSessionBtn.disabled = true;
+      el.runRegressionSessionBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setRegressionStatus("running regression session...", "warn");
+
+      try {
+        const body = {
+          baseline_id: baselineId,
+          candidate_run_ids: candidateRunIds,
+          stop_on_first_fail: false,
+          tag: "dashboard_regression",
+        };
+        if (sessionId) {
+          body.session_id = sessionId;
+          body.overwrite = true;
+        }
+        const resp = await fetchApiJson(`${apiBase}/api/regression-sessions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const session = resp && resp.regression_session ? resp.regression_session : null;
+        if (!session) {
+          throw new Error("regression session response missing payload");
+        }
+        state.lastRegressionSession = session;
+        renderRegressionSession(session);
+        if (Boolean(session.all_pass)) {
+          setRegressionStatus(`all pass: ${session.session_id}`, "ok");
+        } else {
+          setRegressionStatus(`holds detected: ${session.session_id}`, "warn");
+        }
+      } catch (err) {
+        setRegressionStatus(`regression failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.runRegressionSessionBtn.disabled = false;
+        el.runRegressionSessionBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      }
+    }
+
     async function fetchSummaryFromPath(pathValue) {
-      const target = (pathValue || "").trim();
-      if (!target) {
+      const targetRaw = (pathValue || "").trim();
+      if (!targetRaw) {
         throw new Error("Summary path is empty.");
       }
+      const target = normalizeRepoPath(targetRaw) || targetRaw;
       const res = await fetch(`${target}${target.includes("?") ? "&" : "?"}t=${Date.now()}`);
       if (!res.ok) {
         throw new Error(`Failed to fetch summary (${res.status} ${res.statusText})`);
@@ -1175,6 +1311,7 @@
       el.pinBaselineBtn.addEventListener("click", () => pinBaselineViaApi());
       el.compareApiBtn.addEventListener("click", () => compareRunsViaApi());
       el.policyCompareBtn.addEventListener("click", () => evaluatePolicyViaApi());
+      el.runRegressionSessionBtn.addEventListener("click", () => runRegressionSessionViaApi());
 
       el.loadJsonBtn.addEventListener("click", () => {
         el.summaryFileInput.click();
@@ -1245,6 +1382,8 @@
       const queryBaselineId = params.get("baseline_id");
       const queryCompareRef = params.get("compare_ref");
       const queryCompareCand = params.get("compare_cand");
+      const queryRegressionSessionId = params.get("regression_session_id");
+      const queryRegressionCandidates = params.get("regression_candidates");
       el.summaryPathInput.value = querySummary && querySummary.trim() ? querySummary.trim() : DEFAULT_SUMMARY_PATH;
       el.apiBaseInput.value = queryApi && queryApi.trim() ? queryApi.trim() : DEFAULT_API_BASE;
       el.sceneJsonInput.value = queryScene && queryScene.trim() ? queryScene.trim() : DEFAULT_SCENE_JSON_PATH;
@@ -1252,6 +1391,10 @@
       el.baselineIdInput.value = queryBaselineId && queryBaselineId.trim() ? queryBaselineId.trim() : "main_baseline";
       el.compareRefRunInput.value = queryCompareRef && queryCompareRef.trim() ? queryCompareRef.trim() : "";
       el.compareCandRunInput.value = queryCompareCand && queryCompareCand.trim() ? queryCompareCand.trim() : "";
+      el.regressionSessionIdInput.value =
+        queryRegressionSessionId && queryRegressionSessionId.trim() ? queryRegressionSessionId.trim() : "";
+      el.regressionCandidatesInput.value =
+        queryRegressionCandidates && queryRegressionCandidates.trim() ? queryRegressionCandidates.trim() : "";
       el.fovInput.value = 120;
       el.rangeInput.value = 100;
       el.freqInput.value = 77;
@@ -1274,6 +1417,7 @@
       updateLoadedSummaryFlag(false);
       setApiRunStatus("api run idle", "neutral");
       setCompareStatus("compare idle", "neutral");
+      setRegressionStatus("regression idle", "neutral");
       renderComparison(null);
       setStatus("idle", "neutral", "viewer is waiting for summary json");
       await refreshSummary();

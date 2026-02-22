@@ -1501,3 +1501,21 @@
   - dashboard HTML served and API health endpoint returns `ok=true`
   - dashboard contains API run/compare controls (`runSceneViaApi`, `compareRunsViaApi`)
   - dashboard contains baseline/policy controls (`pinBaselineViaApi`, `evaluatePolicyViaApi`)
+
+## Web E2E Regression Session API (M15.4)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - regression session API validated (`POST /api/regression-sessions`, `GET /api/regression-sessions`, `GET /api/regression-sessions/{id}`)
+  - batch stop-on-first-fail path validated (`requested=2`, `evaluated=1`, `truncated=true`)
+  - health payload includes `regression_session_count`
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8093 8113` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`)
+- Result: pass
+- Notes:
+  - launcher starts API + dashboard and health returns `ok=true`
+  - dashboard HTML includes regression controls (`runRegressionSessionViaApi`)
+  - summary fetch path handling now normalizes relative repo paths via `normalizeRepoPath(targetRaw)` before `fetch`

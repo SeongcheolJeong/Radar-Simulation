@@ -27,6 +27,9 @@ Implementation:
 - `GET /api/policy-evals`
 - `GET /api/policy-evals/{policy_eval_id}`
 - `POST /api/compare/policy`
+- `GET /api/regression-sessions`
+- `GET /api/regression-sessions/{session_id}`
+- `POST /api/regression-sessions`
 
 ## POST /api/runs Request
 
@@ -121,6 +124,48 @@ Response:
 - `policy_eval.gate_failures`
 - `policy_eval.recommendation` (`adopt_candidate` or `hold_candidate`)
 
+## POST /api/regression-sessions Request
+
+```json
+{
+  "session_id": "main_regression",
+  "baseline_id": "main_baseline",
+  "candidate_run_ids": [
+    "run_20260222_123045_efgh5678",
+    "run_20260222_123120_ijkl9012"
+  ],
+  "stop_on_first_fail": false,
+  "policy": {
+    "require_parity_pass": true,
+    "max_failure_count": 0
+  }
+}
+```
+
+Rules:
+
+- baseline source is either:
+  - `baseline_id` (preferred), or
+  - `reference_run_id` / `reference_summary_json`
+- candidate set is provided by one or more:
+  - `candidate_run_ids: string[]`
+  - `candidate_summary_jsons: string[]`
+  - `candidates: [{run_id|summary_json,label?}]`
+- duplicates are removed by `(run_id, summary_json)` key
+- `stop_on_first_fail=true` truncates evaluation at first hold case
+
+Response:
+
+- `regression_session.version` = `web_e2e_regression_session_v1`
+- `regression_session.session_id`
+- `regression_session.requested_candidate_count`
+- `regression_session.evaluated_candidate_count`
+- `regression_session.adopted_count`
+- `regression_session.held_count`
+- `regression_session.truncated`
+- `regression_session.recommendation`
+- `regression_session.rows[]` (per-candidate policy verdict summaries)
+
 `POST /api/runs` rules:
 
 - `scene_json_path` required
@@ -135,6 +180,7 @@ Response:
 - `<store_root>/comparisons/<comparison_id>.json`
 - `<store_root>/baselines/<baseline_id>.json`
 - `<store_root>/policy_evals/<policy_eval_id>.json`
+- `<store_root>/regression_sessions/<session_id>.json`
 
 ## Run Summary (v2)
 
@@ -206,6 +252,20 @@ curl -s -X POST "http://127.0.0.1:8099/api/compare/policy" \
   }' | jq .
 ```
 
+```bash
+curl -s -X POST "http://127.0.0.1:8099/api/regression-sessions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id":"main_regression",
+    "baseline_id":"main_baseline",
+    "candidate_run_ids":[
+      "run_20260222_123045_efgh5678",
+      "run_20260222_123120_ijkl9012"
+    ],
+    "stop_on_first_fail":false
+  }' | jq .
+```
+
 ## Validation
 
 ```bash
@@ -222,6 +282,7 @@ Pass criteria:
 6. Compare endpoint returns parity verdict and persisted comparison entry
 7. Baseline pin endpoint stores/retrieves pinned baseline
 8. Compare policy endpoint returns persisted policy verdict payload
+9. Regression session endpoint returns batch verdict summary and persisted session payload
 
 Notes:
 

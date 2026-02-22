@@ -270,10 +270,12 @@ class WebE2EOrchestrator:
         self.comparisons_root = self.store_root / "comparisons"
         self.baselines_root = self.store_root / "baselines"
         self.policy_evals_root = self.store_root / "policy_evals"
+        self.regression_sessions_root = self.store_root / "regression_sessions"
         self.runs_root.mkdir(parents=True, exist_ok=True)
         self.comparisons_root.mkdir(parents=True, exist_ok=True)
         self.baselines_root.mkdir(parents=True, exist_ok=True)
         self.policy_evals_root.mkdir(parents=True, exist_ok=True)
+        self.regression_sessions_root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
 
     def get_profiles(self) -> Dict[str, Dict[str, Any]]:
@@ -341,6 +343,23 @@ class WebE2EOrchestrator:
         p = self.policy_evals_root / f"{safe_id}.json"
         if not p.exists() or not p.is_file():
             raise FileNotFoundError(f"policy eval not found: {p}")
+        return json.loads(p.read_text(encoding="utf-8"))
+
+    def list_regression_sessions(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for p in sorted(self.regression_sessions_root.glob("*.json")):
+            try:
+                rows.append(json.loads(p.read_text(encoding="utf-8")))
+            except Exception:
+                continue
+        rows.sort(key=lambda x: str(x.get("created_at", "")), reverse=True)
+        return rows
+
+    def get_regression_session(self, session_id: str) -> dict[str, Any]:
+        safe_id = self._normalize_identifier_token(session_id, field_name="session_id")
+        p = self.regression_sessions_root / f"{safe_id}.json"
+        if not p.exists() or not p.is_file():
+            raise FileNotFoundError(f"regression session not found: {p}")
         return json.loads(p.read_text(encoding="utf-8"))
 
     def submit_run(self, request_payload: Mapping[str, Any], run_async: bool = True) -> dict[str, Any]:
@@ -546,6 +565,143 @@ class WebE2EOrchestrator:
         out_path.write_text(json.dumps(payload, indent=2, default=_json_default), encoding="utf-8")
         return payload
 
+    def run_regression_session(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(request_payload, Mapping):
+            raise ValueError("request payload must be object")
+
+        session_id_raw = str(request_payload.get("session_id", "")).strip()
+        session_id = (
+            self._new_regression_session_id()
+            if session_id_raw == ""
+            else self._normalize_identifier_token(session_id_raw, field_name="session_id")
+        )
+        overwrite = bool(request_payload.get("overwrite", False))
+        stop_on_first_fail = bool(request_payload.get("stop_on_first_fail", False))
+
+        policy = self._normalize_compare_policy(request_payload.get("policy"))
+        thresholds = self._normalize_thresholds(request_payload.get("thresholds"))
+
+        baseline_id = str(request_payload.get("baseline_id", "")).strip()
+        reference_run_id = str(request_payload.get("reference_run_id", "")).strip()
+        reference_summary_json = str(request_payload.get("reference_summary_json", "")).strip()
+        if baseline_id == "" and reference_run_id == "" and reference_summary_json == "":
+            raise ValueError(
+                "regression session requires baseline_id or reference_run_id/reference_summary_json"
+            )
+
+        note = str(request_payload.get("note", "")).strip() or None
+        tag = str(request_payload.get("tag", "")).strip() or None
+
+        candidates = self._normalize_regression_candidates(request_payload)
+        if len(candidates) == 0:
+            raise ValueError(
+                "regression session requires candidates (candidate_run_ids/candidate_summary_jsons/candidates)"
+            )
+
+        rows: list[dict[str, Any]] = []
+        adopted_count = 0
+        held_count = 0
+        truncated = False
+
+        for idx, cand in enumerate(candidates):
+            policy_req: dict[str, Any] = {
+                "policy": policy,
+            }
+            if thresholds is not None:
+                policy_req["thresholds"] = thresholds
+
+            if baseline_id != "":
+                policy_req["baseline_id"] = baseline_id
+            else:
+                if reference_run_id != "":
+                    policy_req["reference_run_id"] = reference_run_id
+                if reference_summary_json != "":
+                    policy_req["reference_summary_json"] = reference_summary_json
+
+            if cand["run_id"] is not None:
+                policy_req["candidate_run_id"] = cand["run_id"]
+            if cand["summary_json"] is not None:
+                policy_req["candidate_summary_json"] = cand["summary_json"]
+
+            eval_payload = self.evaluate_compare_policy(policy_req)
+            gate_failed = bool(eval_payload.get("gate_failed", True))
+            if gate_failed:
+                held_count += 1
+            else:
+                adopted_count += 1
+
+            parity = eval_payload.get("parity", {})
+            metrics = parity.get("metrics", {}) if isinstance(parity, Mapping) else {}
+            row = {
+                "index": int(idx),
+                "label": cand["label"],
+                "candidate_run_id": cand["run_id"],
+                "candidate_summary_json": cand["summary_json"],
+                "policy_eval_id": str(eval_payload.get("policy_eval_id", "")),
+                "gate_failed": gate_failed,
+                "recommendation": str(eval_payload.get("recommendation", "")),
+                "gate_failure_count": int(len(eval_payload.get("gate_failures", []))),
+                "parity_pass": bool((parity or {}).get("pass", False)),
+                "rd_shape_nmse": (
+                    float(metrics["rd_shape_nmse"]) if "rd_shape_nmse" in metrics else None
+                ),
+                "ra_shape_nmse": (
+                    float(metrics["ra_shape_nmse"]) if "ra_shape_nmse" in metrics else None
+                ),
+            }
+            rows.append(row)
+
+            if gate_failed and stop_on_first_fail:
+                truncated = bool(idx + 1 < len(candidates))
+                break
+
+        requested_count = int(len(candidates))
+        evaluated_count = int(len(rows))
+        all_pass = bool(evaluated_count > 0 and held_count == 0 and not truncated)
+        if all_pass:
+            recommendation = "adopt_all_candidates"
+        elif truncated:
+            recommendation = "stopped_on_first_failure"
+        else:
+            recommendation = "hold_some_candidates"
+
+        session_payload = {
+            "version": "web_e2e_regression_session_v1",
+            "session_id": session_id,
+            "created_at": _now_iso(),
+            "baseline": {
+                "baseline_id": baseline_id if baseline_id != "" else None,
+                "reference_run_id": reference_run_id if reference_run_id != "" else None,
+                "reference_summary_json": (
+                    reference_summary_json if reference_summary_json != "" else None
+                ),
+            },
+            "policy": policy,
+            "thresholds": thresholds,
+            "stop_on_first_fail": stop_on_first_fail,
+            "requested_candidate_count": requested_count,
+            "evaluated_candidate_count": evaluated_count,
+            "adopted_count": int(adopted_count),
+            "held_count": int(held_count),
+            "truncated": truncated,
+            "all_pass": all_pass,
+            "recommendation": recommendation,
+            "note": note,
+            "tag": tag,
+            "rows": rows,
+        }
+
+        out_path = self.regression_sessions_root / f"{session_id}.json"
+        if out_path.exists() and not overwrite:
+            raise ValueError(
+                f"regression session already exists: {session_id} (set overwrite=true to replace)"
+            )
+        out_path.write_text(
+            json.dumps(session_payload, indent=2, default=_json_default),
+            encoding="utf-8",
+        )
+        return session_payload
+
     def _new_run_id(self) -> str:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
@@ -560,6 +716,11 @@ class WebE2EOrchestrator:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
         return f"cpol_{stamp}_{token}"
+
+    def _new_regression_session_id(self) -> str:
+        stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
+        token = uuid.uuid4().hex[:8]
+        return f"rsess_{stamp}_{token}"
 
     def _normalize_identifier_token(self, token: str, field_name: str) -> str:
         v = str(token).strip()
@@ -652,6 +813,58 @@ class WebE2EOrchestrator:
                         raise ValueError(f"policy.{k} must be >= 0")
                     out[k] = fv
         return out
+
+    def _normalize_regression_candidates(
+        self,
+        request_payload: Mapping[str, Any],
+    ) -> list[dict[str, Optional[str]]]:
+        items: list[dict[str, Optional[str]]] = []
+
+        def _append(run_id: Optional[str], summary_json: Optional[str], label: Optional[str]) -> None:
+            r = (run_id or "").strip()
+            s = (summary_json or "").strip()
+            l = (label or "").strip()
+            if r == "" and s == "":
+                return
+            items.append(
+                {
+                    "run_id": (r if r != "" else None),
+                    "summary_json": (s if s != "" else None),
+                    "label": (l if l != "" else None),
+                }
+            )
+
+        raw_candidates = request_payload.get("candidates")
+        if isinstance(raw_candidates, list):
+            for item in raw_candidates:
+                if isinstance(item, Mapping):
+                    _append(
+                        run_id=str(item.get("run_id", "")).strip(),
+                        summary_json=str(item.get("summary_json", "")).strip(),
+                        label=str(item.get("label", "")).strip(),
+                    )
+                else:
+                    _append(run_id=str(item).strip(), summary_json="", label=None)
+
+        raw_run_ids = request_payload.get("candidate_run_ids")
+        if isinstance(raw_run_ids, list):
+            for v in raw_run_ids:
+                _append(run_id=str(v).strip(), summary_json="", label=None)
+
+        raw_summary_jsons = request_payload.get("candidate_summary_jsons")
+        if isinstance(raw_summary_jsons, list):
+            for v in raw_summary_jsons:
+                _append(run_id="", summary_json=str(v).strip(), label=None)
+
+        deduped: list[dict[str, Optional[str]]] = []
+        seen: set[tuple[Optional[str], Optional[str]]] = set()
+        for item in items:
+            key = (item.get("run_id"), item.get("summary_json"))
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(item)
+        return deduped
 
     def _resolve_target_with_optional_prefix(
         self,
@@ -1026,6 +1239,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                             "comparison_count": len(orchestrator.list_comparisons()),
                             "baseline_count": len(orchestrator.list_baselines()),
                             "policy_eval_count": len(orchestrator.list_policy_evals()),
+                            "regression_session_count": len(orchestrator.list_regression_sessions()),
                         },
                     )
                     return
@@ -1048,6 +1262,10 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
 
                 if path == "/api/policy-evals":
                     self._send_json(200, {"policy_evals": orchestrator.list_policy_evals()})
+                    return
+
+                if path == "/api/regression-sessions":
+                    self._send_json(200, {"regression_sessions": orchestrator.list_regression_sessions()})
                     return
 
                 if path.startswith("/api/runs/"):
@@ -1081,6 +1299,12 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                     self._send_json(200, payload)
                     return
 
+                if path.startswith("/api/regression-sessions/"):
+                    session_id = path[len("/api/regression-sessions/") :]
+                    payload = orchestrator.get_regression_session(session_id)
+                    self._send_json(200, payload)
+                    return
+
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
             except FileNotFoundError as exc:
                 self._send_json(404, {"ok": False, "error": str(exc)})
@@ -1094,7 +1318,13 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
             path = parsed.path
             query = parse_qs(parsed.query)
 
-            if path not in {"/api/runs", "/api/compare", "/api/baselines", "/api/compare/policy"}:
+            if path not in {
+                "/api/runs",
+                "/api/compare",
+                "/api/baselines",
+                "/api/compare/policy",
+                "/api/regression-sessions",
+            }:
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
                 return
 
@@ -1130,6 +1360,11 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 if path == "/api/compare/policy":
                     payload = orchestrator.evaluate_compare_policy(body)
                     self._send_json(200, {"ok": True, "policy_eval": payload})
+                    return
+
+                if path == "/api/regression-sessions":
+                    payload = orchestrator.run_regression_session(body)
+                    self._send_json(200, {"ok": True, "regression_session": payload})
                     return
 
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})

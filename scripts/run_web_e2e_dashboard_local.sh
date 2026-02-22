@@ -15,7 +15,7 @@ else
   PYTHON_BIN="$(command -v python3)"
 fi
 
-URL="http://localhost:${UI_PORT}/frontend/avx_like_dashboard.html?summary=/${SUMMARY_REL}&api=http://127.0.0.1:${API_PORT}&scene=${SCENE_REL}&profile=fast_debug&baseline_id=main_baseline"
+URL="http://localhost:${UI_PORT}/frontend/avx_like_dashboard.html?summary=/${SUMMARY_REL}&api=http://127.0.0.1:${API_PORT}&scene=${SCENE_REL}&profile=fast_debug&baseline_id=main_baseline&regression_session_id=main_regression"
 
 echo "[1/3] Building frontend demo fixtures..."
 PYTHONPATH="${ROOT_DIR}/src" "${PYTHON_BIN}" "${ROOT_DIR}/scripts/build_frontend_demo_example.py" \
