@@ -151,6 +151,51 @@ def run() -> None:
             assert status == 200
             assert "fast_debug" in prof["profiles"]
 
+            status, template_resp = _http_json("GET", f"{base}/api/graph/templates")
+            assert status == 200
+            templates = template_resp.get("templates")
+            assert isinstance(templates, list)
+            assert len(templates) >= 1
+            first_template = templates[0]
+            assert isinstance(first_template, dict)
+            assert isinstance(first_template.get("graph"), dict)
+
+            status, graph_ok = _http_json(
+                "POST",
+                f"{base}/api/graph/validate",
+                payload=first_template["graph"],
+            )
+            assert status == 200
+            assert graph_ok["ok"] is True
+            gv = graph_ok["graph_validation"]
+            assert gv["version"] == "web_e2e_graph_validation_v1"
+            assert gv["valid"] is True
+            assert gv["stats"]["node_count"] >= 1
+            assert len(gv["normalized"]["topological_order"]) == gv["stats"]["node_count"]
+
+            invalid_cycle_graph = {
+                "version": "web_e2e_graph_schema_v1",
+                "graph_id": "invalid_cycle",
+                "profile": "fast_debug",
+                "nodes": [
+                    {"id": "a", "type": "SceneSource", "params": {}},
+                    {"id": "b", "type": "RadarMap", "params": {}},
+                ],
+                "edges": [
+                    {"id": "e1", "source": "a", "target": "b", "contract": "x"},
+                    {"id": "e2", "source": "b", "target": "a", "contract": "y"},
+                ],
+            }
+            status, graph_bad = _http_json(
+                "POST",
+                f"{base}/api/graph/validate",
+                payload=invalid_cycle_graph,
+            )
+            assert status == 200
+            assert graph_bad["ok"] is False
+            bad_errors = [str(x) for x in graph_bad["graph_validation"]["errors"]]
+            assert any("cycle" in x for x in bad_errors)
+
             post_payload = {
                 "scene_json_path": str(scene_json),
                 "profile": "fast_debug",

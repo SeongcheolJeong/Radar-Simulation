@@ -1606,3 +1606,32 @@
 - Notes:
   - report exporter includes evidence collector + value formatter helpers
   - markdown template includes top-failure evidence section and no-evidence fallback line
+
+## Web E2E Evidence Drill-Down Panel (M15.13)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - API run/compare/policy/regression/export routes remain stable after evidence drill-down UI wiring
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8103 8123` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=/docs/reports/frontend_quickstart_v1.json` + token grep)
+- Result: pass
+- Notes:
+  - dashboard HTML includes evidence drill-down controls (`evidenceCandidateSelect`, `evidenceRuleSelect`, `evidencePivotCompareBtn`, `evidenceOpenPolicyEvalBtn`)
+  - dashboard JS includes evidence join/render/actions (`collectFocusedSessionFailureRows`, `updateEvidenceDrillDown`, `pivotCompareCandidateFromDrill`, `openEvidencePolicyEvalFromDrill`)
+  - history/session refresh path synchronizes gate/audit/evidence state
+
+## Web E2E Graph Contract Validation API (M16.0)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - new graph contract endpoints validated:
+    - `GET /api/graph/templates`
+    - `POST /api/graph/validate`
+  - valid template graph returns `valid=true` and non-empty topological order
+  - invalid cycle graph returns `valid=false` with cycle-related error
+  - existing API contract regression remains pass after graph endpoint integration

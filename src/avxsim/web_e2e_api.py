@@ -14,6 +14,7 @@ from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 
+from .graph_contract import build_default_graph_templates, validate_graph_contract_payload
 from .parity import compare_hybrid_estimation_payloads
 from .scene_pipeline import run_object_scene_to_radar_map_json
 
@@ -284,6 +285,15 @@ class WebE2EOrchestrator:
 
     def get_profiles(self) -> Dict[str, Dict[str, Any]]:
         return dict(PROFILE_PRESETS)
+
+    def get_graph_templates(self) -> list[dict[str, Any]]:
+        return build_default_graph_templates()
+
+    def validate_graph_contract(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
+        return validate_graph_contract_payload(
+            request_payload,
+            allowed_profiles=PROFILE_PRESETS.keys(),
+        )
 
     def list_runs(self) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
@@ -1469,12 +1479,17 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                             "policy_eval_count": len(orchestrator.list_policy_evals()),
                             "regression_session_count": len(orchestrator.list_regression_sessions()),
                             "regression_export_count": len(orchestrator.list_regression_exports()),
+                            "graph_template_count": len(orchestrator.get_graph_templates()),
                         },
                     )
                     return
 
                 if path == "/api/profiles":
                     self._send_json(200, {"profiles": orchestrator.get_profiles()})
+                    return
+
+                if path == "/api/graph/templates":
+                    self._send_json(200, {"templates": orchestrator.get_graph_templates()})
                     return
 
                 if path == "/api/runs":
@@ -1564,6 +1579,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 "/api/compare/policy",
                 "/api/regression-sessions",
                 "/api/regression-exports",
+                "/api/graph/validate",
             }:
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
                 return
@@ -1610,6 +1626,11 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 if path == "/api/regression-exports":
                     payload = orchestrator.export_regression_session(body)
                     self._send_json(200, {"ok": True, "regression_export": payload})
+                    return
+
+                if path == "/api/graph/validate":
+                    payload = orchestrator.validate_graph_contract(body)
+                    self._send_json(200, {"ok": bool(payload.get("valid")), "graph_validation": payload})
                     return
 
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})

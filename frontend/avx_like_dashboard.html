@@ -197,6 +197,29 @@
             <div id="auditRuleHistogram" class="text-[11px] text-slate-400">rule histogram: -</div>
             <div id="auditHotCandidateLine" class="text-[11px] text-slate-400">hot candidate: -</div>
           </div>
+          <div class="rounded border border-slate-800 bg-slate-900/60 p-2 space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400">Evidence Drill-Down</span>
+              <span id="evidenceDrillBadge" class="text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">NO DATA</span>
+            </div>
+            <div id="evidenceSessionLine" class="text-[11px] text-slate-400">session: -</div>
+            <label class="text-[11px] text-slate-400 block">Candidate row</label>
+            <select id="evidenceCandidateSelect" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none">
+              <option value="">(none)</option>
+            </select>
+            <label class="text-[11px] text-slate-400 block">Gate failure rule</label>
+            <select id="evidenceRuleSelect" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none">
+              <option value="">(none)</option>
+            </select>
+            <div id="evidenceCandidateLine" class="text-[11px] text-slate-400">candidate: -</div>
+            <div id="evidencePolicyEvalLine" class="text-[11px] text-slate-400">policy eval: -</div>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="evidencePivotCompareBtn" class="w-full py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-semibold">Use Candidate</button>
+              <button id="evidenceOpenPolicyEvalBtn" class="w-full py-1.5 rounded bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-semibold">Open Policy Eval</button>
+            </div>
+            <pre id="evidenceDetailBox" class="text-[11px] text-slate-300 bg-slate-950 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
+            <div id="evidenceDrillStatus" class="text-[11px] text-slate-500">evidence drill idle</div>
+          </div>
           <div id="regressionStatus" class="text-[11px] text-slate-500">regression idle</div>
           <div id="compareStatus" class="text-[11px] text-slate-500">compare idle</div>
           <pre id="compareResultBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
@@ -492,6 +515,7 @@
       policyEvals: [],
       lastReviewBundlePath: null,
       lastDecisionReport: null,
+      evidenceRows: [],
     };
 
     const el = {
@@ -541,6 +565,16 @@
       auditTrendLine: document.getElementById("auditTrendLine"),
       auditRuleHistogram: document.getElementById("auditRuleHistogram"),
       auditHotCandidateLine: document.getElementById("auditHotCandidateLine"),
+      evidenceDrillBadge: document.getElementById("evidenceDrillBadge"),
+      evidenceSessionLine: document.getElementById("evidenceSessionLine"),
+      evidenceCandidateSelect: document.getElementById("evidenceCandidateSelect"),
+      evidenceRuleSelect: document.getElementById("evidenceRuleSelect"),
+      evidenceCandidateLine: document.getElementById("evidenceCandidateLine"),
+      evidencePolicyEvalLine: document.getElementById("evidencePolicyEvalLine"),
+      evidencePivotCompareBtn: document.getElementById("evidencePivotCompareBtn"),
+      evidenceOpenPolicyEvalBtn: document.getElementById("evidenceOpenPolicyEvalBtn"),
+      evidenceDetailBox: document.getElementById("evidenceDetailBox"),
+      evidenceDrillStatus: document.getElementById("evidenceDrillStatus"),
       regressionStatus: document.getElementById("regressionStatus"),
       compareStatus: document.getElementById("compareStatus"),
       compareResultBox: document.getElementById("compareResultBox"),
@@ -744,6 +778,19 @@
         el.decisionReportStatus.className = "text-[11px] text-red-400";
       } else {
         el.decisionReportStatus.className = "text-[11px] text-slate-500";
+      }
+    }
+
+    function setEvidenceDrillStatus(text, tone) {
+      el.evidenceDrillStatus.textContent = text || "evidence drill idle";
+      if (tone === "ok") {
+        el.evidenceDrillStatus.className = "text-[11px] text-emerald-400";
+      } else if (tone === "warn") {
+        el.evidenceDrillStatus.className = "text-[11px] text-amber-400";
+      } else if (tone === "error") {
+        el.evidenceDrillStatus.className = "text-[11px] text-red-400";
+      } else {
+        el.evidenceDrillStatus.className = "text-[11px] text-slate-500";
       }
     }
 
@@ -961,6 +1008,317 @@
       setDecisionAuditBadge(label, tone);
     }
 
+    function getFocusedRegressionSession() {
+      const sessions = Array.isArray(state.regressionSessions) ? state.regressionSessions : [];
+      if (sessions.length === 0) return null;
+      const selectedId = String(
+        el.regressionSessionSelect.value || el.regressionSessionIdInput.value || ""
+      ).trim();
+      return (
+        sessions.find((x) => String((x && x.session_id) || "") === selectedId) ||
+        sessions[0] ||
+        null
+      );
+    }
+
+    function buildPolicyEvalMap() {
+      const evalById = new Map();
+      const evals = Array.isArray(state.policyEvals) ? state.policyEvals : [];
+      evals.forEach((row) => {
+        const id = String((row && row.policy_eval_id) || "").trim();
+        if (id) evalById.set(id, row);
+      });
+      return evalById;
+    }
+
+    function collectFocusedSessionFailureRows() {
+      const focusSession = getFocusedRegressionSession();
+      if (!focusSession) {
+        return { focusSession: null, rows: [] };
+      }
+      const evalById = buildPolicyEvalMap();
+      const focusRows = Array.isArray(focusSession.rows) ? focusSession.rows : [];
+      const rows = [];
+      focusRows.forEach((row, rowIdx) => {
+        if (!Boolean(row && row.gate_failed)) return;
+        const policyEvalId = String((row && row.policy_eval_id) || "").trim();
+        const evalPayload = policyEvalId ? evalById.get(policyEvalId) : null;
+        const gateFailures = Array.isArray(evalPayload?.gate_failures)
+          ? evalPayload.gate_failures
+          : [];
+        const candidateRunId = String((row && row.candidate_run_id) || "").trim();
+        const candidateSummaryJson = String((row && row.candidate_summary_json) || "").trim();
+        const candidateId = candidateRunId || candidateSummaryJson || `row_${Number(rowIdx)}`;
+        const gateFailureCount = Number((row && row.gate_failure_count) || 0);
+        let score = gateFailureCount > 0 ? gateFailureCount : 1;
+        gateFailures.forEach((g) => {
+          const valueNum = Number(g && g.value);
+          const limitNum = Number(g && g.limit);
+          if (Number.isFinite(valueNum) && Number.isFinite(limitNum)) {
+            score = Math.max(score, valueNum - limitNum);
+          }
+        });
+        const rowIndex = Number.isFinite(Number(row && row.index))
+          ? Math.round(Number(row.index))
+          : Number(rowIdx);
+        const rowKey = `${policyEvalId || "-"}::${candidateId}::${rowIndex}`;
+        rows.push({
+          rowKey,
+          rowIndex,
+          score,
+          gateFailureCount,
+          policyEvalId: policyEvalId || "-",
+          candidateId: String(candidateId),
+          candidateRunId: candidateRunId || null,
+          recommendation: String((row && row.recommendation) || "-"),
+          gateFailed: Boolean(row && row.gate_failed),
+          gateFailures,
+          evalPayload: evalPayload || null,
+          row: row || {},
+        });
+      });
+
+      rows.sort((a, b) => {
+        const ds = Number(b.score || 0) - Number(a.score || 0);
+        if (Math.abs(ds) > 1e-12) return ds;
+        const dg = Number(b.gateFailureCount || 0) - Number(a.gateFailureCount || 0);
+        if (dg !== 0) return dg;
+        return String(a.candidateId || "").localeCompare(String(b.candidateId || ""));
+      });
+      return {
+        focusSession,
+        rows,
+      };
+    }
+
+    function formatGateFailureDetailLine(failure, idx) {
+      const f = failure || {};
+      const rule = String(f.rule || "unknown_rule");
+      const metric = f.metric ? ` (${String(f.metric)})` : "";
+      const value = Object.prototype.hasOwnProperty.call(f, "value") ? f.value : null;
+      const limit = Object.prototype.hasOwnProperty.call(f, "limit") ? f.limit : null;
+      const valueNum = Number(value);
+      const limitNum = Number(limit);
+      const deltaText =
+        Number.isFinite(valueNum) && Number.isFinite(limitNum)
+          ? ` | delta=${formatEvidenceValue(valueNum - limitNum)}`
+          : "";
+      return `- [${Number(idx) + 1}] ${rule}${metric}: value=${formatEvidenceValue(
+        value
+      )} | limit=${formatEvidenceValue(limit)}${deltaText}`;
+    }
+
+    function setEvidenceDrillBadge(label, tone) {
+      el.evidenceDrillBadge.textContent = label || "NO DATA";
+      if (tone === "ok") {
+        el.evidenceDrillBadge.className = "text-[10px] px-2 py-0.5 rounded border border-emerald-500/40 text-emerald-200 bg-emerald-500/10";
+      } else if (tone === "warn") {
+        el.evidenceDrillBadge.className = "text-[10px] px-2 py-0.5 rounded border border-amber-500/40 text-amber-200 bg-amber-500/10";
+      } else if (tone === "error") {
+        el.evidenceDrillBadge.className = "text-[10px] px-2 py-0.5 rounded border border-rose-500/40 text-rose-200 bg-rose-500/10";
+      } else {
+        el.evidenceDrillBadge.className = "text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300";
+      }
+    }
+
+    function getSelectedEvidenceRowEntry() {
+      const rows = Array.isArray(state.evidenceRows) ? state.evidenceRows : [];
+      if (rows.length === 0) return null;
+      const rowKey = String(el.evidenceCandidateSelect.value || "").trim();
+      return rows.find((x) => String((x && x.rowKey) || "") === rowKey) || rows[0] || null;
+    }
+
+    function updateEvidenceDrillDown(preferredRowKey, preferredRuleValue) {
+      const payload = collectFocusedSessionFailureRows();
+      const focusSession = payload.focusSession;
+      const rows = payload.rows;
+      state.evidenceRows = rows;
+
+      if (!focusSession) {
+        el.evidenceSessionLine.textContent = "session: -";
+        el.evidenceCandidateLine.textContent = "candidate: -";
+        el.evidencePolicyEvalLine.textContent = "policy eval: -";
+        el.evidenceDetailBox.textContent = "-";
+        el.evidenceCandidateSelect.innerHTML = '<option value="">(none)</option>';
+        el.evidenceRuleSelect.innerHTML = '<option value="">(none)</option>';
+        setEvidenceDrillBadge("NO DATA", "neutral");
+        setEvidenceDrillStatus("evidence drill idle", "neutral");
+        return;
+      }
+
+      const sessionId = String(focusSession.session_id || "-");
+      const evaluatedCount = Number(focusSession.evaluated_candidate_count || 0);
+      el.evidenceSessionLine.textContent = `session: ${sessionId} | failed_rows=${rows.length}/${evaluatedCount}`;
+
+      const prevRowKey = String(preferredRowKey || el.evidenceCandidateSelect.value || "").trim();
+      el.evidenceCandidateSelect.innerHTML = "";
+      const emptyCandidate = document.createElement("option");
+      emptyCandidate.value = "";
+      emptyCandidate.textContent = rows.length > 0 ? "(select candidate row)" : "(no failed rows)";
+      el.evidenceCandidateSelect.appendChild(emptyCandidate);
+      rows.forEach((entry) => {
+        const opt = document.createElement("option");
+        opt.value = entry.rowKey;
+        opt.textContent = `${entry.candidateId} | fail=${entry.gateFailureCount} | rec=${entry.recommendation}`;
+        el.evidenceCandidateSelect.appendChild(opt);
+      });
+      if (
+        prevRowKey &&
+        Array.from(el.evidenceCandidateSelect.options).some((o) => o.value === prevRowKey)
+      ) {
+        el.evidenceCandidateSelect.value = prevRowKey;
+      } else if (rows.length > 0) {
+        el.evidenceCandidateSelect.value = rows[0].rowKey;
+      }
+
+      const active = getSelectedEvidenceRowEntry();
+      if (!active) {
+        el.evidenceCandidateLine.textContent = "candidate: -";
+        el.evidencePolicyEvalLine.textContent = "policy eval: -";
+        el.evidenceDetailBox.textContent = "no gate-failed rows in current focus session";
+        el.evidenceRuleSelect.innerHTML = '<option value="">(none)</option>';
+        setEvidenceDrillBadge("CLEAN", "ok");
+        setEvidenceDrillStatus("no failed rows to inspect", "ok");
+        return;
+      }
+
+      el.evidenceCandidateLine.textContent = `candidate: ${active.candidateId} | row=${active.rowIndex}`;
+      el.evidencePolicyEvalLine.textContent = `policy eval: ${active.policyEvalId} | failures=${active.gateFailureCount}`;
+
+      const prevRuleValue = String(preferredRuleValue || el.evidenceRuleSelect.value || "").trim();
+      const gateFailures = Array.isArray(active.gateFailures) ? active.gateFailures : [];
+      el.evidenceRuleSelect.innerHTML = "";
+      if (gateFailures.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "__none__";
+        opt.textContent = "(no gate_failures payload)";
+        el.evidenceRuleSelect.appendChild(opt);
+        el.evidenceRuleSelect.value = "__none__";
+      } else {
+        const allOpt = document.createElement("option");
+        allOpt.value = "__all__";
+        allOpt.textContent = "(all gate failures)";
+        el.evidenceRuleSelect.appendChild(allOpt);
+        gateFailures.forEach((g, idx) => {
+          const rule = String((g && g.rule) || "unknown_rule");
+          const metric = g && g.metric ? ` (${String(g.metric)})` : "";
+          const opt = document.createElement("option");
+          opt.value = String(Number(idx));
+          opt.textContent = `[${Number(idx) + 1}] ${rule}${metric}`;
+          el.evidenceRuleSelect.appendChild(opt);
+        });
+        if (
+          prevRuleValue &&
+          Array.from(el.evidenceRuleSelect.options).some((o) => o.value === prevRuleValue)
+        ) {
+          el.evidenceRuleSelect.value = prevRuleValue;
+        } else {
+          el.evidenceRuleSelect.value = "__all__";
+        }
+      }
+
+      const lines = [
+        `session_id: ${sessionId}`,
+        `candidate: ${active.candidateId}`,
+        `policy_eval_id: ${active.policyEvalId}`,
+        `recommendation: ${active.recommendation}`,
+        `gate_failed: ${Boolean(active.gateFailed)}`,
+        `gate_failure_count: ${Number(active.gateFailureCount || 0)}`,
+      ];
+      if (gateFailures.length === 0) {
+        lines.push("gate_failures: none (payload missing or empty)");
+      } else {
+        lines.push("gate_failures:");
+        const selectedRuleValue = String(el.evidenceRuleSelect.value || "__all__");
+        if (selectedRuleValue === "__all__") {
+          gateFailures.slice(0, 12).forEach((g, idx) => {
+            lines.push(formatGateFailureDetailLine(g, idx));
+          });
+        } else {
+          const idx = Math.max(0, Math.floor(Number(selectedRuleValue)));
+          const g = gateFailures[idx] || gateFailures[0];
+          lines.push(formatGateFailureDetailLine(g, idx));
+        }
+      }
+      el.evidenceDetailBox.textContent = lines.join("\n");
+
+      let tone = "warn";
+      let label = "FOCUS";
+      if (Number(active.gateFailureCount || 0) >= 3) {
+        tone = "error";
+        label = "RISK";
+      } else if (Number(active.gateFailureCount || 0) === 0) {
+        tone = "ok";
+        label = "CLEAN";
+      }
+      setEvidenceDrillBadge(label, tone);
+      setEvidenceDrillStatus(
+        `focused ${active.candidateId} (${active.policyEvalId})`,
+        tone === "error" ? "warn" : "ok"
+      );
+    }
+
+    function pivotCompareCandidateFromDrill() {
+      const active = getSelectedEvidenceRowEntry();
+      if (!active) {
+        setEvidenceDrillStatus("no evidence row selected", "error");
+        return;
+      }
+      const runId = String(active.candidateRunId || active.candidateId || "").trim();
+      if (!runId) {
+        setEvidenceDrillStatus("selected row has no candidate id", "error");
+        return;
+      }
+      el.compareCandRunInput.value = runId;
+      setEvidenceDrillStatus(`candidate moved to compare input: ${runId}`, "ok");
+      setCompareStatus(`compare candidate set from evidence: ${runId}`, "ok");
+    }
+
+    async function openEvidencePolicyEvalFromDrill() {
+      const active = getSelectedEvidenceRowEntry();
+      if (!active) {
+        setEvidenceDrillStatus("no evidence row selected", "error");
+        return;
+      }
+
+      let payload = active.evalPayload;
+      const evalId = String(active.policyEvalId || "").trim();
+      if (!payload && evalId && evalId !== "-") {
+        const apiBase = normalizeApiBase(el.apiBaseInput.value);
+        if (!apiBase) {
+          setEvidenceDrillStatus("api base URL required to fetch policy eval", "error");
+          return;
+        }
+        try {
+          payload = await fetchApiJson(`${apiBase}/api/policy-evals/${encodeURIComponent(evalId)}`);
+        } catch (err) {
+          setEvidenceDrillStatus(`policy eval fetch failed: ${String(err.message || err)}`, "error");
+          return;
+        }
+      }
+
+      if (!payload) {
+        setEvidenceDrillStatus("policy eval payload unavailable", "warn");
+        return;
+      }
+
+      const payloadId = String(payload.policy_eval_id || evalId || "").trim();
+      if (payloadId) {
+        const idx = state.policyEvals.findIndex(
+          (x) => String((x && x.policy_eval_id) || "").trim() === payloadId
+        );
+        if (idx >= 0) state.policyEvals[idx] = payload;
+        else state.policyEvals.push(payload);
+      }
+      active.evalPayload = payload;
+      active.gateFailures = Array.isArray(payload.gate_failures) ? payload.gate_failures : [];
+      state.lastPolicyEval = payload;
+      renderPolicyEval(payload);
+      setCompareStatus(`policy eval opened: ${payload.policy_eval_id || evalId || "-"}`, "ok");
+      updateEvidenceDrillDown(active.rowKey, el.evidenceRuleSelect.value || "__all__");
+      setEvidenceDrillStatus("policy eval opened in compare panel", "ok");
+    }
+
     function renderComparison(comparison) {
       if (!comparison) {
         el.compareResultBox.textContent = "-";
@@ -1113,40 +1471,20 @@
 
     function collectTopFailureEvidenceRows(maxItems) {
       const takeN = Math.max(1, Number(maxItems || 8));
-      const sessions = Array.isArray(state.regressionSessions) ? state.regressionSessions : [];
-      const evals = Array.isArray(state.policyEvals) ? state.policyEvals : [];
-      if (sessions.length === 0 || evals.length === 0) return [];
-
-      const selectedId = String(
-        el.regressionSessionSelect.value || el.regressionSessionIdInput.value || ""
-      ).trim();
-      const focusSession =
-        sessions.find((x) => String((x && x.session_id) || "") === selectedId) || sessions[0] || {};
-      const focusRows = Array.isArray(focusSession.rows) ? focusSession.rows : [];
-
-      const evalById = new Map();
-      evals.forEach((row) => {
-        const id = String((row && row.policy_eval_id) || "").trim();
-        if (id) evalById.set(id, row);
-      });
-
+      const payload = collectFocusedSessionFailureRows();
+      const focusRows = payload.rows;
+      if (focusRows.length === 0) return [];
       const entries = [];
-      focusRows.forEach((row, rowIdx) => {
-        if (!Boolean(row && row.gate_failed)) return;
-        const policyEvalId = String((row && row.policy_eval_id) || "").trim();
-        const evalPayload = policyEvalId ? evalById.get(policyEvalId) : null;
-        const candidateId =
-          (row && (row.candidate_run_id || row.candidate_summary_json)) ||
-          `row_${Number(rowIdx)}`;
-        const gateFailureCount = Number((row && row.gate_failure_count) || 0);
-        const gateFailures = Array.isArray(evalPayload?.gate_failures)
-          ? evalPayload.gate_failures
-          : [];
+      focusRows.forEach((rowEntry) => {
+        const policyEvalId = String(rowEntry.policyEvalId || "-");
+        const candidateId = String(rowEntry.candidateId || "-");
+        const gateFailureCount = Number(rowEntry.gateFailureCount || 0);
+        const gateFailures = Array.isArray(rowEntry.gateFailures) ? rowEntry.gateFailures : [];
 
         if (gateFailures.length === 0) {
           entries.push({
             score: gateFailureCount > 0 ? gateFailureCount : 1,
-            candidateId: String(candidateId),
+            candidateId,
             policyEvalId: policyEvalId || "-",
             rule: "unknown_rule",
             metric: null,
@@ -1170,7 +1508,7 @@
             : 1;
           entries.push({
             score,
-            candidateId: String(candidateId),
+            candidateId,
             policyEvalId: policyEvalId || "-",
             rule: String((g && g.rule) || "unknown_rule"),
             metric: g && g.metric ? String(g.metric) : null,
@@ -2116,10 +2454,12 @@
         );
         updateRegressionGateOverview();
         updateRegressionDecisionAudit();
+        updateEvidenceDrillDown("", "__all__");
       } catch (err) {
         setRegressionHistoryStatus(`history load failed: ${String(err.message || err)}`, "error");
         updateRegressionGateOverview();
         updateRegressionDecisionAudit();
+        updateEvidenceDrillDown("", "__all__");
       }
     }
 
@@ -2140,6 +2480,7 @@
           setRegressionStatus(`holds detected: ${session.session_id}`, "warn");
         }
         updateRegressionDecisionAudit();
+        updateEvidenceDrillDown("", "__all__");
       } catch (err) {
         setRegressionStatus(`session load failed: ${String(err.message || err)}`, "error");
       }
@@ -2337,6 +2678,16 @@
       el.exportDecisionReportBtn.addEventListener("click", () => exportDecisionReportTemplate());
       el.regressionSessionSelect.addEventListener("change", () => loadSelectedRegressionSessionViaApi());
       el.regressionExportSelect.addEventListener("change", () => loadSelectedRegressionExportViaApi());
+      el.evidenceCandidateSelect.addEventListener("change", () =>
+        updateEvidenceDrillDown(el.evidenceCandidateSelect.value, "__all__")
+      );
+      el.evidenceRuleSelect.addEventListener("change", () =>
+        updateEvidenceDrillDown(el.evidenceCandidateSelect.value, el.evidenceRuleSelect.value)
+      );
+      el.evidencePivotCompareBtn.addEventListener("click", () => pivotCompareCandidateFromDrill());
+      el.evidenceOpenPolicyEvalBtn.addEventListener("click", () =>
+        openEvidencePolicyEvalFromDrill()
+      );
 
       el.loadJsonBtn.addEventListener("click", () => {
         el.summaryFileInput.click();
@@ -2473,11 +2824,13 @@
       setRegressionHistoryStatus("history idle", "neutral");
       setReviewBundleStatus("review bundle idle", "neutral");
       setDecisionReportStatus("decision report idle", "neutral");
+      setEvidenceDrillStatus("evidence drill idle", "neutral");
       el.reviewBundlePathBox.textContent = "-";
       el.decisionReportFileBox.textContent = "-";
       renderRegressionDownloads(null);
       updateRegressionGateOverview();
       updateRegressionDecisionAudit();
+      updateEvidenceDrillDown("", "__all__");
       renderComparison(null);
       setStatus("idle", "neutral", "viewer is waiting for summary json");
       await refreshSummary();

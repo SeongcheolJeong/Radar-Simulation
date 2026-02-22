@@ -101,7 +101,13 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.10: Regression review bundle export hook (dashboard one-click package copy path)
 - [x] M15.11: Regression decision report template export (markdown handoff skeleton)
 - [x] M15.12: Regression report auto-include policy-eval excerpts (top failure evidence block)
-- [ ] M15.13: Regression evidence drill-down panel (session row/policy-eval quick pivot for reviewer loop)
+- [x] M15.13: Regression evidence drill-down panel (session row/policy-eval quick pivot for reviewer loop)
+- [x] M16.0: Simulink-style Graph contract freeze (ReactFlow node/edge schema + validator contract)
+- [ ] M16.1: ReactFlow shell bootstrap (graph canvas + property inspector + template loader)
+- [ ] M16.2: Graph executor API bridge (`/api/graph/*` validation/run/status)
+- [ ] M16.3: Artifact inspector panels (Path/ADC/RD/RA + node-output trace)
+- [ ] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
+- [ ] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -114,7 +120,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.13 regression evidence drill-down panel while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M16.1 ReactFlow shell bootstrap for graph editing/template loading while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -625,3 +631,32 @@ M15.12 outcome (2026-02-22):
   - `Top Failure Evidence (Auto-Extracted)` section
   - top-N failure lines (`candidate`, `policy_eval_id`, `rule`, optional `metric`, `value`, `limit`, `row_failures`)
   - graceful fallback line when no gate-failure evidence exists
+
+M15.13 outcome (2026-02-22):
+
+- dashboard evidence drill-down panel added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- new reviewer loop controls:
+  - failed candidate selector (`evidenceCandidateSelect`)
+  - per-failure rule selector (`evidenceRuleSelect`)
+  - quick actions (`Use Candidate`, `Open Policy Eval`)
+- new evidence join/render flow:
+  - `collectFocusedSessionFailureRows()` joins focused session rows with `policy_evals`
+  - `updateEvidenceDrillDown()` renders focused candidate/policy-eval/failure details
+  - `pivotCompareCandidateFromDrill()` and `openEvidencePolicyEvalFromDrill()` shorten review workflow
+- history/session refresh paths now auto-sync evidence panel state with gate/audit state
+
+M16.0 outcome (2026-02-22):
+
+- ReactFlow-first graph contract baseline added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/graph_contract.py`
+- new graph endpoints on orchestrator API:
+  - `GET /api/graph/templates`
+  - `POST /api/graph/validate`
+  - `/health` now includes `graph_template_count`
+- validation harness expanded:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+  - covers valid template graph pass + cycle graph fail
+- planning/contract docs added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/126_reactflow_simulink_style_plan.md`
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/128_web_e2e_graph_contract_validation_api.md`
