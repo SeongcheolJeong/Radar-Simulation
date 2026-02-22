@@ -1410,6 +1410,13 @@
   - PO-SBR runtime provider output contract validated via stubbed solver (`paths_by_chirp`, delay/doppler/path_id mapping)
 
 - Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_provider_integration_stubbed.py`
+- Result: pass
+- Notes:
+  - `scene_pipeline -> runtime_provider(po_sbr_rt_provider) -> canonical outputs` end-to-end path validated with stubbed PO solver
+  - `runtime_resolution.mode=runtime_provider` and provider spec trace validated
+
+- Date: 2026-02-22
 - Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_po_sbr_pilot.py`
 - Result: pass
 - Notes:
