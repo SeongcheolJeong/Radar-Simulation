@@ -2513,3 +2513,29 @@
     - `selected 0`
     - `select presets to import`
     - `replace_custom`
+
+## Web E2E Graph Replace Import Confirmation + Undo (M17.31)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - replace-confirm/undo frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8162/8142)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - replace-confirm/undo model tokens confirmed:
+    - `cloneNormalizedFilterPresets`
+    - `filterReplaceConfirmChecked`
+    - `filterImportUndoSnapshot`
+    - `undoLastFilterImport`
+    - `replaceImportNeedsConfirmation`
+  - replace-confirm/undo UI/status tokens confirmed:
+    - `co_filter_replace_confirm`
+    - `co_filter_import_undo`
+    - `co_filter_import_undo_hint`
+    - `confirm required: enable replace confirmation for replace custom`
+    - `undo restored snapshot`

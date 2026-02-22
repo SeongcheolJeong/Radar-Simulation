@@ -139,6 +139,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.28: Filter preset transfer import/export (team-shareable JSON bundle)
 - [x] M17.29: Filter preset import guardrails (merge/replace mode + conflict preview)
 - [x] M17.30: Selective filter preset import + dry-run conflict visibility
+- [x] M17.31: Replace-mode confirmation + one-click undo recovery
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -151,7 +152,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.30 frontend hardening track: add destructive-action confirmation/undo path for import-replace flows while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.31 frontend hardening track: add import audit trail (`what changed`) and multi-level undo/redo for transfer operations while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1224,3 +1225,18 @@ M17.30 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - unselected presets are excluded from apply
   - empty selection returns explicit no-op status (`import skipped: no presets selected`)
+
+M17.31 outcome (2026-02-22):
+
+- replace-mode destructive apply now requires explicit confirmation:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - confirmation control key: `co_filter_replace_confirm`
+  - import apply guard status: `confirm required: enable replace confirmation for replace custom`
+- import undo recovery path added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - snapshot helper: `cloneNormalizedFilterPresets`
+  - actions/keys: `Undo Last Import` (`co_filter_import_undo`), `co_filter_import_undo_hint`
+- safety behavior:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - replace confirmation automatically resets on payload change
+  - undo restores preset map + active preset + draft name from captured snapshot

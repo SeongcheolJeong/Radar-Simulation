@@ -444,6 +444,18 @@ function saveFilterPresets(presets) {
   }
 }
 
+function cloneNormalizedFilterPresets(presets) {
+  const rows = presets && typeof presets === "object" && !Array.isArray(presets) ? presets : {};
+  const out = {};
+  Object.keys(rows).forEach((name) => {
+    const pname = normalizeFilterPresetName(name);
+    if (!pname) return;
+    const fallback = DEFAULT_FILTER_PRESETS[pname] || DEFAULT_FILTER_PRESETS.default;
+    out[pname] = normalizeFilterPresetConfig(rows[pname], fallback);
+  });
+  return out;
+}
+
 function buildFilterPresetExportBundle(presets) {
   const rows = presets && typeof presets === "object" && !Array.isArray(presets) ? presets : {};
   const normalized = {};
@@ -999,6 +1011,8 @@ export function ContractWarningOverlay({
   const [filterTransferText, setFilterTransferText] = React.useState("");
   const [filterTransferStatus, setFilterTransferStatus] = React.useState("");
   const [filterImportSelection, setFilterImportSelection] = React.useState({});
+  const [filterReplaceConfirmChecked, setFilterReplaceConfirmChecked] = React.useState(false);
+  const [filterImportUndoSnapshot, setFilterImportUndoSnapshot] = React.useState(null);
   const [shortcutTransferText, setShortcutTransferText] = React.useState("");
   const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
   const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
@@ -1118,6 +1132,17 @@ export function ContractWarningOverlay({
       setFilterImportMode(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportMode);
     }
   }, [filterImportMode]);
+
+  React.useEffect(() => {
+    if (filterImportMode === "replace_custom") return;
+    if (!filterReplaceConfirmChecked) return;
+    setFilterReplaceConfirmChecked(false);
+  }, [filterImportMode, filterReplaceConfirmChecked]);
+
+  React.useEffect(() => {
+    if (!filterReplaceConfirmChecked) return;
+    setFilterReplaceConfirmChecked(false);
+  }, [filterReplaceConfirmChecked, filterTransferText]);
 
   React.useEffect(() => {
     if (!runOptions.includes(pinnedRunId)) {
@@ -1746,6 +1771,10 @@ export function ContractWarningOverlay({
     () => !parsedFilterImportPayload.empty && !parsedFilterImportPayload.error,
     [parsedFilterImportPayload.empty, parsedFilterImportPayload.error]
   );
+  const replaceImportNeedsConfirmation = React.useMemo(
+    () => filterImportMode === "replace_custom" && selectedFilterImportNames.length > 0,
+    [filterImportMode, selectedFilterImportNames]
+  );
   const toggleFilterImportPresetSelection = React.useCallback((presetName) => {
     const name = String(presetName || "").trim();
     if (!name) return;
@@ -1878,6 +1907,25 @@ export function ContractWarningOverlay({
       setFilterTransferStatus("clipboard write failed; copy from text buffer");
     }
   }, [filterPresets]);
+  const undoLastFilterImport = React.useCallback(() => {
+    const snapshot =
+      filterImportUndoSnapshot && typeof filterImportUndoSnapshot === "object"
+        ? filterImportUndoSnapshot
+        : null;
+    if (!snapshot || !snapshot.presets || typeof snapshot.presets !== "object") {
+      setFilterTransferStatus("undo skipped: no snapshot");
+      return;
+    }
+    const restored = cloneNormalizedFilterPresets(snapshot.presets);
+    setFilterPresets(restored);
+    setActiveFilterPreset(String(snapshot.activeFilterPreset || "default"));
+    setFilterPresetDraft(
+      String(snapshot.filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft)
+    );
+    setFilterReplaceConfirmChecked(false);
+    setFilterImportUndoSnapshot(null);
+    setFilterTransferStatus(`undo restored snapshot (${String(snapshot.captured_at_iso || "-")})`);
+  }, [filterImportUndoSnapshot]);
   const importFilterPresetsFromText = React.useCallback(() => {
     if (parsedFilterImportPayload.empty) {
       setFilterTransferStatus("import failed: empty import payload");
@@ -1899,9 +1947,19 @@ export function ContractWarningOverlay({
       setFilterTransferStatus("import skipped: no presets selected");
       return;
     }
+    if (filterImportMode === "replace_custom" && !filterReplaceConfirmChecked) {
+      setFilterTransferStatus("confirm required: enable replace confirmation for replace custom");
+      return;
+    }
     const imported = {};
     names.forEach((name) => {
       imported[name] = importedAll[name];
+    });
+    setFilterImportUndoSnapshot({
+      presets: cloneNormalizedFilterPresets(filterPresets),
+      activeFilterPreset: String(activeFilterPreset || "default"),
+      filterPresetDraft: String(filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft),
+      captured_at_iso: new Date().toISOString(),
     });
     setFilterPresets((prev) => {
       if (filterImportMode !== "replace_custom") {
@@ -1931,8 +1989,13 @@ export function ContractWarningOverlay({
       setFilterPresetDraft(firstImported);
       setActiveFilterPreset(firstImported);
     }
+    setFilterReplaceConfirmChecked(false);
   }, [
+    activeFilterPreset,
     filterImportMode,
+    filterPresetDraft,
+    filterPresets,
+    filterReplaceConfirmChecked,
     parsedFilterImportPayload.empty,
     parsedFilterImportPayload.error,
     parsedFilterImportPayload.imported,
@@ -2356,6 +2419,20 @@ export function ContractWarningOverlay({
       }, FILTER_IMPORT_MODE_OPTIONS.map((option) =>
         h("option", { value: option.id, key: `co_filter_import_mode_opt_${option.id}` }, option.label)
       )),
+      filterImportMode === "replace_custom"
+        ? h("label", {
+          key: "co_filter_replace_confirm",
+          className: "hint",
+          style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#f0b33a" },
+        }, [
+          h("input", {
+            type: "checkbox",
+            checked: Boolean(filterReplaceConfirmChecked),
+            onChange: (e) => setFilterReplaceConfirmChecked(Boolean(e.target.checked)),
+          }),
+          "confirm replace custom presets",
+        ])
+        : null,
       h("button", {
         className: "btn",
         key: "co_filter_import_select_all",
@@ -2375,8 +2452,15 @@ export function ContractWarningOverlay({
         disabled:
           String(filterTransferText || "").trim().length === 0
           || !filterImportPreviewIsValid
-          || selectedFilterImportNames.length === 0,
+          || selectedFilterImportNames.length === 0
+          || (replaceImportNeedsConfirmation && !filterReplaceConfirmChecked),
       }, "Import Filter Presets"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_import_undo",
+        onClick: undoLastFilterImport,
+        disabled: !filterImportUndoSnapshot,
+      }, "Undo Last Import"),
       h("input", {
         type: "file",
         key: "co_filter_import_file",
@@ -2408,6 +2492,13 @@ export function ContractWarningOverlay({
             : "#8eb6ca",
         },
       }, filterImportPreview),
+      filterImportUndoSnapshot
+        ? h("span", {
+          key: "co_filter_import_undo_hint",
+          className: "hint",
+          style: { color: "#8eb6ca" },
+        }, `undo snapshot: ${String(filterImportUndoSnapshot.captured_at_iso || "-")}`)
+        : null,
       filterImportRows.length > 0
         ? h("div", {
           key: "co_filter_import_rows",
