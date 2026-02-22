@@ -110,6 +110,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
 - [x] M17.0: Graph Lab async run monitor (sync/async mode + polling progress + manual poll controls)
 - [x] M17.1: Graph Lab frontend modularization (inline script -> ES modules, helper/runtime split)
+- [x] M17.2: Graph Lab component/API split (`app` orchestration + panel components + api client)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -122,7 +123,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue M17 componentization track after modularization closure: split monolithic `app.mjs` into panel-level components and API client modules while preserving M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
+Continue M17 frontend hardening track after component/API split closure: extract action/state groups into smaller hooks (`useGraphRunOps`, `useGateOps`) and keep M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -771,3 +772,17 @@ M17.1 outcome (2026-02-22):
 - behavioral parity preserved for M16.5/M17.0 run controls:
   - cache/cancel/retry/poll flows remain in `app.mjs`
   - async run tokens and endpoint bindings remain unchanged (`?async=...`, retry/cancel routes)
+
+M17.2 outcome (2026-02-22):
+
+- Graph Lab component/API split completed:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/api_client.mjs`
+- frontend modular responsibilities clarified:
+  - `app.mjs`: state + action orchestration only
+  - `panels.mjs`: left/center/right panel rendering components
+  - `api_client.mjs`: graph/baseline/policy endpoint wrappers
+- M16.5/M17.0 behavior parity preserved:
+  - async run/retry query binding (`?async=...`) unchanged
+  - cancel/recovery/gate workflows still exposed in UI controls

@@ -1767,3 +1767,21 @@
   - Graph Lab HTML shell now loads module entry only (`./graph_lab/main.mjs`)
   - app runtime tokens remain present in external module (`Run Mode`, `Auto Poll`, `Poll Last Run`)
   - async/retry/cancel endpoint bindings remain present in moduleized app (`/api/graph/runs?async=...`, `/retry?async=...`, `/cancel`)
+
+## Web E2E Graph Component + API Split (M17.2)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - frontend refactor 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contract and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8113 8133` + smoke (`curl /frontend/graph_lab_reactflow.html?api=...`, `curl /frontend/graph_lab/app.mjs`, `curl /frontend/graph_lab/api_client.mjs` token grep)
+- Result: pass
+- Notes:
+  - HTML shell still loads module entry (`./graph_lab/main.mjs`)
+  - `app.mjs` contains panel composition tokens (`GraphInputsPanel`, `GraphCanvasPanel`, `NodeInspectorPanel`)
+  - `app.mjs` run actions route through API client wrappers (`runGraph`, `retryGraphRun`, `cancelGraphRun`)
+  - endpoint strings are centralized in `api_client.mjs` (`/api/graph/runs?async=...`, `/retry?async=...`, `/cancel`, `/api/baselines`, `/api/compare/policy`)
