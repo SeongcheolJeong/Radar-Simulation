@@ -1667,3 +1667,20 @@
   - ReactFlow shell includes graph-run execution hook (`Run Graph (API)`)
   - page wires run endpoint and summary retrieval (`/api/graph/runs`, `/api/graph/runs/{id}/summary`)
   - result panel includes graph-run artifact pointers (`graph_run_summary_json`)
+
+## Web E2E Graph Artifact Inspector (M16.3)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - graph run summary contract remains stable with artifact-inspector frontend integration
+  - graph run endpoints and summary artifacts remain valid under regression harness
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8106 8126` + smoke (`curl /health`, `curl /frontend/graph_lab_reactflow.html?api=...` + token grep)
+- Result: pass
+- Notes:
+  - Graph Lab includes `Artifact Inspector` section and `Run Graph (API)` action
+  - shell includes graph-run endpoint wiring and trace/visual labels (`/api/graph/runs`, `node trace`, `visuals`)
+  - artifact inspector path normalization helper added (`normalizeRepoPath`)

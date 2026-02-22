@@ -105,7 +105,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M16.0: Simulink-style Graph contract freeze (ReactFlow node/edge schema + validator contract)
 - [x] M16.1: ReactFlow shell bootstrap (graph canvas + property inspector + template loader)
 - [x] M16.2: Graph executor API bridge (`/api/graph/*` validation/run/status)
-- [ ] M16.3: Artifact inspector panels (Path/ADC/RD/RA + node-output trace)
+- [x] M16.3: Artifact inspector panels (Path/ADC/RD/RA + node-output trace)
 - [ ] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
 - [ ] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
 
@@ -120,7 +120,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M16.3 artifact inspector panels (Path/ADC/RD/RA + node-output trace) on top of graph-run bridge while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M16.4 regression gate integration on graph runs (policy/gate/evidence/report one-click) while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -692,3 +692,15 @@ M16.2 outcome (2026-02-22):
 - ReactFlow shell bridge hookup:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
   - `Run Graph (API)` action now executes graph and shows summary/artifact pointers
+
+M16.3 outcome (2026-02-22):
+
+- Graph Lab artifact inspector panel expanded:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+- artifact visibility features:
+  - direct links for `path_list_json`, `adc_cube_npz`, `radar_map_npz`, `graph_run_summary_json`
+  - run-level KPIs (`path_count_total`, `adc_shape`, `rd_shape`, `ra_shape`)
+  - per-node output trace from `execution.node_results`
+  - visual thumbnails (`rd_map`, `ra_map`, `adc`, `path_scatter`) when available
+- path normalization helper added for absolute->served repo path mapping:
+  - `normalizeRepoPath(pathValue)`
