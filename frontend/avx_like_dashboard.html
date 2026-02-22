@@ -1111,6 +1111,99 @@
       window.setTimeout(() => URL.revokeObjectURL(href), 1000);
     }
 
+    function collectTopFailureEvidenceRows(maxItems) {
+      const takeN = Math.max(1, Number(maxItems || 8));
+      const sessions = Array.isArray(state.regressionSessions) ? state.regressionSessions : [];
+      const evals = Array.isArray(state.policyEvals) ? state.policyEvals : [];
+      if (sessions.length === 0 || evals.length === 0) return [];
+
+      const selectedId = String(
+        el.regressionSessionSelect.value || el.regressionSessionIdInput.value || ""
+      ).trim();
+      const focusSession =
+        sessions.find((x) => String((x && x.session_id) || "") === selectedId) || sessions[0] || {};
+      const focusRows = Array.isArray(focusSession.rows) ? focusSession.rows : [];
+
+      const evalById = new Map();
+      evals.forEach((row) => {
+        const id = String((row && row.policy_eval_id) || "").trim();
+        if (id) evalById.set(id, row);
+      });
+
+      const entries = [];
+      focusRows.forEach((row, rowIdx) => {
+        if (!Boolean(row && row.gate_failed)) return;
+        const policyEvalId = String((row && row.policy_eval_id) || "").trim();
+        const evalPayload = policyEvalId ? evalById.get(policyEvalId) : null;
+        const candidateId =
+          (row && (row.candidate_run_id || row.candidate_summary_json)) ||
+          `row_${Number(rowIdx)}`;
+        const gateFailureCount = Number((row && row.gate_failure_count) || 0);
+        const gateFailures = Array.isArray(evalPayload?.gate_failures)
+          ? evalPayload.gate_failures
+          : [];
+
+        if (gateFailures.length === 0) {
+          entries.push({
+            score: gateFailureCount > 0 ? gateFailureCount : 1,
+            candidateId: String(candidateId),
+            policyEvalId: policyEvalId || "-",
+            rule: "unknown_rule",
+            metric: null,
+            value: null,
+            limit: null,
+            gateFailureCount,
+          });
+          return;
+        }
+
+        gateFailures.forEach((g) => {
+          const value = g && Object.prototype.hasOwnProperty.call(g, "value") ? g.value : null;
+          const limit = g && Object.prototype.hasOwnProperty.call(g, "limit") ? g.limit : null;
+          const valueNum = Number(value);
+          const limitNum = Number(limit);
+          const hasNumeric = Number.isFinite(valueNum) && Number.isFinite(limitNum);
+          const score = hasNumeric
+            ? valueNum - limitNum
+            : gateFailureCount > 0
+            ? gateFailureCount
+            : 1;
+          entries.push({
+            score,
+            candidateId: String(candidateId),
+            policyEvalId: policyEvalId || "-",
+            rule: String((g && g.rule) || "unknown_rule"),
+            metric: g && g.metric ? String(g.metric) : null,
+            value,
+            limit,
+            gateFailureCount,
+          });
+        });
+      });
+
+      entries.sort((a, b) => {
+        const ds = Number(b.score || 0) - Number(a.score || 0);
+        if (Math.abs(ds) > 1e-12) return ds;
+        const dg = Number(b.gateFailureCount || 0) - Number(a.gateFailureCount || 0);
+        if (dg !== 0) return dg;
+        const ra = String(a.rule || "");
+        const rb = String(b.rule || "");
+        return ra < rb ? -1 : ra > rb ? 1 : 0;
+      });
+      return entries.slice(0, takeN);
+    }
+
+    function formatEvidenceValue(v) {
+      if (v === null || v === undefined) return "-";
+      if (typeof v === "number") {
+        if (!Number.isFinite(v)) return String(v);
+        const av = Math.abs(v);
+        if ((av > 0 && av < 0.01) || av >= 1000) return v.toExponential(3);
+        return String(Number(v.toFixed(6)));
+      }
+      return String(v);
+    }
+
     function buildDecisionReportTemplateMarkdown() {
       const nowIso = new Date().toISOString();
       const baselineId = String(el.baselineIdInput.value || "").trim() || "-";
@@ -1119,6 +1212,7 @@
       const runRef = String(el.compareRefRunInput.value || "").trim() || "-";
       const runCand = String(el.compareCandRunInput.value || "").trim() || "-";
       const tuning = collectPolicyTuningConfig();
+      const evidenceRows = collectTopFailureEvidenceRows(8);
 
       const reportName = `regression_decision_report_${sanitizeFilenameToken(sessionId, "session")}_${nowIso.slice(0, 19).replace(/[:T]/g, "_")}.md`;
       const reviewBundlePath = state.lastReviewBundlePath || "-";
@@ -1157,6 +1251,22 @@
         `- rule_histogram: ${String(el.auditRuleHistogram.textContent || "").trim() || "-"}`,
         `- hot_candidate: ${String(el.auditHotCandidateLine.textContent || "").trim() || "-"}`,
         "",
+        "## Top Failure Evidence (Auto-Extracted)",
+        `- source_session: ${sessionId}`,
+        `- source_policy_eval_count: ${Array.isArray(state.policyEvals) ? state.policyEvals.length : 0}`,
+      ];
+      if (evidenceRows.length === 0) {
+        lines.push("- none (no gate-failure evidence found for current focus session)");
+      } else {
+        evidenceRows.forEach((ev, idx) => {
+          const metricSuffix = ev.metric ? ` (${ev.metric})` : "";
+          lines.push(
+            `- [${idx + 1}] candidate=${ev.candidateId} | eval=${ev.policyEvalId} | rule=${ev.rule}${metricSuffix} | value=${formatEvidenceValue(ev.value)} | limit=${formatEvidenceValue(ev.limit)} | row_failures=${Number(ev.gateFailureCount || 0)}`
+          );
+        });
+      }
+      lines.push(
+        "",
         "## Artifact Pointers",
         `- review_bundle_path: ${reviewBundlePath}`,
         `- session_json: ${String((state.lastRegressionExport && state.lastRegressionExport.artifacts && state.lastRegressionExport.artifacts.session_json) || "-")}`,
@@ -1174,7 +1284,7 @@
         "- due_date: `<YYYY-MM-DD>`",
         "- notes:",
         "  - ",
-      ];
+      );
       return {
         filename: reportName,
         markdown: lines.join("\n"),

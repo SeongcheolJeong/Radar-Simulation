@@ -1590,3 +1590,19 @@
   - dashboard HTML includes report-export controls (`exportDecisionReportBtn`, `decisionReportStatus`, `decisionReportFileBox`)
   - dashboard JS includes markdown template exporter (`buildDecisionReportTemplateMarkdown`, `exportDecisionReportTemplate`)
   - export path includes blob-download + best-effort clipboard copy with status updates
+
+## Web E2E Decision Report Failure Evidence (M15.12)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - API baseline/compare/policy/regression/export endpoints remain stable after dashboard report logic extension
+  - no regression observed in orchestrator API contract checks
+
+- Date: 2026-02-22
+- Command: `rg -n "collectTopFailureEvidenceRows|formatEvidenceValue|Top Failure Evidence \(Auto-Extracted\)|no gate-failure evidence found" /Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- Result: pass
+- Notes:
+  - report exporter includes evidence collector + value formatter helpers
+  - markdown template includes top-failure evidence section and no-evidence fallback line

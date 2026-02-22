@@ -100,7 +100,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.9: Regression decision audit panel (per-rule failure histogram + recent trend)
 - [x] M15.10: Regression review bundle export hook (dashboard one-click package copy path)
 - [x] M15.11: Regression decision report template export (markdown handoff skeleton)
-- [ ] M15.12: Regression report auto-include policy-eval excerpts (top failure evidence block)
+- [x] M15.12: Regression report auto-include policy-eval excerpts (top failure evidence block)
+- [ ] M15.13: Regression evidence drill-down panel (session row/policy-eval quick pivot for reviewer loop)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -113,7 +114,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.12 regression report auto-include policy-eval excerpts while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.13 regression evidence drill-down panel while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -612,3 +613,15 @@ M15.11 outcome (2026-02-22):
 - new UI state fields:
   - `decisionReportStatus`
   - `decisionReportFileBox`
+
+M15.12 outcome (2026-02-22):
+
+- decision report exporter enhanced with auto evidence extraction:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- new helper flow:
+  - `collectTopFailureEvidenceRows(maxItems)` ranks gate-failure evidence from focused regression session rows joined with `policy_evals`
+  - `formatEvidenceValue(v)` normalizes numeric/non-numeric evidence values for markdown readability
+- markdown template now auto-adds:
+  - `Top Failure Evidence (Auto-Extracted)` section
+  - top-N failure lines (`candidate`, `policy_eval_id`, `rule`, optional `metric`, `value`, `limit`, `row_failures`)
+  - graceful fallback line when no gate-failure evidence exists
