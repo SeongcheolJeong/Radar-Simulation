@@ -109,6 +109,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
 - [x] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
 - [x] M17.0: Graph Lab async run monitor (sync/async mode + polling progress + manual poll controls)
+- [x] M17.1: Graph Lab frontend modularization (inline script -> ES modules, helper/runtime split)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -121,7 +122,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue M17 modularization track after async monitor closure: split `graph_lab_reactflow.html` into componentized frontend build and preserve M16.5+M17.0 run semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
+Continue M17 componentization track after modularization closure: split monolithic `app.mjs` into panel-level components and API client modules while preserving M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -755,3 +756,18 @@ M17.0 outcome (2026-02-22):
   - async submission path can auto-poll until terminal state and auto-load summary on completion
   - retry path also respects sync/async mode and polling behavior
   - non-terminal/failed/canceled rows reuse recovery rendering for consistent operator feedback
+
+M17.1 outcome (2026-02-22):
+
+- Graph Lab frontend modularization completed:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/main.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+- helper/runtime modules introduced:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/deps.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/constants.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/graph_helpers.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/run_monitor.mjs`
+- behavioral parity preserved for M16.5/M17.0 run controls:
+  - cache/cancel/retry/poll flows remain in `app.mjs`
+  - async run tokens and endpoint bindings remain unchanged (`?async=...`, retry/cancel routes)

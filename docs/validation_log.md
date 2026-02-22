@@ -1750,3 +1750,20 @@
     - `poll_state`
     - `/api/graph/runs?async=...`
     - `/api/graph/runs/{id}/retry?async=...`
+
+## Web E2E Graph Frontend Modularization (M17.1)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - backend graph run/cancel/retry/policy API contract remains stable after frontend module split
+  - no regression observed in existing orchestrator regression harness
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8112 8132` + smoke (`curl /frontend/graph_lab_reactflow.html?api=...` + `curl /frontend/graph_lab/app.mjs` token grep)
+- Result: pass
+- Notes:
+  - Graph Lab HTML shell now loads module entry only (`./graph_lab/main.mjs`)
+  - app runtime tokens remain present in external module (`Run Mode`, `Auto Poll`, `Poll Last Run`)
+  - async/retry/cancel endpoint bindings remain present in moduleized app (`/api/graph/runs?async=...`, `/retry?async=...`, `/cancel`)
