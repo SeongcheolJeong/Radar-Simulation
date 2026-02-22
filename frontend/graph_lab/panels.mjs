@@ -1366,6 +1366,54 @@ export function ContractWarningOverlay({
     const payload = [header, formatRowDetailText(row)].join("\n");
     await copyTextToClipboard(payload, `row:${Number(idx) + 1}`);
   }, [copyTextToClipboard, formatRowDetailText]);
+  const resetOverlayFilters = React.useCallback(() => {
+    setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
+    setSeverityFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
+    setPolicyFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.policyFilter);
+    setPinnedRunId(CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId);
+    setNonZeroOnly(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.nonZeroOnly));
+    setGateHistoryLimit(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit));
+    setGateHistoryPages(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages));
+    setRowWindowSizeText(String(CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize));
+    setRowWindowOffset(0);
+  }, []);
+  const activeFilterTokens = React.useMemo(() => {
+    const tokens = [];
+    if (sourceFilter !== CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter) {
+      tokens.push(`source:${sourceFilter}`);
+    }
+    if (severityFilter !== CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter) {
+      tokens.push(`severity:${severityFilter}`);
+    }
+    if (policyFilter !== CONTRACT_OVERLAY_DEFAULT_PREFS.policyFilter) {
+      tokens.push(`policy:${policyFilter}`);
+    }
+    if (pinnedRunId !== CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId) {
+      tokens.push(`run:${pinnedRunId}`);
+    }
+    if (Boolean(nonZeroOnly) !== Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.nonZeroOnly)) {
+      tokens.push("delta!=0");
+    }
+    if (String(gateHistoryLimit) !== String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit)) {
+      tokens.push(`gate_window:${gateHistoryLimit}`);
+    }
+    if (String(gateHistoryPages) !== String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages)) {
+      tokens.push(`gate_pages:${gateHistoryPages}`);
+    }
+    if (String(rowWindowSizeText) !== String(CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize)) {
+      tokens.push(`rows_window:${rowWindowSizeText}`);
+    }
+    return tokens;
+  }, [
+    gateHistoryLimit,
+    gateHistoryPages,
+    nonZeroOnly,
+    pinnedRunId,
+    policyFilter,
+    rowWindowSizeText,
+    severityFilter,
+    sourceFilter,
+  ]);
   const triggerShortcutAction = React.useCallback((actionId) => {
     const id = String(actionId || "");
     if (id === "toggle_help") {
@@ -1536,7 +1584,7 @@ export function ContractWarningOverlay({
         h("option", { value: String(opt.id || "all"), key: `co_sev_opt_${String(opt.id || "all")}` }, String(opt.label || opt.id || "all"))
       )),
       h("div", { key: "co_severity_quick", style: { display: "inline-flex", alignItems: "center", gap: "4px" } }, [
-        ...["high", "med", "low"].map((sev) =>
+        ...["all", "high", "med", "low"].map((sev) =>
           h("button", {
             className: "btn",
             key: `co_sev_btn_${sev}`,
@@ -1549,7 +1597,7 @@ export function ContractWarningOverlay({
               borderColor: severityFilter === sev ? "#4d7a93" : undefined,
               background: severityFilter === sev ? "rgba(46, 86, 106, 0.42)" : undefined,
             },
-          }, `${sev}:${Number(severityCounts[sev] || 0)}`)
+          }, `${sev}:${sev === "all" ? Number(scopedRows.length || 0) : Number(severityCounts[sev] || 0)}`)
         ),
       ]),
       h("label", { key: "co_policy_label" }, "policy:"),
@@ -1562,7 +1610,7 @@ export function ContractWarningOverlay({
         h("option", { value: String(opt.id || "all"), key: `co_pol_opt_${String(opt.id || "all")}` }, String(opt.label || opt.id || "all"))
       )),
       h("div", { key: "co_policy_quick", style: { display: "inline-flex", alignItems: "center", gap: "4px" } }, [
-        ...["hold", "adopt", "none"].map((policy) =>
+        ...["all", "hold", "adopt", "none"].map((policy) =>
           h("button", {
             className: "btn",
             key: `co_pol_btn_${policy}`,
@@ -1575,7 +1623,7 @@ export function ContractWarningOverlay({
               borderColor: policyFilter === policy ? "#4d7a93" : undefined,
               background: policyFilter === policy ? "rgba(46, 86, 106, 0.42)" : undefined,
             },
-          }, `${policy}:${Number(policyCounts[policy] || 0)}`)
+          }, `${policy}:${policy === "all" ? Number(severityScopedRows.length || 0) : Number(policyCounts[policy] || 0)}`)
         ),
       ]),
       h("label", { key: "co_run_label" }, "run:"),
@@ -1659,6 +1707,36 @@ export function ContractWarningOverlay({
         `showing ${filteredRows.length}/${severityScopedRows.length}/${scopedRows.length}/${rows.length} (policy/severity/scoped/all) | `,
         `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
       ]),
+    ]),
+    h("div", {
+      className: "contract-overlay-filter",
+      key: "co_filter_summary",
+      style: { flexWrap: "wrap", rowGap: "6px", borderTop: "1px dashed #27485a" },
+    }, [
+      h("label", { key: "co_filter_summary_label" }, "active filters:"),
+      activeFilterTokens.length === 0
+        ? h("span", { key: "co_filter_summary_none", className: "hint", style: { color: "#8eb6ca" } }, "(none)")
+        : activeFilterTokens.map((token, idx) =>
+          h("span", {
+            key: `co_filter_token_${idx}`,
+            className: "hint",
+            style: {
+              display: "inline-flex",
+              alignItems: "center",
+              border: "1px solid #31576b",
+              borderRadius: "999px",
+              padding: "2px 7px",
+              background: "rgba(24, 50, 65, 0.42)",
+              color: "#b8d5e7",
+            },
+          }, token)
+        ),
+      h("button", {
+        className: "btn",
+        key: "co_reset_filters",
+        onClick: resetOverlayFilters,
+        disabled: activeFilterTokens.length === 0,
+      }, "Reset Filters"),
     ]),
     h("div", {
       className: "contract-overlay-filter",
