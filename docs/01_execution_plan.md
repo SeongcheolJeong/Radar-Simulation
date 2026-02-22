@@ -141,6 +141,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.30: Selective filter preset import + dry-run conflict visibility
 - [x] M17.31: Replace-mode confirmation + one-click undo recovery
 - [x] M17.32: Import audit trail + multi-level undo/redo stacks
+- [x] M17.33: Audit detail drilldown + local persistence for import history
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -153,7 +154,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.32 frontend hardening track: add audit-detail drilldown (added/removed names full list export) and bounded history persistence while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.33 frontend hardening track: add history maintenance controls (clear/prune policy) and audit search/filter interactions while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1256,3 +1257,20 @@ M17.32 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - helpers: `buildFilterPresetStateSnapshot`, `compactNameList`
   - import status now reports `+added/~changed/-removed` counts
+
+M17.33 outcome (2026-02-22):
+
+- audit detail drilldown controls added in import transfer area:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - controls: `Copy Audit Detail`, `Export Audit JSON`
+  - detail panel key: `co_filter_import_audit_detail`
+- audit row selection and detail rendering expanded:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - active selector state: `activeFilterImportAuditId`
+  - helper: `buildFilterImportAuditDetailText`
+  - audit rows now include compact selected-name preview
+- import history persistence added (bounded localStorage):
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - storage key: `graph_lab_contract_overlay_filter_import_history_v1`
+  - helpers: `loadFilterImportHistoryState`, `saveFilterImportHistoryState`
+  - startup restore + runtime sync for undo/redo/audit stacks

@@ -2570,3 +2570,33 @@
     - `kind: "import"`
     - `kind: "undo"`
     - `kind: "redo"`
+
+## Web E2E Graph Audit Drilldown + Import-History Persistence (M17.33)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-drilldown/persistence frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8164/8144)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - import-history persistence tokens confirmed:
+    - `CONTRACT_OVERLAY_FILTER_IMPORT_HISTORY_KEY`
+    - `loadFilterImportHistoryState`
+    - `saveFilterImportHistoryState`
+    - `buildFilterImportAuditExportBundle`
+    - `serializeFilterImportAuditExportBundle`
+  - audit drilldown tokens confirmed:
+    - `activeFilterImportAuditId`
+    - `buildFilterImportAuditDetailText`
+    - `co_filter_import_audit_controls`
+    - `co_filter_import_audit_copy`
+    - `co_filter_import_audit_export`
+    - `co_filter_import_audit_rows`
+    - `co_filter_import_audit_detail`
+    - `co_filter_import_audit_row_`
+    - `names:`

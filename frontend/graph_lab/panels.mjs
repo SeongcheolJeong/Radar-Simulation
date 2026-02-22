@@ -101,6 +101,7 @@ function buildContractRowKey(row) {
 const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
 const CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY = "graph_lab_contract_overlay_shortcut_profiles_v1";
 const CONTRACT_OVERLAY_FILTER_PRESETS_KEY = "graph_lab_contract_overlay_filter_presets_v1";
+const CONTRACT_OVERLAY_FILTER_IMPORT_HISTORY_KEY = "graph_lab_contract_overlay_filter_import_history_v1";
 const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   sourceFilter: "all",
   severityFilter: "all",
@@ -470,6 +471,160 @@ function compactNameList(names, maxItems = 6) {
   const rows = Array.isArray(names) ? names.map((x) => String(x || "").trim()).filter(Boolean) : [];
   if (rows.length <= maxItems) return rows;
   return [...rows.slice(0, maxItems), `...(+${rows.length - maxItems})`];
+}
+
+function sanitizeAuditNameList(rawList, maxItems = 256) {
+  const rows = Array.isArray(rawList) ? rawList : [];
+  const out = [];
+  rows.forEach((item) => {
+    const token = String(item || "").trim();
+    if (!token) return;
+    out.push(token.slice(0, 64));
+  });
+  return out.slice(0, maxItems);
+}
+
+function normalizeFilterPresetStateSnapshot(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const presets = cloneNormalizedFilterPresets(raw.presets);
+  if (Object.keys(presets).length === 0) return null;
+  return {
+    presets,
+    activeFilterPreset: String(raw.activeFilterPreset || "default"),
+    filterPresetDraft: String(raw.filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft),
+    captured_at_iso: String(raw.captured_at_iso || "-"),
+  };
+}
+
+function normalizeFilterImportAuditEntry(raw, idx = 0) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const kindRaw = String(raw.kind || "import").toLowerCase();
+  const kind = kindRaw === "undo" || kindRaw === "redo" ? kindRaw : "import";
+  const modeRaw = String(raw.mode || "merge").toLowerCase();
+  const mode = modeRaw === "replace_custom" || modeRaw === "undo" || modeRaw === "redo" ? modeRaw : "merge";
+  const clampCount = (value) => clampInteger(value, 0, 1_000_000, 0);
+  return {
+    id: String(raw.id || `fia_restore_${idx}`),
+    kind,
+    timestamp_iso: String(raw.timestamp_iso || "-"),
+    mode,
+    selected_count: clampCount(raw.selected_count),
+    added_count: clampCount(raw.added_count),
+    changed_count: clampCount(raw.changed_count),
+    removed_count: clampCount(raw.removed_count),
+    new_count: clampCount(raw.new_count),
+    overwrite_builtin_count: clampCount(raw.overwrite_builtin_count),
+    overwrite_custom_count: clampCount(raw.overwrite_custom_count),
+    selected_names: sanitizeAuditNameList(raw.selected_names),
+    added_names: sanitizeAuditNameList(raw.added_names),
+    removed_names: sanitizeAuditNameList(raw.removed_names),
+    note: String(raw.note || "").slice(0, 240),
+  };
+}
+
+function loadFilterImportHistoryState() {
+  const empty = { undoStack: [], redoStack: [], auditTrail: [] };
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return empty;
+    const raw = String(window.localStorage.getItem(CONTRACT_OVERLAY_FILTER_IMPORT_HISTORY_KEY) || "").trim();
+    if (!raw) return empty;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return empty;
+    const undoSource = Array.isArray(parsed.undo_stack) ? parsed.undo_stack : [];
+    const redoSource = Array.isArray(parsed.redo_stack) ? parsed.redo_stack : [];
+    const auditSource = Array.isArray(parsed.audit_trail) ? parsed.audit_trail : [];
+    const undoStack = undoSource
+      .map((row) => normalizeFilterPresetStateSnapshot(row))
+      .filter(Boolean)
+      .slice(-FILTER_IMPORT_HISTORY_LIMIT);
+    const redoStack = redoSource
+      .map((row) => normalizeFilterPresetStateSnapshot(row))
+      .filter(Boolean)
+      .slice(-FILTER_IMPORT_HISTORY_LIMIT);
+    const auditTrail = auditSource
+      .map((row, idx) => normalizeFilterImportAuditEntry(row, idx))
+      .filter(Boolean)
+      .slice(0, FILTER_IMPORT_HISTORY_LIMIT);
+    return { undoStack, redoStack, auditTrail };
+  } catch (_) {
+    return empty;
+  }
+}
+
+function saveFilterImportHistoryState(history) {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    const row = history && typeof history === "object" && !Array.isArray(history) ? history : {};
+    const undoSource = Array.isArray(row.undoStack) ? row.undoStack : [];
+    const redoSource = Array.isArray(row.redoStack) ? row.redoStack : [];
+    const auditSource = Array.isArray(row.auditTrail) ? row.auditTrail : [];
+    const payload = {
+      schema_version: 1,
+      kind: "graph_lab_contract_overlay_filter_import_history",
+      saved_at_iso: new Date().toISOString(),
+      undo_stack: undoSource
+        .map((x) => normalizeFilterPresetStateSnapshot(x))
+        .filter(Boolean)
+        .slice(-FILTER_IMPORT_HISTORY_LIMIT),
+      redo_stack: redoSource
+        .map((x) => normalizeFilterPresetStateSnapshot(x))
+        .filter(Boolean)
+        .slice(-FILTER_IMPORT_HISTORY_LIMIT),
+      audit_trail: auditSource
+        .map((x, idx) => normalizeFilterImportAuditEntry(x, idx))
+        .filter(Boolean)
+        .slice(0, FILTER_IMPORT_HISTORY_LIMIT),
+    };
+    window.localStorage.setItem(CONTRACT_OVERLAY_FILTER_IMPORT_HISTORY_KEY, JSON.stringify(payload));
+  } catch (_) {
+    // localStorage may be blocked; ignore and continue with in-memory state
+  }
+}
+
+function buildFilterImportAuditExportBundle(auditTrail) {
+  const rows = Array.isArray(auditTrail) ? auditTrail : [];
+  const entries = rows
+    .map((row, idx) => normalizeFilterImportAuditEntry(row, idx))
+    .filter(Boolean);
+  return {
+    schema_version: 1,
+    kind: "graph_lab_contract_overlay_filter_import_audit",
+    exported_at_iso: new Date().toISOString(),
+    entries,
+  };
+}
+
+function serializeFilterImportAuditExportBundle(auditTrail) {
+  return JSON.stringify(buildFilterImportAuditExportBundle(auditTrail), null, 2);
+}
+
+function buildFilterImportAuditDetailText(entry) {
+  const row = entry && typeof entry === "object" ? entry : null;
+  if (!row) return "(no audit entry selected)";
+  const lines = [
+    `id: ${String(row.id || "-")}`,
+    `timestamp_iso: ${String(row.timestamp_iso || "-")}`,
+    `kind: ${String(row.kind || "-")}`,
+    `mode: ${String(row.mode || "-")}`,
+    `selected_count: ${Number(row.selected_count || 0)}`,
+    `added_count: ${Number(row.added_count || 0)}`,
+    `changed_count: ${Number(row.changed_count || 0)}`,
+    `removed_count: ${Number(row.removed_count || 0)}`,
+    `new_count: ${Number(row.new_count || 0)}`,
+    `overwrite_builtin_count: ${Number(row.overwrite_builtin_count || 0)}`,
+    `overwrite_custom_count: ${Number(row.overwrite_custom_count || 0)}`,
+    `note: ${String(row.note || "-")}`,
+    "",
+    "selected_names:",
+    ...(sanitizeAuditNameList(row.selected_names).map((name) => `- ${name}`)),
+    "",
+    "added_names:",
+    ...(sanitizeAuditNameList(row.added_names).map((name) => `- ${name}`)),
+    "",
+    "removed_names:",
+    ...(sanitizeAuditNameList(row.removed_names).map((name) => `- ${name}`)),
+  ];
+  return lines.join("\n");
 }
 
 function buildFilterPresetExportBundle(presets) {
@@ -956,6 +1111,7 @@ export function ContractWarningOverlay({
     const profileBindings = initialShortcutProfiles[initialActiveShortcutProfile] || DEFAULT_SHORTCUT_BINDINGS;
     return normalizeShortcutBindings(initialPrefs.shortcutBindings, profileBindings);
   }, [initialActiveShortcutProfile, initialPrefs.shortcutBindings, initialShortcutProfiles]);
+  const initialFilterImportHistory = React.useMemo(() => loadFilterImportHistoryState(), []);
   const [sourceFilter, setSourceFilter] = React.useState(
     String(initialPrefs.sourceFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter)
   );
@@ -1028,9 +1184,18 @@ export function ContractWarningOverlay({
   const [filterTransferStatus, setFilterTransferStatus] = React.useState("");
   const [filterImportSelection, setFilterImportSelection] = React.useState({});
   const [filterReplaceConfirmChecked, setFilterReplaceConfirmChecked] = React.useState(false);
-  const [filterImportUndoStack, setFilterImportUndoStack] = React.useState([]);
-  const [filterImportRedoStack, setFilterImportRedoStack] = React.useState([]);
-  const [filterImportAuditTrail, setFilterImportAuditTrail] = React.useState([]);
+  const [filterImportUndoStack, setFilterImportUndoStack] = React.useState(
+    () => initialFilterImportHistory.undoStack
+  );
+  const [filterImportRedoStack, setFilterImportRedoStack] = React.useState(
+    () => initialFilterImportHistory.redoStack
+  );
+  const [filterImportAuditTrail, setFilterImportAuditTrail] = React.useState(
+    () => initialFilterImportHistory.auditTrail
+  );
+  const [activeFilterImportAuditId, setActiveFilterImportAuditId] = React.useState(
+    () => String(initialFilterImportHistory.auditTrail[0]?.id || "")
+  );
   const [shortcutTransferText, setShortcutTransferText] = React.useState("");
   const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
   const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
@@ -1163,6 +1328,18 @@ export function ContractWarningOverlay({
   }, [filterReplaceConfirmChecked, filterTransferText]);
 
   React.useEffect(() => {
+    const rows = Array.isArray(filterImportAuditTrail) ? filterImportAuditTrail : [];
+    if (rows.length === 0) {
+      if (activeFilterImportAuditId) {
+        setActiveFilterImportAuditId("");
+      }
+      return;
+    }
+    if (rows.some((row) => String(row?.id || "") === activeFilterImportAuditId)) return;
+    setActiveFilterImportAuditId(String(rows[0]?.id || ""));
+  }, [activeFilterImportAuditId, filterImportAuditTrail]);
+
+  React.useEffect(() => {
     if (!runOptions.includes(pinnedRunId)) {
       setPinnedRunId("all");
     }
@@ -1202,6 +1379,14 @@ export function ContractWarningOverlay({
   React.useEffect(() => {
     saveShortcutProfiles(shortcutProfiles);
   }, [shortcutProfiles]);
+
+  React.useEffect(() => {
+    saveFilterImportHistoryState({
+      undoStack: filterImportUndoStack,
+      redoStack: filterImportRedoStack,
+      auditTrail: filterImportAuditTrail,
+    });
+  }, [filterImportAuditTrail, filterImportRedoStack, filterImportUndoStack]);
 
   React.useEffect(() => {
     saveContractOverlayPrefs({
@@ -1793,6 +1978,16 @@ export function ContractWarningOverlay({
     () => filterImportMode === "replace_custom" && selectedFilterImportNames.length > 0,
     [filterImportMode, selectedFilterImportNames]
   );
+  const activeFilterImportAuditEntry = React.useMemo(() => {
+    const rows = Array.isArray(filterImportAuditTrail) ? filterImportAuditTrail : [];
+    if (rows.length === 0) return null;
+    if (!activeFilterImportAuditId) return rows[0];
+    return rows.find((row) => String(row?.id || "") === activeFilterImportAuditId) || rows[0];
+  }, [activeFilterImportAuditId, filterImportAuditTrail]);
+  const filterImportAuditDetailText = React.useMemo(
+    () => buildFilterImportAuditDetailText(activeFilterImportAuditEntry),
+    [activeFilterImportAuditEntry]
+  );
   const toggleFilterImportPresetSelection = React.useCallback((presetName) => {
     const name = String(presetName || "").trim();
     if (!name) return;
@@ -1925,6 +2120,45 @@ export function ContractWarningOverlay({
       setFilterTransferStatus("clipboard write failed; copy from text buffer");
     }
   }, [filterPresets]);
+  const copyFilterImportAuditDetail = React.useCallback(async () => {
+    const detailText = String(filterImportAuditDetailText || "");
+    if (!detailText.trim()) {
+      setFilterTransferStatus("audit copy skipped: empty detail");
+      return;
+    }
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(detailText);
+        setFilterTransferStatus("audit detail copied to clipboard");
+        return;
+      }
+      setFilterTransferStatus("audit copy failed: clipboard unavailable");
+    } catch (_) {
+      setFilterTransferStatus("audit copy failed: clipboard write error");
+    }
+  }, [filterImportAuditDetailText]);
+  const exportFilterImportAuditJson = React.useCallback(() => {
+    const jsonText = serializeFilterImportAuditExportBundle(filterImportAuditTrail);
+    try {
+      if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
+        setFilterTransferStatus("audit export prepared in-memory only");
+        return;
+      }
+      const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `graph_lab_filter_import_audit_${ts}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      setFilterTransferStatus(`audit export complete (${filterImportAuditTrail.length} entries)`);
+    } catch (_) {
+      setFilterTransferStatus("audit export failed");
+    }
+  }, [filterImportAuditTrail]);
   const restoreFilterPresetSnapshot = React.useCallback((snapshot) => {
     const row = snapshot && typeof snapshot === "object" ? snapshot : null;
     if (!row || !row.presets || typeof row.presets !== "object") return false;
@@ -1955,23 +2189,25 @@ export function ContractWarningOverlay({
     }
     setFilterImportUndoStack((prev) => prev.slice(0, -1));
     setFilterImportRedoStack((prev) => [...prev, currentSnapshot].slice(-FILTER_IMPORT_HISTORY_LIMIT));
+    const auditEntry = {
+      id: `fia_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+      kind: "undo",
+      timestamp_iso: new Date().toISOString(),
+      mode: "undo",
+      selected_count: 0,
+      added_count: 0,
+      changed_count: 0,
+      removed_count: 0,
+      note: `restored ${String(snapshot.captured_at_iso || "-")}`,
+      selected_names: [],
+      added_names: [],
+      removed_names: [],
+    };
     setFilterImportAuditTrail((prev) => [
-      {
-        id: `fia_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
-        kind: "undo",
-        timestamp_iso: new Date().toISOString(),
-        mode: "undo",
-        selected_count: 0,
-        added_count: 0,
-        changed_count: 0,
-        removed_count: 0,
-        note: `restored ${String(snapshot.captured_at_iso || "-")}`,
-        selected_names: [],
-        added_names: [],
-        removed_names: [],
-      },
+      auditEntry,
       ...prev,
     ].slice(0, FILTER_IMPORT_HISTORY_LIMIT));
+    setActiveFilterImportAuditId(String(auditEntry.id));
     setFilterReplaceConfirmChecked(false);
     setFilterTransferStatus(`undo restored snapshot (${String(snapshot.captured_at_iso || "-")})`);
   }, [
@@ -2000,23 +2236,25 @@ export function ContractWarningOverlay({
     }
     setFilterImportRedoStack((prev) => prev.slice(0, -1));
     setFilterImportUndoStack((prev) => [...prev, currentSnapshot].slice(-FILTER_IMPORT_HISTORY_LIMIT));
+    const auditEntry = {
+      id: `fia_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+      kind: "redo",
+      timestamp_iso: new Date().toISOString(),
+      mode: "redo",
+      selected_count: 0,
+      added_count: 0,
+      changed_count: 0,
+      removed_count: 0,
+      note: `restored ${String(snapshot.captured_at_iso || "-")}`,
+      selected_names: [],
+      added_names: [],
+      removed_names: [],
+    };
     setFilterImportAuditTrail((prev) => [
-      {
-        id: `fia_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
-        kind: "redo",
-        timestamp_iso: new Date().toISOString(),
-        mode: "redo",
-        selected_count: 0,
-        added_count: 0,
-        changed_count: 0,
-        removed_count: 0,
-        note: `restored ${String(snapshot.captured_at_iso || "-")}`,
-        selected_names: [],
-        added_names: [],
-        removed_names: [],
-      },
+      auditEntry,
       ...prev,
     ].slice(0, FILTER_IMPORT_HISTORY_LIMIT));
+    setActiveFilterImportAuditId(String(auditEntry.id));
     setFilterReplaceConfirmChecked(false);
     setFilterTransferStatus(`redo restored snapshot (${String(snapshot.captured_at_iso || "-")})`);
   }, [
@@ -2116,14 +2354,15 @@ export function ContractWarningOverlay({
       new_count: selectedNewCount,
       overwrite_builtin_count: selectedOverwriteBuiltinCount,
       overwrite_custom_count: selectedOverwriteCustomCount,
-      selected_names: compactNameList(names),
-      added_names: compactNameList(addedNames),
-      removed_names: compactNameList(removedNames),
+      selected_names: [...names],
+      added_names: [...addedNames],
+      removed_names: [...removedNames],
       note: filterImportMode === "replace_custom" ? "replace custom apply" : "merge apply",
     };
     setFilterImportUndoStack((prev) => [...prev, beforeSnapshot].slice(-FILTER_IMPORT_HISTORY_LIMIT));
     setFilterImportRedoStack([]);
     setFilterImportAuditTrail((prev) => [auditEntry, ...prev].slice(0, FILTER_IMPORT_HISTORY_LIMIT));
+    setActiveFilterImportAuditId(String(auditEntry.id));
     setFilterPresets(afterPresets);
     if (filterImportMode === "replace_custom") {
       setFilterTransferStatus(
@@ -2695,20 +2934,64 @@ export function ContractWarningOverlay({
             borderTop: "1px dashed #27485a",
             paddingTop: "6px",
             display: "grid",
-            rowGap: "3px",
+            rowGap: "6px",
           },
-        }, filterImportAuditTrail.slice(0, 6).map((entry, idx) =>
-          h("span", {
-            key: `co_filter_import_audit_row_${idx}`,
-            className: "hint",
-            style: { color: "#8eb6ca" },
-          }, [
-            `${String(entry?.timestamp_iso || "-")} | ${String(entry?.kind || "import")} | mode:${String(entry?.mode || "-")} | `,
-            `sel:${Number(entry?.selected_count || 0)} +${Number(entry?.added_count || 0)} `,
-            `~${Number(entry?.changed_count || 0)} -${Number(entry?.removed_count || 0)} `,
-            entry?.note ? `| ${String(entry.note)}` : "",
-          ].join(""))
-        ))
+        }, [
+          h("div", { className: "btn-row", key: "co_filter_import_audit_controls", style: { gap: "6px" } }, [
+            h("label", { key: "co_filter_import_audit_label" }, `audit trail (${filterImportAuditTrail.length})`),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_copy",
+              onClick: copyFilterImportAuditDetail,
+              disabled: !activeFilterImportAuditEntry,
+            }, "Copy Audit Detail"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_export",
+              onClick: exportFilterImportAuditJson,
+              disabled: filterImportAuditTrail.length === 0,
+            }, "Export Audit JSON"),
+          ]),
+          h("div", { key: "co_filter_import_audit_rows", style: { display: "grid", rowGap: "3px" } },
+            filterImportAuditTrail.slice(0, 6).map((entry, idx) => {
+              const entryId = String(entry?.id || `idx_${idx}`);
+              const selected = entryId === String(activeFilterImportAuditId || "");
+              const namesPreview = compactNameList(entry?.selected_names, 3).join(", ");
+              return h("button", {
+                className: "btn",
+                key: `co_filter_import_audit_row_${idx}`,
+                onClick: () => setActiveFilterImportAuditId(entryId),
+                style: {
+                  textAlign: "left",
+                  justifyContent: "flex-start",
+                  fontSize: "10px",
+                  minHeight: 0,
+                  borderColor: selected ? "#4d7a93" : undefined,
+                  background: selected ? "rgba(46, 86, 106, 0.42)" : undefined,
+                },
+              }, [
+                `${String(entry?.timestamp_iso || "-")} | ${String(entry?.kind || "import")} | mode:${String(entry?.mode || "-")} | `,
+                `sel:${Number(entry?.selected_count || 0)} +${Number(entry?.added_count || 0)} `,
+                `~${Number(entry?.changed_count || 0)} -${Number(entry?.removed_count || 0)} `,
+                namesPreview ? `| names:${namesPreview} ` : "",
+                entry?.note ? `| ${String(entry.note)}` : "",
+              ].join(""));
+            })
+          ),
+          h("textarea", {
+            className: "textarea",
+            key: "co_filter_import_audit_detail",
+            value: filterImportAuditDetailText,
+            readOnly: true,
+            style: {
+              flexBasis: "100%",
+              minHeight: "120px",
+              padding: "6px 7px",
+              fontSize: "10px",
+              lineHeight: "1.35",
+            },
+          }),
+        ])
         : null,
       filterTransferStatus
         ? h("span", {
