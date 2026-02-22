@@ -131,6 +131,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.20: Overlay shortcut remap + profile persistence
 - [x] M17.21: Row detail field-level toggles + core/all presets
 - [x] M17.22: Shortcut profile transfer import/export (team-shareable JSON)
+- [x] M17.23: Detail-view copy ergonomics (row/visible copy actions)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -143,7 +144,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.22 frontend hardening track: add lightweight detail-view ergonomics while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.23 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1094,3 +1095,18 @@ M17.22 outcome (2026-02-22):
   - profile names normalized (`normalizeShortcutProfileName`)
   - invalid payload guard with explicit status (`import failed: ...`)
   - imported profiles are normalized to current action schema
+
+M17.23 outcome (2026-02-22):
+
+- detail copy workflow added at overlay-level and row-level:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Copy Visible` + per-row `Copy`
+  - copy payload respects current field toggle selection (`formatRowDetailText`)
+- clipboard/status handling added for operator feedback:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - helper: `copyTextToClipboard(...)`
+  - status field: `detail_copy: ...` (`co_detail_copy_status`)
+- copy behavior scope definition:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - visible-copy outputs current row window with row/run/source headers
+  - row-copy supports compact/full rows and non-run rows consistently

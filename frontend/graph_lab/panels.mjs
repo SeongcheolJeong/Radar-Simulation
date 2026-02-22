@@ -764,6 +764,7 @@ export function ContractWarningOverlay({
   );
   const [shortcutTransferText, setShortcutTransferText] = React.useState("");
   const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
+  const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
   const shortcutImportFileInputRef = React.useRef(null);
   const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
   const [expandedRowKeys, setExpandedRowKeys] = React.useState(() => new Set());
@@ -1243,6 +1244,48 @@ export function ContractWarningOverlay({
     }
     return lines.join("\n");
   }, [detailFieldStates]);
+  const copyTextToClipboard = React.useCallback(async (text, label) => {
+    const body = String(text || "");
+    if (!body.trim()) {
+      setDetailCopyStatus("copy skipped: empty detail payload");
+      return;
+    }
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(body);
+        setDetailCopyStatus(`copied: ${String(label || "details")}`);
+        return;
+      }
+      setDetailCopyStatus("clipboard unavailable");
+    } catch (_) {
+      setDetailCopyStatus("clipboard write failed");
+    }
+  }, []);
+  const copyVisibleDetailRows = React.useCallback(async () => {
+    if (!Array.isArray(visibleRows) || visibleRows.length === 0) {
+      setDetailCopyStatus("copy skipped: no visible rows");
+      return;
+    }
+    const payload = visibleRows
+      .map((row, localIdx) => {
+        const idx = rowWindowOffset + localIdx;
+        const runId = String(row?.graph_run_id || "-");
+        const source = String(row?.event_source || "-");
+        return [
+          `row#${idx + 1} | run=${runId} | source=${source}`,
+          formatRowDetailText(row),
+        ].join("\n");
+      })
+      .join("\n\n---\n\n");
+    await copyTextToClipboard(payload, `visible_rows:${visibleRows.length}`);
+  }, [copyTextToClipboard, formatRowDetailText, rowWindowOffset, visibleRows]);
+  const copySingleRowDetails = React.useCallback(async (row, idx) => {
+    const source = String(row?.event_source || "-");
+    const runId = String(row?.graph_run_id || "-");
+    const header = `row#${Number(idx) + 1} | run=${runId} | source=${source}`;
+    const payload = [header, formatRowDetailText(row)].join("\n");
+    await copyTextToClipboard(payload, `row:${Number(idx) + 1}`);
+  }, [copyTextToClipboard, formatRowDetailText]);
   const triggerShortcutAction = React.useCallback((actionId) => {
     const id = String(actionId || "");
     if (id === "toggle_help") {
@@ -1384,6 +1427,12 @@ export function ContractWarningOverlay({
           key: "co_collapse_details",
           disabled: expandedRowKeys.size === 0,
         }, "Collapse Details"),
+        h("button", {
+          className: "btn",
+          onClick: copyVisibleDetailRows,
+          key: "co_copy_visible_details",
+          disabled: visibleRows.length === 0,
+        }, "Copy Visible"),
         h("button", { className: "btn", onClick: onExport, key: "co_export" }, "Export JSON"),
         h("button", { className: "btn", onClick: onClear, key: "co_clear" }, "Clear"),
         h("button", { className: "btn", onClick: onClose, key: "co_hide" }, "Hide"),
@@ -1687,6 +1736,13 @@ export function ContractWarningOverlay({
         style: { marginLeft: "auto", color: "#8eb6ca" },
       }, `selected ${detailFieldSelectedCount}/${DETAIL_FIELD_DEFS.length}`),
     ]),
+    detailCopyStatus
+      ? h("div", {
+        className: "hint",
+        key: "co_detail_copy_status",
+        style: { margin: "2px 2px 4px 2px", color: "#8eb6ca" },
+      }, `detail_copy: ${detailCopyStatus}`)
+      : null,
     showShortcutHelp
       ? h(
         "div",
@@ -1746,6 +1802,11 @@ export function ContractWarningOverlay({
                   : null,
                 h("button", {
                   className: "btn contract-row-detail-btn",
+                  key: `co_row_copy_compact_${idx}`,
+                  onClick: () => copySingleRowDetails(row, idx),
+                }, "Copy"),
+                h("button", {
+                  className: "btn contract-row-detail-btn",
                   key: `co_row_detail_compact_${idx}`,
                   onClick: () => toggleRowExpanded(rowExpandedKey),
                 }, rowDetailsExpanded ? "Hide" : "Details"),
@@ -1791,12 +1852,22 @@ export function ContractWarningOverlay({
                       }, "Open Gate")
                     : null,
                   h("button", {
+                    key: `co_row_copy_${idx}`,
+                    className: "btn contract-row-detail-btn",
+                    onClick: () => copySingleRowDetails(row, idx),
+                  }, "Copy"),
+                  h("button", {
                     key: `co_row_detail_${idx}`,
                     className: "btn contract-row-detail-btn",
                     onClick: () => toggleRowExpanded(rowExpandedKey),
                   }, rowDetailsExpanded ? "Hide" : "Details"),
                 ])
               : h("div", { className: "contract-overlay-row-actions", key: `co_row_actions_${idx}` }, [
+                  h("button", {
+                    key: `co_row_copy_only_${idx}`,
+                    className: "btn contract-row-detail-btn",
+                    onClick: () => copySingleRowDetails(row, idx),
+                  }, "Copy"),
                   h("button", {
                     key: `co_row_detail_only_${idx}`,
                     className: "btn contract-row-detail-btn",
