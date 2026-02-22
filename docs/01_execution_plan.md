@@ -111,6 +111,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.0: Graph Lab async run monitor (sync/async mode + polling progress + manual poll controls)
 - [x] M17.1: Graph Lab frontend modularization (inline script -> ES modules, helper/runtime split)
 - [x] M17.2: Graph Lab component/API split (`app` orchestration + panel components + api client)
+- [x] M17.3: Graph Lab action hooks split (`useGraphRunOps`, `useGateOps`)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -123,7 +124,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue M17 frontend hardening track after component/API split closure: extract action/state groups into smaller hooks (`useGraphRunOps`, `useGateOps`) and keep M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
+Continue M17 frontend hardening track after hook split closure: reduce prop fan-out via grouped action factories and typed contracts while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -786,3 +787,16 @@ M17.2 outcome (2026-02-22):
 - M16.5/M17.0 behavior parity preserved:
   - async run/retry query binding (`?async=...`) unchanged
   - cancel/recovery/gate workflows still exposed in UI controls
+
+M17.3 outcome (2026-02-22):
+
+- Graph Lab action hooks split completed:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_graph_run_ops.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+- responsibilities clarified:
+  - `useGraphRunOps`: run submit/poll/retry/cancel/recovery
+  - `useGateOps`: baseline pin/policy gate/report export
+  - `app.mjs`: state + orchestration wiring
+- behavioral parity preserved for existing operator controls:
+  - run mode (`sync|async`), auto-poll, poll-last, retry/cancel actions remain wired to same backend endpoints

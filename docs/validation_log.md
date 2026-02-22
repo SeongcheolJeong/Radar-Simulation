@@ -1785,3 +1785,20 @@
   - `app.mjs` contains panel composition tokens (`GraphInputsPanel`, `GraphCanvasPanel`, `NodeInspectorPanel`)
   - `app.mjs` run actions route through API client wrappers (`runGraph`, `retryGraphRun`, `cancelGraphRun`)
   - endpoint strings are centralized in `api_client.mjs` (`/api/graph/runs?async=...`, `/retry?async=...`, `/cancel`, `/api/baselines`, `/api/compare/policy`)
+
+## Web E2E Graph Action Hooks Split (M17.3)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - hook refactor 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8114 8134` + smoke (`curl /frontend/graph_lab/app.mjs`, `curl /frontend/graph_lab/hooks/use_graph_run_ops.mjs`, `curl /frontend/graph_lab/hooks/use_gate_ops.mjs` token grep)
+- Result: pass
+- Notes:
+  - `app.mjs` now wires hook entry points (`useGraphRunOps`, `useGateOps`)
+  - run hook includes existing run-control API paths (`runGraph`, `retryGraphRun`, `cancelGraphRun`, summary poll path)
+  - gate hook includes baseline/policy/report actions (`createBaseline`, `evaluatePolicyGate`, report filename prefix `graph_gate_report_`)
