@@ -1915,3 +1915,33 @@
   - overlay CSS tokens confirmed:
     - `contract-overlay`
     - `contract-overlay-row`
+
+## Web E2E Graph Contract Timeline Filter + Export (M17.9)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - timeline filter/export + gate-report diagnostics changes 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - async cancel assertion showed one intermittent timing failure on first try; immediate rerun passed (known flaky cancel timing path)
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8120 8140` + smoke (`curl /health`, `curl /frontend/graph_lab*.mjs` token grep)
+- Result: pass
+- Notes:
+  - app export tokens confirmed:
+    - `exportContractTimeline`
+    - `contract_timeline_export_v1`
+    - `onExport`
+  - overlay filter/export tokens confirmed:
+    - `Export JSON`
+    - `source:`
+    - `non-zero delta`
+    - `showing filtered/total`
+    - `contract-overlay-filter`
+  - gate report contract diagnostics tokens confirmed:
+    - `## Contract Diagnostics`
+    - `runtime_contract_diagnostics`
+    - `run.delta_unique`
+    - `gate.delta_unique`
+    - `contract_debug_version`

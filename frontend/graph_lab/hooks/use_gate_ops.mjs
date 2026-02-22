@@ -162,6 +162,18 @@ export function useGateOps(opts) {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim() || "-";
     const p = lastPolicyEval || {};
     const failures = Array.isArray(p.gate_failures) ? p.gate_failures : [];
+    const runContract = graphRunSummary?.runtime_contract_diagnostics || null;
+    const gateContract = p?.runtime_contract_diagnostics || null;
+    const formatContractBlock = (label, row) => {
+      if (!row || typeof row !== "object") return [];
+      return [
+        `- ${label}.source: ${String(row.source || "-")}`,
+        `- ${label}.delta_unique: ${Number(row?.delta?.unique_warning_count || 0)}`,
+        `- ${label}.delta_attempts: ${Number(row?.delta?.attempt_count_total || 0)}`,
+        `- ${label}.total_unique: ${Number(row?.snapshot?.unique_warning_count || 0)}`,
+        `- ${label}.total_attempts: ${Number(row?.snapshot?.attempt_count_total || 0)}`,
+      ];
+    };
     const nowIso = new Date().toISOString();
     const reportLines = [
       "# Graph Run Gate Report",
@@ -187,6 +199,16 @@ export function useGateOps(opts) {
           )} limit=${String((f && f.limit) ?? "-")}`
         );
       });
+    }
+    reportLines.push(
+      "",
+      "## Contract Diagnostics",
+      `- contract_debug_version: ${String(gateContract?.snapshot?.contract_debug_version || runContract?.snapshot?.contract_debug_version || "-")}`,
+      ...formatContractBlock("run", runContract),
+      ...formatContractBlock("gate", gateContract)
+    );
+    if (!runContract && !gateContract) {
+      reportLines.push("- none");
     }
     const text = reportLines.join("\n");
     const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });

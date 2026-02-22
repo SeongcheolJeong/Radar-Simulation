@@ -363,20 +363,58 @@ export function ContractWarningOverlay({
   timeline,
   onClose,
   onClear,
+  onExport,
 }) {
   if (!visible) return null;
   const rows = Array.isArray(timeline) ? timeline : [];
+  const [sourceFilter, setSourceFilter] = React.useState("all");
+  const [nonZeroOnly, setNonZeroOnly] = React.useState(false);
+  const sourceOptions = React.useMemo(() => {
+    const set = new Set();
+    rows.forEach((row) => set.add(String(row?.event_source || "-")));
+    return ["all", ...Array.from(set.values()).sort((a, b) => a.localeCompare(b))];
+  }, [rows]);
+  const filteredRows = React.useMemo(() => rows.filter((row) => {
+    const source = String(row?.event_source || "-");
+    if (sourceFilter !== "all" && source !== sourceFilter) return false;
+    if (!nonZeroOnly) return true;
+    const du = Number(row?.delta?.unique_warning_count || 0);
+    const da = Number(row?.delta?.attempt_count_total || 0);
+    return du !== 0 || da !== 0;
+  }), [nonZeroOnly, rows, sourceFilter]);
   return h("aside", { className: "contract-overlay", key: "contract_overlay" }, [
     h("div", { className: "contract-overlay-hd", key: "co_hd" }, [
       h("div", { key: "co_t" }, `Contract Timeline (${rows.length})`),
       h("div", { className: "contract-overlay-actions", key: "co_actions" }, [
+        h("button", { className: "btn", onClick: onExport, key: "co_export" }, "Export JSON"),
         h("button", { className: "btn", onClick: onClear, key: "co_clear" }, "Clear"),
         h("button", { className: "btn", onClick: onClose, key: "co_hide" }, "Hide"),
       ]),
     ]),
-    h("div", { className: "contract-overlay-bd", key: "co_bd" }, rows.length === 0
+    h("div", { className: "contract-overlay-filter", key: "co_filter" }, [
+      h("label", { key: "co_filter_label" }, "source:"),
+      h("select", {
+        className: "select",
+        key: "co_filter_select",
+        value: sourceFilter,
+        onChange: (e) => setSourceFilter(String(e.target.value || "all")),
+      }, sourceOptions.map((opt) => h("option", { value: opt, key: `co_src_${opt}` }, opt))),
+      h("label", {
+        key: "co_filter_nonzero",
+        style: { display: "inline-flex", alignItems: "center", gap: "6px", marginLeft: "6px" },
+      }, [
+        h("input", {
+          type: "checkbox",
+          checked: Boolean(nonZeroOnly),
+          onChange: (e) => setNonZeroOnly(Boolean(e.target.checked)),
+        }),
+        "non-zero delta",
+      ]),
+      h("span", { key: "co_filter_count", style: { marginLeft: "auto", color: "#8eb6ca" } }, `showing ${filteredRows.length}/${rows.length}`),
+    ]),
+    h("div", { className: "contract-overlay-bd", key: "co_bd" }, filteredRows.length === 0
       ? h("pre", { className: "result-box", key: "co_empty" }, "no contract events yet")
-      : rows.map((row, idx) =>
+      : filteredRows.map((row, idx) =>
         h("div", { className: "contract-overlay-row", key: `co_row_${idx}` }, [
           h("div", { className: "contract-overlay-row-hd", key: `co_row_hd_${idx}` }, [
             `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")}`,

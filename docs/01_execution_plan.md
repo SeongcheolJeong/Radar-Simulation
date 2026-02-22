@@ -117,6 +117,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.6: Contract diagnostics surface (warning counters + debug panel actions)
 - [x] M17.7: Auto contract diagnostics propagation (run/gate text + inspector auto-sync)
 - [x] M17.8: Contract overlay timeline (opt-in overlay + run/gate delta event wiring)
+- [x] M17.9: Contract timeline filter/export + gate report diagnostics slice
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -129,7 +130,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.8 frontend hardening track: add event filtering/export for contract timeline and attach contract delta slices to generated gate report markdown, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.9 frontend hardening track: add operator-focused compact mode for timeline (severity badges + pinned run) and include timeline tail references in exported gate reports, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -875,3 +876,18 @@ M17.8 outcome (2026-02-22):
 - Artifact Inspector now surfaces per-run contract delta/total KPIs:
   - `contract_delta(unique/attempt)`
   - `contract_total(unique/attempt)`
+
+M17.9 outcome (2026-02-22):
+
+- timeline operator utilities added in overlay:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - source filter, non-zero delta filter, filtered count, `Export JSON`
+- overlay filter styling added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+  - `contract-overlay-filter` block styles
+- timeline export action added in app orchestration:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - payload version: `contract_timeline_export_v1`
+- gate handoff report now includes contract diagnostics slices:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+  - report section: `## Contract Diagnostics` with `run.*` and `gate.*` delta/total fields

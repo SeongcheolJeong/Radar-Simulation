@@ -134,6 +134,27 @@ export function App() {
     setStatus("contract timeline cleared", "status-ok");
   }, [setStatus]);
 
+  const exportContractTimeline = React.useCallback(() => {
+    const nowIso = new Date().toISOString();
+    const payload = {
+      version: "contract_timeline_export_v1",
+      exported_at_utc: nowIso,
+      event_count: Number(contractTimeline.length || 0),
+      events: contractTimeline,
+    };
+    const text = JSON.stringify(payload, null, 2);
+    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = `contract_timeline_${nowIso.slice(0, 19).replace(/[:T]/g, "_")}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+    setStatus("contract timeline exported", "status-ok");
+  }, [contractTimeline, setStatus]);
+
   React.useEffect(() => {
     refreshContractWarnings();
   }, [refreshContractWarnings]);
@@ -453,6 +474,7 @@ export function App() {
       timeline: contractTimeline,
       onClose: () => setContractOverlayEnabled(false),
       onClear: clearContractTimeline,
+      onExport: exportContractTimeline,
     }),
   ]);
 }
