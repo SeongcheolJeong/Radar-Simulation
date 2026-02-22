@@ -121,6 +121,41 @@ def run() -> None:
             )
             assert status == 200
             assert summary["status"] == "completed"
+            assert summary["version"] == "web_e2e_run_summary_v2"
+            assert Path(str(summary["scene_json"])).resolve() == scene_json.resolve()
+            assert "outputs" in summary
+            assert "path_summary" in summary
+            assert "adc_summary" in summary
+            assert "radar_map_summary" in summary
+
+            out = summary["outputs"]
+            assert Path(str(out["path_list_json"])).exists()
+            assert Path(str(out["adc_cube_npz"])).exists()
+            assert Path(str(out["radar_map_npz"])).exists()
+            assert Path(str(out["run_summary_json"])).exists()
+
+            ps = summary["path_summary"]
+            assert ps["n_chirps"] == 4
+            assert ps["path_count_total"] == 8
+            assert ps["path_count_per_chirp"] == [2, 2, 2, 2]
+            assert len(ps["first_chirp_paths"]) == 2
+
+            adc_s = summary["adc_summary"]
+            assert adc_s["shape"] == [256, 4, 2, 2]
+            assert adc_s["metadata"]["samples_per_chirp"] == 256
+
+            rm_s = summary["radar_map_summary"]
+            assert rm_s["rd_shape"] == [16, 64]
+            assert rm_s["ra_shape"] == [8, 64]
+            assert len(rm_s["rd_top_peaks"]) > 0
+            assert len(rm_s["ra_top_peaks"]) > 0
+
+            if "visuals" in summary:
+                visuals = summary["visuals"]
+                assert isinstance(visuals, dict)
+                for _, path_value in visuals.items():
+                    assert Path(str(path_value)).exists()
+
             q = summary["quicklook"]
             assert q["n_chirps"] == 4
             assert q["path_count_total"] == 8

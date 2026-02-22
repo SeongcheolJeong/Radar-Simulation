@@ -88,6 +88,9 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M14.5: `sionna.rt` full runtime enablement (working LLVM backend on target host)
 - [ ] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment
 - [x] M15.0: Web E2E orchestration API phase-0 skeleton (`/health`, `/api/runs`, run summary quicklook)
+- [x] M15.1: Web run summary schema v2 (frontend-compatible `outputs/path_summary/adc_summary/radar_map_summary`)
+- [x] M15.2: Dashboard API-run mode (`POST /api/runs` + polling + summary auto-load) and dual-server local launcher
+- [ ] M15.3: Compare/regression API endpoints (`/api/compare`, baseline pinning, policy verdict payload)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -100,7 +103,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Complete M14.6 on Linux+NVIDIA target by running strict PO-SBR runtime pilot command (no `--allow-blocked`) and lock `pilot_status=executed` evidence JSON.
+Implement M15.3 compare/regression API flow for web E2E while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -427,3 +430,30 @@ M14.6 progress (2026-02-22):
   - current state: `ready=false`, missing only `linux_executed_report_missing`
 - remaining to close M14.6:
   - execute strict pilot on Linux+NVIDIA host and archive `pilot_status=executed` report
+
+M15.0 outcome (2026-02-22):
+
+- web orchestration API skeleton added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/web_e2e_api.py`
+- run script and validation added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_web_e2e_orchestrator_api.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- contract added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/118_web_e2e_orchestrator_api_contract.md`
+
+M15.1 outcome (2026-02-22):
+
+- run summary upgraded to frontend-compatible v2 schema:
+  - `scene_json`, `outputs`, `path_summary`, `adc_summary`, `radar_map_summary`, `quicklook`
+- backward compatibility kept via `artifacts` mirror of `outputs`
+- validator upgraded to assert v2 fields and output file existence
+
+M15.2 outcome (2026-02-22):
+
+- dashboard API-run mode added in:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+  - new controls: `apiBase`, `scene_json_path`, `profile`, async toggle, run status
+  - run flow: `POST /api/runs` -> poll `/api/runs/{id}` -> auto-load `/api/runs/{id}/summary`
+- local combined launcher added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_web_e2e_dashboard_local.sh`
+  - starts orchestrator API + static dashboard server in one command

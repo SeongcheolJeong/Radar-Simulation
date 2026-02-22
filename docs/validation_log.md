@@ -1480,3 +1480,20 @@
   - phase-0 API endpoints validated (`/health`, `/api/profiles`, `/api/runs`, `/api/runs/{id}`, `/api/runs/{id}/summary`)
   - sync run creation path validated (`POST /api/runs?async=0`) with analytic scene
   - run summary quicklook contract validated (`n_chirps`, path counts, ADC/RD/RA shapes, top peaks)
+
+## Web E2E Summary v2 + Dashboard API Mode (M15.1/M15.2)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - run summary upgraded to v2 frontend-compatible schema (`scene_json`, `outputs`, `path_summary`, `adc_summary`, `radar_map_summary`)
+  - backward-compatible `quicklook` retained and validated
+  - output artifact file existence checks validated
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8086 8106` + health/dashboard smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html`)
+- Result: pass
+- Notes:
+  - combined launcher starts orchestrator API + static dashboard in one command
+  - dashboard HTML served and API health endpoint returns `ok=true`

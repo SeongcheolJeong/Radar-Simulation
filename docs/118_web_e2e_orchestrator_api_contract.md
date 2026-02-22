@@ -43,22 +43,38 @@ Rules:
 - `<store_root>/runs/<run_id>/run_summary.json`
 - `<store_root>/runs/<run_id>/output/` (pipeline artifacts)
 
-## Run Summary (v1)
+## Run Summary (v2)
 
-Contains:
+`GET /api/runs/{run_id}/summary` now returns a frontend-compatible schema:
 
-- request snapshot
-- artifact paths (`path_list`, `adc_cube`, `radar_map`)
-- quicklook metrics:
-  - `n_chirps`, `path_count_total`
-  - `adc_shape`, `rd_shape`, `ra_shape`
-  - top RD/RA peaks
+- run metadata:
+  - `version`, `run_id`, `status`, `profile`, `created_at`, `completed_at`, `request`
+- scene/artifact paths:
+  - `scene_json`
+  - `outputs.path_list_json`
+  - `outputs.adc_cube_npz`
+  - `outputs.radar_map_npz`
+  - `outputs.hybrid_estimation_npz` (optional)
+  - `outputs.run_summary_json`
+- summaries:
+  - `path_summary` (`n_chirps`, `path_count_total`, `path_count_per_chirp`, `first_chirp_paths`)
+  - `adc_summary` (`shape`, `dtype`, `abs_mean`, `abs_max`, `metadata`)
+  - `radar_map_summary` (`rd_shape`, `ra_shape`, top peaks, metadata)
+- compatibility:
+  - `quicklook` retained for phase-0 clients
+  - `artifacts` mirrors `outputs`
 
 ## Start API
 
 ```bash
 cd /Users/seongcheoljeong/Documents/Codex_test
 PYTHONPATH=src python3 scripts/run_web_e2e_orchestrator_api.py --host 127.0.0.1 --port 8099
+```
+
+One-command local dashboard + API launcher:
+
+```bash
+scripts/run_web_e2e_dashboard_local.sh 8080 8099
 ```
 
 ## Example Calls
@@ -89,5 +105,9 @@ Pass criteria:
 1. Health endpoint returns `ok=true`
 2. Profile endpoint returns three presets
 3. Sync run creation completes with `status=completed`
-4. Run summary endpoint returns quicklook with expected shapes
+4. Run summary endpoint returns frontend-compatible v2 summary fields and expected shapes
 5. Run list contains created `run_id`
+
+Notes:
+
+- `visuals` is best-effort and may be omitted if plotting dependency is unavailable in the runtime python.

@@ -50,6 +50,33 @@
           <input id="summaryFileInput" type="file" accept="application/json,.json" class="hidden" />
         </div>
 
+        <div class="mt-4 space-y-2 border border-slate-800 rounded-lg p-3 bg-slate-950/40">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Run via API</div>
+          <label class="text-xs text-slate-400 block">API base URL</label>
+          <input id="apiBaseInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
+          <label class="text-xs text-slate-400 block">Scene JSON path (API request)</label>
+          <input id="sceneJsonInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
+          <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-1">
+              <label class="text-xs text-slate-400 block">Profile</label>
+              <select id="profileSelect" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none">
+                <option value="fast_debug">fast_debug</option>
+                <option value="balanced_dev">balanced_dev</option>
+                <option value="fidelity_eval">fidelity_eval</option>
+              </select>
+            </div>
+            <label class="text-xs text-slate-400 flex items-end gap-2 pb-1">
+              <input id="runAsyncCheck" type="checkbox" class="accent-cyan-500" checked />
+              <span>Async run</span>
+            </label>
+          </div>
+          <button id="runApiBtn" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+            <i data-lucide="rocket" class="w-4 h-4"></i>
+            Run Scene on API
+          </button>
+          <div id="apiRunStatus" class="text-[11px] text-slate-500">api run idle</div>
+        </div>
+
         <div class="mt-4">
           <label class="flex flex-col items-center justify-center w-full py-3 px-4 border-2 border-dashed border-slate-700 rounded-lg hover:border-cyan-500/50 hover:bg-slate-800/50 cursor-pointer transition-all group">
             <div class="flex items-center gap-2 text-slate-400 group-hover:text-cyan-400 transition-colors">
@@ -291,6 +318,8 @@
   <script>
     const C0 = 299792458.0;
     const DEFAULT_SUMMARY_PATH = "/docs/reports/avx_like_showcase_macos_2026_02_22.json";
+    const DEFAULT_API_BASE = "http://127.0.0.1:8099";
+    const DEFAULT_SCENE_JSON_PATH = "data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json";
 
     const state = {
       summary: null,
@@ -305,10 +334,17 @@
         adc: null,
         path: null,
       },
+      activeRunId: null,
     };
 
     const el = {
       summaryPathInput: document.getElementById("summaryPathInput"),
+      apiBaseInput: document.getElementById("apiBaseInput"),
+      sceneJsonInput: document.getElementById("sceneJsonInput"),
+      profileSelect: document.getElementById("profileSelect"),
+      runAsyncCheck: document.getElementById("runAsyncCheck"),
+      runApiBtn: document.getElementById("runApiBtn"),
+      apiRunStatus: document.getElementById("apiRunStatus"),
       refreshBtn: document.getElementById("refreshBtn"),
       runBtn: document.getElementById("runBtn"),
       loadJsonBtn: document.getElementById("loadJsonBtn"),
@@ -377,9 +413,32 @@
       return i > 0 ? pathValue.slice(0, i) : null;
     }
 
+    function normalizeApiBase(value) {
+      const raw = (value || "").trim();
+      if (!raw) return null;
+      return raw.endsWith("/") ? raw.slice(0, -1) : raw;
+    }
+
+    function sleepMs(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, Number(ms) || 0));
+    }
+
     function formatDb(value) {
       if (!Number.isFinite(value)) return "-";
       return `${value.toFixed(2)} dB`;
+    }
+
+    function setApiRunStatus(text, tone) {
+      el.apiRunStatus.textContent = text || "api run idle";
+      if (tone === "ok") {
+        el.apiRunStatus.className = "text-[11px] text-emerald-400";
+      } else if (tone === "warn") {
+        el.apiRunStatus.className = "text-[11px] text-amber-400";
+      } else if (tone === "error") {
+        el.apiRunStatus.className = "text-[11px] text-red-400";
+      } else {
+        el.apiRunStatus.className = "text-[11px] text-slate-500";
+      }
     }
 
     function setStatus(text, tone, note) {
@@ -716,6 +775,120 @@
       setStatus("loaded", "ok", sourceLabel ? `source: ${sourceLabel}` : "summary loaded");
     }
 
+    async function fetchApiJson(url, init) {
+      const res = await fetch(url, init || {});
+      const text = await res.text();
+      let payload = {};
+      if (text) {
+        try {
+          payload = JSON.parse(text);
+        } catch (_) {
+          throw new Error(`Invalid JSON from API (${res.status} ${res.statusText})`);
+        }
+      }
+
+      if (!res.ok) {
+        const msg = payload && payload.error ? String(payload.error) : `${res.status} ${res.statusText}`;
+        throw new Error(msg);
+      }
+      if (payload && payload.ok === false) {
+        throw new Error(String(payload.error || "API request failed"));
+      }
+      return payload;
+    }
+
+    async function pollRunCompletion(apiBase, runId) {
+      const maxPoll = 300;
+      for (let i = 0; i < maxPoll; i += 1) {
+        const row = await fetchApiJson(`${apiBase}/api/runs/${encodeURIComponent(runId)}`);
+        const status = String(row.status || "unknown");
+        setApiRunStatus(`running: ${runId} (${status})`, "warn");
+
+        if (status === "completed") {
+          return row;
+        }
+        if (status === "failed") {
+          throw new Error(String(row.error || "run failed"));
+        }
+
+        if (state.progress < 95) {
+          setProgress(state.progress + Math.random() * 4 + 1.5);
+        }
+        await sleepMs(600);
+      }
+      throw new Error(`run polling timeout: ${runId}`);
+    }
+
+    async function runSceneViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const sceneJsonPath = (el.sceneJsonInput.value || "").trim();
+      const profile = (el.profileSelect.value || "balanced_dev").trim();
+      const runAsync = !!el.runAsyncCheck.checked;
+
+      if (!apiBase) {
+        setStatus("error", "error", "API base URL is empty");
+        setApiRunStatus("api base URL required", "error");
+        return;
+      }
+      if (!sceneJsonPath) {
+        setStatus("error", "error", "Scene JSON path is empty");
+        setApiRunStatus("scene json path required", "error");
+        return;
+      }
+
+      startProgress();
+      el.runApiBtn.disabled = true;
+      el.runApiBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setStatus("running", "warn", "submitting API run request");
+      setApiRunStatus("submitting run...", "warn");
+
+      try {
+        const postPayload = {
+          scene_json_path: sceneJsonPath,
+          profile: profile,
+          run_hybrid_estimation: false,
+        };
+        const created = await fetchApiJson(`${apiBase}/api/runs?async=${runAsync ? 1 : 0}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(postPayload),
+        });
+
+        const run = created && created.run ? created.run : null;
+        if (!run || !run.run_id) {
+          throw new Error("API response missing run_id");
+        }
+
+        state.activeRunId = String(run.run_id);
+        setApiRunStatus(`queued: ${state.activeRunId}`, "warn");
+
+        let finalRun = run;
+        if (String(run.status || "") !== "completed") {
+          finalRun = await pollRunCompletion(apiBase, state.activeRunId);
+        }
+
+        const summaryUrl = `${apiBase}/api/runs/${encodeURIComponent(String(finalRun.run_id))}/summary`;
+        el.summaryPathInput.value = summaryUrl;
+        const summary = await fetchSummaryFromPath(summaryUrl);
+        setProgress(100);
+        applySummary(summary, summaryUrl);
+        setApiRunStatus(`completed: ${finalRun.run_id}`, "ok");
+      } catch (err) {
+        updateLoadedSummaryFlag(false);
+        setStatus("error", "error", String(err.message || err));
+        setApiRunStatus(`failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.runApiBtn.disabled = false;
+        el.runApiBtn.classList.remove("opacity-60", "cursor-not-allowed");
+        window.setTimeout(() => {
+          stopProgress();
+          if (state.progress > 0 && state.progress < 100) {
+            setProgress(100);
+          }
+        }, 180);
+      }
+    }
+
     async function fetchSummaryFromPath(pathValue) {
       const target = (pathValue || "").trim();
       if (!target) {
@@ -752,6 +925,7 @@
     function bindEvents() {
       el.refreshBtn.addEventListener("click", () => refreshSummary());
       el.runBtn.addEventListener("click", () => refreshSummary());
+      el.runApiBtn.addEventListener("click", () => runSceneViaApi());
 
       el.loadJsonBtn.addEventListener("click", () => {
         el.summaryFileInput.click();
@@ -814,8 +988,15 @@
       lucide.createIcons();
       bindEvents();
 
-      const querySummary = new URLSearchParams(window.location.search).get("summary");
+      const params = new URLSearchParams(window.location.search);
+      const querySummary = params.get("summary");
+      const queryApi = params.get("api");
+      const queryScene = params.get("scene");
+      const queryProfile = params.get("profile");
       el.summaryPathInput.value = querySummary && querySummary.trim() ? querySummary.trim() : DEFAULT_SUMMARY_PATH;
+      el.apiBaseInput.value = queryApi && queryApi.trim() ? queryApi.trim() : DEFAULT_API_BASE;
+      el.sceneJsonInput.value = queryScene && queryScene.trim() ? queryScene.trim() : DEFAULT_SCENE_JSON_PATH;
+      el.profileSelect.value = queryProfile && queryProfile.trim() ? queryProfile.trim() : "balanced_dev";
       el.fovInput.value = 120;
       el.rangeInput.value = 100;
       el.freqInput.value = 77;
@@ -836,6 +1017,7 @@
       }
 
       updateLoadedSummaryFlag(false);
+      setApiRunStatus("api run idle", "neutral");
       setStatus("idle", "neutral", "viewer is waiting for summary json");
       await refreshSummary();
     }
