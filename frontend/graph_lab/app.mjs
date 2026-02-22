@@ -201,15 +201,22 @@ export function App() {
     return { payload, cacheHit: false };
   }, [apiBase]);
 
-  const openGateEvidenceFromTimeline = React.useCallback(async (row) => {
+  const openGateEvidenceFromTimeline = React.useCallback(async (row, lookupOptions) => {
     const eventRow = row && typeof row === "object" ? row : {};
     const note = eventRow.note && typeof eventRow.note === "object" ? eventRow.note : {};
+    const lookup = lookupOptions && typeof lookupOptions === "object" ? lookupOptions : {};
     const normalizeHint = (v) => {
       const text = String(v || "").trim();
       if (text === "" || text === "-") return "";
       const low = text.toLowerCase();
       if (low === "none" || low === "null") return "";
       return text;
+    };
+    const asPositiveInt = (v, fallback, minValue, maxValue) => {
+      const n = Number(v);
+      if (!Number.isFinite(n) || n <= 0) return Number(fallback);
+      const iv = Math.floor(n);
+      return Math.max(Number(minValue), Math.min(Number(maxValue), iv));
     };
     const normalizePath = (v) => String(v || "").replace(/\\/g, "/").trim();
     const pathMatches = (a, b) => {
@@ -223,6 +230,8 @@ export function App() {
     const runIdHint = normalizeHint(eventRow.graph_run_id);
     const baselineIdHint = normalizeHint(note.baseline_id);
     const summaryHint = normalizeHint(note.candidate_summary_json);
+    const historyLimit = asPositiveInt(lookup.historyLimit, 256, 32, 4096);
+    const pageBudget = asPositiveInt(lookup.pageBudget, 2, 1, 8);
 
     setStatus("loading gate evidence...", "status-warn");
 
@@ -230,6 +239,7 @@ export function App() {
     let evidenceSource = "timeline_note";
     let scanCount = 0;
     let cacheHitAny = false;
+    let pageCountUsed = 0;
     const lookupErrors = [];
 
     if (policyEvalIdHint) {
@@ -245,7 +255,7 @@ export function App() {
     }
 
     if (!resolvedEval) {
-      const resolveFromRows = (rows, scopeTag, cacheHit) => {
+      const resolveFromRows = (rows, scopeTag, cacheHit, pageIndex) => {
         const list = Array.isArray(rows) ? rows : [];
         const matchRun = (item) =>
           runIdHint !== "" &&
@@ -273,7 +283,7 @@ export function App() {
         else if (bySummaryOnly) matchedBy = "summary_json";
         else if (byBaselineOnly) matchedBy = "baseline_id";
         resolvedEval = resolved;
-        evidenceSource = `policy_eval_list:${scopeTag}:${matchedBy}${cacheHit ? ":cache_hit" : ""}`;
+        evidenceSource = `policy_eval_list:${scopeTag}:${matchedBy}:page${Number(pageIndex)}${cacheHit ? ":cache_hit" : ""}`;
         return true;
       };
 
@@ -283,47 +293,71 @@ export function App() {
           scopeTag: baselineIdHint ? "run_id+baseline_id" : "run_id",
           candidateRunId: runIdHint,
           baselineId: baselineIdHint || "",
-          limit: 256,
         });
       }
       if (baselineIdHint) {
         queryPlans.push({
           scopeTag: "baseline_id",
           baselineId: baselineIdHint,
-          limit: 256,
         });
       }
       queryPlans.push({
         scopeTag: "global",
-        limit: 512,
       });
 
       const seenPlans = new Set();
       for (const plan of queryPlans) {
-        const normalizedPlan = {
+        const basePlan = {
           candidateRunId: String(plan.candidateRunId || "").trim(),
           baselineId: String(plan.baselineId || "").trim(),
-          limit: Number(plan.limit || 0),
-          offset: Number(plan.offset || 0),
+          limit: historyLimit,
+          offset: 0,
         };
-        const planKey = JSON.stringify(normalizedPlan);
+        const planKey = JSON.stringify({
+          candidateRunId: basePlan.candidateRunId,
+          baselineId: basePlan.baselineId,
+        });
         if (seenPlans.has(planKey)) continue;
         seenPlans.add(planKey);
-        try {
-          const result = await fetchPolicyEvalListCached(normalizedPlan);
-          const payload = result && typeof result === "object" ? result.payload : {};
-          const cacheHit = Boolean(result && result.cacheHit);
-          cacheHitAny = cacheHitAny || cacheHit;
-          const rows = Array.isArray(payload?.policy_evals) ? payload.policy_evals : [];
-          const returnedCount = Number(payload?.page?.returned_count);
-          scanCount += Number.isFinite(returnedCount) && returnedCount >= 0
-            ? returnedCount
-            : rows.length;
-          if (resolveFromRows(rows, String(plan.scopeTag || "global"), cacheHit)) {
+
+        for (let pageIdx = 0; pageIdx < pageBudget; pageIdx += 1) {
+          const normalizedPlan = {
+            ...basePlan,
+            offset: pageIdx * historyLimit,
+          };
+          try {
+            const result = await fetchPolicyEvalListCached(normalizedPlan);
+            const payload = result && typeof result === "object" ? result.payload : {};
+            const cacheHit = Boolean(result && result.cacheHit);
+            cacheHitAny = cacheHitAny || cacheHit;
+            const rows = Array.isArray(payload?.policy_evals) ? payload.policy_evals : [];
+            const returnedCount = Number(payload?.page?.returned_count);
+            const totalCount = Number(payload?.page?.total_count);
+            const effectiveReturnedCount =
+              Number.isFinite(returnedCount) && returnedCount >= 0
+                ? returnedCount
+                : rows.length;
+            scanCount += effectiveReturnedCount;
+            pageCountUsed = Math.max(pageCountUsed, pageIdx + 1);
+            if (resolveFromRows(rows, String(plan.scopeTag || "global"), cacheHit, pageIdx + 1)) {
+              break;
+            }
+            const reachedEnd =
+              effectiveReturnedCount <= 0 ||
+              !Number.isFinite(totalCount) ||
+              (normalizedPlan.offset + effectiveReturnedCount) >= totalCount;
+            if (reachedEnd) {
+              break;
+            }
+          } catch (err) {
+            lookupErrors.push(
+              `list_policy_evals(${String(plan.scopeTag || "global")}@page${pageIdx + 1}) failed: ${String(err.message || err)}`
+            );
             break;
           }
-        } catch (err) {
-          lookupErrors.push(`list_policy_evals(${String(plan.scopeTag || "global")}) failed: ${String(err.message || err)}`);
+        }
+        if (resolvedEval) {
+          break;
         }
       }
     }
@@ -357,6 +391,9 @@ export function App() {
         `parity_pass: ${Boolean(parity.pass)}`,
         `parity_failure_count: ${Number(parityFailures.length || 0)}`,
         `gate_failure_count: ${Number(gateFailures.length || 0)}`,
+        `policy_eval_history_limit: ${Number(historyLimit)}`,
+        `policy_eval_page_budget: ${Number(pageBudget)}`,
+        `policy_eval_page_count_used: ${Number(pageCountUsed || 0)}`,
         `policy_eval_scan_count: ${Number(scanCount || 0)}`,
         `policy_eval_cache_hit_any: ${Boolean(cacheHitAny)}`,
         "",
@@ -411,6 +448,9 @@ export function App() {
       `graph_run_id: ${runIdHint || "-"}`,
       `candidate_summary_json: ${summaryHint || "-"}`,
       `failure_count: ${Number(note.failure_count || 0)}`,
+      `policy_eval_history_limit: ${Number(historyLimit)}`,
+      `policy_eval_page_budget: ${Number(pageBudget)}`,
+      `policy_eval_page_count_used: ${Number(pageCountUsed || 0)}`,
       `policy_eval_scan_count: ${Number(scanCount || 0)}`,
       `policy_eval_cache_hit_any: ${Boolean(cacheHitAny)}`,
       "",

@@ -124,6 +124,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.13: Timeline -> gate evidence deep-link + failure-rule badges
 - [x] M17.14: Historical policy-eval fetch fallback (`policy_eval_id -> run_id/summary`) for persisted gate evidence
 - [x] M17.15: Policy-eval filtered pagination + frontend evidence cache (large-history scan control)
+- [x] M17.16: Overlay gate-history window controls + incremental page-budget lookup UX
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -136,7 +137,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.15 frontend hardening track: add overlay-side explicit history-window controls and incremental loading UX while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.16 frontend hardening track: add timeline row virtualization and persisted user-preference memory for overlay lookup knobs while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -981,3 +982,17 @@ M17.15 outcome (2026-02-22):
   - cache TTL/eviction applied (`policyEvalListCacheRef`)
   - lookup order: `run_id(+baseline)` -> `baseline` -> `global`
   - trace fields added: `policy_eval_cache_hit_any`, `policy_eval_scan_count`
+
+M17.16 outcome (2026-02-22):
+
+- overlay now exposes gate-history lookup knobs directly:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - controls added: `gate window`, `max pages`, `+page`
+  - row `Open Gate` now passes lookup options (`historyLimit`, `pageBudget`)
+- gate-evidence resolver supports incremental paged scans per scope:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - per-scope scan loops by page (`offset = page * historyLimit`) until match/end/budget
+  - evidence source now records page index (`...:pageN`)
+- operator traceability fields expanded for tuning/diagnostics:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - `policy_eval_history_limit`, `policy_eval_page_budget`, `policy_eval_page_count_used`

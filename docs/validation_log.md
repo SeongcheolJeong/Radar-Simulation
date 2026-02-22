@@ -2096,3 +2096,31 @@
     - `baseline_id`
     - `limit`
     - `offset`
+
+## Web E2E Graph Overlay Gate-History Window + Incremental Lookup (M17.16)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass (2nd run)
+- Notes:
+  - 첫 실행에서 async cancel 타이밍 경합으로 간헐적 assertion 발생, 즉시 재실행 pass (known flaky path)
+  - overlay gate-history control/incremental lookup frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8147/8127)` + filtered endpoint assertion + token grep (`curl /api/policy-evals?...`, `curl /frontend/graph_lab/app.mjs`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - filtered endpoint query contract reaffirmed (`limit=64`, `offset=128`)
+  - app incremental lookup tokens confirmed:
+    - `historyLimit`
+    - `pageBudget`
+    - `policy_eval_page_budget`
+    - `policy_eval_page_count_used`
+    - `@page`
+  - overlay control/pass-through tokens confirmed:
+    - `gate window`
+    - `max pages`
+    - `co_gate_window_select`
+    - `co_gate_pages_select`
+    - `+page`
+    - `gateOpenHandler(row, gateLookupOptions)`

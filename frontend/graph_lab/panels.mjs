@@ -418,6 +418,19 @@ export function ContractWarningOverlay({
   const [pinnedRunId, setPinnedRunId] = React.useState("all");
   const [nonZeroOnly, setNonZeroOnly] = React.useState(false);
   const [compactMode, setCompactMode] = React.useState(false);
+  const [gateHistoryLimit, setGateHistoryLimit] = React.useState("256");
+  const [gateHistoryPages, setGateHistoryPages] = React.useState("2");
+  const gateLookupOptions = React.useMemo(() => {
+    const limitRaw = Number(gateHistoryLimit || 0);
+    const pagesRaw = Number(gateHistoryPages || 0);
+    const historyLimit = Number.isFinite(limitRaw) && limitRaw > 0
+      ? Math.max(32, Math.min(4096, Math.floor(limitRaw)))
+      : 256;
+    const pageBudget = Number.isFinite(pagesRaw) && pagesRaw > 0
+      ? Math.max(1, Math.min(8, Math.floor(pagesRaw)))
+      : 2;
+    return { historyLimit, pageBudget };
+  }, [gateHistoryLimit, gateHistoryPages]);
   const sourceOptions = React.useMemo(() => {
     const set = new Set();
     rows.forEach((row) => set.add(String(row?.event_source || "-")));
@@ -509,6 +522,36 @@ export function ContractWarningOverlay({
         }),
         "non-zero delta",
       ]),
+      h("label", { key: "co_gate_window_label", style: { marginLeft: "8px" } }, "gate window:"),
+      h("select", {
+        className: "select",
+        key: "co_gate_window_select",
+        value: gateHistoryLimit,
+        onChange: (e) => setGateHistoryLimit(String(e.target.value || "256")),
+      }, ["64", "128", "256", "512", "1024"].map((opt) =>
+        h("option", { value: opt, key: `co_gate_window_${opt}` }, opt)
+      )),
+      h("label", { key: "co_gate_pages_label" }, "max pages:"),
+      h("div", { className: "btn-row", key: "co_gate_pages_row", style: { gap: "4px" } }, [
+        h("select", {
+          className: "select",
+          key: "co_gate_pages_select",
+          value: gateHistoryPages,
+          onChange: (e) => setGateHistoryPages(String(e.target.value || "2")),
+        }, ["1", "2", "3", "4", "5", "6", "7", "8"].map((opt) =>
+          h("option", { value: opt, key: `co_gate_pages_${opt}` }, opt)
+        )),
+        h("button", {
+          className: "btn",
+          key: "co_gate_pages_more",
+          onClick: () =>
+            setGateHistoryPages((prev) => {
+              const n = Number(prev || 0);
+              const next = Number.isFinite(n) ? (Math.floor(n) + 1) : 2;
+              return String(Math.max(1, Math.min(8, next)));
+            }),
+        }, "+page"),
+      ]),
       h("span", { key: "co_filter_count", style: { marginLeft: "auto", color: "#8eb6ca" } }, `showing ${filteredRows.length}/${rows.length}`),
     ]),
     h("div", { className: "contract-overlay-bd", key: "co_bd" }, filteredRows.length === 0
@@ -550,7 +593,7 @@ export function ContractWarningOverlay({
                   ? h("button", {
                       className: "btn contract-open-gate-btn",
                       key: `co_row_gate_compact_${idx}`,
-                      onClick: () => gateOpenHandler(row),
+                      onClick: () => gateOpenHandler(row, gateLookupOptions),
                     }, "Open Gate")
                   : null,
               ]),
@@ -585,7 +628,7 @@ export function ContractWarningOverlay({
                     ? h("button", {
                         key: `co_row_gate_${idx}`,
                         className: "btn contract-open-gate-btn",
-                        onClick: () => gateOpenHandler(row),
+                        onClick: () => gateOpenHandler(row, gateLookupOptions),
                       }, "Open Gate")
                     : null,
                 ])
