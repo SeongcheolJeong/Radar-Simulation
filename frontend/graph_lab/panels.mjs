@@ -55,6 +55,14 @@ function severityLabel(severity) {
   return "LOW";
 }
 
+function classifyPolicyState(row) {
+  const note = row?.note && typeof row.note === "object" ? row.note : {};
+  if (typeof note.gate_failed === "boolean") {
+    return note.gate_failed ? "hold" : "adopt";
+  }
+  return "none";
+}
+
 function getPolicyCorrelationTag(row, policyByRun) {
   const runId = String(row?.graph_run_id || "").trim();
   if (!runId) return "";
@@ -95,6 +103,7 @@ const CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY = "graph_lab_contract_overlay_short
 const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   sourceFilter: "all",
   severityFilter: "all",
+  policyFilter: "all",
   pinnedRunId: "all",
   nonZeroOnly: false,
   compactMode: false,
@@ -111,6 +120,12 @@ const SEVERITY_FILTER_OPTIONS = [
   { id: "high", label: "high" },
   { id: "med", label: "med" },
   { id: "low", label: "low" },
+];
+const POLICY_FILTER_OPTIONS = [
+  { id: "all", label: "all" },
+  { id: "hold", label: "hold" },
+  { id: "adopt", label: "adopt" },
+  { id: "none", label: "none" },
 ];
 const DETAIL_FIELD_DEFS = [
   { id: "timestamp_iso", label: "time" },
@@ -725,6 +740,9 @@ export function ContractWarningOverlay({
   const [severityFilter, setSeverityFilter] = React.useState(
     String(initialPrefs.severityFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter)
   );
+  const [policyFilter, setPolicyFilter] = React.useState(
+    String(initialPrefs.policyFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.policyFilter)
+  );
   const [pinnedRunId, setPinnedRunId] = React.useState(
     String(initialPrefs.pinnedRunId || CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId)
   );
@@ -783,6 +801,7 @@ export function ContractWarningOverlay({
     if (name === "reset_all") {
       setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
       setSeverityFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
+      setPolicyFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.policyFilter);
       setPinnedRunId(CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId);
       setNonZeroOnly(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.nonZeroOnly));
       setCompactMode(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.compactMode));
@@ -796,6 +815,7 @@ export function ContractWarningOverlay({
     }
     if (name === "triage") {
       setSeverityFilter("high");
+      setPolicyFilter("hold");
       setNonZeroOnly(true);
       setCompactMode(true);
       setGateHistoryLimit("128");
@@ -815,6 +835,7 @@ export function ContractWarningOverlay({
     }
     if (name === "deep_gate") {
       setSeverityFilter("all");
+      setPolicyFilter("all");
       setNonZeroOnly(false);
       setCompactMode(false);
       setGateHistoryLimit("512");
@@ -875,6 +896,13 @@ export function ContractWarningOverlay({
   }, [severityFilter]);
 
   React.useEffect(() => {
+    const allowed = POLICY_FILTER_OPTIONS.map((x) => String(x.id || ""));
+    if (!allowed.includes(policyFilter)) {
+      setPolicyFilter("all");
+    }
+  }, [policyFilter]);
+
+  React.useEffect(() => {
     if (!runOptions.includes(pinnedRunId)) {
       setPinnedRunId("all");
     }
@@ -904,6 +932,7 @@ export function ContractWarningOverlay({
     saveContractOverlayPrefs({
       sourceFilter,
       severityFilter,
+      policyFilter,
       pinnedRunId,
       nonZeroOnly,
       compactMode,
@@ -923,6 +952,7 @@ export function ContractWarningOverlay({
     gateHistoryLimit,
     gateHistoryPages,
     nonZeroOnly,
+    policyFilter,
     pinnedRunId,
     rowWindowSize,
     severityFilter,
@@ -952,17 +982,31 @@ export function ContractWarningOverlay({
     });
     return out;
   }, [scopedRows]);
-  const filteredRows = React.useMemo(() => {
+  const severityScopedRows = React.useMemo(() => {
     if (severityFilter === "all") return scopedRows;
     return scopedRows.filter((row) => classifyContractSeverity(row) === severityFilter);
   }, [scopedRows, severityFilter]);
+  const policyCounts = React.useMemo(() => {
+    const out = { hold: 0, adopt: 0, none: 0 };
+    severityScopedRows.forEach((row) => {
+      const p = classifyPolicyState(row);
+      if (p === "hold" || p === "adopt" || p === "none") {
+        out[p] += 1;
+      }
+    });
+    return out;
+  }, [severityScopedRows]);
+  const filteredRows = React.useMemo(() => {
+    if (policyFilter === "all") return severityScopedRows;
+    return severityScopedRows.filter((row) => classifyPolicyState(row) === policyFilter);
+  }, [policyFilter, severityScopedRows]);
   const maxRowWindowOffset = React.useMemo(
     () => Math.max(0, Number(filteredRows.length || 0) - rowWindowSize),
     [filteredRows.length, rowWindowSize]
   );
   React.useEffect(() => {
     setRowWindowOffset(0);
-  }, [nonZeroOnly, pinnedRunId, rowWindowSize, severityFilter, sourceFilter]);
+  }, [nonZeroOnly, pinnedRunId, policyFilter, rowWindowSize, severityFilter, sourceFilter]);
   React.useEffect(() => {
     if (rowWindowOffset > maxRowWindowOffset) {
       setRowWindowOffset(maxRowWindowOffset);
@@ -1508,6 +1552,32 @@ export function ContractWarningOverlay({
           }, `${sev}:${Number(severityCounts[sev] || 0)}`)
         ),
       ]),
+      h("label", { key: "co_policy_label" }, "policy:"),
+      h("select", {
+        className: "select",
+        key: "co_policy_select",
+        value: policyFilter,
+        onChange: (e) => setPolicyFilter(String(e.target.value || "all")),
+      }, POLICY_FILTER_OPTIONS.map((opt) =>
+        h("option", { value: String(opt.id || "all"), key: `co_pol_opt_${String(opt.id || "all")}` }, String(opt.label || opt.id || "all"))
+      )),
+      h("div", { key: "co_policy_quick", style: { display: "inline-flex", alignItems: "center", gap: "4px" } }, [
+        ...["hold", "adopt", "none"].map((policy) =>
+          h("button", {
+            className: "btn",
+            key: `co_pol_btn_${policy}`,
+            onClick: () => setPolicyFilter(policy),
+            style: {
+              padding: "4px 7px",
+              fontSize: "10px",
+              lineHeight: 1,
+              minHeight: 0,
+              borderColor: policyFilter === policy ? "#4d7a93" : undefined,
+              background: policyFilter === policy ? "rgba(46, 86, 106, 0.42)" : undefined,
+            },
+          }, `${policy}:${Number(policyCounts[policy] || 0)}`)
+        ),
+      ]),
       h("label", { key: "co_run_label" }, "run:"),
       h("select", {
         className: "select",
@@ -1586,7 +1656,7 @@ export function ContractWarningOverlay({
         }, "Next"),
       ]),
       h("span", { key: "co_filter_count", style: { marginLeft: "auto", color: "#8eb6ca" } }, [
-        `showing ${filteredRows.length}/${scopedRows.length}/${rows.length} (filtered/scoped/all) | `,
+        `showing ${filteredRows.length}/${severityScopedRows.length}/${scopedRows.length}/${rows.length} (policy/severity/scoped/all) | `,
         `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
       ]),
     ]),

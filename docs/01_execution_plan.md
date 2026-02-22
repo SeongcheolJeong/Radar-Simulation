@@ -133,6 +133,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.22: Shortcut profile transfer import/export (team-shareable JSON)
 - [x] M17.23: Detail-view copy ergonomics (row/visible copy actions)
 - [x] M17.24: Severity-first triage filter (all/high/med/low with scoped counts)
+- [x] M17.25: Policy-first triage filter (all/hold/adopt/none with scoped counts)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -145,7 +146,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.24 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.25 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1126,3 +1127,18 @@ M17.24 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - `Preset: Triage` now defaults severity to `high`
   - `severityFilter` persisted in overlay prefs and restored on reload
+
+M17.25 outcome (2026-02-22):
+
+- policy-first triage filtering added to overlay controls:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - filter options: `all`, `hold`, `adopt`, `none`
+  - quick policy buttons with severity-scoped counts: `hold:n`, `adopt:n`, `none:n`
+- filter pipeline expanded for clearer diagnostic scope:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `scopedRows` -> `severityScopedRows` -> `filteredRows(policy-applied)`
+  - count line now shows `policy/severity/scoped/all`
+- preset/persistence integration:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `Preset: Triage` now defaults policy to `hold`
+  - `policyFilter` persisted in overlay prefs and restored on reload

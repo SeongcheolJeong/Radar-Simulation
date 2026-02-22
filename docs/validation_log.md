@@ -2347,3 +2347,31 @@
     - `filtered/scoped/all`
   - preset integration token confirmed:
     - `setSeverityFilter("high")`
+
+## Web E2E Graph Policy-First Triage Filter (M17.25)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass (2nd run)
+- Notes:
+  - 첫 실행에서 async cancel 상태 assertion 간헐 실패, 즉시 재실행 pass (known flaky cancel path)
+  - policy triage filter frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8156/8136)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - policy filter state/model tokens confirmed:
+    - `policyFilter`
+    - `POLICY_FILTER_OPTIONS`
+    - `classifyPolicyState`
+    - `policyCounts`
+  - policy filter UI tokens confirmed:
+    - `co_policy_select`
+    - `co_pol_btn_hold`
+    - `co_pol_btn_adopt`
+    - `co_pol_btn_none`
+    - `policy/severity/scoped/all`
+  - preset integration token confirmed:
+    - `setPolicyFilter("hold")`
