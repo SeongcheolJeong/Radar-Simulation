@@ -26,6 +26,16 @@ function formatTimeOfDay(timestampMs) {
   }
 }
 
+function formatTimestampIso(timestampMs) {
+  const t = Number(timestampMs || 0);
+  if (!Number.isFinite(t) || t <= 0) return "-";
+  try {
+    return new Date(t).toISOString();
+  } catch (_) {
+    return "-";
+  }
+}
+
 function classifyContractSeverity(row) {
   const source = String(row?.event_source || "").toLowerCase();
   const note = row?.note && typeof row.note === "object" ? row.note : {};
@@ -67,6 +77,17 @@ function getFailureRuleTags(row, policyByRun) {
     .map((x) => String(x || "").trim())
     .filter((x) => x.length > 0)
     .slice(0, 3);
+}
+
+function buildContractRowKey(row) {
+  const note = row?.note && typeof row.note === "object" ? row.note : {};
+  return [
+    String(Number(row?.timestamp_ms || 0)),
+    String(row?.event_source || "-"),
+    String(row?.graph_run_id || "-"),
+    String(note.policy_eval_id || "-"),
+    String(note.recommendation || "-"),
+  ].join("|");
 }
 
 const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
@@ -502,6 +523,7 @@ export function ContractWarningOverlay({
     )
   );
   const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
+  const [expandedRowKeys, setExpandedRowKeys] = React.useState(() => new Set());
   const applyOverlayPreset = React.useCallback((presetName) => {
     const name = String(presetName || "").trim();
     if (name === "reset_all") {
@@ -626,6 +648,64 @@ export function ContractWarningOverlay({
     () => filteredRows.slice(rowWindowOffset, rowWindowEnd),
     [filteredRows, rowWindowEnd, rowWindowOffset]
   );
+  const visibleRowKeySet = React.useMemo(() => {
+    const out = new Set();
+    visibleRows.forEach((row) => out.add(buildContractRowKey(row)));
+    return out;
+  }, [visibleRows]);
+  React.useEffect(() => {
+    setExpandedRowKeys((prev) => {
+      if (!(prev instanceof Set) || prev.size === 0) return prev;
+      const next = new Set();
+      prev.forEach((key) => {
+        if (visibleRowKeySet.has(key)) next.add(key);
+      });
+      if (next.size === prev.size) return prev;
+      return next;
+    });
+  }, [visibleRowKeySet]);
+  const toggleRowExpanded = React.useCallback((rowKey) => {
+    const key = String(rowKey || "");
+    if (!key) return;
+    setExpandedRowKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+  const expandVisibleDetails = React.useCallback(() => {
+    setExpandedRowKeys((prev) => {
+      const next = new Set(prev);
+      visibleRows.forEach((row) => next.add(buildContractRowKey(row)));
+      return next;
+    });
+  }, [visibleRows]);
+  const collapseAllDetails = React.useCallback(() => {
+    setExpandedRowKeys(new Set());
+  }, []);
+  const formatRowDetailText = React.useCallback((row) => {
+    const snapshot = row?.snapshot && typeof row.snapshot === "object" ? row.snapshot : {};
+    const baseline = row?.baseline && typeof row.baseline === "object" ? row.baseline : {};
+    const delta = row?.delta && typeof row.delta === "object" ? row.delta : {};
+    const note = row?.note && typeof row.note === "object" ? row.note : {};
+    let noteJson = "{}";
+    try {
+      noteJson = JSON.stringify(note, null, 2);
+    } catch (_) {
+      noteJson = String(note);
+    }
+    return [
+      `timestamp_iso: ${formatTimestampIso(row?.timestamp_ms)}`,
+      `event_source: ${String(row?.event_source || "-")}`,
+      `graph_run_id: ${String(row?.graph_run_id || "-")}`,
+      `delta(unique/attempt): ${formatSigned(delta.unique_warning_count)}/${formatSigned(delta.attempt_count_total)}`,
+      `snapshot(unique/attempt): ${Number(snapshot.unique_warning_count || 0)}/${Number(snapshot.attempt_count_total || 0)}`,
+      `baseline(unique/attempt): ${Number(baseline.unique_warning_count || 0)}/${Number(baseline.attempt_count_total || 0)}`,
+      "note_json:",
+      noteJson,
+    ].join("\n");
+  }, []);
   React.useEffect(() => {
     const onKeyDown = (evt) => {
       if (!evt || evt.defaultPrevented) return;
@@ -675,11 +755,27 @@ export function ContractWarningOverlay({
       if (key === "0") {
         evt.preventDefault();
         applyOverlayPreset("reset_all");
+        return;
+      }
+      if (key === "e") {
+        evt.preventDefault();
+        expandVisibleDetails();
+        return;
+      }
+      if (key === "x") {
+        evt.preventDefault();
+        collapseAllDetails();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [applyOverlayPreset, maxRowWindowOffset, rowWindowSize]);
+  }, [
+    applyOverlayPreset,
+    collapseAllDetails,
+    expandVisibleDetails,
+    maxRowWindowOffset,
+    rowWindowSize,
+  ]);
   const policyByRun = React.useMemo(() => {
     const map = new Map();
     rows.forEach((row) => {
@@ -737,6 +833,18 @@ export function ContractWarningOverlay({
           onClick: () => setShowShortcutHelp((x) => !x),
           key: "co_shortcuts_toggle",
         }, showShortcutHelp ? "Shortcuts: on" : "Shortcuts: off"),
+        h("button", {
+          className: "btn",
+          onClick: expandVisibleDetails,
+          key: "co_expand_visible",
+          disabled: visibleRows.length === 0,
+        }, "Expand Visible"),
+        h("button", {
+          className: "btn",
+          onClick: collapseAllDetails,
+          key: "co_collapse_details",
+          disabled: expandedRowKeys.size === 0,
+        }, "Collapse Details"),
         h("button", { className: "btn", onClick: onExport, key: "co_export" }, "Export JSON"),
         h("button", { className: "btn", onClick: onClear, key: "co_clear" }, "Clear"),
         h("button", { className: "btn", onClick: onClose, key: "co_hide" }, "Hide"),
@@ -840,7 +948,7 @@ export function ContractWarningOverlay({
           key: "co_shortcuts_hint",
           style: { margin: "6px 2px 8px 2px", color: "#8eb6ca" },
         },
-        "Shortcuts: h(help), c(compact), n(non-zero), j(next), k(prev), g(top), 1(triage), 2(deep), 0(reset)."
+        "Shortcuts: h(help), c(compact), n(non-zero), j(next), k(prev), g(top), e(expand visible), x(collapse details), 1(triage), 2(deep), 0(reset)."
       )
       : null,
     h("div", { className: "contract-overlay-bd", key: "co_bd" }, filteredRows.length === 0
@@ -848,6 +956,9 @@ export function ContractWarningOverlay({
       : visibleRows.map((row, localIdx) =>
         (() => {
           const idx = rowWindowOffset + localIdx;
+          const rowExpandedKey = buildContractRowKey(row);
+          const rowDetailsExpanded = expandedRowKeys.has(rowExpandedKey);
+          const rowDetailText = rowDetailsExpanded ? formatRowDetailText(row) : "";
           const runId = String(row?.graph_run_id || "").trim();
           const severity = classifyContractSeverity(row);
           const badgeText = severityLabel(severity);
@@ -886,7 +997,18 @@ export function ContractWarningOverlay({
                       onClick: () => gateOpenHandler(row, gateLookupOptions),
                     }, "Open Gate")
                   : null,
+                h("button", {
+                  className: "btn contract-row-detail-btn",
+                  key: `co_row_detail_compact_${idx}`,
+                  onClick: () => toggleRowExpanded(rowExpandedKey),
+                }, rowDetailsExpanded ? "Hide" : "Details"),
               ]),
+              rowDetailsExpanded
+                ? h("pre", {
+                  className: "contract-overlay-row-detail",
+                  key: `co_row_detail_block_compact_${idx}`,
+                }, rowDetailText)
+                : null,
             ]);
           }
           return h("div", { className, key: `co_row_${idx}` }, [
@@ -921,7 +1043,24 @@ export function ContractWarningOverlay({
                         onClick: () => gateOpenHandler(row, gateLookupOptions),
                       }, "Open Gate")
                     : null,
+                  h("button", {
+                    key: `co_row_detail_${idx}`,
+                    className: "btn contract-row-detail-btn",
+                    onClick: () => toggleRowExpanded(rowExpandedKey),
+                  }, rowDetailsExpanded ? "Hide" : "Details"),
                 ])
+              : h("div", { className: "contract-overlay-row-actions", key: `co_row_actions_${idx}` }, [
+                  h("button", {
+                    key: `co_row_detail_only_${idx}`,
+                    className: "btn contract-row-detail-btn",
+                    onClick: () => toggleRowExpanded(rowExpandedKey),
+                  }, rowDetailsExpanded ? "Hide" : "Details"),
+                ]),
+            rowDetailsExpanded
+              ? h("pre", {
+                className: "contract-overlay-row-detail",
+                key: `co_row_detail_block_${idx}`,
+              }, rowDetailText)
               : null,
           ]);
         })()

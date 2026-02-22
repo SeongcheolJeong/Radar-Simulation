@@ -2176,3 +2176,31 @@
     - `key === "1"`
     - `key === "2"`
     - `key === "0"`
+
+## Web E2E Graph Row Detail Lazy-Expansion (M17.19)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass (3rd run)
+- Notes:
+  - 첫 2회 실행에서 async cancel 타이밍/HTTP 400 간헐 이슈 발생, 재실행 pass (known flaky cancel path)
+  - row-detail lazy-expansion frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8150/8130)` + token grep (`curl /frontend/graph_lab/panels.mjs`, `curl /frontend/graph_lab_reactflow.html`)
+- Result: pass
+- Notes:
+  - row-detail control tokens confirmed:
+    - `Expand Visible`
+    - `Collapse Details`
+    - `Details`
+    - `Hide`
+  - lazy-detail/runtime tokens confirmed:
+    - `buildContractRowKey`
+    - `formatRowDetailText`
+    - `toggleRowExpanded`
+    - `key === "e"`
+    - `key === "x"`
+  - style tokens confirmed:
+    - `contract-row-detail-btn`
+    - `contract-overlay-row-detail`

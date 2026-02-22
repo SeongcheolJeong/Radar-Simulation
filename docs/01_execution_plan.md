@@ -127,6 +127,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.16: Overlay gate-history window controls + incremental page-budget lookup UX
 - [x] M17.17: Timeline row-window virtualization + overlay preference persistence
 - [x] M17.18: Overlay shortcut keys + preset/reset operations
+- [x] M17.19: Row detail lazy-expansion controls + detail rendering on demand
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -139,7 +140,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.18 frontend hardening track: add lightweight row detail lazy-expansion and optional keyboard shortcut remap/profile save while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.19 frontend hardening track: add optional keyboard shortcut remap/profile save and row-detail field-level toggles while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1027,3 +1028,17 @@ M17.18 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - toggle: `Shortcuts: on/off`
   - inline hint line with key map summary
+
+M17.19 outcome (2026-02-22):
+
+- row details now render only when requested (lazy-expansion):
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - row actions include `Details`/`Hide` toggle in compact and full modes
+  - detail renderer computes payload only when expanded (`formatRowDetailText`)
+- batch detail controls added for visible window:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Expand Visible`, `Collapse Details`
+  - shortcuts: `e` (expand visible), `x` (collapse details)
+- detail UI styling and readability support added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+  - classes: `contract-row-detail-btn`, `contract-overlay-row-detail`
