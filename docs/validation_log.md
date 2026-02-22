@@ -1635,3 +1635,13 @@
   - valid template graph returns `valid=true` and non-empty topological order
   - invalid cycle graph returns `valid=false` with cycle-related error
   - existing API contract regression remains pass after graph endpoint integration
+
+## Web E2E ReactFlow Shell (M16.1)
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8104 8124` + smoke (`curl /health`, `curl /frontend/graph_lab_reactflow.html?api=...` + token grep)
+- Result: pass
+- Notes:
+  - ReactFlow shell page served from `frontend/graph_lab_reactflow.html`
+  - page includes graph-template/validation API wiring (`/api/graph/templates`, `/api/graph/validate`)
+  - launcher starts API + static server and health returns `ok=true`

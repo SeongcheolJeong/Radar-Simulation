@@ -103,7 +103,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.12: Regression report auto-include policy-eval excerpts (top failure evidence block)
 - [x] M15.13: Regression evidence drill-down panel (session row/policy-eval quick pivot for reviewer loop)
 - [x] M16.0: Simulink-style Graph contract freeze (ReactFlow node/edge schema + validator contract)
-- [ ] M16.1: ReactFlow shell bootstrap (graph canvas + property inspector + template loader)
+- [x] M16.1: ReactFlow shell bootstrap (graph canvas + property inspector + template loader)
 - [ ] M16.2: Graph executor API bridge (`/api/graph/*` validation/run/status)
 - [ ] M16.3: Artifact inspector panels (Path/ADC/RD/RA + node-output trace)
 - [ ] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
@@ -120,7 +120,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M16.1 ReactFlow shell bootstrap for graph editing/template loading while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M16.2 graph executor API bridge for `/api/graph/runs` family while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -660,3 +660,16 @@ M16.0 outcome (2026-02-22):
 - planning/contract docs added:
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/126_reactflow_simulink_style_plan.md`
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/128_web_e2e_graph_contract_validation_api.md`
+
+M16.1 outcome (2026-02-22):
+
+- ReactFlow graph shell page added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+- v1 shell capabilities:
+  - graph canvas (`@xyflow/react`) with edge connect/edit
+  - template fetch/load via `GET /api/graph/templates`
+  - node inspector with JSON params editor
+  - contract validation action via `POST /api/graph/validate`
+  - graph export (`web_e2e_graph_schema_v1` payload)
+- local launcher added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_graph_lab_local.sh`

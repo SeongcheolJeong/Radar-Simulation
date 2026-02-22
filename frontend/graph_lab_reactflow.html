@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Radar Graph Lab (ReactFlow)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/@xyflow/react@12.9.0/dist/style.css" />
+  <style>
+    :root {
+      --bg: #0b131a;
+      --panel: #111f29;
+      --panel-2: #0e1a23;
+      --line: #254254;
+      --text: #d2e2ed;
+      --muted: #86a1b4;
+      --ok: #35c885;
+      --warn: #f0b33a;
+      --err: #f06363;
+      --accent: #19b4d7;
+      --accent-2: #58d9b3;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(1200px 600px at 10% -20%, #1d3848 0%, transparent 60%), var(--bg);
+      color: var(--text);
+      font-family: "Space Grotesk", sans-serif;
+    }
+    .page {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 56px 1fr;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, rgba(17,31,41,0.94), rgba(17,31,41,0.72));
+      backdrop-filter: blur(6px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 18px rgba(25, 180, 215, 0.45);
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .content {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 300px 1fr 360px;
+      gap: 10px;
+      padding: 10px;
+    }
+    .panel {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(17,31,41,0.96), rgba(14,26,35,0.96));
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-hd {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .panel-bd {
+      padding: 10px 12px;
+      overflow: auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .flow-wrap {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .label {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: "JetBrains Mono", monospace;
+    }
+    .input, .select, .textarea, .btn {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      padding: 8px 9px;
+    }
+    .textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+    .btn {
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .btn:hover {
+      border-color: #3e7088;
+      transform: translateY(-1px);
+    }
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--muted);
+      background: rgba(15, 30, 40, 0.6);
+    }
+    .status-ok { color: var(--ok); }
+    .status-warn { color: var(--warn); }
+    .status-err { color: var(--err); }
+    .status-neutral { color: var(--muted); }
+    .result-box {
+      border: 1px solid var(--line);
+      background: rgba(9, 19, 26, 0.88);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      min-height: 110px;
+      color: #b9d5e7;
+    }
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--muted);
+      background: rgba(13, 25, 34, 0.65);
+    }
+    @media (max-width: 1280px) {
+      .content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(420px, 1fr) auto;
+      }
+    }
+    .react-flow__node-default {
+      border-radius: 8px !important;
+      border: 1px solid #2d566b !important;
+      background: linear-gradient(180deg, #15303f, #112835) !important;
+      color: #d7ecf7 !important;
+      font-family: "JetBrains Mono", monospace !important;
+      font-size: 11px !important;
+      min-width: 180px;
+    }
+    .react-flow__attribution {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import React from "https://esm.sh/react@18.3.1";
+    import ReactDOM from "https://esm.sh/react-dom@18.3.1/client";
+    import {
+      ReactFlow,
+      Background,
+      Controls,
+      MiniMap,
+      addEdge,
+      useNodesState,
+      useEdgesState,
+    } from "https://esm.sh/@xyflow/react@12.9.0";
+
+    const h = React.createElement;
+    const NODE_TYPES = [
+      "SceneSource",
+      "RadarConfig",
+      "Propagation",
+      "AntennaPattern",
+      "SynthFMCW",
+      "RadarMap",
+      "ComparePolicy",
+      "RegressionGate",
+      "ReportExport",
+    ];
+
+    function toFlowNode(node, idx) {
+      const id = String(node && node.id ? node.id : `node_${idx + 1}`);
+      const nType = String(node && node.type ? node.type : "SceneSource");
+      const ui = node && typeof node.ui === "object" ? node.ui : {};
+      const pos = ui && typeof ui === "object" && ui.position ? ui.position : null;
+      const px = Number(pos && pos.x);
+      const py = Number(pos && pos.y);
+      const col = idx % 4;
+      const row = Math.floor(idx / 4);
+      const position = {
+        x: Number.isFinite(px) ? px : 50 + col * 240,
+        y: Number.isFinite(py) ? py : 50 + row * 140,
+      };
+      const params = node && typeof node.params === "object" ? node.params : {};
+      return {
+        id,
+        type: "default",
+        position,
+        data: {
+          label: `${nType}\n${id}`,
+          nodeType: nType,
+          params,
+        },
+      };
+    }
+
+    function toGraphPayload(opts) {
+      const nodes = (opts.nodes || []).map((n) => ({
+        id: String(n.id),
+        type: String(n.data && n.data.nodeType ? n.data.nodeType : "SceneSource"),
+        params: (n.data && typeof n.data.params === "object") ? n.data.params : {},
+        ui: {
+          position: {
+            x: Number(n.position && n.position.x ? n.position.x : 0),
+            y: Number(n.position && n.position.y ? n.position.y : 0),
+          },
+        },
+      }));
+      const edges = (opts.edges || []).map((e, i) => ({
+        id: String(e.id || `e${i + 1}`),
+        source: String(e.source || ""),
+        target: String(e.target || ""),
+        contract: String(e.data && e.data.contract ? e.data.contract : "generic"),
+      }));
+      return {
+        version: "web_e2e_graph_schema_v1",
+        graph_id: String(opts.graphId || "graph_lab"),
+        profile: String(opts.profile || "fast_debug"),
+        nodes,
+        edges,
+      };
+    }
+
+    function App() {
+      const params = new URLSearchParams(window.location.search);
+      const [apiBase, setApiBase] = React.useState(
+        String(params.get("api") || "http://127.0.0.1:8099")
+      );
+      const [graphId, setGraphId] = React.useState("graph_lab");
+      const [profile, setProfile] = React.useState("fast_debug");
+      const [templates, setTemplates] = React.useState([]);
+      const [statusText, setStatusText] = React.useState("idle");
+      const [statusTone, setStatusTone] = React.useState("status-neutral");
+      const [validationText, setValidationText] = React.useState("-");
+      const [selectedNodeId, setSelectedNodeId] = React.useState("");
+      const [selectedNodeParamsText, setSelectedNodeParamsText] = React.useState("{}");
+
+      const [nodes, setNodes, onNodesChange] = useNodesState([]);
+      const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+      const selectedNode = React.useMemo(
+        () => nodes.find((n) => String(n.id) === String(selectedNodeId)) || null,
+        [nodes, selectedNodeId]
+      );
+
+      React.useEffect(() => {
+        if (!selectedNode) {
+          setSelectedNodeParamsText("{}");
+          return;
+        }
+        const paramsObj = selectedNode.data && selectedNode.data.params ? selectedNode.data.params : {};
+        setSelectedNodeParamsText(JSON.stringify(paramsObj, null, 2));
+      }, [selectedNode]);
+
+      const setStatus = React.useCallback((text, tone) => {
+        setStatusText(String(text || "idle"));
+        setStatusTone(String(tone || "status-neutral"));
+      }, []);
+
+      const applyGraph = React.useCallback((graph) => {
+        const g = graph && typeof graph === "object" ? graph : {};
+        setGraphId(String(g.graph_id || "graph_lab"));
+        setProfile(String(g.profile || "fast_debug"));
+        const nextNodes = Array.isArray(g.nodes) ? g.nodes.map(toFlowNode) : [];
+        const nextEdges = Array.isArray(g.edges)
+          ? g.edges.map((e, idx) => ({
+              id: String(e.id || `e${idx + 1}`),
+              source: String(e.source || ""),
+              target: String(e.target || ""),
+              data: { contract: String(e.contract || "generic") },
+            }))
+          : [];
+        setNodes(nextNodes);
+        setEdges(nextEdges);
+        setSelectedNodeId(nextNodes.length > 0 ? String(nextNodes[0].id) : "");
+      }, [setEdges, setNodes]);
+
+      const fetchTemplates = React.useCallback(async () => {
+        setStatus("loading templates...", "status-warn");
+        try {
+          const res = await fetch(`${apiBase.replace(/\\/$/, "")}/api/graph/templates`);
+          if (!res.ok) throw new Error(`template request failed (${res.status})`);
+          const payload = await res.json();
+          const rows = Array.isArray(payload.templates) ? payload.templates : [];
+          setTemplates(rows);
+          if (rows.length > 0 && rows[0].graph) {
+            applyGraph(rows[0].graph);
+          }
+          setStatus(`templates loaded: ${rows.length}`, "status-ok");
+        } catch (err) {
+          setStatus(`template load failed: ${String(err.message || err)}`, "status-err");
+        }
+      }, [apiBase, applyGraph, setStatus]);
+
+      React.useEffect(() => {
+        fetchTemplates();
+      }, [fetchTemplates]);
+
+      const onConnect = React.useCallback(
+        (params) => setEdges((eds) => addEdge({ ...params, data: { contract: "generic" } }, eds)),
+        [setEdges]
+      );
+
+      const addNodeByType = React.useCallback((nodeType) => {
+        const idx = nodes.length;
+        const id = `${String(nodeType || "Node")}_${idx + 1}`;
+        const col = idx % 4;
+        const row = Math.floor(idx / 4);
+        setNodes((prev) =>
+          prev.concat({
+            id,
+            type: "default",
+            position: { x: 80 + col * 230, y: 80 + row * 130 },
+            data: { label: `${nodeType}\n${id}`, nodeType, params: {} },
+          })
+        );
+        setSelectedNodeId(id);
+      }, [nodes.length, setNodes]);
+
+      const applySelectedNodeParams = React.useCallback(() => {
+        if (!selectedNode) {
+          setStatus("select a node first", "status-warn");
+          return;
+        }
+        try {
+          const obj = JSON.parse(selectedNodeParamsText || "{}");
+          setNodes((prev) =>
+            prev.map((n) => {
+              if (String(n.id) !== String(selectedNode.id)) return n;
+              return {
+                ...n,
+                data: {
+                  ...(n.data || {}),
+                  params: obj,
+                },
+              };
+            })
+          );
+          setStatus(`params updated: ${selectedNode.id}`, "status-ok");
+        } catch (err) {
+          setStatus(`invalid params json: ${String(err.message || err)}`, "status-err");
+        }
+      }, [selectedNode, selectedNodeParamsText, setNodes, setStatus]);
+
+      const runGraphValidation = React.useCallback(async () => {
+        const graph = toGraphPayload({ graphId, profile, nodes, edges });
+        setStatus("validating graph...", "status-warn");
+        try {
+          const res = await fetch(`${apiBase.replace(/\\/$/, "")}/api/graph/validate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(graph),
+          });
+          if (!res.ok) throw new Error(`validate request failed (${res.status})`);
+          const payload = await res.json();
+          const gv = payload.graph_validation || {};
+          const ok = Boolean(gv.valid);
+          const lines = [
+            `valid: ${ok}`,
+            `nodes: ${Number(gv?.stats?.node_count || 0)}, edges: ${Number(gv?.stats?.edge_count || 0)}`,
+            `sources/sinks: ${Number(gv?.stats?.source_count || 0)}/${Number(gv?.stats?.sink_count || 0)}`,
+            "",
+            "errors:",
+            ...(Array.isArray(gv.errors) && gv.errors.length > 0 ? gv.errors.map((x) => `- ${x}`) : ["- none"]),
+            "",
+            "warnings:",
+            ...(Array.isArray(gv.warnings) && gv.warnings.length > 0 ? gv.warnings.map((x) => `- ${x}`) : ["- none"]),
+            "",
+            `topological_order: ${(gv?.normalized?.topological_order || []).join(" -> ") || "-"}`,
+          ];
+          setValidationText(lines.join("\n"));
+          setStatus(ok ? "graph valid" : "graph invalid", ok ? "status-ok" : "status-err");
+        } catch (err) {
+          setValidationText(`validate failed\n- ${String(err.message || err)}`);
+          setStatus(`validate failed: ${String(err.message || err)}`, "status-err");
+        }
+      }, [apiBase, edges, graphId, nodes, profile, setStatus]);
+
+      const loadTemplateByIndex = React.useCallback((idx) => {
+        const i = Math.max(0, Math.floor(Number(idx)));
+        const row = templates[i];
+        if (!row || !row.graph) {
+          setStatus("template not found", "status-warn");
+          return;
+        }
+        applyGraph(row.graph);
+        setValidationText("-");
+        setStatus(`template applied: ${row.template_id || i}`, "status-ok");
+      }, [applyGraph, setStatus, templates]);
+
+      const exportGraph = React.useCallback(() => {
+        const payload = toGraphPayload({ graphId, profile, nodes, edges });
+        const text = JSON.stringify(payload, null, 2);
+        const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = `${payload.graph_id || "graph"}_schema_v1.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+        setStatus("graph exported", "status-ok");
+      }, [edges, graphId, nodes, profile, setStatus]);
+
+      return h("div", { className: "page" }, [
+        h("header", { className: "topbar", key: "hd" }, [
+          h("div", { className: "brand", key: "b1" }, [
+            h("span", { className: "brand-dot", key: "dot" }),
+            h("div", { key: "txt" }, [
+              h("div", { className: "brand-title", key: "t1" }, "Radar Graph Lab"),
+              h("div", { className: "brand-sub", key: "t2" }, "ReactFlow Simulink-Style Workspace"),
+            ]),
+          ]),
+          h("div", { className: "top-actions", key: "b2" }, [
+            h("span", { className: `stat ${statusTone}`, key: "s1" }, statusText),
+            h("span", { className: "stat", key: "s2" }, `nodes ${nodes.length} / edges ${edges.length}`),
+          ]),
+        ]),
+
+        h("main", { className: "content", key: "ct" }, [
+          h("section", { className: "panel", key: "left" }, [
+            h("div", { className: "panel-hd", key: "lhd" }, "Graph Inputs"),
+            h("div", { className: "panel-bd", key: "lbd" }, [
+              h("div", { className: "field", key: "api" }, [
+                h("label", { className: "label", key: "lbl" }, "API Base"),
+                h("input", {
+                  className: "input",
+                  value: apiBase,
+                  onChange: (e) => setApiBase(e.target.value),
+                  placeholder: "http://127.0.0.1:8099",
+                }),
+              ]),
+              h("div", { className: "btn-row", key: "btns0" }, [
+                h("button", { className: "btn", onClick: fetchTemplates, key: "r1" }, "Refresh Templates"),
+                h("button", { className: "btn", onClick: exportGraph, key: "r2" }, "Export Graph"),
+              ]),
+              h("div", { className: "field", key: "graphid" }, [
+                h("label", { className: "label", key: "lbl1" }, "Graph ID"),
+                h("input", {
+                  className: "input",
+                  value: graphId,
+                  onChange: (e) => setGraphId(e.target.value),
+                  placeholder: "graph_lab",
+                }),
+              ]),
+              h("div", { className: "field", key: "profile" }, [
+                h("label", { className: "label", key: "lbl2" }, "Profile"),
+                h("select", {
+                  className: "select",
+                  value: profile,
+                  onChange: (e) => setProfile(e.target.value),
+                }, [
+                  h("option", { value: "fast_debug", key: "p1" }, "fast_debug"),
+                  h("option", { value: "balanced_dev", key: "p2" }, "balanced_dev"),
+                  h("option", { value: "fidelity_eval", key: "p3" }, "fidelity_eval"),
+                ]),
+              ]),
+              h("div", { className: "field", key: "tpl" }, [
+                h("label", { className: "label", key: "lbl3" }, "Template"),
+                h("div", { className: "btn-row", key: "btnrowtpl" }, [
+                  h("select", {
+                    className: "select",
+                    id: "templateSelect",
+                    defaultValue: "0",
+                    onChange: (e) => loadTemplateByIndex(Number(e.target.value)),
+                  }, (templates.length > 0 ? templates : [{ template_id: "none", title: "(none)" }]).map((t, i) =>
+                    h("option", { value: String(i), key: `tpl_${i}` }, `${t.template_id || i} | ${t.title || "-"}`)
+                  )),
+                  h("button", { className: "btn", onClick: () => loadTemplateByIndex(0), key: "tplbtn" }, "Load #1"),
+                ]),
+              ]),
+              h("div", { className: "field", key: "nodepalette" }, [
+                h("label", { className: "label", key: "lbl4" }, "Node Palette"),
+                h("div", { className: "chip-list", key: "chips" }, NODE_TYPES.map((x) =>
+                  h("button", {
+                    key: `node_${x}`,
+                    className: "chip btn",
+                    onClick: () => addNodeByType(x),
+                    title: `Add ${x}`,
+                  }, x)
+                )),
+              ]),
+              h("button", { className: "btn", onClick: runGraphValidation, key: "validate" }, "Validate Graph Contract"),
+              h("div", { className: "hint", key: "hint" }, "Tip: connect nodes on canvas, then validate to check schema/profile/DAG constraints."),
+            ]),
+          ]),
+
+          h("section", { className: "panel", key: "center" }, [
+            h("div", { className: "panel-hd", key: "chd" }, "Graph Canvas"),
+            h("div", { className: "panel-bd", style: { padding: "8px" }, key: "cbd" }, [
+              h("div", { className: "flow-wrap", style: { height: "100%" }, key: "flow" }, [
+                h(ReactFlow, {
+                  nodes,
+                  edges,
+                  onNodesChange,
+                  onEdgesChange,
+                  onConnect,
+                  fitView: true,
+                  onNodeClick: (_, node) => setSelectedNodeId(String(node.id)),
+                }, [
+                  h(Background, { key: "bg", color: "#2b4f62", gap: 22, size: 1 }),
+                  h(MiniMap, { key: "mm", pannable: true, zoomable: true, style: { background: "#0f1d27" } }),
+                  h(Controls, { key: "ctl", showInteractive: false }),
+                ]),
+              ]),
+            ]),
+          ]),
+
+          h("section", { className: "panel", key: "right" }, [
+            h("div", { className: "panel-hd", key: "rhd" }, "Node Inspector"),
+            h("div", { className: "panel-bd", key: "rbd" }, [
+              h("div", { className: "field", key: "selnode" }, [
+                h("label", { className: "label", key: "lbls" }, "Selected Node"),
+                h("input", {
+                  className: "input",
+                  readOnly: true,
+                  value: selectedNode ? `${selectedNode.data.nodeType} | ${selectedNode.id}` : "(none)",
+                }),
+              ]),
+              h("div", { className: "field", key: "params" }, [
+                h("label", { className: "label", key: "lblp" }, "Node Params (JSON)"),
+                h("textarea", {
+                  className: "textarea",
+                  value: selectedNodeParamsText,
+                  onChange: (e) => setSelectedNodeParamsText(e.target.value),
+                  placeholder: "{}",
+                }),
+              ]),
+              h("div", { className: "btn-row-3", key: "btns2" }, [
+                h("button", { className: "btn", onClick: applySelectedNodeParams, key: "b1" }, "Apply Params"),
+                h("button", {
+                  className: "btn",
+                  onClick: () => setSelectedNodeParamsText("{}"),
+                  key: "b2",
+                }, "Reset JSON"),
+                h("button", { className: "btn", onClick: runGraphValidation, key: "b3" }, "Re-Validate"),
+              ]),
+              h("div", { className: "field", key: "result" }, [
+                h("label", { className: "label", key: "lblr" }, "Validation Result"),
+                h("pre", { className: "result-box", key: "box" }, validationText),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]);
+    }
+
+    ReactDOM.createRoot(document.getElementById("app")).render(h(App));
+  </script>
+</body>
+</html>
