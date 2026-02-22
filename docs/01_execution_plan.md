@@ -118,6 +118,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.7: Auto contract diagnostics propagation (run/gate text + inspector auto-sync)
 - [x] M17.8: Contract overlay timeline (opt-in overlay + run/gate delta event wiring)
 - [x] M17.9: Contract timeline filter/export + gate report diagnostics slice
+- [x] M17.10: Contract compact timeline + run pin + gate tail refs
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -130,7 +131,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.9 frontend hardening track: add operator-focused compact mode for timeline (severity badges + pinned run) and include timeline tail references in exported gate reports, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.10 frontend hardening track: add overlay row-to-run jump actions and policy-failure correlation tags in timeline rows, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -891,3 +892,19 @@ M17.9 outcome (2026-02-22):
 - gate handoff report now includes contract diagnostics slices:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
   - report section: `## Contract Diagnostics` with `run.*` and `gate.*` delta/total fields
+
+M17.10 outcome (2026-02-22):
+
+- overlay compact mode and run pin filters added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - compact toggle (`Compact: on/off`)
+  - run pin selector (`run:`)
+- severity badge + row styling added for timeline triage:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+  - badges/classes: `contract-sev-badge`, `contract-sev-high|med|low`
+- gate report now includes timeline tail references:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+  - section: `## Contract Timeline Tail` (`active_graph_run_id`, `scoped_event_count`, `tail_event_count`, `sev`)
+- gate hook contract options extended:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/contracts.mjs`
+  - `contractTimeline` option read path + app forwarding from `contractTimeline` state

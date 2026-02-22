@@ -297,6 +297,7 @@ export function normalizeGateOpsOptions(raw) {
     baselineId: readString(scope, root, "baselineId", "graph_lab_baseline"),
     graphId: readString(scope, root, "graphId", "graph_lab"),
     lastPolicyEval: asNullableObject(scope, root.lastPolicyEval, "lastPolicyEval"),
+    contractTimeline: readArray(scope, root, "contractTimeline", []),
     setStatus: readFunction(scope, root, "setStatus"),
     setGateResultText: readFunction(scope, root, "setGateResultText"),
     setLastPolicyEval: readFunction(scope, root, "setLastPolicyEval"),

@@ -1945,3 +1945,33 @@
     - `run.delta_unique`
     - `gate.delta_unique`
     - `contract_debug_version`
+
+## Web E2E Graph Contract Compact Pin + Tail Ref (M17.10)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - compact/pin/tail-ref frontend integration 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8121 8141` + smoke (`curl /health`, `curl /frontend/graph_lab*.mjs` token grep)
+- Result: pass
+- Notes:
+  - overlay compact/pin/severity tokens confirmed:
+    - `Compact: on/off`
+    - `run:`
+    - `pinnedRunId`
+    - `classifyContractSeverity`
+    - `contract-sev-badge`
+    - `contract-overlay-row-compact`
+  - gate timeline-tail report tokens confirmed:
+    - `## Contract Timeline Tail`
+    - `timeline_export_hint`
+    - `tail_event_count`
+    - `scoped_event_count`
+    - `sev=`
+  - gate options + app wiring tokens confirmed:
+    - `contractTimeline: readArray(...)`
+    - `contractTimeline` pass-through from app

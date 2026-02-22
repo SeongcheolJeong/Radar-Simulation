@@ -26,6 +26,25 @@ function formatTimeOfDay(timestampMs) {
   }
 }
 
+function classifyContractSeverity(row) {
+  const source = String(row?.event_source || "").toLowerCase();
+  const note = row?.note && typeof row.note === "object" ? row.note : {};
+  const du = Number(row?.delta?.unique_warning_count || 0);
+  const da = Number(row?.delta?.attempt_count_total || 0);
+  if (String(note.error || "").trim()) return "high";
+  if (source.includes("failed") || source.includes("error")) return "high";
+  if (Boolean(note.gate_failed)) return "med";
+  if (source.includes("cancel")) return "med";
+  if (du > 0 || da > 0) return "med";
+  return "low";
+}
+
+function severityLabel(severity) {
+  if (severity === "high") return "HIGH";
+  if (severity === "med") return "MED";
+  return "LOW";
+}
+
 function renderArtifactInspector(graphRunSummary) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
@@ -368,24 +387,41 @@ export function ContractWarningOverlay({
   if (!visible) return null;
   const rows = Array.isArray(timeline) ? timeline : [];
   const [sourceFilter, setSourceFilter] = React.useState("all");
+  const [pinnedRunId, setPinnedRunId] = React.useState("all");
   const [nonZeroOnly, setNonZeroOnly] = React.useState(false);
+  const [compactMode, setCompactMode] = React.useState(false);
   const sourceOptions = React.useMemo(() => {
     const set = new Set();
     rows.forEach((row) => set.add(String(row?.event_source || "-")));
     return ["all", ...Array.from(set.values()).sort((a, b) => a.localeCompare(b))];
   }, [rows]);
+  const runOptions = React.useMemo(() => {
+    const set = new Set();
+    rows.forEach((row) => {
+      const runId = String(row?.graph_run_id || "").trim();
+      if (runId) set.add(runId);
+    });
+    return ["all", ...Array.from(set.values()).sort((a, b) => a.localeCompare(b))];
+  }, [rows]);
   const filteredRows = React.useMemo(() => rows.filter((row) => {
     const source = String(row?.event_source || "-");
     if (sourceFilter !== "all" && source !== sourceFilter) return false;
+    const runId = String(row?.graph_run_id || "");
+    if (pinnedRunId !== "all" && runId !== pinnedRunId) return false;
     if (!nonZeroOnly) return true;
     const du = Number(row?.delta?.unique_warning_count || 0);
     const da = Number(row?.delta?.attempt_count_total || 0);
     return du !== 0 || da !== 0;
-  }), [nonZeroOnly, rows, sourceFilter]);
+  }), [nonZeroOnly, pinnedRunId, rows, sourceFilter]);
   return h("aside", { className: "contract-overlay", key: "contract_overlay" }, [
     h("div", { className: "contract-overlay-hd", key: "co_hd" }, [
       h("div", { key: "co_t" }, `Contract Timeline (${rows.length})`),
       h("div", { className: "contract-overlay-actions", key: "co_actions" }, [
+        h("button", {
+          className: "btn",
+          onClick: () => setCompactMode((x) => !x),
+          key: "co_compact",
+        }, compactMode ? "Compact: on" : "Compact: off"),
         h("button", { className: "btn", onClick: onExport, key: "co_export" }, "Export JSON"),
         h("button", { className: "btn", onClick: onClear, key: "co_clear" }, "Clear"),
         h("button", { className: "btn", onClick: onClose, key: "co_hide" }, "Hide"),
@@ -399,6 +435,13 @@ export function ContractWarningOverlay({
         value: sourceFilter,
         onChange: (e) => setSourceFilter(String(e.target.value || "all")),
       }, sourceOptions.map((opt) => h("option", { value: opt, key: `co_src_${opt}` }, opt))),
+      h("label", { key: "co_run_label" }, "run:"),
+      h("select", {
+        className: "select",
+        key: "co_run_select",
+        value: pinnedRunId,
+        onChange: (e) => setPinnedRunId(String(e.target.value || "all")),
+      }, runOptions.map((opt) => h("option", { value: opt, key: `co_run_${opt}` }, opt))),
       h("label", {
         key: "co_filter_nonzero",
         style: { display: "inline-flex", alignItems: "center", gap: "6px", marginLeft: "6px" },
@@ -415,15 +458,32 @@ export function ContractWarningOverlay({
     h("div", { className: "contract-overlay-bd", key: "co_bd" }, filteredRows.length === 0
       ? h("pre", { className: "result-box", key: "co_empty" }, "no contract events yet")
       : filteredRows.map((row, idx) =>
-        h("div", { className: "contract-overlay-row", key: `co_row_${idx}` }, [
-          h("div", { className: "contract-overlay-row-hd", key: `co_row_hd_${idx}` }, [
-            `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")}`,
-          ]),
-          h("div", { className: "contract-overlay-row-kpi", key: `co_row_kpi_${idx}` }, [
-            `delta(unique/attempt): ${formatSigned(row?.delta?.unique_warning_count)}/${formatSigned(row?.delta?.attempt_count_total)} | `,
-            `total(unique/attempt): ${Number(row?.snapshot?.unique_warning_count || 0)}/${Number(row?.snapshot?.attempt_count_total || 0)}`,
-          ]),
-        ])
+        (() => {
+          const severity = classifyContractSeverity(row);
+          const badgeText = severityLabel(severity);
+          const className = compactMode
+            ? `contract-overlay-row compact contract-sev-${severity}`
+            : `contract-overlay-row contract-sev-${severity}`;
+          if (compactMode) {
+            return h("div", { className, key: `co_row_${idx}` }, [
+              h("div", { className: "contract-overlay-row-compact", key: `co_row_compact_${idx}` }, [
+                h("span", { className: `contract-sev-badge ${severity}`, key: `co_row_badge_${idx}` }, badgeText),
+                `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")} | `,
+                `d=${formatSigned(row?.delta?.unique_warning_count)}/${formatSigned(row?.delta?.attempt_count_total)}`,
+              ]),
+            ]);
+          }
+          return h("div", { className, key: `co_row_${idx}` }, [
+            h("div", { className: "contract-overlay-row-hd", key: `co_row_hd_${idx}` }, [
+              h("span", { className: `contract-sev-badge ${severity}`, key: `co_row_badge_${idx}` }, badgeText),
+              `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")}`,
+            ]),
+            h("div", { className: "contract-overlay-row-kpi", key: `co_row_kpi_${idx}` }, [
+              `delta(unique/attempt): ${formatSigned(row?.delta?.unique_warning_count)}/${formatSigned(row?.delta?.attempt_count_total)} | `,
+              `total(unique/attempt): ${Number(row?.snapshot?.unique_warning_count || 0)}/${Number(row?.snapshot?.attempt_count_total || 0)}`,
+            ]),
+          ]);
+        })()
       )),
   ]);
 }

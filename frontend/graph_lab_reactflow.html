@@ -259,7 +259,7 @@
       background: rgba(11, 24, 33, 0.92);
     }
     .contract-overlay-filter .select {
-      min-width: 140px;
+      min-width: 110px;
       padding: 5px 7px;
       font-size: 11px;
     }
@@ -279,6 +279,54 @@
     }
     .contract-overlay-row-kpi {
       color: #d3ebff;
+    }
+    .contract-overlay-row.compact {
+      padding: 6px 8px;
+    }
+    .contract-overlay-row-compact {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #cde3f2;
+      line-height: 1.35;
+    }
+    .contract-sev-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 18px;
+      border-radius: 999px;
+      padding: 0 7px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-right: 6px;
+      border: 1px solid transparent;
+    }
+    .contract-sev-badge.high {
+      color: #ffd5d5;
+      background: rgba(143, 39, 39, 0.45);
+      border-color: #b94848;
+    }
+    .contract-sev-badge.med {
+      color: #ffe9bf;
+      background: rgba(118, 89, 24, 0.45);
+      border-color: #c28c2f;
+    }
+    .contract-sev-badge.low {
+      color: #caf6e4;
+      background: rgba(32, 96, 70, 0.38);
+      border-color: #3eae7f;
+    }
+    .contract-sev-high {
+      border-color: #b74a4a;
+    }
+    .contract-sev-med {
+      border-color: #9f7d3c;
+    }
+    .contract-sev-low {
+      border-color: #3f7a63;
     }
     @media (max-width: 1280px) {
       .content {

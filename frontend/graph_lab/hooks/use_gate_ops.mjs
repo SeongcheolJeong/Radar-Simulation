@@ -13,11 +13,38 @@ export function useGateOps(opts) {
     baselineId,
     graphId,
     lastPolicyEval,
+    contractTimeline,
     setStatus,
     setGateResultText,
     setLastPolicyEval,
     onContractDiagnosticsEvent,
   } = safeOpts;
+
+  const classifyTimelineSeverity = React.useCallback((row) => {
+    const source = String(row?.event_source || "").toLowerCase();
+    const note = row?.note && typeof row.note === "object" ? row.note : {};
+    const du = Number(row?.delta?.unique_warning_count || 0);
+    const da = Number(row?.delta?.attempt_count_total || 0);
+    if (String(note.error || "").trim()) return "high";
+    if (source.includes("failed") || source.includes("error")) return "high";
+    if (Boolean(note.gate_failed)) return "med";
+    if (source.includes("canceled") || source.includes("cancel")) return "med";
+    if (du > 0 || da > 0) return "med";
+    return "low";
+  }, []);
+
+  const formatTimelineRefLine = React.useCallback((idx, row) => {
+    const timestampMs = Number(row?.timestamp_ms || 0);
+    const timestamp = Number.isFinite(timestampMs) && timestampMs > 0
+      ? new Date(timestampMs).toISOString()
+      : "-";
+    const runId = String(row?.graph_run_id || "-");
+    const source = String(row?.event_source || "-");
+    const severity = classifyTimelineSeverity(row);
+    const du = Number(row?.delta?.unique_warning_count || 0);
+    const da = Number(row?.delta?.attempt_count_total || 0);
+    return `- [${Number(idx) + 1}] t=${timestamp} | source=${source} | run=${runId} | sev=${severity} | delta=${du >= 0 ? "+" : ""}${du}/${da >= 0 ? "+" : ""}${da}`;
+  }, [classifyTimelineSeverity]);
 
   const collectContractDiagnostics = React.useCallback((beforeSnapshot) => {
     const beforeUnique = Number(beforeSnapshot?.unique_warning_count || 0);
@@ -162,8 +189,12 @@ export function useGateOps(opts) {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim() || "-";
     const p = lastPolicyEval || {};
     const failures = Array.isArray(p.gate_failures) ? p.gate_failures : [];
+    const timelineRows = Array.isArray(contractTimeline) ? contractTimeline : [];
     const runContract = graphRunSummary?.runtime_contract_diagnostics || null;
     const gateContract = p?.runtime_contract_diagnostics || null;
+    const activeGraphRunId = String(
+      gateContract?.graph_run_id || runContract?.graph_run_id || graphRunSummary?.graph_run_id || graphRunSummary?.run_id || ""
+    );
     const formatContractBlock = (label, row) => {
       if (!row || typeof row !== "object") return [];
       return [
@@ -174,6 +205,10 @@ export function useGateOps(opts) {
         `- ${label}.total_attempts: ${Number(row?.snapshot?.attempt_count_total || 0)}`,
       ];
     };
+    const runScopedTimeline = activeGraphRunId
+      ? timelineRows.filter((row) => String(row?.graph_run_id || "") === activeGraphRunId)
+      : timelineRows;
+    const timelineTail = runScopedTimeline.slice(0, 8);
     const nowIso = new Date().toISOString();
     const reportLines = [
       "# Graph Run Gate Report",
@@ -210,6 +245,21 @@ export function useGateOps(opts) {
     if (!runContract && !gateContract) {
       reportLines.push("- none");
     }
+    reportLines.push(
+      "",
+      "## Contract Timeline Tail",
+      `- active_graph_run_id: ${activeGraphRunId || "-"}`,
+      `- scoped_event_count: ${Number(runScopedTimeline.length || 0)}`,
+      `- tail_event_count: ${Number(timelineTail.length || 0)}`,
+      `- timeline_export_hint: use Contract Overlay -> Export JSON`,
+    );
+    if (timelineTail.length === 0) {
+      reportLines.push("- none");
+    } else {
+      timelineTail.forEach((row, idx) => {
+        reportLines.push(formatTimelineRefLine(idx, row));
+      });
+    }
     const text = reportLines.join("\n");
     const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
     const href = URL.createObjectURL(blob);
@@ -221,7 +271,15 @@ export function useGateOps(opts) {
     document.body.removeChild(a);
     window.setTimeout(() => URL.revokeObjectURL(href), 1000);
     setStatus("gate report exported", "status-ok");
-  }, [baselineId, graphId, graphRunSummary, lastPolicyEval, setStatus]);
+  }, [
+    baselineId,
+    contractTimeline,
+    formatTimelineRefLine,
+    graphId,
+    graphRunSummary,
+    lastPolicyEval,
+    setStatus,
+  ]);
 
   return {
     pinBaselineFromGraphRun,

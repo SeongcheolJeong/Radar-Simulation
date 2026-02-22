@@ -311,6 +311,7 @@ export function App() {
     baselineId,
     graphId,
     lastPolicyEval,
+    contractTimeline,
     setStatus,
     setGateResultText,
     setLastPolicyEval,
