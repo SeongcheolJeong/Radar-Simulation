@@ -108,6 +108,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M16.3: Artifact inspector panels (Path/ADC/RD/RA + node-output trace)
 - [x] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
 - [x] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
+- [x] M17.0: Graph Lab async run monitor (sync/async mode + polling progress + manual poll controls)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -120,7 +121,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Freeze M16 baseline and start M17 modularization track: split `graph_lab_reactflow.html` into componentized frontend build + add true async run monitor (polling/progress) on top of M16.5 cache/cancel/retry APIs, while keeping M14.6 Linux strict pilot closure in parallel.
+Continue M17 modularization track after async monitor closure: split `graph_lab_reactflow.html` into componentized frontend build and preserve M16.5+M17.0 run semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -739,3 +740,18 @@ M16.5 outcome (2026-02-22):
 - validator coverage extended:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
   - covers full-cache hit, partial rerun hit, async cancel, retry from canceled run, failure guidance, retry from failed run
+
+M17.0 outcome (2026-02-22):
+
+- Graph Lab async run monitor flow added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+- run execution UX updates:
+  - run mode selector (`sync|async`)
+  - async poll config (`Auto Poll`, poll interval ms)
+  - poll state/status indicator (`poll_state`, `polling_active`)
+  - manual poll action (`Poll Last Run`)
+- execution behavior updates:
+  - `Run Graph (API)` now submits with `?async=0|1` based on UI mode
+  - async submission path can auto-poll until terminal state and auto-load summary on completion
+  - retry path also respects sync/async mode and polling behavior
+  - non-terminal/failed/canceled rows reuse recovery rendering for consistent operator feedback

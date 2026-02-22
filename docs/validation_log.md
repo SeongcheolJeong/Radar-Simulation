@@ -1729,3 +1729,24 @@
     - `/api/graph/runs/{id}/retry`
     - `/api/graph/runs/{id}/cancel`
     - `cache_hit` run-result field
+
+## Web E2E Graph Async Monitor (M17.0)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - M16.5 backend run semantics remain stable while Graph Lab async monitor client logic was added
+  - no regression observed in graph run/cancel/retry/recovery API contract checks
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8111 8131` + smoke (`curl /frontend/graph_lab_reactflow.html?api=...` token grep)
+- Result: pass
+- Notes:
+  - Graph Lab page contains async monitor controls/tokens:
+    - `Run Mode`
+    - `Auto Poll`
+    - `Poll Last Run`
+    - `poll_state`
+    - `/api/graph/runs?async=...`
+    - `/api/graph/runs/{id}/retry?async=...`
