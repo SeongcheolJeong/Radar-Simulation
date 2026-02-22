@@ -275,12 +275,14 @@ class WebE2EOrchestrator:
         self.policy_evals_root = self.store_root / "policy_evals"
         self.regression_sessions_root = self.store_root / "regression_sessions"
         self.regression_exports_root = self.store_root / "regression_exports"
+        self.graph_runs_root = self.store_root / "graph_runs"
         self.runs_root.mkdir(parents=True, exist_ok=True)
         self.comparisons_root.mkdir(parents=True, exist_ok=True)
         self.baselines_root.mkdir(parents=True, exist_ok=True)
         self.policy_evals_root.mkdir(parents=True, exist_ok=True)
         self.regression_sessions_root.mkdir(parents=True, exist_ok=True)
         self.regression_exports_root.mkdir(parents=True, exist_ok=True)
+        self.graph_runs_root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
 
     def get_profiles(self) -> Dict[str, Dict[str, Any]]:
@@ -294,6 +296,89 @@ class WebE2EOrchestrator:
             request_payload,
             allowed_profiles=PROFILE_PRESETS.keys(),
         )
+
+    def list_graph_runs(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for record_path in sorted(self.graph_runs_root.glob("*/graph_run_record.json")):
+            try:
+                rows.append(self._load_graph_record_path(record_path))
+            except Exception:
+                continue
+        rows.sort(key=lambda x: str(x.get("created_at", "")), reverse=True)
+        return rows
+
+    def get_graph_run(self, graph_run_id: str) -> dict[str, Any]:
+        return self._load_graph_record(graph_run_id)
+
+    def load_graph_run_summary(self, graph_run_id: str) -> dict[str, Any]:
+        record = self.get_graph_run(graph_run_id)
+        summary_path = Path(str(record["paths"]["graph_run_summary_json"]))
+        if not summary_path.exists() or not summary_path.is_file():
+            raise FileNotFoundError(f"graph run summary not found: {summary_path}")
+        return json.loads(summary_path.read_text(encoding="utf-8"))
+
+    def submit_graph_run(
+        self,
+        request_payload: Mapping[str, Any],
+        run_async: bool = True,
+    ) -> dict[str, Any]:
+        req = self._normalize_graph_run_request(request_payload)
+        graph_run_id = self._new_graph_run_id()
+        graph_run_dir = self.graph_runs_root / graph_run_id
+        output_dir = graph_run_dir / str(req["output_subdir"])
+        graph_payload_json = graph_run_dir / "graph_payload.json"
+        graph_run_summary_json = graph_run_dir / "graph_run_summary.json"
+        graph_run_record_json = graph_run_dir / "graph_run_record.json"
+
+        graph_run_dir.mkdir(parents=True, exist_ok=False)
+        graph_payload_json.write_text(
+            json.dumps(req["graph"], indent=2, default=_json_default),
+            encoding="utf-8",
+        )
+
+        node_plan = [
+            {
+                "node_id": str(node.get("id", "")),
+                "node_type": str(node.get("type", "")),
+                "status": "queued",
+            }
+            for node in req["graph"]["nodes"]
+        ]
+
+        record: dict[str, Any] = {
+            "version": "web_e2e_graph_run_record_v1",
+            "graph_run_id": graph_run_id,
+            "status": "queued",
+            "created_at": _now_iso(),
+            "updated_at": _now_iso(),
+            "request": req,
+            "graph_meta": {
+                "graph_id": req["graph"]["graph_id"],
+                "graph_version": req["graph"]["version"],
+                "node_count": len(req["graph"]["nodes"]),
+                "edge_count": len(req["graph"]["edges"]),
+                "topological_order": list(req["graph_topological_order"]),
+            },
+            "node_plan": node_plan,
+            "paths": {
+                "graph_run_dir": str(graph_run_dir),
+                "output_dir": str(output_dir),
+                "graph_payload_json": str(graph_payload_json),
+                "graph_run_summary_json": str(graph_run_summary_json),
+                "graph_run_record_json": str(graph_run_record_json),
+            },
+            "result": None,
+            "error": None,
+        }
+        self._save_graph_record(record)
+
+        if run_async:
+            th = threading.Thread(target=self._execute_graph_run, args=(graph_run_id,), daemon=True)
+            th.start()
+        else:
+            self._execute_graph_run(graph_run_id)
+
+        return self.get_graph_run(graph_run_id)
 
     def list_runs(self) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
@@ -940,6 +1025,11 @@ class WebE2EOrchestrator:
         token = uuid.uuid4().hex[:8]
         return f"run_{stamp}_{token}"
 
+    def _new_graph_run_id(self) -> str:
+        stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
+        token = uuid.uuid4().hex[:8]
+        return f"grun_{stamp}_{token}"
+
     def _new_comparison_id(self) -> str:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
@@ -992,6 +1082,66 @@ class WebE2EOrchestrator:
         scene_json_abs = self._resolve_scene_path(scene_json_raw)
 
         return {
+            "scene_json_path": str(scene_json_abs),
+            "scene_json_input": scene_json_raw,
+            "profile": profile,
+            "run_hybrid_estimation": bool(request_payload.get("run_hybrid_estimation", False)),
+            "output_subdir": output_subdir,
+            "tag": str(request_payload.get("tag", "")).strip() or None,
+            "requested_at": _now_iso(),
+        }
+
+    def _normalize_graph_run_request(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(request_payload, Mapping):
+            raise ValueError("request payload must be object")
+
+        graph_payload = request_payload.get("graph")
+        if not isinstance(graph_payload, Mapping):
+            raise ValueError("graph run requires graph object in request.graph")
+        gv = self.validate_graph_contract(graph_payload)
+        if not bool(gv.get("valid", False)):
+            errors = gv.get("errors", [])
+            if isinstance(errors, list) and len(errors) > 0:
+                joined = "; ".join(str(x) for x in errors[:6])
+                raise ValueError(f"graph contract invalid: {joined}")
+            raise ValueError("graph contract invalid")
+        normalized_graph = dict(gv["normalized"])
+
+        profile = str(request_payload.get("profile", normalized_graph.get("profile", "balanced_dev"))).strip()
+        if profile == "":
+            profile = str(normalized_graph.get("profile", "balanced_dev"))
+        if profile not in PROFILE_PRESETS:
+            raise ValueError(
+                f"profile must be one of: {', '.join(sorted(PROFILE_PRESETS.keys()))}"
+            )
+        normalized_graph["profile"] = profile
+
+        output_subdir = str(request_payload.get("output_subdir", "output")).strip() or "output"
+        out_path = Path(output_subdir)
+        if out_path.is_absolute() or any(part == ".." for part in out_path.parts):
+            raise ValueError("output_subdir must be a safe relative path")
+
+        scene_json_raw = str(request_payload.get("scene_json_path", "")).strip()
+        if scene_json_raw == "":
+            for node in normalized_graph.get("nodes", []):
+                if not isinstance(node, Mapping):
+                    continue
+                if str(node.get("type", "")).strip() != "SceneSource":
+                    continue
+                params = node.get("params")
+                if not isinstance(params, Mapping):
+                    continue
+                candidate = str(params.get("scene_json_path", "")).strip()
+                if candidate != "":
+                    scene_json_raw = candidate
+                    break
+        if scene_json_raw == "":
+            raise ValueError("scene_json_path is required (request field or SceneSource params)")
+        scene_json_abs = self._resolve_scene_path(scene_json_raw)
+
+        return {
+            "graph": normalized_graph,
+            "graph_topological_order": list(gv["normalized"].get("topological_order", [])),
             "scene_json_path": str(scene_json_abs),
             "scene_json_input": scene_json_raw,
             "profile": profile,
@@ -1303,6 +1453,140 @@ class WebE2EOrchestrator:
 
             self._mutate_record(run_id, _fail)
 
+    def _execute_graph_run(self, graph_run_id: str) -> None:
+        self._mutate_graph_record(
+            graph_run_id,
+            lambda rec: rec.update(
+                {
+                    "status": "running",
+                    "updated_at": _now_iso(),
+                    "error": None,
+                }
+            ),
+        )
+
+        try:
+            record = self.get_graph_run(graph_run_id)
+            req = dict(record["request"])
+            out_dir = Path(str(record["paths"]["output_dir"]))
+            out_dir.mkdir(parents=True, exist_ok=True)
+
+            run_out = run_object_scene_to_radar_map_json(
+                scene_json_path=str(req["scene_json_path"]),
+                output_dir=str(out_dir),
+                run_hybrid_estimation=bool(req.get("run_hybrid_estimation", False)),
+            )
+            summary_body = self._build_summary_payload(
+                scene_json_path=str(req["scene_json_path"]),
+                output_dir=out_dir,
+                run_out=run_out,
+            )
+
+            graph_obj = req.get("graph", {})
+            nodes = graph_obj.get("nodes", []) if isinstance(graph_obj, Mapping) else []
+            topological_order = req.get("graph_topological_order", [])
+            node_by_id = {}
+            if isinstance(nodes, list):
+                for node in nodes:
+                    if isinstance(node, Mapping):
+                        node_by_id[str(node.get("id", "")).strip()] = node
+
+            node_results: list[dict[str, Any]] = []
+            now_iso = _now_iso()
+            for idx, node_id in enumerate(topological_order if isinstance(topological_order, list) else []):
+                raw = node_by_id.get(str(node_id).strip(), {})
+                node_type = str(raw.get("type", "unknown"))
+                out_contract = "none"
+                out_artifacts: dict[str, Any] = {}
+                if node_type == "SceneSource":
+                    out_contract = "scene_payload"
+                    out_artifacts["scene_json"] = str(req["scene_json_path"])
+                elif node_type == "Propagation":
+                    out_contract = "path_list"
+                    out_artifacts["path_list_json"] = summary_body["outputs"]["path_list_json"]
+                elif node_type == "SynthFMCW":
+                    out_contract = "adc_cube"
+                    out_artifacts["adc_cube_npz"] = summary_body["outputs"]["adc_cube_npz"]
+                elif node_type == "RadarMap":
+                    out_contract = "radar_map"
+                    out_artifacts["radar_map_npz"] = summary_body["outputs"]["radar_map_npz"]
+                node_results.append(
+                    {
+                        "index": int(idx),
+                        "node_id": str(node_id),
+                        "node_type": node_type,
+                        "status": "completed",
+                        "started_at": now_iso,
+                        "completed_at": now_iso,
+                        "output_contract": out_contract,
+                        "artifacts": out_artifacts,
+                    }
+                )
+
+            graph_summary = {
+                "version": "web_e2e_graph_run_summary_v1",
+                "graph_run_id": graph_run_id,
+                "status": "completed",
+                "profile": str(req.get("profile", "balanced_dev")),
+                "created_at": str(record.get("created_at")),
+                "completed_at": _now_iso(),
+                "request": req,
+                "graph": {
+                    "graph_id": str(graph_obj.get("graph_id", "unknown"))
+                    if isinstance(graph_obj, Mapping)
+                    else "unknown",
+                    "graph_version": str(graph_obj.get("version", "unknown"))
+                    if isinstance(graph_obj, Mapping)
+                    else "unknown",
+                    "node_count": int(len(nodes)) if isinstance(nodes, list) else 0,
+                    "edge_count": int(len(graph_obj.get("edges", [])))
+                    if isinstance(graph_obj, Mapping)
+                    and isinstance(graph_obj.get("edges", []), list)
+                    else 0,
+                    "topological_order": list(topological_order)
+                    if isinstance(topological_order, list)
+                    else [],
+                },
+                "execution": {
+                    "bridge_mode": "scene_pipeline_single_pass_v1",
+                    "node_results": node_results,
+                },
+            }
+            graph_summary.update(summary_body)
+
+            graph_summary_path = Path(str(record["paths"]["graph_run_summary_json"]))
+            graph_summary["outputs"]["graph_run_summary_json"] = str(graph_summary_path)
+            graph_summary["artifacts"] = dict(graph_summary["outputs"])
+            graph_summary["artifacts"]["graph_payload_json"] = str(record["paths"]["graph_payload_json"])
+            graph_summary_path.write_text(
+                json.dumps(graph_summary, indent=2, default=_json_default),
+                encoding="utf-8",
+            )
+
+            def _ok(rec: dict[str, Any]) -> None:
+                rec["status"] = "completed"
+                rec["updated_at"] = _now_iso()
+                rec["result"] = {
+                    "graph_id": graph_summary["graph"]["graph_id"],
+                    "node_count": int(graph_summary["graph"]["node_count"]),
+                    "edge_count": int(graph_summary["graph"]["edge_count"]),
+                    "path_count_total": int(graph_summary["path_summary"]["path_count_total"]),
+                    "quicklook": graph_summary["quicklook"],
+                    "graph_run_summary_json": str(graph_summary_path),
+                    "summary_version": str(graph_summary["version"]),
+                }
+                rec["error"] = None
+
+            self._mutate_graph_record(graph_run_id, _ok)
+
+        except Exception as exc:
+            def _fail(rec: dict[str, Any]) -> None:
+                rec["status"] = "failed"
+                rec["updated_at"] = _now_iso()
+                rec["error"] = f"{type(exc).__name__}: {exc}"
+
+            self._mutate_graph_record(graph_run_id, _fail)
+
     def _build_summary_payload(
         self,
         scene_json_path: str,
@@ -1402,12 +1686,23 @@ class WebE2EOrchestrator:
     def _record_path(self, run_id: str) -> Path:
         return self.runs_root / run_id / "run_record.json"
 
+    def _graph_record_path(self, graph_run_id: str) -> Path:
+        return self.graph_runs_root / graph_run_id / "graph_run_record.json"
+
     def _load_record(self, run_id: str) -> dict[str, Any]:
         return self._load_record_path(self._record_path(run_id))
 
     def _load_record_path(self, path: Path) -> dict[str, Any]:
         if not path.exists() or not path.is_file():
             raise FileNotFoundError(f"run record not found: {path}")
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def _load_graph_record(self, graph_run_id: str) -> dict[str, Any]:
+        return self._load_graph_record_path(self._graph_record_path(graph_run_id))
+
+    def _load_graph_record_path(self, path: Path) -> dict[str, Any]:
+        if not path.exists() or not path.is_file():
+            raise FileNotFoundError(f"graph run record not found: {path}")
         return json.loads(path.read_text(encoding="utf-8"))
 
     def _save_record(self, record: Mapping[str, Any]) -> None:
@@ -1418,12 +1713,28 @@ class WebE2EOrchestrator:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(record, indent=2, default=_json_default), encoding="utf-8")
 
+    def _save_graph_record(self, record: Mapping[str, Any]) -> None:
+        graph_run_id = str(record.get("graph_run_id", "")).strip()
+        if graph_run_id == "":
+            raise ValueError("graph_run_id missing in record")
+        path = self._graph_record_path(graph_run_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(record, indent=2, default=_json_default), encoding="utf-8")
+
     def _mutate_record(self, run_id: str, mutate_fn: Any) -> dict[str, Any]:
         with self._lock:
             rec = self._load_record(run_id)
             mutate_fn(rec)
             rec["updated_at"] = _now_iso()
             self._save_record(rec)
+            return rec
+
+    def _mutate_graph_record(self, graph_run_id: str, mutate_fn: Any) -> dict[str, Any]:
+        with self._lock:
+            rec = self._load_graph_record(graph_run_id)
+            mutate_fn(rec)
+            rec["updated_at"] = _now_iso()
+            self._save_graph_record(rec)
             return rec
 
 
@@ -1480,6 +1791,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                             "regression_session_count": len(orchestrator.list_regression_sessions()),
                             "regression_export_count": len(orchestrator.list_regression_exports()),
                             "graph_template_count": len(orchestrator.get_graph_templates()),
+                            "graph_run_count": len(orchestrator.list_graph_runs()),
                         },
                     )
                     return
@@ -1490,6 +1802,10 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
 
                 if path == "/api/graph/templates":
                     self._send_json(200, {"templates": orchestrator.get_graph_templates()})
+                    return
+
+                if path == "/api/graph/runs":
+                    self._send_json(200, {"graph_runs": orchestrator.list_graph_runs()})
                     return
 
                 if path == "/api/runs":
@@ -1526,6 +1842,19 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
 
                     run_id = suffix
                     payload = orchestrator.get_run(run_id)
+                    self._send_json(200, payload)
+                    return
+
+                if path.startswith("/api/graph/runs/"):
+                    suffix = path[len("/api/graph/runs/") :]
+                    if suffix.endswith("/summary"):
+                        graph_run_id = suffix[: -len("/summary")]
+                        payload = orchestrator.load_graph_run_summary(graph_run_id)
+                        self._send_json(200, payload)
+                        return
+
+                    graph_run_id = suffix
+                    payload = orchestrator.get_graph_run(graph_run_id)
                     self._send_json(200, payload)
                     return
 
@@ -1580,6 +1909,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 "/api/regression-sessions",
                 "/api/regression-exports",
                 "/api/graph/validate",
+                "/api/graph/runs",
             }:
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
                 return
@@ -1631,6 +1961,15 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 if path == "/api/graph/validate":
                     payload = orchestrator.validate_graph_contract(body)
                     self._send_json(200, {"ok": bool(payload.get("valid")), "graph_validation": payload})
+                    return
+
+                if path == "/api/graph/runs":
+                    run_async = _parse_bool_query(query, "async", default=True)
+                    record = orchestrator.submit_graph_run(body, run_async=run_async)
+                    self._send_json(
+                        202 if run_async else 200,
+                        {"ok": True, "graph_run": record},
+                    )
                     return
 
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})

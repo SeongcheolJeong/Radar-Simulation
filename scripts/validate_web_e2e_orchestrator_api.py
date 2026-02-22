@@ -146,6 +146,8 @@ def run() -> None:
             assert "policy_eval_count" in health
             assert "regression_session_count" in health
             assert "regression_export_count" in health
+            assert "graph_template_count" in health
+            assert "graph_run_count" in health
 
             status, prof = _http_json("GET", f"{base}/api/profiles")
             assert status == 200
@@ -195,6 +197,54 @@ def run() -> None:
             assert graph_bad["ok"] is False
             bad_errors = [str(x) for x in graph_bad["graph_validation"]["errors"]]
             assert any("cycle" in x for x in bad_errors)
+
+            graph_run_payload = {
+                "graph": first_template["graph"],
+                "scene_json_path": str(scene_json),
+                "profile": "fast_debug",
+                "run_hybrid_estimation": False,
+                "tag": "validate_graph_run",
+            }
+            status, graph_run_created = _http_json(
+                "POST",
+                f"{base}/api/graph/runs?async=0",
+                payload=graph_run_payload,
+            )
+            assert status == 200
+            assert graph_run_created["ok"] is True
+            graph_run = graph_run_created["graph_run"]
+            assert graph_run["version"] == "web_e2e_graph_run_record_v1"
+            assert graph_run["status"] == "completed"
+            graph_run_id = str(graph_run["graph_run_id"])
+            assert graph_run["graph_meta"]["node_count"] >= 1
+
+            status, graph_run_list = _http_json("GET", f"{base}/api/graph/runs")
+            assert status == 200
+            assert any(
+                str(x.get("graph_run_id")) == graph_run_id
+                for x in graph_run_list["graph_runs"]
+            )
+
+            status, graph_run_row = _http_json(
+                "GET",
+                f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_id)}",
+            )
+            assert status == 200
+            assert str(graph_run_row["graph_run_id"]) == graph_run_id
+            assert graph_run_row["status"] == "completed"
+
+            status, graph_run_summary = _http_json(
+                "GET",
+                f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_id)}/summary",
+            )
+            assert status == 200
+            assert graph_run_summary["version"] == "web_e2e_graph_run_summary_v1"
+            assert graph_run_summary["status"] == "completed"
+            assert graph_run_summary["graph"]["node_count"] >= 1
+            assert len(graph_run_summary["execution"]["node_results"]) >= 1
+            assert Path(str(graph_run_summary["outputs"]["path_list_json"])).exists()
+            assert Path(str(graph_run_summary["outputs"]["adc_cube_npz"])).exists()
+            assert Path(str(graph_run_summary["outputs"]["radar_map_npz"])).exists()
 
             post_payload = {
                 "scene_json_path": str(scene_json),

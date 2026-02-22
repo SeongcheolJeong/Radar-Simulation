@@ -314,10 +314,14 @@
       );
       const [graphId, setGraphId] = React.useState("graph_lab");
       const [profile, setProfile] = React.useState("fast_debug");
+      const [sceneJsonPath, setSceneJsonPath] = React.useState(
+        String(params.get("scene") || "data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json")
+      );
       const [templates, setTemplates] = React.useState([]);
       const [statusText, setStatusText] = React.useState("idle");
       const [statusTone, setStatusTone] = React.useState("status-neutral");
       const [validationText, setValidationText] = React.useState("-");
+      const [graphRunText, setGraphRunText] = React.useState("-");
       const [selectedNodeId, setSelectedNodeId] = React.useState("");
       const [selectedNodeParamsText, setSelectedNodeParamsText] = React.useState("{}");
 
@@ -462,6 +466,59 @@
         }
       }, [apiBase, edges, graphId, nodes, profile, setStatus]);
 
+      const runGraphViaApi = React.useCallback(async () => {
+        const graph = toGraphPayload({ graphId, profile, nodes, edges });
+        setStatus("submitting graph run...", "status-warn");
+        try {
+          const res = await fetch(`${apiBase.replace(/\\/$/, "")}/api/graph/runs?async=0`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              graph,
+              scene_json_path: sceneJsonPath,
+              profile,
+              run_hybrid_estimation: false,
+              tag: "graph_lab",
+            }),
+          });
+          if (!res.ok) throw new Error(`graph run request failed (${res.status})`);
+          const payload = await res.json();
+          const row = payload.graph_run || {};
+          const graphRunId = String(row.graph_run_id || "").trim();
+          if (!graphRunId) {
+            throw new Error("graph run id missing in response");
+          }
+          const sumRes = await fetch(
+            `${apiBase.replace(/\\/$/, "")}/api/graph/runs/${encodeURIComponent(graphRunId)}/summary`
+          );
+          if (!sumRes.ok) throw new Error(`graph summary request failed (${sumRes.status})`);
+          const summary = await sumRes.json();
+          const quick = summary.quicklook || {};
+          const lines = [
+            `graph_run_id: ${graphRunId}`,
+            `status: ${summary.status || row.status || "-"}`,
+            `graph_id: ${summary?.graph?.graph_id || "-"}`,
+            `profile: ${summary.profile || profile}`,
+            `nodes/edges: ${Number(summary?.graph?.node_count || 0)}/${Number(summary?.graph?.edge_count || 0)}`,
+            `path_count_total: ${Number(quick.path_count_total || 0)}`,
+            `adc_shape: ${Array.isArray(quick.adc_shape) ? quick.adc_shape.join("x") : "-"}`,
+            `rd_shape: ${Array.isArray(quick.rd_shape) ? quick.rd_shape.join("x") : "-"}`,
+            `ra_shape: ${Array.isArray(quick.ra_shape) ? quick.ra_shape.join("x") : "-"}`,
+            "",
+            "artifacts:",
+            `- path_list_json: ${String(summary?.outputs?.path_list_json || "-")}`,
+            `- adc_cube_npz: ${String(summary?.outputs?.adc_cube_npz || "-")}`,
+            `- radar_map_npz: ${String(summary?.outputs?.radar_map_npz || "-")}`,
+            `- graph_run_summary_json: ${String(summary?.outputs?.graph_run_summary_json || "-")}`,
+          ];
+          setGraphRunText(lines.join("\n"));
+          setStatus(`graph run completed: ${graphRunId}`, "status-ok");
+        } catch (err) {
+          setGraphRunText(`graph run failed\n- ${String(err.message || err)}`);
+          setStatus(`graph run failed: ${String(err.message || err)}`, "status-err");
+        }
+      }, [apiBase, edges, graphId, nodes, profile, sceneJsonPath, setStatus]);
+
       const loadTemplateByIndex = React.useCallback((idx) => {
         const i = Math.max(0, Math.floor(Number(idx)));
         const row = templates[i];
@@ -530,6 +587,15 @@
                   placeholder: "graph_lab",
                 }),
               ]),
+              h("div", { className: "field", key: "scenepath" }, [
+                h("label", { className: "label", key: "lbl1b" }, "Scene JSON Path"),
+                h("input", {
+                  className: "input",
+                  value: sceneJsonPath,
+                  onChange: (e) => setSceneJsonPath(e.target.value),
+                  placeholder: "data/demo/.../scene.json",
+                }),
+              ]),
               h("div", { className: "field", key: "profile" }, [
                 h("label", { className: "label", key: "lbl2" }, "Profile"),
                 h("select", {
@@ -568,6 +634,7 @@
                 )),
               ]),
               h("button", { className: "btn", onClick: runGraphValidation, key: "validate" }, "Validate Graph Contract"),
+              h("button", { className: "btn", onClick: runGraphViaApi, key: "rungraph" }, "Run Graph (API)"),
               h("div", { className: "hint", key: "hint" }, "Tip: connect nodes on canvas, then validate to check schema/profile/DAG constraints."),
             ]),
           ]),
@@ -625,6 +692,10 @@
               h("div", { className: "field", key: "result" }, [
                 h("label", { className: "label", key: "lblr" }, "Validation Result"),
                 h("pre", { className: "result-box", key: "box" }, validationText),
+              ]),
+              h("div", { className: "field", key: "runresult" }, [
+                h("label", { className: "label", key: "lblrr" }, "Graph Run Result"),
+                h("pre", { className: "result-box", key: "runbox" }, graphRunText),
               ]),
             ]),
           ]),

@@ -1645,3 +1645,25 @@
   - ReactFlow shell page served from `frontend/graph_lab_reactflow.html`
   - page includes graph-template/validation API wiring (`/api/graph/templates`, `/api/graph/validate`)
   - launcher starts API + static server and health returns `ok=true`
+
+## Web E2E Graph Run Bridge API (M16.2)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - graph run API validated:
+    - `POST /api/graph/runs?async=0`
+    - `GET /api/graph/runs`
+    - `GET /api/graph/runs/{graph_run_id}`
+    - `GET /api/graph/runs/{graph_run_id}/summary`
+  - health now includes `graph_run_count`
+  - graph run summary contract validated (`web_e2e_graph_run_summary_v1`, node results, output artifacts)
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8105 8125` + smoke (`curl /health`, `curl /frontend/graph_lab_reactflow.html?api=...` + token grep)
+- Result: pass
+- Notes:
+  - ReactFlow shell includes graph-run execution hook (`Run Graph (API)`)
+  - page wires run endpoint and summary retrieval (`/api/graph/runs`, `/api/graph/runs/{id}/summary`)
+  - result panel includes graph-run artifact pointers (`graph_run_summary_json`)
