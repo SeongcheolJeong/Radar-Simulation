@@ -30,6 +30,9 @@ Implementation:
 - `GET /api/regression-sessions`
 - `GET /api/regression-sessions/{session_id}`
 - `POST /api/regression-sessions`
+- `GET /api/regression-exports`
+- `GET /api/regression-exports/{export_id}`
+- `POST /api/regression-exports`
 
 ## POST /api/runs Request
 
@@ -166,6 +169,40 @@ Response:
 - `regression_session.recommendation`
 - `regression_session.rows[]` (per-candidate policy verdict summaries)
 
+## POST /api/regression-exports Request
+
+```json
+{
+  "session_id": "main_regression",
+  "export_id": "main_regression_export",
+  "include_policy_payload": true
+}
+```
+
+Rules:
+
+- `session_id` is required and must reference existing regression session
+- `export_id` is optional (auto-generated if omitted)
+- `overwrite=true` replaces existing export with same `export_id`
+- export emits artifacts:
+  - `regression_session.json` (session snapshot)
+  - `regression_rows.csv` (rows tabular view)
+  - `regression_summary_index.json` (candidate/policy summary index)
+  - `regression_package.json` (JSON package for downstream consumers)
+
+Response:
+
+- `regression_export.version` = `web_e2e_regression_export_v1`
+- `regression_export.export_id`
+- `regression_export.session_id`
+- `regression_export.row_count`
+- `regression_export.include_policy_payload`
+- `regression_export.artifacts.artifact_dir`
+- `regression_export.artifacts.session_json`
+- `regression_export.artifacts.rows_csv`
+- `regression_export.artifacts.summary_index_json`
+- `regression_export.artifacts.package_json`
+
 `POST /api/runs` rules:
 
 - `scene_json_path` required
@@ -181,6 +218,8 @@ Response:
 - `<store_root>/baselines/<baseline_id>.json`
 - `<store_root>/policy_evals/<policy_eval_id>.json`
 - `<store_root>/regression_sessions/<session_id>.json`
+- `<store_root>/regression_exports/<export_id>.json`
+- `<store_root>/regression_exports/<export_id>/` (`regression_session.json`, `regression_rows.csv`, `regression_summary_index.json`, `regression_package.json`)
 
 ## Run Summary (v2)
 
@@ -266,6 +305,16 @@ curl -s -X POST "http://127.0.0.1:8099/api/regression-sessions" \
   }' | jq .
 ```
 
+```bash
+curl -s -X POST "http://127.0.0.1:8099/api/regression-exports" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id":"main_regression",
+    "export_id":"main_regression_export",
+    "include_policy_payload":true
+  }' | jq .
+```
+
 ## Validation
 
 ```bash
@@ -283,6 +332,7 @@ Pass criteria:
 7. Baseline pin endpoint stores/retrieves pinned baseline
 8. Compare policy endpoint returns persisted policy verdict payload
 9. Regression session endpoint returns batch verdict summary and persisted session payload
+10. Regression export endpoint writes CSV/JSON artifacts and returns persisted export manifest
 
 Notes:
 

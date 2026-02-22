@@ -93,7 +93,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.3a: Compare API v1 (`POST /api/compare`, `/api/comparisons`) + dashboard compare panel
 - [x] M15.3b: Baseline pinning and regression policy verdict payload (`/api/baselines`, `/api/compare/policy`)
 - [x] M15.4: Regression session API (`/api/regression-sessions`, baseline + candidate set + batched policy verdicts`)
-- [ ] M15.5: Regression artifacts export API (session CSV/JSON package + summary index)
+- [x] M15.5: Regression artifacts export API (`/api/regression-exports`, session CSV/JSON package + summary index)
+- [ ] M15.6: Regression history dashboard wiring (session/export browse + download actions)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -106,7 +107,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.5 regression artifacts export API while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.6 regression history dashboard wiring while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -506,3 +507,19 @@ M15.4 outcome (2026-02-22):
   - regression session id input
   - candidate run-id list input (comma/newline)
   - regression session run action + session summary view
+
+M15.5 outcome (2026-02-22):
+
+- regression export API added:
+  - `POST /api/regression-exports`
+  - `GET /api/regression-exports`
+  - `GET /api/regression-exports/{export_id}`
+- export artifacts standardized per session:
+  - `regression_session.json`
+  - `regression_rows.csv`
+  - `regression_summary_index.json`
+  - `regression_package.json`
+- orchestration store expanded:
+  - `/Users/seongcheoljeong/Documents/Codex_test/data/web_e2e/regression_exports/<export_id>.json`
+  - `/Users/seongcheoljeong/Documents/Codex_test/data/web_e2e/regression_exports/<export_id>/...`
+- validator expanded to assert export manifest endpoints and artifact file integrity

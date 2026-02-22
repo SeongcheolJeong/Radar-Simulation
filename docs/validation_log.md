@@ -1519,3 +1519,14 @@
   - launcher starts API + dashboard and health returns `ok=true`
   - dashboard HTML includes regression controls (`runRegressionSessionViaApi`)
   - summary fetch path handling now normalizes relative repo paths via `normalizeRepoPath(targetRaw)` before `fetch`
+
+## Web E2E Regression Export API (M15.5)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - regression export API validated (`POST /api/regression-exports`, `GET /api/regression-exports`, `GET /api/regression-exports/{id}`)
+  - export artifacts validated: `regression_session.json`, `regression_rows.csv`, `regression_summary_index.json`, `regression_package.json`
+  - summary index and package schema checks pass (`version`, row count, policy payload inclusion when enabled)
+  - health payload includes `regression_export_count`

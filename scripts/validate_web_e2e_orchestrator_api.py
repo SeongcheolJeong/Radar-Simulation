@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import csv
 import json
 import tempfile
 import threading
@@ -144,6 +145,7 @@ def run() -> None:
             assert "baseline_count" in health
             assert "policy_eval_count" in health
             assert "regression_session_count" in health
+            assert "regression_export_count" in health
 
             status, prof = _http_json("GET", f"{base}/api/profiles")
             assert status == 200
@@ -373,6 +375,68 @@ def run() -> None:
             )
             assert status == 200
             assert str(sess_row["session_id"]) == "validate_session"
+
+            # Regression artifacts export (CSV + JSON package + summary index).
+            export_payload = {
+                "session_id": "validate_session",
+                "export_id": "validate_export",
+                "include_policy_payload": True,
+                "tag": "validate_export_tag",
+            }
+            status, export_resp = _http_json(
+                "POST", f"{base}/api/regression-exports", payload=export_payload
+            )
+            assert status == 200
+            assert export_resp["ok"] is True
+            export_obj = export_resp["regression_export"]
+            assert export_obj["version"] == "web_e2e_regression_export_v1"
+            assert export_obj["export_id"] == "validate_export"
+            assert export_obj["session_id"] == "validate_session"
+            assert export_obj["row_count"] == 1
+            assert export_obj["include_policy_payload"] is True
+            assert export_obj["tag"] == "validate_export_tag"
+
+            art = export_obj["artifacts"]
+            session_json_path = Path(str(art["session_json"]))
+            rows_csv_path = Path(str(art["rows_csv"]))
+            summary_index_path = Path(str(art["summary_index_json"]))
+            package_json_path = Path(str(art["package_json"]))
+            assert session_json_path.exists()
+            assert rows_csv_path.exists()
+            assert summary_index_path.exists()
+            assert package_json_path.exists()
+
+            with rows_csv_path.open("r", encoding="utf-8", newline="") as f:
+                csv_rows = list(csv.DictReader(f))
+            assert len(csv_rows) == 1
+            assert csv_rows[0]["candidate_run_id"] == run_id_bad
+            assert csv_rows[0]["gate_failed"] in {"True", "true", "1"}
+
+            summary_index = json.loads(summary_index_path.read_text(encoding="utf-8"))
+            assert summary_index["version"] == "web_e2e_regression_summary_index_v1"
+            assert summary_index["export_id"] == "validate_export"
+            assert summary_index["row_count"] == 1
+            assert len(summary_index["rows"]) == 1
+            assert summary_index["rows"][0]["policy_eval_id"] is not None
+
+            package_payload = json.loads(package_json_path.read_text(encoding="utf-8"))
+            assert package_payload["version"] == "web_e2e_regression_package_v1"
+            assert package_payload["include_policy_payload"] is True
+            assert len(package_payload["rows"]) == 1
+            assert "policy_eval" in package_payload["rows"][0]
+
+            status, export_list = _http_json("GET", f"{base}/api/regression-exports")
+            assert status == 200
+            assert any(
+                str(x.get("export_id")) == "validate_export"
+                for x in export_list["regression_exports"]
+            )
+
+            status, export_row = _http_json(
+                "GET", f"{base}/api/regression-exports/{urllib.parse.quote('validate_export')}"
+            )
+            assert status == 200
+            assert str(export_row["export_id"]) == "validate_export"
 
         finally:
             server.shutdown()

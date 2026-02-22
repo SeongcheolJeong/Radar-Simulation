@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import datetime as _dt
+import csv
 import json
 import re
+import shutil
 import threading
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -271,11 +273,13 @@ class WebE2EOrchestrator:
         self.baselines_root = self.store_root / "baselines"
         self.policy_evals_root = self.store_root / "policy_evals"
         self.regression_sessions_root = self.store_root / "regression_sessions"
+        self.regression_exports_root = self.store_root / "regression_exports"
         self.runs_root.mkdir(parents=True, exist_ok=True)
         self.comparisons_root.mkdir(parents=True, exist_ok=True)
         self.baselines_root.mkdir(parents=True, exist_ok=True)
         self.policy_evals_root.mkdir(parents=True, exist_ok=True)
         self.regression_sessions_root.mkdir(parents=True, exist_ok=True)
+        self.regression_exports_root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
 
     def get_profiles(self) -> Dict[str, Dict[str, Any]]:
@@ -360,6 +364,23 @@ class WebE2EOrchestrator:
         p = self.regression_sessions_root / f"{safe_id}.json"
         if not p.exists() or not p.is_file():
             raise FileNotFoundError(f"regression session not found: {p}")
+        return json.loads(p.read_text(encoding="utf-8"))
+
+    def list_regression_exports(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for p in sorted(self.regression_exports_root.glob("*.json")):
+            try:
+                rows.append(json.loads(p.read_text(encoding="utf-8")))
+            except Exception:
+                continue
+        rows.sort(key=lambda x: str(x.get("created_at", "")), reverse=True)
+        return rows
+
+    def get_regression_export(self, export_id: str) -> dict[str, Any]:
+        safe_id = self._normalize_identifier_token(export_id, field_name="export_id")
+        p = self.regression_exports_root / f"{safe_id}.json"
+        if not p.exists() or not p.is_file():
+            raise FileNotFoundError(f"regression export not found: {p}")
         return json.loads(p.read_text(encoding="utf-8"))
 
     def submit_run(self, request_payload: Mapping[str, Any], run_async: bool = True) -> dict[str, Any]:
@@ -702,6 +723,208 @@ class WebE2EOrchestrator:
         )
         return session_payload
 
+    def export_regression_session(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(request_payload, Mapping):
+            raise ValueError("request payload must be object")
+
+        session_id_raw = str(request_payload.get("session_id", "")).strip()
+        if session_id_raw == "":
+            raise ValueError("session_id is required")
+        session_id = self._normalize_identifier_token(session_id_raw, field_name="session_id")
+
+        export_id_raw = str(request_payload.get("export_id", "")).strip()
+        export_id = (
+            self._new_regression_export_id()
+            if export_id_raw == ""
+            else self._normalize_identifier_token(export_id_raw, field_name="export_id")
+        )
+
+        overwrite = bool(request_payload.get("overwrite", False))
+        include_policy_payload = bool(request_payload.get("include_policy_payload", False))
+        note = str(request_payload.get("note", "")).strip() or None
+        tag = str(request_payload.get("tag", "")).strip() or None
+
+        session_payload = self.get_regression_session(session_id)
+        rows_raw = session_payload.get("rows", [])
+        if not isinstance(rows_raw, list):
+            raise ValueError("regression session rows must be array")
+
+        manifest_path = self.regression_exports_root / f"{export_id}.json"
+        artifact_dir = self.regression_exports_root / export_id
+
+        if (manifest_path.exists() or artifact_dir.exists()) and not overwrite:
+            raise ValueError(
+                f"regression export already exists: {export_id} (set overwrite=true to replace)"
+            )
+        if artifact_dir.exists():
+            if not artifact_dir.is_dir():
+                raise ValueError(f"artifact path exists and is not directory: {artifact_dir}")
+            shutil.rmtree(artifact_dir)
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+
+        session_json = artifact_dir / "regression_session.json"
+        rows_csv = artifact_dir / "regression_rows.csv"
+        summary_index_json = artifact_dir / "regression_summary_index.json"
+        package_json = artifact_dir / "regression_package.json"
+
+        session_json.write_text(
+            json.dumps(session_payload, indent=2, default=_json_default),
+            encoding="utf-8",
+        )
+
+        csv_fields = [
+            "index",
+            "label",
+            "candidate_run_id",
+            "candidate_summary_json",
+            "policy_eval_id",
+            "gate_failed",
+            "recommendation",
+            "gate_failure_count",
+            "parity_pass",
+            "rd_shape_nmse",
+            "ra_shape_nmse",
+        ]
+        with rows_csv.open("w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=csv_fields)
+            writer.writeheader()
+            for row_raw in rows_raw:
+                row = row_raw if isinstance(row_raw, Mapping) else {}
+                writer.writerow({k: row.get(k) for k in csv_fields})
+
+        index_rows: list[dict[str, Any]] = []
+        package_rows: list[dict[str, Any]] = []
+        for row_raw in rows_raw:
+            row = dict(row_raw) if isinstance(row_raw, Mapping) else {}
+            policy_eval_id = str(row.get("policy_eval_id", "")).strip()
+            policy_eval = None
+            policy_eval_json_path: Optional[str] = None
+            baseline_row: dict[str, Any] = {}
+            candidate_row: dict[str, Any] = {}
+            parity_pass = bool(row.get("parity_pass", False))
+
+            if policy_eval_id != "":
+                try:
+                    safe_eval_id = self._normalize_identifier_token(
+                        policy_eval_id,
+                        field_name="policy_eval_id",
+                    )
+                    p = self.policy_evals_root / f"{safe_eval_id}.json"
+                    if p.exists() and p.is_file():
+                        policy_eval_json_path = str(p.resolve())
+                        policy_eval = json.loads(p.read_text(encoding="utf-8"))
+                except Exception:
+                    policy_eval = None
+                    policy_eval_json_path = None
+
+            if isinstance(policy_eval, Mapping):
+                b = policy_eval.get("baseline")
+                c = policy_eval.get("candidate")
+                if isinstance(b, Mapping):
+                    baseline_row = {
+                        "baseline_id": b.get("baseline_id"),
+                        "baseline_run_id": b.get("run_id"),
+                        "baseline_run_summary_json": b.get("run_summary_json"),
+                        "baseline_radar_map_npz": b.get("radar_map_npz"),
+                    }
+                if isinstance(c, Mapping):
+                    candidate_row = {
+                        "candidate_run_id": row.get("candidate_run_id", c.get("run_id")),
+                        "candidate_summary_json": row.get(
+                            "candidate_summary_json",
+                            c.get("run_summary_json"),
+                        ),
+                        "candidate_run_summary_json": c.get("run_summary_json"),
+                        "candidate_radar_map_npz": c.get("radar_map_npz"),
+                    }
+                parity = policy_eval.get("parity")
+                if isinstance(parity, Mapping):
+                    parity_pass = bool(parity.get("pass", parity_pass))
+
+            index_row = {
+                "index": int(row.get("index", 0)),
+                "label": row.get("label"),
+                "candidate_run_id": row.get("candidate_run_id"),
+                "candidate_summary_json": row.get("candidate_summary_json"),
+                "policy_eval_id": policy_eval_id if policy_eval_id != "" else None,
+                "policy_eval_json": policy_eval_json_path,
+                "gate_failed": bool(row.get("gate_failed", False)),
+                "recommendation": row.get("recommendation"),
+                "parity_pass": parity_pass,
+                "rd_shape_nmse": row.get("rd_shape_nmse"),
+                "ra_shape_nmse": row.get("ra_shape_nmse"),
+            }
+            index_row.update(baseline_row)
+            index_row.update(candidate_row)
+            index_rows.append(index_row)
+
+            package_row = dict(index_row)
+            if include_policy_payload:
+                package_row["policy_eval"] = policy_eval
+            package_rows.append(package_row)
+
+        index_payload = {
+            "version": "web_e2e_regression_summary_index_v1",
+            "export_id": export_id,
+            "session_id": session_id,
+            "created_at": _now_iso(),
+            "row_count": len(index_rows),
+            "session": {
+                "version": session_payload.get("version"),
+                "created_at": session_payload.get("created_at"),
+                "requested_candidate_count": session_payload.get("requested_candidate_count"),
+                "evaluated_candidate_count": session_payload.get("evaluated_candidate_count"),
+                "adopted_count": session_payload.get("adopted_count"),
+                "held_count": session_payload.get("held_count"),
+                "truncated": session_payload.get("truncated"),
+                "recommendation": session_payload.get("recommendation"),
+            },
+            "rows": index_rows,
+        }
+        summary_index_json.write_text(
+            json.dumps(index_payload, indent=2, default=_json_default),
+            encoding="utf-8",
+        )
+
+        package_payload = {
+            "version": "web_e2e_regression_package_v1",
+            "export_id": export_id,
+            "session_id": session_id,
+            "created_at": _now_iso(),
+            "session_json": str(session_json.resolve()),
+            "summary_index_json": str(summary_index_json.resolve()),
+            "rows": package_rows,
+            "include_policy_payload": include_policy_payload,
+        }
+        package_json.write_text(
+            json.dumps(package_payload, indent=2, default=_json_default),
+            encoding="utf-8",
+        )
+
+        export_payload = {
+            "version": "web_e2e_regression_export_v1",
+            "export_id": export_id,
+            "created_at": _now_iso(),
+            "session_id": session_id,
+            "row_count": int(len(rows_raw)),
+            "include_policy_payload": include_policy_payload,
+            "session_recommendation": session_payload.get("recommendation"),
+            "note": note,
+            "tag": tag,
+            "artifacts": {
+                "artifact_dir": str(artifact_dir.resolve()),
+                "session_json": str(session_json.resolve()),
+                "rows_csv": str(rows_csv.resolve()),
+                "summary_index_json": str(summary_index_json.resolve()),
+                "package_json": str(package_json.resolve()),
+            },
+        }
+        manifest_path.write_text(
+            json.dumps(export_payload, indent=2, default=_json_default),
+            encoding="utf-8",
+        )
+        return export_payload
+
     def _new_run_id(self) -> str:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
@@ -721,6 +944,11 @@ class WebE2EOrchestrator:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
         return f"rsess_{stamp}_{token}"
+
+    def _new_regression_export_id(self) -> str:
+        stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
+        token = uuid.uuid4().hex[:8]
+        return f"rexp_{stamp}_{token}"
 
     def _normalize_identifier_token(self, token: str, field_name: str) -> str:
         v = str(token).strip()
@@ -1240,6 +1468,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                             "baseline_count": len(orchestrator.list_baselines()),
                             "policy_eval_count": len(orchestrator.list_policy_evals()),
                             "regression_session_count": len(orchestrator.list_regression_sessions()),
+                            "regression_export_count": len(orchestrator.list_regression_exports()),
                         },
                     )
                     return
@@ -1266,6 +1495,10 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
 
                 if path == "/api/regression-sessions":
                     self._send_json(200, {"regression_sessions": orchestrator.list_regression_sessions()})
+                    return
+
+                if path == "/api/regression-exports":
+                    self._send_json(200, {"regression_exports": orchestrator.list_regression_exports()})
                     return
 
                 if path.startswith("/api/runs/"):
@@ -1305,6 +1538,12 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                     self._send_json(200, payload)
                     return
 
+                if path.startswith("/api/regression-exports/"):
+                    export_id = path[len("/api/regression-exports/") :]
+                    payload = orchestrator.get_regression_export(export_id)
+                    self._send_json(200, payload)
+                    return
+
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
             except FileNotFoundError as exc:
                 self._send_json(404, {"ok": False, "error": str(exc)})
@@ -1324,6 +1563,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 "/api/baselines",
                 "/api/compare/policy",
                 "/api/regression-sessions",
+                "/api/regression-exports",
             }:
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
                 return
@@ -1365,6 +1605,11 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 if path == "/api/regression-sessions":
                     payload = orchestrator.run_regression_session(body)
                     self._send_json(200, {"ok": True, "regression_session": payload})
+                    return
+
+                if path == "/api/regression-exports":
+                    payload = orchestrator.export_regression_session(body)
+                    self._send_json(200, {"ok": True, "regression_export": payload})
                     return
 
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
