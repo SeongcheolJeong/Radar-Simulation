@@ -16,7 +16,33 @@ export function useGateOps(opts) {
     setStatus,
     setGateResultText,
     setLastPolicyEval,
+    onContractDiagnosticsEvent,
   } = safeOpts;
+
+  const collectContractDiagnostics = React.useCallback((beforeSnapshot) => {
+    const beforeUnique = Number(beforeSnapshot?.unique_warning_count || 0);
+    const beforeAttempts = Number(beforeSnapshot?.attempt_count_total || 0);
+    const snapshot = getContractWarningSnapshot();
+    const uniqueNow = Number(snapshot.unique_warning_count || 0);
+    const attemptsNow = Number(snapshot.attempt_count_total || 0);
+    return {
+      baseline: {
+        unique_warning_count: beforeUnique,
+        attempt_count_total: beforeAttempts,
+      },
+      snapshot,
+      delta: {
+        unique_warning_count: uniqueNow - beforeUnique,
+        attempt_count_total: attemptsNow - beforeAttempts,
+      },
+      lines: [
+        `contract_warning_unique: ${uniqueNow}`,
+        `contract_warning_attempts: ${attemptsNow}`,
+        `contract_warning_delta_unique: ${(uniqueNow - beforeUnique) >= 0 ? "+" : ""}${uniqueNow - beforeUnique}`,
+        `contract_warning_delta_attempts: ${(attemptsNow - beforeAttempts) >= 0 ? "+" : ""}${attemptsNow - beforeAttempts}`,
+      ],
+    };
+  }, []);
 
   const pinBaselineFromGraphRun = React.useCallback(async () => {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
@@ -48,6 +74,7 @@ export function useGateOps(opts) {
   const runPolicyGateForGraphRun = React.useCallback(async () => {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
     const bId = String(baselineId || "").trim();
+    const beforeContractSnapshot = getContractWarningSnapshot();
     if (!summaryPath) {
       setStatus("run graph first to evaluate gate", "status-warn");
       return;
@@ -81,13 +108,36 @@ export function useGateOps(opts) {
           );
         });
       }
-      const snapshot = getContractWarningSnapshot();
-      lines.push(
-        `contract_warning_unique: ${Number(snapshot.unique_warning_count || 0)}`,
-        `contract_warning_attempts: ${Number(snapshot.attempt_count_total || 0)}`
-      );
+      const contract = collectContractDiagnostics(beforeContractSnapshot);
+      lines.push(...contract.lines);
       setGateResultText(lines.join("\n"));
-      setLastPolicyEval(row);
+      const runtimeDiag = {
+        version: "policy_gate_contract_diagnostics_v1",
+        source: "policy_gate_eval",
+        graph_run_id: String(graphRunSummary?.graph_run_id || graphRunSummary?.run_id || ""),
+        baseline: contract.baseline,
+        snapshot: {
+          contract_debug_version: String(contract.snapshot?.contract_debug_version || "-"),
+          unique_warning_count: Number(contract.snapshot?.unique_warning_count || 0),
+          attempt_count_total: Number(contract.snapshot?.attempt_count_total || 0),
+        },
+        delta: contract.delta,
+        timestamp_ms: Date.now(),
+      };
+      const policyEvalWithDiagnostics = {
+        ...row,
+        runtime_contract_diagnostics: runtimeDiag,
+      };
+      setLastPolicyEval(policyEvalWithDiagnostics);
+      onContractDiagnosticsEvent({
+        event_source: "policy_gate_eval",
+        graph_run_id: runtimeDiag.graph_run_id,
+        timestamp_ms: runtimeDiag.timestamp_ms,
+        baseline: contract.baseline,
+        snapshot: contract.snapshot,
+        delta: contract.delta,
+        note: { gate_failed: Boolean(row.gate_failed), baseline_id: bId },
+      });
       setStatus(
         Boolean(row.gate_failed) ? "policy gate: HOLD" : "policy gate: ADOPT",
         Boolean(row.gate_failed) ? "status-warn" : "status-ok"
@@ -97,7 +147,16 @@ export function useGateOps(opts) {
       setLastPolicyEval(null);
       setStatus(`policy gate failed: ${String(err.message || err)}`, "status-err");
     }
-  }, [apiBase, baselineId, graphRunSummary, setGateResultText, setLastPolicyEval, setStatus]);
+  }, [
+    apiBase,
+    baselineId,
+    collectContractDiagnostics,
+    graphRunSummary,
+    onContractDiagnosticsEvent,
+    setGateResultText,
+    setLastPolicyEval,
+    setStatus,
+  ]);
 
   const exportGateReport = React.useCallback(() => {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim() || "-";

@@ -34,6 +34,7 @@ export function useGraphRunOps(opts) {
     setPollingActive,
     setGateResultText,
     setLastPolicyEval,
+    onContractDiagnosticsEvent,
   } = safeOpts;
 
   const normalizePollIntervalMs = React.useCallback(
@@ -41,31 +42,76 @@ export function useGraphRunOps(opts) {
     [pollIntervalMsText]
   );
 
-  const getContractSnapshotLines = React.useCallback(() => {
+  const collectContractDiagnostics = React.useCallback((beforeSnapshot) => {
+    const beforeUnique = Number(beforeSnapshot?.unique_warning_count || 0);
+    const beforeAttempts = Number(beforeSnapshot?.attempt_count_total || 0);
     const s = getContractWarningSnapshot();
-    return [
-      `contract_warning_unique: ${Number(s.unique_warning_count || 0)}`,
-      `contract_warning_attempts: ${Number(s.attempt_count_total || 0)}`,
-    ];
+    const nowUnique = Number(s.unique_warning_count || 0);
+    const nowAttempts = Number(s.attempt_count_total || 0);
+    const uniqueDelta = nowUnique - beforeUnique;
+    const attemptsDelta = nowAttempts - beforeAttempts;
+    return {
+      baseline: {
+        unique_warning_count: beforeUnique,
+        attempt_count_total: beforeAttempts,
+      },
+      snapshot: s,
+      delta: {
+        unique_warning_count: uniqueDelta,
+        attempt_count_total: attemptsDelta,
+      },
+      lines: [
+        `contract_warning_unique: ${nowUnique}`,
+        `contract_warning_attempts: ${nowAttempts}`,
+        `contract_warning_delta_unique: ${uniqueDelta >= 0 ? "+" : ""}${uniqueDelta}`,
+        `contract_warning_delta_attempts: ${attemptsDelta >= 0 ? "+" : ""}${attemptsDelta}`,
+      ],
+    };
   }, []);
 
-  const renderGraphRunRecord = React.useCallback((row, graphRunId, extraLines) => {
-    const merged = [
-      ...(Array.isArray(extraLines) ? extraLines.map((x) => String(x)) : []),
-      ...getContractSnapshotLines(),
-    ];
-    setGraphRunText(buildGraphRunRecordText(row, graphRunId, merged));
-  }, [getContractSnapshotLines, setGraphRunText]);
+  const emitContractDiagnosticsEvent = React.useCallback((source, graphRunId, contract, note) => {
+    const diag = contract && typeof contract === "object" && contract.snapshot
+      ? contract
+      : collectContractDiagnostics(contract);
+    const payload = {
+      event_source: String(source || "graph_run"),
+      graph_run_id: String(graphRunId || ""),
+      timestamp_ms: Date.now(),
+      snapshot: diag.snapshot,
+      delta: diag.delta,
+      baseline: diag.baseline,
+      note: note && typeof note === "object" ? { ...note } : {},
+    };
+    onContractDiagnosticsEvent(payload);
+    return payload;
+  }, [collectContractDiagnostics, onContractDiagnosticsEvent]);
 
-  const loadGraphRunSummaryById = React.useCallback(async (graphRunId, fallbackRow) => {
+  const renderGraphRunRecord = React.useCallback((row, graphRunId, extraLines, beforeSnapshot) => {
+    const contract = collectContractDiagnostics(beforeSnapshot);
+    setGraphRunText(buildGraphRunRecordText(row, graphRunId, [
+      ...(Array.isArray(extraLines) ? extraLines.map((x) => String(x)) : []),
+      ...contract.lines,
+    ]));
+    return contract;
+  }, [collectContractDiagnostics, setGraphRunText]);
+
+  const loadGraphRunSummaryById = React.useCallback(async (
+    graphRunId,
+    fallbackRow,
+    beforeContractSnapshot,
+    eventSource
+  ) => {
     const sumRes = await getGraphRunSummaryMaybe(apiBase, graphRunId);
     if (!sumRes.ok) {
       const recRes = await getGraphRunMaybe(apiBase, graphRunId);
       if (recRes.ok) {
         const rec = recRes.payload || {};
-        renderGraphRunRecord(rec, graphRunId, [
+        const contract = renderGraphRunRecord(rec, graphRunId, [
           `summary_fetch_error: graph summary request failed (${Number(sumRes.status)})`,
-        ]);
+        ], beforeContractSnapshot);
+        emitContractDiagnosticsEvent("graph_run_summary_missing", graphRunId, contract, {
+          http_status: Number(sumRes.status),
+        });
         setGraphRunSummary(null);
         setGateResultText("-");
         setLastPolicyEval(null);
@@ -77,6 +123,7 @@ export function useGraphRunOps(opts) {
     const summary = sumRes.payload || {};
     const quick = summary.quicklook || {};
     const cacheInfo = summary?.execution?.cache || {};
+    const contract = collectContractDiagnostics(beforeContractSnapshot);
     const lines = [
       `graph_run_id: ${graphRunId}`,
       `status: ${summary.status || (fallbackRow && fallbackRow.status) || "-"}`,
@@ -98,18 +145,41 @@ export function useGraphRunOps(opts) {
       `- graph_run_summary_json: ${String(summary?.outputs?.graph_run_summary_json || "-")}`,
       "",
       "contract_diagnostics:",
-      ...getContractSnapshotLines(),
+      ...contract.lines,
     ];
     setGraphRunText(lines.join("\n"));
-    setGraphRunSummary(summary);
+    const runtimeDiag = {
+      version: "graph_run_contract_diagnostics_v1",
+      source: String(eventSource || "graph_run_summary"),
+      graph_run_id: graphRunId,
+      timestamp_ms: Date.now(),
+      baseline: contract.baseline,
+      snapshot: {
+        contract_debug_version: String(contract.snapshot?.contract_debug_version || "-"),
+        unique_warning_count: Number(contract.snapshot?.unique_warning_count || 0),
+        attempt_count_total: Number(contract.snapshot?.attempt_count_total || 0),
+      },
+      delta: contract.delta,
+    };
+    setGraphRunSummary({
+      ...summary,
+      runtime_contract_diagnostics: runtimeDiag,
+    });
+    emitContractDiagnosticsEvent(
+      runtimeDiag.source,
+      graphRunId,
+      contract,
+      { cache_hit: Boolean(cacheInfo?.hit) }
+    );
     setGateResultText("-");
     setLastPolicyEval(null);
     setStatus(`graph run completed: ${graphRunId}`, "status-ok");
     return { ok: true, summary };
   }, [
     apiBase,
+    collectContractDiagnostics,
+    emitContractDiagnosticsEvent,
     profile,
-    getContractSnapshotLines,
     renderGraphRunRecord,
     setGateResultText,
     setGraphRunSummary,
@@ -118,7 +188,7 @@ export function useGraphRunOps(opts) {
     setStatus,
   ]);
 
-  const pollGraphRunUntilTerminal = React.useCallback(async (graphRunId) => {
+  const pollGraphRunUntilTerminal = React.useCallback(async (graphRunId, beforeContractSnapshot) => {
     const intervalMs = normalizePollIntervalMs();
     const maxPolls = 300;
     setPollingActive(true);
@@ -131,11 +201,27 @@ export function useGraphRunOps(opts) {
         const status = String(row?.status || "").trim().toLowerCase();
         setPollStateText(`poll #${i + 1} status=${status || "-"}`);
         if (status === "completed") {
-          await loadGraphRunSummaryById(graphRunId, row);
+          await loadGraphRunSummaryById(
+            graphRunId,
+            row,
+            beforeContractSnapshot,
+            "graph_run_poll_completed"
+          );
           return { ok: true, status: "completed" };
         }
         if (status === "failed" || status === "canceled") {
-          renderGraphRunRecord(row, graphRunId, [`poll_final_status: ${status}`]);
+          const contract = renderGraphRunRecord(
+            row,
+            graphRunId,
+            [`poll_final_status: ${status}`],
+            beforeContractSnapshot
+          );
+          emitContractDiagnosticsEvent(
+            status === "canceled" ? "graph_run_poll_canceled" : "graph_run_poll_failed",
+            graphRunId,
+            contract,
+            { poll_final_status: status }
+          );
           setGraphRunSummary(null);
           setGateResultText("-");
           setLastPolicyEval(null);
@@ -153,6 +239,7 @@ export function useGraphRunOps(opts) {
     }
   }, [
     apiBase,
+    emitContractDiagnosticsEvent,
     loadGraphRunSummaryById,
     normalizePollIntervalMs,
     renderGraphRunRecord,
@@ -167,6 +254,8 @@ export function useGraphRunOps(opts) {
   const runGraphViaApi = React.useCallback(async () => {
     const graph = toGraphPayload({ graphId, profile, nodes, edges });
     const runAsync = String(runMode || "sync") === "async";
+    const beforeContractSnapshot = getContractWarningSnapshot();
+    let submittedGraphRunId = "";
     setStatus(
       runAsync ? "submitting graph run (async)..." : "submitting graph run...",
       "status-warn"
@@ -185,6 +274,7 @@ export function useGraphRunOps(opts) {
       );
       const row = payload.graph_run || {};
       const graphRunId = String(row.graph_run_id || "").trim();
+      submittedGraphRunId = graphRunId;
       if (!graphRunId) {
         throw new Error("graph run id missing in response");
       }
@@ -192,22 +282,28 @@ export function useGraphRunOps(opts) {
       setPollStateText(runAsync ? "async run submitted" : "-");
       const rowStatus = String(row.status || "").trim().toLowerCase();
       if (runAsync) {
-        renderGraphRunRecord(row, graphRunId, [
+        const contract = renderGraphRunRecord(row, graphRunId, [
           "run_mode: async",
           `polling: ${autoPollAsyncRun ? "auto" : "manual"}`,
-        ]);
+        ], beforeContractSnapshot);
+        emitContractDiagnosticsEvent("graph_run_async_submitted", graphRunId, contract, {
+          auto_poll: Boolean(autoPollAsyncRun),
+        });
         setGraphRunSummary(null);
         setGateResultText("-");
         setLastPolicyEval(null);
         if (autoPollAsyncRun) {
-          await pollGraphRunUntilTerminal(graphRunId);
+          await pollGraphRunUntilTerminal(graphRunId, beforeContractSnapshot);
         } else {
           setStatus(`graph run queued: ${graphRunId}`, "status-warn");
         }
         return;
       }
       if (rowStatus && rowStatus !== "completed") {
-        renderGraphRunRecord(row, graphRunId);
+        const contract = renderGraphRunRecord(row, graphRunId, [], beforeContractSnapshot);
+        emitContractDiagnosticsEvent("graph_run_non_completed", graphRunId, contract, {
+          status: rowStatus,
+        });
         setGraphRunSummary(null);
         setGateResultText("-");
         setLastPolicyEval(null);
@@ -215,9 +311,25 @@ export function useGraphRunOps(opts) {
         setStatus(`graph run ${rowStatus}: ${graphRunId}`, tone);
         return;
       }
-      await loadGraphRunSummaryById(graphRunId, row);
+      await loadGraphRunSummaryById(
+        graphRunId,
+        row,
+        beforeContractSnapshot,
+        "graph_run_sync_completed"
+      );
     } catch (err) {
-      setGraphRunText(`graph run failed\n- ${String(err.message || err)}`);
+      const contract = collectContractDiagnostics(beforeContractSnapshot);
+      setGraphRunText([
+        "graph run failed",
+        `- ${String(err.message || err)}`,
+        ...contract.lines.map((line) => `- ${line}`),
+      ].join("\n"));
+      emitContractDiagnosticsEvent(
+        "graph_run_submit_error",
+        submittedGraphRunId,
+        contract,
+        { error: String(err.message || err) }
+      );
       setGraphRunSummary(null);
       setGateResultText("-");
       setLastPolicyEval(null);
@@ -226,7 +338,9 @@ export function useGraphRunOps(opts) {
   }, [
     apiBase,
     autoPollAsyncRun,
+    collectContractDiagnostics,
     edges,
+    emitContractDiagnosticsEvent,
     graphId,
     loadGraphRunSummaryById,
     nodes,
@@ -252,9 +366,18 @@ export function useGraphRunOps(opts) {
     }
     setStatus(`canceling graph run: ${graphRunId}`, "status-warn");
     try {
+      const beforeContractSnapshot = getContractWarningSnapshot();
       const payload = await cancelGraphRun(apiBase, graphRunId, "graph_lab_manual_cancel");
       const row = payload.graph_run || {};
-      renderGraphRunRecord(row, graphRunId, ["cancel_requested: true"]);
+      const contract = renderGraphRunRecord(
+        row,
+        graphRunId,
+        ["cancel_requested: true"],
+        beforeContractSnapshot
+      );
+      emitContractDiagnosticsEvent("graph_run_cancel_requested", graphRunId, contract, {
+        cancel_requested: true,
+      });
       setGraphRunSummary(null);
       setGateResultText("-");
       setLastPolicyEval(null);
@@ -265,6 +388,7 @@ export function useGraphRunOps(opts) {
     }
   }, [
     apiBase,
+    emitContractDiagnosticsEvent,
     lastGraphRunId,
     renderGraphRunRecord,
     setGateResultText,
@@ -281,6 +405,7 @@ export function useGraphRunOps(opts) {
       return;
     }
     const runAsync = String(runMode || "sync") === "async";
+    const beforeContractSnapshot = getContractWarningSnapshot();
     setStatus(`retrying graph run: ${graphRunId}${runAsync ? " (async)" : ""}`, "status-warn");
     try {
       const payload = await retryGraphRun(
@@ -300,35 +425,52 @@ export function useGraphRunOps(opts) {
 
       const rowStatus = String(row.status || "").trim().toLowerCase();
       if (runAsync) {
-        renderGraphRunRecord(row, newGraphRunId, [
+        const contract = renderGraphRunRecord(row, newGraphRunId, [
           "run_mode: async",
           `polling: ${autoPollAsyncRun ? "auto" : "manual"}`,
-        ]);
+        ], beforeContractSnapshot);
+        emitContractDiagnosticsEvent("graph_run_retry_async_submitted", newGraphRunId, contract, {
+          auto_poll: Boolean(autoPollAsyncRun),
+        });
         setGraphRunSummary(null);
         setGateResultText("-");
         setLastPolicyEval(null);
         if (autoPollAsyncRun) {
-          await pollGraphRunUntilTerminal(newGraphRunId);
+          await pollGraphRunUntilTerminal(newGraphRunId, beforeContractSnapshot);
         } else {
           setStatus(`retry queued: ${newGraphRunId}`, "status-warn");
         }
         return;
       }
       if (rowStatus !== "completed") {
-        renderGraphRunRecord(row, newGraphRunId);
+        const contract = renderGraphRunRecord(
+          row,
+          newGraphRunId,
+          [],
+          beforeContractSnapshot
+        );
+        emitContractDiagnosticsEvent("graph_run_retry_non_completed", newGraphRunId, contract, {
+          status: String(row.status || "-"),
+        });
         setGraphRunSummary(null);
         setGateResultText("-");
         setLastPolicyEval(null);
         setStatus(`retry ended with status: ${String(row.status || "-")}`, "status-warn");
         return;
       }
-      await loadGraphRunSummaryById(newGraphRunId, row);
+      await loadGraphRunSummaryById(
+        newGraphRunId,
+        row,
+        beforeContractSnapshot,
+        "graph_run_retry_completed"
+      );
     } catch (err) {
       setStatus(`retry failed: ${String(err.message || err)}`, "status-err");
     }
   }, [
     apiBase,
     autoPollAsyncRun,
+    emitContractDiagnosticsEvent,
     lastGraphRunId,
     loadGraphRunSummaryById,
     pollGraphRunUntilTerminal,
@@ -354,7 +496,7 @@ export function useGraphRunOps(opts) {
     }
     setStatus(`polling graph run: ${graphRunId}`, "status-warn");
     try {
-      await pollGraphRunUntilTerminal(graphRunId);
+      await pollGraphRunUntilTerminal(graphRunId, getContractWarningSnapshot());
     } catch (err) {
       setStatus(`poll failed: ${String(err.message || err)}`, "status-err");
     }

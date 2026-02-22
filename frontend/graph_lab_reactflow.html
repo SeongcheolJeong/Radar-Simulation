@@ -205,6 +205,65 @@
       color: var(--muted);
       background: rgba(13, 25, 34, 0.65);
     }
+    .contract-overlay {
+      position: fixed;
+      right: 14px;
+      top: 68px;
+      width: min(420px, calc(100vw - 28px));
+      max-height: calc(100vh - 82px);
+      border: 1px solid #2f566a;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(10, 26, 35, 0.97), rgba(10, 20, 28, 0.97));
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .contract-overlay-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: #9bc3d8;
+      background: rgba(15, 35, 48, 0.9);
+    }
+    .contract-overlay-actions {
+      display: inline-flex;
+      gap: 6px;
+    }
+    .contract-overlay-actions .btn {
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+    .contract-overlay-bd {
+      overflow: auto;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .contract-overlay-row {
+      border: 1px solid #27485a;
+      border-radius: 8px;
+      background: rgba(9, 18, 24, 0.86);
+      padding: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      color: #b9d5e7;
+    }
+    .contract-overlay-row-hd {
+      color: #8eb6ca;
+      margin-bottom: 4px;
+    }
+    .contract-overlay-row-kpi {
+      color: #d3ebff;
+    }
     @media (max-width: 1280px) {
       .content {
         grid-template-columns: 1fr;

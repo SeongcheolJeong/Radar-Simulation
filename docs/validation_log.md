@@ -1878,3 +1878,40 @@
     - `contract_warning_attempts`
   - panel token confirmed:
     - `Contract Diagnostics (Auto)`
+
+## Web E2E Graph Contract Overlay Timeline (M17.8)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - overlay/timeline frontend integration 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8119 8139` + smoke (`curl /health`, `curl /frontend/graph_lab*.mjs` token grep)
+- Result: pass
+- Notes:
+  - app overlay/timeline tokens confirmed:
+    - `ContractWarningOverlay`
+    - `contractOverlayEnabled`
+    - `contractTimeline`
+    - `onContractDiagnosticsEvent`
+  - contract model/options tokens confirmed:
+    - `contractOverlayEnabled`
+    - `contractTimelineCount`
+    - `setContractOverlayEnabled`
+    - `clearContractTimeline`
+    - `onContractDiagnosticsEvent`
+  - panel + inspector tokens confirmed:
+    - `Show Overlay`
+    - `Clear Timeline`
+    - `Contract Timeline`
+    - `contract_delta(unique/attempt)`
+  - run/gate hook delta/runtime tokens confirmed:
+    - `contract_warning_delta_unique`
+    - `contract_warning_delta_attempts`
+    - `runtime_contract_diagnostics`
+  - overlay CSS tokens confirmed:
+    - `contract-overlay`
+    - `contract-overlay-row`

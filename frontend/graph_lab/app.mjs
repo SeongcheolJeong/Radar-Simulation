@@ -15,6 +15,7 @@ import {
   validateGraphContract,
 } from "./api_client.mjs";
 import {
+  ContractWarningOverlay,
   GraphCanvasPanel,
   GraphInputsPanel,
   NodeInspectorPanel,
@@ -57,6 +58,10 @@ export function App() {
   const [gateResultText, setGateResultText] = React.useState("-");
   const [lastPolicyEval, setLastPolicyEval] = React.useState(null);
   const [contractDebugText, setContractDebugText] = React.useState("-");
+  const [contractOverlayEnabled, setContractOverlayEnabled] = React.useState(
+    String(params.get("contract_overlay") || "0") === "1"
+  );
+  const [contractTimeline, setContractTimeline] = React.useState([]);
   const [selectedNodeId, setSelectedNodeId] = React.useState("");
   const [selectedNodeParamsText, setSelectedNodeParamsText] = React.useState("{}");
 
@@ -109,6 +114,25 @@ export function App() {
     refreshContractWarnings();
     setStatus("contract warnings reset", "status-ok");
   }, [refreshContractWarnings, setStatus]);
+
+  const appendContractDiagnosticsEvent = React.useCallback((eventPayload) => {
+    const e = eventPayload && typeof eventPayload === "object" ? eventPayload : {};
+    const row = {
+      event_source: String(e.event_source || "graph_lab"),
+      graph_run_id: String(e.graph_run_id || ""),
+      timestamp_ms: Number(e.timestamp_ms || Date.now()),
+      snapshot: e.snapshot && typeof e.snapshot === "object" ? e.snapshot : {},
+      delta: e.delta && typeof e.delta === "object" ? e.delta : {},
+      baseline: e.baseline && typeof e.baseline === "object" ? e.baseline : {},
+      note: e.note && typeof e.note === "object" ? e.note : {},
+    };
+    setContractTimeline((prev) => [row, ...prev].slice(0, 80));
+  }, []);
+
+  const clearContractTimeline = React.useCallback(() => {
+    setContractTimeline([]);
+    setStatus("contract timeline cleared", "status-ok");
+  }, [setStatus]);
 
   React.useEffect(() => {
     refreshContractWarnings();
@@ -253,6 +277,7 @@ export function App() {
     setPollingActive,
     setGateResultText,
     setLastPolicyEval,
+    onContractDiagnosticsEvent: appendContractDiagnosticsEvent,
   });
 
   const {
@@ -268,6 +293,7 @@ export function App() {
     setStatus,
     setGateResultText,
     setLastPolicyEval,
+    onContractDiagnosticsEvent: appendContractDiagnosticsEvent,
   });
 
   const loadTemplateByIndex = React.useCallback((idx) => {
@@ -312,6 +338,8 @@ export function App() {
       templates,
       lastGraphRunId,
       contractDebugText,
+      contractOverlayEnabled,
+      contractTimelineCount: contractTimeline.length,
     },
     setters: {
       setApiBase,
@@ -322,6 +350,7 @@ export function App() {
       setRunMode,
       setAutoPollAsyncRun,
       setPollIntervalMsText,
+      setContractOverlayEnabled,
     },
     templateActions: {
       fetchTemplates,
@@ -346,6 +375,7 @@ export function App() {
     contractActions: {
       refreshContractWarnings,
       resetContractWarnings,
+      clearContractTimeline,
     },
   }), [
     apiBase,
@@ -361,6 +391,8 @@ export function App() {
     templates,
     lastGraphRunId,
     contractDebugText,
+    contractOverlayEnabled,
+    contractTimeline.length,
     fetchTemplates,
     exportGraph,
     loadTemplateByIndex,
@@ -375,6 +407,8 @@ export function App() {
     exportGateReport,
     refreshContractWarnings,
     resetContractWarnings,
+    clearContractTimeline,
+    setContractOverlayEnabled,
   ]);
 
   return h("div", { className: "page" }, [
@@ -413,6 +447,13 @@ export function App() {
         contractDebugText,
       }),
     ]),
+    h(ContractWarningOverlay, {
+      key: "contract_overlay",
+      visible: contractOverlayEnabled,
+      timeline: contractTimeline,
+      onClose: () => setContractOverlayEnabled(false),
+      onClear: clearContractTimeline,
+    }),
   ]);
 }
 

@@ -11,10 +11,26 @@ import { normalizeRepoPath } from "./graph_helpers.mjs";
 
 const h = React.createElement;
 
+function formatSigned(value) {
+  const n = Number(value || 0);
+  return `${n >= 0 ? "+" : ""}${n}`;
+}
+
+function formatTimeOfDay(timestampMs) {
+  const t = Number(timestampMs || 0);
+  if (!Number.isFinite(t) || t <= 0) return "-";
+  try {
+    return new Date(t).toLocaleTimeString();
+  } catch (_) {
+    return "-";
+  }
+}
+
 function renderArtifactInspector(graphRunSummary) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
   }
+  const runtimeContract = graphRunSummary?.runtime_contract_diagnostics || null;
   return h("div", { className: "result-box", key: "aibox" }, [
     h("div", { key: "kpi", style: { marginBottom: "8px" } }, [
       `paths=${Number(graphRunSummary?.path_summary?.path_count_total || 0)} | `,
@@ -22,6 +38,12 @@ function renderArtifactInspector(graphRunSummary) {
       `rd=${Array.isArray(graphRunSummary?.radar_map_summary?.rd_shape) ? graphRunSummary.radar_map_summary.rd_shape.join("x") : "-"} | `,
       `ra=${Array.isArray(graphRunSummary?.radar_map_summary?.ra_shape) ? graphRunSummary.radar_map_summary.ra_shape.join("x") : "-"}`,
     ]),
+    runtimeContract
+      ? h("div", { key: "contract_runtime", style: { marginBottom: "8px", color: "#8fb3c9" } }, [
+          `contract_delta(unique/attempt): ${formatSigned(runtimeContract?.delta?.unique_warning_count)}/${formatSigned(runtimeContract?.delta?.attempt_count_total)} | `,
+          `contract_total(unique/attempt): ${Number(runtimeContract?.snapshot?.unique_warning_count || 0)}/${Number(runtimeContract?.snapshot?.attempt_count_total || 0)}`,
+        ])
+      : null,
     h("div", { key: "links", style: { marginBottom: "8px" } }, [
       h("div", { key: "lt" }, "artifacts:"),
       ...[
@@ -146,6 +168,8 @@ export function GraphInputsPanel({ model }) {
     templates,
     lastGraphRunId,
     contractDebugText,
+    contractOverlayEnabled,
+    contractTimelineCount,
   } = values;
   const {
     setApiBase,
@@ -156,6 +180,7 @@ export function GraphInputsPanel({ model }) {
     setRunMode,
     setAutoPollAsyncRun,
     setPollIntervalMsText,
+    setContractOverlayEnabled,
   } = setters;
   const {
     fetchTemplates,
@@ -180,6 +205,7 @@ export function GraphInputsPanel({ model }) {
   const {
     refreshContractWarnings,
     resetContractWarnings,
+    clearContractTimeline,
   } = contractActions;
 
   return h("section", { className: "panel", key: "left" }, [
@@ -313,10 +339,54 @@ export function GraphInputsPanel({ model }) {
           h("button", { className: "btn", onClick: refreshContractWarnings, key: "cdr1" }, "Refresh Guard"),
           h("button", { className: "btn", onClick: resetContractWarnings, key: "cdr2" }, "Reset Guard"),
         ]),
+        h("div", { className: "btn-row", key: "contractoverlay" }, [
+          h("label", { key: "overlaychk", style: { display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "#8fb3c9" } }, [
+            h("input", {
+              type: "checkbox",
+              checked: Boolean(contractOverlayEnabled),
+              onChange: (e) => setContractOverlayEnabled(Boolean(e.target.checked)),
+            }),
+            "Show Overlay",
+          ]),
+          h("button", { className: "btn", onClick: clearContractTimeline, key: "clearTimeline" }, "Clear Timeline"),
+        ]),
         h("pre", { className: "result-box", key: "cdbox" }, String(contractDebugText || "-")),
+        h("div", { className: "hint", key: "contracthint2" }, `contract_timeline_events: ${Number(contractTimelineCount || 0)}`),
       ]),
       h("div", { className: "hint", key: "hint" }, "Tip: connect nodes on canvas, then validate to check schema/profile/DAG constraints."),
     ]),
+  ]);
+}
+
+export function ContractWarningOverlay({
+  visible,
+  timeline,
+  onClose,
+  onClear,
+}) {
+  if (!visible) return null;
+  const rows = Array.isArray(timeline) ? timeline : [];
+  return h("aside", { className: "contract-overlay", key: "contract_overlay" }, [
+    h("div", { className: "contract-overlay-hd", key: "co_hd" }, [
+      h("div", { key: "co_t" }, `Contract Timeline (${rows.length})`),
+      h("div", { className: "contract-overlay-actions", key: "co_actions" }, [
+        h("button", { className: "btn", onClick: onClear, key: "co_clear" }, "Clear"),
+        h("button", { className: "btn", onClick: onClose, key: "co_hide" }, "Hide"),
+      ]),
+    ]),
+    h("div", { className: "contract-overlay-bd", key: "co_bd" }, rows.length === 0
+      ? h("pre", { className: "result-box", key: "co_empty" }, "no contract events yet")
+      : rows.map((row, idx) =>
+        h("div", { className: "contract-overlay-row", key: `co_row_${idx}` }, [
+          h("div", { className: "contract-overlay-row-hd", key: `co_row_hd_${idx}` }, [
+            `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")}`,
+          ]),
+          h("div", { className: "contract-overlay-row-kpi", key: `co_row_kpi_${idx}` }, [
+            `delta(unique/attempt): ${formatSigned(row?.delta?.unique_warning_count)}/${formatSigned(row?.delta?.attempt_count_total)} | `,
+            `total(unique/attempt): ${Number(row?.snapshot?.unique_warning_count || 0)}/${Number(row?.snapshot?.attempt_count_total || 0)}`,
+          ]),
+        ])
+      )),
   ]);
 }
 

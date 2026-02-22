@@ -66,6 +66,16 @@ function readBoolean(scope, root, key, fallback) {
   return Boolean(fallback);
 }
 
+function readNumber(scope, root, key, fallback) {
+  const value = root[key];
+  if (typeof value === "number" && Number.isFinite(value)) return Number(value);
+  if (value === undefined || value === null || value === "") return Number(fallback);
+  const parsed = Number(value);
+  if (Number.isFinite(parsed)) return parsed;
+  warnOnce(scope, `expected number for "${key}"`);
+  return Number(fallback);
+}
+
 function readArray(scope, root, key, fallback) {
   const value = root[key];
   if (Array.isArray(value)) return value;
@@ -82,6 +92,14 @@ function readFunction(scope, root, key) {
   } else {
     warnOnce(scope, `missing function "${key}"`);
   }
+  return NOOP;
+}
+
+function readOptionalFunction(scope, root, key) {
+  const value = root[key];
+  if (typeof value === "function") return value;
+  if (value === undefined || value === null) return NOOP;
+  warnOnce(scope, `expected function for "${key}"`);
   return NOOP;
 }
 
@@ -138,6 +156,8 @@ export function resetContractWarnings() {
  * @property {Array<any>} templates
  * @property {string} lastGraphRunId
  * @property {string} contractDebugText
+ * @property {boolean} contractOverlayEnabled
+ * @property {number} contractTimelineCount
  */
 
 /**
@@ -186,6 +206,8 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       templates: readArray(scope, values, "templates", []),
       lastGraphRunId: readString(scope, values, "lastGraphRunId", ""),
       contractDebugText: readString(scope, values, "contractDebugText", "-"),
+      contractOverlayEnabled: readBoolean(scope, values, "contractOverlayEnabled", false),
+      contractTimelineCount: readNumber(scope, values, "contractTimelineCount", 0),
     },
     setters: {
       setApiBase: readFunction(scope, setters, "setApiBase"),
@@ -196,6 +218,7 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       setRunMode: readFunction(scope, setters, "setRunMode"),
       setAutoPollAsyncRun: readFunction(scope, setters, "setAutoPollAsyncRun"),
       setPollIntervalMsText: readFunction(scope, setters, "setPollIntervalMsText"),
+      setContractOverlayEnabled: readFunction(scope, setters, "setContractOverlayEnabled"),
     },
     templateActions: {
       fetchTemplates: readFunction(scope, templateActions, "fetchTemplates"),
@@ -220,6 +243,7 @@ export function normalizeGraphInputsPanelModel(rawModel) {
     contractActions: {
       refreshContractWarnings: readFunction(scope, contractActions, "refreshContractWarnings"),
       resetContractWarnings: readFunction(scope, contractActions, "resetContractWarnings"),
+      clearContractTimeline: readFunction(scope, contractActions, "clearContractTimeline"),
     },
   };
 }
@@ -253,6 +277,7 @@ export function normalizeGraphRunOpsOptions(raw) {
     setPollingActive: readFunction(scope, root, "setPollingActive"),
     setGateResultText: readFunction(scope, root, "setGateResultText"),
     setLastPolicyEval: readFunction(scope, root, "setLastPolicyEval"),
+    onContractDiagnosticsEvent: readOptionalFunction(scope, root, "onContractDiagnosticsEvent"),
   };
 }
 
@@ -275,5 +300,6 @@ export function normalizeGateOpsOptions(raw) {
     setStatus: readFunction(scope, root, "setStatus"),
     setGateResultText: readFunction(scope, root, "setGateResultText"),
     setLastPolicyEval: readFunction(scope, root, "setLastPolicyEval"),
+    onContractDiagnosticsEvent: readOptionalFunction(scope, root, "onContractDiagnosticsEvent"),
   };
 }

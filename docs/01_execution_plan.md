@@ -116,6 +116,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.5: Frontend typed contract + runtime guard (`contracts.mjs` for panel/hook bindings)
 - [x] M17.6: Contract diagnostics surface (warning counters + debug panel actions)
 - [x] M17.7: Auto contract diagnostics propagation (run/gate text + inspector auto-sync)
+- [x] M17.8: Contract overlay timeline (opt-in overlay + run/gate delta event wiring)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -128,7 +129,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start post-M17.7 frontend hardening track: add opt-in developer overlay/timeline for contract warnings and connect per-run warning deltas to artifact inspector summaries, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.8 frontend hardening track: add event filtering/export for contract timeline and attach contract delta slices to generated gate report markdown, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -856,3 +857,21 @@ M17.7 outcome (2026-02-22):
 - Node Inspector diagnostics visibility expanded:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - new auto box: `Contract Diagnostics (Auto)`
+
+M17.8 outcome (2026-02-22):
+
+- opt-in contract overlay/timeline wiring completed:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+- contract model/options extended for overlay and event callbacks:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/contracts.mjs`
+  - `contractOverlayEnabled`, `contractTimelineCount`, `setContractOverlayEnabled`, `clearContractTimeline`, `onContractDiagnosticsEvent`
+- run/gate hooks now emit structured contract diagnostics events and deltas:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_graph_run_ops.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+  - delta tokens: `contract_warning_delta_unique`, `contract_warning_delta_attempts`
+  - runtime object: `runtime_contract_diagnostics`
+- Artifact Inspector now surfaces per-run contract delta/total KPIs:
+  - `contract_delta(unique/attempt)`
+  - `contract_total(unique/attempt)`
