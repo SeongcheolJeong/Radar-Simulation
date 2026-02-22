@@ -1400,3 +1400,26 @@
 - Result: pass
 - Notes:
   - blocker report now recommends `next_recommended_runtime=sionna_rt_full_runtime`
+
+## PO-SBR Runtime Pilot (M14.6)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_po_sbr_runtime_provider_stubbed.py`
+- Result: pass
+- Notes:
+  - PO-SBR runtime provider output contract validated via stubbed solver (`paths_by_chirp`, delay/doppler/path_id mapping)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_po_sbr_pilot.py`
+- Result: pass
+- Notes:
+  - pilot summary contract validated for both deterministic states (`blocked|executed`)
+  - blocked branch validates actionable blocker reasons and Linux rerun command
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_po_sbr_pilot.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/po_sbr_runtime_pilot_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json --allow-blocked`
+- Result: pass
+- Notes:
+  - current Darwin host is deterministically blocked
+  - blockers: `missing_required_modules`, `unsupported_platform:Darwin`, `missing_nvidia_runtime`
+  - report archived with Linux strict rerun command hint

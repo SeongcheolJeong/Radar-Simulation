@@ -53,3 +53,9 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 - [x] M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock
 - [x] M14.5: `sionna.rt` full runtime enablement (working LLVM backend)
 - [ ] M14.6: `po-sbr` runtime pilot (Linux+NVIDIA target)
+
+## M14.6 Status
+
+- runtime provider + pilot runner + validation stack added in repo
+- Darwin host preflight is deterministically blocked (`rtxpy`, `igl`, Linux+NVIDIA requirements)
+- next closure action remains unchanged: strict pilot execution on Linux+NVIDIA host

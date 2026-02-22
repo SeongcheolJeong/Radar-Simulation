@@ -1,0 +1,42 @@
+{
+  "scene_id": "po_sbr_runtime_pilot_v1",
+  "pilot_status": "blocked",
+  "blockers": [
+    "missing_required_modules",
+    "unsupported_platform:Darwin",
+    "missing_nvidia_runtime"
+  ],
+  "diagnostics": {
+    "platform": "Darwin",
+    "repo_root": "/Users/seongcheoljeong/Documents/Codex_test/external/PO-SBR-Python",
+    "repo_exists": true,
+    "geometry_path": "/Users/seongcheoljeong/Documents/Codex_test/external/PO-SBR-Python/geometries/plate.obj",
+    "geometry_exists": true,
+    "module_report": {
+      "rtxpy": {
+        "available": false,
+        "module_name": "rtxpy",
+        "error": "ModuleNotFoundError: No module named 'rtxpy'"
+      },
+      "igl": {
+        "available": false,
+        "module_name": "igl",
+        "error": "ModuleNotFoundError: No module named 'igl'"
+      }
+    },
+    "missing_modules": [
+      "rtxpy",
+      "igl"
+    ],
+    "nvidia_runtime_available": false
+  },
+  "recommended_linux_command": "PYTHONPATH=src python3 scripts/run_scene_runtime_po_sbr_pilot.py --output-root data/runtime_pilot/po_sbr_runtime_pilot_v1 --output-summary-json docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json --po-sbr-repo-root external/PO-SBR-Python --geometry-path geometries/plate.obj",
+  "scene_json": null,
+  "output_dir": null,
+  "path_list_json": null,
+  "adc_cube_npz": null,
+  "radar_map_npz": null,
+  "frame_count": 0,
+  "path_count": 0,
+  "runtime_resolution": null
+}

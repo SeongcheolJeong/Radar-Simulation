@@ -99,7 +99,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M14.6: execute first `po-sbr` runtime pilot on Linux+NVIDIA target (Darwin host remains blocked by platform/runtime constraints).
+Complete M14.6 on Linux+NVIDIA target by running strict PO-SBR runtime pilot command (no `--allow-blocked`) and lock `pilot_status=executed` evidence JSON.
 
 ## M10.19 Decision Gate
 
@@ -388,3 +388,24 @@ M14.5 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_probe_m14_5_2026_02_22.json`
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_blocker_report_m14_5_2026_02_22.json`
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/111_sionna_rt_full_runtime_enablement_contract.md`
+
+M14.6 progress (2026-02-22):
+
+- PO-SBR runtime provider added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/runtime_providers/po_sbr_rt_provider.py`
+  - provider maps `POsolver.build/simulate` output to canonical `paths_by_chirp`
+- runtime pilot runner added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_po_sbr_pilot.py`
+  - deterministic preflight blockers with `pilot_status` contract (`blocked|executed`)
+  - `--allow-blocked` mode added to avoid repeated no-op attempts on unsupported hosts
+- validations added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_po_sbr_runtime_provider_stubbed.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_po_sbr_pilot.py`
+- contracts/docs added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/112_scene_runtime_po_sbr_pilot_contract.md`
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/113_po_sbr_linux_runtime_runbook.md`
+- current host evidence (Darwin) locked as blocked:
+  - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json`
+  - blockers: missing modules (`rtxpy`, `igl`), unsupported platform, missing NVIDIA runtime
+- remaining to close M14.6:
+  - execute strict pilot on Linux+NVIDIA host and archive `pilot_status=executed` report

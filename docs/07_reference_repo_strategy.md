@@ -53,8 +53,9 @@ Use references via local adapters, not by merging third-party internals into cor
   - `sionna + tensorflow` runtime installed and minimal PHY sanity lock added
   - blocker report automation to prevent repeated unsupported-runtime attempts
   - `sionna.rt` full runtime unlocked on macOS host via validated `DRJIT_LIBLLVM_PATH` candidate
+  - PO-SBR runtime provider and pilot runner added with deterministic preflight/blocked reporting
 - Remaining high-impact physics/backend work:
-  - PO-SBR runtime enablement (`po_sbr`, `pyoptix`, `optix`) and first real pilot
+  - PO-SBR strict runtime pilot execution on Linux+NVIDIA host (`pilot_status=executed` evidence pending)
   - scattering-physics fidelity tuning against measured scenarios
 - RadarSimPy position:
   - useful as regression oracle

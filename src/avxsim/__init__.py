@@ -122,7 +122,10 @@ from .runtime_blockers import (
     load_runtime_probe_summary_json,
     save_runtime_blocker_report_json,
 )
-from .runtime_providers import generate_sionna_like_paths_from_mitsuba
+from .runtime_providers import (
+    generate_po_sbr_like_paths_from_posbr,
+    generate_sionna_like_paths_from_mitsuba,
+)
 from .replay_batch import (
     load_replay_manifest_json,
     run_replay_cases,
@@ -233,6 +236,7 @@ __all__ = [
     "DEFAULT_RUNTIME_PRIORITY",
     "build_runtime_blocker_report",
     "detect_runtime_modules",
+    "generate_po_sbr_like_paths_from_posbr",
     "generate_sionna_like_paths_from_mitsuba",
     "invoke_runtime_paths_provider",
     "load_runtime_probe_summary_json",
