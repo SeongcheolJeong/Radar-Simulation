@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 
+from .parity import compare_hybrid_estimation_payloads
 from .scene_pipeline import run_object_scene_to_radar_map_json
 
 
@@ -256,7 +257,9 @@ class WebE2EOrchestrator:
         self.repo_root = Path(repo_root).expanduser().resolve()
         self.store_root = Path(store_root).expanduser().resolve()
         self.runs_root = self.store_root / "runs"
+        self.comparisons_root = self.store_root / "comparisons"
         self.runs_root.mkdir(parents=True, exist_ok=True)
+        self.comparisons_root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
 
     def get_profiles(self) -> Dict[str, Dict[str, Any]]:
@@ -275,6 +278,22 @@ class WebE2EOrchestrator:
 
     def get_run(self, run_id: str) -> dict[str, Any]:
         return self._load_record(run_id)
+
+    def list_comparisons(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for p in sorted(self.comparisons_root.glob("*.json")):
+            try:
+                rows.append(json.loads(p.read_text(encoding="utf-8")))
+            except Exception:
+                continue
+        rows.sort(key=lambda x: str(x.get("created_at", "")), reverse=True)
+        return rows
+
+    def get_comparison(self, comparison_id: str) -> dict[str, Any]:
+        p = self.comparisons_root / f"{comparison_id}.json"
+        if not p.exists() or not p.is_file():
+            raise FileNotFoundError(f"comparison not found: {p}")
+        return json.loads(p.read_text(encoding="utf-8"))
 
     def submit_run(self, request_payload: Mapping[str, Any], run_async: bool = True) -> dict[str, Any]:
         req = self._normalize_request(request_payload)
@@ -319,10 +338,57 @@ class WebE2EOrchestrator:
             raise FileNotFoundError(f"run summary not found: {summary_path}")
         return json.loads(summary_path.read_text(encoding="utf-8"))
 
+    def compare_runs(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(request_payload, Mapping):
+            raise ValueError("request payload must be object")
+
+        ref_summary, ref_info = self._resolve_compare_target(request_payload, prefix="reference")
+        cand_summary, cand_info = self._resolve_compare_target(request_payload, prefix="candidate")
+        thresholds = self._normalize_thresholds(request_payload.get("thresholds"))
+
+        ref_map_npz = self._extract_radar_map_npz_path(ref_summary)
+        cand_map_npz = self._extract_radar_map_npz_path(cand_summary)
+        ref_payload = self._load_radar_map_payload(ref_map_npz)
+        cand_payload = self._load_radar_map_payload(cand_map_npz)
+        parity = compare_hybrid_estimation_payloads(
+            reference=ref_payload,
+            candidate=cand_payload,
+            thresholds=thresholds,
+        )
+
+        cmp_id = self._new_comparison_id()
+        out = {
+            "version": "web_e2e_compare_v1",
+            "comparison_id": cmp_id,
+            "created_at": _now_iso(),
+            "reference": {
+                **ref_info,
+                "radar_map_npz": str(ref_map_npz),
+            },
+            "candidate": {
+                **cand_info,
+                "radar_map_npz": str(cand_map_npz),
+            },
+            "parity": parity,
+            "verdict": {
+                "pass": bool(parity.get("pass", False)),
+                "failure_count": int(len(parity.get("failures", []))),
+            },
+        }
+
+        out_path = self.comparisons_root / f"{cmp_id}.json"
+        out_path.write_text(json.dumps(out, indent=2, default=_json_default), encoding="utf-8")
+        return out
+
     def _new_run_id(self) -> str:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
         return f"run_{stamp}_{token}"
+
+    def _new_comparison_id(self) -> str:
+        stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
+        token = uuid.uuid4().hex[:8]
+        return f"cmp_{stamp}_{token}"
 
     def _normalize_request(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
         if not isinstance(request_payload, Mapping):
@@ -362,6 +428,83 @@ class WebE2EOrchestrator:
         if not path.exists() or not path.is_file():
             raise FileNotFoundError(f"scene json not found: {path}")
         return path
+
+    def _resolve_json_path(self, path_text: str, field_name: str) -> Path:
+        path = Path(path_text).expanduser()
+        if not path.is_absolute():
+            path = (self.repo_root / path).resolve()
+        if not path.exists() or not path.is_file():
+            raise FileNotFoundError(f"{field_name} not found: {path}")
+        return path
+
+    def _normalize_thresholds(self, raw: Any) -> Optional[dict[str, float]]:
+        if raw is None:
+            return None
+        if not isinstance(raw, Mapping):
+            raise ValueError("thresholds must be object")
+        out: dict[str, float] = {}
+        for key, value in raw.items():
+            out[str(key)] = float(value)
+        return out
+
+    def _resolve_compare_target(
+        self,
+        request_payload: Mapping[str, Any],
+        prefix: str,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        run_id_key = f"{prefix}_run_id"
+        summary_key = f"{prefix}_summary_json"
+        run_id = str(request_payload.get(run_id_key, "")).strip()
+        summary_json = str(request_payload.get(summary_key, "")).strip()
+
+        if run_id != "":
+            summary = self.load_run_summary(run_id)
+            record = self.get_run(run_id)
+            info = {
+                "run_id": run_id,
+                "run_summary_json": str(record["paths"]["run_summary_json"]),
+            }
+            return summary, info
+
+        if summary_json != "":
+            summary_path = self._resolve_json_path(summary_json, summary_key)
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+            if not isinstance(summary, Mapping):
+                raise ValueError(f"{summary_key} must contain JSON object")
+            info = {
+                "run_id": None,
+                "run_summary_json": str(summary_path),
+            }
+            return dict(summary), info
+
+        raise ValueError(f"{run_id_key} or {summary_key} is required")
+
+    def _extract_radar_map_npz_path(self, summary_payload: Mapping[str, Any]) -> Path:
+        outputs = summary_payload.get("outputs")
+        path_text: Optional[str] = None
+        if isinstance(outputs, Mapping):
+            raw = outputs.get("radar_map_npz")
+            if raw is not None:
+                path_text = str(raw)
+        if path_text is None or path_text.strip() == "":
+            artifacts = summary_payload.get("artifacts")
+            if isinstance(artifacts, Mapping):
+                raw = artifacts.get("radar_map_npz")
+                if raw is not None:
+                    path_text = str(raw)
+        if path_text is None or path_text.strip() == "":
+            raise ValueError("summary payload missing outputs.radar_map_npz")
+        return self._resolve_json_path(path_text, "radar_map_npz")
+
+    def _load_radar_map_payload(self, radar_map_npz: Path) -> dict[str, Any]:
+        with np.load(str(radar_map_npz), allow_pickle=False) as payload:
+            if "fx_dop_win" not in payload or "fx_ang" not in payload:
+                raise ValueError(f"radar map missing required arrays: {radar_map_npz}")
+            out: dict[str, Any] = {
+                "fx_dop_win": np.asarray(payload["fx_dop_win"]),
+                "fx_ang": np.asarray(payload["fx_ang"]),
+            }
+        return out
 
     def _execute_run(self, run_id: str) -> None:
         self._mutate_record(
@@ -614,6 +757,10 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                     self._send_json(200, {"runs": orchestrator.list_runs()})
                     return
 
+                if path == "/api/comparisons":
+                    self._send_json(200, {"comparisons": orchestrator.list_comparisons()})
+                    return
+
                 if path.startswith("/api/runs/"):
                     suffix = path[len("/api/runs/") :]
                     if suffix.endswith("/summary"):
@@ -624,6 +771,12 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
 
                     run_id = suffix
                     payload = orchestrator.get_run(run_id)
+                    self._send_json(200, payload)
+                    return
+
+                if path.startswith("/api/comparisons/"):
+                    cmp_id = path[len("/api/comparisons/") :]
+                    payload = orchestrator.get_comparison(cmp_id)
                     self._send_json(200, payload)
                     return
 
@@ -640,7 +793,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
             path = parsed.path
             query = parse_qs(parsed.query)
 
-            if path != "/api/runs":
+            if path not in {"/api/runs", "/api/compare"}:
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
                 return
 
@@ -656,10 +809,19 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 self._send_json(400, {"ok": False, "error": f"invalid json body: {exc}"})
                 return
 
-            run_async = _parse_bool_query(query, "async", default=True)
             try:
-                record = orchestrator.submit_run(body, run_async=run_async)
-                self._send_json(202 if run_async else 200, {"ok": True, "run": record})
+                if path == "/api/runs":
+                    run_async = _parse_bool_query(query, "async", default=True)
+                    record = orchestrator.submit_run(body, run_async=run_async)
+                    self._send_json(202 if run_async else 200, {"ok": True, "run": record})
+                    return
+
+                if path == "/api/compare":
+                    payload = orchestrator.compare_runs(body)
+                    self._send_json(200, {"ok": True, "comparison": payload})
+                    return
+
+                self._send_json(404, {"ok": False, "error": f"not found: {path}"})
             except FileNotFoundError as exc:
                 self._send_json(404, {"ok": False, "error": str(exc)})
             except ValueError as exc:

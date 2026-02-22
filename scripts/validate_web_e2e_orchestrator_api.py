@@ -167,6 +167,37 @@ def run() -> None:
             assert isinstance(rows["runs"], list)
             assert any(str(x.get("run_id")) == run_id for x in rows["runs"])
 
+            # Compare endpoint smoke: compare two completed runs.
+            status, created_2 = _http_json("POST", f"{base}/api/runs?async=0", payload=post_payload)
+            assert status == 200
+            run_id_2 = str(created_2["run"]["run_id"])
+            assert run_id_2 != run_id
+
+            compare_payload = {
+                "reference_run_id": run_id,
+                "candidate_run_id": run_id_2,
+            }
+            status, cmp_resp = _http_json("POST", f"{base}/api/compare", payload=compare_payload)
+            assert status == 200
+            assert cmp_resp["ok"] is True
+            cmp_obj = cmp_resp["comparison"]
+            assert cmp_obj["version"] == "web_e2e_compare_v1"
+            assert cmp_obj["reference"]["run_id"] == run_id
+            assert cmp_obj["candidate"]["run_id"] == run_id_2
+            assert cmp_obj["parity"]["pass"] is True
+            assert cmp_obj["verdict"]["pass"] is True
+            cmp_id = str(cmp_obj["comparison_id"])
+
+            status, cmp_list = _http_json("GET", f"{base}/api/comparisons")
+            assert status == 200
+            assert any(str(x.get("comparison_id")) == cmp_id for x in cmp_list["comparisons"])
+
+            status, cmp_row = _http_json(
+                "GET", f"{base}/api/comparisons/{urllib.parse.quote(cmp_id)}"
+            )
+            assert status == 200
+            assert str(cmp_row["comparison_id"]) == cmp_id
+
         finally:
             server.shutdown()
             server.server_close()

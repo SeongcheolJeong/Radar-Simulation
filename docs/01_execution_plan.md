@@ -90,7 +90,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.0: Web E2E orchestration API phase-0 skeleton (`/health`, `/api/runs`, run summary quicklook)
 - [x] M15.1: Web run summary schema v2 (frontend-compatible `outputs/path_summary/adc_summary/radar_map_summary`)
 - [x] M15.2: Dashboard API-run mode (`POST /api/runs` + polling + summary auto-load) and dual-server local launcher
-- [ ] M15.3: Compare/regression API endpoints (`/api/compare`, baseline pinning, policy verdict payload)
+- [x] M15.3a: Compare API v1 (`POST /api/compare`, `/api/comparisons`) + dashboard compare panel
+- [ ] M15.3b: Baseline pinning and regression policy verdict payload (`/api/compare/policy`)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -103,7 +104,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.3 compare/regression API flow for web E2E while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.3b baseline pinning + policy verdict flow while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -457,3 +458,15 @@ M15.2 outcome (2026-02-22):
 - local combined launcher added:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_web_e2e_dashboard_local.sh`
   - starts orchestrator API + static dashboard server in one command
+
+M15.3a outcome (2026-02-22):
+
+- comparison API added in orchestrator:
+  - `POST /api/compare` (run/summary targets + parity thresholds override)
+  - `GET /api/comparisons`
+  - `GET /api/comparisons/{comparison_id}`
+- compare result persistence added under:
+  - `/Users/seongcheoljeong/Documents/Codex_test/data/web_e2e/comparisons/*.json`
+- dashboard compare panel added:
+  - reference/candidate `run_id` inputs
+  - API compare trigger and parity quick-result display (`pass`, failures, `rd/ra_shape_nmse`)

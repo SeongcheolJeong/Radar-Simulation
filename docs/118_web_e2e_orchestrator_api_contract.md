@@ -18,6 +18,9 @@ Implementation:
 - `GET /api/runs/{run_id}`
 - `GET /api/runs/{run_id}/summary`
 - `POST /api/runs?async=1|0`
+- `GET /api/comparisons`
+- `GET /api/comparisons/{comparison_id}`
+- `POST /api/compare`
 
 ## POST /api/runs Request
 
@@ -31,7 +34,37 @@ Implementation:
 }
 ```
 
-Rules:
+## POST /api/compare Request
+
+```json
+{
+  "reference_run_id": "run_20260222_123000_abcd1234",
+  "candidate_run_id": "run_20260222_123045_efgh5678",
+  "thresholds": {
+    "rd_shape_nmse_max": 0.25,
+    "ra_shape_nmse_max": 0.25
+  }
+}
+```
+
+`POST /api/compare` rules:
+
+- compare target must provide one of:
+  - `reference_run_id` or `reference_summary_json`
+  - `candidate_run_id` or `candidate_summary_json`
+- thresholds are optional and override default parity thresholds
+
+`POST /api/compare` response:
+
+- `comparison.version` = `web_e2e_compare_v1`
+- `comparison.reference` / `comparison.candidate`
+  - `run_id` (nullable when summary-json mode)
+  - `run_summary_json`
+  - `radar_map_npz`
+- `comparison.parity` (shared `avxsim.parity` metrics/failures)
+- `comparison.verdict.pass` and `comparison.verdict.failure_count`
+
+`POST /api/runs` rules:
 
 - `scene_json_path` required
 - `profile` one of: `fast_debug`, `balanced_dev`, `fidelity_eval`
@@ -42,6 +75,7 @@ Rules:
 - `<store_root>/runs/<run_id>/run_record.json`
 - `<store_root>/runs/<run_id>/run_summary.json`
 - `<store_root>/runs/<run_id>/output/` (pipeline artifacts)
+- `<store_root>/comparisons/<comparison_id>.json`
 
 ## Run Summary (v2)
 
@@ -107,6 +141,7 @@ Pass criteria:
 3. Sync run creation completes with `status=completed`
 4. Run summary endpoint returns frontend-compatible v2 summary fields and expected shapes
 5. Run list contains created `run_id`
+6. Compare endpoint returns parity verdict and persisted comparison entry
 
 Notes:
 

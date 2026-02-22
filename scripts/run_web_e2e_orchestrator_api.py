@@ -41,6 +41,9 @@ def main() -> None:
     print("    GET  /api/runs/{run_id}")
     print("    GET  /api/runs/{run_id}/summary")
     print("    POST /api/runs?async=1|0")
+    print("    GET  /api/comparisons")
+    print("    GET  /api/comparisons/{comparison_id}")
+    print("    POST /api/compare")
 
     serve_web_e2e_http_api(host=args.host, port=args.port, orchestrator=orchestrator)
 

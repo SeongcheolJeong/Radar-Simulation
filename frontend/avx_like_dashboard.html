@@ -77,6 +77,20 @@
           <div id="apiRunStatus" class="text-[11px] text-slate-500">api run idle</div>
         </div>
 
+        <div class="mt-4 space-y-2 border border-slate-800 rounded-lg p-3 bg-slate-950/40">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Compare Runs (API)</div>
+          <label class="text-xs text-slate-400 block">Reference run_id</label>
+          <input id="compareRefRunInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
+          <label class="text-xs text-slate-400 block">Candidate run_id</label>
+          <input id="compareCandRunInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
+          <button id="compareApiBtn" class="w-full py-2 rounded bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+            <i data-lucide="git-compare-arrows" class="w-4 h-4"></i>
+            Compare via API
+          </button>
+          <div id="compareStatus" class="text-[11px] text-slate-500">compare idle</div>
+          <pre id="compareResultBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
+        </div>
+
         <div class="mt-4">
           <label class="flex flex-col items-center justify-center w-full py-3 px-4 border-2 border-dashed border-slate-700 rounded-lg hover:border-cyan-500/50 hover:bg-slate-800/50 cursor-pointer transition-all group">
             <div class="flex items-center gap-2 text-slate-400 group-hover:text-cyan-400 transition-colors">
@@ -335,6 +349,7 @@
         path: null,
       },
       activeRunId: null,
+      lastComparison: null,
     };
 
     const el = {
@@ -345,6 +360,11 @@
       runAsyncCheck: document.getElementById("runAsyncCheck"),
       runApiBtn: document.getElementById("runApiBtn"),
       apiRunStatus: document.getElementById("apiRunStatus"),
+      compareRefRunInput: document.getElementById("compareRefRunInput"),
+      compareCandRunInput: document.getElementById("compareCandRunInput"),
+      compareApiBtn: document.getElementById("compareApiBtn"),
+      compareStatus: document.getElementById("compareStatus"),
+      compareResultBox: document.getElementById("compareResultBox"),
       refreshBtn: document.getElementById("refreshBtn"),
       runBtn: document.getElementById("runBtn"),
       loadJsonBtn: document.getElementById("loadJsonBtn"),
@@ -439,6 +459,43 @@
       } else {
         el.apiRunStatus.className = "text-[11px] text-slate-500";
       }
+    }
+
+    function setCompareStatus(text, tone) {
+      el.compareStatus.textContent = text || "compare idle";
+      if (tone === "ok") {
+        el.compareStatus.className = "text-[11px] text-emerald-400";
+      } else if (tone === "warn") {
+        el.compareStatus.className = "text-[11px] text-amber-400";
+      } else if (tone === "error") {
+        el.compareStatus.className = "text-[11px] text-red-400";
+      } else {
+        el.compareStatus.className = "text-[11px] text-slate-500";
+      }
+    }
+
+    function renderComparison(comparison) {
+      if (!comparison) {
+        el.compareResultBox.textContent = "-";
+        return;
+      }
+      const parity = comparison.parity || {};
+      const metrics = parity.metrics || {};
+      const failures = Array.isArray(parity.failures) ? parity.failures : [];
+      const lines = [
+        `id: ${comparison.comparison_id || "-"}`,
+        `pass: ${Boolean(comparison?.verdict?.pass)}`,
+        `failures: ${Number(comparison?.verdict?.failure_count || 0)}`,
+        `rd_shape_nmse: ${Number(metrics.rd_shape_nmse || 0).toExponential(3)}`,
+        `ra_shape_nmse: ${Number(metrics.ra_shape_nmse || 0).toExponential(3)}`,
+      ];
+      if (failures.length > 0) {
+        lines.push("failure metrics:");
+        failures.slice(0, 4).forEach((f) => {
+          lines.push(`- ${f.metric}: ${Number(f.value).toFixed(4)} > ${Number(f.limit).toFixed(4)}`);
+        });
+      }
+      el.compareResultBox.textContent = lines.join("\n");
     }
 
     function setStatus(text, tone, note) {
@@ -873,6 +930,12 @@
         setProgress(100);
         applySummary(summary, summaryUrl);
         setApiRunStatus(`completed: ${finalRun.run_id}`, "ok");
+
+        const prevCandidate = (el.compareCandRunInput.value || "").trim();
+        if (!el.compareRefRunInput.value.trim() && prevCandidate && prevCandidate !== String(finalRun.run_id)) {
+          el.compareRefRunInput.value = prevCandidate;
+        }
+        el.compareCandRunInput.value = String(finalRun.run_id);
       } catch (err) {
         updateLoadedSummaryFlag(false);
         setStatus("error", "error", String(err.message || err));
@@ -886,6 +949,52 @@
             setProgress(100);
           }
         }, 180);
+      }
+    }
+
+    async function compareRunsViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const refRunId = (el.compareRefRunInput.value || "").trim();
+      const candRunId = (el.compareCandRunInput.value || "").trim();
+
+      if (!apiBase) {
+        setCompareStatus("api base URL required", "error");
+        return;
+      }
+      if (!refRunId || !candRunId) {
+        setCompareStatus("reference/candidate run_id required", "error");
+        return;
+      }
+
+      el.compareApiBtn.disabled = true;
+      el.compareApiBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setCompareStatus("submitting compare...", "warn");
+
+      try {
+        const resp = await fetchApiJson(`${apiBase}/api/compare`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reference_run_id: refRunId,
+            candidate_run_id: candRunId,
+          }),
+        });
+        const cmp = resp && resp.comparison ? resp.comparison : null;
+        if (!cmp) {
+          throw new Error("compare response missing comparison");
+        }
+        state.lastComparison = cmp;
+        renderComparison(cmp);
+        if (Boolean(cmp?.verdict?.pass)) {
+          setCompareStatus(`pass: ${cmp.comparison_id}`, "ok");
+        } else {
+          setCompareStatus(`fail: ${cmp.comparison_id}`, "warn");
+        }
+      } catch (err) {
+        setCompareStatus(`compare failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.compareApiBtn.disabled = false;
+        el.compareApiBtn.classList.remove("opacity-60", "cursor-not-allowed");
       }
     }
 
@@ -926,6 +1035,7 @@
       el.refreshBtn.addEventListener("click", () => refreshSummary());
       el.runBtn.addEventListener("click", () => refreshSummary());
       el.runApiBtn.addEventListener("click", () => runSceneViaApi());
+      el.compareApiBtn.addEventListener("click", () => compareRunsViaApi());
 
       el.loadJsonBtn.addEventListener("click", () => {
         el.summaryFileInput.click();
@@ -993,10 +1103,14 @@
       const queryApi = params.get("api");
       const queryScene = params.get("scene");
       const queryProfile = params.get("profile");
+      const queryCompareRef = params.get("compare_ref");
+      const queryCompareCand = params.get("compare_cand");
       el.summaryPathInput.value = querySummary && querySummary.trim() ? querySummary.trim() : DEFAULT_SUMMARY_PATH;
       el.apiBaseInput.value = queryApi && queryApi.trim() ? queryApi.trim() : DEFAULT_API_BASE;
       el.sceneJsonInput.value = queryScene && queryScene.trim() ? queryScene.trim() : DEFAULT_SCENE_JSON_PATH;
       el.profileSelect.value = queryProfile && queryProfile.trim() ? queryProfile.trim() : "balanced_dev";
+      el.compareRefRunInput.value = queryCompareRef && queryCompareRef.trim() ? queryCompareRef.trim() : "";
+      el.compareCandRunInput.value = queryCompareCand && queryCompareCand.trim() ? queryCompareCand.trim() : "";
       el.fovInput.value = 120;
       el.rangeInput.value = 100;
       el.freqInput.value = 77;
@@ -1018,6 +1132,8 @@
 
       updateLoadedSummaryFlag(false);
       setApiRunStatus("api run idle", "neutral");
+      setCompareStatus("compare idle", "neutral");
+      renderComparison(null);
       setStatus("idle", "neutral", "viewer is waiting for summary json");
       await refreshSummary();
     }
