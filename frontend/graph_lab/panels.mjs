@@ -116,6 +116,7 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   shortcutProfileDraft: "custom_profile",
   activeFilterPreset: "default",
   filterPresetDraft: "custom_filter",
+  filterImportMode: "merge",
   detailFieldStates: null,
 };
 const SEVERITY_FILTER_OPTIONS = [
@@ -129,6 +130,10 @@ const POLICY_FILTER_OPTIONS = [
   { id: "hold", label: "hold" },
   { id: "adopt", label: "adopt" },
   { id: "none", label: "none" },
+];
+const FILTER_IMPORT_MODE_OPTIONS = [
+  { id: "merge", label: "merge (overwrite same name)" },
+  { id: "replace_custom", label: "replace custom presets" },
 ];
 const DEFAULT_FILTER_PRESETS = {
   default: {
@@ -265,6 +270,12 @@ function normalizeFilterPresetName(raw) {
     .replace(/_+/g, "_")
     .replace(/^_+|_+$/g, "");
   return compact.slice(0, 32);
+}
+
+function normalizeFilterImportMode(raw) {
+  const text = String(raw || "").trim().toLowerCase();
+  const allowed = new Set(FILTER_IMPORT_MODE_OPTIONS.map((x) => String(x.id || "")));
+  return allowed.has(text) ? text : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportMode;
 }
 
 function normalizeShortcutBindings(raw, fallback) {
@@ -966,6 +977,11 @@ export function ContractWarningOverlay({
   const [filterPresetDraft, setFilterPresetDraft] = React.useState(
     String(initialPrefs.filterPresetDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.filterPresetDraft)
   );
+  const [filterImportMode, setFilterImportMode] = React.useState(
+    normalizeFilterImportMode(
+      initialPrefs.filterImportMode || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportMode
+    )
+  );
   const [shortcutProfiles, setShortcutProfiles] = React.useState(() => initialShortcutProfiles);
   const [activeShortcutProfile, setActiveShortcutProfile] = React.useState(
     String(initialActiveShortcutProfile || "default")
@@ -1096,6 +1112,13 @@ export function ContractWarningOverlay({
   }, [policyFilter]);
 
   React.useEffect(() => {
+    const allowed = FILTER_IMPORT_MODE_OPTIONS.map((x) => String(x.id || ""));
+    if (!allowed.includes(filterImportMode)) {
+      setFilterImportMode(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportMode);
+    }
+  }, [filterImportMode]);
+
+  React.useEffect(() => {
     if (!runOptions.includes(pinnedRunId)) {
       setPinnedRunId("all");
     }
@@ -1150,6 +1173,7 @@ export function ContractWarningOverlay({
       showShortcutHelp,
       activeFilterPreset,
       filterPresetDraft,
+      filterImportMode,
       activeShortcutProfile,
       shortcutProfileDraft,
       shortcutBindings,
@@ -1157,6 +1181,7 @@ export function ContractWarningOverlay({
     });
   }, [
     activeFilterPreset,
+    filterImportMode,
     filterPresetDraft,
     activeShortcutProfile,
     compactMode,
@@ -1604,6 +1629,35 @@ export function ContractWarningOverlay({
     () => Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, activeFilterPreset),
     [activeFilterPreset]
   );
+  const filterImportPreview = React.useMemo(() => {
+    const text = String(filterTransferText || "").trim();
+    if (!text) {
+      return "preview: waiting for JSON payload";
+    }
+    try {
+      const imported = parseFilterPresetImportText(text);
+      const names = Object.keys(imported);
+      let overwriteCount = 0;
+      let builtinOverwriteCount = 0;
+      names.forEach((name) => {
+        if (!Object.prototype.hasOwnProperty.call(filterPresets, name)) return;
+        overwriteCount += 1;
+        if (Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) {
+          builtinOverwriteCount += 1;
+        }
+      });
+      const newCount = names.length - overwriteCount;
+      const modeToken = filterImportMode === "replace_custom" ? "replace_custom" : "merge";
+      const builtinTag = builtinOverwriteCount > 0 ? `, built-in overwrite ${builtinOverwriteCount}` : "";
+      return `preview: total ${names.length}, new ${newCount}, overwrite ${overwriteCount}${builtinTag}, mode ${modeToken}`;
+    } catch (err) {
+      return `preview: invalid payload (${String(err?.message || "parse error")})`;
+    }
+  }, [filterImportMode, filterPresets, filterTransferText]);
+  const filterImportPreviewIsValid = React.useMemo(
+    () => !String(filterImportPreview || "").startsWith("preview: invalid payload"),
+    [filterImportPreview]
+  );
   const applyActiveFilterPreset = React.useCallback(() => {
     const profileName = String(activeFilterPreset || "").trim();
     const cfg = filterPresets[profileName] || DEFAULT_FILTER_PRESETS.default;
@@ -1714,18 +1768,38 @@ export function ContractWarningOverlay({
     try {
       const imported = parseFilterPresetImportText(filterTransferText);
       const names = Object.keys(imported);
-      setFilterPresets((prev) => ({
-        ...prev,
-        ...imported,
-      }));
-      setFilterTransferStatus(`imported ${names.length} preset(s)`);
+      setFilterPresets((prev) => {
+        if (filterImportMode !== "replace_custom") {
+          return {
+            ...prev,
+            ...imported,
+          };
+        }
+        const next = {};
+        Object.keys(prev).forEach((name) => {
+          if (!Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) return;
+          const fallback = DEFAULT_FILTER_PRESETS[name] || DEFAULT_FILTER_PRESETS.default;
+          next[name] = normalizeFilterPresetConfig(prev[name], fallback);
+        });
+        return {
+          ...next,
+          ...imported,
+        };
+      });
+      if (filterImportMode === "replace_custom") {
+        setFilterTransferStatus(`imported ${names.length} preset(s); replaced existing custom presets`);
+      } else {
+        setFilterTransferStatus(`imported ${names.length} preset(s)`);
+      }
       if (names.length > 0) {
-        setFilterPresetDraft(String(names[0]));
+        const firstImported = String(names[0]);
+        setFilterPresetDraft(firstImported);
+        setActiveFilterPreset(firstImported);
       }
     } catch (err) {
       setFilterTransferStatus(`import failed: ${String(err?.message || "invalid payload")}`);
     }
-  }, [filterTransferText]);
+  }, [filterImportMode, filterTransferText]);
   const resetOverlayFilters = React.useCallback(() => {
     setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
     setSeverityFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
@@ -2135,11 +2209,20 @@ export function ContractWarningOverlay({
         key: "co_filter_load_json",
         onClick: triggerFilterImportFilePick,
       }, "Load Filter JSON"),
+      h("label", { key: "co_filter_import_mode_label" }, "import mode:"),
+      h("select", {
+        className: "select",
+        key: "co_filter_import_mode_select",
+        value: filterImportMode,
+        onChange: (e) => setFilterImportMode(normalizeFilterImportMode(e.target.value)),
+      }, FILTER_IMPORT_MODE_OPTIONS.map((option) =>
+        h("option", { value: option.id, key: `co_filter_import_mode_opt_${option.id}` }, option.label)
+      )),
       h("button", {
         className: "btn",
         key: "co_filter_import_presets",
         onClick: importFilterPresetsFromText,
-        disabled: String(filterTransferText || "").trim().length === 0,
+        disabled: String(filterTransferText || "").trim().length === 0 || !filterImportPreviewIsValid,
       }, "Import Filter Presets"),
       h("input", {
         type: "file",
@@ -2163,6 +2246,15 @@ export function ContractWarningOverlay({
           lineHeight: "1.35",
         },
       }),
+      h("span", {
+        key: "co_filter_import_preview",
+        className: "hint",
+        style: {
+          color: String(filterImportPreview || "").startsWith("preview: invalid payload")
+            ? "#f39b9b"
+            : "#8eb6ca",
+        },
+      }, filterImportPreview),
       filterTransferStatus
         ? h("span", {
           key: "co_filter_transfer_status",

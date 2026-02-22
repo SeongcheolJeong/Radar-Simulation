@@ -137,6 +137,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.26: Active filter summary chips + filter-only reset action
 - [x] M17.27: Filter preset profiles (load/save/delete with persistence)
 - [x] M17.28: Filter preset transfer import/export (team-shareable JSON bundle)
+- [x] M17.29: Filter preset import guardrails (merge/replace mode + conflict preview)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -149,7 +150,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.28 frontend hardening track: add safer transfer ergonomics (merge/replace guardrails and conflict hints) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.29 frontend hardening track: add selective-import controls (choose preset subset) with dry-run diff visibility while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1192,3 +1193,18 @@ M17.28 outcome (2026-02-22):
   - parser accepts bundle form or direct preset-map form
   - invalid payload guard with explicit status (`import failed: ...`)
   - imported presets normalized to current filter schema before merge
+
+M17.29 outcome (2026-02-22):
+
+- transfer import guardrails expanded with explicit mode control:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - mode options: `merge (overwrite same name)`, `replace custom presets`
+  - mode persistence key in overlay prefs: `filterImportMode`
+- payload conflict preview surfaced before import apply:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - preview content: `total/new/overwrite/built-in overwrite/mode`
+  - preview UI key: `co_filter_import_preview`
+- import safety behavior tightened:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - invalid payload now disables import action
+  - `replace_custom` mode preserves built-ins while replacing existing custom presets

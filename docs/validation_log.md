@@ -2460,3 +2460,28 @@
     - `Import Filter Presets`
     - `co_filter_transfer_text`
     - `co_filter_transfer_status`
+
+## Web E2E Graph Filter Preset Import Guardrails (M17.29)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - import guardrail frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8160/8140)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - guardrail mode/preview tokens confirmed:
+    - `FILTER_IMPORT_MODE_OPTIONS`
+    - `normalizeFilterImportMode`
+    - `filterImportMode`
+    - `filterImportPreview`
+    - `co_filter_import_mode_select`
+    - `co_filter_import_preview`
+  - safety behavior tokens confirmed:
+    - `replace_custom`
+    - `disabled: String(filterTransferText || \"\").trim().length === 0 || !filterImportPreviewIsValid`
+    - `graph_lab_contract_overlay_filter_presets`
