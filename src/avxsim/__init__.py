@@ -116,6 +116,7 @@ from .runtime_coupling import (
     invoke_runtime_paths_provider,
     load_runtime_provider_callable,
 )
+from .runtime_providers import generate_sionna_like_paths_from_mitsuba
 from .replay_batch import (
     load_replay_manifest_json,
     run_replay_cases,
@@ -224,6 +225,7 @@ __all__ = [
     "run_object_scene_to_radar_map",
     "run_object_scene_to_radar_map_json",
     "detect_runtime_modules",
+    "generate_sionna_like_paths_from_mitsuba",
     "invoke_runtime_paths_provider",
     "load_runtime_provider_callable",
     "DEFAULT_SIDECAR_PROFILE",

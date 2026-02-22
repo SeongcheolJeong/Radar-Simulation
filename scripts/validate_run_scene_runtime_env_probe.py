@@ -36,10 +36,11 @@ def run() -> None:
         assert isinstance(payload.get("module_report"), dict)
         runtime_report = payload.get("runtime_report")
         assert isinstance(runtime_report, dict)
+        assert "sionna_rt_mitsuba_runtime" in runtime_report
         assert "sionna_runtime" in runtime_report
         assert "po_sbr_runtime" in runtime_report
 
-        for runtime_name in ("sionna_runtime", "po_sbr_runtime"):
+        for runtime_name in ("sionna_rt_mitsuba_runtime", "sionna_runtime", "po_sbr_runtime"):
             info = runtime_report[runtime_name]
             assert isinstance(info, dict)
             assert isinstance(info.get("required_modules"), list)

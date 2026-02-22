@@ -82,7 +82,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M13.3: RadarSimPy periodic parity-lock automation (signal-chain drift guard, optional runtime dependency)
 - [x] M14.0: Direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
 - [x] M14.1: Runtime environment contract + readiness probe (`sionna`/`po-sbr`)
-- [ ] M14.2: Real runtime engine binding pilot (first real scene run on ready backend)
+- [x] M14.2: Real runtime engine binding pilot (Mitsuba-backed `sionna_rt` first scene run)
+- [ ] M14.3: Full `sionna`/`po-sbr` runtime track enablement (`tensorflow`, `optix`, LLVM backend provisioning)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -95,7 +96,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Start M14.2: execute first real scene run on backend that passes M14.1 readiness gate.
+Start M14.3: close remaining full-runtime blockers (`sionna+tensorflow`, `po-sbr+optix`) and run first physics-grade pilot.
 
 ## M10.19 Decision Gate
 
@@ -333,6 +334,14 @@ M14.0 outcome (2026-02-21):
 M14.1 outcome (2026-02-21):
 
 - runtime environment probe runner added (`required modules + external repo presence -> ready gate`)
-- runtime readiness summary schema locked for `sionna_runtime` and `po_sbr_runtime`
+- runtime readiness summary schema locked for `sionna_rt_mitsuba_runtime`, `sionna_runtime`, `po_sbr_runtime`
 - contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/106_scene_runtime_env_probe_contract.md`
 - validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_env_probe.py`
+
+M14.2 outcome (2026-02-22):
+
+- Mitsuba-backed runtime provider added for `sionna_rt` backend
+- first real runtime scene pilot executed without pre-exported path JSON
+- real pilot report locked: `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_mitsuba_pilot_v1_2026_02_22.json`
+- contract added: `/Users/seongcheoljeong/Documents/Codex_test/docs/107_scene_runtime_mitsuba_pilot_contract.md`
+- validation added: `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_mitsuba_pilot.py`

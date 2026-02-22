@@ -1,0 +1,34 @@
+{
+  "scene_id": "mitsuba_runtime_pilot_v1",
+  "scene_json": "/Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/mitsuba_runtime_pilot_v1/scene_mitsuba_runtime_pilot.json",
+  "output_dir": "/Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/mitsuba_runtime_pilot_v1/pipeline_outputs",
+  "path_list_json": "/Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/mitsuba_runtime_pilot_v1/pipeline_outputs/path_list.json",
+  "adc_cube_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/mitsuba_runtime_pilot_v1/pipeline_outputs/adc_cube.npz",
+  "radar_map_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/mitsuba_runtime_pilot_v1/pipeline_outputs/radar_map.npz",
+  "frame_count": 8,
+  "path_count": 8,
+  "runtime_resolution": {
+    "mode": "runtime_provider",
+    "backend_type": "sionna_rt",
+    "runtime_provider": "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba",
+    "runtime_info": {
+      "provider_spec": "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba",
+      "required_modules": [
+        "mitsuba",
+        "drjit"
+      ],
+      "module_report": {
+        "mitsuba": {
+          "available": true,
+          "module_name": "mitsuba",
+          "module_version": "3.7.1"
+        },
+        "drjit": {
+          "available": true,
+          "module_name": "drjit",
+          "module_version": "1.2.0"
+        }
+      }
+    }
+  }
+}

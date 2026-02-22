@@ -34,7 +34,8 @@ Use references via local adapters, not by merging third-party internals into cor
 4. M13.3: RadarSimPy parity-lock automation for periodic signal-chain drift checks (optional hard gate).
 5. M14.0: runtime provider coupling path (`scene -> runtime provider -> canonical paths`) with deterministic fallback policy.
 6. M14.1: runtime environment readiness probe (`required modules + external repo presence`).
-7. M14.2: first real runtime scene pilot on a ready backend.
+7. M14.2: first real runtime scene pilot on a ready backend (Mitsuba-backed `sionna_rt`).
+8. M14.3: full-runtime enablement for `sionna+tensorflow` and `po-sbr+optix`.
 
 ## Current Readiness Assessment
 
@@ -45,8 +46,10 @@ Use references via local adapters, not by merging third-party internals into cor
   - public asset onboarding (`glTF`, `OBJ`) and deterministic fixture bundles
   - exported-path adapters: `sionna_rt`, `po_sbr_rt` + parity locks
   - direct runtime provider coupling path for `sionna_rt`/`po_sbr_rt` (no pre-exported path JSON required)
+  - real runtime pilot path using Mitsuba ray intersection (`sionna_rt` backend)
 - Remaining high-impact physics/backend work:
-  - real external runtime scene execution on backend passing readiness gate
+  - full `sionna+tensorflow` runtime enablement on this host/toolchain
+  - PO-SBR runtime enablement (`po_sbr`, `pyoptix`, `optix`) and first real pilot
   - scattering-physics fidelity tuning against measured scenarios
 - RadarSimPy position:
   - useful as regression oracle

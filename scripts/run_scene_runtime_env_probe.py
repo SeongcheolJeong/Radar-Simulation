@@ -10,6 +10,10 @@ from avxsim.runtime_coupling import detect_runtime_modules
 
 
 DEFAULT_RUNTIME_SPECS: Dict[str, Dict[str, Any]] = {
+    "sionna_rt_mitsuba_runtime": {
+        "required_modules": ("mitsuba", "drjit"),
+        "repo_candidates": ("external/sionna",),
+    },
     "sionna_runtime": {
         "required_modules": ("sionna", "tensorflow"),
         "repo_candidates": ("external/sionna",),

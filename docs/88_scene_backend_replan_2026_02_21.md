@@ -48,4 +48,5 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 - [x] M13.3: RadarSimPy periodic parity-lock automation (drift guard)
 - [x] M14.0: direct Sionna/PO-SBR runtime coupling feasibility spike (no pre-exported path JSON)
 - [x] M14.1: runtime environment contract + readiness probe automation
-- [ ] M14.2: external runtime binding pilot (`sionna`/`po-sbr` first real scene run)
+- [x] M14.2: external runtime binding pilot (Mitsuba-backed `sionna_rt` first real scene run)
+- [ ] M14.3: full `sionna`/`po-sbr` runtime enablement (`tensorflow`, `optix`, LLVM backend)

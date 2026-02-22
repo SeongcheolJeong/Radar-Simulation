@@ -1275,4 +1275,27 @@
 - Notes:
   - runtime readiness summary schema validated (`python`, `module_report`, `runtime_report`)
   - `ready` rule consistency validated (`repo_found && missing_required_modules == 0`)
-  - both runtime tracks covered (`sionna_runtime`, `po_sbr_runtime`)
+  - runtime tracks covered (`sionna_rt_mitsuba_runtime`, `sionna_runtime`, `po_sbr_runtime`)
+
+## Scene Runtime Mitsuba Pilot (M14.2)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_mitsuba_pilot.py`
+- Result: pass
+- Notes:
+  - real runtime provider path validated with Mitsuba ray intersection
+  - canonical artifacts emitted without pre-exported path JSON
+  - runtime metadata confirms `runtime_resolution.mode=runtime_provider`
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_env_probe.py --workspace-root /Users/seongcheoljeong/Documents/Codex_test --output-summary-json /tmp/scene_runtime_env_probe_summary_m14_2.json`
+- Result: pass
+- Notes:
+  - readiness gate confirms `sionna_rt_mitsuba_runtime_ready=true`
+  - `sionna_runtime` and `po_sbr_runtime` remain blocked on missing dependencies
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_mitsuba_pilot.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/mitsuba_runtime_pilot_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_mitsuba_pilot_v1_2026_02_22.json --n-chirps 8 --samples-per-chirp 1024 --target-range-m 25.0 --target-radius-m 0.5`
+- Result: pass
+- Notes:
+  - first real runtime scene pilot executed and report archived

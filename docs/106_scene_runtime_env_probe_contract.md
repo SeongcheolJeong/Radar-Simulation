@@ -15,6 +15,7 @@ Add a runtime probe that emits JSON summary with:
 
 Runtimes covered:
 
+- `sionna_rt_mitsuba_runtime`
 - `sionna_runtime`
 - `po_sbr_runtime`
 
