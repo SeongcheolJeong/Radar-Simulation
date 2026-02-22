@@ -130,6 +130,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.19: Row detail lazy-expansion controls + detail rendering on demand
 - [x] M17.20: Overlay shortcut remap + profile persistence
 - [x] M17.21: Row detail field-level toggles + core/all presets
+- [x] M17.22: Shortcut profile transfer import/export (team-shareable JSON)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -142,7 +143,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.21 frontend hardening track: add team-shareable shortcut profile import/export and lightweight detail-view ergonomics while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.22 frontend hardening track: add lightweight detail-view ergonomics while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1077,3 +1078,19 @@ M17.21 outcome (2026-02-22):
   - `formatRowDetailText` now emits only selected sections
   - `note_json` serialization runs only when selected
   - field-state selection persisted via overlay prefs (`detailFieldStates`)
+
+M17.22 outcome (2026-02-22):
+
+- shortcut profiles are now export/import-shareable as JSON:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - export bundle metadata: `schema_version`, `kind`, `exported_at_iso`, `profiles`
+  - import parser accepts bundle form or direct profile-map form
+- operator transfer workflow controls added to overlay:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Export Profiles`, `Copy Profiles`, `Load JSON`, `Import Profiles`
+  - transfer editor/status fields: `co_shortcut_transfer_text`, `co_shortcut_transfer_status`
+- import/export hardening behavior:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - profile names normalized (`normalizeShortcutProfileName`)
+  - invalid payload guard with explicit status (`import failed: ...`)
+  - imported profiles are normalized to current action schema

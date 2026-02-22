@@ -291,6 +291,59 @@ function saveShortcutProfiles(profiles) {
   }
 }
 
+function buildShortcutProfileExportBundle(profiles) {
+  const rows = profiles && typeof profiles === "object" && !Array.isArray(profiles) ? profiles : {};
+  const normalized = {};
+  Object.keys(rows)
+    .sort((a, b) => String(a).localeCompare(String(b)))
+    .forEach((name) => {
+      const pname = normalizeShortcutProfileName(name);
+      if (!pname) return;
+      normalized[pname] = normalizeShortcutBindings(rows[name], DEFAULT_SHORTCUT_BINDINGS);
+    });
+  return {
+    schema_version: 1,
+    kind: "graph_lab_contract_overlay_shortcut_profiles",
+    exported_at_iso: new Date().toISOString(),
+    profiles: normalized,
+  };
+}
+
+function serializeShortcutProfileExportBundle(profiles) {
+  return JSON.stringify(buildShortcutProfileExportBundle(profiles), null, 2);
+}
+
+function parseShortcutProfileImportText(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text) {
+    throw new Error("empty import payload");
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_) {
+    throw new Error("invalid JSON");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("import root must be object");
+  }
+  const candidate = parsed.profiles && typeof parsed.profiles === "object" && !Array.isArray(parsed.profiles)
+    ? parsed.profiles
+    : parsed;
+  const imported = {};
+  Object.keys(candidate).forEach((name) => {
+    const rawProfile = candidate[name];
+    if (!rawProfile || typeof rawProfile !== "object" || Array.isArray(rawProfile)) return;
+    const pname = normalizeShortcutProfileName(name);
+    if (!pname) return;
+    imported[pname] = normalizeShortcutBindings(rawProfile, DEFAULT_SHORTCUT_BINDINGS);
+  });
+  if (Object.keys(imported).length === 0) {
+    throw new Error("no valid shortcut profiles found");
+  }
+  return imported;
+}
+
 function isEditableElementTarget(target) {
   const t = target && typeof target === "object" ? target : null;
   if (!t) return false;
@@ -709,6 +762,9 @@ export function ContractWarningOverlay({
       DEFAULT_DETAIL_FIELD_STATES
     )
   );
+  const [shortcutTransferText, setShortcutTransferText] = React.useState("");
+  const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
+  const shortcutImportFileInputRef = React.useRef(null);
   const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
   const [expandedRowKeys, setExpandedRowKeys] = React.useState(() => new Set());
   const applyOverlayPreset = React.useCallback((presetName) => {
@@ -975,6 +1031,82 @@ export function ContractWarningOverlay({
       )
     );
   }, []);
+  const triggerShortcutImportFilePick = React.useCallback(() => {
+    const input = shortcutImportFileInputRef.current;
+    if (!input || typeof input.click !== "function") return;
+    input.click();
+  }, []);
+  const handleShortcutImportFileChange = React.useCallback((evt) => {
+    const file = evt?.target?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || "");
+      setShortcutTransferText(text);
+      setShortcutTransferStatus(`loaded file: ${String(file.name || "-")}`);
+    };
+    reader.onerror = () => {
+      setShortcutTransferStatus(`failed to read file: ${String(file.name || "-")}`);
+    };
+    reader.readAsText(file);
+    if (evt?.target) evt.target.value = "";
+  }, []);
+  const exportShortcutProfilesToJson = React.useCallback(() => {
+    const jsonText = serializeShortcutProfileExportBundle(shortcutProfiles);
+    setShortcutTransferText(jsonText);
+    try {
+      if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
+        setShortcutTransferStatus("exported to text buffer");
+        return;
+      }
+      const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `graph_lab_shortcut_profiles_${ts}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      setShortcutTransferStatus(`exported ${Object.keys(shortcutProfiles).length} profile(s)`);
+    } catch (_) {
+      setShortcutTransferStatus("exported to text buffer (file download unavailable)");
+    }
+  }, [shortcutProfiles]);
+  const copyShortcutProfilesJson = React.useCallback(async () => {
+    const jsonText = serializeShortcutProfileExportBundle(shortcutProfiles);
+    setShortcutTransferText(jsonText);
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(jsonText);
+        setShortcutTransferStatus(`copied ${Object.keys(shortcutProfiles).length} profile(s) to clipboard`);
+        return;
+      }
+      setShortcutTransferStatus("clipboard unavailable; copy from text buffer");
+    } catch (_) {
+      setShortcutTransferStatus("clipboard write failed; copy from text buffer");
+    }
+  }, [shortcutProfiles]);
+  const importShortcutProfilesFromText = React.useCallback(() => {
+    try {
+      const imported = parseShortcutProfileImportText(shortcutTransferText);
+      const names = Object.keys(imported);
+      setShortcutProfiles((prev) => ({
+        ...prev,
+        ...imported,
+      }));
+      setShortcutTransferStatus(`imported ${names.length} profile(s)`);
+      if (!activeShortcutProfile && names.length > 0) {
+        setActiveShortcutProfile(String(names[0]));
+      }
+      if (names.length > 0) {
+        setShortcutProfileDraft(String(names[0]));
+      }
+    } catch (err) {
+      setShortcutTransferStatus(`import failed: ${String(err?.message || "invalid payload")}`);
+    }
+  }, [activeShortcutProfile, shortcutTransferText]);
   const shortcutActionByKey = React.useMemo(() => {
     const map = new Map();
     SHORTCUT_ACTION_DEFS.forEach((def) => {
@@ -1397,6 +1529,63 @@ export function ContractWarningOverlay({
         className: "hint",
         style: { marginLeft: "auto", color: activeShortcutIsBuiltin ? "#8eb6ca" : "#f0b33a" },
       }, activeShortcutIsBuiltin ? "profile: built-in" : "profile: custom"),
+    ]),
+    h("div", {
+      className: "contract-overlay-filter",
+      key: "co_shortcut_transfer_cfg",
+      style: { flexWrap: "wrap", rowGap: "6px" },
+    }, [
+      h("label", { key: "co_shortcut_transfer_label" }, "profile transfer:"),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_export_profiles",
+        onClick: exportShortcutProfilesToJson,
+      }, "Export Profiles"),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_copy_profiles",
+        onClick: copyShortcutProfilesJson,
+      }, "Copy Profiles"),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_load_json",
+        onClick: triggerShortcutImportFilePick,
+      }, "Load JSON"),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_import_profiles",
+        onClick: importShortcutProfilesFromText,
+        disabled: String(shortcutTransferText || "").trim().length === 0,
+      }, "Import Profiles"),
+      h("input", {
+        type: "file",
+        key: "co_shortcut_import_file",
+        ref: shortcutImportFileInputRef,
+        accept: ".json,application/json",
+        onChange: handleShortcutImportFileChange,
+        style: { display: "none" },
+      }),
+      h("textarea", {
+        className: "textarea",
+        key: "co_shortcut_transfer_text",
+        value: shortcutTransferText,
+        onChange: (e) => setShortcutTransferText(String(e.target.value || "")),
+        placeholder: "{\"profiles\": {\"my_team\": {\"toggle_help\": \"h\"}}}",
+        style: {
+          flexBasis: "100%",
+          minHeight: "74px",
+          padding: "6px 7px",
+          fontSize: "10px",
+          lineHeight: "1.35",
+        },
+      }),
+      shortcutTransferStatus
+        ? h("span", {
+          key: "co_shortcut_transfer_status",
+          className: "hint",
+          style: { marginLeft: "auto", color: "#8eb6ca" },
+        }, shortcutTransferStatus)
+        : null,
     ]),
     h("div", {
       className: "contract-overlay-filter",

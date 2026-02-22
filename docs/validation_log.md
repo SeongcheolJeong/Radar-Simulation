@@ -2265,3 +2265,31 @@
     - `detailFieldStates.snapshot`
     - `detailFieldStates.baseline`
     - `detailFieldStates.note_json`
+
+## Web E2E Graph Shortcut Profile Transfer Import/Export (M17.22)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - shortcut profile transfer frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8153/8133)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - transfer helper/parser tokens confirmed:
+    - `buildShortcutProfileExportBundle`
+    - `serializeShortcutProfileExportBundle`
+    - `parseShortcutProfileImportText`
+    - `schema_version`
+    - `graph_lab_contract_overlay_shortcut_profiles`
+  - transfer UI tokens confirmed:
+    - `co_shortcut_transfer_cfg`
+    - `Export Profiles`
+    - `Copy Profiles`
+    - `Load JSON`
+    - `Import Profiles`
+    - `co_shortcut_transfer_text`
+    - `co_shortcut_transfer_status`
