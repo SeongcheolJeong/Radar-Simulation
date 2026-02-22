@@ -1580,3 +1580,13 @@
   - dashboard HTML includes review-bundle controls (`copyReviewBundleBtn`, `reviewBundleStatus`, `reviewBundlePathBox`)
   - dashboard JS includes bundle hook/copy helpers (`runReviewBundleCopyHook`, `copyTextToClipboard`, `getReviewBundlePathFromExport`)
   - hook path reuses `POST /api/regression-exports` and resolves bundle path from export artifacts
+
+## Web E2E Decision Report Template Export (M15.11)
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8099 8119` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`) + `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - dashboard HTML includes report-export controls (`exportDecisionReportBtn`, `decisionReportStatus`, `decisionReportFileBox`)
+  - dashboard JS includes markdown template exporter (`buildDecisionReportTemplateMarkdown`, `exportDecisionReportTemplate`)
+  - export path includes blob-download + best-effort clipboard copy with status updates

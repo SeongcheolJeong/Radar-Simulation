@@ -168,6 +168,12 @@
           </button>
           <div id="reviewBundleStatus" class="text-[11px] text-slate-500">review bundle idle</div>
           <div id="reviewBundlePathBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 break-all">-</div>
+          <button id="exportDecisionReportBtn" class="w-full py-2 rounded bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-semibold flex items-center justify-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            Export Decision Report (.md)
+          </button>
+          <div id="decisionReportStatus" class="text-[11px] text-slate-500">decision report idle</div>
+          <div id="decisionReportFileBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 break-all">-</div>
           <div class="rounded border border-slate-800 bg-slate-900/60 p-2 space-y-1.5">
             <div class="flex items-center justify-between gap-2">
               <span class="text-[11px] uppercase tracking-wider text-slate-400">Regression Gate</span>
@@ -485,6 +491,7 @@
       regressionExports: [],
       policyEvals: [],
       lastReviewBundlePath: null,
+      lastDecisionReport: null,
     };
 
     const el = {
@@ -520,6 +527,9 @@
       copyReviewBundleBtn: document.getElementById("copyReviewBundleBtn"),
       reviewBundleStatus: document.getElementById("reviewBundleStatus"),
       reviewBundlePathBox: document.getElementById("reviewBundlePathBox"),
+      exportDecisionReportBtn: document.getElementById("exportDecisionReportBtn"),
+      decisionReportStatus: document.getElementById("decisionReportStatus"),
+      decisionReportFileBox: document.getElementById("decisionReportFileBox"),
       regressionGateBadge: document.getElementById("regressionGateBadge"),
       gateSessionCount: document.getElementById("gateSessionCount"),
       gateExportCount: document.getElementById("gateExportCount"),
@@ -721,6 +731,19 @@
         el.reviewBundleStatus.className = "text-[11px] text-red-400";
       } else {
         el.reviewBundleStatus.className = "text-[11px] text-slate-500";
+      }
+    }
+
+    function setDecisionReportStatus(text, tone) {
+      el.decisionReportStatus.textContent = text || "decision report idle";
+      if (tone === "ok") {
+        el.decisionReportStatus.className = "text-[11px] text-emerald-400";
+      } else if (tone === "warn") {
+        el.decisionReportStatus.className = "text-[11px] text-amber-400";
+      } else if (tone === "error") {
+        el.decisionReportStatus.className = "text-[11px] text-red-400";
+      } else {
+        el.decisionReportStatus.className = "text-[11px] text-slate-500";
       }
     }
 
@@ -1065,6 +1088,126 @@
       document.body.removeChild(ta);
       if (!ok) {
         throw new Error("clipboard copy unsupported");
+      }
+    }
+
+    function sanitizeFilenameToken(text, fallbackValue) {
+      const raw = String(text || "").trim();
+      const token = raw.replace(/[^A-Za-z0-9_.-]+/g, "_").replace(/^_+|_+$/g, "");
+      return token || String(fallbackValue || "report");
+    }
+
+    function downloadTextAsFile(filename, text) {
+      const name = String(filename || "report.md");
+      const body = String(text || "");
+      const blob = new Blob([body], { type: "text/markdown;charset=utf-8" });
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+    }
+
+    function buildDecisionReportTemplateMarkdown() {
+      const nowIso = new Date().toISOString();
+      const baselineId = String(el.baselineIdInput.value || "").trim() || "-";
+      const sessionId = String(el.regressionSessionIdInput.value || el.regressionSessionSelect.value || "").trim() || "-";
+      const exportId = String(el.regressionExportIdInput.value || el.regressionExportSelect.value || "").trim() || "-";
+      const runRef = String(el.compareRefRunInput.value || "").trim() || "-";
+      const runCand = String(el.compareCandRunInput.value || "").trim() || "-";
+      const tuning = collectPolicyTuningConfig();
+
+      const reportName = `regression_decision_report_${sanitizeFilenameToken(sessionId, "session")}_${nowIso.slice(0, 19).replace(/[:T]/g, "_")}.md`;
+      const reviewBundlePath = state.lastReviewBundlePath || "-";
+
+      const lines = [
+        "# Regression Decision Report (Template)",
+        "",
+        "## Metadata",
+        `- generated_at_utc: ${nowIso}`,
+        `- baseline_id: ${baselineId}`,
+        `- session_id: ${sessionId}`,
+        `- export_id: ${exportId}`,
+        "",
+        "## Candidate Context",
+        `- reference_run_id: ${runRef}`,
+        `- candidate_run_id: ${runCand}`,
+        "",
+        "## Policy Configuration",
+        `- preset: ${tuning.preset}`,
+        `- require_parity_pass: ${Boolean(tuning.policy.require_parity_pass)}`,
+        `- stop_on_first_fail: ${Boolean(tuning.stopOnFirstFail)}`,
+        `- max_failure_count: ${Number(tuning.policy.max_failure_count || 0)}`,
+        `- max_rd_shape_nmse: ${Number(tuning.policy.max_rd_shape_nmse || 0)}`,
+        `- max_ra_shape_nmse: ${Number(tuning.policy.max_ra_shape_nmse || 0)}`,
+        "",
+        "## Gate Overview Snapshot",
+        `- badge: ${String(el.regressionGateBadge.textContent || "").trim() || "-"}`,
+        `- latest_session: ${String(el.gateLatestSessionLine.textContent || "").trim() || "-"}`,
+        `- linked_export: ${String(el.gateLatestExportLine.textContent || "").trim() || "-"}`,
+        `- cue: ${String(el.gateCueLine.textContent || "").trim() || "-"}`,
+        "",
+        "## Decision Audit Snapshot",
+        `- badge: ${String(el.decisionAuditBadge.textContent || "").trim() || "-"}`,
+        `- summary: ${String(el.auditSummaryLine.textContent || "").trim() || "-"}`,
+        `- trend: ${String(el.auditTrendLine.textContent || "").trim() || "-"}`,
+        `- rule_histogram: ${String(el.auditRuleHistogram.textContent || "").trim() || "-"}`,
+        `- hot_candidate: ${String(el.auditHotCandidateLine.textContent || "").trim() || "-"}`,
+        "",
+        "## Artifact Pointers",
+        `- review_bundle_path: ${reviewBundlePath}`,
+        `- session_json: ${String((state.lastRegressionExport && state.lastRegressionExport.artifacts && state.lastRegressionExport.artifacts.session_json) || "-")}`,
+        `- summary_index_json: ${String((state.lastRegressionExport && state.lastRegressionExport.artifacts && state.lastRegressionExport.artifacts.summary_index_json) || "-")}`,
+        `- package_json: ${String((state.lastRegressionExport && state.lastRegressionExport.artifacts && state.lastRegressionExport.artifacts.package_json) || "-")}`,
+        "",
+        "## Reviewer Checklist",
+        "- [ ] Verify parity/failure rules match expected policy intent",
+        "- [ ] Confirm hold/adopt recommendation consistency with latest trend",
+        "- [ ] Confirm artifact package is attached to team handoff",
+        "",
+        "## Decision",
+        "- final_decision: `<ADOPT|HOLD|NEEDS_INVESTIGATION>`",
+        "- owner: `<name>`",
+        "- due_date: `<YYYY-MM-DD>`",
+        "- notes:",
+        "  - ",
+      ];
+      return {
+        filename: reportName,
+        markdown: lines.join("\n"),
+      };
+    }
+
+    async function exportDecisionReportTemplate() {
+      el.exportDecisionReportBtn.disabled = true;
+      el.exportDecisionReportBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setDecisionReportStatus("building decision report template...", "warn");
+      try {
+        const payload = buildDecisionReportTemplateMarkdown();
+        state.lastDecisionReport = payload;
+        downloadTextAsFile(payload.filename, payload.markdown);
+        el.decisionReportFileBox.textContent = payload.filename;
+
+        let copied = false;
+        try {
+          await copyTextToClipboard(payload.markdown);
+          copied = true;
+        } catch (_) {
+          copied = false;
+        }
+        if (copied) {
+          setDecisionReportStatus(`report exported + copied: ${payload.filename}`, "ok");
+        } else {
+          setDecisionReportStatus(`report exported: ${payload.filename} (clipboard copy skipped)`, "warn");
+        }
+      } catch (err) {
+        setDecisionReportStatus(`report export failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.exportDecisionReportBtn.disabled = false;
+        el.exportDecisionReportBtn.classList.remove("opacity-60", "cursor-not-allowed");
       }
     }
 
@@ -2081,6 +2224,7 @@
       );
       el.exportRegressionBtn.addEventListener("click", () => exportRegressionSessionViaApi());
       el.copyReviewBundleBtn.addEventListener("click", () => runReviewBundleCopyHook());
+      el.exportDecisionReportBtn.addEventListener("click", () => exportDecisionReportTemplate());
       el.regressionSessionSelect.addEventListener("change", () => loadSelectedRegressionSessionViaApi());
       el.regressionExportSelect.addEventListener("change", () => loadSelectedRegressionExportViaApi());
 
@@ -2218,7 +2362,9 @@
       setRegressionStatus("regression idle", "neutral");
       setRegressionHistoryStatus("history idle", "neutral");
       setReviewBundleStatus("review bundle idle", "neutral");
+      setDecisionReportStatus("decision report idle", "neutral");
       el.reviewBundlePathBox.textContent = "-";
+      el.decisionReportFileBox.textContent = "-";
       renderRegressionDownloads(null);
       updateRegressionGateOverview();
       updateRegressionDecisionAudit();

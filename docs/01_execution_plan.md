@@ -99,7 +99,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.8: Regression policy tuning controls (dashboard thresholds/policy presets)
 - [x] M15.9: Regression decision audit panel (per-rule failure histogram + recent trend)
 - [x] M15.10: Regression review bundle export hook (dashboard one-click package copy path)
-- [ ] M15.11: Regression decision report template export (markdown handoff skeleton)
+- [x] M15.11: Regression decision report template export (markdown handoff skeleton)
+- [ ] M15.12: Regression report auto-include policy-eval excerpts (top failure evidence block)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -112,7 +113,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.11 regression decision report template export while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.12 regression report auto-include policy-eval excerpts while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -599,3 +600,15 @@ M15.10 outcome (2026-02-22):
 - state wiring completed:
   - selected export updates review bundle path/status
   - history refresh syncs active review bundle path
+
+M15.11 outcome (2026-02-22):
+
+- dashboard decision report template export added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- one-click markdown handoff skeleton:
+  - button: `Export Decision Report (.md)`
+  - generated file includes metadata, policy config, gate overview, decision-audit snapshot, artifact pointers, and reviewer checklist
+  - markdown template is downloaded and copy-to-clipboard is attempted
+- new UI state fields:
+  - `decisionReportStatus`
+  - `decisionReportFileBox`
