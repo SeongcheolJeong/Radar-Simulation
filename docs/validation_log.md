@@ -1353,3 +1353,50 @@
   - blockers observed:
     - llvmlite candidate API mismatch
     - Xcode SDK `libLLVM` candidates are non-macOS target binaries
+
+## Sionna RT Full Runtime Enablement (M14.5)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_env_probe.py`
+- Result: pass
+- Notes:
+  - env probe schema remains stable after `--drjit-libllvm-path` override support
+  - `applied_overrides` field added for deterministic runtime-trace metadata
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_blocker_report.py`
+- Result: pass
+- Notes:
+  - blocker report remains deterministic after runtime priority update
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_sionna_rt_llvm_probe.py`
+- Result: pass
+- Notes:
+  - LLVM probe remains schema-stable with macOS-default candidate filtering
+
+- Date: 2026-02-22
+- Command: `DRJIT_LIBLLVM_PATH=/Users/seongcheoljeong/Documents/Codex_test/external/runtime/llvm-21.1.6/homebrew17-lib/lib/libLLVM.dylib PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python -c "import importlib, sionna; importlib.import_module('sionna.rt')"`
+- Result: pass
+- Notes:
+  - direct `sionna.rt` import succeeded on target host (`rc=0`)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_sionna_rt_llvm_probe.py --extra-candidate /Users/seongcheoljeong/Documents/Codex_test/external/runtime/llvm-21.1.6/homebrew17-lib/lib/libLLVM.dylib --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/sionna_rt_llvm_probe_m14_5_2026_02_22.json`
+- Result: pass
+- Notes:
+  - probe succeeded (`success=true`, `working_libllvm_path` set)
+  - probe count reduced (`probe_count=3`) by default macOS-only candidate filtering
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_env_probe.py --workspace-root /Users/seongcheoljeong/Documents/Codex_test --drjit-libllvm-path /Users/seongcheoljeong/Documents/Codex_test/external/runtime/llvm-21.1.6/homebrew17-lib/lib/libLLVM.dylib --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_probe_m14_5_2026_02_22.json`
+- Result: pass
+- Notes:
+  - `sionna_rt_full_runtime_ready=true` with zero blockers
+  - `po_sbr_runtime` remains blocked on Darwin+NVIDIA/module constraints
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src /Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_blocker_report.py --probe-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_probe_m14_5_2026_02_22.json --output-report-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/runtime_blocker_report_m14_5_2026_02_22.json`
+- Result: pass
+- Notes:
+  - blocker report now recommends `next_recommended_runtime=sionna_rt_full_runtime`

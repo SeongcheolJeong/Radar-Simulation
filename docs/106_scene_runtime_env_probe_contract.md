@@ -12,6 +12,7 @@ Add a runtime probe that emits JSON summary with:
 2. required module availability
 3. external repository presence
 4. per-runtime `ready` decision
+5. optional runtime override metadata (`DRJIT_LIBLLVM_PATH`)
 
 Runtimes covered:
 
@@ -34,6 +35,11 @@ Probe output includes:
 - `status` (`ready|blocked`)
 - `blockers` (deterministic reason list)
 - platform and NVIDIA diagnostics
+- `applied_overrides` (for deterministic runtime override traceability)
+
+Probe runner supports:
+
+- `--drjit-libllvm-path` to inject `DRJIT_LIBLLVM_PATH` during module import checks
 
 ## Code Paths
 
@@ -55,3 +61,4 @@ M14.1 is accepted only if:
 1. probe emits deterministic summary JSON schema
 2. `ready` value is consistent with module/repo conditions
 3. validator enforces the consistency rule on both runtime tracks
+4. runtime override path, when provided, is captured in `applied_overrides`

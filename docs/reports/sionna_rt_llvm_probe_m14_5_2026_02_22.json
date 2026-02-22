@@ -1,0 +1,30 @@
+{
+  "python_executable": "/Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/bin/python",
+  "candidate_count": 2,
+  "probe_count": 3,
+  "success": true,
+  "working_libllvm_path": "/Users/seongcheoljeong/Documents/Codex_test/external/runtime/llvm-21.1.6/homebrew17-lib/lib/libLLVM.dylib",
+  "results": [
+    {
+      "candidate_path": null,
+      "success": false,
+      "return_code": 1,
+      "stdout": "",
+      "stderr": "jitc_llvm_init(): LLVM API initialization failed ..\nTraceback (most recent call last):\n  File \"/Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/lib/python3.11/site-packages/sionna/rt/__init__.py\", line 16, in <module>\n    mi.set_variant(\"cuda_ad_mono_polarized\", \"llvm_ad_mono_polarized\")\nImportError: jit_init_thread_state(): the LLVM backend is inactive because the LLVM shared library (\"libLLVM.dylib\") could not be found! Set the DRJIT_LIBLLVM_PATH environment variable to specify its path.\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/Users/seongcheoljeong/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/importlib/__init__.py\", line 126, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1204, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1176, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1147, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 690, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 940, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 241, in _call_with_frames_removed\n  File \"/Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/lib/python3.11/site-packages/sionna/rt/__init__.py\", line 18, in <module>\n    mi.set_variant(\"llvm_ad_mono_polarized\")\nImportError: jit_init_thread_state(): the LLVM backend is inactive because the LLVM shared library (\"libLLVM.dylib\") could not be found! Set the DRJIT_LIBLLVM_PATH environment variable to specify its path."
+    },
+    {
+      "candidate_path": "/Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/lib/python3.11/site-packages/llvmlite/binding/libllvmlite.dylib",
+      "success": false,
+      "return_code": 1,
+      "stdout": "",
+      "stderr": "jit_llvm_init(): the detected LLVM version was too old, at least 11.0.0 is needed.\njitc_llvm_init(): LLVM API initialization failed ..\nTraceback (most recent call last):\n  File \"/Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/lib/python3.11/site-packages/sionna/rt/__init__.py\", line 16, in <module>\n    mi.set_variant(\"cuda_ad_mono_polarized\", \"llvm_ad_mono_polarized\")\nImportError: jit_init_thread_state(): the LLVM backend is inactive because the LLVM shared library (\"libLLVM.dylib\") could not be found! Set the DRJIT_LIBLLVM_PATH environment variable to specify its path.\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/Users/seongcheoljeong/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/importlib/__init__.py\", line 126, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1204, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1176, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1147, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 690, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 940, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 241, in _call_with_frames_removed\n  File \"/Users/seongcheoljeong/Documents/Codex_test/.venv-sionna311/lib/python3.11/site-packages/sionna/rt/__init__.py\", line 18, in <module>\n    mi.set_variant(\"llvm_ad_mono_polarized\")\nImportError: jit_init_thread_state(): the LLVM backend is inactive because the LLVM shared library (\"libLLVM.dylib\") could not be found! Set the DRJIT_LIBLLVM_PATH environment variable to specify its path."
+    },
+    {
+      "candidate_path": "/Users/seongcheoljeong/Documents/Codex_test/external/runtime/llvm-21.1.6/homebrew17-lib/lib/libLLVM.dylib",
+      "success": true,
+      "return_code": 0,
+      "stdout": "sionna_rt_import_ok",
+      "stderr": ""
+    }
+  ]
+}

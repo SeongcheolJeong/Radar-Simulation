@@ -4,9 +4,9 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 
 DEFAULT_RUNTIME_PRIORITY: Tuple[str, ...] = (
+    "sionna_rt_full_runtime",
     "sionna_rt_mitsuba_runtime",
     "sionna_runtime",
-    "sionna_rt_full_runtime",
     "po_sbr_runtime",
 )
 

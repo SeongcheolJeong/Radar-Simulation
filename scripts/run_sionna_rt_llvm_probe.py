@@ -13,6 +13,11 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Probe DRJIT LLVM shared-library candidates for sionna.rt import")
     p.add_argument("--output-summary-json", required=True, help="Output summary JSON path")
     p.add_argument(
+        "--include-non-macos-xcode-sdks",
+        action="store_true",
+        help="Also include iOS/tvOS/watchOS/etc Xcode SDK libLLVM candidates (off by default)",
+    )
+    p.add_argument(
         "--extra-candidate",
         action="append",
         default=[],
@@ -21,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def _discover_default_candidates() -> List[str]:
+def _discover_default_candidates(include_non_macos_xcode_sdks: bool = False) -> List[str]:
     candidates: List[str] = []
     env_path = os.environ.get("DRJIT_LIBLLVM_PATH")
     if env_path:
@@ -33,11 +38,18 @@ def _discover_default_candidates() -> List[str]:
         if p.exists():
             candidates.append(str(p))
 
-    # Known macOS SDK locations (typically incompatible, but useful for explicit diagnostics).
-    xcode_candidates = list(
-        Path("/Applications/Xcode.app").glob("Contents/Developer/Platforms/*/Developer/SDKs/*/usr/lib/libLLVM.dylib")
+    # Prefer macOS-compatible SDK paths by default to avoid repeated incompatible-platform probes.
+    xcode_macos = Path("/Applications/Xcode.app").glob(
+        "Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/*/usr/lib/libLLVM.dylib"
     )
-    candidates.extend(str(p) for p in xcode_candidates if p.exists())
+    clt_macos = Path("/Library/Developer/CommandLineTools").glob("SDKs/MacOSX*.sdk/usr/lib/libLLVM.dylib")
+    candidates.extend(str(p) for p in xcode_macos if p.exists())
+    candidates.extend(str(p) for p in clt_macos if p.exists())
+    if include_non_macos_xcode_sdks:
+        all_xcode = Path("/Applications/Xcode.app").glob(
+            "Contents/Developer/Platforms/*/Developer/SDKs/*/usr/lib/libLLVM.dylib"
+        )
+        candidates.extend(str(p) for p in all_xcode if p.exists())
 
     # De-dup while preserving order
     dedup: List[str] = []
@@ -103,7 +115,9 @@ def build_probe_summary(python_executable: str, candidate_paths: Sequence[str]) 
 
 def main() -> None:
     args = parse_args()
-    candidates = _discover_default_candidates()
+    candidates = _discover_default_candidates(
+        include_non_macos_xcode_sdks=bool(args.include_non_macos_xcode_sdks)
+    )
     for extra in args.extra_candidate:
         text = str(extra).strip()
         if text:

@@ -51,5 +51,5 @@ To reduce repeated fit-loop work with low marginal gain, priority shifts to scen
 - [x] M14.2: external runtime binding pilot (Mitsuba-backed `sionna_rt` first real scene run)
 - [x] M14.3: runtime blocker gate + `sionna` PHY runtime sanity enablement
 - [x] M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock
-- [ ] M14.5: `sionna.rt` full runtime enablement (working LLVM backend)
+- [x] M14.5: `sionna.rt` full runtime enablement (working LLVM backend)
 - [ ] M14.6: `po-sbr` runtime pilot (Linux+NVIDIA target)

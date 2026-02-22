@@ -11,6 +11,7 @@ def run() -> None:
         root = Path(td)
         repo_root = Path(__file__).resolve().parents[1]
         out_json = root / "runtime_probe_summary.json"
+        fake_libllvm = root / "missing_libLLVM.dylib"
 
         env = dict(os.environ)
         env["PYTHONPATH"] = str(repo_root / "src")
@@ -20,6 +21,8 @@ def run() -> None:
                 "scripts/run_scene_runtime_env_probe.py",
                 "--workspace-root",
                 str(repo_root),
+                "--drjit-libllvm-path",
+                str(fake_libllvm),
                 "--output-summary-json",
                 str(out_json),
             ],
@@ -32,6 +35,12 @@ def run() -> None:
         assert "Scene runtime environment probe completed." in proc.stdout, proc.stdout
 
         payload = json.loads(out_json.read_text(encoding="utf-8"))
+        overrides = payload.get("applied_overrides")
+        assert isinstance(overrides, dict)
+        drjit_override = overrides.get("DRJIT_LIBLLVM_PATH")
+        assert isinstance(drjit_override, dict)
+        assert drjit_override.get("path") == str(fake_libllvm.resolve())
+        assert drjit_override.get("exists") is False
         assert isinstance(payload.get("python"), dict)
         assert isinstance(payload.get("module_report"), dict)
         assert isinstance(payload.get("nvidia_runtime"), dict)

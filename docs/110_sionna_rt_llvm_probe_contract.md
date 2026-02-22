@@ -10,6 +10,8 @@ candidate shared-library paths against real import execution.
 Probe runner:
 
 - discovers default `libLLVM` candidates (env var, llvmlite, Xcode SDK paths)
+- defaults to macOS-compatible SDK candidates only
+- can optionally include non-macOS Xcode SDK candidates via flag
 - runs baseline import probe (`sionna.rt` without env override)
 - runs per-candidate import probe with `DRJIT_LIBLLVM_PATH`
 - records success/failure and stderr diagnostics

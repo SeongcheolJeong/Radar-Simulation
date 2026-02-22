@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import platform
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from avxsim.runtime_coupling import detect_runtime_modules
 
@@ -49,6 +50,11 @@ def parse_args() -> argparse.Namespace:
         "--workspace-root",
         default=str(Path(__file__).resolve().parents[1]),
         help="Workspace root containing external/ repositories",
+    )
+    p.add_argument(
+        "--drjit-libllvm-path",
+        default="",
+        help="Optional DRJIT_LIBLLVM_PATH override for probing sionna.rt availability",
     )
     p.add_argument("--output-summary-json", required=True, help="Output summary JSON path")
     return p.parse_args()
@@ -107,9 +113,20 @@ def _detect_nvidia_runtime() -> Dict[str, Any]:
         }
 
 
-def build_runtime_probe_summary(workspace_root: str) -> Dict[str, Any]:
+def build_runtime_probe_summary(
+    workspace_root: str,
+    drjit_libllvm_path: Optional[str] = None,
+) -> Dict[str, Any]:
     root = Path(workspace_root).resolve()
     system = platform.system()
+    applied_overrides: Dict[str, Any] = {}
+    if drjit_libllvm_path is not None and str(drjit_libllvm_path).strip() != "":
+        libllvm_text = str(Path(str(drjit_libllvm_path).strip()).expanduser().resolve())
+        os.environ["DRJIT_LIBLLVM_PATH"] = libllvm_text
+        applied_overrides["DRJIT_LIBLLVM_PATH"] = {
+            "path": libllvm_text,
+            "exists": bool(Path(libllvm_text).exists()),
+        }
     all_modules: List[str] = []
     for spec in DEFAULT_RUNTIME_SPECS.values():
         for module_name in spec["required_modules"]:
@@ -158,6 +175,7 @@ def build_runtime_probe_summary(workspace_root: str) -> Dict[str, Any]:
 
     return {
         "workspace_root": str(root),
+        "applied_overrides": applied_overrides,
         "python": {
             "version": str(sys.version).strip(),
             "version_info": {
@@ -176,7 +194,10 @@ def build_runtime_probe_summary(workspace_root: str) -> Dict[str, Any]:
 
 def main() -> None:
     args = parse_args()
-    summary = build_runtime_probe_summary(workspace_root=str(args.workspace_root))
+    summary = build_runtime_probe_summary(
+        workspace_root=str(args.workspace_root),
+        drjit_libllvm_path=str(args.drjit_libllvm_path),
+    )
 
     out = Path(args.output_summary_json)
     out.parent.mkdir(parents=True, exist_ok=True)

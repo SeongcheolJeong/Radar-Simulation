@@ -52,8 +52,8 @@ Use references via local adapters, not by merging third-party internals into cor
   - real runtime pilot path using Mitsuba ray intersection (`sionna_rt` backend)
   - `sionna + tensorflow` runtime installed and minimal PHY sanity lock added
   - blocker report automation to prevent repeated unsupported-runtime attempts
+  - `sionna.rt` full runtime unlocked on macOS host via validated `DRJIT_LIBLLVM_PATH` candidate
 - Remaining high-impact physics/backend work:
-  - `sionna.rt` full runtime enablement on this host/toolchain (probe confirms LLVM blocker)
   - PO-SBR runtime enablement (`po_sbr`, `pyoptix`, `optix`) and first real pilot
   - scattering-physics fidelity tuning against measured scenarios
 - RadarSimPy position:
