@@ -27,6 +27,23 @@ Expected on ready Linux host:
 
 - `pilot_status` becomes `executed` (not `blocked`)
 
+## Environment Bootstrap (Linux)
+
+If `rtxpy`/`igl` are missing, run:
+
+```bash
+bash /Users/seongcheoljeong/Documents/Codex_test/scripts/bootstrap_po_sbr_linux_env.sh \
+  /Users/seongcheoljeong/Documents/Codex_test/.venv-po-sbr \
+  /Users/seongcheoljeong/Documents/Codex_test/external/rtxpy-mod
+```
+
+This script:
+
+1. creates/updates a Python venv
+2. installs baseline modules (`numpy`, `matplotlib`, `libigl`)
+3. clones/updates modified `rtxpy` and installs it editable
+4. optionally installs `cupy` when CUDA toolkit is detectable
+
 ## Real Pilot Run (strict)
 
 ```bash

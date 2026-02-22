@@ -36,6 +36,7 @@ preflight gating for Linux+NVIDIA constraints.
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_po_sbr_pilot.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_executed_report.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_validate_scene_runtime_po_sbr_executed_report.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/bootstrap_po_sbr_linux_env.sh`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_strict.sh`
 
 ## Validation

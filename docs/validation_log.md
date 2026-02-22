@@ -1451,3 +1451,9 @@
 - Notes:
   - readiness report archived (`ready=false`)
   - only remaining missing item: `linux_executed_report_missing`
+
+- Date: 2026-02-22
+- Command: `bash -n /Users/seongcheoljeong/Documents/Codex_test/scripts/bootstrap_po_sbr_linux_env.sh`
+- Result: pass
+- Notes:
+  - Linux PO-SBR environment bootstrap script syntax validated
