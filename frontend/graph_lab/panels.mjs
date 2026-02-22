@@ -130,6 +130,7 @@ export function GraphInputsPanel({ model }) {
     graphActions,
     runActions,
     gateActions,
+    contractActions,
   } = safeModel;
   const {
     apiBase,
@@ -144,6 +145,7 @@ export function GraphInputsPanel({ model }) {
     pollingActive,
     templates,
     lastGraphRunId,
+    contractDebugText,
   } = values;
   const {
     setApiBase,
@@ -175,6 +177,10 @@ export function GraphInputsPanel({ model }) {
     runPolicyGateForGraphRun,
     exportGateReport,
   } = gateActions;
+  const {
+    refreshContractWarnings,
+    resetContractWarnings,
+  } = contractActions;
 
   return h("section", { className: "panel", key: "left" }, [
     h("div", { className: "panel-hd", key: "lhd" }, "Graph Inputs"),
@@ -301,6 +307,14 @@ export function GraphInputsPanel({ model }) {
         h("button", { className: "btn", onClick: runPolicyGateForGraphRun, key: "runpg" }, "Policy Gate"),
       ]),
       h("button", { className: "btn", onClick: exportGateReport, key: "xgate" }, "Export Gate Report (.md)"),
+      h("div", { className: "field", key: "contractdbg" }, [
+        h("label", { className: "label", key: "lblcd" }, "Contract Guard"),
+        h("div", { className: "btn-row", key: "contractbtns" }, [
+          h("button", { className: "btn", onClick: refreshContractWarnings, key: "cdr1" }, "Refresh Guard"),
+          h("button", { className: "btn", onClick: resetContractWarnings, key: "cdr2" }, "Reset Guard"),
+        ]),
+        h("pre", { className: "result-box", key: "cdbox" }, String(contractDebugText || "-")),
+      ]),
       h("div", { className: "hint", key: "hint" }, "Tip: connect nodes on canvas, then validate to check schema/profile/DAG constraints."),
     ]),
   ]);

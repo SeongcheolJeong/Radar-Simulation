@@ -1,10 +1,29 @@
 const CONTRACT_WARNED = new Set();
+const CONTRACT_WARNING_ATTEMPTS = new Map();
+const CONTRACT_WARNING_UNIQUE_BY_SCOPE = new Map();
+const CONTRACT_WARNING_ATTEMPTS_BY_SCOPE = new Map();
+let LAST_WARNING = null;
 const NOOP = () => {};
 
 function warnOnce(scope, message) {
   const key = `${scope}:${message}`;
+  CONTRACT_WARNING_ATTEMPTS.set(key, Number(CONTRACT_WARNING_ATTEMPTS.get(key) || 0) + 1);
+  CONTRACT_WARNING_ATTEMPTS_BY_SCOPE.set(
+    scope,
+    Number(CONTRACT_WARNING_ATTEMPTS_BY_SCOPE.get(scope) || 0) + 1
+  );
   if (CONTRACT_WARNED.has(key)) return;
   CONTRACT_WARNED.add(key);
+  CONTRACT_WARNING_UNIQUE_BY_SCOPE.set(
+    scope,
+    Number(CONTRACT_WARNING_UNIQUE_BY_SCOPE.get(scope) || 0) + 1
+  );
+  LAST_WARNING = {
+    key,
+    scope,
+    message: String(message),
+    timestamp_ms: Date.now(),
+  };
   if (typeof console !== "undefined" && typeof console.warn === "function") {
     console.warn(`[contract:${scope}] ${message}`);
   }
@@ -70,6 +89,40 @@ export const GRAPH_INPUTS_PANEL_MODEL_CONTRACT = "graph_inputs_panel_model_v1";
 export const GRAPH_RUN_OPS_OPTIONS_CONTRACT = "graph_run_ops_options_v1";
 export const GATE_OPS_OPTIONS_CONTRACT = "gate_ops_options_v1";
 
+export function getContractWarningSnapshot() {
+  const uniqueWarningCount = Number(CONTRACT_WARNED.size || 0);
+  const attemptCountTotal = Array.from(CONTRACT_WARNING_ATTEMPTS.values()).reduce(
+    (acc, v) => acc + Number(v || 0),
+    0
+  );
+  const byScope = Array.from(CONTRACT_WARNING_ATTEMPTS_BY_SCOPE.entries())
+    .map(([scope, attempts]) => ({
+      scope,
+      attempts: Number(attempts || 0),
+      unique: Number(CONTRACT_WARNING_UNIQUE_BY_SCOPE.get(scope) || 0),
+    }))
+    .sort((a, b) => {
+      const d1 = Number(b.attempts || 0) - Number(a.attempts || 0);
+      if (d1 !== 0) return d1;
+      return String(a.scope).localeCompare(String(b.scope));
+    });
+  return {
+    contract_debug_version: "contract_warning_debug_v1",
+    unique_warning_count: uniqueWarningCount,
+    attempt_count_total: Number(attemptCountTotal || 0),
+    by_scope: byScope,
+    last_warning: LAST_WARNING ? { ...LAST_WARNING } : null,
+  };
+}
+
+export function resetContractWarnings() {
+  CONTRACT_WARNED.clear();
+  CONTRACT_WARNING_ATTEMPTS.clear();
+  CONTRACT_WARNING_UNIQUE_BY_SCOPE.clear();
+  CONTRACT_WARNING_ATTEMPTS_BY_SCOPE.clear();
+  LAST_WARNING = null;
+}
+
 /**
  * @typedef {Object} GraphInputsPanelValues
  * @property {string} apiBase
@@ -84,6 +137,7 @@ export const GATE_OPS_OPTIONS_CONTRACT = "gate_ops_options_v1";
  * @property {boolean} pollingActive
  * @property {Array<any>} templates
  * @property {string} lastGraphRunId
+ * @property {string} contractDebugText
  */
 
 /**
@@ -95,6 +149,7 @@ export const GATE_OPS_OPTIONS_CONTRACT = "gate_ops_options_v1";
  * @property {Object<string, Function>} graphActions
  * @property {Object<string, Function>} runActions
  * @property {Object<string, Function>} gateActions
+ * @property {Object<string, Function>} contractActions
  */
 
 /**
@@ -113,6 +168,7 @@ export function normalizeGraphInputsPanelModel(rawModel) {
   const graphActions = readObjectSection(scope, root, "graphActions");
   const runActions = readObjectSection(scope, root, "runActions");
   const gateActions = readObjectSection(scope, root, "gateActions");
+  const contractActions = readObjectSection(scope, root, "contractActions");
 
   return {
     __contract_version: GRAPH_INPUTS_PANEL_MODEL_CONTRACT,
@@ -129,6 +185,7 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       pollingActive: readBoolean(scope, values, "pollingActive", false),
       templates: readArray(scope, values, "templates", []),
       lastGraphRunId: readString(scope, values, "lastGraphRunId", ""),
+      contractDebugText: readString(scope, values, "contractDebugText", "-"),
     },
     setters: {
       setApiBase: readFunction(scope, setters, "setApiBase"),
@@ -159,6 +216,10 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       pinBaselineFromGraphRun: readFunction(scope, gateActions, "pinBaselineFromGraphRun"),
       runPolicyGateForGraphRun: readFunction(scope, gateActions, "runPolicyGateForGraphRun"),
       exportGateReport: readFunction(scope, gateActions, "exportGateReport"),
+    },
+    contractActions: {
+      refreshContractWarnings: readFunction(scope, contractActions, "refreshContractWarnings"),
+      resetContractWarnings: readFunction(scope, contractActions, "resetContractWarnings"),
     },
   };
 }

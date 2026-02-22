@@ -114,6 +114,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.3: Graph Lab action hooks split (`useGraphRunOps`, `useGateOps`)
 - [x] M17.4: Graph input panel model grouping (reduce action/state fan-out)
 - [x] M17.5: Frontend typed contract + runtime guard (`contracts.mjs` for panel/hook bindings)
+- [x] M17.6: Contract diagnostics surface (warning counters + debug panel actions)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -126,7 +127,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue M17 frontend hardening track after runtime contract guard closure: add lightweight contract diagnostics (guard warning counters + debug panel hook) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
+Continue M17 frontend hardening track after contract diagnostics closure: expose contract health in optional developer overlays and wire contract-check snapshots into run summaries while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -826,3 +827,15 @@ M17.5 outcome (2026-02-22):
   - panel model contract normalized to `graph_inputs_panel_model_v1`
   - run/gate hook option contracts normalized (`graph_run_ops_options_v1`, `gate_ops_options_v1`)
   - missing/invalid fields degrade safely with one-time warning + no-op fallback handlers
+
+M17.6 outcome (2026-02-22):
+
+- contract diagnostics counters/snapshot APIs added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/contracts.mjs`
+  - `getContractWarningSnapshot`, `resetContractWarnings`, `contract_warning_debug_v1`
+- diagnostics UI surfaced in Graph Inputs panel:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - new controls: `Contract Guard`, `Refresh Guard`, `Reset Guard`
+- diagnostics wiring added in app orchestration:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - snapshot formatting + state (`contractDebugText`) + action bridging

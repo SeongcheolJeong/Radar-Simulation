@@ -1836,3 +1836,20 @@
   - contract version/normalizer tokens served (`graph_inputs_panel_model_v1`, `graph_run_ops_options_v1`, `gate_ops_options_v1`)
   - app/panel/hook guard integration tokens confirmed (`normalizeGraphInputsPanelModel`, `normalizeGraphRunOpsOptions`, `normalizeGateOpsOptions`)
   - run/gate operator controls remain wired with existing semantics under guarded model/options path
+
+## Web E2E Graph Contract Diagnostics Surface (M17.6)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - contract diagnostics integration 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8117 8137` + smoke (`curl /frontend/graph_lab/panels.mjs`, `curl /frontend/graph_lab/contracts.mjs`, `curl /frontend/graph_lab/app.mjs` token grep)
+- Result: pass
+- Notes:
+  - panel diagnostics controls present (`Contract Guard`, `Refresh Guard`, `Reset Guard`)
+  - contract diagnostics API tokens served (`getContractWarningSnapshot`, `resetContractWarnings`, `contract_warning_debug_v1`)
+  - app wiring tokens present (`refreshContractWarnings`, `resetContractWarnings`, `contractDebugText`)

@@ -4,7 +4,11 @@ import {
   useNodesState,
   useEdgesState,
 } from "./deps.mjs";
-import { normalizeGraphInputsPanelModel } from "./contracts.mjs";
+import {
+  getContractWarningSnapshot,
+  normalizeGraphInputsPanelModel,
+  resetContractWarnings as resetContractWarningStore,
+} from "./contracts.mjs";
 import { toFlowNode, toGraphPayload } from "./graph_helpers.mjs";
 import {
   getGraphTemplates,
@@ -52,6 +56,7 @@ export function App() {
   const [pollingActive, setPollingActive] = React.useState(false);
   const [gateResultText, setGateResultText] = React.useState("-");
   const [lastPolicyEval, setLastPolicyEval] = React.useState(null);
+  const [contractDebugText, setContractDebugText] = React.useState("-");
   const [selectedNodeId, setSelectedNodeId] = React.useState("");
   const [selectedNodeParamsText, setSelectedNodeParamsText] = React.useState("{}");
 
@@ -76,6 +81,38 @@ export function App() {
     setStatusText(String(text || "idle"));
     setStatusTone(String(tone || "status-neutral"));
   }, []);
+
+  const formatContractWarningSnapshot = React.useCallback((snapshot) => {
+    const s = snapshot && typeof snapshot === "object" ? snapshot : {};
+    const byScope = Array.isArray(s.by_scope) ? s.by_scope : [];
+    const topScopes = byScope
+      .slice(0, 4)
+      .map((x) => `${String(x.scope || "-")}(${Number(x.unique || 0)}/${Number(x.attempts || 0)})`)
+      .join(", ");
+    const last = s.last_warning && typeof s.last_warning === "object" ? s.last_warning : null;
+    return [
+      `contract_debug_version: ${String(s.contract_debug_version || "-")}`,
+      `unique_warning_count: ${Number(s.unique_warning_count || 0)}`,
+      `warning_attempt_count: ${Number(s.attempt_count_total || 0)}`,
+      `top_scopes(unique/attempt): ${topScopes || "-"}`,
+      `last_warning: ${last ? `${String(last.scope || "-")} | ${String(last.message || "-")}` : "-"}`,
+    ].join("\n");
+  }, []);
+
+  const refreshContractWarnings = React.useCallback(() => {
+    const snapshot = getContractWarningSnapshot();
+    setContractDebugText(formatContractWarningSnapshot(snapshot));
+  }, [formatContractWarningSnapshot]);
+
+  const resetContractWarnings = React.useCallback(() => {
+    resetContractWarningStore();
+    refreshContractWarnings();
+    setStatus("contract warnings reset", "status-ok");
+  }, [refreshContractWarnings, setStatus]);
+
+  React.useEffect(() => {
+    refreshContractWarnings();
+  }, [refreshContractWarnings]);
 
   const applyGraph = React.useCallback((graph) => {
     const g = graph && typeof graph === "object" ? graph : {};
@@ -270,6 +307,7 @@ export function App() {
       pollingActive,
       templates,
       lastGraphRunId,
+      contractDebugText,
     },
     setters: {
       setApiBase,
@@ -301,6 +339,10 @@ export function App() {
       runPolicyGateForGraphRun,
       exportGateReport,
     },
+    contractActions: {
+      refreshContractWarnings,
+      resetContractWarnings,
+    },
   }), [
     apiBase,
     graphId,
@@ -314,6 +356,7 @@ export function App() {
     pollingActive,
     templates,
     lastGraphRunId,
+    contractDebugText,
     fetchTemplates,
     exportGraph,
     loadTemplateByIndex,
@@ -326,6 +369,8 @@ export function App() {
     pinBaselineFromGraphRun,
     runPolicyGateForGraphRun,
     exportGateReport,
+    refreshContractWarnings,
+    resetContractWarnings,
   ]);
 
   return h("div", { className: "page" }, [
