@@ -69,7 +69,7 @@ fi
 echo "[bootstrap] completed."
 echo "[bootstrap] activate: source \"$VENV_PATH/bin/activate\""
 echo "[bootstrap] run strict pilot:"
-echo "  bash \"$ROOT_DIR/scripts/run_m14_6_po_sbr_linux_strict.sh\" \\"
+echo "  PYTHON_BIN=\"$VENV_PATH/bin/python\" bash \"$ROOT_DIR/scripts/run_m14_6_po_sbr_linux_strict.sh\" \\"
 echo "    \"$ROOT_DIR/data/runtime_pilot/po_sbr_runtime_pilot_v1\" \\"
 echo "    \"$ROOT_DIR/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json\" \\"
 echo "    \"$ROOT_DIR/external/PO-SBR-Python\" geometries/plate.obj"

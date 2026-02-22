@@ -54,6 +54,23 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_
   geometries/plate.obj
 ```
 
+## macOS -> Linux Remote One-Shot (SSH)
+
+From local macOS, run remote bootstrap + strict pilot + report download:
+
+```bash
+bash /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_remote_linux_over_ssh.sh \
+  --ssh-host <user>@<linux-host> \
+  --remote-repo /absolute/path/to/Codex_test \
+  --apply-finalize-local
+```
+
+Optional flags:
+
+1. `--ssh-port <port>`
+2. `--identity-file <path>`
+3. `--skip-bootstrap` (if Linux env already prepared)
+
 ## Success Criteria
 
 1. summary JSON:

@@ -1464,3 +1464,9 @@
 - Result: pass
 - Notes:
   - Linux PO-SBR environment bootstrap script syntax validated
+
+- Date: 2026-02-22
+- Command: `bash -n /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_remote_linux_over_ssh.sh`
+- Result: pass
+- Notes:
+  - macOS->Linux SSH orchestration script syntax validated
