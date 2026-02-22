@@ -112,8 +112,20 @@ export async function evaluatePolicyGate(apiBase, policyPayload) {
   });
 }
 
-export async function listPolicyEvals(apiBase) {
-  return requestJsonOrThrow(apiBase, "/api/policy-evals");
+export async function listPolicyEvals(apiBase, options) {
+  const opts = options && typeof options === "object" ? options : {};
+  const params = new URLSearchParams();
+  const candidateRunId = String(opts.candidateRunId || "").trim();
+  const baselineId = String(opts.baselineId || "").trim();
+  const limit = Number(opts.limit || 0);
+  const offset = Number(opts.offset || 0);
+  if (candidateRunId) params.set("candidate_run_id", candidateRunId);
+  if (baselineId) params.set("baseline_id", baselineId);
+  if (Number.isFinite(limit) && limit > 0) params.set("limit", String(Math.floor(limit)));
+  if (Number.isFinite(offset) && offset > 0) params.set("offset", String(Math.floor(offset)));
+  const query = params.toString();
+  const path = query ? `/api/policy-evals?${query}` : "/api/policy-evals";
+  return requestJsonOrThrow(apiBase, path);
 }
 
 export async function getPolicyEval(apiBase, policyEvalId) {

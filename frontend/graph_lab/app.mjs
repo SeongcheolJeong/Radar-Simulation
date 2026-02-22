@@ -66,6 +66,7 @@ export function App() {
   const [contractTimeline, setContractTimeline] = React.useState([]);
   const [selectedNodeId, setSelectedNodeId] = React.useState("");
   const [selectedNodeParamsText, setSelectedNodeParamsText] = React.useState("{}");
+  const policyEvalListCacheRef = React.useRef(new Map());
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -157,6 +158,49 @@ export function App() {
     setStatus("contract timeline exported", "status-ok");
   }, [contractTimeline, setStatus]);
 
+  React.useEffect(() => {
+    policyEvalListCacheRef.current.clear();
+  }, [apiBase]);
+
+  const fetchPolicyEvalListCached = React.useCallback(async (options) => {
+    const opts = options && typeof options === "object" ? options : {};
+    const candidateRunId = String(opts.candidateRunId || "").trim();
+    const baselineId = String(opts.baselineId || "").trim();
+    const limit = Number(opts.limit || 0);
+    const offset = Number(opts.offset || 0);
+    const normalized = {
+      candidateRunId,
+      baselineId,
+      limit: Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0,
+      offset: Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0,
+    };
+    const key = JSON.stringify(normalized);
+    const nowMs = Date.now();
+    const ttlMs = 20_000;
+    const cache = policyEvalListCacheRef.current;
+    const cached = cache.get(key);
+    if (
+      cached &&
+      typeof cached === "object" &&
+      Number.isFinite(Number(cached.timestamp_ms || 0)) &&
+      (nowMs - Number(cached.timestamp_ms || 0)) <= ttlMs
+    ) {
+      return { payload: cached.payload || {}, cacheHit: true };
+    }
+    const payload = await listPolicyEvals(apiBase, normalized);
+    cache.set(key, { timestamp_ms: nowMs, payload });
+    if (cache.size > 24) {
+      const entries = Array.from(cache.entries());
+      entries.sort((a, b) => Number(a?.[1]?.timestamp_ms || 0) - Number(b?.[1]?.timestamp_ms || 0));
+      while (entries.length > 16) {
+        const removed = entries.shift();
+        if (!removed) break;
+        cache.delete(String(removed[0]));
+      }
+    }
+    return { payload, cacheHit: false };
+  }, [apiBase]);
+
   const openGateEvidenceFromTimeline = React.useCallback(async (row) => {
     const eventRow = row && typeof row === "object" ? row : {};
     const note = eventRow.note && typeof eventRow.note === "object" ? eventRow.note : {};
@@ -185,6 +229,7 @@ export function App() {
     let resolvedEval = null;
     let evidenceSource = "timeline_note";
     let scanCount = 0;
+    let cacheHitAny = false;
     const lookupErrors = [];
 
     if (policyEvalIdHint) {
@@ -200,10 +245,8 @@ export function App() {
     }
 
     if (!resolvedEval) {
-      try {
-        const payload = await listPolicyEvals(apiBase);
-        const rows = Array.isArray(payload?.policy_evals) ? payload.policy_evals : [];
-        scanCount = rows.length;
+      const resolveFromRows = (rows, scopeTag, cacheHit) => {
+        const list = Array.isArray(rows) ? rows : [];
         const matchRun = (item) =>
           runIdHint !== "" &&
           normalizeHint(item?.candidate?.run_id) === runIdHint;
@@ -212,25 +255,76 @@ export function App() {
           pathMatches(item?.candidate?.run_summary_json, summaryHint);
 
         const byEvalId = policyEvalIdHint !== ""
-          ? rows.find((item) => normalizeHint(item?.policy_eval_id) === policyEvalIdHint) || null
+          ? list.find((item) => normalizeHint(item?.policy_eval_id) === policyEvalIdHint) || null
           : null;
-        const byRunAndSummary = rows.find((item) => matchRun(item) && matchSummary(item)) || null;
-        const byRunOnly = rows.find((item) => matchRun(item)) || null;
-        const bySummaryOnly = rows.find((item) => matchSummary(item)) || null;
+        const byRunAndSummary = list.find((item) => matchRun(item) && matchSummary(item)) || null;
+        const byRunOnly = list.find((item) => matchRun(item)) || null;
+        const bySummaryOnly = list.find((item) => matchSummary(item)) || null;
         const byBaselineOnly = baselineIdHint !== ""
-          ? rows.find((item) => normalizeHint(item?.baseline?.baseline_id) === baselineIdHint) || null
+          ? list.find((item) => normalizeHint(item?.baseline?.baseline_id) === baselineIdHint) || null
           : null;
+        const resolved = byEvalId || byRunAndSummary || byRunOnly || bySummaryOnly || byBaselineOnly;
+        if (!resolved) return false;
 
-        resolvedEval = byEvalId || byRunAndSummary || byRunOnly || bySummaryOnly || byBaselineOnly;
-        if (resolvedEval) {
-          if (byEvalId) evidenceSource = "policy_eval_list:policy_eval_id";
-          else if (byRunAndSummary) evidenceSource = "policy_eval_list:run_id+summary_json";
-          else if (byRunOnly) evidenceSource = "policy_eval_list:run_id";
-          else if (bySummaryOnly) evidenceSource = "policy_eval_list:summary_json";
-          else evidenceSource = "policy_eval_list:baseline_id";
+        let matchedBy = "fallback";
+        if (byEvalId) matchedBy = "policy_eval_id";
+        else if (byRunAndSummary) matchedBy = "run_id+summary_json";
+        else if (byRunOnly) matchedBy = "run_id";
+        else if (bySummaryOnly) matchedBy = "summary_json";
+        else if (byBaselineOnly) matchedBy = "baseline_id";
+        resolvedEval = resolved;
+        evidenceSource = `policy_eval_list:${scopeTag}:${matchedBy}${cacheHit ? ":cache_hit" : ""}`;
+        return true;
+      };
+
+      const queryPlans = [];
+      if (runIdHint) {
+        queryPlans.push({
+          scopeTag: baselineIdHint ? "run_id+baseline_id" : "run_id",
+          candidateRunId: runIdHint,
+          baselineId: baselineIdHint || "",
+          limit: 256,
+        });
+      }
+      if (baselineIdHint) {
+        queryPlans.push({
+          scopeTag: "baseline_id",
+          baselineId: baselineIdHint,
+          limit: 256,
+        });
+      }
+      queryPlans.push({
+        scopeTag: "global",
+        limit: 512,
+      });
+
+      const seenPlans = new Set();
+      for (const plan of queryPlans) {
+        const normalizedPlan = {
+          candidateRunId: String(plan.candidateRunId || "").trim(),
+          baselineId: String(plan.baselineId || "").trim(),
+          limit: Number(plan.limit || 0),
+          offset: Number(plan.offset || 0),
+        };
+        const planKey = JSON.stringify(normalizedPlan);
+        if (seenPlans.has(planKey)) continue;
+        seenPlans.add(planKey);
+        try {
+          const result = await fetchPolicyEvalListCached(normalizedPlan);
+          const payload = result && typeof result === "object" ? result.payload : {};
+          const cacheHit = Boolean(result && result.cacheHit);
+          cacheHitAny = cacheHitAny || cacheHit;
+          const rows = Array.isArray(payload?.policy_evals) ? payload.policy_evals : [];
+          const returnedCount = Number(payload?.page?.returned_count);
+          scanCount += Number.isFinite(returnedCount) && returnedCount >= 0
+            ? returnedCount
+            : rows.length;
+          if (resolveFromRows(rows, String(plan.scopeTag || "global"), cacheHit)) {
+            break;
+          }
+        } catch (err) {
+          lookupErrors.push(`list_policy_evals(${String(plan.scopeTag || "global")}) failed: ${String(err.message || err)}`);
         }
-      } catch (err) {
-        lookupErrors.push(`list_policy_evals failed: ${String(err.message || err)}`);
       }
     }
 
@@ -264,6 +358,7 @@ export function App() {
         `parity_failure_count: ${Number(parityFailures.length || 0)}`,
         `gate_failure_count: ${Number(gateFailures.length || 0)}`,
         `policy_eval_scan_count: ${Number(scanCount || 0)}`,
+        `policy_eval_cache_hit_any: ${Boolean(cacheHitAny)}`,
         "",
         "gate_failures:",
       ];
@@ -317,6 +412,7 @@ export function App() {
       `candidate_summary_json: ${summaryHint || "-"}`,
       `failure_count: ${Number(note.failure_count || 0)}`,
       `policy_eval_scan_count: ${Number(scanCount || 0)}`,
+      `policy_eval_cache_hit_any: ${Boolean(cacheHitAny)}`,
       "",
       "gate_failures:",
       ...(rules.length > 0 ? rules.map((rule, idx) => `- [${Number(idx) + 1}] ${rule}`) : ["- none"]),
@@ -331,7 +427,7 @@ export function App() {
     setGateResultText(lines.join("\n"));
     if (runIdHint) setLastGraphRunId(runIdHint);
     setStatus(`gate evidence unresolved: ${runIdHint || "-"}`, "status-warn");
-  }, [apiBase, setGateResultText, setLastGraphRunId, setStatus]);
+  }, [apiBase, fetchPolicyEvalListCached, setGateResultText, setLastGraphRunId, setStatus]);
 
   React.useEffect(() => {
     refreshContractWarnings();

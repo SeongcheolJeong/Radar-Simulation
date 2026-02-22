@@ -123,6 +123,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.12: Policy failure correlation tags on timeline rows
 - [x] M17.13: Timeline -> gate evidence deep-link + failure-rule badges
 - [x] M17.14: Historical policy-eval fetch fallback (`policy_eval_id -> run_id/summary`) for persisted gate evidence
+- [x] M17.15: Policy-eval filtered pagination + frontend evidence cache (large-history scan control)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -135,7 +136,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.14 frontend hardening track: add policy-eval evidence pagination/caching and large-history filtering while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.15 frontend hardening track: add overlay-side explicit history-window controls and incremental loading UX while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -965,3 +966,18 @@ M17.14 outcome (2026-02-22):
 - gate-event metadata hardened for lookup stability:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
   - timeline note now includes `candidate_run_id` + `candidate_summary_json`
+
+M17.15 outcome (2026-02-22):
+
+- `policy-evals` API now supports filtered pagination for large history:
+  - `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/web_e2e_api.py`
+  - query params: `candidate_run_id`, `baseline_id`, `limit`, `offset`
+  - response page metadata: `total_count`, `returned_count`, `filtered`, `limit`, `offset`
+- frontend API client now emits filtered query requests:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/api_client.mjs`
+  - `listPolicyEvals(apiBase, { candidateRunId, baselineId, limit, offset })`
+- timeline gate evidence lookup now uses cache + scoped queries first:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - cache TTL/eviction applied (`policyEvalListCacheRef`)
+  - lookup order: `run_id(+baseline)` -> `baseline` -> `global`
+  - trace fields added: `policy_eval_cache_hit_any`, `policy_eval_scan_count`

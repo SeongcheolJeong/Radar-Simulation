@@ -2066,3 +2066,33 @@
   - gate note hint tokens confirmed:
     - `candidate_run_id`
     - `candidate_summary_json`
+
+## Web E2E Graph Policy-Eval Filtered Paging + Cache (M17.15)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - policy-eval filtered paging backend addition 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8146/8126)` + endpoint/page assertion + token grep (`curl /api/policy-evals?...`, `curl /frontend/graph_lab/app.mjs`, `curl /frontend/graph_lab/api_client.mjs`)
+- Result: pass
+- Notes:
+  - `/api/policy-evals` page metadata contract confirmed:
+    - `page.total_count`
+    - `page.returned_count`
+    - `page.limit`
+    - `page.offset`
+    - `page.filtered.candidate_run_id`
+    - `page.filtered.baseline_id`
+  - frontend cache/scoped-query tokens confirmed:
+    - `fetchPolicyEvalListCached`
+    - `run_id+baseline_id`
+    - `policy_eval_cache_hit_any`
+  - API client filtered query tokens confirmed:
+    - `candidate_run_id`
+    - `baseline_id`
+    - `limit`
+    - `offset`

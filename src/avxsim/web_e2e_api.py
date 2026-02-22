@@ -2398,6 +2398,35 @@ def _parse_bool_query(query: Mapping[str, list[str]], key: str, default: bool = 
     return bool(default)
 
 
+def _parse_optional_text_query(query: Mapping[str, list[str]], key: str) -> Optional[str]:
+    raw = query.get(key, None)
+    if not raw:
+        return None
+    token = str(raw[0]).strip()
+    if token == "":
+        return None
+    if token.lower() in {"none", "null"}:
+        return None
+    return token
+
+
+def _parse_nonneg_int_query(
+    query: Mapping[str, list[str]],
+    key: str,
+    default: int = 0,
+) -> int:
+    raw = query.get(key, None)
+    if not raw:
+        return int(default)
+    token = str(raw[0]).strip()
+    if token == "":
+        return int(default)
+    value = int(token)
+    if value < 0:
+        raise ValueError(f"query.{key} must be >= 0")
+    return value
+
+
 def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         server_version = "WebE2EOrchestrator/0.1"
@@ -2423,6 +2452,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
         def do_GET(self) -> None:  # noqa: N802
             parsed = urlparse(self.path)
             path = parsed.path
+            query = parse_qs(parsed.query)
 
             try:
                 if path == "/health":
@@ -2469,7 +2499,62 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                     return
 
                 if path == "/api/policy-evals":
-                    self._send_json(200, {"policy_evals": orchestrator.list_policy_evals()})
+                    candidate_run_id = _parse_optional_text_query(query, "candidate_run_id")
+                    baseline_id = _parse_optional_text_query(query, "baseline_id")
+                    limit = _parse_nonneg_int_query(query, "limit", default=0)
+                    offset = _parse_nonneg_int_query(query, "offset", default=0)
+
+                    rows = orchestrator.list_policy_evals()
+
+                    if candidate_run_id is not None:
+                        rows = [
+                            x
+                            for x in rows
+                            if str(
+                                (
+                                    x.get("candidate", {})
+                                    if isinstance(x.get("candidate"), Mapping)
+                                    else {}
+                                ).get("run_id", "")
+                            ).strip()
+                            == candidate_run_id
+                        ]
+                    if baseline_id is not None:
+                        rows = [
+                            x
+                            for x in rows
+                            if str(
+                                (
+                                    x.get("baseline", {})
+                                    if isinstance(x.get("baseline"), Mapping)
+                                    else {}
+                                ).get("baseline_id", "")
+                            ).strip()
+                            == baseline_id
+                        ]
+
+                    total_count = len(rows)
+                    if offset > 0:
+                        rows = rows[offset:]
+                    if limit > 0:
+                        rows = rows[:limit]
+
+                    self._send_json(
+                        200,
+                        {
+                            "policy_evals": rows,
+                            "page": {
+                                "total_count": int(total_count),
+                                "returned_count": int(len(rows)),
+                                "offset": int(offset),
+                                "limit": int(limit),
+                                "filtered": {
+                                    "candidate_run_id": candidate_run_id,
+                                    "baseline_id": baseline_id,
+                                },
+                            },
+                        },
+                    )
                     return
 
                 if path == "/api/regression-sessions":
