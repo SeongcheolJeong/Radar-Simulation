@@ -2204,3 +2204,31 @@
   - style tokens confirmed:
     - `contract-row-detail-btn`
     - `contract-overlay-row-detail`
+
+## Web E2E Graph Overlay Shortcut Remap + Profile Persistence (M17.20)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - shortcut remap/profile frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8151/8131)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`, `curl /frontend/graph_lab_reactflow.html`)
+- Result: pass
+- Notes:
+  - shortcut profile persistence tokens confirmed:
+    - `CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY`
+    - `loadShortcutProfiles`
+    - `saveShortcutProfiles`
+  - dynamic shortcut dispatch tokens confirmed:
+    - `shortcutActionByKey`
+    - `triggerShortcutAction`
+    - `shortcutHintText`
+  - profile/remap UI tokens confirmed:
+    - `co_shortcut_profile_select`
+    - `Load Profile`
+    - `Save Profile`
+    - `Delete Profile`
+    - `Shortcut conflict`

@@ -91,6 +91,7 @@ function buildContractRowKey(row) {
 }
 
 const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
+const CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY = "graph_lab_contract_overlay_shortcut_profiles_v1";
 const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   sourceFilter: "all",
   pinnedRunId: "all",
@@ -100,6 +101,50 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   gateHistoryPages: "2",
   rowWindowSize: "120",
   showShortcutHelp: false,
+  activeShortcutProfile: "default",
+  shortcutProfileDraft: "custom_profile",
+};
+const SHORTCUT_ACTION_DEFS = [
+  { id: "toggle_help", label: "help" },
+  { id: "toggle_compact", label: "compact" },
+  { id: "toggle_nonzero", label: "non-zero" },
+  { id: "row_next", label: "next row window" },
+  { id: "row_prev", label: "prev row window" },
+  { id: "row_top", label: "row window top" },
+  { id: "expand_visible", label: "expand visible" },
+  { id: "collapse_details", label: "collapse details" },
+  { id: "preset_triage", label: "preset triage" },
+  { id: "preset_deep", label: "preset deep" },
+  { id: "preset_reset", label: "preset reset" },
+];
+const DEFAULT_SHORTCUT_BINDINGS = {
+  toggle_help: "h",
+  toggle_compact: "c",
+  toggle_nonzero: "n",
+  row_next: "j",
+  row_prev: "k",
+  row_top: "g",
+  expand_visible: "e",
+  collapse_details: "x",
+  preset_triage: "1",
+  preset_deep: "2",
+  preset_reset: "0",
+};
+const DEFAULT_SHORTCUT_PROFILES = {
+  default: DEFAULT_SHORTCUT_BINDINGS,
+  ops_fast: {
+    toggle_help: "h",
+    toggle_compact: "v",
+    toggle_nonzero: "b",
+    row_next: "j",
+    row_prev: "k",
+    row_top: "g",
+    expand_visible: "l",
+    collapse_details: "x",
+    preset_triage: "7",
+    preset_deep: "8",
+    preset_reset: "9",
+  },
 };
 
 function clampInteger(raw, minValue, maxValue, fallback) {
@@ -127,6 +172,82 @@ function saveContractOverlayPrefs(prefs) {
     if (typeof window === "undefined" || !window.localStorage) return;
     const payload = prefs && typeof prefs === "object" ? prefs : {};
     window.localStorage.setItem(CONTRACT_OVERLAY_PREFS_KEY, JSON.stringify(payload));
+  } catch (_) {
+    // localStorage may be blocked; ignore and continue with in-memory state
+  }
+}
+
+function normalizeShortcutToken(raw) {
+  const text = String(raw || "").trim().toLowerCase();
+  if (text.length === 0) return "";
+  return text.slice(0, 1);
+}
+
+function normalizeShortcutProfileName(raw) {
+  const text = String(raw || "").trim().toLowerCase();
+  if (!text) return "";
+  const compact = text
+    .replace(/[^a-z0-9_-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return compact.slice(0, 32);
+}
+
+function normalizeShortcutBindings(raw, fallback) {
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const base = fallback && typeof fallback === "object" && !Array.isArray(fallback)
+    ? fallback
+    : DEFAULT_SHORTCUT_BINDINGS;
+  const out = {};
+  SHORTCUT_ACTION_DEFS.forEach((def) => {
+    const k = String(def.id || "");
+    const token = normalizeShortcutToken(source[k]);
+    if (token) {
+      out[k] = token;
+      return;
+    }
+    out[k] = normalizeShortcutToken(base[k]);
+  });
+  return out;
+}
+
+function loadShortcutProfiles() {
+  const normalizedDefaults = {};
+  Object.keys(DEFAULT_SHORTCUT_PROFILES).forEach((name) => {
+    normalizedDefaults[String(name)] = normalizeShortcutBindings(
+      DEFAULT_SHORTCUT_PROFILES[name],
+      DEFAULT_SHORTCUT_BINDINGS
+    );
+  });
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return normalizedDefaults;
+    const raw = String(window.localStorage.getItem(CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY) || "").trim();
+    if (!raw) return normalizedDefaults;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return normalizedDefaults;
+    const merged = { ...normalizedDefaults };
+    Object.keys(parsed).forEach((name) => {
+      const pname = String(name || "").trim();
+      if (!pname) return;
+      merged[pname] = normalizeShortcutBindings(parsed[name], normalizedDefaults.default);
+    });
+    return merged;
+  } catch (_) {
+    return normalizedDefaults;
+  }
+}
+
+function saveShortcutProfiles(profiles) {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    const rows = profiles && typeof profiles === "object" && !Array.isArray(profiles) ? profiles : {};
+    const payload = {};
+    Object.keys(rows).forEach((name) => {
+      const pname = String(name || "").trim();
+      if (!pname) return;
+      payload[pname] = normalizeShortcutBindings(rows[pname], DEFAULT_SHORTCUT_BINDINGS);
+    });
+    window.localStorage.setItem(CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY, JSON.stringify(payload));
   } catch (_) {
     // localStorage may be blocked; ignore and continue with in-memory state
   }
@@ -486,6 +607,20 @@ export function ContractWarningOverlay({
   const runOpenHandler = typeof onOpenRun === "function" ? onOpenRun : () => {};
   const gateOpenHandler = typeof onOpenGateEvidence === "function" ? onOpenGateEvidence : () => {};
   const initialPrefs = React.useMemo(() => loadContractOverlayPrefs(), []);
+  const initialShortcutProfiles = React.useMemo(() => loadShortcutProfiles(), []);
+  const initialActiveShortcutProfile = React.useMemo(() => {
+    const preferred = String(
+      initialPrefs.activeShortcutProfile || CONTRACT_OVERLAY_DEFAULT_PREFS.activeShortcutProfile
+    ).trim();
+    if (preferred && initialShortcutProfiles[preferred]) return preferred;
+    if (initialShortcutProfiles.default) return "default";
+    const names = Object.keys(initialShortcutProfiles);
+    return names.length > 0 ? String(names[0]) : "default";
+  }, [initialPrefs.activeShortcutProfile, initialShortcutProfiles]);
+  const initialShortcutBindings = React.useMemo(() => {
+    const profileBindings = initialShortcutProfiles[initialActiveShortcutProfile] || DEFAULT_SHORTCUT_BINDINGS;
+    return normalizeShortcutBindings(initialPrefs.shortcutBindings, profileBindings);
+  }, [initialActiveShortcutProfile, initialPrefs.shortcutBindings, initialShortcutProfiles]);
   const [sourceFilter, setSourceFilter] = React.useState(
     String(initialPrefs.sourceFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter)
   );
@@ -522,6 +657,14 @@ export function ContractWarningOverlay({
         : CONTRACT_OVERLAY_DEFAULT_PREFS.showShortcutHelp
     )
   );
+  const [shortcutProfiles, setShortcutProfiles] = React.useState(() => initialShortcutProfiles);
+  const [activeShortcutProfile, setActiveShortcutProfile] = React.useState(
+    String(initialActiveShortcutProfile || "default")
+  );
+  const [shortcutProfileDraft, setShortcutProfileDraft] = React.useState(
+    String(initialPrefs.shortcutProfileDraft || CONTRACT_OVERLAY_DEFAULT_PREFS.shortcutProfileDraft)
+  );
+  const [shortcutBindings, setShortcutBindings] = React.useState(() => initialShortcutBindings);
   const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
   const [expandedRowKeys, setExpandedRowKeys] = React.useState(() => new Set());
   const applyOverlayPreset = React.useCallback((presetName) => {
@@ -600,6 +743,26 @@ export function ContractWarningOverlay({
   }, [pinnedRunId, runOptions]);
 
   React.useEffect(() => {
+    const names = Object.keys(shortcutProfiles);
+    if (names.length === 0) {
+      setShortcutProfiles(loadShortcutProfiles());
+      return;
+    }
+    if (shortcutProfiles[activeShortcutProfile]) return;
+    const fallbackName = shortcutProfiles.default ? "default" : String(names[0] || "default");
+    const fallbackBindings = normalizeShortcutBindings(
+      shortcutProfiles[fallbackName],
+      DEFAULT_SHORTCUT_BINDINGS
+    );
+    setActiveShortcutProfile(fallbackName);
+    setShortcutBindings(fallbackBindings);
+  }, [activeShortcutProfile, shortcutProfiles]);
+
+  React.useEffect(() => {
+    saveShortcutProfiles(shortcutProfiles);
+  }, [shortcutProfiles]);
+
+  React.useEffect(() => {
     saveContractOverlayPrefs({
       sourceFilter,
       pinnedRunId,
@@ -609,8 +772,12 @@ export function ContractWarningOverlay({
       gateHistoryPages,
       rowWindowSize,
       showShortcutHelp,
+      activeShortcutProfile,
+      shortcutProfileDraft,
+      shortcutBindings,
     });
   }, [
+    activeShortcutProfile,
     compactMode,
     gateHistoryLimit,
     gateHistoryPages,
@@ -618,6 +785,8 @@ export function ContractWarningOverlay({
     pinnedRunId,
     rowWindowSize,
     showShortcutHelp,
+    shortcutBindings,
+    shortcutProfileDraft,
     sourceFilter,
   ]);
 
@@ -684,6 +853,122 @@ export function ContractWarningOverlay({
   const collapseAllDetails = React.useCallback(() => {
     setExpandedRowKeys(new Set());
   }, []);
+  const shortcutProfileOptions = React.useMemo(() => {
+    const names = Object.keys(shortcutProfiles).map((name) => String(name || "").trim()).filter(Boolean);
+    names.sort((a, b) => a.localeCompare(b));
+    if (!names.includes("default")) return names;
+    return ["default", ...names.filter((name) => name !== "default")];
+  }, [shortcutProfiles]);
+  const normalizedShortcutProfileDraft = React.useMemo(
+    () => normalizeShortcutProfileName(shortcutProfileDraft),
+    [shortcutProfileDraft]
+  );
+  const activeShortcutIsBuiltin = React.useMemo(
+    () => Object.prototype.hasOwnProperty.call(DEFAULT_SHORTCUT_PROFILES, activeShortcutProfile),
+    [activeShortcutProfile]
+  );
+  const applyActiveShortcutProfile = React.useCallback(() => {
+    const profileName = String(activeShortcutProfile || "").trim();
+    const fromProfile = shortcutProfiles[profileName] || DEFAULT_SHORTCUT_BINDINGS;
+    setShortcutBindings(normalizeShortcutBindings(fromProfile, DEFAULT_SHORTCUT_BINDINGS));
+  }, [activeShortcutProfile, shortcutProfiles]);
+  const resetShortcutBindingsToDefaults = React.useCallback(() => {
+    setShortcutBindings(normalizeShortcutBindings(DEFAULT_SHORTCUT_BINDINGS, DEFAULT_SHORTCUT_BINDINGS));
+  }, []);
+  const saveCurrentShortcutProfile = React.useCallback(() => {
+    const nextName = normalizeShortcutProfileName(shortcutProfileDraft);
+    if (!nextName) return;
+    const normalizedBindings = normalizeShortcutBindings(shortcutBindings, DEFAULT_SHORTCUT_BINDINGS);
+    setShortcutProfiles((prev) => ({
+      ...prev,
+      [nextName]: normalizedBindings,
+    }));
+    setActiveShortcutProfile(nextName);
+    setShortcutProfileDraft(nextName);
+  }, [shortcutBindings, shortcutProfileDraft]);
+  const deleteActiveShortcutProfile = React.useCallback(() => {
+    const profileName = String(activeShortcutProfile || "").trim();
+    if (!profileName) return;
+    if (Object.prototype.hasOwnProperty.call(DEFAULT_SHORTCUT_PROFILES, profileName)) return;
+    setShortcutProfiles((prev) => {
+      if (!Object.prototype.hasOwnProperty.call(prev, profileName)) return prev;
+      const next = { ...prev };
+      delete next[profileName];
+      return next;
+    });
+  }, [activeShortcutProfile]);
+  const updateShortcutBinding = React.useCallback((actionId, rawToken) => {
+    const id = String(actionId || "");
+    if (!id) return;
+    const token = normalizeShortcutToken(rawToken);
+    if (!token) return;
+    setShortcutBindings((prev) =>
+      normalizeShortcutBindings(
+        {
+          ...prev,
+          [id]: token,
+        },
+        prev
+      )
+    );
+  }, []);
+  const shortcutActionByKey = React.useMemo(() => {
+    const map = new Map();
+    SHORTCUT_ACTION_DEFS.forEach((def) => {
+      const actionId = String(def.id || "");
+      const token = normalizeShortcutToken(shortcutBindings[actionId]);
+      if (!actionId || !token) return;
+      if (!map.has(token)) {
+        map.set(token, actionId);
+      }
+    });
+    return map;
+  }, [shortcutBindings]);
+  const shortcutConflictText = React.useMemo(() => {
+    const reverse = new Map();
+    SHORTCUT_ACTION_DEFS.forEach((def) => {
+      const actionId = String(def.id || "");
+      const token = normalizeShortcutToken(shortcutBindings[actionId]);
+      if (!actionId || !token) return;
+      const bag = reverse.get(token) || [];
+      bag.push(String(def.label || actionId));
+      reverse.set(token, bag);
+    });
+    const conflicts = [];
+    reverse.forEach((labels, token) => {
+      if (labels.length <= 1) return;
+      conflicts.push(`${token}: ${labels.join("/")}`);
+    });
+    return conflicts.join(" | ");
+  }, [shortcutBindings]);
+  const conflictActionSet = React.useMemo(() => {
+    const reverse = new Map();
+    SHORTCUT_ACTION_DEFS.forEach((def) => {
+      const actionId = String(def.id || "");
+      const token = normalizeShortcutToken(shortcutBindings[actionId]);
+      if (!actionId || !token) return;
+      const bag = reverse.get(token) || [];
+      bag.push(actionId);
+      reverse.set(token, bag);
+    });
+    const out = new Set();
+    reverse.forEach((actionIds) => {
+      if (actionIds.length <= 1) return;
+      actionIds.forEach((actionId) => out.add(actionId));
+    });
+    return out;
+  }, [shortcutBindings]);
+  const shortcutHintText = React.useMemo(
+    () =>
+      SHORTCUT_ACTION_DEFS
+        .map((def) => {
+          const actionId = String(def.id || "");
+          const token = normalizeShortcutToken(shortcutBindings[actionId]) || "-";
+          return `${token}(${String(def.label || actionId)})`;
+        })
+        .join(", "),
+    [shortcutBindings]
+  );
   const formatRowDetailText = React.useCallback((row) => {
     const snapshot = row?.snapshot && typeof row.snapshot === "object" ? row.snapshot : {};
     const baseline = row?.baseline && typeof row.baseline === "object" ? row.baseline : {};
@@ -706,75 +991,77 @@ export function ContractWarningOverlay({
       noteJson,
     ].join("\n");
   }, []);
-  React.useEffect(() => {
-    const onKeyDown = (evt) => {
-      if (!evt || evt.defaultPrevented) return;
-      if (evt.metaKey || evt.ctrlKey || evt.altKey) return;
-      if (isEditableElementTarget(evt.target)) return;
-      const key = String(evt.key || "").toLowerCase();
-      if (key === "h") {
-        evt.preventDefault();
-        setShowShortcutHelp((x) => !x);
-        return;
-      }
-      if (key === "c") {
-        evt.preventDefault();
-        setCompactMode((x) => !x);
-        return;
-      }
-      if (key === "n") {
-        evt.preventDefault();
-        setNonZeroOnly((x) => !x);
-        return;
-      }
-      if (key === "g") {
-        evt.preventDefault();
-        setRowWindowOffset(0);
-        return;
-      }
-      if (key === "j") {
-        evt.preventDefault();
-        setRowWindowOffset((prev) => Math.min(maxRowWindowOffset, Number(prev || 0) + rowWindowSize));
-        return;
-      }
-      if (key === "k") {
-        evt.preventDefault();
-        setRowWindowOffset((prev) => Math.max(0, Number(prev || 0) - rowWindowSize));
-        return;
-      }
-      if (key === "1") {
-        evt.preventDefault();
-        applyOverlayPreset("triage");
-        return;
-      }
-      if (key === "2") {
-        evt.preventDefault();
-        applyOverlayPreset("deep_gate");
-        return;
-      }
-      if (key === "0") {
-        evt.preventDefault();
-        applyOverlayPreset("reset_all");
-        return;
-      }
-      if (key === "e") {
-        evt.preventDefault();
-        expandVisibleDetails();
-        return;
-      }
-      if (key === "x") {
-        evt.preventDefault();
-        collapseAllDetails();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+  const triggerShortcutAction = React.useCallback((actionId) => {
+    const id = String(actionId || "");
+    if (id === "toggle_help") {
+      setShowShortcutHelp((x) => !x);
+      return true;
+    }
+    if (id === "toggle_compact") {
+      setCompactMode((x) => !x);
+      return true;
+    }
+    if (id === "toggle_nonzero") {
+      setNonZeroOnly((x) => !x);
+      return true;
+    }
+    if (id === "row_top") {
+      setRowWindowOffset(0);
+      return true;
+    }
+    if (id === "row_next") {
+      setRowWindowOffset((prev) => Math.min(maxRowWindowOffset, Number(prev || 0) + rowWindowSize));
+      return true;
+    }
+    if (id === "row_prev") {
+      setRowWindowOffset((prev) => Math.max(0, Number(prev || 0) - rowWindowSize));
+      return true;
+    }
+    if (id === "preset_triage") {
+      applyOverlayPreset("triage");
+      return true;
+    }
+    if (id === "preset_deep") {
+      applyOverlayPreset("deep_gate");
+      return true;
+    }
+    if (id === "preset_reset") {
+      applyOverlayPreset("reset_all");
+      return true;
+    }
+    if (id === "expand_visible") {
+      expandVisibleDetails();
+      return true;
+    }
+    if (id === "collapse_details") {
+      collapseAllDetails();
+      return true;
+    }
+    return false;
   }, [
     applyOverlayPreset,
     collapseAllDetails,
     expandVisibleDetails,
     maxRowWindowOffset,
     rowWindowSize,
+  ]);
+  React.useEffect(() => {
+    const onKeyDown = (evt) => {
+      if (!evt || evt.defaultPrevented) return;
+      if (evt.metaKey || evt.ctrlKey || evt.altKey) return;
+      if (isEditableElementTarget(evt.target)) return;
+      const key = normalizeShortcutToken(evt.key);
+      if (!key) return;
+      const actionId = shortcutActionByKey.get(key);
+      if (!actionId) return;
+      evt.preventDefault();
+      triggerShortcutAction(actionId);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    shortcutActionByKey,
+    triggerShortcutAction,
   ]);
   const policyByRun = React.useMemo(() => {
     const map = new Map();
@@ -940,6 +1227,111 @@ export function ContractWarningOverlay({
         `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
       ]),
     ]),
+    h("div", {
+      className: "contract-overlay-filter",
+      key: "co_shortcut_profile_cfg",
+      style: { flexWrap: "wrap", rowGap: "6px" },
+    }, [
+      h("label", { key: "co_shortcut_profile_label" }, "shortcut profile:"),
+      h("select", {
+        className: "select",
+        key: "co_shortcut_profile_select",
+        value: activeShortcutProfile,
+        onChange: (e) => setActiveShortcutProfile(String(e.target.value || "default")),
+      }, shortcutProfileOptions.map((name) =>
+        h("option", { value: name, key: `co_shortcut_profile_opt_${name}` }, name)
+      )),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_profile_apply",
+        onClick: applyActiveShortcutProfile,
+      }, "Load Profile"),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_reset_defaults",
+        onClick: resetShortcutBindingsToDefaults,
+      }, "Reset Keys"),
+      h("label", { key: "co_shortcut_save_label", style: { marginLeft: "8px" } }, "save as:"),
+      h("input", {
+        className: "input",
+        key: "co_shortcut_profile_draft",
+        value: shortcutProfileDraft,
+        onChange: (e) => setShortcutProfileDraft(String(e.target.value || "")),
+        placeholder: "custom_profile",
+        style: { minWidth: "140px", maxWidth: "180px", padding: "5px 7px", fontSize: "11px" },
+      }),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_profile_save",
+        onClick: saveCurrentShortcutProfile,
+        disabled: !normalizedShortcutProfileDraft,
+      }, "Save Profile"),
+      h("button", {
+        className: "btn",
+        key: "co_shortcut_profile_delete",
+        onClick: deleteActiveShortcutProfile,
+        disabled: activeShortcutIsBuiltin,
+      }, "Delete Profile"),
+      h("span", {
+        key: "co_shortcut_profile_builtin_tag",
+        className: "hint",
+        style: { marginLeft: "auto", color: activeShortcutIsBuiltin ? "#8eb6ca" : "#f0b33a" },
+      }, activeShortcutIsBuiltin ? "profile: built-in" : "profile: custom"),
+    ]),
+    h("div", {
+      className: "contract-overlay-filter",
+      key: "co_shortcut_remap_grid",
+      style: { flexWrap: "wrap", rowGap: "6px", alignItems: "stretch" },
+    }, SHORTCUT_ACTION_DEFS.map((def) => {
+      const actionId = String(def.id || "");
+      const value = normalizeShortcutToken(shortcutBindings[actionId]);
+      const hasConflict = conflictActionSet.has(actionId);
+      return h("div", {
+        key: `co_shortcut_row_${actionId}`,
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+          border: hasConflict ? "1px solid #c28c2f" : "1px solid #27485a",
+          borderRadius: "6px",
+          background: hasConflict ? "rgba(92, 65, 20, 0.32)" : "rgba(9, 18, 24, 0.72)",
+          padding: "4px 6px",
+        },
+      }, [
+        h("label", {
+          key: `co_shortcut_row_lbl_${actionId}`,
+          className: "hint",
+          style: { color: "#9bc3d8", whiteSpace: "nowrap" },
+        }, `${String(def.label || actionId)}:`),
+        h("input", {
+          className: "input",
+          key: `co_shortcut_row_in_${actionId}`,
+          value,
+          onChange: (e) => updateShortcutBinding(actionId, e.target.value),
+          maxLength: 1,
+          style: {
+            width: "34px",
+            textAlign: "center",
+            padding: "4px 5px",
+            fontSize: "11px",
+          },
+        }),
+        hasConflict
+          ? h("span", {
+            key: `co_shortcut_row_conflict_${actionId}`,
+            className: "hint",
+            style: { color: "#ffd08b" },
+          }, "dup")
+          : null,
+      ]);
+    })),
+    shortcutConflictText
+      ? h("div", {
+        className: "hint",
+        key: "co_shortcuts_conflict_hint",
+        style: { margin: "4px 2px 2px 2px", color: "#ffd08b" },
+      }, `Shortcut conflict: ${shortcutConflictText} (first mapping wins).`)
+      : null,
     showShortcutHelp
       ? h(
         "div",
@@ -948,7 +1340,7 @@ export function ContractWarningOverlay({
           key: "co_shortcuts_hint",
           style: { margin: "6px 2px 8px 2px", color: "#8eb6ca" },
         },
-        "Shortcuts: h(help), c(compact), n(non-zero), j(next), k(prev), g(top), e(expand visible), x(collapse details), 1(triage), 2(deep), 0(reset)."
+        `Shortcuts: ${shortcutHintText}.`
       )
       : null,
     h("div", { className: "contract-overlay-bd", key: "co_bd" }, filteredRows.length === 0

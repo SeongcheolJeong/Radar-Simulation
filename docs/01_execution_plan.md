@@ -1042,3 +1042,20 @@ M17.19 outcome (2026-02-22):
 - detail UI styling and readability support added:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
   - classes: `contract-row-detail-btn`, `contract-overlay-row-detail`
+
+M17.20 outcome (2026-02-22):
+
+- overlay shortcuts are now remappable with profile persistence:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - profile store key: `graph_lab_contract_overlay_shortcut_profiles_v1`
+  - profile ops: `Load Profile`, `Save Profile`, `Delete Profile`, `Reset Keys`
+- dynamic key dispatch replaces hardcoded shortcut branching:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - dispatch map: `shortcutActionByKey`
+  - action router: `triggerShortcutAction(...)`
+  - help line now renders from current bindings (`shortcutHintText`)
+- remap safety/traceability added for operators:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - per-action inline key editor for all overlay actions
+  - duplicate key detection + conflict hint (`first mapping wins`)
+  - prefs now persist active profile/draft/bindings in overlay localStorage
