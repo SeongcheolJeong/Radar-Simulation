@@ -2320,3 +2320,30 @@
     - `co_row_copy_`
     - `co_row_copy_only_`
     - `detail_copy:`
+
+## Web E2E Graph Severity-First Triage Filter (M17.24)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - severity triage filter frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8155/8135)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - severity filter state/model tokens confirmed:
+    - `severityFilter`
+    - `SEVERITY_FILTER_OPTIONS`
+    - `scopedRows`
+    - `severityCounts`
+  - severity filter UI tokens confirmed:
+    - `co_severity_select`
+    - `co_sev_btn_high`
+    - `co_sev_btn_med`
+    - `co_sev_btn_low`
+    - `filtered/scoped/all`
+  - preset integration token confirmed:
+    - `setSeverityFilter("high")`

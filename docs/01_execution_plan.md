@@ -132,6 +132,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.21: Row detail field-level toggles + core/all presets
 - [x] M17.22: Shortcut profile transfer import/export (team-shareable JSON)
 - [x] M17.23: Detail-view copy ergonomics (row/visible copy actions)
+- [x] M17.24: Severity-first triage filter (all/high/med/low with scoped counts)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -144,7 +145,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.23 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.24 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1110,3 +1111,18 @@ M17.23 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - visible-copy outputs current row window with row/run/source headers
   - row-copy supports compact/full rows and non-run rows consistently
+
+M17.24 outcome (2026-02-22):
+
+- severity-first triage filtering added to overlay controls:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - filter options: `all`, `high`, `med`, `low`
+  - quick severity buttons with scoped counts: `high:n`, `med:n`, `low:n`
+- filter pipeline split for clearer operator context:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `scopedRows` (source/run/non-zero scope) -> `filteredRows` (severity-applied)
+  - count line now shows `filtered/scoped/all`
+- preset/persistence integration:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `Preset: Triage` now defaults severity to `high`
+  - `severityFilter` persisted in overlay prefs and restored on reload

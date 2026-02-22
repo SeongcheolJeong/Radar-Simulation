@@ -94,6 +94,7 @@ const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
 const CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY = "graph_lab_contract_overlay_shortcut_profiles_v1";
 const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   sourceFilter: "all",
+  severityFilter: "all",
   pinnedRunId: "all",
   nonZeroOnly: false,
   compactMode: false,
@@ -105,6 +106,12 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   shortcutProfileDraft: "custom_profile",
   detailFieldStates: null,
 };
+const SEVERITY_FILTER_OPTIONS = [
+  { id: "all", label: "all" },
+  { id: "high", label: "high" },
+  { id: "med", label: "med" },
+  { id: "low", label: "low" },
+];
 const DETAIL_FIELD_DEFS = [
   { id: "timestamp_iso", label: "time" },
   { id: "event_meta", label: "event/run" },
@@ -715,6 +722,9 @@ export function ContractWarningOverlay({
   const [sourceFilter, setSourceFilter] = React.useState(
     String(initialPrefs.sourceFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter)
   );
+  const [severityFilter, setSeverityFilter] = React.useState(
+    String(initialPrefs.severityFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter)
+  );
   const [pinnedRunId, setPinnedRunId] = React.useState(
     String(initialPrefs.pinnedRunId || CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId)
   );
@@ -772,6 +782,7 @@ export function ContractWarningOverlay({
     const name = String(presetName || "").trim();
     if (name === "reset_all") {
       setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
+      setSeverityFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
       setPinnedRunId(CONTRACT_OVERLAY_DEFAULT_PREFS.pinnedRunId);
       setNonZeroOnly(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.nonZeroOnly));
       setCompactMode(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.compactMode));
@@ -784,6 +795,7 @@ export function ContractWarningOverlay({
       return;
     }
     if (name === "triage") {
+      setSeverityFilter("high");
       setNonZeroOnly(true);
       setCompactMode(true);
       setGateHistoryLimit("128");
@@ -802,6 +814,7 @@ export function ContractWarningOverlay({
       return;
     }
     if (name === "deep_gate") {
+      setSeverityFilter("all");
       setNonZeroOnly(false);
       setCompactMode(false);
       setGateHistoryLimit("512");
@@ -855,6 +868,13 @@ export function ContractWarningOverlay({
   }, [sourceFilter, sourceOptions]);
 
   React.useEffect(() => {
+    const allowed = SEVERITY_FILTER_OPTIONS.map((x) => String(x.id || ""));
+    if (!allowed.includes(severityFilter)) {
+      setSeverityFilter("all");
+    }
+  }, [severityFilter]);
+
+  React.useEffect(() => {
     if (!runOptions.includes(pinnedRunId)) {
       setPinnedRunId("all");
     }
@@ -883,6 +903,7 @@ export function ContractWarningOverlay({
   React.useEffect(() => {
     saveContractOverlayPrefs({
       sourceFilter,
+      severityFilter,
       pinnedRunId,
       nonZeroOnly,
       compactMode,
@@ -904,13 +925,14 @@ export function ContractWarningOverlay({
     nonZeroOnly,
     pinnedRunId,
     rowWindowSize,
+    severityFilter,
     showShortcutHelp,
     shortcutBindings,
     shortcutProfileDraft,
     sourceFilter,
   ]);
 
-  const filteredRows = React.useMemo(() => rows.filter((row) => {
+  const scopedRows = React.useMemo(() => rows.filter((row) => {
     const source = String(row?.event_source || "-");
     if (sourceFilter !== "all" && source !== sourceFilter) return false;
     const runId = String(row?.graph_run_id || "");
@@ -920,13 +942,27 @@ export function ContractWarningOverlay({
     const da = Number(row?.delta?.attempt_count_total || 0);
     return du !== 0 || da !== 0;
   }), [nonZeroOnly, pinnedRunId, rows, sourceFilter]);
+  const severityCounts = React.useMemo(() => {
+    const out = { high: 0, med: 0, low: 0 };
+    scopedRows.forEach((row) => {
+      const s = classifyContractSeverity(row);
+      if (s === "high" || s === "med" || s === "low") {
+        out[s] += 1;
+      }
+    });
+    return out;
+  }, [scopedRows]);
+  const filteredRows = React.useMemo(() => {
+    if (severityFilter === "all") return scopedRows;
+    return scopedRows.filter((row) => classifyContractSeverity(row) === severityFilter);
+  }, [scopedRows, severityFilter]);
   const maxRowWindowOffset = React.useMemo(
     () => Math.max(0, Number(filteredRows.length || 0) - rowWindowSize),
     [filteredRows.length, rowWindowSize]
   );
   React.useEffect(() => {
     setRowWindowOffset(0);
-  }, [nonZeroOnly, pinnedRunId, sourceFilter, rowWindowSize]);
+  }, [nonZeroOnly, pinnedRunId, rowWindowSize, severityFilter, sourceFilter]);
   React.useEffect(() => {
     if (rowWindowOffset > maxRowWindowOffset) {
       setRowWindowOffset(maxRowWindowOffset);
@@ -1446,6 +1482,32 @@ export function ContractWarningOverlay({
         value: sourceFilter,
         onChange: (e) => setSourceFilter(String(e.target.value || "all")),
       }, sourceOptions.map((opt) => h("option", { value: opt, key: `co_src_${opt}` }, opt))),
+      h("label", { key: "co_severity_label" }, "severity:"),
+      h("select", {
+        className: "select",
+        key: "co_severity_select",
+        value: severityFilter,
+        onChange: (e) => setSeverityFilter(String(e.target.value || "all")),
+      }, SEVERITY_FILTER_OPTIONS.map((opt) =>
+        h("option", { value: String(opt.id || "all"), key: `co_sev_opt_${String(opt.id || "all")}` }, String(opt.label || opt.id || "all"))
+      )),
+      h("div", { key: "co_severity_quick", style: { display: "inline-flex", alignItems: "center", gap: "4px" } }, [
+        ...["high", "med", "low"].map((sev) =>
+          h("button", {
+            className: "btn",
+            key: `co_sev_btn_${sev}`,
+            onClick: () => setSeverityFilter(sev),
+            style: {
+              padding: "4px 7px",
+              fontSize: "10px",
+              lineHeight: 1,
+              minHeight: 0,
+              borderColor: severityFilter === sev ? "#4d7a93" : undefined,
+              background: severityFilter === sev ? "rgba(46, 86, 106, 0.42)" : undefined,
+            },
+          }, `${sev}:${Number(severityCounts[sev] || 0)}`)
+        ),
+      ]),
       h("label", { key: "co_run_label" }, "run:"),
       h("select", {
         className: "select",
@@ -1524,7 +1586,7 @@ export function ContractWarningOverlay({
         }, "Next"),
       ]),
       h("span", { key: "co_filter_count", style: { marginLeft: "auto", color: "#8eb6ca" } }, [
-        `showing ${filteredRows.length}/${rows.length} | `,
+        `showing ${filteredRows.length}/${scopedRows.length}/${rows.length} (filtered/scoped/all) | `,
         `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
       ]),
     ]),
