@@ -142,6 +142,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.31: Replace-mode confirmation + one-click undo recovery
 - [x] M17.32: Import audit trail + multi-level undo/redo stacks
 - [x] M17.33: Audit detail drilldown + local persistence for import history
+- [x] M17.34: Import history maintenance controls + audit search/filter
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -154,7 +155,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.33 frontend hardening track: add history maintenance controls (clear/prune policy) and audit search/filter interactions while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.34 frontend hardening track: add audit-query reset ergonomics and row-volume guardrails while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1274,3 +1275,18 @@ M17.33 outcome (2026-02-22):
   - storage key: `graph_lab_contract_overlay_filter_import_history_v1`
   - helpers: `loadFilterImportHistoryState`, `saveFilterImportHistoryState`
   - startup restore + runtime sync for undo/redo/audit stacks
+
+M17.34 outcome (2026-02-22):
+
+- import history maintenance controls added in audit toolbar:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions/keys: `co_filter_import_prune_keep`, `co_filter_import_prune`, `co_filter_import_clear`
+  - behavior: bounded prune for undo/redo/audit stacks + full clear reset
+- audit search/filter interactions added for operator drilldown:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - controls/keys: `co_filter_import_audit_search`, `co_filter_import_audit_kind`, `co_filter_import_audit_mode`
+  - computed view model: `filterImportAuditRowsFiltered`
+- audit list/detail synchronization hardened under filtered views:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - active entry auto-fallback when filtered result changes
+  - visibility hint key: `co_filter_import_audit_count`

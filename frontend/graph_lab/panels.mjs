@@ -217,6 +217,8 @@ const DEFAULT_SHORTCUT_PROFILES = {
   },
 };
 const FILTER_IMPORT_HISTORY_LIMIT = 16;
+const FILTER_IMPORT_AUDIT_KIND_OPTIONS = ["all", "import", "undo", "redo"];
+const FILTER_IMPORT_AUDIT_MODE_OPTIONS = ["all", "merge", "replace_custom", "undo", "redo"];
 
 function clampInteger(raw, minValue, maxValue, fallback) {
   const n = Number(raw);
@@ -1196,6 +1198,10 @@ export function ContractWarningOverlay({
   const [activeFilterImportAuditId, setActiveFilterImportAuditId] = React.useState(
     () => String(initialFilterImportHistory.auditTrail[0]?.id || "")
   );
+  const [filterImportAuditSearchText, setFilterImportAuditSearchText] = React.useState("");
+  const [filterImportAuditKindFilter, setFilterImportAuditKindFilter] = React.useState("all");
+  const [filterImportAuditModeFilter, setFilterImportAuditModeFilter] = React.useState("all");
+  const [filterImportHistoryKeepText, setFilterImportHistoryKeepText] = React.useState("8");
   const [shortcutTransferText, setShortcutTransferText] = React.useState("");
   const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
   const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
@@ -1317,6 +1323,16 @@ export function ContractWarningOverlay({
   }, [filterImportMode]);
 
   React.useEffect(() => {
+    if (FILTER_IMPORT_AUDIT_KIND_OPTIONS.includes(filterImportAuditKindFilter)) return;
+    setFilterImportAuditKindFilter("all");
+  }, [filterImportAuditKindFilter]);
+
+  React.useEffect(() => {
+    if (FILTER_IMPORT_AUDIT_MODE_OPTIONS.includes(filterImportAuditModeFilter)) return;
+    setFilterImportAuditModeFilter("all");
+  }, [filterImportAuditModeFilter]);
+
+  React.useEffect(() => {
     if (filterImportMode === "replace_custom") return;
     if (!filterReplaceConfirmChecked) return;
     setFilterReplaceConfirmChecked(false);
@@ -1326,18 +1342,6 @@ export function ContractWarningOverlay({
     if (!filterReplaceConfirmChecked) return;
     setFilterReplaceConfirmChecked(false);
   }, [filterReplaceConfirmChecked, filterTransferText]);
-
-  React.useEffect(() => {
-    const rows = Array.isArray(filterImportAuditTrail) ? filterImportAuditTrail : [];
-    if (rows.length === 0) {
-      if (activeFilterImportAuditId) {
-        setActiveFilterImportAuditId("");
-      }
-      return;
-    }
-    if (rows.some((row) => String(row?.id || "") === activeFilterImportAuditId)) return;
-    setActiveFilterImportAuditId(String(rows[0]?.id || ""));
-  }, [activeFilterImportAuditId, filterImportAuditTrail]);
 
   React.useEffect(() => {
     if (!runOptions.includes(pinnedRunId)) {
@@ -1978,12 +1982,62 @@ export function ContractWarningOverlay({
     () => filterImportMode === "replace_custom" && selectedFilterImportNames.length > 0,
     [filterImportMode, selectedFilterImportNames]
   );
-  const activeFilterImportAuditEntry = React.useMemo(() => {
+  const filterImportAuditRowsFiltered = React.useMemo(() => {
     const rows = Array.isArray(filterImportAuditTrail) ? filterImportAuditTrail : [];
+    const kindFilter = String(filterImportAuditKindFilter || "all");
+    const modeFilter = String(filterImportAuditModeFilter || "all");
+    const queryTokens = String(filterImportAuditSearchText || "")
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    return rows.filter((entry) => {
+      const kind = String(entry?.kind || "import");
+      const mode = String(entry?.mode || "merge");
+      if (kindFilter !== "all" && kind !== kindFilter) return false;
+      if (modeFilter !== "all" && mode !== modeFilter) return false;
+      if (queryTokens.length === 0) return true;
+      const haystack = [
+        String(entry?.id || ""),
+        String(entry?.timestamp_iso || ""),
+        kind,
+        mode,
+        String(entry?.note || ""),
+        ...sanitizeAuditNameList(entry?.selected_names),
+        ...sanitizeAuditNameList(entry?.added_names),
+        ...sanitizeAuditNameList(entry?.removed_names),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return queryTokens.every((token) => haystack.includes(token));
+    });
+  }, [
+    filterImportAuditKindFilter,
+    filterImportAuditModeFilter,
+    filterImportAuditSearchText,
+    filterImportAuditTrail,
+  ]);
+  const activeFilterImportAuditEntry = React.useMemo(() => {
+    const rows = Array.isArray(filterImportAuditRowsFiltered) ? filterImportAuditRowsFiltered : [];
     if (rows.length === 0) return null;
     if (!activeFilterImportAuditId) return rows[0];
     return rows.find((row) => String(row?.id || "") === activeFilterImportAuditId) || rows[0];
-  }, [activeFilterImportAuditId, filterImportAuditTrail]);
+  }, [activeFilterImportAuditId, filterImportAuditRowsFiltered]);
+  React.useEffect(() => {
+    const rows = Array.isArray(filterImportAuditRowsFiltered) ? filterImportAuditRowsFiltered : [];
+    if (rows.length === 0) {
+      if (activeFilterImportAuditId) {
+        setActiveFilterImportAuditId("");
+      }
+      return;
+    }
+    if (!activeFilterImportAuditId) {
+      setActiveFilterImportAuditId(String(rows[0]?.id || ""));
+      return;
+    }
+    if (rows.some((row) => String(row?.id || "") === activeFilterImportAuditId)) return;
+    setActiveFilterImportAuditId(String(rows[0]?.id || ""));
+  }, [activeFilterImportAuditId, filterImportAuditRowsFiltered]);
   const filterImportAuditDetailText = React.useMemo(
     () => buildFilterImportAuditDetailText(activeFilterImportAuditEntry),
     [activeFilterImportAuditEntry]
@@ -2159,6 +2213,30 @@ export function ContractWarningOverlay({
       setFilterTransferStatus("audit export failed");
     }
   }, [filterImportAuditTrail]);
+  const clearFilterImportHistory = React.useCallback(() => {
+    setFilterImportUndoStack([]);
+    setFilterImportRedoStack([]);
+    setFilterImportAuditTrail([]);
+    setActiveFilterImportAuditId("");
+    setFilterTransferStatus("import history cleared");
+  }, []);
+  const pruneFilterImportHistory = React.useCallback(() => {
+    const keep = clampInteger(filterImportHistoryKeepText, 1, FILTER_IMPORT_HISTORY_LIMIT, 8);
+    setFilterImportHistoryKeepText(String(keep));
+    setFilterImportUndoStack((prev) => {
+      const rows = Array.isArray(prev) ? prev : [];
+      return rows.slice(-keep);
+    });
+    setFilterImportRedoStack((prev) => {
+      const rows = Array.isArray(prev) ? prev : [];
+      return rows.slice(-keep);
+    });
+    setFilterImportAuditTrail((prev) => {
+      const rows = Array.isArray(prev) ? prev : [];
+      return rows.slice(0, keep);
+    });
+    setFilterTransferStatus(`import history pruned to ${keep}`);
+  }, [filterImportHistoryKeepText]);
   const restoreFilterPresetSnapshot = React.useCallback((snapshot) => {
     const row = snapshot && typeof snapshot === "object" ? snapshot : null;
     if (!row || !row.presets || typeof row.presets !== "object") return false;
@@ -2938,7 +3016,57 @@ export function ContractWarningOverlay({
           },
         }, [
           h("div", { className: "btn-row", key: "co_filter_import_audit_controls", style: { gap: "6px" } }, [
-            h("label", { key: "co_filter_import_audit_label" }, `audit trail (${filterImportAuditTrail.length})`),
+            h("label", { key: "co_filter_import_audit_label" }, "audit trail:"),
+            h("input", {
+              className: "input",
+              key: "co_filter_import_audit_search",
+              value: filterImportAuditSearchText,
+              onChange: (e) => setFilterImportAuditSearchText(String(e.target.value || "")),
+              placeholder: "search id/name/note",
+              style: { minWidth: "160px", maxWidth: "240px", padding: "5px 7px", fontSize: "11px" },
+            }),
+            h("select", {
+              className: "select",
+              key: "co_filter_import_audit_kind",
+              value: filterImportAuditKindFilter,
+              onChange: (e) => setFilterImportAuditKindFilter(String(e.target.value || "all")),
+              style: { minWidth: "110px", padding: "5px 7px", fontSize: "11px" },
+            }, FILTER_IMPORT_AUDIT_KIND_OPTIONS.map((kind) =>
+              h("option", { value: kind, key: `co_filter_import_audit_kind_opt_${kind}` }, `kind:${kind}`)
+            )),
+            h("select", {
+              className: "select",
+              key: "co_filter_import_audit_mode",
+              value: filterImportAuditModeFilter,
+              onChange: (e) => setFilterImportAuditModeFilter(String(e.target.value || "all")),
+              style: { minWidth: "150px", padding: "5px 7px", fontSize: "11px" },
+            }, FILTER_IMPORT_AUDIT_MODE_OPTIONS.map((mode) =>
+              h("option", { value: mode, key: `co_filter_import_audit_mode_opt_${mode}` }, `mode:${mode}`)
+            )),
+            h("label", { key: "co_filter_import_prune_label", className: "hint", style: { color: "#8eb6ca" } }, "keep:"),
+            h("input", {
+              className: "input",
+              key: "co_filter_import_prune_keep",
+              type: "number",
+              min: 1,
+              max: FILTER_IMPORT_HISTORY_LIMIT,
+              step: 1,
+              value: filterImportHistoryKeepText,
+              onChange: (e) => setFilterImportHistoryKeepText(String(e.target.value || "")),
+              style: { width: "72px", padding: "5px 7px", fontSize: "11px" },
+            }),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_prune",
+              onClick: pruneFilterImportHistory,
+              disabled: filterImportAuditTrail.length === 0,
+            }, "Prune"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_clear",
+              onClick: clearFilterImportHistory,
+              disabled: filterImportAuditTrail.length === 0,
+            }, "Clear"),
             h("button", {
               className: "btn",
               key: "co_filter_import_audit_copy",
@@ -2951,33 +3079,44 @@ export function ContractWarningOverlay({
               onClick: exportFilterImportAuditJson,
               disabled: filterImportAuditTrail.length === 0,
             }, "Export Audit JSON"),
+            h("span", {
+              key: "co_filter_import_audit_count",
+              className: "hint",
+              style: { marginLeft: "auto", color: "#8eb6ca" },
+            }, `visible ${filterImportAuditRowsFiltered.length}/${filterImportAuditTrail.length}`),
           ]),
-          h("div", { key: "co_filter_import_audit_rows", style: { display: "grid", rowGap: "3px" } },
-            filterImportAuditTrail.slice(0, 6).map((entry, idx) => {
-              const entryId = String(entry?.id || `idx_${idx}`);
-              const selected = entryId === String(activeFilterImportAuditId || "");
-              const namesPreview = compactNameList(entry?.selected_names, 3).join(", ");
-              return h("button", {
-                className: "btn",
-                key: `co_filter_import_audit_row_${idx}`,
-                onClick: () => setActiveFilterImportAuditId(entryId),
-                style: {
-                  textAlign: "left",
-                  justifyContent: "flex-start",
-                  fontSize: "10px",
-                  minHeight: 0,
-                  borderColor: selected ? "#4d7a93" : undefined,
-                  background: selected ? "rgba(46, 86, 106, 0.42)" : undefined,
-                },
-              }, [
-                `${String(entry?.timestamp_iso || "-")} | ${String(entry?.kind || "import")} | mode:${String(entry?.mode || "-")} | `,
-                `sel:${Number(entry?.selected_count || 0)} +${Number(entry?.added_count || 0)} `,
-                `~${Number(entry?.changed_count || 0)} -${Number(entry?.removed_count || 0)} `,
-                namesPreview ? `| names:${namesPreview} ` : "",
-                entry?.note ? `| ${String(entry.note)}` : "",
-              ].join(""));
-            })
-          ),
+          filterImportAuditRowsFiltered.length > 0
+            ? h("div", { key: "co_filter_import_audit_rows", style: { display: "grid", rowGap: "3px" } },
+              filterImportAuditRowsFiltered.map((entry, idx) => {
+                const entryId = String(entry?.id || `idx_${idx}`);
+                const selected = entryId === String(activeFilterImportAuditId || "");
+                const namesPreview = compactNameList(entry?.selected_names, 3).join(", ");
+                return h("button", {
+                  className: "btn",
+                  key: `co_filter_import_audit_row_${idx}`,
+                  onClick: () => setActiveFilterImportAuditId(entryId),
+                  style: {
+                    textAlign: "left",
+                    justifyContent: "flex-start",
+                    fontSize: "10px",
+                    minHeight: 0,
+                    borderColor: selected ? "#4d7a93" : undefined,
+                    background: selected ? "rgba(46, 86, 106, 0.42)" : undefined,
+                  },
+                }, [
+                  `${String(entry?.timestamp_iso || "-")} | ${String(entry?.kind || "import")} | mode:${String(entry?.mode || "-")} | `,
+                  `sel:${Number(entry?.selected_count || 0)} +${Number(entry?.added_count || 0)} `,
+                  `~${Number(entry?.changed_count || 0)} -${Number(entry?.removed_count || 0)} `,
+                  namesPreview ? `| names:${namesPreview} ` : "",
+                  entry?.note ? `| ${String(entry.note)}` : "",
+                ].join(""));
+              })
+            )
+            : h("div", {
+              key: "co_filter_import_audit_empty",
+              className: "hint",
+              style: { color: "#8eb6ca", padding: "2px 0 4px 2px" },
+            }, "no audit rows matched current filters"),
           h("textarea", {
             className: "textarea",
             key: "co_filter_import_audit_detail",

@@ -2600,3 +2600,30 @@
     - `co_filter_import_audit_detail`
     - `co_filter_import_audit_row_`
     - `names:`
+
+## Web E2E Graph Import History Maintenance + Audit Search/Filter (M17.34)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - import-history maintenance/audit-filter frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8165/8145)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - history maintenance tokens confirmed:
+    - `clearFilterImportHistory`
+    - `pruneFilterImportHistory`
+    - `co_filter_import_prune_keep`
+    - `co_filter_import_prune`
+    - `co_filter_import_clear`
+  - audit search/filter tokens confirmed:
+    - `filterImportAuditRowsFiltered`
+    - `co_filter_import_audit_search`
+    - `co_filter_import_audit_kind`
+    - `co_filter_import_audit_mode`
+    - `co_filter_import_audit_count`
+    - `no audit rows matched current filters`
