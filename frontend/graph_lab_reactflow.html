@@ -340,12 +340,17 @@
       const [sceneJsonPath, setSceneJsonPath] = React.useState(
         String(params.get("scene") || "data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json")
       );
+      const [baselineId, setBaselineId] = React.useState(
+        String(params.get("baseline_id") || "graph_lab_baseline")
+      );
       const [templates, setTemplates] = React.useState([]);
       const [statusText, setStatusText] = React.useState("idle");
       const [statusTone, setStatusTone] = React.useState("status-neutral");
       const [validationText, setValidationText] = React.useState("-");
       const [graphRunText, setGraphRunText] = React.useState("-");
       const [graphRunSummary, setGraphRunSummary] = React.useState(null);
+      const [gateResultText, setGateResultText] = React.useState("-");
+      const [lastPolicyEval, setLastPolicyEval] = React.useState(null);
       const [selectedNodeId, setSelectedNodeId] = React.useState("");
       const [selectedNodeParamsText, setSelectedNodeParamsText] = React.useState("{}");
 
@@ -537,13 +542,148 @@
           ];
           setGraphRunText(lines.join("\n"));
           setGraphRunSummary(summary);
+          setGateResultText("-");
+          setLastPolicyEval(null);
           setStatus(`graph run completed: ${graphRunId}`, "status-ok");
         } catch (err) {
           setGraphRunText(`graph run failed\n- ${String(err.message || err)}`);
           setGraphRunSummary(null);
+          setGateResultText("-");
+          setLastPolicyEval(null);
           setStatus(`graph run failed: ${String(err.message || err)}`, "status-err");
         }
       }, [apiBase, edges, graphId, nodes, profile, sceneJsonPath, setStatus]);
+
+      const pinBaselineFromGraphRun = React.useCallback(async () => {
+        const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
+        const bId = String(baselineId || "").trim();
+        if (!summaryPath) {
+          setStatus("run graph first to pin baseline", "status-warn");
+          return;
+        }
+        if (!bId) {
+          setStatus("baseline id is required", "status-warn");
+          return;
+        }
+        setStatus("pinning baseline...", "status-warn");
+        try {
+          const res = await fetch(`${apiBase.replace(/\\/$/, "")}/api/baselines`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              baseline_id: bId,
+              summary_json: summaryPath,
+              overwrite: true,
+              note: "pinned from graph_lab",
+              tags: ["graph_lab", "graph_run"],
+            }),
+          });
+          if (!res.ok) throw new Error(`baseline pin failed (${res.status})`);
+          const payload = await res.json();
+          const row = payload.baseline || {};
+          setStatus(`baseline pinned: ${String(row.baseline_id || bId)}`, "status-ok");
+        } catch (err) {
+          setStatus(`baseline pin failed: ${String(err.message || err)}`, "status-err");
+        }
+      }, [apiBase, baselineId, graphRunSummary, setStatus]);
+
+      const runPolicyGateForGraphRun = React.useCallback(async () => {
+        const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
+        const bId = String(baselineId || "").trim();
+        if (!summaryPath) {
+          setStatus("run graph first to evaluate gate", "status-warn");
+          return;
+        }
+        if (!bId) {
+          setStatus("baseline id is required", "status-warn");
+          return;
+        }
+        setStatus("running policy gate...", "status-warn");
+        try {
+          const res = await fetch(`${apiBase.replace(/\\/$/, "")}/api/compare/policy`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              baseline_id: bId,
+              candidate_summary_json: summaryPath,
+            }),
+          });
+          if (!res.ok) throw new Error(`policy gate failed (${res.status})`);
+          const payload = await res.json();
+          const row = payload.policy_eval || {};
+          const failures = Array.isArray(row.gate_failures) ? row.gate_failures : [];
+          const lines = [
+            `policy_eval_id: ${String(row.policy_eval_id || "-")}`,
+            `gate_failed: ${Boolean(row.gate_failed)}`,
+            `recommendation: ${String(row.recommendation || "-")}`,
+            `failure_count: ${failures.length}`,
+          ];
+          if (failures.length > 0) {
+            lines.push("gate_failures:");
+            failures.slice(0, 8).forEach((f, idx) => {
+              const metric = f && f.metric ? ` (${String(f.metric)})` : "";
+              lines.push(
+                `- [${Number(idx) + 1}] ${String((f && f.rule) || "unknown_rule")}${metric}: ${String(
+                  (f && f.value) ?? "-"
+                )} > ${String((f && f.limit) ?? "-")}`
+              );
+            });
+          }
+          setGateResultText(lines.join("\n"));
+          setLastPolicyEval(row);
+          setStatus(
+            Boolean(row.gate_failed) ? "policy gate: HOLD" : "policy gate: ADOPT",
+            Boolean(row.gate_failed) ? "status-warn" : "status-ok"
+          );
+        } catch (err) {
+          setGateResultText(`gate failed\n- ${String(err.message || err)}`);
+          setLastPolicyEval(null);
+          setStatus(`policy gate failed: ${String(err.message || err)}`, "status-err");
+        }
+      }, [apiBase, baselineId, graphRunSummary, setStatus]);
+
+      const exportGateReport = React.useCallback(() => {
+        const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim() || "-";
+        const p = lastPolicyEval || {};
+        const failures = Array.isArray(p.gate_failures) ? p.gate_failures : [];
+        const nowIso = new Date().toISOString();
+        const reportLines = [
+          "# Graph Run Gate Report",
+          "",
+          `- generated_at_utc: ${nowIso}`,
+          `- graph_id: ${String(graphRunSummary?.graph?.graph_id || graphId || "-")}`,
+          `- graph_run_summary_json: ${summaryPath}`,
+          `- baseline_id: ${String(baselineId || "-")}`,
+          `- policy_eval_id: ${String(p.policy_eval_id || "-")}`,
+          `- gate_failed: ${Boolean(p.gate_failed)}`,
+          `- recommendation: ${String(p.recommendation || "-")}`,
+          "",
+          "## Failures",
+        ];
+        if (failures.length === 0) {
+          reportLines.push("- none");
+        } else {
+          failures.forEach((f, idx) => {
+            const metric = f && f.metric ? ` (${String(f.metric)})` : "";
+            reportLines.push(
+              `- [${Number(idx) + 1}] ${String((f && f.rule) || "unknown_rule")}${metric}: value=${String(
+                (f && f.value) ?? "-"
+              )} limit=${String((f && f.limit) ?? "-")}`
+            );
+          });
+        }
+        const text = reportLines.join("\n");
+        const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = href;
+        a.download = `graph_gate_report_${String(graphId || "graph")}_${nowIso.slice(0, 19).replace(/[:T]/g, "_")}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+        setStatus("gate report exported", "status-ok");
+      }, [baselineId, graphId, graphRunSummary, lastPolicyEval, setStatus]);
 
       const loadTemplateByIndex = React.useCallback((idx) => {
         const i = Math.max(0, Math.floor(Number(idx)));
@@ -622,6 +762,15 @@
                   placeholder: "data/demo/.../scene.json",
                 }),
               ]),
+              h("div", { className: "field", key: "baselineid" }, [
+                h("label", { className: "label", key: "lbl1c" }, "Baseline ID"),
+                h("input", {
+                  className: "input",
+                  value: baselineId,
+                  onChange: (e) => setBaselineId(e.target.value),
+                  placeholder: "graph_lab_baseline",
+                }),
+              ]),
               h("div", { className: "field", key: "profile" }, [
                 h("label", { className: "label", key: "lbl2" }, "Profile"),
                 h("select", {
@@ -661,6 +810,11 @@
               ]),
               h("button", { className: "btn", onClick: runGraphValidation, key: "validate" }, "Validate Graph Contract"),
               h("button", { className: "btn", onClick: runGraphViaApi, key: "rungraph" }, "Run Graph (API)"),
+              h("div", { className: "btn-row", key: "gatebtns" }, [
+                h("button", { className: "btn", onClick: pinBaselineFromGraphRun, key: "pinb" }, "Pin Baseline"),
+                h("button", { className: "btn", onClick: runPolicyGateForGraphRun, key: "runpg" }, "Policy Gate"),
+              ]),
+              h("button", { className: "btn", onClick: exportGateReport, key: "xgate" }, "Export Gate Report (.md)"),
               h("div", { className: "hint", key: "hint" }, "Tip: connect nodes on canvas, then validate to check schema/profile/DAG constraints."),
             ]),
           ]),
@@ -722,6 +876,10 @@
               h("div", { className: "field", key: "runresult" }, [
                 h("label", { className: "label", key: "lblrr" }, "Graph Run Result"),
                 h("pre", { className: "result-box", key: "runbox" }, graphRunText),
+              ]),
+              h("div", { className: "field", key: "gateresult" }, [
+                h("label", { className: "label", key: "lblgr" }, "Policy Gate Result"),
+                h("pre", { className: "result-box", key: "gatebox" }, gateResultText),
               ]),
               h("div", { className: "field", key: "artifactinspect" }, [
                 h("label", { className: "label", key: "lblai" }, "Artifact Inspector"),

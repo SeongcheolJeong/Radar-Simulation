@@ -106,7 +106,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M16.1: ReactFlow shell bootstrap (graph canvas + property inspector + template loader)
 - [x] M16.2: Graph executor API bridge (`/api/graph/*` validation/run/status)
 - [x] M16.3: Artifact inspector panels (Path/ADC/RD/RA + node-output trace)
-- [ ] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
+- [x] M16.4: Regression gate integration on graph runs (policy/gate/evidence/report one-click)
 - [ ] M16.5: Performance/reliability hardening (partial rerun cache/cancel/failure recovery)
 
 ## Iteration Rule (One-by-One Verification)
@@ -120,7 +120,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M16.4 regression gate integration on graph runs (policy/gate/evidence/report one-click) while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M16.5 performance/reliability hardening (partial rerun cache/cancel/failure recovery) while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -704,3 +704,19 @@ M16.3 outcome (2026-02-22):
   - visual thumbnails (`rd_map`, `ra_map`, `adc`, `path_scatter`) when available
 - path normalization helper added for absolute->served repo path mapping:
   - `normalizeRepoPath(pathValue)`
+
+M16.4 outcome (2026-02-22):
+
+- Graph Lab gate workflow added on graph-run outputs:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+- one-screen gate loop:
+  - `Pin Baseline` (baseline from `graph_run_summary_json`)
+  - `Policy Gate` (baseline vs candidate graph summary)
+  - `Export Gate Report (.md)` (gate-failure markdown handoff)
+- frontend state additions:
+  - `baselineId`, `gateResultText`, `lastPolicyEval`
+- backend robustness fix for summary-based baselines:
+  - `/Users/seongcheoljeong/Documents/Codex_test/src/avxsim/web_e2e_api.py`
+  - `_resolve_target_with_optional_prefix` now treats `None/null` run-id tokens as empty and falls back to summary path resolution
+- validator expanded to cover graph-summary baseline + policy gate path:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`

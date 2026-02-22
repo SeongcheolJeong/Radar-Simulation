@@ -245,6 +245,37 @@ def run() -> None:
             assert Path(str(graph_run_summary["outputs"]["path_list_json"])).exists()
             assert Path(str(graph_run_summary["outputs"]["adc_cube_npz"])).exists()
             assert Path(str(graph_run_summary["outputs"]["radar_map_npz"])).exists()
+            graph_run_summary_json = str(graph_run_summary["outputs"]["graph_run_summary_json"])
+            assert Path(graph_run_summary_json).exists()
+
+            status, graph_baseline_created = _http_json(
+                "POST",
+                f"{base}/api/baselines",
+                payload={
+                    "baseline_id": "validate_graph_baseline",
+                    "summary_json": graph_run_summary_json,
+                    "overwrite": True,
+                    "note": "graph-run baseline",
+                },
+            )
+            assert status == 200
+            assert graph_baseline_created["ok"] is True
+            assert graph_baseline_created["baseline"]["baseline_id"] == "validate_graph_baseline"
+
+            status, graph_policy_resp = _http_json(
+                "POST",
+                f"{base}/api/compare/policy",
+                payload={
+                    "baseline_id": "validate_graph_baseline",
+                    "candidate_summary_json": graph_run_summary_json,
+                },
+            )
+            assert status == 200
+            assert graph_policy_resp["ok"] is True
+            graph_policy_eval = graph_policy_resp["policy_eval"]
+            assert graph_policy_eval["baseline"]["baseline_id"] == "validate_graph_baseline"
+            assert graph_policy_eval["gate_failed"] is False
+            assert graph_policy_eval["recommendation"] == "adopt_candidate"
 
             post_payload = {
                 "scene_json_path": str(scene_json),

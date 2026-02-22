@@ -1260,8 +1260,21 @@ class WebE2EOrchestrator:
         run_id_key: str,
         summary_key: str,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        run_id = str(request_payload.get(run_id_key, "")).strip()
-        summary_json = str(request_payload.get(summary_key, "")).strip()
+        run_id_raw = request_payload.get(run_id_key, "")
+        if run_id_raw is None:
+            run_id = ""
+        else:
+            run_id = str(run_id_raw).strip()
+            if run_id.lower() in {"none", "null"}:
+                run_id = ""
+
+        summary_raw = request_payload.get(summary_key, "")
+        if summary_raw is None:
+            summary_json = ""
+        else:
+            summary_json = str(summary_raw).strip()
+            if summary_json.lower() in {"none", "null"}:
+                summary_json = ""
 
         if run_id != "":
             summary = self.load_run_summary(run_id)

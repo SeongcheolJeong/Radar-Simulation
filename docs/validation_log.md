@@ -1684,3 +1684,23 @@
   - Graph Lab includes `Artifact Inspector` section and `Run Graph (API)` action
   - shell includes graph-run endpoint wiring and trace/visual labels (`/api/graph/runs`, `node trace`, `visuals`)
   - artifact inspector path normalization helper added (`normalizeRepoPath`)
+
+## Web E2E Graph Gate Integration (M16.4)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - validator now covers graph-summary baseline path:
+    - `POST /api/baselines` with `summary_json=<graph_run_summary_json>`
+    - `POST /api/compare/policy` with `baseline_id + candidate_summary_json`
+  - backend resolver patch confirmed (`None/null` run-id token handling in summary-first flows)
+  - full API regression suite remains pass after gate integration wiring
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8108 8128` + smoke (`curl /health`, `curl /frontend/graph_lab_reactflow.html?api=...` + token grep)
+- Result: pass
+- Notes:
+  - Graph Lab UI includes graph-run gate controls (`Pin Baseline`, `Policy Gate`, `Export Gate Report (.md)`)
+  - `Policy Gate Result` panel is present
+  - frontend includes baseline/policy API integration tokens (`/api/baselines`, `/api/compare/policy`)
