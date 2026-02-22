@@ -30,11 +30,11 @@ Expected on ready Linux host:
 ## Real Pilot Run (strict)
 
 ```bash
-PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_po_sbr_pilot.py \
-  --output-root /Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/po_sbr_runtime_pilot_v1 \
-  --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json \
-  --po-sbr-repo-root /Users/seongcheoljeong/Documents/Codex_test/external/PO-SBR-Python \
-  --geometry-path geometries/plate.obj
+bash /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_strict.sh \
+  /Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/po_sbr_runtime_pilot_v1 \
+  /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json \
+  /Users/seongcheoljeong/Documents/Codex_test/external/PO-SBR-Python \
+  geometries/plate.obj
 ```
 
 ## Success Criteria
@@ -43,6 +43,8 @@ PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_s
    - `pilot_status = executed`
    - `path_count > 0`
    - `runtime_resolution.mode = runtime_provider`
+   - passes validator:
+     - `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_executed_report.py --summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json`
 2. artifacts generated:
    - `path_list.json`
    - `adc_cube.npz`

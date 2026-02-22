@@ -398,9 +398,13 @@ M14.6 progress (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_po_sbr_pilot.py`
   - deterministic preflight blockers with `pilot_status` contract (`blocked|executed`)
   - `--allow-blocked` mode added to avoid repeated no-op attempts on unsupported hosts
+- strict completion gate added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_executed_report.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_strict.sh`
 - validations added:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_po_sbr_runtime_provider_stubbed.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_po_sbr_pilot.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_validate_scene_runtime_po_sbr_executed_report.py`
 - contracts/docs added:
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/112_scene_runtime_po_sbr_pilot_contract.md`
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/113_po_sbr_linux_runtime_runbook.md`

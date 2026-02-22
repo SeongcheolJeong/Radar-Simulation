@@ -1417,6 +1417,13 @@
   - blocked branch validates actionable blocker reasons and Linux rerun command
 
 - Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_validate_scene_runtime_po_sbr_executed_report.py`
+- Result: pass
+- Notes:
+  - strict executed-report validator contract validated with synthetic executed summary
+  - hard gate now available for Linux strict completion evidence
+
+- Date: 2026-02-22
 - Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/run_scene_runtime_po_sbr_pilot.py --output-root /Users/seongcheoljeong/Documents/Codex_test/data/runtime_pilot/po_sbr_runtime_pilot_v1 --output-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json --allow-blocked`
 - Result: pass
 - Notes:

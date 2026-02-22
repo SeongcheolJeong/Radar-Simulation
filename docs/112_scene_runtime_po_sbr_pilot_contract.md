@@ -22,6 +22,7 @@ preflight gating for Linux+NVIDIA constraints.
 3. validation:
    - provider logic validation with stubbed solver
    - pilot summary contract validation (blocked/executed branches)
+   - executed-summary hard gate validation (`pilot_status=executed`)
 
 ## Code Paths
 
@@ -32,12 +33,16 @@ preflight gating for Linux+NVIDIA constraints.
 - validations:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_po_sbr_runtime_provider_stubbed.py`
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_po_sbr_pilot.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_scene_runtime_po_sbr_executed_report.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/validate_validate_scene_runtime_po_sbr_executed_report.py`
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_strict.sh`
 
 ## Validation
 
 ```bash
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_po_sbr_runtime_provider_stubbed.py
 PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_run_scene_runtime_po_sbr_pilot.py
+PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_validate_scene_runtime_po_sbr_executed_report.py
 ```
 
 Runtime pilot evidence run (current host may be blocked):
@@ -57,3 +62,4 @@ M14.6 is accepted only if:
 2. pilot runner emits deterministic summary with explicit `pilot_status`
 3. blocked state includes deterministic blocker reasons and Linux rerun command
 4. executed state records `runtime_resolution.mode=runtime_provider` with non-zero path count
+5. executed report passes hard-gate validator (`validate_scene_runtime_po_sbr_executed_report.py`)
