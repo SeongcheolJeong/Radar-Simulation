@@ -1550,3 +1550,13 @@
   - dashboard HTML includes gate overview elements (`regressionGateBadge`, `gateCueLine`, `gateLatestSessionLine`)
   - dashboard JS includes gate evaluator (`updateRegressionGateOverview`, `setRegressionGateBadge`)
   - history refresh path updates gate overview from latest session/export lists
+
+## Web E2E Regression Policy Tuning Controls (M15.8)
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8095 8115` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`) + `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - dashboard HTML includes policy-tuning controls (`regressionPolicyPresetSelect`, `requireParityPassCheck`, `stopOnFirstFailCheck`, `maxFailureCountInput`, `rdShapeNmseMaxInput`, `raShapeNmseMaxInput`)
+  - dashboard JS includes tuning collector/applier (`collectPolicyTuningConfig`, `applyPolicyPresetToInputs`)
+  - compare/policy/regression-session requests include tuned policy/threshold payload fields

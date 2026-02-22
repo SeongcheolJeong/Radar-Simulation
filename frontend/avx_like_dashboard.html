@@ -99,6 +99,39 @@
             <i data-lucide="shield-check" class="w-4 h-4"></i>
             Policy Verdict
           </button>
+          <div class="rounded border border-slate-800 bg-slate-900/60 p-2 space-y-2">
+            <div class="text-[11px] uppercase tracking-wider text-slate-400">Policy Tuning</div>
+            <label class="text-xs text-slate-400 block">Preset</label>
+            <select id="regressionPolicyPresetSelect" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none">
+              <option value="default">default</option>
+              <option value="strict">strict</option>
+              <option value="loose">loose</option>
+            </select>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="flex items-center gap-1.5 text-xs text-slate-300">
+                <input id="requireParityPassCheck" type="checkbox" class="accent-cyan-500" checked />
+                <span>Require parity</span>
+              </label>
+              <label class="flex items-center gap-1.5 text-xs text-slate-300">
+                <input id="stopOnFirstFailCheck" type="checkbox" class="accent-cyan-500" />
+                <span>Stop on first fail</span>
+              </label>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="text-[11px] text-slate-400 block">max_fail</label>
+                <input id="maxFailureCountInput" type="number" min="0" step="1" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-400 block">rd_nmse_max</label>
+                <input id="rdShapeNmseMaxInput" type="number" min="0" step="0.01" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-400 block">ra_nmse_max</label>
+                <input id="raShapeNmseMaxInput" type="number" min="0" step="0.01" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5" />
+              </div>
+            </div>
+          </div>
           <label class="text-xs text-slate-400 block">Regression Session ID (optional)</label>
           <input id="regressionSessionIdInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
           <label class="text-xs text-slate-400 block">Candidate run_ids (comma/newline)</label>
@@ -390,6 +423,29 @@
     const DEFAULT_SUMMARY_PATH = "/docs/reports/avx_like_showcase_macos_2026_02_22.json";
     const DEFAULT_API_BASE = "http://127.0.0.1:8099";
     const DEFAULT_SCENE_JSON_PATH = "data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json";
+    const REGRESSION_POLICY_PRESETS = {
+      default: {
+        requireParityPass: true,
+        stopOnFirstFail: false,
+        maxFailureCount: 0,
+        rdShapeNmseMax: 0.25,
+        raShapeNmseMax: 0.25,
+      },
+      strict: {
+        requireParityPass: true,
+        stopOnFirstFail: true,
+        maxFailureCount: 0,
+        rdShapeNmseMax: 0.15,
+        raShapeNmseMax: 0.15,
+      },
+      loose: {
+        requireParityPass: true,
+        stopOnFirstFail: false,
+        maxFailureCount: 2,
+        rdShapeNmseMax: 0.5,
+        raShapeNmseMax: 0.5,
+      },
+    };
 
     const state = {
       summary: null,
@@ -427,6 +483,12 @@
       pinBaselineBtn: document.getElementById("pinBaselineBtn"),
       compareApiBtn: document.getElementById("compareApiBtn"),
       policyCompareBtn: document.getElementById("policyCompareBtn"),
+      regressionPolicyPresetSelect: document.getElementById("regressionPolicyPresetSelect"),
+      requireParityPassCheck: document.getElementById("requireParityPassCheck"),
+      stopOnFirstFailCheck: document.getElementById("stopOnFirstFailCheck"),
+      maxFailureCountInput: document.getElementById("maxFailureCountInput"),
+      rdShapeNmseMaxInput: document.getElementById("rdShapeNmseMaxInput"),
+      raShapeNmseMaxInput: document.getElementById("raShapeNmseMaxInput"),
       regressionSessionIdInput: document.getElementById("regressionSessionIdInput"),
       regressionCandidatesInput: document.getElementById("regressionCandidatesInput"),
       runRegressionSessionBtn: document.getElementById("runRegressionSessionBtn"),
@@ -522,6 +584,48 @@
 
     function sleepMs(ms) {
       return new Promise((resolve) => window.setTimeout(resolve, Number(ms) || 0));
+    }
+
+    function parseBoolToken(v, defaultValue) {
+      const raw = String(v || "").trim().toLowerCase();
+      if (!raw) return !!defaultValue;
+      if (["1", "true", "yes", "y", "on"].includes(raw)) return true;
+      if (["0", "false", "no", "n", "off"].includes(raw)) return false;
+      return !!defaultValue;
+    }
+
+    function applyPolicyPresetToInputs(presetId) {
+      const key = String(presetId || "default").trim();
+      const preset = REGRESSION_POLICY_PRESETS[key] || REGRESSION_POLICY_PRESETS.default;
+      el.regressionPolicyPresetSelect.value = key in REGRESSION_POLICY_PRESETS ? key : "default";
+      el.requireParityPassCheck.checked = !!preset.requireParityPass;
+      el.stopOnFirstFailCheck.checked = !!preset.stopOnFirstFail;
+      el.maxFailureCountInput.value = String(Number(preset.maxFailureCount || 0));
+      el.rdShapeNmseMaxInput.value = String(Number(preset.rdShapeNmseMax || 0.25));
+      el.raShapeNmseMaxInput.value = String(Number(preset.raShapeNmseMax || 0.25));
+    }
+
+    function collectPolicyTuningConfig() {
+      const maxFailureCount = Math.max(
+        0,
+        Math.round(Number(el.maxFailureCountInput.value || 0))
+      );
+      const rdShapeNmseMax = Math.max(0, Number(el.rdShapeNmseMaxInput.value || 0.25));
+      const raShapeNmseMax = Math.max(0, Number(el.raShapeNmseMaxInput.value || 0.25));
+      return {
+        preset: String(el.regressionPolicyPresetSelect.value || "default"),
+        policy: {
+          require_parity_pass: !!el.requireParityPassCheck.checked,
+          max_failure_count: maxFailureCount,
+          max_rd_shape_nmse: rdShapeNmseMax,
+          max_ra_shape_nmse: raShapeNmseMax,
+        },
+        thresholds: {
+          rd_shape_nmse_max: rdShapeNmseMax,
+          ra_shape_nmse_max: raShapeNmseMax,
+        },
+        stopOnFirstFail: !!el.stopOnFirstFailCheck.checked,
+      };
     }
 
     function formatDb(value) {
@@ -1250,6 +1354,7 @@
       const apiBase = normalizeApiBase(el.apiBaseInput.value);
       const refRunId = (el.compareRefRunInput.value || "").trim();
       const candRunId = (el.compareCandRunInput.value || "").trim();
+      const tuning = collectPolicyTuningConfig();
 
       if (!apiBase) {
         setCompareStatus("api base URL required", "error");
@@ -1271,6 +1376,7 @@
           body: JSON.stringify({
             reference_run_id: refRunId,
             candidate_run_id: candRunId,
+            thresholds: tuning.thresholds,
           }),
         });
         const cmp = resp && resp.comparison ? resp.comparison : null;
@@ -1341,6 +1447,7 @@
       const apiBase = normalizeApiBase(el.apiBaseInput.value);
       const baselineId = (el.baselineIdInput.value || "").trim();
       const candRunId = (el.compareCandRunInput.value || "").trim();
+      const tuning = collectPolicyTuningConfig();
 
       if (!apiBase) {
         setCompareStatus("api base URL required", "error");
@@ -1365,6 +1472,8 @@
           body: JSON.stringify({
             baseline_id: baselineId,
             candidate_run_id: candRunId,
+            thresholds: tuning.thresholds,
+            policy: tuning.policy,
           }),
         });
         const policyEval = resp && resp.policy_eval ? resp.policy_eval : null;
@@ -1406,6 +1515,7 @@
       const apiBase = normalizeApiBase(el.apiBaseInput.value);
       const baselineId = (el.baselineIdInput.value || "").trim();
       const sessionId = (el.regressionSessionIdInput.value || "").trim();
+      const tuning = collectPolicyTuningConfig();
       let candidateRunIds = parseCandidateRunIdsText(el.regressionCandidatesInput.value);
 
       if (candidateRunIds.length === 0) {
@@ -1435,7 +1545,9 @@
         const body = {
           baseline_id: baselineId,
           candidate_run_ids: candidateRunIds,
-          stop_on_first_fail: false,
+          stop_on_first_fail: tuning.stopOnFirstFail,
+          policy: tuning.policy,
+          thresholds: tuning.thresholds,
           tag: "dashboard_regression",
         };
         if (sessionId) {
@@ -1670,6 +1782,9 @@
       el.compareApiBtn.addEventListener("click", () => compareRunsViaApi());
       el.policyCompareBtn.addEventListener("click", () => evaluatePolicyViaApi());
       el.runRegressionSessionBtn.addEventListener("click", () => runRegressionSessionViaApi());
+      el.regressionPolicyPresetSelect.addEventListener("change", () =>
+        applyPolicyPresetToInputs(el.regressionPolicyPresetSelect.value)
+      );
       el.refreshRegressionHistoryBtn.addEventListener("click", () =>
         refreshRegressionHistoryViaApi("", "")
       );
@@ -1749,6 +1864,12 @@
       const queryRegressionSessionId = params.get("regression_session_id");
       const queryRegressionCandidates = params.get("regression_candidates");
       const queryRegressionExportId = params.get("regression_export_id");
+      const queryPolicyPreset = params.get("policy_preset");
+      const queryPolicyRequireParity = params.get("policy_require_parity");
+      const queryPolicyMaxFail = params.get("policy_max_fail");
+      const queryPolicyRdNmse = params.get("policy_rd_nmse");
+      const queryPolicyRaNmse = params.get("policy_ra_nmse");
+      const queryStopOnFirstFail = params.get("stop_on_first_fail");
       el.summaryPathInput.value = querySummary && querySummary.trim() ? querySummary.trim() : DEFAULT_SUMMARY_PATH;
       el.apiBaseInput.value = queryApi && queryApi.trim() ? queryApi.trim() : DEFAULT_API_BASE;
       el.sceneJsonInput.value = queryScene && queryScene.trim() ? queryScene.trim() : DEFAULT_SCENE_JSON_PATH;
@@ -1762,6 +1883,24 @@
         queryRegressionCandidates && queryRegressionCandidates.trim() ? queryRegressionCandidates.trim() : "";
       el.regressionExportIdInput.value =
         queryRegressionExportId && queryRegressionExportId.trim() ? queryRegressionExportId.trim() : "";
+      applyPolicyPresetToInputs(
+        queryPolicyPreset && queryPolicyPreset.trim() ? queryPolicyPreset.trim() : "default"
+      );
+      if (queryPolicyRequireParity !== null) {
+        el.requireParityPassCheck.checked = parseBoolToken(queryPolicyRequireParity, true);
+      }
+      if (queryStopOnFirstFail !== null) {
+        el.stopOnFirstFailCheck.checked = parseBoolToken(queryStopOnFirstFail, false);
+      }
+      if (queryPolicyMaxFail !== null && Number.isFinite(Number(queryPolicyMaxFail))) {
+        el.maxFailureCountInput.value = String(Math.max(0, Math.round(Number(queryPolicyMaxFail))));
+      }
+      if (queryPolicyRdNmse !== null && Number.isFinite(Number(queryPolicyRdNmse))) {
+        el.rdShapeNmseMaxInput.value = String(Math.max(0, Number(queryPolicyRdNmse)));
+      }
+      if (queryPolicyRaNmse !== null && Number.isFinite(Number(queryPolicyRaNmse))) {
+        el.raShapeNmseMaxInput.value = String(Math.max(0, Number(queryPolicyRaNmse)));
+      }
       el.fovInput.value = 120;
       el.rangeInput.value = 100;
       el.freqInput.value = 77;

@@ -96,7 +96,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.5: Regression artifacts export API (`/api/regression-exports`, session CSV/JSON package + summary index)
 - [x] M15.6: Regression history dashboard wiring (session/export browse + download actions)
 - [x] M15.7: Regression gate overview panel (latest verdict KPIs + quick adopt/hold cues)
-- [ ] M15.8: Regression policy tuning controls (dashboard thresholds/policy presets)
+- [x] M15.8: Regression policy tuning controls (dashboard thresholds/policy presets)
+- [ ] M15.9: Regression decision audit panel (per-rule failure histogram + recent trend)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -109,7 +110,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.8 regression policy tuning controls while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.9 regression decision audit panel while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -552,3 +553,18 @@ M15.7 outcome (2026-02-22):
 - auto-refresh wiring completed:
   - panel updates on history refresh and startup bootstrap
   - panel reflects new session/export results without page reload
+
+M15.8 outcome (2026-02-22):
+
+- dashboard policy-tuning controls added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- controls include:
+  - preset selector (`default` / `strict` / `loose`)
+  - `require parity`, `stop on first fail` toggles
+  - numeric gates (`max_fail`, `rd_nmse_max`, `ra_nmse_max`)
+- API payload wiring expanded:
+  - `POST /api/compare` receives `thresholds`
+  - `POST /api/compare/policy` receives `policy + thresholds`
+  - `POST /api/regression-sessions` receives `policy + thresholds + stop_on_first_fail`
+- launcher URL defaults include policy preset query:
+  - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_web_e2e_dashboard_local.sh`
