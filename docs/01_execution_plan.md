@@ -87,6 +87,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock
 - [x] M14.5: `sionna.rt` full runtime enablement (working LLVM backend on target host)
 - [ ] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment
+- [x] M15.0: Web E2E orchestration API phase-0 skeleton (`/health`, `/api/runs`, run summary quicklook)
 
 ## Iteration Rule (One-by-One Verification)
 

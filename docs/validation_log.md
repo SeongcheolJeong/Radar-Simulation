@@ -1470,3 +1470,13 @@
 - Result: pass
 - Notes:
   - macOS->Linux SSH orchestration script syntax validated
+
+## Web E2E Orchestrator API (M15.0)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - phase-0 API endpoints validated (`/health`, `/api/profiles`, `/api/runs`, `/api/runs/{id}`, `/api/runs/{id}/summary`)
+  - sync run creation path validated (`POST /api/runs?async=0`) with analytic scene
+  - run summary quicklook contract validated (`n_chirps`, path counts, ADC/RD/RA shapes, top peaks)
