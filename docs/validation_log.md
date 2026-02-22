@@ -1570,3 +1570,13 @@
   - dashboard HTML includes decision-audit elements (`decisionAuditBadge`, `auditRuleHistogram`, `auditHotCandidateLine`)
   - dashboard JS includes audit evaluator (`updateRegressionDecisionAudit`, `setDecisionAuditBadge`)
   - history refresh now joins `policy-evals` with session rows for rule histogram/trend summary
+
+## Web E2E Review Bundle Hook (M15.10)
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8098 8118` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`) + `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - dashboard HTML includes review-bundle controls (`copyReviewBundleBtn`, `reviewBundleStatus`, `reviewBundlePathBox`)
+  - dashboard JS includes bundle hook/copy helpers (`runReviewBundleCopyHook`, `copyTextToClipboard`, `getReviewBundlePathFromExport`)
+  - hook path reuses `POST /api/regression-exports` and resolves bundle path from export artifacts

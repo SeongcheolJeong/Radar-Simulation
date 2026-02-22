@@ -162,6 +162,12 @@
           </select>
           <div id="regressionHistoryStatus" class="text-[11px] text-slate-500">history idle</div>
           <div id="regressionDownloads" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 break-all">-</div>
+          <button id="copyReviewBundleBtn" class="w-full py-2 rounded bg-lime-700 hover:bg-lime-600 text-white text-sm font-semibold flex items-center justify-center gap-2">
+            <i data-lucide="copy-check" class="w-4 h-4"></i>
+            Review Bundle + Copy Path
+          </button>
+          <div id="reviewBundleStatus" class="text-[11px] text-slate-500">review bundle idle</div>
+          <div id="reviewBundlePathBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 break-all">-</div>
           <div class="rounded border border-slate-800 bg-slate-900/60 p-2 space-y-1.5">
             <div class="flex items-center justify-between gap-2">
               <span class="text-[11px] uppercase tracking-wider text-slate-400">Regression Gate</span>
@@ -478,6 +484,7 @@
       regressionSessions: [],
       regressionExports: [],
       policyEvals: [],
+      lastReviewBundlePath: null,
     };
 
     const el = {
@@ -510,6 +517,9 @@
       regressionExportSelect: document.getElementById("regressionExportSelect"),
       regressionHistoryStatus: document.getElementById("regressionHistoryStatus"),
       regressionDownloads: document.getElementById("regressionDownloads"),
+      copyReviewBundleBtn: document.getElementById("copyReviewBundleBtn"),
+      reviewBundleStatus: document.getElementById("reviewBundleStatus"),
+      reviewBundlePathBox: document.getElementById("reviewBundlePathBox"),
       regressionGateBadge: document.getElementById("regressionGateBadge"),
       gateSessionCount: document.getElementById("gateSessionCount"),
       gateExportCount: document.getElementById("gateExportCount"),
@@ -698,6 +708,19 @@
         el.regressionHistoryStatus.className = "text-[11px] text-red-400";
       } else {
         el.regressionHistoryStatus.className = "text-[11px] text-slate-500";
+      }
+    }
+
+    function setReviewBundleStatus(text, tone) {
+      el.reviewBundleStatus.textContent = text || "review bundle idle";
+      if (tone === "ok") {
+        el.reviewBundleStatus.className = "text-[11px] text-emerald-400";
+      } else if (tone === "warn") {
+        el.reviewBundleStatus.className = "text-[11px] text-amber-400";
+      } else if (tone === "error") {
+        el.reviewBundleStatus.className = "text-[11px] text-red-400";
+      } else {
+        el.reviewBundleStatus.className = "text-[11px] text-slate-500";
       }
     }
 
@@ -1011,6 +1034,38 @@
         .map(([name, href]) => `<a class="text-cyan-300 hover:text-cyan-200 underline" href="${href}" target="_blank" rel="noopener noreferrer">${name}</a>`)
         .join(" | ");
       el.regressionDownloads.innerHTML = links;
+    }
+
+    function getReviewBundlePathFromExport(exportPayload) {
+      if (!exportPayload || !exportPayload.artifacts) return null;
+      const art = exportPayload.artifacts;
+      const preferred = String(art.package_json || "").trim();
+      if (preferred) return preferred;
+      const fallback = String(art.artifact_dir || "").trim();
+      return fallback || null;
+    }
+
+    async function copyTextToClipboard(text) {
+      const value = String(text || "");
+      if (!value) {
+        throw new Error("copy text is empty");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(value);
+        return;
+      }
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      ta.setAttribute("readonly", "readonly");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (!ok) {
+        throw new Error("clipboard copy unsupported");
+      }
     }
 
     function fillSelectFromRows(selectEl, rows, idKey, labelBuilder) {
@@ -1789,6 +1844,19 @@
           el.regressionExportSelect.value = selectExportId;
         }
 
+        const activeExportId = String(el.regressionExportSelect.value || "").trim();
+        const activeExport =
+          exports.find((x) => String((x && x.export_id) || "") === activeExportId) || null;
+        const bundlePath = getReviewBundlePathFromExport(activeExport);
+        state.lastReviewBundlePath = bundlePath || null;
+        if (bundlePath) {
+          el.reviewBundlePathBox.textContent = bundlePath;
+          setReviewBundleStatus("review bundle path ready", "ok");
+        } else {
+          el.reviewBundlePathBox.textContent = "-";
+          setReviewBundleStatus("review bundle idle", "neutral");
+        }
+
         setRegressionHistoryStatus(
           `history loaded: sessions=${sessions.length}, exports=${exports.length}, evals=${policyEvals.length}`,
           "ok"
@@ -1835,7 +1903,11 @@
         state.lastRegressionExport = payload;
         el.regressionExportIdInput.value = String(payload.export_id || exportId);
         renderRegressionDownloads(payload);
+        const bundlePath = getReviewBundlePathFromExport(payload);
+        state.lastReviewBundlePath = bundlePath || null;
+        el.reviewBundlePathBox.textContent = bundlePath || "-";
         setRegressionHistoryStatus(`export loaded: ${payload.export_id}`, "ok");
+        setReviewBundleStatus(bundlePath ? "review bundle path ready" : "review bundle unavailable", bundlePath ? "ok" : "warn");
       } catch (err) {
         setRegressionHistoryStatus(`export load failed: ${String(err.message || err)}`, "error");
       }
@@ -1882,13 +1954,80 @@
         state.lastRegressionExport = payload;
         el.regressionExportIdInput.value = String(payload.export_id || "");
         renderRegressionDownloads(payload);
+        const bundlePath = getReviewBundlePathFromExport(payload);
+        state.lastReviewBundlePath = bundlePath || null;
+        el.reviewBundlePathBox.textContent = bundlePath || "-";
         setRegressionHistoryStatus(`export ready: ${payload.export_id}`, "ok");
+        setReviewBundleStatus(bundlePath ? "review bundle path ready" : "review bundle unavailable", bundlePath ? "ok" : "warn");
         await refreshRegressionHistoryViaApi(sessionId, String(payload.export_id || ""));
       } catch (err) {
         setRegressionHistoryStatus(`export failed: ${String(err.message || err)}`, "error");
       } finally {
         el.exportRegressionBtn.disabled = false;
         el.exportRegressionBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      }
+    }
+
+    async function runReviewBundleCopyHook() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const exportIdHint = String(el.regressionExportIdInput.value || "").trim();
+      const inputSessionId = String(el.regressionSessionIdInput.value || "").trim();
+      const selectedSessionId = String(el.regressionSessionSelect.value || "").trim();
+      const sessionId = inputSessionId || selectedSessionId;
+
+      if (!apiBase) {
+        setReviewBundleStatus("api base URL required", "error");
+        return;
+      }
+
+      el.copyReviewBundleBtn.disabled = true;
+      el.copyReviewBundleBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setReviewBundleStatus("preparing review bundle...", "warn");
+      try {
+        let payload = state.lastRegressionExport;
+        const hasReusableExport =
+          payload &&
+          payload.session_id &&
+          String(payload.session_id) === String(sessionId || payload.session_id);
+        if (!hasReusableExport) {
+          if (!sessionId) {
+            throw new Error("session id required to build review bundle");
+          }
+          const exportId = exportIdHint || `${sessionId}_review`;
+          const resp = await fetchApiJson(`${apiBase}/api/regression-exports`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_id: sessionId,
+              export_id: exportId,
+              overwrite: true,
+              include_policy_payload: true,
+              tag: "dashboard_review_bundle",
+            }),
+          });
+          payload = resp && resp.regression_export ? resp.regression_export : null;
+          if (!payload) {
+            throw new Error("review bundle export response missing payload");
+          }
+          state.lastRegressionExport = payload;
+          el.regressionExportIdInput.value = String(payload.export_id || exportId);
+          renderRegressionDownloads(payload);
+          await refreshRegressionHistoryViaApi(sessionId, String(payload.export_id || exportId));
+        }
+
+        const bundlePath = getReviewBundlePathFromExport(payload);
+        if (!bundlePath) {
+          throw new Error("review bundle path missing in export artifacts");
+        }
+        state.lastReviewBundlePath = bundlePath;
+        el.reviewBundlePathBox.textContent = bundlePath;
+        await copyTextToClipboard(bundlePath);
+        setReviewBundleStatus("bundle path copied to clipboard", "ok");
+      } catch (err) {
+        setReviewBundleStatus(`bundle hook failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.copyReviewBundleBtn.disabled = false;
+        el.copyReviewBundleBtn.classList.remove("opacity-60", "cursor-not-allowed");
       }
     }
 
@@ -1941,6 +2080,7 @@
         refreshRegressionHistoryViaApi("", "")
       );
       el.exportRegressionBtn.addEventListener("click", () => exportRegressionSessionViaApi());
+      el.copyReviewBundleBtn.addEventListener("click", () => runReviewBundleCopyHook());
       el.regressionSessionSelect.addEventListener("change", () => loadSelectedRegressionSessionViaApi());
       el.regressionExportSelect.addEventListener("change", () => loadSelectedRegressionExportViaApi());
 
@@ -2077,6 +2217,8 @@
       setCompareStatus("compare idle", "neutral");
       setRegressionStatus("regression idle", "neutral");
       setRegressionHistoryStatus("history idle", "neutral");
+      setReviewBundleStatus("review bundle idle", "neutral");
+      el.reviewBundlePathBox.textContent = "-";
       renderRegressionDownloads(null);
       updateRegressionGateOverview();
       updateRegressionDecisionAudit();

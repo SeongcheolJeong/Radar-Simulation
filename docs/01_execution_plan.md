@@ -98,7 +98,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.7: Regression gate overview panel (latest verdict KPIs + quick adopt/hold cues)
 - [x] M15.8: Regression policy tuning controls (dashboard thresholds/policy presets)
 - [x] M15.9: Regression decision audit panel (per-rule failure histogram + recent trend)
-- [ ] M15.10: Regression review bundle export hook (dashboard one-click package copy path)
+- [x] M15.10: Regression review bundle export hook (dashboard one-click package copy path)
+- [ ] M15.11: Regression decision report template export (markdown handoff skeleton)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -111,7 +112,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.10 regression review bundle export hook while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.11 regression decision report template export while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -582,3 +583,19 @@ M15.9 outcome (2026-02-22):
 - history fetch path expanded:
   - `GET /api/policy-evals` joined with sessions/exports to build rule histogram
 - panel auto-updates on bootstrap/history refresh/session selection
+
+M15.10 outcome (2026-02-22):
+
+- dashboard review-bundle hook added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- one-click flow implemented:
+  - export (or reuse) review bundle via `POST /api/regression-exports` (`include_policy_payload=true`)
+  - derive package path from export artifacts (`package_json` preferred)
+  - copy package path to clipboard
+- new UI elements:
+  - `copyReviewBundleBtn`
+  - `reviewBundleStatus`
+  - `reviewBundlePathBox`
+- state wiring completed:
+  - selected export updates review bundle path/status
+  - history refresh syncs active review bundle path
