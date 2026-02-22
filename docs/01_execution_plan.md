@@ -136,6 +136,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.25: Policy-first triage filter (all/hold/adopt/none with scoped counts)
 - [x] M17.26: Active filter summary chips + filter-only reset action
 - [x] M17.27: Filter preset profiles (load/save/delete with persistence)
+- [x] M17.28: Filter preset transfer import/export (team-shareable JSON bundle)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -148,7 +149,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.27 frontend hardening track: refine detail-view ergonomics and operator flow while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.28 frontend hardening track: add safer transfer ergonomics (merge/replace guardrails and conflict hints) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1175,3 +1176,19 @@ M17.27 outcome (2026-02-22):
   - profile name sanitizer: `normalizeFilterPresetName`
   - payload normalizer: `normalizeFilterPresetConfig`
   - active preset/draft persisted in overlay prefs and restored on reload
+
+M17.28 outcome (2026-02-22):
+
+- filter preset transfer bundle/export parser added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - helpers: `buildFilterPresetExportBundle`, `serializeFilterPresetExportBundle`, `parseFilterPresetImportText`
+  - bundle metadata: `schema_version`, `kind`, `exported_at_iso`, `presets`
+- overlay transfer workflow controls added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Export Filter Presets`, `Copy Filter Presets`, `Load Filter JSON`, `Import Filter Presets`
+  - UI keys: `co_filter_transfer_cfg`, `co_filter_transfer_text`, `co_filter_transfer_status`
+- import/export hardening behavior:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - parser accepts bundle form or direct preset-map form
+  - invalid payload guard with explicit status (`import failed: ...`)
+  - imported presets normalized to current filter schema before merge

@@ -433,6 +433,59 @@ function saveFilterPresets(presets) {
   }
 }
 
+function buildFilterPresetExportBundle(presets) {
+  const rows = presets && typeof presets === "object" && !Array.isArray(presets) ? presets : {};
+  const normalized = {};
+  Object.keys(rows)
+    .sort((a, b) => String(a).localeCompare(String(b)))
+    .forEach((name) => {
+      const pname = normalizeFilterPresetName(name);
+      if (!pname) return;
+      normalized[pname] = normalizeFilterPresetConfig(rows[name], DEFAULT_FILTER_PRESETS.default);
+    });
+  return {
+    schema_version: 1,
+    kind: "graph_lab_contract_overlay_filter_presets",
+    exported_at_iso: new Date().toISOString(),
+    presets: normalized,
+  };
+}
+
+function serializeFilterPresetExportBundle(presets) {
+  return JSON.stringify(buildFilterPresetExportBundle(presets), null, 2);
+}
+
+function parseFilterPresetImportText(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text) {
+    throw new Error("empty import payload");
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_) {
+    throw new Error("invalid JSON");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("import root must be object");
+  }
+  const candidate = parsed.presets && typeof parsed.presets === "object" && !Array.isArray(parsed.presets)
+    ? parsed.presets
+    : parsed;
+  const imported = {};
+  Object.keys(candidate).forEach((name) => {
+    const rawPreset = candidate[name];
+    if (!rawPreset || typeof rawPreset !== "object" || Array.isArray(rawPreset)) return;
+    const pname = normalizeFilterPresetName(name);
+    if (!pname) return;
+    imported[pname] = normalizeFilterPresetConfig(rawPreset, DEFAULT_FILTER_PRESETS.default);
+  });
+  if (Object.keys(imported).length === 0) {
+    throw new Error("no valid filter presets found");
+  }
+  return imported;
+}
+
 function buildShortcutProfileExportBundle(profiles) {
   const rows = profiles && typeof profiles === "object" && !Array.isArray(profiles) ? profiles : {};
   const normalized = {};
@@ -927,9 +980,12 @@ export function ContractWarningOverlay({
       DEFAULT_DETAIL_FIELD_STATES
     )
   );
+  const [filterTransferText, setFilterTransferText] = React.useState("");
+  const [filterTransferStatus, setFilterTransferStatus] = React.useState("");
   const [shortcutTransferText, setShortcutTransferText] = React.useState("");
   const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
   const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
+  const filterImportFileInputRef = React.useRef(null);
   const shortcutImportFileInputRef = React.useRef(null);
   const [rowWindowOffset, setRowWindowOffset] = React.useState(0);
   const [expandedRowKeys, setExpandedRowKeys] = React.useState(() => new Set());
@@ -1597,6 +1653,79 @@ export function ContractWarningOverlay({
       return next;
     });
   }, [activeFilterPreset]);
+  const triggerFilterImportFilePick = React.useCallback(() => {
+    const input = filterImportFileInputRef.current;
+    if (!input || typeof input.click !== "function") return;
+    input.click();
+  }, []);
+  const handleFilterImportFileChange = React.useCallback((evt) => {
+    const file = evt?.target?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || "");
+      setFilterTransferText(text);
+      setFilterTransferStatus(`loaded file: ${String(file.name || "-")}`);
+    };
+    reader.onerror = () => {
+      setFilterTransferStatus(`failed to read file: ${String(file.name || "-")}`);
+    };
+    reader.readAsText(file);
+    if (evt?.target) evt.target.value = "";
+  }, []);
+  const exportFilterPresetsToJson = React.useCallback(() => {
+    const jsonText = serializeFilterPresetExportBundle(filterPresets);
+    setFilterTransferText(jsonText);
+    try {
+      if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
+        setFilterTransferStatus("exported to text buffer");
+        return;
+      }
+      const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `graph_lab_filter_presets_${ts}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      setFilterTransferStatus(`exported ${Object.keys(filterPresets).length} preset(s)`);
+    } catch (_) {
+      setFilterTransferStatus("exported to text buffer (file download unavailable)");
+    }
+  }, [filterPresets]);
+  const copyFilterPresetsJson = React.useCallback(async () => {
+    const jsonText = serializeFilterPresetExportBundle(filterPresets);
+    setFilterTransferText(jsonText);
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(jsonText);
+        setFilterTransferStatus(`copied ${Object.keys(filterPresets).length} preset(s) to clipboard`);
+        return;
+      }
+      setFilterTransferStatus("clipboard unavailable; copy from text buffer");
+    } catch (_) {
+      setFilterTransferStatus("clipboard write failed; copy from text buffer");
+    }
+  }, [filterPresets]);
+  const importFilterPresetsFromText = React.useCallback(() => {
+    try {
+      const imported = parseFilterPresetImportText(filterTransferText);
+      const names = Object.keys(imported);
+      setFilterPresets((prev) => ({
+        ...prev,
+        ...imported,
+      }));
+      setFilterTransferStatus(`imported ${names.length} preset(s)`);
+      if (names.length > 0) {
+        setFilterPresetDraft(String(names[0]));
+      }
+    } catch (err) {
+      setFilterTransferStatus(`import failed: ${String(err?.message || "invalid payload")}`);
+    }
+  }, [filterTransferText]);
   const resetOverlayFilters = React.useCallback(() => {
     setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
     setSeverityFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
@@ -1984,6 +2113,63 @@ export function ContractWarningOverlay({
         className: "hint",
         style: { marginLeft: "auto", color: activeFilterPresetIsBuiltin ? "#8eb6ca" : "#f0b33a" },
       }, activeFilterPresetIsBuiltin ? "preset: built-in" : "preset: custom"),
+    ]),
+    h("div", {
+      className: "contract-overlay-filter",
+      key: "co_filter_transfer_cfg",
+      style: { flexWrap: "wrap", rowGap: "6px" },
+    }, [
+      h("label", { key: "co_filter_transfer_label" }, "filter preset transfer:"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_export_presets",
+        onClick: exportFilterPresetsToJson,
+      }, "Export Filter Presets"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_copy_presets",
+        onClick: copyFilterPresetsJson,
+      }, "Copy Filter Presets"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_load_json",
+        onClick: triggerFilterImportFilePick,
+      }, "Load Filter JSON"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_import_presets",
+        onClick: importFilterPresetsFromText,
+        disabled: String(filterTransferText || "").trim().length === 0,
+      }, "Import Filter Presets"),
+      h("input", {
+        type: "file",
+        key: "co_filter_import_file",
+        ref: filterImportFileInputRef,
+        accept: ".json,application/json",
+        onChange: handleFilterImportFileChange,
+        style: { display: "none" },
+      }),
+      h("textarea", {
+        className: "textarea",
+        key: "co_filter_transfer_text",
+        value: filterTransferText,
+        onChange: (e) => setFilterTransferText(String(e.target.value || "")),
+        placeholder: "{\"presets\": {\"my_filter\": {\"severityFilter\": \"high\", \"policyFilter\": \"hold\"}}}",
+        style: {
+          flexBasis: "100%",
+          minHeight: "74px",
+          padding: "6px 7px",
+          fontSize: "10px",
+          lineHeight: "1.35",
+        },
+      }),
+      filterTransferStatus
+        ? h("span", {
+          key: "co_filter_transfer_status",
+          className: "hint",
+          style: { marginLeft: "auto", color: "#8eb6ca" },
+        }, filterTransferStatus)
+        : null,
     ]),
     h("div", {
       className: "contract-overlay-filter",
