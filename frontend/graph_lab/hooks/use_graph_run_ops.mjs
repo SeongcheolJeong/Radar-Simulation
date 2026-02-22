@@ -1,4 +1,5 @@
 import { React } from "../deps.mjs";
+import { normalizeGraphRunOpsOptions } from "../contracts.mjs";
 import { toGraphPayload } from "../graph_helpers.mjs";
 import { buildGraphRunRecordText, clampPollIntervalMs } from "../run_monitor.mjs";
 import {
@@ -10,6 +11,7 @@ import {
 } from "../api_client.mjs";
 
 export function useGraphRunOps(opts) {
+  const safeOpts = normalizeGraphRunOpsOptions(opts);
   const {
     apiBase,
     profile,
@@ -29,7 +31,7 @@ export function useGraphRunOps(opts) {
     setPollingActive,
     setGateResultText,
     setLastPolicyEval,
-  } = opts;
+  } = safeOpts;
 
   const normalizePollIntervalMs = React.useCallback(
     () => clampPollIntervalMs(pollIntervalMsText),

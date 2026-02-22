@@ -6,6 +6,7 @@ import {
   MiniMap,
 } from "./deps.mjs";
 import { NODE_TYPES } from "./constants.mjs";
+import { normalizeGraphInputsPanelModel } from "./contracts.mjs";
 import { normalizeRepoPath } from "./graph_helpers.mjs";
 
 const h = React.createElement;
@@ -121,6 +122,7 @@ export function TopBar({ statusTone, statusText, nodeCount, edgeCount }) {
 }
 
 export function GraphInputsPanel({ model }) {
+  const safeModel = normalizeGraphInputsPanelModel(model);
   const {
     values,
     setters,
@@ -128,7 +130,7 @@ export function GraphInputsPanel({ model }) {
     graphActions,
     runActions,
     gateActions,
-  } = model;
+  } = safeModel;
   const {
     apiBase,
     graphId,

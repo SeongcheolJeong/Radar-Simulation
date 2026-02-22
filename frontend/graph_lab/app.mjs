@@ -4,6 +4,7 @@ import {
   useNodesState,
   useEdgesState,
 } from "./deps.mjs";
+import { normalizeGraphInputsPanelModel } from "./contracts.mjs";
 import { toFlowNode, toGraphPayload } from "./graph_helpers.mjs";
 import {
   getGraphTemplates,
@@ -255,7 +256,7 @@ export function App() {
     setStatus("graph exported", "status-ok");
   }, [edges, graphId, nodes, profile, setStatus]);
 
-  const inputPanelModel = React.useMemo(() => ({
+  const inputPanelModel = React.useMemo(() => normalizeGraphInputsPanelModel({
     values: {
       apiBase,
       graphId,

@@ -1819,3 +1819,20 @@
   - `app.mjs` exports grouped panel model (`inputPanelModel`) with section keys (`values`, `templateActions`, `runActions`, `gateActions`)
   - `GraphInputsPanel` now consumes grouped `model` contract (`{ model }` + grouped destructuring)
   - existing operator UI tokens remain present (`Run Mode`, `Auto Poll`, `Poll Last Run`)
+
+## Web E2E Graph Runtime Contract Guard (M17.5)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - contract/guard integration 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8116 8136` + smoke (`curl /frontend/graph_lab/contracts.mjs`, `curl /frontend/graph_lab/app.mjs`, `curl /frontend/graph_lab/panels.mjs`, `curl /frontend/graph_lab/hooks/use_graph_run_ops.mjs`, `curl /frontend/graph_lab/hooks/use_gate_ops.mjs` token grep)
+- Result: pass
+- Notes:
+  - contract version/normalizer tokens served (`graph_inputs_panel_model_v1`, `graph_run_ops_options_v1`, `gate_ops_options_v1`)
+  - app/panel/hook guard integration tokens confirmed (`normalizeGraphInputsPanelModel`, `normalizeGraphRunOpsOptions`, `normalizeGateOpsOptions`)
+  - run/gate operator controls remain wired with existing semantics under guarded model/options path

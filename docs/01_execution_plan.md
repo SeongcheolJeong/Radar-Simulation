@@ -113,6 +113,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.2: Graph Lab component/API split (`app` orchestration + panel components + api client)
 - [x] M17.3: Graph Lab action hooks split (`useGraphRunOps`, `useGateOps`)
 - [x] M17.4: Graph input panel model grouping (reduce action/state fan-out)
+- [x] M17.5: Frontend typed contract + runtime guard (`contracts.mjs` for panel/hook bindings)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -125,7 +126,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue M17 frontend hardening track after input-model grouping closure: introduce typed interface guards and minimal runtime contract checks for panel/hook bindings while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
+Continue M17 frontend hardening track after runtime contract guard closure: add lightweight contract diagnostics (guard warning counters + debug panel hook) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -811,3 +812,17 @@ M17.4 outcome (2026-02-22):
   - `model.values`, `model.setters`, `model.templateActions`, `model.graphActions`, `model.runActions`, `model.gateActions`
 - behavior parity maintained:
   - existing run/gate/operator controls preserved with same hook and API route wiring
+
+M17.5 outcome (2026-02-22):
+
+- frontend runtime contract guard module added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/contracts.mjs`
+- typed + guarded binding paths applied:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_graph_run_ops.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+- contract behavior:
+  - panel model contract normalized to `graph_inputs_panel_model_v1`
+  - run/gate hook option contracts normalized (`graph_run_ops_options_v1`, `gate_ops_options_v1`)
+  - missing/invalid fields degrade safely with one-time warning + no-op fallback handlers

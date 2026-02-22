@@ -1,7 +1,9 @@
 import { React } from "../deps.mjs";
+import { normalizeGateOpsOptions } from "../contracts.mjs";
 import { createBaseline, evaluatePolicyGate } from "../api_client.mjs";
 
 export function useGateOps(opts) {
+  const safeOpts = normalizeGateOpsOptions(opts);
   const {
     apiBase,
     graphRunSummary,
@@ -11,7 +13,7 @@ export function useGateOps(opts) {
     setStatus,
     setGateResultText,
     setLastPolicyEval,
-  } = opts;
+  } = safeOpts;
 
   const pinBaselineFromGraphRun = React.useCallback(async () => {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
