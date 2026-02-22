@@ -25,6 +25,28 @@ python3 -m http.server 8080
 
 - `http://localhost:8080/frontend/avx_like_dashboard.html`
 
+## Quick Example (Recommended)
+
+Generate a fresh analytic demo and launch dashboard in one command:
+
+```bash
+cd /Users/seongcheoljeong/Documents/Codex_test
+scripts/run_frontend_demo_local.sh 8080
+```
+
+The script does:
+
+1. Builds demo artifacts via:
+   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_frontend_demo_example.py`
+2. Writes summary:
+   - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/frontend_quickstart_v1.json`
+3. Starts local web server and serves:
+   - `http://localhost:8080/frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`
+
+You can switch summary source by changing query:
+
+- `?summary=docs/reports/avx_like_showcase_macos_2026_02_22.json`
+
 ## What The Dashboard Reads
 
 From the summary JSON:
@@ -54,4 +76,3 @@ From the demo visual folder (auto-derived):
 - Browser cannot execute Python simulation directly; backend run is still CLI-based.
 - Dashboard is a visualization layer on top of generated artifacts.
 - If you open via `file://` instead of `http://`, `fetch` may fail due browser restrictions.
-

@@ -667,6 +667,17 @@
     }
 
     function deriveVisualPaths(summary) {
+      const visualObj = summary?.visuals || {};
+      const direct = {
+        rd: normalizeRepoPath(visualObj.rd_map_png),
+        ra: normalizeRepoPath(visualObj.ra_map_png),
+        adc: normalizeRepoPath(visualObj.adc_tx0_rx0_png),
+        path: normalizeRepoPath(visualObj.path_scatter_chirp0_png),
+      };
+      if (direct.rd || direct.ra || direct.adc || direct.path) {
+        return direct;
+      }
+
       const pathListRel = normalizeRepoPath(summary?.outputs?.path_list_json);
       const outDir = dirname(pathListRel);
       const base = outDir && outDir.endsWith("/output") ? outDir.slice(0, -"/output".length) : dirname(pathListRel);
@@ -791,7 +802,8 @@
       lucide.createIcons();
       bindEvents();
 
-      el.summaryPathInput.value = DEFAULT_SUMMARY_PATH;
+      const querySummary = new URLSearchParams(window.location.search).get("summary");
+      el.summaryPathInput.value = querySummary && querySummary.trim() ? querySummary.trim() : DEFAULT_SUMMARY_PATH;
       el.fovInput.value = 120;
       el.rangeInput.value = 100;
       el.freqInput.value = 77;

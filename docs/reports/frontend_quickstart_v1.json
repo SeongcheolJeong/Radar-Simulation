@@ -1,0 +1,279 @@
+{
+  "scene_json": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json",
+  "outputs": {
+    "path_list_json": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/output/path_list.json",
+    "adc_cube_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/output/adc_cube.npz",
+    "radar_map_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/output/radar_map.npz"
+  },
+  "path_summary": {
+    "n_chirps": 16,
+    "path_count_total": 48,
+    "path_count_per_chirp": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "first_chirp_paths": [
+      {
+        "delay_s": 1.6011076569511297e-07,
+        "doppler_hz": 0.0,
+        "unit_direction": [
+          0.9945218953682733,
+          0.10452846326765347,
+          0.0
+        ],
+        "amp_complex": {
+          "re": 0.001736111111111111,
+          "im": 0.0
+        },
+        "path_id": "front_static_car",
+        "material_tag": "vehicle_static",
+        "reflection_order": 1
+      },
+      {
+        "delay_s": 2.3349486663870644e-07,
+        "doppler_hz": -4109.509652841233,
+        "unit_direction": [
+          0.9986295347545738,
+          -0.052335956242943835,
+          0.0
+        ],
+        "amp_complex": {
+          "re": 0.0003608218358586634,
+          "im": 8.01826301908141e-05
+        },
+        "path_id": "front_moving_car",
+        "material_tag": "vehicle_moving",
+        "reflection_order": 1
+      },
+      {
+        "delay_s": 3.2022153139022595e-07,
+        "doppler_hz": 1027.3774132103083,
+        "unit_direction": [
+          0.9702957262759965,
+          0.24192189559966773,
+          0.0
+        ],
+        "amp_complex": {
+          "re": 0.00013261905082868983,
+          "im": -1.4735450092076648e-05
+        },
+        "path_id": "right_slow_target",
+        "material_tag": "pedestrian",
+        "reflection_order": 1
+      }
+    ]
+  },
+  "adc_summary": {
+    "shape": [
+      1024,
+      16,
+      2,
+      4
+    ],
+    "dtype": "complex64",
+    "abs_mean": 0.0008791275904513896,
+    "abs_max": 0.00223923590965569,
+    "metadata": {
+      "fc_hz": 77000000000.0,
+      "slope_hz_per_s": 20000000000000.0,
+      "fs_hz": 20000000.0,
+      "samples_per_chirp": 1024,
+      "tx_schedule": [
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1
+      ],
+      "tx_pos_m": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.0078,
+          0.0
+        ]
+      ],
+      "rx_pos_m": [
+        [
+          0.0,
+          0.00185,
+          0.0
+        ],
+        [
+          0.0,
+          0.0037,
+          0.0
+        ],
+        [
+          0.0,
+          0.00555,
+          0.0
+        ],
+        [
+          0.0,
+          0.0074,
+          0.0
+        ]
+      ]
+    }
+  },
+  "radar_map_summary": {
+    "rd_shape": [
+      64,
+      256
+    ],
+    "ra_shape": [
+      32,
+      256
+    ],
+    "rd_top_peaks": [
+      {
+        "doppler_bin": 32,
+        "range_bin": 164,
+        "power": 11.058491188103488,
+        "rel_db": 0.0
+      },
+      {
+        "doppler_bin": 0,
+        "range_bin": 164,
+        "power": 11.058491188103488,
+        "rel_db": 0.0
+      },
+      {
+        "doppler_bin": 31,
+        "range_bin": 164,
+        "power": 10.299620858540774,
+        "rel_db": -0.30874638114876196
+      },
+      {
+        "doppler_bin": 63,
+        "range_bin": 164,
+        "power": 10.299620858540774,
+        "rel_db": -0.30874638114876196
+      },
+      {
+        "doppler_bin": 1,
+        "range_bin": 164,
+        "power": 10.299620849195554,
+        "rel_db": -0.3087463850892736
+      },
+      {
+        "doppler_bin": 33,
+        "range_bin": 164,
+        "power": 10.299620849195554,
+        "rel_db": -0.3087463850892736
+      }
+    ],
+    "ra_top_peaks": [
+      {
+        "angle_bin": 19,
+        "range_bin": 164,
+        "power": 1.4470286515966444,
+        "rel_db": 0.0
+      },
+      {
+        "angle_bin": 18,
+        "range_bin": 164,
+        "power": 1.3938851865335924,
+        "rel_db": -0.16250127698221792
+      },
+      {
+        "angle_bin": 20,
+        "range_bin": 164,
+        "power": 1.3246213850529587,
+        "rel_db": -0.3838536822641423
+      },
+      {
+        "angle_bin": 17,
+        "range_bin": 164,
+        "power": 1.1513311686588106,
+        "rel_db": -0.9927686838970428
+      },
+      {
+        "angle_bin": 21,
+        "range_bin": 164,
+        "power": 1.0919696602696378,
+        "rel_db": -1.2226655844242087
+      },
+      {
+        "angle_bin": 22,
+        "range_bin": 164,
+        "power": 0.8285770041215622,
+        "rel_db": -2.4214425440861365
+      }
+    ],
+    "metadata": {
+      "scene_id": "frontend_quickstart_2026_02_22",
+      "backend_type": "analytic_targets",
+      "frame_count": 16,
+      "tx_schedule": [
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1
+      ],
+      "rd_ra_metadata": {
+        "input_shape_sctr": [
+          1024,
+          16,
+          2,
+          4
+        ],
+        "nfft_range": 1024,
+        "nfft_doppler": 64,
+        "nfft_angle": 32,
+        "range_window": "hann",
+        "doppler_window": "hann",
+        "angle_window": "hann",
+        "range_bin_limit": 256
+      }
+    }
+  },
+  "visuals": {
+    "rd_map_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/rd_map.png",
+    "ra_map_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/ra_map.png",
+    "adc_tx0_rx0_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/adc_tx0_rx0.png",
+    "path_scatter_chirp0_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/path_scatter_chirp0.png"
+  }
+}
