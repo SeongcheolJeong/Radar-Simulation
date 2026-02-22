@@ -122,6 +122,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.11: Timeline row -> graph run jump action
 - [x] M17.12: Policy failure correlation tags on timeline rows
 - [x] M17.13: Timeline -> gate evidence deep-link + failure-rule badges
+- [x] M17.14: Historical policy-eval fetch fallback (`policy_eval_id -> run_id/summary`) for persisted gate evidence
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -134,7 +135,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.13 frontend hardening track: add historical policy-eval fetch by run id (not only latest eval) and timeline row deep-link to persisted gate evidence artifacts, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.14 frontend hardening track: add policy-eval evidence pagination/caching and large-history filtering while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -949,3 +950,18 @@ M17.13 outcome (2026-02-22):
 - run-open action exposed as reusable hook endpoint:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_graph_run_ops.mjs`
   - action: `openGraphRunById`
+
+M17.14 outcome (2026-02-22):
+
+- persisted policy-eval fetch path added for timeline gate evidence:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/api_client.mjs`
+  - new API wrappers: `listPolicyEvals`, `getPolicyEval`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - `Open Gate` flow now resolves evidence from persisted policy-eval artifacts first
+- fallback lookup strategy added when direct `policy_eval_id` fetch is unavailable:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - match order: `policy_eval_id` -> `run_id+summary_json` -> `run_id` -> `summary_json` -> `baseline_id`
+  - evidence trace fields emitted: `evidence_source`, `policy_eval_scan_count`
+- gate-event metadata hardened for lookup stability:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+  - timeline note now includes `candidate_run_id` + `candidate_summary_json`

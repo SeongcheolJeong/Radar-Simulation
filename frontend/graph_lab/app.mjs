@@ -12,6 +12,8 @@ import {
 import { toFlowNode, toGraphPayload } from "./graph_helpers.mjs";
 import {
   getGraphTemplates,
+  getPolicyEval,
+  listPolicyEvals,
   validateGraphContract,
 } from "./api_client.mjs";
 import {
@@ -155,19 +157,166 @@ export function App() {
     setStatus("contract timeline exported", "status-ok");
   }, [contractTimeline, setStatus]);
 
-  const openGateEvidenceFromTimeline = React.useCallback((row) => {
+  const openGateEvidenceFromTimeline = React.useCallback(async (row) => {
     const eventRow = row && typeof row === "object" ? row : {};
     const note = eventRow.note && typeof eventRow.note === "object" ? eventRow.note : {};
-    const runId = String(eventRow.graph_run_id || "").trim();
+    const normalizeHint = (v) => {
+      const text = String(v || "").trim();
+      if (text === "" || text === "-") return "";
+      const low = text.toLowerCase();
+      if (low === "none" || low === "null") return "";
+      return text;
+    };
+    const normalizePath = (v) => String(v || "").replace(/\\/g, "/").trim();
+    const pathMatches = (a, b) => {
+      const left = normalizePath(a);
+      const right = normalizePath(b);
+      if (!left || !right) return false;
+      return left === right || left.endsWith(right) || right.endsWith(left);
+    };
+
+    const policyEvalIdHint = normalizeHint(note.policy_eval_id);
+    const runIdHint = normalizeHint(eventRow.graph_run_id);
+    const baselineIdHint = normalizeHint(note.baseline_id);
+    const summaryHint = normalizeHint(note.candidate_summary_json);
+
+    setStatus("loading gate evidence...", "status-warn");
+
+    let resolvedEval = null;
+    let evidenceSource = "timeline_note";
+    let scanCount = 0;
+    const lookupErrors = [];
+
+    if (policyEvalIdHint) {
+      try {
+        const payload = await getPolicyEval(apiBase, policyEvalIdHint);
+        if (payload && typeof payload === "object") {
+          resolvedEval = payload;
+          evidenceSource = "policy_eval_id";
+        }
+      } catch (err) {
+        lookupErrors.push(`get_policy_eval(${policyEvalIdHint}) failed: ${String(err.message || err)}`);
+      }
+    }
+
+    if (!resolvedEval) {
+      try {
+        const payload = await listPolicyEvals(apiBase);
+        const rows = Array.isArray(payload?.policy_evals) ? payload.policy_evals : [];
+        scanCount = rows.length;
+        const matchRun = (item) =>
+          runIdHint !== "" &&
+          normalizeHint(item?.candidate?.run_id) === runIdHint;
+        const matchSummary = (item) =>
+          summaryHint !== "" &&
+          pathMatches(item?.candidate?.run_summary_json, summaryHint);
+
+        const byEvalId = policyEvalIdHint !== ""
+          ? rows.find((item) => normalizeHint(item?.policy_eval_id) === policyEvalIdHint) || null
+          : null;
+        const byRunAndSummary = rows.find((item) => matchRun(item) && matchSummary(item)) || null;
+        const byRunOnly = rows.find((item) => matchRun(item)) || null;
+        const bySummaryOnly = rows.find((item) => matchSummary(item)) || null;
+        const byBaselineOnly = baselineIdHint !== ""
+          ? rows.find((item) => normalizeHint(item?.baseline?.baseline_id) === baselineIdHint) || null
+          : null;
+
+        resolvedEval = byEvalId || byRunAndSummary || byRunOnly || bySummaryOnly || byBaselineOnly;
+        if (resolvedEval) {
+          if (byEvalId) evidenceSource = "policy_eval_list:policy_eval_id";
+          else if (byRunAndSummary) evidenceSource = "policy_eval_list:run_id+summary_json";
+          else if (byRunOnly) evidenceSource = "policy_eval_list:run_id";
+          else if (bySummaryOnly) evidenceSource = "policy_eval_list:summary_json";
+          else evidenceSource = "policy_eval_list:baseline_id";
+        }
+      } catch (err) {
+        lookupErrors.push(`list_policy_evals failed: ${String(err.message || err)}`);
+      }
+    }
+
+    if (resolvedEval && typeof resolvedEval === "object") {
+      const candidate = resolvedEval.candidate && typeof resolvedEval.candidate === "object"
+        ? resolvedEval.candidate
+        : {};
+      const baseline = resolvedEval.baseline && typeof resolvedEval.baseline === "object"
+        ? resolvedEval.baseline
+        : {};
+      const parity = resolvedEval.parity && typeof resolvedEval.parity === "object"
+        ? resolvedEval.parity
+        : {};
+      const policy = resolvedEval.policy && typeof resolvedEval.policy === "object"
+        ? resolvedEval.policy
+        : {};
+      const gateFailures = Array.isArray(resolvedEval.gate_failures) ? resolvedEval.gate_failures : [];
+      const parityFailures = Array.isArray(parity.failures) ? parity.failures : [];
+      const runId = normalizeHint(candidate.run_id) || runIdHint;
+      const gateFailed = Boolean(resolvedEval.gate_failed);
+      const policyKeys = Object.keys(policy).sort((a, b) => a.localeCompare(b));
+      const lines = [
+        `policy_eval_id: ${normalizeHint(resolvedEval.policy_eval_id) || policyEvalIdHint || "-"}`,
+        `evidence_source: persisted/${evidenceSource}`,
+        `gate_failed: ${gateFailed}`,
+        `recommendation: ${String(resolvedEval.recommendation || "-")}`,
+        `baseline_id: ${normalizeHint(baseline.baseline_id) || baselineIdHint || "-"}`,
+        `candidate_run_id: ${runId || "-"}`,
+        `candidate_summary_json: ${normalizeHint(candidate.run_summary_json) || summaryHint || "-"}`,
+        `parity_pass: ${Boolean(parity.pass)}`,
+        `parity_failure_count: ${Number(parityFailures.length || 0)}`,
+        `gate_failure_count: ${Number(gateFailures.length || 0)}`,
+        `policy_eval_scan_count: ${Number(scanCount || 0)}`,
+        "",
+        "gate_failures:",
+      ];
+      if (gateFailures.length === 0) {
+        lines.push("- none");
+      } else {
+        gateFailures.slice(0, 12).forEach((failure, idx) => {
+          const metric = failure && failure.metric ? ` (${String(failure.metric)})` : "";
+          lines.push(
+            `- [${Number(idx) + 1}] ${String((failure && failure.rule) || "unknown_rule")}${metric}: ${String(
+              (failure && failure.value) ?? "-"
+            )} > ${String((failure && failure.limit) ?? "-")}`
+          );
+        });
+      }
+      lines.push("", "policy:");
+      if (policyKeys.length === 0) {
+        lines.push("- none");
+      } else {
+        policyKeys.forEach((key) => {
+          lines.push(`- ${String(key)}: ${String(policy[key])}`);
+        });
+      }
+      lines.push(
+        "",
+        `source_event: ${String(eventRow.event_source || "-")}`,
+        `timestamp_ms: ${Number(eventRow.timestamp_ms || 0)}`,
+        `contract_delta: ${Number(eventRow?.delta?.unique_warning_count || 0)}/${Number(eventRow?.delta?.attempt_count_total || 0)}`,
+      );
+      if (lookupErrors.length > 0) {
+        lines.push("", "lookup_warnings:", ...lookupErrors.map((msg) => `- ${msg}`));
+      }
+      setGateResultText(lines.join("\n"));
+      if (runId) setLastGraphRunId(runId);
+      setStatus(
+        gateFailed ? `gate evidence opened (HOLD): ${runId || "-"}` : `gate evidence opened (ADOPT): ${runId || "-"}`,
+        gateFailed ? "status-warn" : "status-ok"
+      );
+      return;
+    }
+
     const gateFailed = Boolean(note.gate_failed);
     const rules = Array.isArray(note.failure_rules) ? note.failure_rules : [];
     const lines = [
-      `policy_eval_id: ${String(note.policy_eval_id || "-")}`,
+      `policy_eval_id: ${policyEvalIdHint || "-"}`,
+      "evidence_source: timeline_note_only",
       `gate_failed: ${gateFailed}`,
       `recommendation: ${String(note.recommendation || "-")}`,
-      `baseline_id: ${String(note.baseline_id || "-")}`,
-      `graph_run_id: ${runId || "-"}`,
+      `baseline_id: ${baselineIdHint || "-"}`,
+      `graph_run_id: ${runIdHint || "-"}`,
+      `candidate_summary_json: ${summaryHint || "-"}`,
       `failure_count: ${Number(note.failure_count || 0)}`,
+      `policy_eval_scan_count: ${Number(scanCount || 0)}`,
       "",
       "gate_failures:",
       ...(rules.length > 0 ? rules.map((rule, idx) => `- [${Number(idx) + 1}] ${rule}`) : ["- none"]),
@@ -176,13 +325,13 @@ export function App() {
       `timestamp_ms: ${Number(eventRow.timestamp_ms || 0)}`,
       `contract_delta: ${Number(eventRow?.delta?.unique_warning_count || 0)}/${Number(eventRow?.delta?.attempt_count_total || 0)}`,
     ];
+    if (lookupErrors.length > 0) {
+      lines.push("", "lookup_warnings:", ...lookupErrors.map((msg) => `- ${msg}`));
+    }
     setGateResultText(lines.join("\n"));
-    if (runId) setLastGraphRunId(runId);
-    setStatus(
-      gateFailed ? `gate evidence opened (HOLD): ${runId || "-"}` : `gate evidence opened (ADOPT): ${runId || "-"}`,
-      gateFailed ? "status-warn" : "status-ok"
-    );
-  }, [setGateResultText, setLastGraphRunId, setStatus]);
+    if (runIdHint) setLastGraphRunId(runIdHint);
+    setStatus(`gate evidence unresolved: ${runIdHint || "-"}`, "status-warn");
+  }, [apiBase, setGateResultText, setLastGraphRunId, setStatus]);
 
   React.useEffect(() => {
     refreshContractWarnings();

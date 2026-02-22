@@ -111,3 +111,12 @@ export async function evaluatePolicyGate(apiBase, policyPayload) {
     body: JSON.stringify(policyPayload),
   });
 }
+
+export async function listPolicyEvals(apiBase) {
+  return requestJsonOrThrow(apiBase, "/api/policy-evals");
+}
+
+export async function getPolicyEval(apiBase, policyEvalId) {
+  const eid = encodeURIComponent(String(policyEvalId || ""));
+  return requestJsonOrThrow(apiBase, `/api/policy-evals/${eid}`);
+}

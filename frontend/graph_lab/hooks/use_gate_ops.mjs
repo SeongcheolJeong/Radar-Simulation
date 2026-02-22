@@ -108,6 +108,9 @@ export function useGateOps(opts) {
   const runPolicyGateForGraphRun = React.useCallback(async () => {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
     const bId = String(baselineId || "").trim();
+    const candidateRunId = String(
+      graphRunSummary?.graph_run_id || graphRunSummary?.run_id || ""
+    ).trim();
     const beforeContractSnapshot = getContractWarningSnapshot();
     if (!summaryPath) {
       setStatus("run graph first to evaluate gate", "status-warn");
@@ -121,6 +124,7 @@ export function useGateOps(opts) {
     try {
       const payload = await evaluatePolicyGate(apiBase, {
         baseline_id: bId,
+        candidate_run_id: candidateRunId || undefined,
         candidate_summary_json: summaryPath,
       });
       const row = payload.policy_eval || {};
@@ -175,6 +179,8 @@ export function useGateOps(opts) {
           recommendation: String(row.recommendation || "-"),
           gate_failed: Boolean(row.gate_failed),
           baseline_id: bId,
+          candidate_run_id: candidateRunId || "",
+          candidate_summary_json: summaryPath,
           failure_count: Number(failures.length || 0),
           failure_rules: failures.slice(0, 3).map((f) => String((f && f.rule) || "unknown_rule")),
         },

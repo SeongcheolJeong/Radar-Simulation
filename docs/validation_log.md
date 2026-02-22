@@ -2040,3 +2040,29 @@
     - `failure_rules`
     - `failure_count`
     - `| policy=`
+
+## Web E2E Graph Historical Policy-Eval Fetch (M17.14)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - historical gate-evidence fetch frontend changes 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8145/8125)` + token grep (`curl /health`, `curl /frontend/graph_lab/app.mjs`, `curl /frontend/graph_lab/api_client.mjs`, `curl /frontend/graph_lab/hooks/use_gate_ops.mjs`)
+- Result: pass
+- Notes:
+  - app historical fetch tokens confirmed:
+    - `getPolicyEval`
+    - `listPolicyEvals`
+    - `policy_eval_list:run_id+summary_json`
+    - `evidence_source: persisted/`
+    - `gate evidence unresolved`
+  - API client endpoint tokens confirmed:
+    - `/api/policy-evals`
+    - `/api/policy-evals/{id}`
+  - gate note hint tokens confirmed:
+    - `candidate_run_id`
+    - `candidate_summary_json`
