@@ -121,6 +121,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.10: Contract compact timeline + run pin + gate tail refs
 - [x] M17.11: Timeline row -> graph run jump action
 - [x] M17.12: Policy failure correlation tags on timeline rows
+- [x] M17.13: Timeline -> gate evidence deep-link + failure-rule badges
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -133,7 +134,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.12 frontend hardening track: add timeline-to-gate evidence deep-linking and per-rule failure badges in timeline rows, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.13 frontend hardening track: add historical policy-eval fetch by run id (not only latest eval) and timeline row deep-link to persisted gate evidence artifacts, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -934,3 +935,17 @@ M17.12 outcome (2026-02-22):
 - gate report timeline tail now includes policy correlation token:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
   - tail line field: `policy:...`
+
+M17.13 outcome (2026-02-22):
+
+- timeline -> gate evidence deep-link added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - row action: `Open Gate` (policy-evidence summary loaded into `Policy Gate Result`)
+- per-rule failure badges added on timeline rows:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab_reactflow.html`
+  - style class: `contract-failure-rule-badge`
+- run-open action exposed as reusable hook endpoint:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_graph_run_ops.mjs`
+  - action: `openGraphRunById`

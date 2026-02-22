@@ -1996,14 +1996,47 @@
     - `graph_run_overlay_open`
     - `opened_from_overlay`
     - `onOpenRun`
-  - timeline policy tag tokens confirmed:
     - `Open Run`
+  - timeline policy tag tokens confirmed:
+    - `Open Gate`
     - `getPolicyCorrelationTag`
+    - `getFailureRuleTags`
     - `policy:HOLD#`
     - `policy:ADOPT`
     - `contract-policy-tag`
+    - `contract-failure-rule-badge`
   - gate report correlation tokens confirmed:
     - `failure_rules`
     - `failure_count`
     - `| policy=`
     - `## Contract Timeline Tail`
+
+## Web E2E Graph Timeline Gate Deep-Link + Rule Badges (M17.13)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - timeline gate deep-link/rule-badge integration 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8123 8143` + smoke (`curl /health`, `curl /frontend/graph_lab*.mjs` token grep)
+- Result: pass
+- Notes:
+  - deep-link tokens confirmed:
+    - `Open Run`
+    - `Open Gate`
+    - `onOpenRun`
+    - `onOpenGateEvidence`
+    - `openGraphRunById`
+  - correlation/rule badge tokens confirmed:
+    - `contract-policy-tag`
+    - `contract-failure-rule-badge`
+    - `getFailureRuleTags`
+  - gate note/report tokens confirmed:
+    - `policy_eval_id`
+    - `recommendation`
+    - `failure_rules`
+    - `failure_count`
+    - `| policy=`

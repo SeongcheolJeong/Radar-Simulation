@@ -57,6 +57,18 @@ function getPolicyCorrelationTag(row, policyByRun) {
   return "policy:ADOPT";
 }
 
+function getFailureRuleTags(row, policyByRun) {
+  const runId = String(row?.graph_run_id || "").trim();
+  if (!runId) return [];
+  const info = policyByRun.get(runId) || null;
+  if (!info) return [];
+  const rules = Array.isArray(info.failure_rules) ? info.failure_rules : [];
+  return rules
+    .map((x) => String(x || "").trim())
+    .filter((x) => x.length > 0)
+    .slice(0, 3);
+}
+
 function renderArtifactInspector(graphRunSummary) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
@@ -396,10 +408,12 @@ export function ContractWarningOverlay({
   onClear,
   onExport,
   onOpenRun,
+  onOpenGateEvidence,
 }) {
   if (!visible) return null;
   const rows = Array.isArray(timeline) ? timeline : [];
   const runOpenHandler = typeof onOpenRun === "function" ? onOpenRun : () => {};
+  const gateOpenHandler = typeof onOpenGateEvidence === "function" ? onOpenGateEvidence : () => {};
   const [sourceFilter, setSourceFilter] = React.useState("all");
   const [pinnedRunId, setPinnedRunId] = React.useState("all");
   const [nonZeroOnly, setNonZeroOnly] = React.useState(false);
@@ -438,6 +452,10 @@ export function ContractWarningOverlay({
       const candidate = {
         gate_failed: Boolean(note.gate_failed),
         failure_count: Number(note.failure_count || 0),
+        failure_rules: Array.isArray(note.failure_rules) ? note.failure_rules.slice(0, 3) : [],
+        policy_eval_id: String(note.policy_eval_id || "-"),
+        recommendation: String(note.recommendation || "-"),
+        baseline_id: String(note.baseline_id || "-"),
       };
       if (!previous) {
         map.set(runId, candidate);
@@ -501,6 +519,8 @@ export function ContractWarningOverlay({
           const severity = classifyContractSeverity(row);
           const badgeText = severityLabel(severity);
           const policyTag = getPolicyCorrelationTag(row, policyByRun);
+          const failureRuleTags = getFailureRuleTags(row, policyByRun);
+          const hasPolicyCorrelation = Boolean(policyTag);
           const className = compactMode
             ? `contract-overlay-row compact contract-sev-${severity}`
             : `contract-overlay-row contract-sev-${severity}`;
@@ -511,6 +531,9 @@ export function ContractWarningOverlay({
                 policyTag
                   ? h("span", { className: `contract-policy-tag ${String(policyTag).includes("HOLD") ? "hold" : "adopt"}`, key: `co_row_policy_compact_${idx}` }, policyTag)
                   : null,
+                ...failureRuleTags.map((rule, ridx) =>
+                  h("span", { className: "contract-failure-rule-badge", key: `co_row_rule_compact_${idx}_${ridx}` }, rule)
+                ),
                 `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")} | `,
                 `d=${formatSigned(row?.delta?.unique_warning_count)}/${formatSigned(row?.delta?.attempt_count_total)}`,
                 runId
@@ -523,6 +546,13 @@ export function ContractWarningOverlay({
                       },
                     }, "Open Run")
                   : null,
+                runId && hasPolicyCorrelation
+                  ? h("button", {
+                      className: "btn contract-open-gate-btn",
+                      key: `co_row_gate_compact_${idx}`,
+                      onClick: () => gateOpenHandler(row),
+                    }, "Open Gate")
+                  : null,
               ]),
             ]);
           }
@@ -532,6 +562,9 @@ export function ContractWarningOverlay({
               policyTag
                 ? h("span", { className: `contract-policy-tag ${String(policyTag).includes("HOLD") ? "hold" : "adopt"}`, key: `co_row_policy_${idx}` }, policyTag)
                 : null,
+              ...failureRuleTags.map((rule, ridx) =>
+                h("span", { className: "contract-failure-rule-badge", key: `co_row_rule_${idx}_${ridx}` }, rule)
+              ),
               `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")}`,
             ]),
             h("div", { className: "contract-overlay-row-kpi", key: `co_row_kpi_${idx}` }, [
@@ -548,6 +581,13 @@ export function ContractWarningOverlay({
                       runOpenHandler(runId);
                     },
                   }, "Open Run"),
+                  hasPolicyCorrelation
+                    ? h("button", {
+                        key: `co_row_gate_${idx}`,
+                        className: "btn contract-open-gate-btn",
+                        onClick: () => gateOpenHandler(row),
+                      }, "Open Gate")
+                    : null,
                 ])
               : null,
           ]);

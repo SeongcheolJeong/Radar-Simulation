@@ -50,7 +50,7 @@ export function useGateOps(opts) {
         ? `policy:HOLD#${Number(policyInfo.failure_count || 0)}`
         : "policy:ADOPT";
     }
-    return `- [${Number(idx) + 1}] t=${timestamp} | source=${source} | run=${runId} | sev=${severity} | delta=${du >= 0 ? "+" : ""}${du}/${da >= 0 ? "+" : ""}${da} | ${policyTag}`;
+    return `- [${Number(idx) + 1}] t=${timestamp} | source=${source} | run=${runId} | sev=${severity} | delta=${du >= 0 ? "+" : ""}${du}/${da >= 0 ? "+" : ""}${da} | policy=${policyTag}`;
   }, [classifyTimelineSeverity]);
 
   const collectContractDiagnostics = React.useCallback((beforeSnapshot) => {
@@ -171,6 +171,8 @@ export function useGateOps(opts) {
         snapshot: contract.snapshot,
         delta: contract.delta,
         note: {
+          policy_eval_id: String(row.policy_eval_id || "-"),
+          recommendation: String(row.recommendation || "-"),
           gate_failed: Boolean(row.gate_failed),
           baseline_id: bId,
           failure_count: Number(failures.length || 0),

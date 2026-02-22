@@ -155,6 +155,35 @@ export function App() {
     setStatus("contract timeline exported", "status-ok");
   }, [contractTimeline, setStatus]);
 
+  const openGateEvidenceFromTimeline = React.useCallback((row) => {
+    const eventRow = row && typeof row === "object" ? row : {};
+    const note = eventRow.note && typeof eventRow.note === "object" ? eventRow.note : {};
+    const runId = String(eventRow.graph_run_id || "").trim();
+    const gateFailed = Boolean(note.gate_failed);
+    const rules = Array.isArray(note.failure_rules) ? note.failure_rules : [];
+    const lines = [
+      `policy_eval_id: ${String(note.policy_eval_id || "-")}`,
+      `gate_failed: ${gateFailed}`,
+      `recommendation: ${String(note.recommendation || "-")}`,
+      `baseline_id: ${String(note.baseline_id || "-")}`,
+      `graph_run_id: ${runId || "-"}`,
+      `failure_count: ${Number(note.failure_count || 0)}`,
+      "",
+      "gate_failures:",
+      ...(rules.length > 0 ? rules.map((rule, idx) => `- [${Number(idx) + 1}] ${rule}`) : ["- none"]),
+      "",
+      `source_event: ${String(eventRow.event_source || "-")}`,
+      `timestamp_ms: ${Number(eventRow.timestamp_ms || 0)}`,
+      `contract_delta: ${Number(eventRow?.delta?.unique_warning_count || 0)}/${Number(eventRow?.delta?.attempt_count_total || 0)}`,
+    ];
+    setGateResultText(lines.join("\n"));
+    if (runId) setLastGraphRunId(runId);
+    setStatus(
+      gateFailed ? `gate evidence opened (HOLD): ${runId || "-"}` : `gate evidence opened (ADOPT): ${runId || "-"}`,
+      gateFailed ? "status-warn" : "status-ok"
+    );
+  }, [setGateResultText, setLastGraphRunId, setStatus]);
+
   React.useEffect(() => {
     refreshContractWarnings();
   }, [refreshContractWarnings]);
@@ -478,6 +507,7 @@ export function App() {
       onClear: clearContractTimeline,
       onExport: exportContractTimeline,
       onOpenRun: openGraphRunById,
+      onOpenGateEvidence: openGateEvidenceFromTimeline,
     }),
   ]);
 }
