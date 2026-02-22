@@ -998,6 +998,7 @@ export function ContractWarningOverlay({
   );
   const [filterTransferText, setFilterTransferText] = React.useState("");
   const [filterTransferStatus, setFilterTransferStatus] = React.useState("");
+  const [filterImportSelection, setFilterImportSelection] = React.useState({});
   const [shortcutTransferText, setShortcutTransferText] = React.useState("");
   const [shortcutTransferStatus, setShortcutTransferStatus] = React.useState("");
   const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
@@ -1629,35 +1630,148 @@ export function ContractWarningOverlay({
     () => Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, activeFilterPreset),
     [activeFilterPreset]
   );
-  const filterImportPreview = React.useMemo(() => {
+  const parsedFilterImportPayload = React.useMemo(() => {
     const text = String(filterTransferText || "").trim();
     if (!text) {
-      return "preview: waiting for JSON payload";
+      return {
+        imported: null,
+        error: "",
+        empty: true,
+      };
     }
     try {
-      const imported = parseFilterPresetImportText(text);
-      const names = Object.keys(imported);
-      let overwriteCount = 0;
-      let builtinOverwriteCount = 0;
-      names.forEach((name) => {
-        if (!Object.prototype.hasOwnProperty.call(filterPresets, name)) return;
-        overwriteCount += 1;
-        if (Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) {
-          builtinOverwriteCount += 1;
-        }
-      });
-      const newCount = names.length - overwriteCount;
-      const modeToken = filterImportMode === "replace_custom" ? "replace_custom" : "merge";
-      const builtinTag = builtinOverwriteCount > 0 ? `, built-in overwrite ${builtinOverwriteCount}` : "";
-      return `preview: total ${names.length}, new ${newCount}, overwrite ${overwriteCount}${builtinTag}, mode ${modeToken}`;
+      return {
+        imported: parseFilterPresetImportText(text),
+        error: "",
+        empty: false,
+      };
     } catch (err) {
-      return `preview: invalid payload (${String(err?.message || "parse error")})`;
+      return {
+        imported: null,
+        error: String(err?.message || "parse error"),
+        empty: false,
+      };
     }
-  }, [filterImportMode, filterPresets, filterTransferText]);
-  const filterImportPreviewIsValid = React.useMemo(
-    () => !String(filterImportPreview || "").startsWith("preview: invalid payload"),
-    [filterImportPreview]
+  }, [filterTransferText]);
+  const filterImportRows = React.useMemo(() => {
+    const imported = parsedFilterImportPayload.imported;
+    if (!imported || typeof imported !== "object") return [];
+    return Object.keys(imported)
+      .sort((a, b) => String(a).localeCompare(String(b)))
+      .map((name) => {
+        const hasExisting = Object.prototype.hasOwnProperty.call(filterPresets, name);
+        if (!hasExisting) {
+          return { name, conflict: "new" };
+        }
+        if (Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) {
+          return { name, conflict: "overwrite_builtin" };
+        }
+        return { name, conflict: "overwrite_custom" };
+      });
+  }, [filterPresets, parsedFilterImportPayload.imported]);
+  const filterImportNamesSignature = React.useMemo(
+    () => filterImportRows.map((row) => row.name).join("|"),
+    [filterImportRows]
   );
+  React.useEffect(() => {
+    if (!filterImportNamesSignature) {
+      setFilterImportSelection({});
+      return;
+    }
+    setFilterImportSelection((prev) => {
+      const base = prev && typeof prev === "object" && !Array.isArray(prev) ? prev : {};
+      const next = {};
+      filterImportRows.forEach((row) => {
+        const name = String(row.name || "");
+        if (!name) return;
+        if (Object.prototype.hasOwnProperty.call(base, name)) {
+          next[name] = Boolean(base[name]);
+          return;
+        }
+        next[name] = true;
+      });
+      return next;
+    });
+  }, [filterImportNamesSignature, filterImportRows]);
+  const selectedFilterImportNames = React.useMemo(
+    () =>
+      filterImportRows
+        .map((row) => String(row.name || ""))
+        .filter((name) => name.length > 0 && Boolean(filterImportSelection[name])),
+    [filterImportRows, filterImportSelection]
+  );
+  const filterImportPreview = React.useMemo(() => {
+    if (parsedFilterImportPayload.empty) {
+      return "preview: waiting for JSON payload";
+    }
+    if (parsedFilterImportPayload.error) {
+      return `preview: invalid payload (${parsedFilterImportPayload.error})`;
+    }
+    const selectedSet = new Set(selectedFilterImportNames);
+    let selectedNew = 0;
+    let selectedOverwrite = 0;
+    let selectedBuiltinOverwrite = 0;
+    filterImportRows.forEach((row) => {
+      const name = String(row?.name || "");
+      if (!selectedSet.has(name)) return;
+      if (row.conflict === "new") {
+        selectedNew += 1;
+        return;
+      }
+      selectedOverwrite += 1;
+      if (row.conflict === "overwrite_builtin") {
+        selectedBuiltinOverwrite += 1;
+      }
+    });
+    const modeToken = filterImportMode === "replace_custom" ? "replace_custom" : "merge";
+    if (selectedFilterImportNames.length === 0) {
+      return `preview: total ${filterImportRows.length}, selected 0, mode ${modeToken} (select presets to import)`;
+    }
+    const builtinTag = selectedBuiltinOverwrite > 0 ? `, built-in overwrite ${selectedBuiltinOverwrite}` : "";
+    return [
+      `preview: total ${filterImportRows.length}`,
+      `selected ${selectedFilterImportNames.length}`,
+      `new ${selectedNew}`,
+      `overwrite ${selectedOverwrite}${builtinTag}`,
+      `mode ${modeToken}`,
+    ].join(", ");
+  }, [
+    filterImportMode,
+    filterImportRows,
+    parsedFilterImportPayload.empty,
+    parsedFilterImportPayload.error,
+    selectedFilterImportNames,
+  ]);
+  const filterImportPreviewIsValid = React.useMemo(
+    () => !parsedFilterImportPayload.empty && !parsedFilterImportPayload.error,
+    [parsedFilterImportPayload.empty, parsedFilterImportPayload.error]
+  );
+  const toggleFilterImportPresetSelection = React.useCallback((presetName) => {
+    const name = String(presetName || "").trim();
+    if (!name) return;
+    setFilterImportSelection((prev) => ({
+      ...(prev && typeof prev === "object" && !Array.isArray(prev) ? prev : {}),
+      [name]: !Boolean(prev?.[name]),
+    }));
+  }, []);
+  const selectAllFilterImportPresets = React.useCallback(() => {
+    const next = {};
+    filterImportRows.forEach((row) => {
+      const name = String(row.name || "");
+      if (!name) return;
+      next[name] = true;
+    });
+    setFilterImportSelection(next);
+  }, [filterImportRows]);
+  const clearFilterImportPresets = React.useCallback(() => {
+    const next = {};
+    filterImportRows.forEach((row) => {
+      const name = String(row.name || "");
+      if (!name) return;
+      next[name] = false;
+    });
+    setFilterImportSelection(next);
+  }, [filterImportRows]);
   const applyActiveFilterPreset = React.useCallback(() => {
     const profileName = String(activeFilterPreset || "").trim();
     const cfg = filterPresets[profileName] || DEFAULT_FILTER_PRESETS.default;
@@ -1765,41 +1879,65 @@ export function ContractWarningOverlay({
     }
   }, [filterPresets]);
   const importFilterPresetsFromText = React.useCallback(() => {
-    try {
-      const imported = parseFilterPresetImportText(filterTransferText);
-      const names = Object.keys(imported);
-      setFilterPresets((prev) => {
-        if (filterImportMode !== "replace_custom") {
-          return {
-            ...prev,
-            ...imported,
-          };
-        }
-        const next = {};
-        Object.keys(prev).forEach((name) => {
-          if (!Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) return;
-          const fallback = DEFAULT_FILTER_PRESETS[name] || DEFAULT_FILTER_PRESETS.default;
-          next[name] = normalizeFilterPresetConfig(prev[name], fallback);
-        });
+    if (parsedFilterImportPayload.empty) {
+      setFilterTransferStatus("import failed: empty import payload");
+      return;
+    }
+    if (parsedFilterImportPayload.error) {
+      setFilterTransferStatus(`import failed: ${parsedFilterImportPayload.error}`);
+      return;
+    }
+    const importedAll = parsedFilterImportPayload.imported;
+    if (!importedAll || typeof importedAll !== "object") {
+      setFilterTransferStatus("import failed: invalid payload");
+      return;
+    }
+    const names = selectedFilterImportNames.filter((name) =>
+      Object.prototype.hasOwnProperty.call(importedAll, name)
+    );
+    if (names.length === 0) {
+      setFilterTransferStatus("import skipped: no presets selected");
+      return;
+    }
+    const imported = {};
+    names.forEach((name) => {
+      imported[name] = importedAll[name];
+    });
+    setFilterPresets((prev) => {
+      if (filterImportMode !== "replace_custom") {
         return {
-          ...next,
+          ...prev,
           ...imported,
         };
+      }
+      const next = {};
+      Object.keys(prev).forEach((name) => {
+        if (!Object.prototype.hasOwnProperty.call(DEFAULT_FILTER_PRESETS, name)) return;
+        const fallback = DEFAULT_FILTER_PRESETS[name] || DEFAULT_FILTER_PRESETS.default;
+        next[name] = normalizeFilterPresetConfig(prev[name], fallback);
       });
-      if (filterImportMode === "replace_custom") {
-        setFilterTransferStatus(`imported ${names.length} preset(s); replaced existing custom presets`);
-      } else {
-        setFilterTransferStatus(`imported ${names.length} preset(s)`);
-      }
-      if (names.length > 0) {
-        const firstImported = String(names[0]);
-        setFilterPresetDraft(firstImported);
-        setActiveFilterPreset(firstImported);
-      }
-    } catch (err) {
-      setFilterTransferStatus(`import failed: ${String(err?.message || "invalid payload")}`);
+      return {
+        ...next,
+        ...imported,
+      };
+    });
+    if (filterImportMode === "replace_custom") {
+      setFilterTransferStatus(`imported ${names.length} preset(s); replaced existing custom presets`);
+    } else {
+      setFilterTransferStatus(`imported ${names.length} preset(s)`);
     }
-  }, [filterImportMode, filterTransferText]);
+    const firstImported = String(names[0] || "");
+    if (firstImported) {
+      setFilterPresetDraft(firstImported);
+      setActiveFilterPreset(firstImported);
+    }
+  }, [
+    filterImportMode,
+    parsedFilterImportPayload.empty,
+    parsedFilterImportPayload.error,
+    parsedFilterImportPayload.imported,
+    selectedFilterImportNames,
+  ]);
   const resetOverlayFilters = React.useCallback(() => {
     setSourceFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.sourceFilter);
     setSeverityFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.severityFilter);
@@ -2220,9 +2358,24 @@ export function ContractWarningOverlay({
       )),
       h("button", {
         className: "btn",
+        key: "co_filter_import_select_all",
+        onClick: selectAllFilterImportPresets,
+        disabled: filterImportRows.length === 0,
+      }, "Select All"),
+      h("button", {
+        className: "btn",
+        key: "co_filter_import_select_none",
+        onClick: clearFilterImportPresets,
+        disabled: filterImportRows.length === 0,
+      }, "Select None"),
+      h("button", {
+        className: "btn",
         key: "co_filter_import_presets",
         onClick: importFilterPresetsFromText,
-        disabled: String(filterTransferText || "").trim().length === 0 || !filterImportPreviewIsValid,
+        disabled:
+          String(filterTransferText || "").trim().length === 0
+          || !filterImportPreviewIsValid
+          || selectedFilterImportNames.length === 0,
       }, "Import Filter Presets"),
       h("input", {
         type: "file",
@@ -2255,6 +2408,39 @@ export function ContractWarningOverlay({
             : "#8eb6ca",
         },
       }, filterImportPreview),
+      filterImportRows.length > 0
+        ? h("div", {
+          key: "co_filter_import_rows",
+          style: {
+            flexBasis: "100%",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "6px",
+          },
+        }, filterImportRows.map((row) =>
+          h("label", {
+            key: `co_filter_import_row_${row.name}`,
+            className: "hint",
+            style: {
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              border: "1px solid #31576b",
+              borderRadius: "999px",
+              padding: "2px 7px",
+              background: "rgba(24, 50, 65, 0.42)",
+              color: "#b8d5e7",
+            },
+          }, [
+            h("input", {
+              type: "checkbox",
+              checked: Boolean(filterImportSelection[row.name]),
+              onChange: () => toggleFilterImportPresetSelection(row.name),
+            }),
+            `${row.name}:${row.conflict}`,
+          ])
+        ))
+        : null,
       filterTransferStatus
         ? h("span", {
           key: "co_filter_transfer_status",

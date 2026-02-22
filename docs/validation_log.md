@@ -2485,3 +2485,31 @@
     - `replace_custom`
     - `disabled: String(filterTransferText || \"\").trim().length === 0 || !filterImportPreviewIsValid`
     - `graph_lab_contract_overlay_filter_presets`
+
+## Web E2E Graph Selective Filter Preset Import + Dry-Run Rows (M17.30)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - selective import frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `python3 api/ui local smoke (8161/8141)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - selective import model tokens confirmed:
+    - `parsedFilterImportPayload`
+    - `filterImportRows`
+    - `selectedFilterImportNames`
+    - `import skipped: no presets selected`
+  - selective import UI tokens confirmed:
+    - `co_filter_import_select_all`
+    - `co_filter_import_select_none`
+    - `co_filter_import_rows`
+    - `co_filter_import_row_`
+  - dry-run preview tokens confirmed:
+    - `selected 0`
+    - `select presets to import`
+    - `replace_custom`

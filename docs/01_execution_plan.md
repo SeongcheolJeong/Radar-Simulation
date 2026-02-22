@@ -138,6 +138,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.27: Filter preset profiles (load/save/delete with persistence)
 - [x] M17.28: Filter preset transfer import/export (team-shareable JSON bundle)
 - [x] M17.29: Filter preset import guardrails (merge/replace mode + conflict preview)
+- [x] M17.30: Selective filter preset import + dry-run conflict visibility
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -150,7 +151,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.29 frontend hardening track: add selective-import controls (choose preset subset) with dry-run diff visibility while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.30 frontend hardening track: add destructive-action confirmation/undo path for import-replace flows while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1208,3 +1209,18 @@ M17.29 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - invalid payload now disables import action
   - `replace_custom` mode preserves built-ins while replacing existing custom presets
+
+M17.30 outcome (2026-02-22):
+
+- selective import controls added for transfer payload presets:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - actions: `Select All`, `Select None`
+  - per-preset selectors: `co_filter_import_row_<name>`
+- dry-run conflict visibility expanded:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - parsed payload model: `parsedFilterImportPayload`
+  - preview now reports selected subset and conflict classes (`new`, `overwrite_custom`, `overwrite_builtin`)
+- import apply path now obeys selected subset:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - unselected presets are excluded from apply
+  - empty selection returns explicit no-op status (`import skipped: no presets selected`)
