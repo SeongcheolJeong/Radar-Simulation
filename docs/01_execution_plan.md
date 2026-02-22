@@ -128,6 +128,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.17: Timeline row-window virtualization + overlay preference persistence
 - [x] M17.18: Overlay shortcut keys + preset/reset operations
 - [x] M17.19: Row detail lazy-expansion controls + detail rendering on demand
+- [x] M17.20: Overlay shortcut remap + profile persistence
+- [x] M17.21: Row detail field-level toggles + core/all presets
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -140,7 +142,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.19 frontend hardening track: add optional keyboard shortcut remap/profile save and row-detail field-level toggles while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.21 frontend hardening track: add team-shareable shortcut profile import/export and lightweight detail-view ergonomics while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
