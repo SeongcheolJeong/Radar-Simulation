@@ -360,6 +360,7 @@ export function NodeInspectorPanel({
   graphRunText,
   gateResultText,
   graphRunSummary,
+  contractDebugText,
 }) {
   return h("section", { className: "panel", key: "right" }, [
     h("div", { className: "panel-hd", key: "rhd" }, "Node Inspector"),
@@ -401,6 +402,10 @@ export function NodeInspectorPanel({
       h("div", { className: "field", key: "gateresult" }, [
         h("label", { className: "label", key: "lblgr" }, "Policy Gate Result"),
         h("pre", { className: "result-box", key: "gatebox" }, gateResultText),
+      ]),
+      h("div", { className: "field", key: "contractdiagauto" }, [
+        h("label", { className: "label", key: "lblcda" }, "Contract Diagnostics (Auto)"),
+        h("pre", { className: "result-box", key: "contractboxauto" }, String(contractDebugText || "-")),
       ]),
       h("div", { className: "field", key: "artifactinspect" }, [
         h("label", { className: "label", key: "lblai" }, "Artifact Inspector"),

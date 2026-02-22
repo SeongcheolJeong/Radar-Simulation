@@ -1,5 +1,8 @@
 import { React } from "../deps.mjs";
-import { normalizeGateOpsOptions } from "../contracts.mjs";
+import {
+  getContractWarningSnapshot,
+  normalizeGateOpsOptions,
+} from "../contracts.mjs";
 import { createBaseline, evaluatePolicyGate } from "../api_client.mjs";
 
 export function useGateOps(opts) {
@@ -78,6 +81,11 @@ export function useGateOps(opts) {
           );
         });
       }
+      const snapshot = getContractWarningSnapshot();
+      lines.push(
+        `contract_warning_unique: ${Number(snapshot.unique_warning_count || 0)}`,
+        `contract_warning_attempts: ${Number(snapshot.attempt_count_total || 0)}`
+      );
       setGateResultText(lines.join("\n"));
       setLastPolicyEval(row);
       setStatus(

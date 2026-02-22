@@ -1853,3 +1853,28 @@
   - panel diagnostics controls present (`Contract Guard`, `Refresh Guard`, `Reset Guard`)
   - contract diagnostics API tokens served (`getContractWarningSnapshot`, `resetContractWarnings`, `contract_warning_debug_v1`)
   - app wiring tokens present (`refreshContractWarnings`, `resetContractWarnings`, `contractDebugText`)
+
+## Web E2E Graph Auto Contract Propagation (M17.7)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - frontend auto-propagation changes 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8118 8138` + smoke (`curl /health`, `curl /frontend/graph_lab/*.mjs` token grep)
+- Result: pass
+- Notes:
+  - `app.mjs` auto-refresh dependency token confirmed:
+    - `[graphRunText, gateResultText, validationText, refreshContractWarnings]`
+  - run hook tokens confirmed:
+    - `contract_warning_unique`
+    - `contract_warning_attempts`
+    - `contract_diagnostics:`
+  - gate hook tokens confirmed:
+    - `contract_warning_unique`
+    - `contract_warning_attempts`
+  - panel token confirmed:
+    - `Contract Diagnostics (Auto)`

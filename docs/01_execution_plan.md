@@ -839,3 +839,19 @@ M17.6 outcome (2026-02-22):
 - diagnostics wiring added in app orchestration:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
   - snapshot formatting + state (`contractDebugText`) + action bridging
+
+M17.7 outcome (2026-02-22):
+
+- automatic contract diagnostics propagation added across run/gate paths:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_graph_run_ops.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+- run/gate result surfaces now carry guard counters:
+  - graph run text includes `contract_warning_unique`, `contract_warning_attempts`
+  - graph run summary path adds `contract_diagnostics:` block
+  - policy gate result text includes `contract_warning_unique`, `contract_warning_attempts`
+- auto-refresh wiring expanded in app orchestration:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - contract snapshot refresh effect now tracks `graphRunText`, `gateResultText`, `validationText`
+- Node Inspector diagnostics visibility expanded:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - new auto box: `Contract Diagnostics (Auto)`

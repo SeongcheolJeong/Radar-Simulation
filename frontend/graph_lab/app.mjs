@@ -114,6 +114,10 @@ export function App() {
     refreshContractWarnings();
   }, [refreshContractWarnings]);
 
+  React.useEffect(() => {
+    refreshContractWarnings();
+  }, [graphRunText, gateResultText, validationText, refreshContractWarnings]);
+
   const applyGraph = React.useCallback((graph) => {
     const g = graph && typeof graph === "object" ? graph : {};
     setGraphId(String(g.graph_id || "graph_lab"));
@@ -406,6 +410,7 @@ export function App() {
         graphRunText,
         gateResultText,
         graphRunSummary,
+        contractDebugText,
       }),
     ]),
   ]);

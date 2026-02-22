@@ -1,5 +1,8 @@
 import { React } from "../deps.mjs";
-import { normalizeGraphRunOpsOptions } from "../contracts.mjs";
+import {
+  getContractWarningSnapshot,
+  normalizeGraphRunOpsOptions,
+} from "../contracts.mjs";
 import { toGraphPayload } from "../graph_helpers.mjs";
 import { buildGraphRunRecordText, clampPollIntervalMs } from "../run_monitor.mjs";
 import {
@@ -38,9 +41,21 @@ export function useGraphRunOps(opts) {
     [pollIntervalMsText]
   );
 
+  const getContractSnapshotLines = React.useCallback(() => {
+    const s = getContractWarningSnapshot();
+    return [
+      `contract_warning_unique: ${Number(s.unique_warning_count || 0)}`,
+      `contract_warning_attempts: ${Number(s.attempt_count_total || 0)}`,
+    ];
+  }, []);
+
   const renderGraphRunRecord = React.useCallback((row, graphRunId, extraLines) => {
-    setGraphRunText(buildGraphRunRecordText(row, graphRunId, extraLines));
-  }, [setGraphRunText]);
+    const merged = [
+      ...(Array.isArray(extraLines) ? extraLines.map((x) => String(x)) : []),
+      ...getContractSnapshotLines(),
+    ];
+    setGraphRunText(buildGraphRunRecordText(row, graphRunId, merged));
+  }, [getContractSnapshotLines, setGraphRunText]);
 
   const loadGraphRunSummaryById = React.useCallback(async (graphRunId, fallbackRow) => {
     const sumRes = await getGraphRunSummaryMaybe(apiBase, graphRunId);
@@ -81,6 +96,9 @@ export function useGraphRunOps(opts) {
       `- adc_cube_npz: ${String(summary?.outputs?.adc_cube_npz || "-")}`,
       `- radar_map_npz: ${String(summary?.outputs?.radar_map_npz || "-")}`,
       `- graph_run_summary_json: ${String(summary?.outputs?.graph_run_summary_json || "-")}`,
+      "",
+      "contract_diagnostics:",
+      ...getContractSnapshotLines(),
     ];
     setGraphRunText(lines.join("\n"));
     setGraphRunSummary(summary);
@@ -91,6 +109,7 @@ export function useGraphRunOps(opts) {
   }, [
     apiBase,
     profile,
+    getContractSnapshotLines,
     renderGraphRunRecord,
     setGateResultText,
     setGraphRunSummary,
