@@ -115,6 +115,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.4: Graph input panel model grouping (reduce action/state fan-out)
 - [x] M17.5: Frontend typed contract + runtime guard (`contracts.mjs` for panel/hook bindings)
 - [x] M17.6: Contract diagnostics surface (warning counters + debug panel actions)
+- [x] M17.7: Auto contract diagnostics propagation (run/gate text + inspector auto-sync)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -127,7 +128,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue M17 frontend hardening track after contract diagnostics closure: expose contract health in optional developer overlays and wire contract-check snapshots into run summaries while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), while keeping M14.6 Linux strict pilot closure in parallel.
+Start post-M17.7 frontend hardening track: add opt-in developer overlay/timeline for contract warnings and connect per-run warning deltas to artifact inspector summaries, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
