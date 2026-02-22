@@ -129,6 +129,19 @@
           </select>
           <div id="regressionHistoryStatus" class="text-[11px] text-slate-500">history idle</div>
           <div id="regressionDownloads" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 break-all">-</div>
+          <div class="rounded border border-slate-800 bg-slate-900/60 p-2 space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] uppercase tracking-wider text-slate-400">Regression Gate</span>
+              <span id="regressionGateBadge" class="text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">NO DATA</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1 text-[11px] text-slate-400">
+              <div>sessions: <span id="gateSessionCount" class="text-slate-200">0</span></div>
+              <div>exports: <span id="gateExportCount" class="text-slate-200">0</span></div>
+            </div>
+            <div id="gateLatestSessionLine" class="text-[11px] text-slate-400">latest session: -</div>
+            <div id="gateLatestExportLine" class="text-[11px] text-slate-400">linked export: -</div>
+            <div id="gateCueLine" class="text-[11px] text-slate-400">cue: refresh history</div>
+          </div>
           <div id="regressionStatus" class="text-[11px] text-slate-500">regression idle</div>
           <div id="compareStatus" class="text-[11px] text-slate-500">compare idle</div>
           <pre id="compareResultBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
@@ -424,6 +437,12 @@
       regressionExportSelect: document.getElementById("regressionExportSelect"),
       regressionHistoryStatus: document.getElementById("regressionHistoryStatus"),
       regressionDownloads: document.getElementById("regressionDownloads"),
+      regressionGateBadge: document.getElementById("regressionGateBadge"),
+      gateSessionCount: document.getElementById("gateSessionCount"),
+      gateExportCount: document.getElementById("gateExportCount"),
+      gateLatestSessionLine: document.getElementById("gateLatestSessionLine"),
+      gateLatestExportLine: document.getElementById("gateLatestExportLine"),
+      gateCueLine: document.getElementById("gateCueLine"),
       regressionStatus: document.getElementById("regressionStatus"),
       compareStatus: document.getElementById("compareStatus"),
       compareResultBox: document.getElementById("compareResultBox"),
@@ -560,6 +579,92 @@
       } else {
         el.regressionHistoryStatus.className = "text-[11px] text-slate-500";
       }
+    }
+
+    function setRegressionGateBadge(label, tone) {
+      el.regressionGateBadge.textContent = label || "NO DATA";
+      if (tone === "ok") {
+        el.regressionGateBadge.className = "text-[10px] px-2 py-0.5 rounded border border-emerald-500/40 text-emerald-200 bg-emerald-500/10";
+      } else if (tone === "warn") {
+        el.regressionGateBadge.className = "text-[10px] px-2 py-0.5 rounded border border-amber-500/40 text-amber-200 bg-amber-500/10";
+      } else if (tone === "error") {
+        el.regressionGateBadge.className = "text-[10px] px-2 py-0.5 rounded border border-rose-500/40 text-rose-200 bg-rose-500/10";
+      } else {
+        el.regressionGateBadge.className = "text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300";
+      }
+    }
+
+    function formatIsoShort(v) {
+      const raw = String(v || "").trim();
+      if (!raw) return "-";
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return raw;
+      return d.toLocaleString();
+    }
+
+    function updateRegressionGateOverview() {
+      const sessions = Array.isArray(state.regressionSessions) ? state.regressionSessions : [];
+      const exports = Array.isArray(state.regressionExports) ? state.regressionExports : [];
+      el.gateSessionCount.textContent = String(sessions.length);
+      el.gateExportCount.textContent = String(exports.length);
+
+      if (sessions.length === 0) {
+        setRegressionGateBadge("NO DATA", "neutral");
+        el.gateLatestSessionLine.textContent = "latest session: -";
+        el.gateLatestExportLine.textContent = "linked export: -";
+        el.gateCueLine.textContent = "cue: run regression session first";
+        return;
+      }
+
+      const latest = sessions[0] || {};
+      const latestId = String(latest.session_id || "-");
+      const held = Number(latest.held_count || 0);
+      const adopted = Number(latest.adopted_count || 0);
+      const evaluated = Number(latest.evaluated_candidate_count || 0);
+      const recommendation = String(latest.recommendation || "-");
+      const latestWhen = formatIsoShort(latest.created_at);
+      const allPass = Boolean(latest.all_pass);
+      const truncated = Boolean(latest.truncated);
+
+      el.gateLatestSessionLine.textContent =
+        `latest session: ${latestId} @ ${latestWhen} | adopted/held ${adopted}/${held}`;
+
+      const linkedExport = exports.find((x) => String((x && x.session_id) || "") === latestId) || null;
+      if (linkedExport) {
+        const exportId = String(linkedExport.export_id || "-");
+        const rowCount = Number(linkedExport.row_count || 0);
+        el.gateLatestExportLine.textContent = `linked export: ${exportId} | rows ${rowCount}/${evaluated}`;
+      } else {
+        el.gateLatestExportLine.textContent = "linked export: none (export recommended)";
+      }
+
+      let tone = "warn";
+      let label = "REVIEW";
+      let cue = `cue: ${recommendation}`;
+
+      if (evaluated <= 0) {
+        tone = "warn";
+        label = "EMPTY";
+        cue = "cue: candidate evaluation count is zero";
+      } else if (truncated) {
+        tone = "error";
+        label = "HOLD";
+        cue = "cue: stopped on first failure, inspect gate_failures";
+      } else if (held > 0) {
+        tone = "error";
+        label = "HOLD";
+        cue = "cue: hold candidates until parity/policy failures are fixed";
+      } else if (allPass) {
+        tone = "ok";
+        label = "ADOPT";
+        cue = "cue: all candidates passed current policy";
+      }
+
+      if (!linkedExport) {
+        cue = `${cue}; export this session for traceability`;
+      }
+      el.gateCueLine.textContent = cue;
+      setRegressionGateBadge(label, tone);
     }
 
     function renderComparison(comparison) {
@@ -1427,8 +1532,10 @@
           `history loaded: sessions=${sessions.length}, exports=${exports.length}`,
           "ok"
         );
+        updateRegressionGateOverview();
       } catch (err) {
         setRegressionHistoryStatus(`history load failed: ${String(err.message || err)}`, "error");
+        updateRegressionGateOverview();
       }
     }
 
@@ -1680,6 +1787,7 @@
       setRegressionStatus("regression idle", "neutral");
       setRegressionHistoryStatus("history idle", "neutral");
       renderRegressionDownloads(null);
+      updateRegressionGateOverview();
       renderComparison(null);
       setStatus("idle", "neutral", "viewer is waiting for summary json");
       await refreshSummary();

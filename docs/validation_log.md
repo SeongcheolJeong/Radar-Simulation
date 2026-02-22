@@ -1540,3 +1540,13 @@
   - dashboard HTML includes regression history controls (`refreshRegressionHistoryBtn`, `exportRegressionBtn`, `regressionSessionSelect`, `regressionExportSelect`)
   - dashboard JS includes history/export handlers (`refreshRegressionHistoryViaApi`, `exportRegressionSessionViaApi`)
   - API health includes `regression_export_count`
+
+## Web E2E Regression Gate Overview Panel (M15.7)
+
+- Date: 2026-02-22
+- Command: `scripts/run_web_e2e_dashboard_local.sh 8094 8114` + smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html?summary=docs/reports/frontend_quickstart_v1.json`)
+- Result: pass
+- Notes:
+  - dashboard HTML includes gate overview elements (`regressionGateBadge`, `gateCueLine`, `gateLatestSessionLine`)
+  - dashboard JS includes gate evaluator (`updateRegressionGateOverview`, `setRegressionGateBadge`)
+  - history refresh path updates gate overview from latest session/export lists

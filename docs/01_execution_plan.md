@@ -95,7 +95,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.4: Regression session API (`/api/regression-sessions`, baseline + candidate set + batched policy verdicts`)
 - [x] M15.5: Regression artifacts export API (`/api/regression-exports`, session CSV/JSON package + summary index)
 - [x] M15.6: Regression history dashboard wiring (session/export browse + download actions)
-- [ ] M15.7: Regression gate overview panel (latest verdict KPIs + quick adopt/hold cues)
+- [x] M15.7: Regression gate overview panel (latest verdict KPIs + quick adopt/hold cues)
+- [ ] M15.8: Regression policy tuning controls (dashboard thresholds/policy presets)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -108,7 +109,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.7 regression gate overview panel while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.8 regression policy tuning controls while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -538,3 +539,16 @@ M15.6 outcome (2026-02-22):
   - startup history refresh + selector state restore
 - local launcher default URL expanded with regression export query:
   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/run_web_e2e_dashboard_local.sh`
+
+M15.7 outcome (2026-02-22):
+
+- dashboard regression gate overview panel added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- overview computes latest gate KPIs from history APIs:
+  - session/export counts
+  - latest session adopted/held summary
+  - linked export coverage
+  - quick cue (`ADOPT` / `HOLD` / `REVIEW` / `EMPTY`)
+- auto-refresh wiring completed:
+  - panel updates on history refresh and startup bootstrap
+  - panel reflects new session/export results without page reload
