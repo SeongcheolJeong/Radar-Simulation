@@ -280,6 +280,11 @@
     .contract-overlay-row-kpi {
       color: #d3ebff;
     }
+    .contract-overlay-row-actions {
+      margin-top: 6px;
+      display: flex;
+      justify-content: flex-end;
+    }
     .contract-overlay-row.compact {
       padding: 6px 8px;
     }
@@ -327,6 +332,37 @@
     }
     .contract-sev-low {
       border-color: #3f7a63;
+    }
+    .contract-policy-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 88px;
+      height: 18px;
+      border-radius: 999px;
+      padding: 0 7px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      margin-right: 6px;
+      border: 1px solid transparent;
+      font-family: "JetBrains Mono", monospace;
+    }
+    .contract-policy-tag.hold {
+      color: #ffe0b6;
+      background: rgba(117, 71, 22, 0.42);
+      border-color: #c28132;
+    }
+    .contract-policy-tag.adopt {
+      color: #cbf6e2;
+      background: rgba(26, 90, 58, 0.42);
+      border-color: #3db07e;
+    }
+    .contract-open-run-btn {
+      padding: 4px 7px;
+      font-size: 10px;
+      line-height: 1;
+      min-height: 0;
     }
     @media (max-width: 1280px) {
       .content {

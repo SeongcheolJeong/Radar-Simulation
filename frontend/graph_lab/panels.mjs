@@ -45,6 +45,18 @@ function severityLabel(severity) {
   return "LOW";
 }
 
+function getPolicyCorrelationTag(row, policyByRun) {
+  const runId = String(row?.graph_run_id || "").trim();
+  if (!runId) return "";
+  const info = policyByRun.get(runId) || null;
+  if (!info) return "";
+  const failCount = Number(info.failure_count || 0);
+  if (info.gate_failed) {
+    return `policy:HOLD#${failCount}`;
+  }
+  return "policy:ADOPT";
+}
+
 function renderArtifactInspector(graphRunSummary) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
@@ -383,9 +395,11 @@ export function ContractWarningOverlay({
   onClose,
   onClear,
   onExport,
+  onOpenRun,
 }) {
   if (!visible) return null;
   const rows = Array.isArray(timeline) ? timeline : [];
+  const runOpenHandler = typeof onOpenRun === "function" ? onOpenRun : () => {};
   const [sourceFilter, setSourceFilter] = React.useState("all");
   const [pinnedRunId, setPinnedRunId] = React.useState("all");
   const [nonZeroOnly, setNonZeroOnly] = React.useState(false);
@@ -413,6 +427,30 @@ export function ContractWarningOverlay({
     const da = Number(row?.delta?.attempt_count_total || 0);
     return du !== 0 || da !== 0;
   }), [nonZeroOnly, pinnedRunId, rows, sourceFilter]);
+  const policyByRun = React.useMemo(() => {
+    const map = new Map();
+    rows.forEach((row) => {
+      const runId = String(row?.graph_run_id || "").trim();
+      if (!runId) return;
+      const note = row?.note && typeof row.note === "object" ? row.note : {};
+      if (typeof note.gate_failed !== "boolean") return;
+      const previous = map.get(runId) || null;
+      const candidate = {
+        gate_failed: Boolean(note.gate_failed),
+        failure_count: Number(note.failure_count || 0),
+      };
+      if (!previous) {
+        map.set(runId, candidate);
+        return;
+      }
+      const prevScore = Number(previous.failure_count || 0);
+      const nextScore = Number(candidate.failure_count || 0);
+      if (nextScore >= prevScore) {
+        map.set(runId, candidate);
+      }
+    });
+    return map;
+  }, [rows]);
   return h("aside", { className: "contract-overlay", key: "contract_overlay" }, [
     h("div", { className: "contract-overlay-hd", key: "co_hd" }, [
       h("div", { key: "co_t" }, `Contract Timeline (${rows.length})`),
@@ -459,8 +497,10 @@ export function ContractWarningOverlay({
       ? h("pre", { className: "result-box", key: "co_empty" }, "no contract events yet")
       : filteredRows.map((row, idx) =>
         (() => {
+          const runId = String(row?.graph_run_id || "").trim();
           const severity = classifyContractSeverity(row);
           const badgeText = severityLabel(severity);
+          const policyTag = getPolicyCorrelationTag(row, policyByRun);
           const className = compactMode
             ? `contract-overlay-row compact contract-sev-${severity}`
             : `contract-overlay-row contract-sev-${severity}`;
@@ -468,20 +508,48 @@ export function ContractWarningOverlay({
             return h("div", { className, key: `co_row_${idx}` }, [
               h("div", { className: "contract-overlay-row-compact", key: `co_row_compact_${idx}` }, [
                 h("span", { className: `contract-sev-badge ${severity}`, key: `co_row_badge_${idx}` }, badgeText),
+                policyTag
+                  ? h("span", { className: `contract-policy-tag ${String(policyTag).includes("HOLD") ? "hold" : "adopt"}`, key: `co_row_policy_compact_${idx}` }, policyTag)
+                  : null,
                 `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")} | `,
                 `d=${formatSigned(row?.delta?.unique_warning_count)}/${formatSigned(row?.delta?.attempt_count_total)}`,
+                runId
+                  ? h("button", {
+                      className: "btn contract-open-run-btn",
+                      key: `co_row_open_compact_${idx}`,
+                      onClick: () => {
+                        setPinnedRunId(runId);
+                        runOpenHandler(runId);
+                      },
+                    }, "Open Run")
+                  : null,
               ]),
             ]);
           }
           return h("div", { className, key: `co_row_${idx}` }, [
             h("div", { className: "contract-overlay-row-hd", key: `co_row_hd_${idx}` }, [
               h("span", { className: `contract-sev-badge ${severity}`, key: `co_row_badge_${idx}` }, badgeText),
+              policyTag
+                ? h("span", { className: `contract-policy-tag ${String(policyTag).includes("HOLD") ? "hold" : "adopt"}`, key: `co_row_policy_${idx}` }, policyTag)
+                : null,
               `${formatTimeOfDay(row?.timestamp_ms)} | ${String(row?.event_source || "-")} | run=${String(row?.graph_run_id || "-")}`,
             ]),
             h("div", { className: "contract-overlay-row-kpi", key: `co_row_kpi_${idx}` }, [
               `delta(unique/attempt): ${formatSigned(row?.delta?.unique_warning_count)}/${formatSigned(row?.delta?.attempt_count_total)} | `,
               `total(unique/attempt): ${Number(row?.snapshot?.unique_warning_count || 0)}/${Number(row?.snapshot?.attempt_count_total || 0)}`,
             ]),
+            runId
+              ? h("div", { className: "contract-overlay-row-actions", key: `co_row_actions_${idx}` }, [
+                  h("button", {
+                    key: `co_row_open_${idx}`,
+                    className: "btn contract-open-run-btn",
+                    onClick: () => {
+                      setPinnedRunId(runId);
+                      runOpenHandler(runId);
+                    },
+                  }, "Open Run"),
+                ])
+              : null,
           ]);
         })()
       )),

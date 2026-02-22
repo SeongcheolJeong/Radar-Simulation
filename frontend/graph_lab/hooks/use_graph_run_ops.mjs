@@ -502,10 +502,67 @@ export function useGraphRunOps(opts) {
     }
   }, [lastGraphRunId, pollGraphRunUntilTerminal, setStatus]);
 
+  const openGraphRunById = React.useCallback(async (graphRunIdInput) => {
+    const graphRunId = String(graphRunIdInput || "").trim();
+    if (!graphRunId) {
+      setStatus("graph run id is required", "status-warn");
+      return;
+    }
+    const beforeContractSnapshot = getContractWarningSnapshot();
+    setLastGraphRunId(graphRunId);
+    setPollStateText("-");
+    setStatus(`opening graph run: ${graphRunId}`, "status-warn");
+    try {
+      const recRes = await getGraphRunMaybe(apiBase, graphRunId);
+      if (!recRes.ok) {
+        throw new Error(`graph run lookup failed (${Number(recRes.status)})`);
+      }
+      const row = recRes.payload || {};
+      const status = String(row?.status || "").trim().toLowerCase();
+      if (status === "completed") {
+        await loadGraphRunSummaryById(
+          graphRunId,
+          row,
+          beforeContractSnapshot,
+          "graph_run_overlay_open"
+        );
+        return;
+      }
+      const contract = renderGraphRunRecord(
+        row,
+        graphRunId,
+        ["opened_from_overlay: true"],
+        beforeContractSnapshot
+      );
+      emitContractDiagnosticsEvent("graph_run_overlay_open_non_completed", graphRunId, contract, {
+        status,
+      });
+      setGraphRunSummary(null);
+      setGateResultText("-");
+      setLastPolicyEval(null);
+      const tone = status === "failed" ? "status-err" : "status-warn";
+      setStatus(`graph run ${status || "-"}: ${graphRunId}`, tone);
+    } catch (err) {
+      setStatus(`open graph run failed: ${String(err.message || err)}`, "status-err");
+    }
+  }, [
+    apiBase,
+    emitContractDiagnosticsEvent,
+    loadGraphRunSummaryById,
+    renderGraphRunRecord,
+    setGateResultText,
+    setGraphRunSummary,
+    setLastGraphRunId,
+    setLastPolicyEval,
+    setPollStateText,
+    setStatus,
+  ]);
+
   return {
     runGraphViaApi,
     cancelLastGraphRun,
     retryLastGraphRun,
     pollLastGraphRunOnce,
+    openGraphRunById,
   };
 }

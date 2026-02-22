@@ -33,7 +33,7 @@ export function useGateOps(opts) {
     return "low";
   }, []);
 
-  const formatTimelineRefLine = React.useCallback((idx, row) => {
+  const formatTimelineRefLine = React.useCallback((idx, row, policyByRun) => {
     const timestampMs = Number(row?.timestamp_ms || 0);
     const timestamp = Number.isFinite(timestampMs) && timestampMs > 0
       ? new Date(timestampMs).toISOString()
@@ -43,7 +43,14 @@ export function useGateOps(opts) {
     const severity = classifyTimelineSeverity(row);
     const du = Number(row?.delta?.unique_warning_count || 0);
     const da = Number(row?.delta?.attempt_count_total || 0);
-    return `- [${Number(idx) + 1}] t=${timestamp} | source=${source} | run=${runId} | sev=${severity} | delta=${du >= 0 ? "+" : ""}${du}/${da >= 0 ? "+" : ""}${da}`;
+    const policyInfo = policyByRun.get(String(runId || "")) || null;
+    let policyTag = "policy:-";
+    if (policyInfo) {
+      policyTag = policyInfo.gate_failed
+        ? `policy:HOLD#${Number(policyInfo.failure_count || 0)}`
+        : "policy:ADOPT";
+    }
+    return `- [${Number(idx) + 1}] t=${timestamp} | source=${source} | run=${runId} | sev=${severity} | delta=${du >= 0 ? "+" : ""}${du}/${da >= 0 ? "+" : ""}${da} | ${policyTag}`;
   }, [classifyTimelineSeverity]);
 
   const collectContractDiagnostics = React.useCallback((beforeSnapshot) => {
@@ -163,7 +170,12 @@ export function useGateOps(opts) {
         baseline: contract.baseline,
         snapshot: contract.snapshot,
         delta: contract.delta,
-        note: { gate_failed: Boolean(row.gate_failed), baseline_id: bId },
+        note: {
+          gate_failed: Boolean(row.gate_failed),
+          baseline_id: bId,
+          failure_count: Number(failures.length || 0),
+          failure_rules: failures.slice(0, 3).map((f) => String((f && f.rule) || "unknown_rule")),
+        },
       });
       setStatus(
         Boolean(row.gate_failed) ? "policy gate: HOLD" : "policy gate: ADOPT",
@@ -209,6 +221,21 @@ export function useGateOps(opts) {
       ? timelineRows.filter((row) => String(row?.graph_run_id || "") === activeGraphRunId)
       : timelineRows;
     const timelineTail = runScopedTimeline.slice(0, 8);
+    const policyByRun = new Map();
+    timelineRows.forEach((row) => {
+      const runId = String(row?.graph_run_id || "").trim();
+      if (!runId) return;
+      const note = row?.note && typeof row.note === "object" ? row.note : {};
+      if (typeof note.gate_failed !== "boolean") return;
+      const prev = policyByRun.get(runId) || null;
+      const next = {
+        gate_failed: Boolean(note.gate_failed),
+        failure_count: Number(note.failure_count || 0),
+      };
+      if (!prev || Number(next.failure_count || 0) >= Number(prev.failure_count || 0)) {
+        policyByRun.set(runId, next);
+      }
+    });
     const nowIso = new Date().toISOString();
     const reportLines = [
       "# Graph Run Gate Report",
@@ -257,7 +284,7 @@ export function useGateOps(opts) {
       reportLines.push("- none");
     } else {
       timelineTail.forEach((row, idx) => {
-        reportLines.push(formatTimelineRefLine(idx, row));
+        reportLines.push(formatTimelineRefLine(idx, row, policyByRun));
       });
     }
     const text = reportLines.join("\n");

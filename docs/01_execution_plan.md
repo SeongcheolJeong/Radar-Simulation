@@ -119,6 +119,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.8: Contract overlay timeline (opt-in overlay + run/gate delta event wiring)
 - [x] M17.9: Contract timeline filter/export + gate report diagnostics slice
 - [x] M17.10: Contract compact timeline + run pin + gate tail refs
+- [x] M17.11: Timeline row -> graph run jump action
+- [x] M17.12: Policy failure correlation tags on timeline rows
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -131,7 +133,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.10 frontend hardening track: add overlay row-to-run jump actions and policy-failure correlation tags in timeline rows, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.12 frontend hardening track: add timeline-to-gate evidence deep-linking and per-rule failure badges in timeline rows, while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) and continuing M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -908,3 +910,27 @@ M17.10 outcome (2026-02-22):
 - gate hook contract options extended:
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/contracts.mjs`
   - `contractTimeline` option read path + app forwarding from `contractTimeline` state
+
+M17.11 outcome (2026-02-22):
+
+- timeline row -> graph-run jump action added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_graph_run_ops.mjs`
+  - new action: `openGraphRunById`
+  - overlay-open event sources: `graph_run_overlay_open`, `graph_run_overlay_open_non_completed`
+- overlay run-open wiring completed:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/app.mjs`
+  - row action: `Open Run` (also pins run filter to selected run id)
+
+M17.12 outcome (2026-02-22):
+
+- policy failure correlation tags auto-attached on timeline rows:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - tag format: `policy:HOLD#<count>` or `policy:ADOPT`
+  - style classes: `contract-policy-tag.hold|adopt`
+- policy correlation metadata enriched at source:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+  - event note fields: `failure_count`, `failure_rules`
+- gate report timeline tail now includes policy correlation token:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/hooks/use_gate_ops.mjs`
+  - tail line field: `policy:...`

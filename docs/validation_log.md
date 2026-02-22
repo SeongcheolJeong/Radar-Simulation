@@ -1975,3 +1975,35 @@
   - gate options + app wiring tokens confirmed:
     - `contractTimeline: readArray(...)`
     - `contractTimeline` pass-through from app
+
+## Web E2E Graph Timeline Jump + Policy Correlation (M17.11/M17.12)
+
+- Date: 2026-02-22
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - timeline jump/correlation frontend integration 이후에도 graph run/cancel/retry/baseline/policy API regression suite pass
+  - async cancel assertion showed one intermittent timing failure on re-run; immediate rerun passed (known flaky cancel timing path)
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-22
+- Command: `scripts/run_graph_lab_local.sh 8122 8142` + smoke (`curl /health`, `curl /frontend/graph_lab*.mjs` token grep)
+- Result: pass
+- Notes:
+  - run-jump tokens confirmed:
+    - `openGraphRunById`
+    - `opening graph run`
+    - `graph_run_overlay_open`
+    - `opened_from_overlay`
+    - `onOpenRun`
+  - timeline policy tag tokens confirmed:
+    - `Open Run`
+    - `getPolicyCorrelationTag`
+    - `policy:HOLD#`
+    - `policy:ADOPT`
+    - `contract-policy-tag`
+  - gate report correlation tokens confirmed:
+    - `failure_rules`
+    - `failure_count`
+    - `| policy=`
+    - `## Contract Timeline Tail`

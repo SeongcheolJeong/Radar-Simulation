@@ -279,6 +279,7 @@ export function App() {
     cancelLastGraphRun,
     retryLastGraphRun,
     pollLastGraphRunOnce,
+    openGraphRunById,
   } = useGraphRunOps({
     apiBase,
     profile,
@@ -476,6 +477,7 @@ export function App() {
       onClose: () => setContractOverlayEnabled(false),
       onClear: clearContractTimeline,
       onExport: exportContractTimeline,
+      onOpenRun: openGraphRunById,
     }),
   ]);
 }
