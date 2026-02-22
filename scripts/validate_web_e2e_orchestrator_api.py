@@ -94,6 +94,10 @@ def run() -> None:
             status, health = _http_json("GET", f"{base}/health")
             assert status == 200
             assert health["ok"] is True
+            assert "run_count" in health
+            assert "comparison_count" in health
+            assert "baseline_count" in health
+            assert "policy_eval_count" in health
 
             status, prof = _http_json("GET", f"{base}/api/profiles")
             assert status == 200
@@ -197,6 +201,66 @@ def run() -> None:
             )
             assert status == 200
             assert str(cmp_row["comparison_id"]) == cmp_id
+
+            # Baseline pinning + policy verdict.
+            baseline_payload = {
+                "baseline_id": "validate_baseline",
+                "run_id": run_id,
+                "note": "baseline for policy validation",
+                "tags": ["validate", "web_e2e"],
+            }
+            status, baseline_created = _http_json(
+                "POST", f"{base}/api/baselines", payload=baseline_payload
+            )
+            assert status == 200
+            assert baseline_created["ok"] is True
+            baseline = baseline_created["baseline"]
+            assert baseline["version"] == "web_e2e_baseline_v1"
+            assert baseline["baseline_id"] == "validate_baseline"
+            assert baseline["target"]["run_id"] == run_id
+
+            status, baseline_list = _http_json("GET", f"{base}/api/baselines")
+            assert status == 200
+            assert any(
+                str(x.get("baseline_id")) == "validate_baseline"
+                for x in baseline_list["baselines"]
+            )
+
+            status, baseline_row = _http_json(
+                "GET", f"{base}/api/baselines/{urllib.parse.quote('validate_baseline')}"
+            )
+            assert status == 200
+            assert baseline_row["baseline_id"] == "validate_baseline"
+
+            policy_payload = {
+                "baseline_id": "validate_baseline",
+                "candidate_run_id": run_id_2,
+            }
+            status, policy_resp = _http_json(
+                "POST", f"{base}/api/compare/policy", payload=policy_payload
+            )
+            assert status == 200
+            assert policy_resp["ok"] is True
+            policy_eval = policy_resp["policy_eval"]
+            assert policy_eval["version"] == "web_e2e_compare_policy_v1"
+            assert policy_eval["baseline"]["baseline_id"] == "validate_baseline"
+            assert policy_eval["candidate"]["run_id"] == run_id_2
+            assert policy_eval["gate_failed"] is False
+            assert policy_eval["recommendation"] == "adopt_candidate"
+            policy_eval_id = str(policy_eval["policy_eval_id"])
+
+            status, policy_list = _http_json("GET", f"{base}/api/policy-evals")
+            assert status == 200
+            assert any(
+                str(x.get("policy_eval_id")) == policy_eval_id
+                for x in policy_list["policy_evals"]
+            )
+
+            status, policy_row = _http_json(
+                "GET", f"{base}/api/policy-evals/{urllib.parse.quote(policy_eval_id)}"
+            )
+            assert status == 200
+            assert str(policy_row["policy_eval_id"]) == policy_eval_id
 
         finally:
             server.shutdown()

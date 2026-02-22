@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import json
+import re
 import threading
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -31,6 +32,15 @@ PROFILE_PRESETS: Dict[str, Dict[str, Any]] = {
         "backend_hint": "sionna_rt_full_or_po_sbr_rt",
         "notes": "high resolution and strict policy",
     },
+}
+
+DEFAULT_COMPARE_POLICY: Dict[str, Any] = {
+    "require_parity_pass": True,
+    "max_failure_count": 0,
+    "max_rd_shape_nmse": 0.25,
+    "max_ra_shape_nmse": 0.25,
+    "max_rd_peak_range_bin_abs_error": 1.0,
+    "max_ra_peak_range_bin_abs_error": 1.0,
 }
 
 C0 = 299_792_458.0
@@ -258,8 +268,12 @@ class WebE2EOrchestrator:
         self.store_root = Path(store_root).expanduser().resolve()
         self.runs_root = self.store_root / "runs"
         self.comparisons_root = self.store_root / "comparisons"
+        self.baselines_root = self.store_root / "baselines"
+        self.policy_evals_root = self.store_root / "policy_evals"
         self.runs_root.mkdir(parents=True, exist_ok=True)
         self.comparisons_root.mkdir(parents=True, exist_ok=True)
+        self.baselines_root.mkdir(parents=True, exist_ok=True)
+        self.policy_evals_root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
 
     def get_profiles(self) -> Dict[str, Dict[str, Any]]:
@@ -293,6 +307,40 @@ class WebE2EOrchestrator:
         p = self.comparisons_root / f"{comparison_id}.json"
         if not p.exists() or not p.is_file():
             raise FileNotFoundError(f"comparison not found: {p}")
+        return json.loads(p.read_text(encoding="utf-8"))
+
+    def list_baselines(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for p in sorted(self.baselines_root.glob("*.json")):
+            try:
+                rows.append(json.loads(p.read_text(encoding="utf-8")))
+            except Exception:
+                continue
+        rows.sort(key=lambda x: str(x.get("updated_at", x.get("created_at", ""))), reverse=True)
+        return rows
+
+    def get_baseline(self, baseline_id: str) -> dict[str, Any]:
+        safe_id = self._normalize_identifier_token(baseline_id, field_name="baseline_id")
+        p = self.baselines_root / f"{safe_id}.json"
+        if not p.exists() or not p.is_file():
+            raise FileNotFoundError(f"baseline not found: {p}")
+        return json.loads(p.read_text(encoding="utf-8"))
+
+    def list_policy_evals(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for p in sorted(self.policy_evals_root.glob("*.json")):
+            try:
+                rows.append(json.loads(p.read_text(encoding="utf-8")))
+            except Exception:
+                continue
+        rows.sort(key=lambda x: str(x.get("created_at", "")), reverse=True)
+        return rows
+
+    def get_policy_eval(self, policy_eval_id: str) -> dict[str, Any]:
+        safe_id = self._normalize_identifier_token(policy_eval_id, field_name="policy_eval_id")
+        p = self.policy_evals_root / f"{safe_id}.json"
+        if not p.exists() or not p.is_file():
+            raise FileNotFoundError(f"policy eval not found: {p}")
         return json.loads(p.read_text(encoding="utf-8"))
 
     def submit_run(self, request_payload: Mapping[str, Any], run_async: bool = True) -> dict[str, Any]:
@@ -380,6 +428,124 @@ class WebE2EOrchestrator:
         out_path.write_text(json.dumps(out, indent=2, default=_json_default), encoding="utf-8")
         return out
 
+    def create_baseline(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(request_payload, Mapping):
+            raise ValueError("request payload must be object")
+
+        baseline_id_raw = str(request_payload.get("baseline_id", "")).strip()
+        if baseline_id_raw == "":
+            raise ValueError("baseline_id is required")
+        baseline_id = self._normalize_identifier_token(baseline_id_raw, field_name="baseline_id")
+
+        overwrite = bool(request_payload.get("overwrite", False))
+        note = str(request_payload.get("note", "")).strip() or None
+        tags_raw = request_payload.get("tags")
+        tags: Optional[list[str]] = None
+        if isinstance(tags_raw, list):
+            tags = [str(x).strip() for x in tags_raw if str(x).strip() != ""]
+
+        summary, info = self._resolve_target_with_optional_prefix(
+            request_payload=request_payload,
+            run_id_key="run_id",
+            summary_key="summary_json",
+        )
+        radar_map_npz = self._extract_radar_map_npz_path(summary)
+
+        payload = {
+            "version": "web_e2e_baseline_v1",
+            "baseline_id": baseline_id,
+            "created_at": _now_iso(),
+            "updated_at": _now_iso(),
+            "target": {
+                "run_id": info.get("run_id"),
+                "run_summary_json": info.get("run_summary_json"),
+                "radar_map_npz": str(radar_map_npz),
+            },
+            "note": note,
+            "tags": tags if tags is not None else [],
+        }
+
+        out_path = self.baselines_root / f"{baseline_id}.json"
+        if out_path.exists() and not overwrite:
+            raise ValueError(f"baseline already exists: {baseline_id} (set overwrite=true to replace)")
+        if out_path.exists() and out_path.is_file():
+            try:
+                old = json.loads(out_path.read_text(encoding="utf-8"))
+                payload["created_at"] = str(old.get("created_at", payload["created_at"]))
+            except Exception:
+                pass
+        out_path.write_text(json.dumps(payload, indent=2, default=_json_default), encoding="utf-8")
+        return payload
+
+    def evaluate_compare_policy(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(request_payload, Mapping):
+            raise ValueError("request payload must be object")
+
+        baseline_id = str(request_payload.get("baseline_id", "")).strip()
+        if baseline_id != "":
+            baseline = self.get_baseline(baseline_id)
+            b_target = baseline.get("target")
+            if not isinstance(b_target, Mapping):
+                raise ValueError("baseline target is invalid")
+            ref_summary, ref_info = self._resolve_target_with_optional_prefix(
+                request_payload={
+                    "run_id": b_target.get("run_id", ""),
+                    "summary_json": b_target.get("run_summary_json", ""),
+                },
+                run_id_key="run_id",
+                summary_key="summary_json",
+            )
+            baseline_meta = {
+                "baseline_id": str(baseline.get("baseline_id", baseline_id)),
+                "note": baseline.get("note"),
+                "tags": baseline.get("tags", []),
+            }
+        else:
+            ref_summary, ref_info = self._resolve_compare_target(request_payload, prefix="reference")
+            baseline_meta = {"baseline_id": None}
+
+        cand_summary, cand_info = self._resolve_compare_target(request_payload, prefix="candidate")
+        thresholds = self._normalize_thresholds(request_payload.get("thresholds"))
+        policy = self._normalize_compare_policy(request_payload.get("policy"))
+
+        ref_map_npz = self._extract_radar_map_npz_path(ref_summary)
+        cand_map_npz = self._extract_radar_map_npz_path(cand_summary)
+        ref_payload = self._load_radar_map_payload(ref_map_npz)
+        cand_payload = self._load_radar_map_payload(cand_map_npz)
+        parity = compare_hybrid_estimation_payloads(
+            reference=ref_payload,
+            candidate=cand_payload,
+            thresholds=thresholds,
+        )
+
+        gate_failures = self._evaluate_policy_failures(parity=parity, policy=policy)
+        gate_failed = bool(len(gate_failures) > 0)
+
+        eval_id = self._new_policy_eval_id()
+        payload = {
+            "version": "web_e2e_compare_policy_v1",
+            "policy_eval_id": eval_id,
+            "created_at": _now_iso(),
+            "baseline": {
+                **baseline_meta,
+                **ref_info,
+                "radar_map_npz": str(ref_map_npz),
+            },
+            "candidate": {
+                **cand_info,
+                "radar_map_npz": str(cand_map_npz),
+            },
+            "policy": policy,
+            "parity": parity,
+            "gate_failed": gate_failed,
+            "gate_failures": gate_failures,
+            "recommendation": "hold_candidate" if gate_failed else "adopt_candidate",
+        }
+
+        out_path = self.policy_evals_root / f"{eval_id}.json"
+        out_path.write_text(json.dumps(payload, indent=2, default=_json_default), encoding="utf-8")
+        return payload
+
     def _new_run_id(self) -> str:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
@@ -389,6 +555,21 @@ class WebE2EOrchestrator:
         stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
         token = uuid.uuid4().hex[:8]
         return f"cmp_{stamp}_{token}"
+
+    def _new_policy_eval_id(self) -> str:
+        stamp = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
+        token = uuid.uuid4().hex[:8]
+        return f"cpol_{stamp}_{token}"
+
+    def _normalize_identifier_token(self, token: str, field_name: str) -> str:
+        v = str(token).strip()
+        if v == "":
+            raise ValueError(f"{field_name} is required")
+        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,128}", v):
+            raise ValueError(
+                f"{field_name} must match [A-Za-z0-9_.-] and be 1..128 chars"
+            )
+        return v
 
     def _normalize_request(self, request_payload: Mapping[str, Any]) -> dict[str, Any]:
         if not isinstance(request_payload, Mapping):
@@ -447,13 +628,37 @@ class WebE2EOrchestrator:
             out[str(key)] = float(value)
         return out
 
-    def _resolve_compare_target(
+    def _normalize_compare_policy(self, raw: Any) -> dict[str, Any]:
+        out = dict(DEFAULT_COMPARE_POLICY)
+        if raw is None:
+            return out
+        if not isinstance(raw, Mapping):
+            raise ValueError("policy must be object")
+        for key, value in raw.items():
+            k = str(key)
+            if k == "require_parity_pass":
+                out[k] = bool(value)
+            elif k == "max_failure_count":
+                iv = int(value)
+                if iv < 0:
+                    raise ValueError("policy.max_failure_count must be >= 0")
+                out[k] = iv
+            else:
+                if value is None:
+                    out[k] = None
+                else:
+                    fv = float(value)
+                    if fv < 0.0:
+                        raise ValueError(f"policy.{k} must be >= 0")
+                    out[k] = fv
+        return out
+
+    def _resolve_target_with_optional_prefix(
         self,
         request_payload: Mapping[str, Any],
-        prefix: str,
+        run_id_key: str,
+        summary_key: str,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        run_id_key = f"{prefix}_run_id"
-        summary_key = f"{prefix}_summary_json"
         run_id = str(request_payload.get(run_id_key, "")).strip()
         summary_json = str(request_payload.get(summary_key, "")).strip()
 
@@ -478,6 +683,79 @@ class WebE2EOrchestrator:
             return dict(summary), info
 
         raise ValueError(f"{run_id_key} or {summary_key} is required")
+
+    def _resolve_compare_target(
+        self,
+        request_payload: Mapping[str, Any],
+        prefix: str,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        run_id_key = f"{prefix}_run_id"
+        summary_key = f"{prefix}_summary_json"
+        return self._resolve_target_with_optional_prefix(
+            request_payload=request_payload,
+            run_id_key=run_id_key,
+            summary_key=summary_key,
+        )
+
+    def _evaluate_policy_failures(
+        self,
+        parity: Mapping[str, Any],
+        policy: Mapping[str, Any],
+    ) -> list[dict[str, Any]]:
+        failures: list[dict[str, Any]] = []
+        metrics = parity.get("metrics", {})
+        if not isinstance(metrics, Mapping):
+            metrics = {}
+
+        if bool(policy.get("require_parity_pass", True)) and (not bool(parity.get("pass", False))):
+            failures.append(
+                {
+                    "rule": "require_parity_pass",
+                    "value": bool(parity.get("pass", False)),
+                    "limit": True,
+                }
+            )
+
+        max_failure_count = int(policy.get("max_failure_count", 0))
+        failure_count = int(len(parity.get("failures", [])))
+        if failure_count > max_failure_count:
+            failures.append(
+                {
+                    "rule": "max_failure_count",
+                    "value": failure_count,
+                    "limit": max_failure_count,
+                }
+            )
+
+        metric_rules = {
+            "max_rd_shape_nmse": "rd_shape_nmse",
+            "max_ra_shape_nmse": "ra_shape_nmse",
+            "max_rd_peak_range_bin_abs_error": "rd_peak_range_bin_abs_error",
+            "max_ra_peak_range_bin_abs_error": "ra_peak_range_bin_abs_error",
+            "max_rd_peak_doppler_bin_abs_error": "rd_peak_doppler_bin_abs_error",
+            "max_ra_peak_angle_bin_abs_error": "ra_peak_angle_bin_abs_error",
+        }
+        for policy_key, metric_key in metric_rules.items():
+            if policy_key not in policy:
+                continue
+            lim = policy.get(policy_key)
+            if lim is None:
+                continue
+            if metric_key not in metrics:
+                continue
+            val = float(metrics[metric_key])
+            limit = float(lim)
+            if val > limit:
+                failures.append(
+                    {
+                        "rule": policy_key,
+                        "metric": metric_key,
+                        "value": val,
+                        "limit": limit,
+                    }
+                )
+
+        return failures
 
     def _extract_radar_map_npz_path(self, summary_payload: Mapping[str, Any]) -> Path:
         outputs = summary_payload.get("outputs")
@@ -745,6 +1023,9 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                             "repo_root": str(orchestrator.repo_root),
                             "store_root": str(orchestrator.store_root),
                             "run_count": len(orchestrator.list_runs()),
+                            "comparison_count": len(orchestrator.list_comparisons()),
+                            "baseline_count": len(orchestrator.list_baselines()),
+                            "policy_eval_count": len(orchestrator.list_policy_evals()),
                         },
                     )
                     return
@@ -759,6 +1040,14 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
 
                 if path == "/api/comparisons":
                     self._send_json(200, {"comparisons": orchestrator.list_comparisons()})
+                    return
+
+                if path == "/api/baselines":
+                    self._send_json(200, {"baselines": orchestrator.list_baselines()})
+                    return
+
+                if path == "/api/policy-evals":
+                    self._send_json(200, {"policy_evals": orchestrator.list_policy_evals()})
                     return
 
                 if path.startswith("/api/runs/"):
@@ -780,6 +1069,18 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                     self._send_json(200, payload)
                     return
 
+                if path.startswith("/api/baselines/"):
+                    baseline_id = path[len("/api/baselines/") :]
+                    payload = orchestrator.get_baseline(baseline_id)
+                    self._send_json(200, payload)
+                    return
+
+                if path.startswith("/api/policy-evals/"):
+                    eval_id = path[len("/api/policy-evals/") :]
+                    payload = orchestrator.get_policy_eval(eval_id)
+                    self._send_json(200, payload)
+                    return
+
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
             except FileNotFoundError as exc:
                 self._send_json(404, {"ok": False, "error": str(exc)})
@@ -793,7 +1094,7 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
             path = parsed.path
             query = parse_qs(parsed.query)
 
-            if path not in {"/api/runs", "/api/compare"}:
+            if path not in {"/api/runs", "/api/compare", "/api/baselines", "/api/compare/policy"}:
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})
                 return
 
@@ -819,6 +1120,16 @@ def build_web_e2e_request_handler(orchestrator: WebE2EOrchestrator) -> type[Base
                 if path == "/api/compare":
                     payload = orchestrator.compare_runs(body)
                     self._send_json(200, {"ok": True, "comparison": payload})
+                    return
+
+                if path == "/api/baselines":
+                    payload = orchestrator.create_baseline(body)
+                    self._send_json(200, {"ok": True, "baseline": payload})
+                    return
+
+                if path == "/api/compare/policy":
+                    payload = orchestrator.evaluate_compare_policy(body)
+                    self._send_json(200, {"ok": True, "policy_eval": payload})
                     return
 
                 self._send_json(404, {"ok": False, "error": f"not found: {path}"})

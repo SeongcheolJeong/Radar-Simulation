@@ -91,7 +91,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M15.1: Web run summary schema v2 (frontend-compatible `outputs/path_summary/adc_summary/radar_map_summary`)
 - [x] M15.2: Dashboard API-run mode (`POST /api/runs` + polling + summary auto-load) and dual-server local launcher
 - [x] M15.3a: Compare API v1 (`POST /api/compare`, `/api/comparisons`) + dashboard compare panel
-- [ ] M15.3b: Baseline pinning and regression policy verdict payload (`/api/compare/policy`)
+- [x] M15.3b: Baseline pinning and regression policy verdict payload (`/api/baselines`, `/api/compare/policy`)
+- [ ] M15.4: Regression session API (`baseline pin + candidate set + batched policy verdicts`)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -104,7 +105,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Implement M15.3b baseline pinning + policy verdict flow while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
+Implement M15.4 regression session API while keeping M14.6 Linux strict pilot as a parallel closure track for high-fidelity physics readiness.
 
 ## M10.19 Decision Gate
 
@@ -470,3 +471,20 @@ M15.3a outcome (2026-02-22):
 - dashboard compare panel added:
   - reference/candidate `run_id` inputs
   - API compare trigger and parity quick-result display (`pass`, failures, `rd/ra_shape_nmse`)
+
+M15.3b outcome (2026-02-22):
+
+- baseline pinning API added:
+  - `POST /api/baselines`
+  - `GET /api/baselines`
+  - `GET /api/baselines/{baseline_id}`
+- policy verdict API added:
+  - `POST /api/compare/policy`
+  - `GET /api/policy-evals`
+  - `GET /api/policy-evals/{policy_eval_id}`
+- orchestration store expanded:
+  - `/Users/seongcheoljeong/Documents/Codex_test/data/web_e2e/baselines/*.json`
+  - `/Users/seongcheoljeong/Documents/Codex_test/data/web_e2e/policy_evals/*.json`
+- dashboard compare section expanded:
+  - baseline ID input + baseline pin action
+  - policy verdict action and gate-failure details view

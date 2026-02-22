@@ -44,6 +44,12 @@ def main() -> None:
     print("    GET  /api/comparisons")
     print("    GET  /api/comparisons/{comparison_id}")
     print("    POST /api/compare")
+    print("    GET  /api/baselines")
+    print("    GET  /api/baselines/{baseline_id}")
+    print("    POST /api/baselines")
+    print("    GET  /api/policy-evals")
+    print("    GET  /api/policy-evals/{policy_eval_id}")
+    print("    POST /api/compare/policy")
 
     serve_web_e2e_http_api(host=args.host, port=args.port, orchestrator=orchestrator)
 

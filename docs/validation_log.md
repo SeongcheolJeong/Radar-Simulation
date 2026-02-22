@@ -1491,6 +1491,7 @@
   - backward-compatible `quicklook` retained and validated
   - output artifact file existence checks validated
   - compare API validated (`POST /api/compare`, `GET /api/comparisons`, `GET /api/comparisons/{id}`)
+  - baseline pin/policy endpoints validated (`POST/GET /api/baselines`, `POST /api/compare/policy`, `GET /api/policy-evals`)
 
 - Date: 2026-02-22
 - Command: `scripts/run_web_e2e_dashboard_local.sh 8086 8106` + health/dashboard smoke (`curl /health`, `curl /frontend/avx_like_dashboard.html`)
@@ -1499,3 +1500,4 @@
   - combined launcher starts orchestrator API + static dashboard in one command
   - dashboard HTML served and API health endpoint returns `ok=true`
   - dashboard contains API run/compare controls (`runSceneViaApi`, `compareRunsViaApi`)
+  - dashboard contains baseline/policy controls (`pinBaselineViaApi`, `evaluatePolicyViaApi`)

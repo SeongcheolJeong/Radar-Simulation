@@ -21,6 +21,12 @@ Implementation:
 - `GET /api/comparisons`
 - `GET /api/comparisons/{comparison_id}`
 - `POST /api/compare`
+- `GET /api/baselines`
+- `GET /api/baselines/{baseline_id}`
+- `POST /api/baselines`
+- `GET /api/policy-evals`
+- `GET /api/policy-evals/{policy_eval_id}`
+- `POST /api/compare/policy`
 
 ## POST /api/runs Request
 
@@ -64,6 +70,57 @@ Implementation:
 - `comparison.parity` (shared `avxsim.parity` metrics/failures)
 - `comparison.verdict.pass` and `comparison.verdict.failure_count`
 
+## POST /api/baselines Request
+
+```json
+{
+  "baseline_id": "main_baseline",
+  "run_id": "run_20260222_123000_abcd1234",
+  "overwrite": true,
+  "note": "baseline pinned from dashboard"
+}
+```
+
+Rules:
+
+- `baseline_id` required (`[A-Za-z0-9_.-]{1,128}`)
+- source must provide one of: `run_id` or `summary_json`
+
+## POST /api/compare/policy Request
+
+```json
+{
+  "baseline_id": "main_baseline",
+  "candidate_run_id": "run_20260222_123045_efgh5678",
+  "policy": {
+    "require_parity_pass": true,
+    "max_failure_count": 0,
+    "max_rd_shape_nmse": 0.25,
+    "max_ra_shape_nmse": 0.25
+  }
+}
+```
+
+Rules:
+
+- baseline source is either:
+  - `baseline_id` (preferred), or
+  - `reference_run_id` / `reference_summary_json`
+- candidate source is one of:
+  - `candidate_run_id`
+  - `candidate_summary_json`
+- if `policy` omitted, server default policy is used
+
+Response:
+
+- `policy_eval.version` = `web_e2e_compare_policy_v1`
+- `policy_eval.policy_eval_id`
+- `policy_eval.baseline` / `policy_eval.candidate`
+- `policy_eval.parity`
+- `policy_eval.gate_failed`
+- `policy_eval.gate_failures`
+- `policy_eval.recommendation` (`adopt_candidate` or `hold_candidate`)
+
 `POST /api/runs` rules:
 
 - `scene_json_path` required
@@ -76,6 +133,8 @@ Implementation:
 - `<store_root>/runs/<run_id>/run_summary.json`
 - `<store_root>/runs/<run_id>/output/` (pipeline artifacts)
 - `<store_root>/comparisons/<comparison_id>.json`
+- `<store_root>/baselines/<baseline_id>.json`
+- `<store_root>/policy_evals/<policy_eval_id>.json`
 
 ## Run Summary (v2)
 
@@ -128,6 +187,25 @@ curl -s -X POST "http://127.0.0.1:8099/api/runs?async=0" \
   }' | jq .
 ```
 
+```bash
+curl -s -X POST "http://127.0.0.1:8099/api/baselines" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "baseline_id":"main_baseline",
+    "run_id":"run_20260222_123000_abcd1234",
+    "overwrite":true
+  }' | jq .
+```
+
+```bash
+curl -s -X POST "http://127.0.0.1:8099/api/compare/policy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "baseline_id":"main_baseline",
+    "candidate_run_id":"run_20260222_123045_efgh5678"
+  }' | jq .
+```
+
 ## Validation
 
 ```bash
@@ -142,6 +220,8 @@ Pass criteria:
 4. Run summary endpoint returns frontend-compatible v2 summary fields and expected shapes
 5. Run list contains created `run_id`
 6. Compare endpoint returns parity verdict and persisted comparison entry
+7. Baseline pin endpoint stores/retrieves pinned baseline
+8. Compare policy endpoint returns persisted policy verdict payload
 
 Notes:
 

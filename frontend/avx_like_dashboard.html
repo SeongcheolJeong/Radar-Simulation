@@ -79,13 +79,25 @@
 
         <div class="mt-4 space-y-2 border border-slate-800 rounded-lg p-3 bg-slate-950/40">
           <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Compare Runs (API)</div>
+          <label class="text-xs text-slate-400 block">Baseline ID</label>
+          <input id="baselineIdInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
           <label class="text-xs text-slate-400 block">Reference run_id</label>
           <input id="compareRefRunInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
           <label class="text-xs text-slate-400 block">Candidate run_id</label>
           <input id="compareCandRunInput" type="text" class="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1.5 focus:border-cyan-500 focus:outline-none" />
-          <button id="compareApiBtn" class="w-full py-2 rounded bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
-            <i data-lucide="git-compare-arrows" class="w-4 h-4"></i>
-            Compare via API
+          <div class="grid grid-cols-2 gap-2">
+            <button id="pinBaselineBtn" class="w-full py-2 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+              Pin Baseline
+            </button>
+            <button id="compareApiBtn" class="w-full py-2 rounded bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+              <i data-lucide="git-compare-arrows" class="w-4 h-4"></i>
+              Compare
+            </button>
+          </div>
+          <button id="policyCompareBtn" class="w-full py-2 rounded bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            Policy Verdict
           </button>
           <div id="compareStatus" class="text-[11px] text-slate-500">compare idle</div>
           <pre id="compareResultBox" class="text-[11px] text-slate-400 bg-slate-900 border border-slate-800 rounded p-2 whitespace-pre-wrap">-</pre>
@@ -350,6 +362,7 @@
       },
       activeRunId: null,
       lastComparison: null,
+      lastPolicyEval: null,
     };
 
     const el = {
@@ -360,9 +373,12 @@
       runAsyncCheck: document.getElementById("runAsyncCheck"),
       runApiBtn: document.getElementById("runApiBtn"),
       apiRunStatus: document.getElementById("apiRunStatus"),
+      baselineIdInput: document.getElementById("baselineIdInput"),
       compareRefRunInput: document.getElementById("compareRefRunInput"),
       compareCandRunInput: document.getElementById("compareCandRunInput"),
+      pinBaselineBtn: document.getElementById("pinBaselineBtn"),
       compareApiBtn: document.getElementById("compareApiBtn"),
+      policyCompareBtn: document.getElementById("policyCompareBtn"),
       compareStatus: document.getElementById("compareStatus"),
       compareResultBox: document.getElementById("compareResultBox"),
       refreshBtn: document.getElementById("refreshBtn"),
@@ -493,6 +509,33 @@
         lines.push("failure metrics:");
         failures.slice(0, 4).forEach((f) => {
           lines.push(`- ${f.metric}: ${Number(f.value).toFixed(4)} > ${Number(f.limit).toFixed(4)}`);
+        });
+      }
+      el.compareResultBox.textContent = lines.join("\n");
+    }
+
+    function renderPolicyEval(policyEval) {
+      if (!policyEval) {
+        el.compareResultBox.textContent = "-";
+        return;
+      }
+      const failures = Array.isArray(policyEval.gate_failures) ? policyEval.gate_failures : [];
+      const parity = policyEval.parity || {};
+      const metrics = parity.metrics || {};
+      const lines = [
+        `policy_eval_id: ${policyEval.policy_eval_id || "-"}`,
+        `baseline_id: ${policyEval?.baseline?.baseline_id || "-"}`,
+        `candidate_run_id: ${policyEval?.candidate?.run_id || "-"}`,
+        `gate_failed: ${Boolean(policyEval.gate_failed)}`,
+        `recommendation: ${policyEval.recommendation || "-"}`,
+        `rd_shape_nmse: ${Number(metrics.rd_shape_nmse || 0).toExponential(3)}`,
+        `ra_shape_nmse: ${Number(metrics.ra_shape_nmse || 0).toExponential(3)}`,
+      ];
+      if (failures.length > 0) {
+        lines.push("gate_failures:");
+        failures.slice(0, 6).forEach((f) => {
+          const metric = f.metric ? ` (${f.metric})` : "";
+          lines.push(`- ${f.rule}${metric}: ${String(f.value)} > ${String(f.limit)}`);
         });
       }
       el.compareResultBox.textContent = lines.join("\n");
@@ -998,6 +1041,100 @@
       }
     }
 
+    async function pinBaselineViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const baselineId = (el.baselineIdInput.value || "").trim();
+      const refRunId = (el.compareRefRunInput.value || "").trim();
+
+      if (!apiBase) {
+        setCompareStatus("api base URL required", "error");
+        return;
+      }
+      if (!baselineId) {
+        setCompareStatus("baseline id required", "error");
+        return;
+      }
+      if (!refRunId) {
+        setCompareStatus("reference run_id required to pin baseline", "error");
+        return;
+      }
+
+      el.pinBaselineBtn.disabled = true;
+      el.pinBaselineBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setCompareStatus("pinning baseline...", "warn");
+      try {
+        const resp = await fetchApiJson(`${apiBase}/api/baselines`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            baseline_id: baselineId,
+            run_id: refRunId,
+            overwrite: true,
+            note: "pinned from dashboard",
+          }),
+        });
+        const baseline = resp && resp.baseline ? resp.baseline : null;
+        if (!baseline) {
+          throw new Error("baseline response missing baseline payload");
+        }
+        setCompareStatus(`baseline pinned: ${baseline.baseline_id}`, "ok");
+      } catch (err) {
+        setCompareStatus(`pin baseline failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.pinBaselineBtn.disabled = false;
+        el.pinBaselineBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      }
+    }
+
+    async function evaluatePolicyViaApi() {
+      const apiBase = normalizeApiBase(el.apiBaseInput.value);
+      const baselineId = (el.baselineIdInput.value || "").trim();
+      const candRunId = (el.compareCandRunInput.value || "").trim();
+
+      if (!apiBase) {
+        setCompareStatus("api base URL required", "error");
+        return;
+      }
+      if (!baselineId) {
+        setCompareStatus("baseline id required", "error");
+        return;
+      }
+      if (!candRunId) {
+        setCompareStatus("candidate run_id required", "error");
+        return;
+      }
+
+      el.policyCompareBtn.disabled = true;
+      el.policyCompareBtn.classList.add("opacity-60", "cursor-not-allowed");
+      setCompareStatus("evaluating policy...", "warn");
+      try {
+        const resp = await fetchApiJson(`${apiBase}/api/compare/policy`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            baseline_id: baselineId,
+            candidate_run_id: candRunId,
+          }),
+        });
+        const policyEval = resp && resp.policy_eval ? resp.policy_eval : null;
+        if (!policyEval) {
+          throw new Error("policy response missing payload");
+        }
+        state.lastPolicyEval = policyEval;
+        renderPolicyEval(policyEval);
+        if (Boolean(policyEval.gate_failed)) {
+          setCompareStatus(`policy hold: ${policyEval.policy_eval_id}`, "warn");
+        } else {
+          setCompareStatus(`policy adopt: ${policyEval.policy_eval_id}`, "ok");
+        }
+      } catch (err) {
+        setCompareStatus(`policy eval failed: ${String(err.message || err)}`, "error");
+      } finally {
+        el.policyCompareBtn.disabled = false;
+        el.policyCompareBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      }
+    }
+
     async function fetchSummaryFromPath(pathValue) {
       const target = (pathValue || "").trim();
       if (!target) {
@@ -1035,7 +1172,9 @@
       el.refreshBtn.addEventListener("click", () => refreshSummary());
       el.runBtn.addEventListener("click", () => refreshSummary());
       el.runApiBtn.addEventListener("click", () => runSceneViaApi());
+      el.pinBaselineBtn.addEventListener("click", () => pinBaselineViaApi());
       el.compareApiBtn.addEventListener("click", () => compareRunsViaApi());
+      el.policyCompareBtn.addEventListener("click", () => evaluatePolicyViaApi());
 
       el.loadJsonBtn.addEventListener("click", () => {
         el.summaryFileInput.click();
@@ -1103,12 +1242,14 @@
       const queryApi = params.get("api");
       const queryScene = params.get("scene");
       const queryProfile = params.get("profile");
+      const queryBaselineId = params.get("baseline_id");
       const queryCompareRef = params.get("compare_ref");
       const queryCompareCand = params.get("compare_cand");
       el.summaryPathInput.value = querySummary && querySummary.trim() ? querySummary.trim() : DEFAULT_SUMMARY_PATH;
       el.apiBaseInput.value = queryApi && queryApi.trim() ? queryApi.trim() : DEFAULT_API_BASE;
       el.sceneJsonInput.value = queryScene && queryScene.trim() ? queryScene.trim() : DEFAULT_SCENE_JSON_PATH;
       el.profileSelect.value = queryProfile && queryProfile.trim() ? queryProfile.trim() : "balanced_dev";
+      el.baselineIdInput.value = queryBaselineId && queryBaselineId.trim() ? queryBaselineId.trim() : "main_baseline";
       el.compareRefRunInput.value = queryCompareRef && queryCompareRef.trim() ? queryCompareRef.trim() : "";
       el.compareCandRunInput.value = queryCompareCand && queryCompareCand.trim() ? queryCompareCand.trim() : "";
       el.fovInput.value = 120;
