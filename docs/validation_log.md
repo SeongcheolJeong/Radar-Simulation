@@ -2627,3 +2627,30 @@
     - `co_filter_import_audit_mode`
     - `co_filter_import_audit_count`
     - `no audit rows matched current filters`
+
+## Web E2E Graph Audit Reset UX + Row-Volume Guardrails (M17.35)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-reset/row-volume-guard frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8166/8146)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - row-volume guard tokens confirmed:
+    - `CONTRACT_ROW_VOLUME_GUARD_TRIGGER`
+    - `CONTRACT_ROW_VOLUME_GUARD_MAX_WINDOW`
+    - `rowVolumeGuardBypass`
+    - `rowVolumeGuardActive`
+    - `rowWindowOptionValues`
+    - `co_row_volume_guard_bypass`
+    - `co_row_volume_guard_hint`
+    - `rows_guard:off`
+  - audit query reset tokens confirmed:
+    - `resetFilterImportAuditQuery`
+    - `filterImportAuditQueryActive`
+    - `co_filter_import_audit_reset`

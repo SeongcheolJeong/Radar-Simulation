@@ -102,6 +102,9 @@ const CONTRACT_OVERLAY_PREFS_KEY = "graph_lab_contract_overlay_prefs_v1";
 const CONTRACT_OVERLAY_SHORTCUT_PROFILES_KEY = "graph_lab_contract_overlay_shortcut_profiles_v1";
 const CONTRACT_OVERLAY_FILTER_PRESETS_KEY = "graph_lab_contract_overlay_filter_presets_v1";
 const CONTRACT_OVERLAY_FILTER_IMPORT_HISTORY_KEY = "graph_lab_contract_overlay_filter_import_history_v1";
+const ROW_WINDOW_SIZE_OPTIONS = ["50", "80", "120", "200", "320", "500"];
+const CONTRACT_ROW_VOLUME_GUARD_TRIGGER = 1500;
+const CONTRACT_ROW_VOLUME_GUARD_MAX_WINDOW = 200;
 const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   sourceFilter: "all",
   severityFilter: "all",
@@ -112,6 +115,7 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   gateHistoryLimit: "256",
   gateHistoryPages: "2",
   rowWindowSize: "120",
+  rowVolumeGuardBypass: false,
   showShortcutHelp: false,
   activeShortcutProfile: "default",
   shortcutProfileDraft: "custom_profile",
@@ -1149,6 +1153,13 @@ export function ContractWarningOverlay({
   const [rowWindowSizeText, setRowWindowSizeText] = React.useState(
     String(initialPrefs.rowWindowSize || CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize)
   );
+  const [rowVolumeGuardBypass, setRowVolumeGuardBypass] = React.useState(
+    Boolean(
+      initialPrefs.rowVolumeGuardBypass !== undefined
+        ? initialPrefs.rowVolumeGuardBypass
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.rowVolumeGuardBypass
+    )
+  );
   const [showShortcutHelp, setShowShortcutHelp] = React.useState(
     Boolean(
       initialPrefs.showShortcutHelp !== undefined
@@ -1221,6 +1232,7 @@ export function ContractWarningOverlay({
       setGateHistoryLimit(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit));
       setGateHistoryPages(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages));
       setRowWindowSizeText(String(CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize));
+      setRowVolumeGuardBypass(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.rowVolumeGuardBypass));
       setShowShortcutHelp(false);
       setDetailFieldStates(normalizeDetailFieldStates(DEFAULT_DETAIL_FIELD_STATES, DEFAULT_DETAIL_FIELD_STATES));
       setRowWindowOffset(0);
@@ -1234,6 +1246,7 @@ export function ContractWarningOverlay({
       setGateHistoryLimit("128");
       setGateHistoryPages("2");
       setRowWindowSizeText("80");
+      setRowVolumeGuardBypass(false);
       setShowShortcutHelp(false);
       setDetailFieldStates(normalizeDetailFieldStates({
         timestamp_iso: true,
@@ -1254,6 +1267,7 @@ export function ContractWarningOverlay({
       setGateHistoryLimit("512");
       setGateHistoryPages("4");
       setRowWindowSizeText("200");
+      setRowVolumeGuardBypass(false);
       setShowShortcutHelp(false);
       setDetailFieldStates(normalizeDetailFieldStates({
         timestamp_iso: true,
@@ -1403,6 +1417,7 @@ export function ContractWarningOverlay({
       gateHistoryLimit,
       gateHistoryPages,
       rowWindowSize,
+      rowVolumeGuardBypass,
       showShortcutHelp,
       activeFilterPreset,
       filterPresetDraft,
@@ -1425,6 +1440,7 @@ export function ContractWarningOverlay({
     policyFilter,
     pinnedRunId,
     rowWindowSize,
+    rowVolumeGuardBypass,
     severityFilter,
     showShortcutHelp,
     shortcutBindings,
@@ -1470,6 +1486,27 @@ export function ContractWarningOverlay({
     if (policyFilter === "all") return severityScopedRows;
     return severityScopedRows.filter((row) => classifyPolicyState(row) === policyFilter);
   }, [policyFilter, severityScopedRows]);
+  const rowVolumeGuardActive = React.useMemo(
+    () => Number(filteredRows.length || 0) >= CONTRACT_ROW_VOLUME_GUARD_TRIGGER,
+    [filteredRows.length]
+  );
+  React.useEffect(() => {
+    if (!rowVolumeGuardActive || rowVolumeGuardBypass) return;
+    const clamped = clampInteger(
+      rowWindowSizeText,
+      20,
+      CONTRACT_ROW_VOLUME_GUARD_MAX_WINDOW,
+      CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize
+    );
+    if (String(clamped) === String(rowWindowSizeText)) return;
+    setRowWindowSizeText(String(clamped));
+  }, [rowVolumeGuardActive, rowVolumeGuardBypass, rowWindowSizeText]);
+  const rowWindowOptionValues = React.useMemo(() => {
+    if (rowVolumeGuardActive && !rowVolumeGuardBypass) {
+      return ROW_WINDOW_SIZE_OPTIONS.filter((opt) => Number(opt) <= CONTRACT_ROW_VOLUME_GUARD_MAX_WINDOW);
+    }
+    return ROW_WINDOW_SIZE_OPTIONS;
+  }, [rowVolumeGuardActive, rowVolumeGuardBypass]);
   const maxRowWindowOffset = React.useMemo(
     () => Math.max(0, Number(filteredRows.length || 0) - rowWindowSize),
     [filteredRows.length, rowWindowSize]
@@ -2017,6 +2054,13 @@ export function ContractWarningOverlay({
     filterImportAuditSearchText,
     filterImportAuditTrail,
   ]);
+  const filterImportAuditQueryActive = React.useMemo(
+    () =>
+      String(filterImportAuditSearchText || "").trim().length > 0
+      || String(filterImportAuditKindFilter || "all") !== "all"
+      || String(filterImportAuditModeFilter || "all") !== "all",
+    [filterImportAuditKindFilter, filterImportAuditModeFilter, filterImportAuditSearchText]
+  );
   const activeFilterImportAuditEntry = React.useMemo(() => {
     const rows = Array.isArray(filterImportAuditRowsFiltered) ? filterImportAuditRowsFiltered : [];
     if (rows.length === 0) return null;
@@ -2213,6 +2257,12 @@ export function ContractWarningOverlay({
       setFilterTransferStatus("audit export failed");
     }
   }, [filterImportAuditTrail]);
+  const resetFilterImportAuditQuery = React.useCallback(() => {
+    setFilterImportAuditSearchText("");
+    setFilterImportAuditKindFilter("all");
+    setFilterImportAuditModeFilter("all");
+    setFilterTransferStatus("audit query reset");
+  }, []);
   const clearFilterImportHistory = React.useCallback(() => {
     setFilterImportUndoStack([]);
     setFilterImportRedoStack([]);
@@ -2478,6 +2528,7 @@ export function ContractWarningOverlay({
     setGateHistoryLimit(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryLimit));
     setGateHistoryPages(String(CONTRACT_OVERLAY_DEFAULT_PREFS.gateHistoryPages));
     setRowWindowSizeText(String(CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize));
+    setRowVolumeGuardBypass(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.rowVolumeGuardBypass));
     setRowWindowOffset(0);
   }, []);
   const activeFilterTokens = React.useMemo(() => {
@@ -2506,6 +2557,9 @@ export function ContractWarningOverlay({
     if (String(rowWindowSizeText) !== String(CONTRACT_OVERLAY_DEFAULT_PREFS.rowWindowSize)) {
       tokens.push(`rows_window:${rowWindowSizeText}`);
     }
+    if (Boolean(rowVolumeGuardBypass) !== Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.rowVolumeGuardBypass)) {
+      tokens.push("rows_guard:off");
+    }
     return tokens;
   }, [
     gateHistoryLimit,
@@ -2513,6 +2567,7 @@ export function ContractWarningOverlay({
     nonZeroOnly,
     pinnedRunId,
     policyFilter,
+    rowVolumeGuardBypass,
     rowWindowSizeText,
     severityFilter,
     sourceFilter,
@@ -2783,9 +2838,23 @@ export function ContractWarningOverlay({
         key: "co_row_window_select",
         value: rowWindowSizeText,
         onChange: (e) => setRowWindowSizeText(String(e.target.value || "120")),
-      }, ["50", "80", "120", "200", "320", "500"].map((opt) =>
+      }, rowWindowOptionValues.map((opt) =>
         h("option", { value: opt, key: `co_row_window_${opt}` }, opt)
       )),
+      rowVolumeGuardActive
+        ? h("label", {
+          key: "co_row_volume_guard_bypass",
+          className: "hint",
+          style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#8eb6ca" },
+        }, [
+          h("input", {
+            type: "checkbox",
+            checked: Boolean(rowVolumeGuardBypass),
+            onChange: (e) => setRowVolumeGuardBypass(Boolean(e.target.checked)),
+          }),
+          "allow large window",
+        ])
+        : null,
       h("div", { className: "btn-row", key: "co_row_window_nav", style: { gap: "4px" } }, [
         h("button", {
           className: "btn",
@@ -2810,6 +2879,13 @@ export function ContractWarningOverlay({
         `showing ${filteredRows.length}/${severityScopedRows.length}/${scopedRows.length}/${rows.length} (policy/severity/scoped/all) | `,
         `window ${filteredRows.length === 0 ? 0 : rowWindowOffset + 1}-${rowWindowEnd}/${filteredRows.length}`,
       ]),
+      rowVolumeGuardActive && !rowVolumeGuardBypass
+        ? h("span", {
+          key: "co_row_volume_guard_hint",
+          className: "hint",
+          style: { color: "#f0b33a" },
+        }, `guard on: rows/window capped at ${CONTRACT_ROW_VOLUME_GUARD_MAX_WINDOW} (rows>=${CONTRACT_ROW_VOLUME_GUARD_TRIGGER})`)
+        : null,
     ]),
     h("div", {
       className: "contract-overlay-filter",
@@ -3067,6 +3143,12 @@ export function ContractWarningOverlay({
               onClick: clearFilterImportHistory,
               disabled: filterImportAuditTrail.length === 0,
             }, "Clear"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_reset",
+              onClick: resetFilterImportAuditQuery,
+              disabled: !filterImportAuditQueryActive,
+            }, "Reset Query"),
             h("button", {
               className: "btn",
               key: "co_filter_import_audit_copy",

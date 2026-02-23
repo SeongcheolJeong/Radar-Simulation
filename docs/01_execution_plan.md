@@ -143,6 +143,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.32: Import audit trail + multi-level undo/redo stacks
 - [x] M17.33: Audit detail drilldown + local persistence for import history
 - [x] M17.34: Import history maintenance controls + audit search/filter
+- [x] M17.35: Audit query reset ergonomics + row-volume guardrails
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -155,7 +156,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.34 frontend hardening track: add audit-query reset ergonomics and row-volume guardrails while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.35 frontend hardening track: add audit row pagination cap and query-state preset shortcuts while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1290,3 +1291,20 @@ M17.34 outcome (2026-02-22):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - active entry auto-fallback when filtered result changes
   - visibility hint key: `co_filter_import_audit_count`
+
+M17.35 outcome (2026-02-23):
+
+- audit query reset ergonomics added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - callback: `resetFilterImportAuditQuery`
+  - UI key: `co_filter_import_audit_reset`
+  - reset scope: `search text + kind filter + mode filter`
+- row-volume guardrail added for large filtered timelines:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - thresholds: `CONTRACT_ROW_VOLUME_GUARD_TRIGGER`, `CONTRACT_ROW_VOLUME_GUARD_MAX_WINDOW`
+  - behavior: when guard active and bypass is off, `rows/window` options are capped to safe range
+- operator override/persistence and visibility cues:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - toggle key: `co_row_volume_guard_bypass`
+  - hint key: `co_row_volume_guard_hint`
+  - active-filter token includes `rows_guard:off` when bypass is enabled
