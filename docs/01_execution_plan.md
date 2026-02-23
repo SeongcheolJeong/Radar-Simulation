@@ -146,6 +146,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.35: Audit query reset ergonomics + row-volume guardrails
 - [x] M17.36: Audit row pagination cap + query preset shortcuts
 - [x] M17.37: Audit deep-link copy bundle + preset pinning ergonomics
+- [x] M17.38: Audit bundle import/restore + pinned preset quick toggle shortcut
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -158,7 +159,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.37 frontend hardening track: add audit bundle import/restore action and pinned-preset quick toggle shortcuts while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.38 frontend hardening track: add bundle schema version guardrails and audit preset/shortcut operator hints while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1345,3 +1346,20 @@ M17.37 outcome (2026-02-23):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - overlay prefs now persist `filterImportAuditPinnedPreset`
   - `Reset Query` now restores pinned preset when pinned (`audit query reset -> pinned:<id>`)
+
+M17.38 outcome (2026-02-23):
+
+- audit bundle import/restore action added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - parser: `parseFilterImportAuditDeepLinkBundleText`
+  - apply callback: `applyFilterImportAuditDeepLinkBundleFromText`
+  - controls/keys: `co_filter_import_audit_apply_deeplink`, `co_filter_import_audit_bundle_preview`
+- pinned preset quick-toggle shortcut added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - shortcut action id: `audit_pin_toggle`
+  - default binding/profile mapping: `p`
+  - shortcut execution path integrated in `triggerShortcutAction`
+- deep-link import safety behavior:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - bundle kind mismatch/JSON parse errors surfaced via status (`audit bundle apply failed: ...`)
+  - restore scope: query (`search/kind/mode`) + paging (`cap/offset`) + pinned preset + active entry id

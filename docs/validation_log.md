@@ -2716,3 +2716,30 @@
     - `audit query preset pinned`
     - `audit query preset unpinned`
     - `audit query reset -> pinned`
+
+## Web E2E Graph Audit Bundle Restore + Shortcut Pin Toggle (M17.38)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-bundle-restore/shortcut-pin-toggle frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8169/8149)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - bundle restore tokens confirmed:
+    - `parseFilterImportAuditDeepLinkBundleText`
+    - `parsedFilterImportAuditDeepLinkPayload`
+    - `filterImportAuditDeepLinkPreview`
+    - `applyFilterImportAuditDeepLinkBundleFromText`
+    - `co_filter_import_audit_bundle_preview`
+    - `co_filter_import_audit_apply_deeplink`
+    - `audit bundle apply failed`
+    - `audit deep-link bundle applied`
+  - shortcut pin toggle tokens confirmed:
+    - `audit_pin_toggle`
+    - `triggerShortcutAction`
+    - `toggleFilterImportAuditPinnedPreset`

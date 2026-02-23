@@ -192,6 +192,7 @@ const SHORTCUT_ACTION_DEFS = [
   { id: "preset_triage", label: "preset triage" },
   { id: "preset_deep", label: "preset deep" },
   { id: "preset_reset", label: "preset reset" },
+  { id: "audit_pin_toggle", label: "audit pin toggle" },
 ];
 const DEFAULT_SHORTCUT_BINDINGS = {
   toggle_help: "h",
@@ -205,6 +206,7 @@ const DEFAULT_SHORTCUT_BINDINGS = {
   preset_triage: "1",
   preset_deep: "2",
   preset_reset: "0",
+  audit_pin_toggle: "p",
 };
 const DEFAULT_SHORTCUT_PROFILES = {
   default: DEFAULT_SHORTCUT_BINDINGS,
@@ -220,6 +222,7 @@ const DEFAULT_SHORTCUT_PROFILES = {
     preset_triage: "7",
     preset_deep: "8",
     preset_reset: "9",
+    audit_pin_toggle: "p",
   },
 };
 const FILTER_IMPORT_HISTORY_LIMIT = 16;
@@ -669,6 +672,59 @@ function buildFilterImportAuditDeepLinkBundle(payload) {
 
 function serializeFilterImportAuditDeepLinkBundle(payload) {
   return JSON.stringify(buildFilterImportAuditDeepLinkBundle(payload), null, 2);
+}
+
+function parseFilterImportAuditDeepLinkBundleText(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text) {
+    throw new Error("empty import payload");
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_) {
+    throw new Error("invalid JSON");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("import root must be object");
+  }
+  if (String(parsed.kind || "") !== "graph_lab_contract_overlay_filter_import_audit_deeplink") {
+    throw new Error("kind mismatch: expected audit deeplink bundle");
+  }
+  const query = parsed.query && typeof parsed.query === "object" && !Array.isArray(parsed.query)
+    ? parsed.query
+    : {};
+  const paging = parsed.paging && typeof parsed.paging === "object" && !Array.isArray(parsed.paging)
+    ? parsed.paging
+    : {};
+  const allowedKind = new Set(FILTER_IMPORT_AUDIT_KIND_OPTIONS.map((x) => String(x || "")));
+  const allowedMode = new Set(FILTER_IMPORT_AUDIT_MODE_OPTIONS.map((x) => String(x || "")));
+  const kindRaw = String(query.kind || "all");
+  const modeRaw = String(query.mode || "all");
+  const kind = allowedKind.has(kindRaw) ? kindRaw : "all";
+  const mode = allowedMode.has(modeRaw) ? modeRaw : "all";
+  const capRaw = clampInteger(paging.cap, 6, 200, 24);
+  const cap = FILTER_IMPORT_AUDIT_ROW_CAP_OPTIONS.includes(String(capRaw))
+    ? String(capRaw)
+    : String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap || "24");
+  const pinnedPresetRaw = String(parsed.pinned_preset_id || "").trim();
+  const activePresetRaw = String(parsed.active_preset_id || "").trim();
+  const isKnownPreset = (id) =>
+    Boolean(id) && FILTER_IMPORT_AUDIT_QUERY_PRESETS.some((row) => String(row?.id || "") === id);
+  return {
+    query: {
+      search: String(query.search || ""),
+      kind,
+      mode,
+    },
+    paging: {
+      cap,
+      offset: clampInteger(paging.offset, 0, 1_000_000, 0),
+    },
+    active_entry_id: String(parsed.active_entry_id || "").trim(),
+    active_preset_id: isKnownPreset(activePresetRaw) ? activePresetRaw : "",
+    pinned_preset_id: isKnownPreset(pinnedPresetRaw) ? pinnedPresetRaw : "",
+  };
 }
 
 function buildFilterImportAuditDetailText(entry) {
@@ -2039,6 +2095,41 @@ export function ContractWarningOverlay({
       };
     }
   }, [filterTransferText]);
+  const parsedFilterImportAuditDeepLinkPayload = React.useMemo(() => {
+    const text = String(filterTransferText || "").trim();
+    if (!text) {
+      return {
+        bundle: null,
+        error: "",
+        empty: true,
+      };
+    }
+    try {
+      return {
+        bundle: parseFilterImportAuditDeepLinkBundleText(text),
+        error: "",
+        empty: false,
+      };
+    } catch (err) {
+      return {
+        bundle: null,
+        error: String(err?.message || "parse error"),
+        empty: false,
+      };
+    }
+  }, [filterTransferText]);
+  const filterImportAuditDeepLinkPreview = React.useMemo(() => {
+    if (parsedFilterImportAuditDeepLinkPayload.empty) {
+      return "audit bundle: waiting for JSON payload";
+    }
+    if (parsedFilterImportAuditDeepLinkPayload.error) {
+      return `audit bundle: invalid payload (${parsedFilterImportAuditDeepLinkPayload.error})`;
+    }
+    const bundle = parsedFilterImportAuditDeepLinkPayload.bundle;
+    const pinned = String(bundle?.pinned_preset_id || "-");
+    const entry = String(bundle?.active_entry_id || "-");
+    return `audit bundle: valid (pinned:${pinned}, entry:${entry})`;
+  }, [parsedFilterImportAuditDeepLinkPayload.bundle, parsedFilterImportAuditDeepLinkPayload.empty, parsedFilterImportAuditDeepLinkPayload.error]);
   const filterImportRows = React.useMemo(() => {
     const imported = parsedFilterImportPayload.imported;
     if (!imported || typeof imported !== "object") return [];
@@ -2465,6 +2556,34 @@ export function ContractWarningOverlay({
     filterImportAuditSearchText,
     filterImportAuditTrail.length,
   ]);
+  const applyFilterImportAuditDeepLinkBundleFromText = React.useCallback(() => {
+    if (parsedFilterImportAuditDeepLinkPayload.empty) {
+      setFilterTransferStatus("audit bundle apply failed: empty import payload");
+      return;
+    }
+    if (parsedFilterImportAuditDeepLinkPayload.error) {
+      setFilterTransferStatus(`audit bundle apply failed: ${parsedFilterImportAuditDeepLinkPayload.error}`);
+      return;
+    }
+    const bundle = parsedFilterImportAuditDeepLinkPayload.bundle;
+    if (!bundle || typeof bundle !== "object") {
+      setFilterTransferStatus("audit bundle apply failed: invalid payload");
+      return;
+    }
+    const query = bundle.query && typeof bundle.query === "object" ? bundle.query : {};
+    const paging = bundle.paging && typeof bundle.paging === "object" ? bundle.paging : {};
+    setFilterImportAuditSearchText(String(query.search || ""));
+    setFilterImportAuditKindFilter(String(query.kind || "all"));
+    setFilterImportAuditModeFilter(String(query.mode || "all"));
+    setFilterImportAuditRowCapText(String(paging.cap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap));
+    setFilterImportAuditRowOffset(clampInteger(paging.offset, 0, 1_000_000, 0));
+    setFilterImportAuditPinnedPresetId(String(bundle.pinned_preset_id || ""));
+    const activeEntryId = String(bundle.active_entry_id || "").trim();
+    if (activeEntryId) {
+      setActiveFilterImportAuditId(activeEntryId);
+    }
+    setFilterTransferStatus("audit deep-link bundle applied");
+  }, [parsedFilterImportAuditDeepLinkPayload]);
   const applyFilterImportAuditQueryPreset = React.useCallback((presetId) => {
     const pid = String(presetId || "").trim();
     const preset = resolveFilterImportAuditQueryPreset(pid);
@@ -2852,6 +2971,10 @@ export function ContractWarningOverlay({
       applyOverlayPreset("reset_all");
       return true;
     }
+    if (id === "audit_pin_toggle") {
+      toggleFilterImportAuditPinnedPreset();
+      return true;
+    }
     if (id === "expand_visible") {
       expandVisibleDetails();
       return true;
@@ -2867,6 +2990,7 @@ export function ContractWarningOverlay({
     expandVisibleDetails,
     maxRowWindowOffset,
     rowWindowSize,
+    toggleFilterImportAuditPinnedPreset,
   ]);
   React.useEffect(() => {
     const onKeyDown = (evt) => {
@@ -3285,6 +3409,15 @@ export function ContractWarningOverlay({
         },
       }, filterImportPreview),
       h("span", {
+        key: "co_filter_import_audit_bundle_preview",
+        className: "hint",
+        style: {
+          color: String(filterImportAuditDeepLinkPreview || "").includes("invalid payload")
+            ? "#f39b9b"
+            : "#8eb6ca",
+        },
+      }, filterImportAuditDeepLinkPreview),
+      h("span", {
         key: "co_filter_import_history_depth",
         className: "hint",
         style: { color: "#8eb6ca" },
@@ -3430,6 +3563,12 @@ export function ContractWarningOverlay({
               onClick: copyFilterImportAuditDeepLinkBundle,
               disabled: !activeFilterImportAuditEntry,
             }, "Copy Deep-Link Bundle"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_apply_deeplink",
+              onClick: applyFilterImportAuditDeepLinkBundleFromText,
+              disabled: parsedFilterImportAuditDeepLinkPayload.empty || Boolean(parsedFilterImportAuditDeepLinkPayload.error),
+            }, "Apply Deep-Link Bundle"),
             h("button", {
               className: "btn",
               key: "co_filter_import_audit_export",
