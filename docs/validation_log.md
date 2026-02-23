@@ -3261,3 +3261,27 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_preview`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_text`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_status`
+
+## Web E2E Graph Audit Quick Telemetry Import Filter-Bundle Schema Guardrails (M17.55)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-import-filter-bundle-schema-guardrail frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `rg -n "QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND|QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION|quickTelemetryDrilldownImportFilterBundleSchemaHint|quickTelemetryDrilldownImportFilterBundleInvalidGuidance|unsupported schema_version|unexpected kind|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_schema_hint|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_operator_hint" /Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - guardrail/hint tokens confirmed:
+    - `QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND`
+    - `QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION`
+    - `quickTelemetryDrilldownImportFilterBundleSchemaHint`
+    - `quickTelemetryDrilldownImportFilterBundleInvalidGuidance`
+    - `unexpected kind`
+    - `unsupported schema_version`
+  - UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_schema_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_operator_hint`

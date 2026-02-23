@@ -323,6 +323,9 @@ const FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX = 48;
 const FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS = 20_000;
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX = 48;
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS = ["8", "16", "24", "48", "96", "160"];
+const QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND =
+  "graph_lab_contract_overlay_quick_telemetry_drilldown_import_filter_bundle";
+const QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION = 1;
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
   { id: "all", label: "all" },
   { id: "new", label: "new" },
@@ -1248,8 +1251,8 @@ function buildQuickTelemetryDrilldownImportFilterBundle(rawBundle) {
     : Number(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap || 16);
   const presetId = String(src.preset_id || "custom").trim() || "custom";
   return {
-    schema_version: 1,
-    kind: "graph_lab_contract_overlay_quick_telemetry_drilldown_import_filter_bundle",
+    schema_version: QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION,
+    kind: QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND,
     exported_at_iso: new Date().toISOString(),
     filter_bundle: {
       preset_id: presetId,
@@ -1279,9 +1282,20 @@ function parseQuickTelemetryDrilldownImportFilterBundleText(rawText) {
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error("import root must be object");
   }
-  const candidate = parsed.filter_bundle && typeof parsed.filter_bundle === "object" && !Array.isArray(parsed.filter_bundle)
-    ? parsed.filter_bundle
-    : parsed;
+  const hasFilterBundleWrapper = Boolean(
+    parsed.filter_bundle
+    && typeof parsed.filter_bundle === "object"
+    && !Array.isArray(parsed.filter_bundle)
+  );
+  const parsedKind = String(parsed.kind || "").trim();
+  const parsedSchemaVersion = Number(parsed.schema_version || 0);
+  if (parsedKind && parsedKind !== QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND) {
+    throw new Error(`unexpected kind (expected ${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND})`);
+  }
+  if (parsed.schema_version !== undefined && parsedSchemaVersion !== QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION) {
+    throw new Error(`unsupported schema_version (expected ${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION})`);
+  }
+  const candidate = hasFilterBundleWrapper ? parsed.filter_bundle : parsed;
   const rowCapRaw = clampInteger(candidate.row_cap, 4, 200, 16);
   const rowCap = QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS.includes(String(rowCapRaw))
     ? rowCapRaw
@@ -1292,6 +1306,9 @@ function parseQuickTelemetryDrilldownImportFilterBundleText(rawText) {
     conflict_filter: normalizeQuickTelemetryDrilldownImportConflictFilter(candidate.conflict_filter || "all"),
     name_query: String(candidate.name_query || "").slice(0, QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX),
     row_cap: rowCap,
+    kind: parsedKind || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND,
+    schema_version: parsedSchemaVersion || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION,
+    has_wrapper: hasFilterBundleWrapper,
   };
 }
 
@@ -2731,6 +2748,35 @@ export function ContractWarningOverlay({
       };
     }
   }, [quickTelemetryDrilldownImportFilterBundleText]);
+  const quickTelemetryDrilldownImportFilterBundleSchemaHint = React.useMemo(
+    () =>
+      `filter bundle expects kind=${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND}, schema=${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION}`,
+    []
+  );
+  const quickTelemetryDrilldownImportFilterBundleInvalidGuidance = React.useMemo(() => {
+    if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) return "";
+    const err = String(parsedQuickTelemetryDrilldownImportFilterBundlePayload.error || "");
+    if (!err) return "";
+    if (err.includes("unexpected kind")) {
+      return `guidance: set kind=${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND}`;
+    }
+    if (err.includes("unsupported schema_version")) {
+      return `guidance: set schema_version=${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION}`;
+    }
+    if (err.includes("invalid JSON")) {
+      return "guidance: paste valid JSON object";
+    }
+    if (err.includes("import root must be object")) {
+      return "guidance: JSON root must be object or {\"filter_bundle\": {...}}";
+    }
+    if (err.includes("empty import payload")) {
+      return "guidance: paste exported filter bundle JSON";
+    }
+    return "guidance: use Export Filter Bundle from this panel";
+  }, [
+    parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty,
+    parsedQuickTelemetryDrilldownImportFilterBundlePayload.error,
+  ]);
   const quickTelemetryDrilldownImportFilterBundlePreview = React.useMemo(() => {
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) {
       return "filter bundle preview: waiting for JSON payload";
@@ -2745,6 +2791,9 @@ export function ContractWarningOverlay({
       `conflict ${String(bundle.conflict_filter || "all")}`,
       `query ${String(bundle.name_query || "").trim() || "-"}`,
       `row-cap ${Number(bundle.row_cap || 0)}`,
+      `kind ${String(bundle.kind || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND)}`,
+      `schema ${Number(bundle.schema_version || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION)}`,
+      `wrapper ${Boolean(bundle.has_wrapper) ? "on" : "off"}`,
     ].join(", ");
   }, [
     parsedQuickTelemetryDrilldownImportFilterBundlePayload.bundle,
@@ -3096,7 +3145,10 @@ export function ContractWarningOverlay({
     }
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.error) {
       setQuickTelemetryDrilldownImportFilterBundleStatus(
-        `filter bundle import failed: ${parsedQuickTelemetryDrilldownImportFilterBundlePayload.error}`
+        [
+          `filter bundle import failed: ${parsedQuickTelemetryDrilldownImportFilterBundlePayload.error}`,
+          quickTelemetryDrilldownImportFilterBundleInvalidGuidance,
+        ].filter(Boolean).join(" | ")
       );
       return;
     }
@@ -3111,9 +3163,10 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownImportRowCapText(String(bundle.row_cap || CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap));
     setQuickTelemetryDrilldownImportRowOffset(0);
     setQuickTelemetryDrilldownImportFilterBundleStatus(
-      `filter bundle imported (preset:${String(bundle.preset_id || "custom")})`
+      `filter bundle imported (preset:${String(bundle.preset_id || "custom")}, schema:${Number(bundle.schema_version || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION)})`
     );
   }, [
+    quickTelemetryDrilldownImportFilterBundleInvalidGuidance,
     parsedQuickTelemetryDrilldownImportFilterBundlePayload.bundle,
     parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty,
     parsedQuickTelemetryDrilldownImportFilterBundlePayload.error,
@@ -6079,15 +6132,22 @@ export function ContractWarningOverlay({
                 disabled: String(quickTelemetryDrilldownImportFilterBundleText || "").trim().length === 0,
               }, "Import Filter Bundle"),
               h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_schema_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryDrilldownImportFilterBundleSchemaHint),
+              h("span", {
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_preview",
                 className: "hint",
-                style: {
-                  marginLeft: "auto",
-                  color: String(quickTelemetryDrilldownImportFilterBundlePreview || "").includes("invalid payload")
-                    ? "#f39b9b"
-                    : "#8eb6ca",
-                },
+                style: { flexBasis: "100%", color: String(quickTelemetryDrilldownImportFilterBundlePreview || "").includes("invalid payload") ? "#f39b9b" : "#8eb6ca" },
               }, quickTelemetryDrilldownImportFilterBundlePreview),
+              quickTelemetryDrilldownImportFilterBundleInvalidGuidance
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_operator_hint",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#e4cf98" },
+                }, quickTelemetryDrilldownImportFilterBundleInvalidGuidance)
+                : null,
               h("textarea", {
                 className: "textarea",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_text",

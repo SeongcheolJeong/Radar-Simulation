@@ -163,6 +163,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.52: Quick telemetry profile import query/filter aids (name search + conflict-class chips)
 - [x] M17.53: Quick telemetry profile import filter presets + one-click reset bundles
 - [x] M17.54: Quick telemetry import filter-bundle transfer (copy/export/import + preview)
+- [x] M17.55: Quick telemetry import filter-bundle schema guardrails (kind/schema checks + operator hints)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -175,7 +176,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.54 frontend hardening track: add drilldown import filter-bundle schema guardrails (kind/version/operator hints + invalid-payload guidance) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable and continue M14.6 Linux strict pilot closure in parallel.
+Advance post-M17.55 frontend hardening track: add drilldown import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
