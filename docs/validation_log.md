@@ -3169,3 +3169,31 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_clear_page`
     - `co_filter_import_audit_quick_telemetry_profile_import_page_hint`
     - `co_filter_import_audit_quick_telemetry_profile_import_selection_safety`
+
+## Web E2E Graph Audit Quick Telemetry Profile Import Query/Filter Aids (M17.52)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-profile-import-query-filter frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `rg -n "QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX|QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS|normalizeQuickTelemetryDrilldownImportConflictFilter|matchQuickTelemetryDrilldownImportConflictFilter|quickTelemetryDrilldownImportNameQuery|quickTelemetryDrilldownImportConflictFilter|quickTelemetryDrilldownImportRowsByQuery|quickTelemetryDrilldownImportConflictFilterCounts|co_filter_import_audit_quick_telemetry_profile_import_name_query|co_filter_import_audit_quick_telemetry_profile_import_filter_reset|co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chips|co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chip_" /Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - query/filter model tokens confirmed:
+    - `QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX`
+    - `QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS`
+    - `normalizeQuickTelemetryDrilldownImportConflictFilter`
+    - `matchQuickTelemetryDrilldownImportConflictFilter`
+    - `quickTelemetryDrilldownImportNameQuery`
+    - `quickTelemetryDrilldownImportConflictFilter`
+    - `quickTelemetryDrilldownImportRowsByQuery`
+    - `quickTelemetryDrilldownImportConflictFilterCounts`
+  - UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_name_query`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_reset`
+    - `co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chips`
+    - `co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chip_`

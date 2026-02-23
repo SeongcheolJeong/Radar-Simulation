@@ -133,6 +133,8 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   filterImportAuditQuickTelemetryFailureOnly: false,
   filterImportAuditQuickTelemetryReasonQuery: "",
   quickTelemetryDrilldownImportConflictOnly: false,
+  quickTelemetryDrilldownImportNameQuery: "",
+  quickTelemetryDrilldownImportConflictFilter: "all",
   quickTelemetryDrilldownImportRowCap: "16",
   activeQuickTelemetryDrilldownProfile: "default",
   quickTelemetryDrilldownProfileDraft: "custom_drilldown",
@@ -319,7 +321,17 @@ const FILTER_IMPORT_AUDIT_QUICK_TREND_WINDOW = 8;
 const FILTER_IMPORT_AUDIT_QUICK_REASON_CHIP_LIMIT = 5;
 const FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX = 48;
 const FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS = 20_000;
+const QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX = 48;
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS = ["8", "16", "24", "48", "96", "160"];
+const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
+  { id: "all", label: "all" },
+  { id: "new", label: "new" },
+  { id: "overwrite_any", label: "overwrite" },
+  { id: "overwrite_changed", label: "changed" },
+  { id: "overwrite_same", label: "same" },
+  { id: "overwrite_builtin", label: "builtin" },
+  { id: "overwrite_custom", label: "custom" },
+];
 
 function resolveFilterImportAuditQueryPreset(rawPresetId) {
   const pid = String(rawPresetId || "").trim();
@@ -425,6 +437,26 @@ function normalizeFilterImportAuditPinChipFilter(raw) {
   const text = String(raw || "").trim().toLowerCase();
   const allowed = new Set(FILTER_IMPORT_AUDIT_PIN_CHIP_FILTER_OPTIONS.map((x) => String(x.id || "")));
   return allowed.has(text) ? text : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter;
+}
+
+function normalizeQuickTelemetryDrilldownImportConflictFilter(raw) {
+  const text = String(raw || "").trim().toLowerCase();
+  const allowed = new Set(QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS.map((x) => String(x.id || "")));
+  return allowed.has(text) ? text : CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictFilter;
+}
+
+function matchQuickTelemetryDrilldownImportConflictFilter(row, filterId) {
+  const rid = normalizeQuickTelemetryDrilldownImportConflictFilter(filterId);
+  if (rid === "all") return true;
+  const conflict = String(row?.conflict || "");
+  const changed = Boolean(row?.changed);
+  if (rid === "new") return conflict === "new";
+  if (rid === "overwrite_any") return conflict !== "new";
+  if (rid === "overwrite_changed") return conflict !== "new" && changed;
+  if (rid === "overwrite_same") return conflict !== "new" && !changed;
+  if (rid === "overwrite_builtin") return conflict === "overwrite_builtin";
+  if (rid === "overwrite_custom") return conflict === "overwrite_custom";
+  return true;
 }
 
 function normalizeShortcutBindings(raw, fallback) {
@@ -1787,6 +1819,19 @@ export function ContractWarningOverlay({
         : CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictOnly
     )
   );
+  const [quickTelemetryDrilldownImportNameQuery, setQuickTelemetryDrilldownImportNameQuery] = React.useState(
+    String(
+      initialPrefs.quickTelemetryDrilldownImportNameQuery
+      || CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportNameQuery
+      || ""
+    ).slice(0, QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX)
+  );
+  const [quickTelemetryDrilldownImportConflictFilter, setQuickTelemetryDrilldownImportConflictFilter] = React.useState(
+    normalizeQuickTelemetryDrilldownImportConflictFilter(
+      initialPrefs.quickTelemetryDrilldownImportConflictFilter
+      || CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictFilter
+    )
+  );
   const [quickTelemetryDrilldownImportRowCapText, setQuickTelemetryDrilldownImportRowCapText] = React.useState(
     String(
       initialPrefs.quickTelemetryDrilldownImportRowCap
@@ -1836,6 +1881,14 @@ export function ContractWarningOverlay({
       );
       setQuickTelemetryDrilldownImportConflictOnlyChecked(
         Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictOnly)
+      );
+      setQuickTelemetryDrilldownImportNameQuery(
+        String(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportNameQuery || "")
+      );
+      setQuickTelemetryDrilldownImportConflictFilter(
+        normalizeQuickTelemetryDrilldownImportConflictFilter(
+          CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictFilter
+        )
       );
       setQuickTelemetryDrilldownImportRowCapText(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap || "16")
@@ -2008,6 +2061,21 @@ export function ContractWarningOverlay({
   }, [filterImportAuditQuickTelemetryReasonQuery]);
 
   React.useEffect(() => {
+    const normalized = String(quickTelemetryDrilldownImportNameQuery || "")
+      .slice(0, QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX);
+    if (normalized === quickTelemetryDrilldownImportNameQuery) return;
+    setQuickTelemetryDrilldownImportNameQuery(normalized);
+  }, [quickTelemetryDrilldownImportNameQuery]);
+
+  React.useEffect(() => {
+    const normalized = normalizeQuickTelemetryDrilldownImportConflictFilter(
+      quickTelemetryDrilldownImportConflictFilter
+    );
+    if (normalized === quickTelemetryDrilldownImportConflictFilter) return;
+    setQuickTelemetryDrilldownImportConflictFilter(normalized);
+  }, [quickTelemetryDrilldownImportConflictFilter]);
+
+  React.useEffect(() => {
     const normalizedRaw = clampInteger(quickTelemetryDrilldownImportRowCapText, 4, 200, 16);
     const normalized = QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS.includes(String(normalizedRaw))
       ? normalizedRaw
@@ -2131,6 +2199,8 @@ export function ContractWarningOverlay({
       filterImportAuditQuickTelemetryFailureOnly: filterImportAuditQuickTelemetryFailureOnlyChecked,
       filterImportAuditQuickTelemetryReasonQuery: filterImportAuditQuickTelemetryReasonQuery,
       quickTelemetryDrilldownImportConflictOnly: quickTelemetryDrilldownImportConflictOnlyChecked,
+      quickTelemetryDrilldownImportNameQuery: quickTelemetryDrilldownImportNameQuery,
+      quickTelemetryDrilldownImportConflictFilter: quickTelemetryDrilldownImportConflictFilter,
       quickTelemetryDrilldownImportRowCap: quickTelemetryDrilldownImportRowCapText,
       activeQuickTelemetryDrilldownProfile,
       quickTelemetryDrilldownProfileDraft,
@@ -2149,6 +2219,8 @@ export function ContractWarningOverlay({
     filterImportAuditQuickTelemetryFailureOnlyChecked,
     filterImportAuditQuickTelemetryReasonQuery,
     quickTelemetryDrilldownImportConflictOnlyChecked,
+    quickTelemetryDrilldownImportNameQuery,
+    quickTelemetryDrilldownImportConflictFilter,
     quickTelemetryDrilldownImportRowCapText,
     activeQuickTelemetryDrilldownProfile,
     quickTelemetryDrilldownProfileDraft,
@@ -2495,10 +2567,40 @@ export function ContractWarningOverlay({
       return next;
     });
   }, [quickTelemetryDrilldownImportNamesSignature, quickTelemetryDrilldownImportRows]);
-  const quickTelemetryDrilldownImportRowsVisible = React.useMemo(() => {
+  const quickTelemetryDrilldownImportNameQueryNormalized = React.useMemo(
+    () => String(quickTelemetryDrilldownImportNameQuery || "").trim().toLowerCase(),
+    [quickTelemetryDrilldownImportNameQuery]
+  );
+  const quickTelemetryDrilldownImportRowsScope = React.useMemo(() => {
     if (!quickTelemetryDrilldownImportConflictOnlyChecked) return quickTelemetryDrilldownImportRows;
     return quickTelemetryDrilldownImportRows.filter((row) => row.conflict !== "new");
   }, [quickTelemetryDrilldownImportConflictOnlyChecked, quickTelemetryDrilldownImportRows]);
+  const quickTelemetryDrilldownImportRowsByQuery = React.useMemo(() => {
+    if (!quickTelemetryDrilldownImportNameQueryNormalized) return quickTelemetryDrilldownImportRowsScope;
+    return quickTelemetryDrilldownImportRowsScope.filter((row) =>
+      String(row?.name || "").toLowerCase().includes(quickTelemetryDrilldownImportNameQueryNormalized)
+    );
+  }, [quickTelemetryDrilldownImportNameQueryNormalized, quickTelemetryDrilldownImportRowsScope]);
+  const quickTelemetryDrilldownImportConflictFilterCounts = React.useMemo(() => {
+    const baseRows = quickTelemetryDrilldownImportRowsByQuery;
+    const counts = {};
+    QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS.forEach((opt) => {
+      const oid = String(opt?.id || "");
+      if (!oid) return;
+      counts[oid] = baseRows.filter((row) => matchQuickTelemetryDrilldownImportConflictFilter(row, oid)).length;
+    });
+    if (!Object.prototype.hasOwnProperty.call(counts, "all")) {
+      counts.all = baseRows.length;
+    }
+    return counts;
+  }, [quickTelemetryDrilldownImportRowsByQuery]);
+  const quickTelemetryDrilldownImportRowsVisible = React.useMemo(
+    () =>
+      quickTelemetryDrilldownImportRowsByQuery.filter((row) =>
+        matchQuickTelemetryDrilldownImportConflictFilter(row, quickTelemetryDrilldownImportConflictFilter)
+      ),
+    [quickTelemetryDrilldownImportConflictFilter, quickTelemetryDrilldownImportRowsByQuery]
+  );
   const quickTelemetryDrilldownImportRowCap = React.useMemo(
     () => clampInteger(quickTelemetryDrilldownImportRowCapText, 4, 200, 16),
     [quickTelemetryDrilldownImportRowCapText]
@@ -2506,7 +2608,9 @@ export function ContractWarningOverlay({
   React.useEffect(() => {
     setQuickTelemetryDrilldownImportRowOffset(0);
   }, [
+    quickTelemetryDrilldownImportConflictFilter,
     quickTelemetryDrilldownImportConflictOnlyChecked,
+    quickTelemetryDrilldownImportNameQueryNormalized,
     quickTelemetryDrilldownImportNamesSignature,
     quickTelemetryDrilldownImportRowCap,
   ]);
@@ -2535,14 +2639,8 @@ export function ContractWarningOverlay({
     ]
   );
   const quickTelemetryDrilldownImportSelectionRows = React.useMemo(
-    () => (quickTelemetryDrilldownImportConflictOnlyChecked
-      ? quickTelemetryDrilldownImportRowsVisible
-      : quickTelemetryDrilldownImportRows),
-    [
-      quickTelemetryDrilldownImportConflictOnlyChecked,
-      quickTelemetryDrilldownImportRowsVisible,
-      quickTelemetryDrilldownImportRows,
-    ]
+    () => quickTelemetryDrilldownImportRowsVisible,
+    [quickTelemetryDrilldownImportRowsVisible]
   );
   const selectedQuickTelemetryDrilldownImportNames = React.useMemo(
     () =>
@@ -2585,6 +2683,8 @@ export function ContractWarningOverlay({
     const tokens = [
       `selection scope ${selectedQuickTelemetryDrilldownImportNames.length}/${quickTelemetryDrilldownImportSelectionRows.length}`,
       `page ${quickTelemetryDrilldownImportSelectedPageCount}/${quickTelemetryDrilldownImportRowsPage.length} (${pageToken})`,
+      `filter ${quickTelemetryDrilldownImportConflictFilter}`,
+      `query ${quickTelemetryDrilldownImportNameQueryNormalized || "-"}`,
     ];
     if (quickTelemetryDrilldownImportSelectedOffPageCount > 0) {
       tokens.push(`off-page ${quickTelemetryDrilldownImportSelectedOffPageCount}`);
@@ -2597,6 +2697,8 @@ export function ContractWarningOverlay({
     parsedQuickTelemetryDrilldownProfileImportPayload.empty,
     parsedQuickTelemetryDrilldownProfileImportPayload.error,
     quickTelemetryDrilldownImportHiddenSelectionCount,
+    quickTelemetryDrilldownImportConflictFilter,
+    quickTelemetryDrilldownImportNameQueryNormalized,
     quickTelemetryDrilldownImportRowEnd,
     quickTelemetryDrilldownImportRowOffset,
     quickTelemetryDrilldownImportRowsPage.length,
@@ -2642,6 +2744,8 @@ export function ContractWarningOverlay({
         `visible ${quickTelemetryDrilldownImportRowsVisible.length}`,
         `page ${quickTelemetryDrilldownImportRowsVisible.length === 0 ? 0 : quickTelemetryDrilldownImportRowOffset + 1}-${quickTelemetryDrilldownImportRowEnd}/${quickTelemetryDrilldownImportRowsVisible.length}`,
         "selected 0",
+        `filter ${quickTelemetryDrilldownImportConflictFilter}`,
+        `query ${quickTelemetryDrilldownImportNameQueryNormalized || "-"}`,
         `view ${viewToken} (select profiles to import)`,
       ].join(", ");
     }
@@ -2655,12 +2759,16 @@ export function ContractWarningOverlay({
       `overwrite ${overwriteCount}`,
       `changed ${changedOverwrite}${builtinTag}`,
       `unchanged ${unchangedCount}`,
+      `filter ${quickTelemetryDrilldownImportConflictFilter}`,
+      `query ${quickTelemetryDrilldownImportNameQueryNormalized || "-"}`,
       `view ${viewToken}`,
     ].join(", ");
   }, [
     parsedQuickTelemetryDrilldownProfileImportPayload.empty,
     parsedQuickTelemetryDrilldownProfileImportPayload.error,
+    quickTelemetryDrilldownImportConflictFilter,
     quickTelemetryDrilldownImportConflictOnlyChecked,
+    quickTelemetryDrilldownImportNameQueryNormalized,
     quickTelemetryDrilldownImportRowEnd,
     quickTelemetryDrilldownImportRowOffset,
     quickTelemetryDrilldownImportRows,
@@ -5444,6 +5552,33 @@ export function ContractWarningOverlay({
               "conflict-only view",
             ]),
             h("label", {
+              key: "co_filter_import_audit_quick_telemetry_profile_import_name_query_label",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, "name filter:"),
+            h("input", {
+              className: "input",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_name_query",
+              value: quickTelemetryDrilldownImportNameQuery,
+              onChange: (e) => setQuickTelemetryDrilldownImportNameQuery(String(e.target.value || "")),
+              placeholder: "contains profile name",
+              style: { minWidth: "140px", maxWidth: "200px", padding: "5px 7px", fontSize: "11px" },
+            }),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_filter_reset",
+              onClick: () => {
+                setQuickTelemetryDrilldownImportNameQuery("");
+                setQuickTelemetryDrilldownImportConflictFilter("all");
+                setQuickTelemetryDrilldownImportRowOffset(0);
+              },
+              disabled: (
+                !quickTelemetryDrilldownImportNameQueryNormalized
+                && quickTelemetryDrilldownImportConflictFilter === "all"
+                && quickTelemetryDrilldownImportRowOffset <= 0
+              ),
+            }, "Reset Filters"),
+            h("label", {
               key: "co_filter_import_audit_quick_telemetry_profile_import_row_cap_label",
               className: "hint",
               style: { color: "#8eb6ca" },
@@ -5522,6 +5657,35 @@ export function ContractWarningOverlay({
               className: "hint",
               style: { flexBasis: "100%", color: "#8eb6ca" },
             }, `window ${quickTelemetryDrilldownImportRowsVisible.length === 0 ? 0 : quickTelemetryDrilldownImportRowOffset + 1}-${quickTelemetryDrilldownImportRowEnd}/${quickTelemetryDrilldownImportRowsVisible.length}`),
+            h("div", {
+              key: "co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chips",
+              style: {
+                flexBasis: "100%",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px",
+                alignItems: "center",
+              },
+            }, [
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_label",
+                className: "hint",
+                style: { color: "#8eb6ca" },
+              }, "conflict filter:"),
+              ...QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS.map((opt) => {
+                const oid = String(opt?.id || "");
+                const selected = oid === quickTelemetryDrilldownImportConflictFilter;
+                const count = Number(quickTelemetryDrilldownImportConflictFilterCounts[oid] || 0);
+                return h("button", {
+                  className: "btn",
+                  key: `co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chip_${oid}`,
+                  onClick: () => setQuickTelemetryDrilldownImportConflictFilter(oid),
+                  style: selected
+                    ? { borderColor: "#4d7a93", background: "rgba(46, 86, 106, 0.42)" }
+                    : undefined,
+                }, `${String(opt?.label || oid)}:${count}`);
+              }),
+            ]),
             h("span", {
               key: "co_filter_import_audit_quick_telemetry_profile_import_selection_safety",
               className: "hint",
