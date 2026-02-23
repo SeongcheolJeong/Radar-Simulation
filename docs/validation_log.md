@@ -2998,3 +2998,35 @@
     - `reason focus:`
     - `Reset Drilldown`
     - `drilldown `
+
+## Web E2E Graph Audit Quick Telemetry Drilldown Presets + Handoff Bundle (M17.47)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-drilldown-preset/handoff frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - drilldown preset/handoff bundle tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS`
+    - `resolveFilterImportAuditQuickDrilldownPreset`
+    - `buildFilterImportAuditQuickTelemetryDrilldownBundle`
+    - `serializeFilterImportAuditQuickTelemetryDrilldownBundle`
+    - `activeFilterImportAuditQuickTelemetryDrilldownPresetId`
+    - `applyFilterImportAuditQuickTelemetryDrilldownPreset`
+    - `applyFilterImportAuditQuickTelemetryReasonChip`
+    - `graph_lab_contract_overlay_filter_import_quick_apply_telemetry_drilldown`
+  - drilldown copy/export controls confirmed:
+    - `co_filter_import_audit_quick_telemetry_drilldown_presets`
+    - `co_filter_import_audit_quick_telemetry_drilldown_preset_`
+    - `co_filter_import_audit_quick_telemetry_drilldown_copy`
+    - `co_filter_import_audit_quick_telemetry_drilldown_export`
+    - `co_filter_import_audit_quick_telemetry_drilldown_preset_active`
+    - `Copy Drilldown JSON`
+    - `Export Drilldown JSON`
+    - `drilldown preset:`

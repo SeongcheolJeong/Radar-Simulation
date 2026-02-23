@@ -129,6 +129,8 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   filterImportAuditRestorePinnedPreset: true,
   filterImportAuditRestoreActiveEntry: true,
   filterImportAuditQuickApplySyncRestore: false,
+  filterImportAuditQuickTelemetryFailureOnly: false,
+  filterImportAuditQuickTelemetryReasonQuery: "",
   filterImportAuditPinChipFilter: "all",
   detailFieldStates: null,
 };
@@ -293,6 +295,13 @@ const FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS = [
   { id: "query_pin", label: "apply:query+pin", query: true, paging: false, pinned: true, entry: false },
   { id: "paging_entry", label: "apply:paging+entry", query: false, paging: true, pinned: false, entry: true },
 ];
+const FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS = [
+  { id: "all", label: "drill:all", failure_only: false, reason_query: "" },
+  { id: "fail_only", label: "drill:failures", failure_only: true, reason_query: "" },
+  { id: "parse_error", label: "drill:parse_error", failure_only: true, reason_query: "parse_error" },
+  { id: "no_scope", label: "drill:no_scope", failure_only: true, reason_query: "no_scope_enabled" },
+  { id: "invalid_payload", label: "drill:invalid", failure_only: true, reason_query: "invalid_payload" },
+];
 const FILTER_IMPORT_AUDIT_QUICK_TELEMETRY_LIMIT = 64;
 const FILTER_IMPORT_AUDIT_QUICK_TREND_WINDOW = 8;
 const FILTER_IMPORT_AUDIT_QUICK_REASON_CHIP_LIMIT = 5;
@@ -318,6 +327,13 @@ function resolveFilterImportAuditQuickApplyOption(rawOptionId) {
   if (!oid) return FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS[0];
   return FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS.find((row) => String(row?.id || "") === oid)
     || FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS[0];
+}
+
+function resolveFilterImportAuditQuickDrilldownPreset(rawPresetId) {
+  const pid = String(rawPresetId || "").trim();
+  if (!pid) return FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS[0];
+  return FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS.find((row) => String(row?.id || "") === pid)
+    || FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS[0];
 }
 
 function clampInteger(raw, minValue, maxValue, fallback) {
@@ -890,6 +906,31 @@ function buildFilterImportAuditQuickApplyTelemetryBundle(entries) {
 
 function serializeFilterImportAuditQuickApplyTelemetryBundle(entries) {
   return JSON.stringify(buildFilterImportAuditQuickApplyTelemetryBundle(entries), null, 2);
+}
+
+function buildFilterImportAuditQuickTelemetryDrilldownBundle(entries, options = {}) {
+  const rows = Array.isArray(entries) ? entries : [];
+  const normalized = rows
+    .map((row, idx) => normalizeFilterImportAuditQuickApplyTelemetryEntry(row, idx))
+    .filter(Boolean)
+    .slice(0, FILTER_IMPORT_AUDIT_QUICK_TELEMETRY_LIMIT);
+  const opt = options && typeof options === "object" && !Array.isArray(options) ? options : {};
+  return {
+    schema_version: 1,
+    kind: "graph_lab_contract_overlay_filter_import_quick_apply_telemetry_drilldown",
+    exported_at_iso: new Date().toISOString(),
+    filter: {
+      preset_id: String(opt.preset_id || ""),
+      failure_only: Boolean(opt.failure_only),
+      reason_query: String(opt.reason_query || "").slice(0, FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX),
+    },
+    entry_count: normalized.length,
+    entries: normalized,
+  };
+}
+
+function serializeFilterImportAuditQuickTelemetryDrilldownBundle(entries, options = {}) {
+  return JSON.stringify(buildFilterImportAuditQuickTelemetryDrilldownBundle(entries, options), null, 2);
 }
 
 function buildFilterPresetExportBundle(presets) {
@@ -1536,8 +1577,20 @@ export function ContractWarningOverlay({
   const [filterImportAuditResetArmedAtMs, setFilterImportAuditResetArmedAtMs] = React.useState(0);
   const [filterImportAuditResetTickMs, setFilterImportAuditResetTickMs] = React.useState(0);
   const [filterImportAuditQuickApplyTelemetry, setFilterImportAuditQuickApplyTelemetry] = React.useState([]);
-  const [filterImportAuditQuickTelemetryFailureOnlyChecked, setFilterImportAuditQuickTelemetryFailureOnlyChecked] = React.useState(false);
-  const [filterImportAuditQuickTelemetryReasonQuery, setFilterImportAuditQuickTelemetryReasonQuery] = React.useState("");
+  const [filterImportAuditQuickTelemetryFailureOnlyChecked, setFilterImportAuditQuickTelemetryFailureOnlyChecked] = React.useState(
+    Boolean(
+      initialPrefs.filterImportAuditQuickTelemetryFailureOnly !== undefined
+        ? initialPrefs.filterImportAuditQuickTelemetryFailureOnly
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickTelemetryFailureOnly
+    )
+  );
+  const [filterImportAuditQuickTelemetryReasonQuery, setFilterImportAuditQuickTelemetryReasonQuery] = React.useState(
+    String(
+      initialPrefs.filterImportAuditQuickTelemetryReasonQuery
+      || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickTelemetryReasonQuery
+      || ""
+    ).slice(0, FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX)
+  );
   const [filterImportHistoryKeepText, setFilterImportHistoryKeepText] = React.useState("8");
   const [filterImportAuditRowCapText, setFilterImportAuditRowCapText] = React.useState(
     String(initialPrefs.filterImportAuditRowCap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap)
@@ -1576,8 +1629,12 @@ export function ContractWarningOverlay({
       setFilterImportAuditQuickApplySyncRestoreChecked(
         Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickApplySyncRestore)
       );
-      setFilterImportAuditQuickTelemetryFailureOnlyChecked(false);
-      setFilterImportAuditQuickTelemetryReasonQuery("");
+      setFilterImportAuditQuickTelemetryFailureOnlyChecked(
+        Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickTelemetryFailureOnly)
+      );
+      setFilterImportAuditQuickTelemetryReasonQuery(
+        String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickTelemetryReasonQuery || "")
+      );
       setFilterImportAuditPinChipFilter(
         normalizeFilterImportAuditPinChipFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter)
       );
@@ -1732,6 +1789,13 @@ export function ContractWarningOverlay({
   }, [filterImportAuditPinChipFilter]);
 
   React.useEffect(() => {
+    const normalized = String(filterImportAuditQuickTelemetryReasonQuery || "")
+      .slice(0, FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX);
+    if (normalized === filterImportAuditQuickTelemetryReasonQuery) return;
+    setFilterImportAuditQuickTelemetryReasonQuery(normalized);
+  }, [filterImportAuditQuickTelemetryReasonQuery]);
+
+  React.useEffect(() => {
     const normalizedRaw = clampInteger(filterImportAuditRowCapText, 6, 200, 24);
     const normalized = FILTER_IMPORT_AUDIT_ROW_CAP_OPTIONS.includes(String(normalizedRaw))
       ? normalizedRaw
@@ -1823,6 +1887,8 @@ export function ContractWarningOverlay({
       filterImportAuditRestorePinnedPreset: filterImportAuditRestorePinnedPresetChecked,
       filterImportAuditRestoreActiveEntry: filterImportAuditRestoreActiveEntryChecked,
       filterImportAuditQuickApplySyncRestore: filterImportAuditQuickApplySyncRestoreChecked,
+      filterImportAuditQuickTelemetryFailureOnly: filterImportAuditQuickTelemetryFailureOnlyChecked,
+      filterImportAuditQuickTelemetryReasonQuery: filterImportAuditQuickTelemetryReasonQuery,
       filterImportAuditPinChipFilter,
       activeShortcutProfile,
       shortcutProfileDraft,
@@ -1835,6 +1901,8 @@ export function ContractWarningOverlay({
     filterImportAuditPinnedPresetId,
     filterImportAuditRestoreActiveEntryChecked,
     filterImportAuditQuickApplySyncRestoreChecked,
+    filterImportAuditQuickTelemetryFailureOnlyChecked,
+    filterImportAuditQuickTelemetryReasonQuery,
     filterImportAuditPinChipFilter,
     filterImportAuditRestorePagingChecked,
     filterImportAuditRestorePinnedPresetChecked,
@@ -2647,6 +2715,16 @@ export function ContractWarningOverlay({
     () => String(filterImportAuditQuickTelemetryReasonQuery || "").trim().toLowerCase().slice(0, FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX),
     [filterImportAuditQuickTelemetryReasonQuery]
   );
+  const activeFilterImportAuditQuickTelemetryDrilldownPresetId = React.useMemo(() => {
+    const match = FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS.find((preset) => (
+      Boolean(preset?.failure_only) === Boolean(filterImportAuditQuickTelemetryFailureOnlyChecked)
+      && String(preset?.reason_query || "").trim().toLowerCase() === filterImportAuditQuickTelemetryReasonQueryNormalized
+    ));
+    return match ? String(match.id || "") : "custom";
+  }, [
+    filterImportAuditQuickTelemetryFailureOnlyChecked,
+    filterImportAuditQuickTelemetryReasonQueryNormalized,
+  ]);
   const filterImportAuditQuickTelemetryRowsDrilldown = React.useMemo(() => {
     const rows = Array.isArray(filterImportAuditQuickApplyTelemetry) ? filterImportAuditQuickApplyTelemetry : [];
     return rows.filter((row) => {
@@ -2698,8 +2776,9 @@ export function ContractWarningOverlay({
     const failed = visibleRows.filter((row) => !Boolean(row?.apply_ok)).length;
     const latest = visible > 0 ? visibleRows[0] : null;
     const latestReason = String(latest?.apply_reason || "-").slice(0, 28) || "-";
-    return `drilldown ${visible}/${total} fail:${failed} filter:${filterImportAuditQuickTelemetryReasonQueryNormalized || "-"} latest:${latestReason}`;
+    return `drilldown ${visible}/${total} fail:${failed} preset:${activeFilterImportAuditQuickTelemetryDrilldownPresetId} filter:${filterImportAuditQuickTelemetryReasonQueryNormalized || "-"} latest:${latestReason}`;
   }, [
+    activeFilterImportAuditQuickTelemetryDrilldownPresetId,
     filterImportAuditQuickApplyTelemetry,
     filterImportAuditQuickTelemetryReasonQueryNormalized,
     filterImportAuditQuickTelemetryRowsDrilldown,
@@ -2979,11 +3058,87 @@ export function ContractWarningOverlay({
     setFilterImportAuditQuickApplyTelemetry([]);
     setFilterTransferStatus("quick telemetry cleared");
   }, []);
+  const applyFilterImportAuditQuickTelemetryDrilldownPreset = React.useCallback((presetId) => {
+    const preset = resolveFilterImportAuditQuickDrilldownPreset(presetId);
+    setFilterImportAuditQuickTelemetryFailureOnlyChecked(Boolean(preset.failure_only));
+    setFilterImportAuditQuickTelemetryReasonQuery(
+      String(preset.reason_query || "").slice(0, FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX)
+    );
+    setFilterTransferStatus(`quick telemetry drilldown preset: ${String(preset.id || "all")}`);
+  }, []);
   const clearFilterImportAuditQuickTelemetryDrilldown = React.useCallback(() => {
     setFilterImportAuditQuickTelemetryFailureOnlyChecked(false);
     setFilterImportAuditQuickTelemetryReasonQuery("");
     setFilterTransferStatus("quick telemetry drilldown reset");
   }, []);
+  const applyFilterImportAuditQuickTelemetryReasonChip = React.useCallback((reason) => {
+    const nextReason = String(reason || "").trim().slice(0, FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX);
+    if (!nextReason) return;
+    setFilterImportAuditQuickTelemetryFailureOnlyChecked(true);
+    setFilterImportAuditQuickTelemetryReasonQuery(nextReason);
+    setFilterTransferStatus(`quick telemetry reason focus: ${nextReason}`);
+  }, []);
+  const exportFilterImportAuditQuickTelemetryDrilldownJson = React.useCallback(() => {
+    const jsonText = serializeFilterImportAuditQuickTelemetryDrilldownBundle(
+      filterImportAuditQuickTelemetryRowsDrilldown,
+      {
+        preset_id: activeFilterImportAuditQuickTelemetryDrilldownPresetId,
+        failure_only: filterImportAuditQuickTelemetryFailureOnlyChecked,
+        reason_query: filterImportAuditQuickTelemetryReasonQueryNormalized,
+      }
+    );
+    setFilterTransferText(jsonText);
+    try {
+      if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
+        setFilterTransferStatus("quick telemetry drilldown export prepared in-memory only");
+        return;
+      }
+      const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `graph_lab_filter_import_quick_apply_telemetry_drilldown_${ts}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      setFilterTransferStatus(`quick telemetry drilldown export complete (${filterImportAuditQuickTelemetryRowsDrilldown.length} entries)`);
+    } catch (_) {
+      setFilterTransferStatus("quick telemetry drilldown export failed");
+    }
+  }, [
+    activeFilterImportAuditQuickTelemetryDrilldownPresetId,
+    filterImportAuditQuickTelemetryFailureOnlyChecked,
+    filterImportAuditQuickTelemetryReasonQueryNormalized,
+    filterImportAuditQuickTelemetryRowsDrilldown,
+  ]);
+  const copyFilterImportAuditQuickTelemetryDrilldownJson = React.useCallback(async () => {
+    const jsonText = serializeFilterImportAuditQuickTelemetryDrilldownBundle(
+      filterImportAuditQuickTelemetryRowsDrilldown,
+      {
+        preset_id: activeFilterImportAuditQuickTelemetryDrilldownPresetId,
+        failure_only: filterImportAuditQuickTelemetryFailureOnlyChecked,
+        reason_query: filterImportAuditQuickTelemetryReasonQueryNormalized,
+      }
+    );
+    setFilterTransferText(jsonText);
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(jsonText);
+        setFilterTransferStatus(`quick telemetry drilldown copied (${filterImportAuditQuickTelemetryRowsDrilldown.length} entries)`);
+        return;
+      }
+      setFilterTransferStatus("quick telemetry drilldown copy failed: clipboard unavailable");
+    } catch (_) {
+      setFilterTransferStatus("quick telemetry drilldown copy failed: clipboard write error");
+    }
+  }, [
+    activeFilterImportAuditQuickTelemetryDrilldownPresetId,
+    filterImportAuditQuickTelemetryFailureOnlyChecked,
+    filterImportAuditQuickTelemetryReasonQueryNormalized,
+    filterImportAuditQuickTelemetryRowsDrilldown,
+  ]);
   const copyFilterImportAuditDeepLinkBundle = React.useCallback(async () => {
     const bundleText = serializeFilterImportAuditDeepLinkBundle({
       activeEntry: activeFilterImportAuditEntry,
@@ -4349,22 +4504,52 @@ export function ContractWarningOverlay({
               style: { marginLeft: "auto", color: "#8eb6ca" },
             }, filterImportAuditQuickTelemetryDrilldownSummary),
           ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_quick_telemetry_drilldown_presets", style: { gap: "6px", flexWrap: "wrap" } }, [
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_drilldown_preset_label",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, "drilldown preset:"),
+            ...FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS.map((preset) => {
+              const pid = String(preset?.id || "");
+              const selected = pid === activeFilterImportAuditQuickTelemetryDrilldownPresetId;
+              return h("button", {
+                className: "btn",
+                key: `co_filter_import_audit_quick_telemetry_drilldown_preset_${pid}`,
+                onClick: () => applyFilterImportAuditQuickTelemetryDrilldownPreset(pid),
+                style: selected
+                  ? { borderColor: "#4d7a93", background: "rgba(46, 86, 106, 0.42)" }
+                  : undefined,
+              }, String(preset?.label || pid));
+            }),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_drilldown_copy",
+              onClick: copyFilterImportAuditQuickTelemetryDrilldownJson,
+              disabled: filterImportAuditQuickTelemetryRowsDrilldown.length === 0,
+            }, "Copy Drilldown JSON"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_drilldown_export",
+              onClick: exportFilterImportAuditQuickTelemetryDrilldownJson,
+              disabled: filterImportAuditQuickTelemetryRowsDrilldown.length === 0,
+            }, "Export Drilldown JSON"),
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_drilldown_preset_active",
+              className: "hint",
+              style: { marginLeft: "auto", color: "#8eb6ca" },
+            }, `active:${activeFilterImportAuditQuickTelemetryDrilldownPresetId}`),
+          ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_quick_telemetry_reason_chips", style: { gap: "6px", flexWrap: "wrap" } }, [
             h("span", {
               key: "co_filter_import_audit_quick_telemetry_reason_chip_label",
               className: "hint",
               style: { color: "#8eb6ca" },
             }, "reason focus:"),
-            ...filterImportAuditQuickTelemetryReasonChips.map((row, idx) => h("span", {
+            ...filterImportAuditQuickTelemetryReasonChips.map((row, idx) => h("button", {
+              className: "btn",
               key: `co_filter_import_audit_quick_telemetry_reason_chip_${idx}`,
-              className: "hint",
-              style: {
-                border: "1px solid #31576b",
-                borderRadius: "999px",
-                padding: "2px 7px",
-                color: "#8eb6ca",
-                background: "rgba(20, 37, 47, 0.42)",
-              },
+              onClick: () => applyFilterImportAuditQuickTelemetryReasonChip(row.reason),
             }, `${String(row.reason || "-").slice(0, 28)}:${Number(row.count || 0)}`)),
             filterImportAuditQuickTelemetryReasonChips.length === 0 ? h("span", {
               key: "co_filter_import_audit_quick_telemetry_reason_chip_empty",
