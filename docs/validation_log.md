@@ -2800,3 +2800,40 @@
     - `co_filter_import_audit_pin_chip_custom`
     - `co_filter_import_audit_pin_chip_shortcut`
     - `scope:`
+
+## Web E2E Graph Audit Restore Presets + Pin Chip Filter Controls (M17.41)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-restore-presets/pin-chip-filter frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - restore preset tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_RESTORE_PRESETS`
+    - `resolveFilterImportAuditRestorePreset`
+    - `activeFilterImportAuditRestorePresetId`
+    - `co_filter_import_audit_restore_presets`
+    - `co_filter_import_audit_restore_preset_all`
+    - `co_filter_import_audit_restore_preset_query_pin`
+    - `co_filter_import_audit_restore_preset_paging_entry`
+    - `co_filter_import_audit_restore_preset_query_only`
+    - `co_filter_import_audit_restore_preset_active`
+    - `audit restore preset:`
+    - `restore:`
+  - pin chip filter tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_PIN_CHIP_FILTER_OPTIONS`
+    - `normalizeFilterImportAuditPinChipFilter`
+    - `filterImportAuditPinChipFilter`
+    - `filterImportAuditPinChipVisibility`
+    - `co_filter_import_audit_pin_chip_filters`
+    - `co_filter_import_audit_pin_chip_filter_all`
+    - `co_filter_import_audit_pin_chip_filter_state`
+    - `co_filter_import_audit_pin_chip_filter_context`
+    - `co_filter_import_audit_pin_chip_filter_shortcut`
+    - `co_filter_import_audit_pin_chip_filter_active`

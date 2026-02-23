@@ -128,6 +128,7 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   filterImportAuditRestorePaging: true,
   filterImportAuditRestorePinnedPreset: true,
   filterImportAuditRestoreActiveEntry: true,
+  filterImportAuditPinChipFilter: "all",
   detailFieldStates: null,
 };
 const SEVERITY_FILTER_OPTIONS = [
@@ -242,12 +243,59 @@ const FILTER_IMPORT_AUDIT_QUERY_PRESETS = [
   { id: "undo", label: "q:undo", search: "", kind: "undo", mode: "all" },
   { id: "redo", label: "q:redo", search: "", kind: "redo", mode: "all" },
 ];
+const FILTER_IMPORT_AUDIT_RESTORE_PRESETS = [
+  {
+    id: "all",
+    label: "restore:all",
+    query: true,
+    paging: true,
+    pinned: true,
+    entry: true,
+  },
+  {
+    id: "query_pin",
+    label: "restore:query+pin",
+    query: true,
+    paging: false,
+    pinned: true,
+    entry: false,
+  },
+  {
+    id: "paging_entry",
+    label: "restore:paging+entry",
+    query: false,
+    paging: true,
+    pinned: false,
+    entry: true,
+  },
+  {
+    id: "query_only",
+    label: "restore:query",
+    query: true,
+    paging: false,
+    pinned: false,
+    entry: false,
+  },
+];
+const FILTER_IMPORT_AUDIT_PIN_CHIP_FILTER_OPTIONS = [
+  { id: "all", label: "chips:all" },
+  { id: "state", label: "chips:state" },
+  { id: "context", label: "chips:context" },
+  { id: "shortcut", label: "chips:shortcut" },
+];
 
 function resolveFilterImportAuditQueryPreset(rawPresetId) {
   const pid = String(rawPresetId || "").trim();
   if (!pid) return FILTER_IMPORT_AUDIT_QUERY_PRESETS[0];
   return FILTER_IMPORT_AUDIT_QUERY_PRESETS.find((row) => String(row?.id || "") === pid)
     || FILTER_IMPORT_AUDIT_QUERY_PRESETS[0];
+}
+
+function resolveFilterImportAuditRestorePreset(rawPresetId) {
+  const pid = String(rawPresetId || "").trim();
+  if (!pid) return FILTER_IMPORT_AUDIT_RESTORE_PRESETS[0];
+  return FILTER_IMPORT_AUDIT_RESTORE_PRESETS.find((row) => String(row?.id || "") === pid)
+    || FILTER_IMPORT_AUDIT_RESTORE_PRESETS[0];
 }
 
 function clampInteger(raw, minValue, maxValue, fallback) {
@@ -310,6 +358,12 @@ function normalizeFilterImportMode(raw) {
   const text = String(raw || "").trim().toLowerCase();
   const allowed = new Set(FILTER_IMPORT_MODE_OPTIONS.map((x) => String(x.id || "")));
   return allowed.has(text) ? text : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportMode;
+}
+
+function normalizeFilterImportAuditPinChipFilter(raw) {
+  const text = String(raw || "").trim().toLowerCase();
+  const allowed = new Set(FILTER_IMPORT_AUDIT_PIN_CHIP_FILTER_OPTIONS.map((x) => String(x.id || "")));
+  return allowed.has(text) ? text : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter;
 }
 
 function normalizeShortcutBindings(raw, fallback) {
@@ -1400,6 +1454,11 @@ export function ContractWarningOverlay({
         : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry
     )
   );
+  const [filterImportAuditPinChipFilter, setFilterImportAuditPinChipFilter] = React.useState(
+    normalizeFilterImportAuditPinChipFilter(
+      initialPrefs.filterImportAuditPinChipFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter
+    )
+  );
   const [filterImportHistoryKeepText, setFilterImportHistoryKeepText] = React.useState("8");
   const [filterImportAuditRowCapText, setFilterImportAuditRowCapText] = React.useState(
     String(initialPrefs.filterImportAuditRowCap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap)
@@ -1435,6 +1494,9 @@ export function ContractWarningOverlay({
       setFilterImportAuditRestorePagingChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePaging));
       setFilterImportAuditRestorePinnedPresetChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePinnedPreset));
       setFilterImportAuditRestoreActiveEntryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry));
+      setFilterImportAuditPinChipFilter(
+        normalizeFilterImportAuditPinChipFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter)
+      );
       setShowShortcutHelp(false);
       setDetailFieldStates(normalizeDetailFieldStates(DEFAULT_DETAIL_FIELD_STATES, DEFAULT_DETAIL_FIELD_STATES));
       setRowWindowOffset(0);
@@ -1555,6 +1617,12 @@ export function ContractWarningOverlay({
   }, [filterImportAuditPinnedPresetId]);
 
   React.useEffect(() => {
+    const normalized = normalizeFilterImportAuditPinChipFilter(filterImportAuditPinChipFilter);
+    if (normalized === filterImportAuditPinChipFilter) return;
+    setFilterImportAuditPinChipFilter(normalized);
+  }, [filterImportAuditPinChipFilter]);
+
+  React.useEffect(() => {
     const normalizedRaw = clampInteger(filterImportAuditRowCapText, 6, 200, 24);
     const normalized = FILTER_IMPORT_AUDIT_ROW_CAP_OPTIONS.includes(String(normalizedRaw))
       ? normalizedRaw
@@ -1645,6 +1713,7 @@ export function ContractWarningOverlay({
       filterImportAuditRestorePaging: filterImportAuditRestorePagingChecked,
       filterImportAuditRestorePinnedPreset: filterImportAuditRestorePinnedPresetChecked,
       filterImportAuditRestoreActiveEntry: filterImportAuditRestoreActiveEntryChecked,
+      filterImportAuditPinChipFilter,
       activeShortcutProfile,
       shortcutProfileDraft,
       shortcutBindings,
@@ -1655,6 +1724,7 @@ export function ContractWarningOverlay({
     filterImportAuditRowCapText,
     filterImportAuditPinnedPresetId,
     filterImportAuditRestoreActiveEntryChecked,
+    filterImportAuditPinChipFilter,
     filterImportAuditRestorePagingChecked,
     filterImportAuditRestorePinnedPresetChecked,
     filterImportAuditRestoreQueryChecked,
@@ -2348,6 +2418,34 @@ export function ContractWarningOverlay({
     ),
     [activeFilterImportAuditQueryPresetId, filterImportAuditPinnedPresetId]
   );
+  const activeFilterImportAuditRestorePresetId = React.useMemo(() => {
+    const match = FILTER_IMPORT_AUDIT_RESTORE_PRESETS.find((preset) => (
+      Boolean(preset?.query) === Boolean(filterImportAuditRestoreQueryChecked)
+      && Boolean(preset?.paging) === Boolean(filterImportAuditRestorePagingChecked)
+      && Boolean(preset?.pinned) === Boolean(filterImportAuditRestorePinnedPresetChecked)
+      && Boolean(preset?.entry) === Boolean(filterImportAuditRestoreActiveEntryChecked)
+    ));
+    return match ? String(match.id || "") : "custom";
+  }, [
+    filterImportAuditRestoreActiveEntryChecked,
+    filterImportAuditRestorePagingChecked,
+    filterImportAuditRestorePinnedPresetChecked,
+    filterImportAuditRestoreQueryChecked,
+  ]);
+  const filterImportAuditPinChipVisibility = React.useMemo(() => {
+    const mode = normalizeFilterImportAuditPinChipFilter(filterImportAuditPinChipFilter);
+    const showCustom = activeFilterImportAuditQueryPresetId === "custom";
+    if (mode === "state") {
+      return { pinned: true, active: true, custom: false, shortcut: false };
+    }
+    if (mode === "context") {
+      return { pinned: false, active: false, custom: showCustom, shortcut: true };
+    }
+    if (mode === "shortcut") {
+      return { pinned: false, active: false, custom: false, shortcut: true };
+    }
+    return { pinned: true, active: true, custom: showCustom, shortcut: true };
+  }, [activeFilterImportAuditQueryPresetId, filterImportAuditPinChipFilter]);
   const filterImportAuditRowCap = React.useMemo(
     () => clampInteger(filterImportAuditRowCapText, 6, 200, 24),
     [filterImportAuditRowCapText]
@@ -2657,15 +2755,24 @@ export function ContractWarningOverlay({
       return;
     }
     setFilterTransferStatus(
-      `audit deep-link bundle applied (schema:${Number(bundle.schema_version || 0)}, scope:${appliedScopes.join("/")})`
+      `audit deep-link bundle applied (schema:${Number(bundle.schema_version || 0)}, scope:${appliedScopes.join("/")}, restore:${activeFilterImportAuditRestorePresetId})`
     );
   }, [
+    activeFilterImportAuditRestorePresetId,
     filterImportAuditRestoreActiveEntryChecked,
     filterImportAuditRestorePagingChecked,
     filterImportAuditRestorePinnedPresetChecked,
     filterImportAuditRestoreQueryChecked,
     parsedFilterImportAuditDeepLinkPayload,
   ]);
+  const applyFilterImportAuditRestorePreset = React.useCallback((presetId) => {
+    const preset = resolveFilterImportAuditRestorePreset(presetId);
+    setFilterImportAuditRestoreQueryChecked(Boolean(preset.query));
+    setFilterImportAuditRestorePagingChecked(Boolean(preset.paging));
+    setFilterImportAuditRestorePinnedPresetChecked(Boolean(preset.pinned));
+    setFilterImportAuditRestoreActiveEntryChecked(Boolean(preset.entry));
+    setFilterTransferStatus(`audit restore preset: ${String(preset.id || "all")}`);
+  }, []);
   const applyFilterImportAuditQueryPreset = React.useCallback((presetId) => {
     const pid = String(presetId || "").trim();
     const preset = resolveFilterImportAuditQueryPreset(pid);
@@ -3729,8 +3836,48 @@ export function ContractWarningOverlay({
               "entry",
             ]),
           ]),
-          h("div", { className: "btn-row", key: "co_filter_import_audit_pin_state_chips", style: { gap: "6px", flexWrap: "wrap" } }, [
+          h("div", { className: "btn-row", key: "co_filter_import_audit_restore_presets", style: { gap: "6px", flexWrap: "wrap" } }, [
+            h("span", { key: "co_filter_import_audit_restore_preset_label", className: "hint", style: { color: "#8eb6ca" } }, "restore preset:"),
+            ...FILTER_IMPORT_AUDIT_RESTORE_PRESETS.map((preset) => {
+              const pid = String(preset?.id || "");
+              const selected = pid === activeFilterImportAuditRestorePresetId;
+              return h("button", {
+                className: "btn",
+                key: `co_filter_import_audit_restore_preset_${pid}`,
+                onClick: () => applyFilterImportAuditRestorePreset(pid),
+                style: selected
+                  ? { borderColor: "#4d7a93", background: "rgba(46, 86, 106, 0.42)" }
+                  : undefined,
+              }, String(preset?.label || pid));
+            }),
             h("span", {
+              key: "co_filter_import_audit_restore_preset_active",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, `active:${activeFilterImportAuditRestorePresetId}`),
+          ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_pin_chip_filters", style: { gap: "6px", flexWrap: "wrap" } }, [
+            h("span", { key: "co_filter_import_audit_pin_chip_filter_label", className: "hint", style: { color: "#8eb6ca" } }, "chip filter:"),
+            ...FILTER_IMPORT_AUDIT_PIN_CHIP_FILTER_OPTIONS.map((opt) => {
+              const oid = String(opt?.id || "");
+              const selected = oid === filterImportAuditPinChipFilter;
+              return h("button", {
+                className: "btn",
+                key: `co_filter_import_audit_pin_chip_filter_${oid}`,
+                onClick: () => setFilterImportAuditPinChipFilter(oid),
+                style: selected
+                  ? { borderColor: "#4d7a93", background: "rgba(46, 86, 106, 0.42)" }
+                  : undefined,
+              }, String(opt?.label || oid));
+            }),
+            h("span", {
+              key: "co_filter_import_audit_pin_chip_filter_active",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, `active:${filterImportAuditPinChipFilter}`),
+          ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_pin_state_chips", style: { gap: "6px", flexWrap: "wrap" } }, [
+            filterImportAuditPinChipVisibility.pinned ? h("span", {
               key: "co_filter_import_audit_pin_chip_pinned",
               className: "hint",
               style: {
@@ -3740,8 +3887,8 @@ export function ContractWarningOverlay({
                 color: "#b8d5e7",
                 background: "rgba(24, 50, 65, 0.42)",
               },
-            }, `pin:${filterImportAuditPinnedPresetId || "-"}`),
-            h("span", {
+            }, `pin:${filterImportAuditPinnedPresetId || "-"}`) : null,
+            filterImportAuditPinChipVisibility.active ? h("span", {
               key: "co_filter_import_audit_pin_chip_active",
               className: "hint",
               style: {
@@ -3751,8 +3898,8 @@ export function ContractWarningOverlay({
                 color: filterImportAuditPinnedPresetActive ? "#b2e7bf" : "#8eb6ca",
                 background: filterImportAuditPinnedPresetActive ? "rgba(21, 72, 38, 0.38)" : "rgba(20, 37, 47, 0.42)",
               },
-            }, filterImportAuditPinnedPresetActive ? "pin-state:active" : "pin-state:idle"),
-            activeFilterImportAuditQueryPresetId === "custom"
+            }, filterImportAuditPinnedPresetActive ? "pin-state:active" : "pin-state:idle") : null,
+            filterImportAuditPinChipVisibility.custom && activeFilterImportAuditQueryPresetId === "custom"
               ? h("span", {
                 key: "co_filter_import_audit_pin_chip_custom",
                 className: "hint",
@@ -3765,7 +3912,7 @@ export function ContractWarningOverlay({
                 },
               }, "active:custom")
               : null,
-            h("span", {
+            filterImportAuditPinChipVisibility.shortcut ? h("span", {
               key: "co_filter_import_audit_pin_chip_shortcut",
               className: "hint",
               style: {
@@ -3775,7 +3922,7 @@ export function ContractWarningOverlay({
                 color: "#8eb6ca",
                 background: "rgba(20, 37, 47, 0.42)",
               },
-            }, `shortcut:${normalizeShortcutToken(shortcutBindings.audit_pin_toggle) || "-"}`),
+            }, `shortcut:${normalizeShortcutToken(shortcutBindings.audit_pin_toggle) || "-"}`) : null,
           ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_window", style: { gap: "4px" } }, [
             h("label", { key: "co_filter_import_audit_row_cap_label", className: "hint", style: { color: "#8eb6ca" } }, "rows/page:"),

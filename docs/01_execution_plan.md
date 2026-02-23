@@ -149,6 +149,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.38: Audit bundle import/restore + pinned preset quick toggle shortcut
 - [x] M17.39: Audit bundle schema guardrails + operator hints
 - [x] M17.40: Audit bundle partial-restore toggles + pin state chips
+- [x] M17.41: Audit restore preset shortcuts + pin-chip filter controls
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -161,7 +162,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.40 frontend hardening track: add audit-bundle restore presets and chip filtering controls while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.41 frontend hardening track: add scoped deep-link apply quick actions and restore/pin operator hint refinements while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1408,3 +1409,38 @@ M17.40 outcome (2026-02-23):
     - `co_filter_import_audit_pin_chip_active`
     - `co_filter_import_audit_pin_chip_custom`
     - `co_filter_import_audit_pin_chip_shortcut`
+
+M17.41 outcome (2026-02-23):
+
+- audit restore preset shortcuts added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - preset constants/helpers:
+    - `FILTER_IMPORT_AUDIT_RESTORE_PRESETS`
+    - `resolveFilterImportAuditRestorePreset`
+    - `activeFilterImportAuditRestorePresetId`
+  - controls/keys:
+    - `co_filter_import_audit_restore_presets`
+    - `co_filter_import_audit_restore_preset_all`
+    - `co_filter_import_audit_restore_preset_query_pin`
+    - `co_filter_import_audit_restore_preset_paging_entry`
+    - `co_filter_import_audit_restore_preset_query_only`
+    - `co_filter_import_audit_restore_preset_active`
+- deep-link apply status now reports active restore preset:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - status format includes `restore:<preset|custom>`
+- pin-state chip filtering controls added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - option constants/helpers:
+    - `FILTER_IMPORT_AUDIT_PIN_CHIP_FILTER_OPTIONS`
+    - `normalizeFilterImportAuditPinChipFilter`
+    - `filterImportAuditPinChipVisibility`
+  - controls/keys:
+    - `co_filter_import_audit_pin_chip_filters`
+    - `co_filter_import_audit_pin_chip_filter_all`
+    - `co_filter_import_audit_pin_chip_filter_state`
+    - `co_filter_import_audit_pin_chip_filter_context`
+    - `co_filter_import_audit_pin_chip_filter_shortcut`
+    - `co_filter_import_audit_pin_chip_filter_active`
+- prefs persistence/reset updated for chip filter mode:
+  - state: `filterImportAuditPinChipFilter`
+  - persisted key: `filterImportAuditPinChipFilter`
