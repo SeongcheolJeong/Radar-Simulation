@@ -157,6 +157,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.46: Quick telemetry drilldown controls (failure-only + reason focus)
 - [x] M17.47: Quick telemetry drilldown presets + filtered export/copy handoff bundle
 - [x] M17.48: Quick telemetry custom profile save/load + team-share transfer
+- [x] M17.49: Quick telemetry profile import diff/merge guardrails + rollback hint
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -169,7 +170,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.48 frontend hardening track: add drilldown profile diff/merge guardrails (overwrite preview + rollback hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable and continue M14.6 Linux strict pilot closure in parallel.
+Advance post-M17.49 frontend hardening track: add drilldown profile selective-import toggles (pick subset + conflict-only view) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 

@@ -3069,3 +3069,35 @@
     - `co_filter_import_audit_quick_telemetry_profile_import`
     - `co_filter_import_audit_quick_telemetry_profile_transfer_text`
     - `drilldown profile transfer:`
+
+## Web E2E Graph Audit Quick Telemetry Profile Import Guardrails + Rollback Hint (M17.49)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-profile-import-guardrail frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - guardrail derivation tokens confirmed:
+    - `cloneNormalizedQuickTelemetryDrilldownProfiles`
+    - `quickTelemetryDrilldownImportOverwriteConfirmChecked`
+    - `quickTelemetryDrilldownImportUndoSnapshot`
+    - `parsedQuickTelemetryDrilldownProfileImportPayload`
+    - `quickTelemetryDrilldownImportRows`
+    - `quickTelemetryDrilldownImportHasChangedOverwrite`
+    - `quickTelemetryDrilldownImportPreview`
+    - `quickTelemetryDrilldownImportRollbackHint`
+    - `undoLastQuickTelemetryDrilldownProfileImport`
+    - `import blocked: confirm overwrite changed profiles`
+    - `rollback: undo available`
+  - UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_confirm_label`
+    - `co_filter_import_audit_quick_telemetry_profile_import_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_rollback_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_undo`
+    - `co_filter_import_audit_quick_telemetry_profile_import_preview_row_`
