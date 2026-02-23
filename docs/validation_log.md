@@ -2864,3 +2864,36 @@
     - `co_filter_import_audit_restore_scope_hint`
     - `co_filter_import_audit_pin_operator_hint`
     - `restore:q`
+
+## Web E2E Graph Audit Quick-Apply Coupling + Safe Reset Affordances (M17.43)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-quick-coupling/safe-reset frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - quick-apply coupling tokens confirmed:
+    - `filterImportAuditQuickApplySyncRestore`
+    - `filterImportAuditQuickApplySyncRestoreChecked`
+    - `activeFilterImportAuditQuickApplyOptionId`
+    - `co_filter_import_audit_apply_quick_sync`
+    - `co_filter_import_audit_apply_quick_active`
+    - `quick:`
+    - `sync:`
+  - safe reset tokens confirmed:
+    - `co_filter_import_audit_safe_reset_controls`
+    - `co_filter_import_audit_reset_arm`
+    - `co_filter_import_audit_reset_restore_scope`
+    - `co_filter_import_audit_reset_pin_context`
+    - `co_filter_import_audit_reset_operator_context`
+    - `co_filter_import_audit_reset_hint`
+    - `reset blocked: arm reset first`
+    - `audit restore scope reset`
+    - `audit pin context reset`
+    - `audit operator context reset`

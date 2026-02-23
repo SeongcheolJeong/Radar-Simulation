@@ -151,6 +151,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.40: Audit bundle partial-restore toggles + pin state chips
 - [x] M17.41: Audit restore preset shortcuts + pin-chip filter controls
 - [x] M17.42: Audit scoped quick-apply actions + restore/pin operator hints
+- [x] M17.43: Quick-apply/restore coupling + operator-safe reset affordances
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -163,7 +164,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.42 frontend hardening track: add deep-link quick-apply/preset coupling refinements and operator-safe reset affordances while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.43 frontend hardening track: add quick-apply telemetry/export hooks and guided reset safety hints while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1469,3 +1470,31 @@ M17.42 outcome (2026-02-23):
     - `co_filter_import_audit_restore_scope_hint`
     - `co_filter_import_audit_pin_operator_hint`
   - hints summarize effective restore toggle vector and pin/chip operator state
+
+M17.43 outcome (2026-02-23):
+
+- quick-apply/restore coupling refinements added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - coupling state/computed ids:
+    - `filterImportAuditQuickApplySyncRestoreChecked`
+    - `activeFilterImportAuditQuickApplyOptionId`
+  - quick-apply controls/keys:
+    - `co_filter_import_audit_apply_quick_sync`
+    - `co_filter_import_audit_apply_quick_active`
+  - behavior:
+    - quick-apply button selection reflects current restore scope match
+    - optional `sync->restore` applies quick scope into persistent restore toggles on successful apply
+- operator-safe reset affordances added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - safe reset arm state:
+    - `filterImportAuditResetArmedChecked`
+  - controls/keys:
+    - `co_filter_import_audit_safe_reset_controls`
+    - `co_filter_import_audit_reset_arm`
+    - `co_filter_import_audit_reset_restore_scope`
+    - `co_filter_import_audit_reset_pin_context`
+    - `co_filter_import_audit_reset_operator_context`
+    - `co_filter_import_audit_reset_hint`
+  - guard/status:
+    - reset blocked when not armed (`reset blocked: arm reset first`)
+    - explicit status on scoped/operator resets

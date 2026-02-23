@@ -128,6 +128,7 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   filterImportAuditRestorePaging: true,
   filterImportAuditRestorePinnedPreset: true,
   filterImportAuditRestoreActiveEntry: true,
+  filterImportAuditQuickApplySyncRestore: false,
   filterImportAuditPinChipFilter: "all",
   detailFieldStates: null,
 };
@@ -1470,11 +1471,19 @@ export function ContractWarningOverlay({
         : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry
     )
   );
+  const [filterImportAuditQuickApplySyncRestoreChecked, setFilterImportAuditQuickApplySyncRestoreChecked] = React.useState(
+    Boolean(
+      initialPrefs.filterImportAuditQuickApplySyncRestore !== undefined
+        ? initialPrefs.filterImportAuditQuickApplySyncRestore
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickApplySyncRestore
+    )
+  );
   const [filterImportAuditPinChipFilter, setFilterImportAuditPinChipFilter] = React.useState(
     normalizeFilterImportAuditPinChipFilter(
       initialPrefs.filterImportAuditPinChipFilter || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter
     )
   );
+  const [filterImportAuditResetArmedChecked, setFilterImportAuditResetArmedChecked] = React.useState(false);
   const [filterImportHistoryKeepText, setFilterImportHistoryKeepText] = React.useState("8");
   const [filterImportAuditRowCapText, setFilterImportAuditRowCapText] = React.useState(
     String(initialPrefs.filterImportAuditRowCap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap)
@@ -1510,9 +1519,13 @@ export function ContractWarningOverlay({
       setFilterImportAuditRestorePagingChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePaging));
       setFilterImportAuditRestorePinnedPresetChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePinnedPreset));
       setFilterImportAuditRestoreActiveEntryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry));
+      setFilterImportAuditQuickApplySyncRestoreChecked(
+        Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickApplySyncRestore)
+      );
       setFilterImportAuditPinChipFilter(
         normalizeFilterImportAuditPinChipFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter)
       );
+      setFilterImportAuditResetArmedChecked(false);
       setShowShortcutHelp(false);
       setDetailFieldStates(normalizeDetailFieldStates(DEFAULT_DETAIL_FIELD_STATES, DEFAULT_DETAIL_FIELD_STATES));
       setRowWindowOffset(0);
@@ -1729,6 +1742,7 @@ export function ContractWarningOverlay({
       filterImportAuditRestorePaging: filterImportAuditRestorePagingChecked,
       filterImportAuditRestorePinnedPreset: filterImportAuditRestorePinnedPresetChecked,
       filterImportAuditRestoreActiveEntry: filterImportAuditRestoreActiveEntryChecked,
+      filterImportAuditQuickApplySyncRestore: filterImportAuditQuickApplySyncRestoreChecked,
       filterImportAuditPinChipFilter,
       activeShortcutProfile,
       shortcutProfileDraft,
@@ -1740,6 +1754,7 @@ export function ContractWarningOverlay({
     filterImportAuditRowCapText,
     filterImportAuditPinnedPresetId,
     filterImportAuditRestoreActiveEntryChecked,
+    filterImportAuditQuickApplySyncRestoreChecked,
     filterImportAuditPinChipFilter,
     filterImportAuditRestorePagingChecked,
     filterImportAuditRestorePinnedPresetChecked,
@@ -2448,17 +2463,35 @@ export function ContractWarningOverlay({
     filterImportAuditRestorePinnedPresetChecked,
     filterImportAuditRestoreQueryChecked,
   ]);
+  const activeFilterImportAuditQuickApplyOptionId = React.useMemo(() => {
+    const match = FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS.find((option) => (
+      Boolean(option?.query) === Boolean(filterImportAuditRestoreQueryChecked)
+      && Boolean(option?.paging) === Boolean(filterImportAuditRestorePagingChecked)
+      && Boolean(option?.pinned) === Boolean(filterImportAuditRestorePinnedPresetChecked)
+      && Boolean(option?.entry) === Boolean(filterImportAuditRestoreActiveEntryChecked)
+    ));
+    return match ? String(match.id || "") : "custom";
+  }, [
+    filterImportAuditRestoreActiveEntryChecked,
+    filterImportAuditRestorePagingChecked,
+    filterImportAuditRestorePinnedPresetChecked,
+    filterImportAuditRestoreQueryChecked,
+  ]);
   const filterImportAuditRestoreScopeHint = React.useMemo(() => [
     `restore:q${filterImportAuditRestoreQueryChecked ? 1 : 0}`,
     `p${filterImportAuditRestorePagingChecked ? 1 : 0}`,
     `pin${filterImportAuditRestorePinnedPresetChecked ? 1 : 0}`,
     `e${filterImportAuditRestoreActiveEntryChecked ? 1 : 0}`,
     `preset:${activeFilterImportAuditRestorePresetId}`,
+    `quick:${activeFilterImportAuditQuickApplyOptionId}`,
+    `sync:${filterImportAuditQuickApplySyncRestoreChecked ? "on" : "off"}`,
   ].join(" "), [
+    activeFilterImportAuditQuickApplyOptionId,
     activeFilterImportAuditRestorePresetId,
     filterImportAuditRestoreActiveEntryChecked,
     filterImportAuditRestorePagingChecked,
     filterImportAuditRestorePinnedPresetChecked,
+    filterImportAuditQuickApplySyncRestoreChecked,
     filterImportAuditRestoreQueryChecked,
   ]);
   const filterImportAuditPinChipVisibility = React.useMemo(() => {
@@ -2822,13 +2855,63 @@ export function ContractWarningOverlay({
   ]);
   const applyFilterImportAuditDeepLinkQuickScope = React.useCallback((optionId) => {
     const option = resolveFilterImportAuditQuickApplyOption(optionId);
-    applyFilterImportAuditDeepLinkBundleWithScopes({
+    const ok = applyFilterImportAuditDeepLinkBundleWithScopes({
       query: Boolean(option.query),
       paging: Boolean(option.paging),
       pinned: Boolean(option.pinned),
       entry: Boolean(option.entry),
     }, `quick:${String(option.id || "all")}`);
-  }, [applyFilterImportAuditDeepLinkBundleWithScopes]);
+    if (!ok) return;
+    if (!filterImportAuditQuickApplySyncRestoreChecked) return;
+    setFilterImportAuditRestoreQueryChecked(Boolean(option.query));
+    setFilterImportAuditRestorePagingChecked(Boolean(option.paging));
+    setFilterImportAuditRestorePinnedPresetChecked(Boolean(option.pinned));
+    setFilterImportAuditRestoreActiveEntryChecked(Boolean(option.entry));
+    setFilterImportAuditResetArmedChecked(false);
+  }, [applyFilterImportAuditDeepLinkBundleWithScopes, filterImportAuditQuickApplySyncRestoreChecked]);
+  const resetFilterImportAuditRestoreScope = React.useCallback(() => {
+    if (!filterImportAuditResetArmedChecked) {
+      setFilterTransferStatus("reset blocked: arm reset first");
+      return;
+    }
+    setFilterImportAuditRestoreQueryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreQuery));
+    setFilterImportAuditRestorePagingChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePaging));
+    setFilterImportAuditRestorePinnedPresetChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePinnedPreset));
+    setFilterImportAuditRestoreActiveEntryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry));
+    setFilterImportAuditResetArmedChecked(false);
+    setFilterTransferStatus("audit restore scope reset");
+  }, [filterImportAuditResetArmedChecked]);
+  const resetFilterImportAuditPinContext = React.useCallback(() => {
+    if (!filterImportAuditResetArmedChecked) {
+      setFilterTransferStatus("reset blocked: arm reset first");
+      return;
+    }
+    setFilterImportAuditPinnedPresetId(String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinnedPreset || ""));
+    setFilterImportAuditPinChipFilter(
+      normalizeFilterImportAuditPinChipFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter)
+    );
+    setFilterImportAuditResetArmedChecked(false);
+    setFilterTransferStatus("audit pin context reset");
+  }, [filterImportAuditResetArmedChecked]);
+  const resetFilterImportAuditOperatorContext = React.useCallback(() => {
+    if (!filterImportAuditResetArmedChecked) {
+      setFilterTransferStatus("reset blocked: arm reset first");
+      return;
+    }
+    setFilterImportAuditRestoreQueryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreQuery));
+    setFilterImportAuditRestorePagingChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePaging));
+    setFilterImportAuditRestorePinnedPresetChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePinnedPreset));
+    setFilterImportAuditRestoreActiveEntryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry));
+    setFilterImportAuditPinnedPresetId(String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinnedPreset || ""));
+    setFilterImportAuditPinChipFilter(
+      normalizeFilterImportAuditPinChipFilter(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinChipFilter)
+    );
+    setFilterImportAuditQuickApplySyncRestoreChecked(
+      Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickApplySyncRestore)
+    );
+    setFilterImportAuditResetArmedChecked(false);
+    setFilterTransferStatus("audit operator context reset");
+  }, [filterImportAuditResetArmedChecked]);
   const applyFilterImportAuditRestorePreset = React.useCallback((presetId) => {
     const preset = resolveFilterImportAuditRestorePreset(presetId);
     setFilterImportAuditRestoreQueryChecked(Boolean(preset.query));
@@ -3853,18 +3936,76 @@ export function ContractWarningOverlay({
             h("span", { key: "co_filter_import_audit_apply_quick_label", className: "hint", style: { color: "#8eb6ca" } }, "quick apply:"),
             ...FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS.map((opt) => {
               const oid = String(opt?.id || "");
+              const selected = oid === activeFilterImportAuditQuickApplyOptionId;
               return h("button", {
                 className: "btn",
                 key: `co_filter_import_audit_apply_quick_${oid}`,
                 onClick: () => applyFilterImportAuditDeepLinkQuickScope(oid),
                 disabled: parsedFilterImportAuditDeepLinkPayload.empty || Boolean(parsedFilterImportAuditDeepLinkPayload.error),
+                style: selected
+                  ? { borderColor: "#4d7a93", background: "rgba(46, 86, 106, 0.42)" }
+                  : undefined,
               }, String(opt?.label || oid));
             }),
+            h("label", {
+              key: "co_filter_import_audit_apply_quick_sync",
+              className: "hint",
+              style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#8eb6ca" },
+            }, [
+              h("input", {
+                type: "checkbox",
+                checked: Boolean(filterImportAuditQuickApplySyncRestoreChecked),
+                onChange: (e) => setFilterImportAuditQuickApplySyncRestoreChecked(Boolean(e.target.checked)),
+              }),
+              "sync->restore",
+            ]),
+            h("span", {
+              key: "co_filter_import_audit_apply_quick_active",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, `active:${activeFilterImportAuditQuickApplyOptionId}`),
             h("span", {
               key: "co_filter_import_audit_apply_quick_hint",
               className: "hint",
-              style: { color: "#8eb6ca" },
+              style: { marginLeft: "auto", color: "#8eb6ca" },
             }, "quick apply overrides restore scope for this action"),
+          ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_safe_reset_controls", style: { gap: "6px", flexWrap: "wrap" } }, [
+            h("label", {
+              key: "co_filter_import_audit_reset_arm",
+              className: "hint",
+              style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#8eb6ca" },
+            }, [
+              h("input", {
+                type: "checkbox",
+                checked: Boolean(filterImportAuditResetArmedChecked),
+                onChange: (e) => setFilterImportAuditResetArmedChecked(Boolean(e.target.checked)),
+              }),
+              "arm reset",
+            ]),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_reset_restore_scope",
+              onClick: resetFilterImportAuditRestoreScope,
+              disabled: !filterImportAuditResetArmedChecked,
+            }, "Reset Restore Scope"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_reset_pin_context",
+              onClick: resetFilterImportAuditPinContext,
+              disabled: !filterImportAuditResetArmedChecked,
+            }, "Reset Pin Context"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_reset_operator_context",
+              onClick: resetFilterImportAuditOperatorContext,
+              disabled: !filterImportAuditResetArmedChecked,
+            }, "Reset Operator Context"),
+            h("span", {
+              key: "co_filter_import_audit_reset_hint",
+              className: "hint",
+              style: { marginLeft: "auto", color: filterImportAuditResetArmedChecked ? "#e6cf95" : "#8eb6ca" },
+            }, filterImportAuditResetArmedChecked ? "reset armed" : "safe reset: arm required"),
           ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_restore_scopes", style: { gap: "8px", flexWrap: "wrap" } }, [
             h("span", { key: "co_filter_import_audit_restore_label", className: "hint", style: { color: "#8eb6ca" } }, "restore scope:"),
