@@ -159,6 +159,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.48: Quick telemetry custom profile save/load + team-share transfer
 - [x] M17.49: Quick telemetry profile import diff/merge guardrails + rollback hint
 - [x] M17.50: Quick telemetry profile selective import toggles (subset pick + conflict-only view)
+- [x] M17.51: Quick telemetry profile import pagination ergonomics (row-cap/window nav + selection safety hints)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -171,7 +172,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.50 frontend hardening track: add large-payload operator ergonomics for drilldown profile import (row-cap/pagination + selection safety copy) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable and continue M14.6 Linux strict pilot closure in parallel.
+Advance post-M17.51 frontend hardening track: add drilldown profile import query/filter aids (name search + conflict-class chips) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 

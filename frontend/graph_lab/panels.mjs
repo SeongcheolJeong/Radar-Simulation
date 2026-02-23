@@ -132,6 +132,8 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   filterImportAuditQuickApplySyncRestore: false,
   filterImportAuditQuickTelemetryFailureOnly: false,
   filterImportAuditQuickTelemetryReasonQuery: "",
+  quickTelemetryDrilldownImportConflictOnly: false,
+  quickTelemetryDrilldownImportRowCap: "16",
   activeQuickTelemetryDrilldownProfile: "default",
   quickTelemetryDrilldownProfileDraft: "custom_drilldown",
   filterImportAuditPinChipFilter: "all",
@@ -317,6 +319,7 @@ const FILTER_IMPORT_AUDIT_QUICK_TREND_WINDOW = 8;
 const FILTER_IMPORT_AUDIT_QUICK_REASON_CHIP_LIMIT = 5;
 const FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX = 48;
 const FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS = 20_000;
+const QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS = ["8", "16", "24", "48", "96", "160"];
 
 function resolveFilterImportAuditQueryPreset(rawPresetId) {
   const pid = String(rawPresetId || "").trim();
@@ -1777,7 +1780,20 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownTransferText, setQuickTelemetryDrilldownTransferText] = React.useState("");
   const [quickTelemetryDrilldownTransferStatus, setQuickTelemetryDrilldownTransferStatus] = React.useState("");
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
-  const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(false);
+  const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
+    Boolean(
+      initialPrefs.quickTelemetryDrilldownImportConflictOnly !== undefined
+        ? initialPrefs.quickTelemetryDrilldownImportConflictOnly
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictOnly
+    )
+  );
+  const [quickTelemetryDrilldownImportRowCapText, setQuickTelemetryDrilldownImportRowCapText] = React.useState(
+    String(
+      initialPrefs.quickTelemetryDrilldownImportRowCap
+      || CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap
+    )
+  );
+  const [quickTelemetryDrilldownImportRowOffset, setQuickTelemetryDrilldownImportRowOffset] = React.useState(0);
   const [quickTelemetryDrilldownImportOverwriteConfirmChecked, setQuickTelemetryDrilldownImportOverwriteConfirmChecked] = React.useState(false);
   const [quickTelemetryDrilldownImportUndoSnapshot, setQuickTelemetryDrilldownImportUndoSnapshot] = React.useState(null);
   const [detailCopyStatus, setDetailCopyStatus] = React.useState("");
@@ -1818,6 +1834,13 @@ export function ContractWarningOverlay({
       setFilterImportAuditQuickTelemetryReasonQuery(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickTelemetryReasonQuery || "")
       );
+      setQuickTelemetryDrilldownImportConflictOnlyChecked(
+        Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictOnly)
+      );
+      setQuickTelemetryDrilldownImportRowCapText(
+        String(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap || "16")
+      );
+      setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
       );
@@ -1985,6 +2008,15 @@ export function ContractWarningOverlay({
   }, [filterImportAuditQuickTelemetryReasonQuery]);
 
   React.useEffect(() => {
+    const normalizedRaw = clampInteger(quickTelemetryDrilldownImportRowCapText, 4, 200, 16);
+    const normalized = QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS.includes(String(normalizedRaw))
+      ? normalizedRaw
+      : Number(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap || 16);
+    if (String(normalized) === String(quickTelemetryDrilldownImportRowCapText)) return;
+    setQuickTelemetryDrilldownImportRowCapText(String(normalized));
+  }, [quickTelemetryDrilldownImportRowCapText]);
+
+  React.useEffect(() => {
     const normalizedRaw = clampInteger(filterImportAuditRowCapText, 6, 200, 24);
     const normalized = FILTER_IMPORT_AUDIT_ROW_CAP_OPTIONS.includes(String(normalizedRaw))
       ? normalizedRaw
@@ -2098,6 +2130,8 @@ export function ContractWarningOverlay({
       filterImportAuditQuickApplySyncRestore: filterImportAuditQuickApplySyncRestoreChecked,
       filterImportAuditQuickTelemetryFailureOnly: filterImportAuditQuickTelemetryFailureOnlyChecked,
       filterImportAuditQuickTelemetryReasonQuery: filterImportAuditQuickTelemetryReasonQuery,
+      quickTelemetryDrilldownImportConflictOnly: quickTelemetryDrilldownImportConflictOnlyChecked,
+      quickTelemetryDrilldownImportRowCap: quickTelemetryDrilldownImportRowCapText,
       activeQuickTelemetryDrilldownProfile,
       quickTelemetryDrilldownProfileDraft,
       filterImportAuditPinChipFilter,
@@ -2114,6 +2148,8 @@ export function ContractWarningOverlay({
     filterImportAuditQuickApplySyncRestoreChecked,
     filterImportAuditQuickTelemetryFailureOnlyChecked,
     filterImportAuditQuickTelemetryReasonQuery,
+    quickTelemetryDrilldownImportConflictOnlyChecked,
+    quickTelemetryDrilldownImportRowCapText,
     activeQuickTelemetryDrilldownProfile,
     quickTelemetryDrilldownProfileDraft,
     filterImportAuditPinChipFilter,
@@ -2463,6 +2499,41 @@ export function ContractWarningOverlay({
     if (!quickTelemetryDrilldownImportConflictOnlyChecked) return quickTelemetryDrilldownImportRows;
     return quickTelemetryDrilldownImportRows.filter((row) => row.conflict !== "new");
   }, [quickTelemetryDrilldownImportConflictOnlyChecked, quickTelemetryDrilldownImportRows]);
+  const quickTelemetryDrilldownImportRowCap = React.useMemo(
+    () => clampInteger(quickTelemetryDrilldownImportRowCapText, 4, 200, 16),
+    [quickTelemetryDrilldownImportRowCapText]
+  );
+  React.useEffect(() => {
+    setQuickTelemetryDrilldownImportRowOffset(0);
+  }, [
+    quickTelemetryDrilldownImportConflictOnlyChecked,
+    quickTelemetryDrilldownImportNamesSignature,
+    quickTelemetryDrilldownImportRowCap,
+  ]);
+  const quickTelemetryDrilldownImportMaxOffset = React.useMemo(
+    () => Math.max(0, Number(quickTelemetryDrilldownImportRowsVisible.length || 0) - quickTelemetryDrilldownImportRowCap),
+    [quickTelemetryDrilldownImportRowCap, quickTelemetryDrilldownImportRowsVisible.length]
+  );
+  React.useEffect(() => {
+    if (quickTelemetryDrilldownImportRowOffset > quickTelemetryDrilldownImportMaxOffset) {
+      setQuickTelemetryDrilldownImportRowOffset(quickTelemetryDrilldownImportMaxOffset);
+    }
+  }, [quickTelemetryDrilldownImportMaxOffset, quickTelemetryDrilldownImportRowOffset]);
+  const quickTelemetryDrilldownImportRowEnd = Math.min(
+    quickTelemetryDrilldownImportRowsVisible.length,
+    quickTelemetryDrilldownImportRowOffset + quickTelemetryDrilldownImportRowCap
+  );
+  const quickTelemetryDrilldownImportRowsPage = React.useMemo(
+    () => quickTelemetryDrilldownImportRowsVisible.slice(
+      quickTelemetryDrilldownImportRowOffset,
+      quickTelemetryDrilldownImportRowEnd
+    ),
+    [
+      quickTelemetryDrilldownImportRowEnd,
+      quickTelemetryDrilldownImportRowOffset,
+      quickTelemetryDrilldownImportRowsVisible,
+    ]
+  );
   const quickTelemetryDrilldownImportSelectionRows = React.useMemo(
     () => (quickTelemetryDrilldownImportConflictOnlyChecked
       ? quickTelemetryDrilldownImportRowsVisible
@@ -2484,6 +2555,57 @@ export function ContractWarningOverlay({
     const selectedSet = new Set(selectedQuickTelemetryDrilldownImportNames);
     return quickTelemetryDrilldownImportRows.filter((row) => selectedSet.has(String(row.name || "")));
   }, [quickTelemetryDrilldownImportRows, selectedQuickTelemetryDrilldownImportNames]);
+  const quickTelemetryDrilldownImportSelectedAllCount = React.useMemo(
+    () => quickTelemetryDrilldownImportRows.filter((row) => Boolean(quickTelemetryDrilldownImportSelection[row.name])).length,
+    [quickTelemetryDrilldownImportRows, quickTelemetryDrilldownImportSelection]
+  );
+  const quickTelemetryDrilldownImportSelectedPageCount = React.useMemo(
+    () => quickTelemetryDrilldownImportRowsPage.filter((row) => Boolean(quickTelemetryDrilldownImportSelection[row.name])).length,
+    [quickTelemetryDrilldownImportRowsPage, quickTelemetryDrilldownImportSelection]
+  );
+  const quickTelemetryDrilldownImportHiddenSelectionCount = Math.max(
+    0,
+    quickTelemetryDrilldownImportSelectedAllCount - selectedQuickTelemetryDrilldownImportNames.length
+  );
+  const quickTelemetryDrilldownImportSelectedOffPageCount = Math.max(
+    0,
+    selectedQuickTelemetryDrilldownImportNames.length - quickTelemetryDrilldownImportSelectedPageCount
+  );
+  const quickTelemetryDrilldownImportSelectionSafetyHint = React.useMemo(() => {
+    if (parsedQuickTelemetryDrilldownProfileImportPayload.empty) {
+      return "selection safety: waiting for JSON payload";
+    }
+    if (parsedQuickTelemetryDrilldownProfileImportPayload.error) {
+      return `selection safety: invalid payload (${parsedQuickTelemetryDrilldownProfileImportPayload.error})`;
+    }
+    const pageStart = quickTelemetryDrilldownImportRowsVisible.length === 0
+      ? 0
+      : quickTelemetryDrilldownImportRowOffset + 1;
+    const pageToken = `${pageStart}-${quickTelemetryDrilldownImportRowEnd}/${quickTelemetryDrilldownImportRowsVisible.length}`;
+    const tokens = [
+      `selection scope ${selectedQuickTelemetryDrilldownImportNames.length}/${quickTelemetryDrilldownImportSelectionRows.length}`,
+      `page ${quickTelemetryDrilldownImportSelectedPageCount}/${quickTelemetryDrilldownImportRowsPage.length} (${pageToken})`,
+    ];
+    if (quickTelemetryDrilldownImportSelectedOffPageCount > 0) {
+      tokens.push(`off-page ${quickTelemetryDrilldownImportSelectedOffPageCount}`);
+    }
+    if (quickTelemetryDrilldownImportHiddenSelectionCount > 0) {
+      tokens.push(`hidden-by-view ${quickTelemetryDrilldownImportHiddenSelectionCount}`);
+    }
+    return tokens.join(", ");
+  }, [
+    parsedQuickTelemetryDrilldownProfileImportPayload.empty,
+    parsedQuickTelemetryDrilldownProfileImportPayload.error,
+    quickTelemetryDrilldownImportHiddenSelectionCount,
+    quickTelemetryDrilldownImportRowEnd,
+    quickTelemetryDrilldownImportRowOffset,
+    quickTelemetryDrilldownImportRowsPage.length,
+    quickTelemetryDrilldownImportRowsVisible.length,
+    quickTelemetryDrilldownImportSelectedOffPageCount,
+    quickTelemetryDrilldownImportSelectedPageCount,
+    quickTelemetryDrilldownImportSelectionRows.length,
+    selectedQuickTelemetryDrilldownImportNames.length,
+  ]);
   const quickTelemetryDrilldownImportHasChangedOverwrite = React.useMemo(
     () => selectedQuickTelemetryDrilldownImportRows.some((row) => row.conflict !== "new" && Boolean(row.changed)),
     [selectedQuickTelemetryDrilldownImportRows]
@@ -2518,6 +2640,7 @@ export function ContractWarningOverlay({
       return [
         `drilldown profile preview: total ${quickTelemetryDrilldownImportRows.length}`,
         `visible ${quickTelemetryDrilldownImportRowsVisible.length}`,
+        `page ${quickTelemetryDrilldownImportRowsVisible.length === 0 ? 0 : quickTelemetryDrilldownImportRowOffset + 1}-${quickTelemetryDrilldownImportRowEnd}/${quickTelemetryDrilldownImportRowsVisible.length}`,
         "selected 0",
         `view ${viewToken} (select profiles to import)`,
       ].join(", ");
@@ -2527,6 +2650,7 @@ export function ContractWarningOverlay({
       `drilldown profile preview: total ${quickTelemetryDrilldownImportRows.length}`,
       `visible ${quickTelemetryDrilldownImportRowsVisible.length}`,
       `selected ${selectedQuickTelemetryDrilldownImportNames.length}`,
+      `page ${quickTelemetryDrilldownImportRowsVisible.length === 0 ? 0 : quickTelemetryDrilldownImportRowOffset + 1}-${quickTelemetryDrilldownImportRowEnd}/${quickTelemetryDrilldownImportRowsVisible.length}`,
       `new ${newCount}`,
       `overwrite ${overwriteCount}`,
       `changed ${changedOverwrite}${builtinTag}`,
@@ -2537,14 +2661,16 @@ export function ContractWarningOverlay({
     parsedQuickTelemetryDrilldownProfileImportPayload.empty,
     parsedQuickTelemetryDrilldownProfileImportPayload.error,
     quickTelemetryDrilldownImportConflictOnlyChecked,
+    quickTelemetryDrilldownImportRowEnd,
+    quickTelemetryDrilldownImportRowOffset,
     quickTelemetryDrilldownImportRows,
     quickTelemetryDrilldownImportRowsVisible.length,
     selectedQuickTelemetryDrilldownImportNames.length,
     selectedQuickTelemetryDrilldownImportRows,
   ]);
   const quickTelemetryDrilldownImportPreviewRows = React.useMemo(
-    () => quickTelemetryDrilldownImportRowsVisible.slice(0, 16),
-    [quickTelemetryDrilldownImportRowsVisible]
+    () => quickTelemetryDrilldownImportRowsPage,
+    [quickTelemetryDrilldownImportRowsPage]
   );
   const quickTelemetryDrilldownImportRollbackHint = React.useMemo(() => {
     const snap = quickTelemetryDrilldownImportUndoSnapshot;
@@ -2591,6 +2717,30 @@ export function ContractWarningOverlay({
       return next;
     });
   }, [quickTelemetryDrilldownImportSelectionRows]);
+  const selectPageQuickTelemetryDrilldownImportSelection = React.useCallback(() => {
+    setQuickTelemetryDrilldownImportSelection((prev) => {
+      const base = prev && typeof prev === "object" && !Array.isArray(prev) ? prev : {};
+      const next = { ...base };
+      quickTelemetryDrilldownImportRowsPage.forEach((row) => {
+        const name = String(row.name || "");
+        if (!name) return;
+        next[name] = true;
+      });
+      return next;
+    });
+  }, [quickTelemetryDrilldownImportRowsPage]);
+  const clearPageQuickTelemetryDrilldownImportSelection = React.useCallback(() => {
+    setQuickTelemetryDrilldownImportSelection((prev) => {
+      const base = prev && typeof prev === "object" && !Array.isArray(prev) ? prev : {};
+      const next = { ...base };
+      quickTelemetryDrilldownImportRowsPage.forEach((row) => {
+        const name = String(row.name || "");
+        if (!name) return;
+        next[name] = false;
+      });
+      return next;
+    });
+  }, [quickTelemetryDrilldownImportRowsPage]);
   const quickTelemetryDrilldownProfileOptions = React.useMemo(() => {
     const names = Object.keys(quickTelemetryDrilldownProfiles).map((name) => String(name || "").trim()).filter(Boolean);
     names.sort((a, b) => a.localeCompare(b));
@@ -5293,18 +5443,67 @@ export function ContractWarningOverlay({
               }),
               "conflict-only view",
             ]),
+            h("label", {
+              key: "co_filter_import_audit_quick_telemetry_profile_import_row_cap_label",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, "rows/page:"),
+            h("select", {
+              className: "select",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_row_cap",
+              value: String(quickTelemetryDrilldownImportRowCap),
+              onChange: (e) => setQuickTelemetryDrilldownImportRowCapText(
+                String(e.target.value || CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap)
+              ),
+              style: { minWidth: "80px", padding: "5px 7px", fontSize: "11px" },
+            }, QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS.map((opt) =>
+              h("option", { value: opt, key: `co_filter_import_audit_quick_telemetry_profile_import_row_cap_opt_${opt}` }, opt)
+            )),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_page_top",
+              onClick: () => setQuickTelemetryDrilldownImportRowOffset(0),
+              disabled: quickTelemetryDrilldownImportRowOffset <= 0,
+            }, "Top"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_page_prev",
+              onClick: () => setQuickTelemetryDrilldownImportRowOffset((prev) => Math.max(0, Number(prev || 0) - quickTelemetryDrilldownImportRowCap)),
+              disabled: quickTelemetryDrilldownImportRowOffset <= 0,
+            }, "Prev"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_page_next",
+              onClick: () => setQuickTelemetryDrilldownImportRowOffset((prev) => Math.min(
+                quickTelemetryDrilldownImportMaxOffset,
+                Number(prev || 0) + quickTelemetryDrilldownImportRowCap
+              )),
+              disabled: quickTelemetryDrilldownImportRowOffset >= quickTelemetryDrilldownImportMaxOffset,
+            }, "Next"),
             h("button", {
               className: "btn",
               key: "co_filter_import_audit_quick_telemetry_profile_import_select_all",
               onClick: selectAllQuickTelemetryDrilldownImportRowsVisible,
               disabled: quickTelemetryDrilldownImportSelectionRows.length === 0,
-            }, "Select All"),
+            }, "Select Scope"),
             h("button", {
               className: "btn",
               key: "co_filter_import_audit_quick_telemetry_profile_import_select_none",
               onClick: clearQuickTelemetryDrilldownImportSelection,
               disabled: quickTelemetryDrilldownImportSelectionRows.length === 0,
-            }, "Select None"),
+            }, "Clear Scope"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_select_page",
+              onClick: selectPageQuickTelemetryDrilldownImportSelection,
+              disabled: quickTelemetryDrilldownImportPreviewRows.length === 0,
+            }, "Select Page"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_clear_page",
+              onClick: clearPageQuickTelemetryDrilldownImportSelection,
+              disabled: quickTelemetryDrilldownImportPreviewRows.length === 0,
+            }, "Clear Page"),
             h("input", {
               type: "file",
               key: "co_filter_import_audit_quick_telemetry_profile_import_file",
@@ -5316,8 +5515,24 @@ export function ContractWarningOverlay({
             h("span", {
               key: "co_filter_import_audit_quick_telemetry_profile_import_preview",
               className: "hint",
-              style: { marginLeft: "auto", color: "#8eb6ca" },
+              style: { flexBasis: "100%", color: "#8eb6ca" },
             }, quickTelemetryDrilldownImportPreview),
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_profile_import_page_hint",
+              className: "hint",
+              style: { flexBasis: "100%", color: "#8eb6ca" },
+            }, `window ${quickTelemetryDrilldownImportRowsVisible.length === 0 ? 0 : quickTelemetryDrilldownImportRowOffset + 1}-${quickTelemetryDrilldownImportRowEnd}/${quickTelemetryDrilldownImportRowsVisible.length}`),
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_profile_import_selection_safety",
+              className: "hint",
+              style: {
+                flexBasis: "100%",
+                color: (
+                  quickTelemetryDrilldownImportHiddenSelectionCount > 0
+                  || quickTelemetryDrilldownImportSelectedOffPageCount > 0
+                ) ? "#e4cf98" : "#8eb6ca",
+              },
+            }, quickTelemetryDrilldownImportSelectionSafetyHint),
             h("span", {
               key: "co_filter_import_audit_quick_telemetry_profile_import_rollback_hint",
               className: "hint",

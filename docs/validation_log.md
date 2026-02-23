@@ -3132,3 +3132,40 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_rows`
     - `co_filter_import_audit_quick_telemetry_profile_import_rows_empty`
     - `import rows: no matches in current view`
+
+## Web E2E Graph Audit Quick Telemetry Profile Import Pagination + Selection Safety (M17.51)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-profile-import-pagination frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `rg -n "QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS|quickTelemetryDrilldownImportRowCapText|quickTelemetryDrilldownImportRowCap|quickTelemetryDrilldownImportRowOffset|quickTelemetryDrilldownImportMaxOffset|quickTelemetryDrilldownImportRowEnd|quickTelemetryDrilldownImportRowsPage|quickTelemetryDrilldownImportSelectionSafetyHint|quickTelemetryDrilldownImportSelectedOffPageCount|quickTelemetryDrilldownImportHiddenSelectionCount|selectPageQuickTelemetryDrilldownImportSelection|clearPageQuickTelemetryDrilldownImportSelection|co_filter_import_audit_quick_telemetry_profile_import_row_cap|co_filter_import_audit_quick_telemetry_profile_import_page_top|co_filter_import_audit_quick_telemetry_profile_import_page_prev|co_filter_import_audit_quick_telemetry_profile_import_page_next|co_filter_import_audit_quick_telemetry_profile_import_select_page|co_filter_import_audit_quick_telemetry_profile_import_clear_page|co_filter_import_audit_quick_telemetry_profile_import_selection_safety|co_filter_import_audit_quick_telemetry_profile_import_page_hint" /Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - pagination/window derivation tokens confirmed:
+    - `QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS`
+    - `quickTelemetryDrilldownImportRowCapText`
+    - `quickTelemetryDrilldownImportRowCap`
+    - `quickTelemetryDrilldownImportRowOffset`
+    - `quickTelemetryDrilldownImportMaxOffset`
+    - `quickTelemetryDrilldownImportRowEnd`
+    - `quickTelemetryDrilldownImportRowsPage`
+  - selection safety tokens confirmed:
+    - `quickTelemetryDrilldownImportSelectionSafetyHint`
+    - `quickTelemetryDrilldownImportSelectedOffPageCount`
+    - `quickTelemetryDrilldownImportHiddenSelectionCount`
+    - `selectPageQuickTelemetryDrilldownImportSelection`
+    - `clearPageQuickTelemetryDrilldownImportSelection`
+  - UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_row_cap`
+    - `co_filter_import_audit_quick_telemetry_profile_import_page_top`
+    - `co_filter_import_audit_quick_telemetry_profile_import_page_prev`
+    - `co_filter_import_audit_quick_telemetry_profile_import_page_next`
+    - `co_filter_import_audit_quick_telemetry_profile_import_select_page`
+    - `co_filter_import_audit_quick_telemetry_profile_import_clear_page`
+    - `co_filter_import_audit_quick_telemetry_profile_import_page_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_selection_safety`
