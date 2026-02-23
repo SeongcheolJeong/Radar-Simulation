@@ -148,6 +148,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.37: Audit deep-link copy bundle + preset pinning ergonomics
 - [x] M17.38: Audit bundle import/restore + pinned preset quick toggle shortcut
 - [x] M17.39: Audit bundle schema guardrails + operator hints
+- [x] M17.40: Audit bundle partial-restore toggles + pin state chips
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -160,7 +161,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.39 frontend hardening track: add audit-bundle partial-restore toggles and preset pin state chips while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.40 frontend hardening track: add audit-bundle restore presets and chip filtering controls while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1379,3 +1380,31 @@ M17.39 outcome (2026-02-23):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - keys: `co_filter_import_audit_preset_active_hint`, `co_filter_import_audit_shortcut_hint`
   - shows current active query preset + pin-toggle shortcut token
+
+M17.40 outcome (2026-02-23):
+
+- audit deep-link bundle partial-restore toggles added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - restore toggle states:
+    - `filterImportAuditRestoreQueryChecked`
+    - `filterImportAuditRestorePagingChecked`
+    - `filterImportAuditRestorePinnedPresetChecked`
+    - `filterImportAuditRestoreActiveEntryChecked`
+  - controls/keys:
+    - `co_filter_import_audit_restore_scopes`
+    - `co_filter_import_audit_restore_query`
+    - `co_filter_import_audit_restore_paging`
+    - `co_filter_import_audit_restore_pinned`
+    - `co_filter_import_audit_restore_entry`
+- restore apply behavior now scope-aware:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - `applyFilterImportAuditDeepLinkBundleFromText` applies only enabled scopes
+  - no-scope case guarded with explicit status (`audit bundle apply skipped: no restore scope enabled`)
+- preset pin state chips added for operator situational awareness:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - chip container key: `co_filter_import_audit_pin_state_chips`
+  - chip keys:
+    - `co_filter_import_audit_pin_chip_pinned`
+    - `co_filter_import_audit_pin_chip_active`
+    - `co_filter_import_audit_pin_chip_custom`
+    - `co_filter_import_audit_pin_chip_shortcut`

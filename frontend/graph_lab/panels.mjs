@@ -124,6 +124,10 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   filterImportMode: "merge",
   filterImportAuditRowCap: "24",
   filterImportAuditPinnedPreset: "",
+  filterImportAuditRestoreQuery: true,
+  filterImportAuditRestorePaging: true,
+  filterImportAuditRestorePinnedPreset: true,
+  filterImportAuditRestoreActiveEntry: true,
   detailFieldStates: null,
 };
 const SEVERITY_FILTER_OPTIONS = [
@@ -1368,6 +1372,34 @@ export function ContractWarningOverlay({
   const [filterImportAuditPinnedPresetId, setFilterImportAuditPinnedPresetId] = React.useState(
     () => String(initialFilterImportAuditPinnedPresetId || "")
   );
+  const [filterImportAuditRestoreQueryChecked, setFilterImportAuditRestoreQueryChecked] = React.useState(
+    Boolean(
+      initialPrefs.filterImportAuditRestoreQuery !== undefined
+        ? initialPrefs.filterImportAuditRestoreQuery
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreQuery
+    )
+  );
+  const [filterImportAuditRestorePagingChecked, setFilterImportAuditRestorePagingChecked] = React.useState(
+    Boolean(
+      initialPrefs.filterImportAuditRestorePaging !== undefined
+        ? initialPrefs.filterImportAuditRestorePaging
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePaging
+    )
+  );
+  const [filterImportAuditRestorePinnedPresetChecked, setFilterImportAuditRestorePinnedPresetChecked] = React.useState(
+    Boolean(
+      initialPrefs.filterImportAuditRestorePinnedPreset !== undefined
+        ? initialPrefs.filterImportAuditRestorePinnedPreset
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePinnedPreset
+    )
+  );
+  const [filterImportAuditRestoreActiveEntryChecked, setFilterImportAuditRestoreActiveEntryChecked] = React.useState(
+    Boolean(
+      initialPrefs.filterImportAuditRestoreActiveEntry !== undefined
+        ? initialPrefs.filterImportAuditRestoreActiveEntry
+        : CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry
+    )
+  );
   const [filterImportHistoryKeepText, setFilterImportHistoryKeepText] = React.useState("8");
   const [filterImportAuditRowCapText, setFilterImportAuditRowCapText] = React.useState(
     String(initialPrefs.filterImportAuditRowCap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap)
@@ -1399,6 +1431,10 @@ export function ContractWarningOverlay({
       setFilterImportAuditKindFilter("all");
       setFilterImportAuditModeFilter("all");
       setFilterImportAuditPinnedPresetId(String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinnedPreset || ""));
+      setFilterImportAuditRestoreQueryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreQuery));
+      setFilterImportAuditRestorePagingChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePaging));
+      setFilterImportAuditRestorePinnedPresetChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestorePinnedPreset));
+      setFilterImportAuditRestoreActiveEntryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry));
       setShowShortcutHelp(false);
       setDetailFieldStates(normalizeDetailFieldStates(DEFAULT_DETAIL_FIELD_STATES, DEFAULT_DETAIL_FIELD_STATES));
       setRowWindowOffset(0);
@@ -1605,6 +1641,10 @@ export function ContractWarningOverlay({
       filterImportMode,
       filterImportAuditRowCap: filterImportAuditRowCapText,
       filterImportAuditPinnedPreset: filterImportAuditPinnedPresetId,
+      filterImportAuditRestoreQuery: filterImportAuditRestoreQueryChecked,
+      filterImportAuditRestorePaging: filterImportAuditRestorePagingChecked,
+      filterImportAuditRestorePinnedPreset: filterImportAuditRestorePinnedPresetChecked,
+      filterImportAuditRestoreActiveEntry: filterImportAuditRestoreActiveEntryChecked,
       activeShortcutProfile,
       shortcutProfileDraft,
       shortcutBindings,
@@ -1614,6 +1654,10 @@ export function ContractWarningOverlay({
     activeFilterPreset,
     filterImportAuditRowCapText,
     filterImportAuditPinnedPresetId,
+    filterImportAuditRestoreActiveEntryChecked,
+    filterImportAuditRestorePagingChecked,
+    filterImportAuditRestorePinnedPresetChecked,
+    filterImportAuditRestoreQueryChecked,
     filterImportMode,
     filterPresetDraft,
     activeShortcutProfile,
@@ -2585,18 +2629,43 @@ export function ContractWarningOverlay({
     }
     const query = bundle.query && typeof bundle.query === "object" ? bundle.query : {};
     const paging = bundle.paging && typeof bundle.paging === "object" ? bundle.paging : {};
-    setFilterImportAuditSearchText(String(query.search || ""));
-    setFilterImportAuditKindFilter(String(query.kind || "all"));
-    setFilterImportAuditModeFilter(String(query.mode || "all"));
-    setFilterImportAuditRowCapText(String(paging.cap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap));
-    setFilterImportAuditRowOffset(clampInteger(paging.offset, 0, 1_000_000, 0));
-    setFilterImportAuditPinnedPresetId(String(bundle.pinned_preset_id || ""));
-    const activeEntryId = String(bundle.active_entry_id || "").trim();
-    if (activeEntryId) {
-      setActiveFilterImportAuditId(activeEntryId);
+    const appliedScopes = [];
+    if (filterImportAuditRestoreQueryChecked) {
+      setFilterImportAuditSearchText(String(query.search || ""));
+      setFilterImportAuditKindFilter(String(query.kind || "all"));
+      setFilterImportAuditModeFilter(String(query.mode || "all"));
+      appliedScopes.push("query");
     }
-    setFilterTransferStatus(`audit deep-link bundle applied (schema:${Number(bundle.schema_version || 0)})`);
-  }, [parsedFilterImportAuditDeepLinkPayload]);
+    if (filterImportAuditRestorePagingChecked) {
+      setFilterImportAuditRowCapText(String(paging.cap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap));
+      setFilterImportAuditRowOffset(clampInteger(paging.offset, 0, 1_000_000, 0));
+      appliedScopes.push("paging");
+    }
+    if (filterImportAuditRestorePinnedPresetChecked) {
+      setFilterImportAuditPinnedPresetId(String(bundle.pinned_preset_id || ""));
+      appliedScopes.push("pinned");
+    }
+    if (filterImportAuditRestoreActiveEntryChecked) {
+      const activeEntryId = String(bundle.active_entry_id || "").trim();
+      if (activeEntryId) {
+        setActiveFilterImportAuditId(activeEntryId);
+      }
+      appliedScopes.push("entry");
+    }
+    if (appliedScopes.length === 0) {
+      setFilterTransferStatus("audit bundle apply skipped: no restore scope enabled");
+      return;
+    }
+    setFilterTransferStatus(
+      `audit deep-link bundle applied (schema:${Number(bundle.schema_version || 0)}, scope:${appliedScopes.join("/")})`
+    );
+  }, [
+    filterImportAuditRestoreActiveEntryChecked,
+    filterImportAuditRestorePagingChecked,
+    filterImportAuditRestorePinnedPresetChecked,
+    filterImportAuditRestoreQueryChecked,
+    parsedFilterImportAuditDeepLinkPayload,
+  ]);
   const applyFilterImportAuditQueryPreset = React.useCallback((presetId) => {
     const pid = String(presetId || "").trim();
     const preset = resolveFilterImportAuditQueryPreset(pid);
@@ -3608,6 +3677,105 @@ export function ContractWarningOverlay({
               className: "hint",
               style: { marginLeft: "auto", color: "#8eb6ca" },
             }, `filtered ${filterImportAuditRowsFiltered.length}/${filterImportAuditTrail.length}`),
+          ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_restore_scopes", style: { gap: "8px", flexWrap: "wrap" } }, [
+            h("span", { key: "co_filter_import_audit_restore_label", className: "hint", style: { color: "#8eb6ca" } }, "restore scope:"),
+            h("label", {
+              key: "co_filter_import_audit_restore_query",
+              className: "hint",
+              style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#8eb6ca" },
+            }, [
+              h("input", {
+                type: "checkbox",
+                checked: Boolean(filterImportAuditRestoreQueryChecked),
+                onChange: (e) => setFilterImportAuditRestoreQueryChecked(Boolean(e.target.checked)),
+              }),
+              "query",
+            ]),
+            h("label", {
+              key: "co_filter_import_audit_restore_paging",
+              className: "hint",
+              style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#8eb6ca" },
+            }, [
+              h("input", {
+                type: "checkbox",
+                checked: Boolean(filterImportAuditRestorePagingChecked),
+                onChange: (e) => setFilterImportAuditRestorePagingChecked(Boolean(e.target.checked)),
+              }),
+              "paging",
+            ]),
+            h("label", {
+              key: "co_filter_import_audit_restore_pinned",
+              className: "hint",
+              style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#8eb6ca" },
+            }, [
+              h("input", {
+                type: "checkbox",
+                checked: Boolean(filterImportAuditRestorePinnedPresetChecked),
+                onChange: (e) => setFilterImportAuditRestorePinnedPresetChecked(Boolean(e.target.checked)),
+              }),
+              "pinned",
+            ]),
+            h("label", {
+              key: "co_filter_import_audit_restore_entry",
+              className: "hint",
+              style: { display: "inline-flex", alignItems: "center", gap: "4px", color: "#8eb6ca" },
+            }, [
+              h("input", {
+                type: "checkbox",
+                checked: Boolean(filterImportAuditRestoreActiveEntryChecked),
+                onChange: (e) => setFilterImportAuditRestoreActiveEntryChecked(Boolean(e.target.checked)),
+              }),
+              "entry",
+            ]),
+          ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_pin_state_chips", style: { gap: "6px", flexWrap: "wrap" } }, [
+            h("span", {
+              key: "co_filter_import_audit_pin_chip_pinned",
+              className: "hint",
+              style: {
+                border: "1px solid #31576b",
+                borderRadius: "999px",
+                padding: "2px 7px",
+                color: "#b8d5e7",
+                background: "rgba(24, 50, 65, 0.42)",
+              },
+            }, `pin:${filterImportAuditPinnedPresetId || "-"}`),
+            h("span", {
+              key: "co_filter_import_audit_pin_chip_active",
+              className: "hint",
+              style: {
+                border: "1px solid #31576b",
+                borderRadius: "999px",
+                padding: "2px 7px",
+                color: filterImportAuditPinnedPresetActive ? "#b2e7bf" : "#8eb6ca",
+                background: filterImportAuditPinnedPresetActive ? "rgba(21, 72, 38, 0.38)" : "rgba(20, 37, 47, 0.42)",
+              },
+            }, filterImportAuditPinnedPresetActive ? "pin-state:active" : "pin-state:idle"),
+            activeFilterImportAuditQueryPresetId === "custom"
+              ? h("span", {
+                key: "co_filter_import_audit_pin_chip_custom",
+                className: "hint",
+                style: {
+                  border: "1px solid #5c4f2a",
+                  borderRadius: "999px",
+                  padding: "2px 7px",
+                  color: "#e4cf98",
+                  background: "rgba(79, 63, 19, 0.33)",
+                },
+              }, "active:custom")
+              : null,
+            h("span", {
+              key: "co_filter_import_audit_pin_chip_shortcut",
+              className: "hint",
+              style: {
+                border: "1px solid #31576b",
+                borderRadius: "999px",
+                padding: "2px 7px",
+                color: "#8eb6ca",
+                background: "rgba(20, 37, 47, 0.42)",
+              },
+            }, `shortcut:${normalizeShortcutToken(shortcutBindings.audit_pin_toggle) || "-"}`),
           ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_window", style: { gap: "4px" } }, [
             h("label", { key: "co_filter_import_audit_row_cap_label", className: "hint", style: { color: "#8eb6ca" } }, "rows/page:"),

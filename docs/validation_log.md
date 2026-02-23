@@ -2768,3 +2768,35 @@
     - `co_filter_import_audit_shortcut_hint`
     - `audit bundle expects kind=`
     - `pin shortcut:`
+
+## Web E2E Graph Audit Partial-Restore Toggles + Pin State Chips (M17.40)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-partial-restore/pin-chip frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - partial-restore toggle tokens confirmed:
+    - `filterImportAuditRestoreQueryChecked`
+    - `filterImportAuditRestorePagingChecked`
+    - `filterImportAuditRestorePinnedPresetChecked`
+    - `filterImportAuditRestoreActiveEntryChecked`
+    - `co_filter_import_audit_restore_scopes`
+    - `co_filter_import_audit_restore_query`
+    - `co_filter_import_audit_restore_paging`
+    - `co_filter_import_audit_restore_pinned`
+    - `co_filter_import_audit_restore_entry`
+    - `audit bundle apply skipped: no restore scope enabled`
+  - pin state chip tokens confirmed:
+    - `co_filter_import_audit_pin_state_chips`
+    - `co_filter_import_audit_pin_chip_pinned`
+    - `co_filter_import_audit_pin_chip_active`
+    - `co_filter_import_audit_pin_chip_custom`
+    - `co_filter_import_audit_pin_chip_shortcut`
+    - `scope:`
