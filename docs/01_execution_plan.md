@@ -145,6 +145,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.34: Import history maintenance controls + audit search/filter
 - [x] M17.35: Audit query reset ergonomics + row-volume guardrails
 - [x] M17.36: Audit row pagination cap + query preset shortcuts
+- [x] M17.37: Audit deep-link copy bundle + preset pinning ergonomics
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -157,7 +158,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.36 frontend hardening track: add audit-detail deep-link copy bundle and preset pinning ergonomics while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.37 frontend hardening track: add audit bundle import/restore action and pinned-preset quick toggle shortcuts while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1326,3 +1327,21 @@ M17.36 outcome (2026-02-23):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - overlay prefs key now stores `filterImportAuditRowCap`
   - controls/keys: `co_filter_import_audit_row_cap`, `co_filter_import_audit_top`, `co_filter_import_audit_prev`, `co_filter_import_audit_next`, `co_filter_import_audit_window_hint`
+
+M17.37 outcome (2026-02-23):
+
+- audit detail deep-link copy bundle added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - helpers: `buildFilterImportAuditDeepLinkBundle`, `serializeFilterImportAuditDeepLinkBundle`
+  - action callback: `copyFilterImportAuditDeepLinkBundle`
+  - UI key: `co_filter_import_audit_copy_deeplink`
+- audit query preset pinning ergonomics added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - resolver/helper: `resolveFilterImportAuditQueryPreset`
+  - pin state: `filterImportAuditPinnedPresetId`
+  - pin action: `toggleFilterImportAuditPinnedPreset`
+  - controls/keys: `co_filter_import_audit_preset_pin`, `co_filter_import_audit_preset_pin_hint`
+- persistence + reset behavior alignment:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - overlay prefs now persist `filterImportAuditPinnedPreset`
+  - `Reset Query` now restores pinned preset when pinned (`audit query reset -> pinned:<id>`)

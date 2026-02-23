@@ -2685,3 +2685,34 @@
     - `activeFilterImportAuditQueryPresetId`
     - `applyFilterImportAuditQueryPreset`
     - `co_filter_import_audit_preset_`
+
+## Web E2E Graph Audit Deep-Link Bundle + Preset Pinning (M17.37)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-deeplink/preset-pin frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8168/8148)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - deep-link bundle tokens confirmed:
+    - `buildFilterImportAuditDeepLinkBundle`
+    - `serializeFilterImportAuditDeepLinkBundle`
+    - `copyFilterImportAuditDeepLinkBundle`
+    - `co_filter_import_audit_copy_deeplink`
+  - preset pinning tokens confirmed:
+    - `resolveFilterImportAuditQueryPreset`
+    - `filterImportAuditPinnedPresetId`
+    - `filterImportAuditPinnedPresetActive`
+    - `toggleFilterImportAuditPinnedPreset`
+    - `filterImportAuditPresetPinnable`
+    - `co_filter_import_audit_preset_pin`
+    - `co_filter_import_audit_preset_pin_hint`
+    - `filterImportAuditPinnedPreset`
+    - `audit query preset pinned`
+    - `audit query preset unpinned`
+    - `audit query reset -> pinned`
