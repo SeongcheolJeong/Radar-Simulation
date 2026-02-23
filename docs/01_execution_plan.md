@@ -152,6 +152,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.41: Audit restore preset shortcuts + pin-chip filter controls
 - [x] M17.42: Audit scoped quick-apply actions + restore/pin operator hints
 - [x] M17.43: Quick-apply/restore coupling + operator-safe reset affordances
+- [x] M17.44: Quick-apply telemetry/export hooks + guided reset safety hints
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -164,7 +165,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.43 frontend hardening track: add quick-apply telemetry/export hooks and guided reset safety hints while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.44 frontend hardening track: add telemetry trend chips + reset safety copy refinements while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1495,6 +1496,35 @@ M17.43 outcome (2026-02-23):
     - `co_filter_import_audit_reset_pin_context`
     - `co_filter_import_audit_reset_operator_context`
     - `co_filter_import_audit_reset_hint`
-  - guard/status:
-    - reset blocked when not armed (`reset blocked: arm reset first`)
-    - explicit status on scoped/operator resets
+- guard/status:
+  - reset blocked when not armed (`reset blocked: arm reset first`)
+  - explicit status on scoped/operator resets
+
+M17.44 outcome (2026-02-23):
+
+- quick-apply telemetry capture/export hooks added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - telemetry constants/helpers:
+    - `FILTER_IMPORT_AUDIT_QUICK_TELEMETRY_LIMIT`
+    - `normalizeFilterImportAuditQuickApplyTelemetryEntry`
+    - `buildFilterImportAuditQuickApplyTelemetryBundle`
+    - `serializeFilterImportAuditQuickApplyTelemetryBundle`
+  - quick telemetry actions/keys:
+    - `copyFilterImportAuditQuickApplyTelemetryJson`
+    - `exportFilterImportAuditQuickApplyTelemetryJson`
+    - `clearFilterImportAuditQuickApplyTelemetry`
+    - `co_filter_import_audit_quick_telemetry_controls`
+    - `co_filter_import_audit_quick_telemetry_copy`
+    - `co_filter_import_audit_quick_telemetry_export`
+    - `co_filter_import_audit_quick_telemetry_clear`
+    - `co_filter_import_audit_quick_telemetry_summary`
+- quick apply execution now emits telemetry entries:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - telemetry includes option/scope/apply result/sync flags/preset context
+- guided reset safety hints improved:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - constants/hints:
+    - `FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS`
+    - `filterImportAuditResetGuidedHint`
+    - `co_filter_import_audit_reset_guided_hint`
+  - reset arm now includes timeout expiry status (`reset arm expired: re-arm to execute reset`)

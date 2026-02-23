@@ -2897,3 +2897,36 @@
     - `audit restore scope reset`
     - `audit pin context reset`
     - `audit operator context reset`
+
+## Web E2E Graph Audit Quick Telemetry + Guided Reset Hint (M17.44)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-quick-telemetry/guided-reset frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - quick telemetry tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_QUICK_TELEMETRY_LIMIT`
+    - `normalizeFilterImportAuditQuickApplyTelemetryEntry`
+    - `buildFilterImportAuditQuickApplyTelemetryBundle`
+    - `serializeFilterImportAuditQuickApplyTelemetryBundle`
+    - `filterImportAuditQuickApplyTelemetry`
+    - `filterImportAuditQuickApplyTelemetrySummary`
+    - `co_filter_import_audit_quick_telemetry_controls`
+    - `co_filter_import_audit_quick_telemetry_copy`
+    - `co_filter_import_audit_quick_telemetry_export`
+    - `co_filter_import_audit_quick_telemetry_clear`
+    - `co_filter_import_audit_quick_telemetry_summary`
+  - guided reset hint tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS`
+    - `filterImportAuditResetGuidedHint`
+    - `co_filter_import_audit_reset_guided_hint`
+    - `reset arm expired: re-arm to execute reset`
+    - `reset armed: choose reset action within 20s`
+    - `quick-telemetry total:`
