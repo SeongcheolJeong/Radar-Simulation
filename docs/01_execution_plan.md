@@ -144,6 +144,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.33: Audit detail drilldown + local persistence for import history
 - [x] M17.34: Import history maintenance controls + audit search/filter
 - [x] M17.35: Audit query reset ergonomics + row-volume guardrails
+- [x] M17.36: Audit row pagination cap + query preset shortcuts
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -156,7 +157,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.35 frontend hardening track: add audit row pagination cap and query-state preset shortcuts while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.36 frontend hardening track: add audit-detail deep-link copy bundle and preset pinning ergonomics while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1308,3 +1309,20 @@ M17.35 outcome (2026-02-23):
   - toggle key: `co_row_volume_guard_bypass`
   - hint key: `co_row_volume_guard_hint`
   - active-filter token includes `rows_guard:off` when bypass is enabled
+
+M17.36 outcome (2026-02-23):
+
+- audit query preset shortcuts added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - preset model: `FILTER_IMPORT_AUDIT_QUERY_PRESETS`
+  - active preset detector: `activeFilterImportAuditQueryPresetId`
+  - apply callback: `applyFilterImportAuditQueryPreset`
+- audit list pagination cap and window navigation added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - cap options: `FILTER_IMPORT_AUDIT_ROW_CAP_OPTIONS`
+  - paging state: `filterImportAuditRowCapText`, `filterImportAuditRowOffset`
+  - computed window: `filterImportAuditRowsVisible`, `filterImportAuditMaxOffset`, `filterImportAuditRowEnd`
+- audit view-state persistence/UX updates:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - overlay prefs key now stores `filterImportAuditRowCap`
+  - controls/keys: `co_filter_import_audit_row_cap`, `co_filter_import_audit_top`, `co_filter_import_audit_prev`, `co_filter_import_audit_next`, `co_filter_import_audit_window_hint`

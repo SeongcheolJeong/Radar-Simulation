@@ -2654,3 +2654,34 @@
     - `resetFilterImportAuditQuery`
     - `filterImportAuditQueryActive`
     - `co_filter_import_audit_reset`
+
+## Web E2E Graph Audit Pagination Cap + Query Preset Shortcuts (M17.36)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-pagination/preset frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - first attempt observed transient async-cancel timing race in validation script; immediate re-run passed without code changes
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8167/8147)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - audit pagination cap tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_ROW_CAP_OPTIONS`
+    - `filterImportAuditRowCapText`
+    - `filterImportAuditRowOffset`
+    - `filterImportAuditRowsVisible`
+    - `filterImportAuditMaxOffset`
+    - `filterImportAuditRowEnd`
+    - `co_filter_import_audit_row_cap`
+    - `co_filter_import_audit_top`
+    - `co_filter_import_audit_prev`
+    - `co_filter_import_audit_next`
+    - `co_filter_import_audit_window_hint`
+  - audit query preset tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_QUERY_PRESETS`
+    - `activeFilterImportAuditQueryPresetId`
+    - `applyFilterImportAuditQueryPreset`
+    - `co_filter_import_audit_preset_`
