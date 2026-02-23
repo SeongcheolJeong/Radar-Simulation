@@ -2964,3 +2964,37 @@
     - `audit restore scope reset (safe reset consumed)`
     - `audit pin context reset (safe reset consumed)`
     - `audit operator context reset (safe reset consumed)`
+
+## Web E2E Graph Audit Quick Telemetry Drilldown Controls (M17.46)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-drilldown frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - telemetry drilldown derivation tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_QUICK_REASON_CHIP_LIMIT`
+    - `FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX`
+    - `filterImportAuditQuickTelemetryReasonQueryNormalized`
+    - `filterImportAuditQuickTelemetryRowsDrilldown`
+    - `filterImportAuditQuickTelemetryReasonChips`
+    - `filterImportAuditQuickTelemetryDrilldownSummary`
+    - `clearFilterImportAuditQuickTelemetryDrilldown`
+  - failures-only/reason-focus UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_drilldown_controls`
+    - `co_filter_import_audit_quick_telemetry_drilldown_failure_only`
+    - `co_filter_import_audit_quick_telemetry_drilldown_reason_query`
+    - `co_filter_import_audit_quick_telemetry_drilldown_clear`
+    - `co_filter_import_audit_quick_telemetry_drilldown_summary`
+    - `co_filter_import_audit_quick_telemetry_reason_chips`
+    - `co_filter_import_audit_quick_telemetry_reason_chip_`
+    - `failures-only`
+    - `reason focus:`
+    - `Reset Drilldown`
+    - `drilldown `
