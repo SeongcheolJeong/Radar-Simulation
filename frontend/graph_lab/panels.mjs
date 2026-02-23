@@ -226,6 +226,8 @@ const DEFAULT_SHORTCUT_PROFILES = {
   },
 };
 const FILTER_IMPORT_HISTORY_LIMIT = 16;
+const FILTER_IMPORT_AUDIT_DEEPLINK_KIND = "graph_lab_contract_overlay_filter_import_audit_deeplink";
+const FILTER_IMPORT_AUDIT_DEEPLINK_SCHEMA_VERSION = 1;
 const FILTER_IMPORT_AUDIT_KIND_OPTIONS = ["all", "import", "undo", "redo"];
 const FILTER_IMPORT_AUDIT_MODE_OPTIONS = ["all", "merge", "replace_custom", "undo", "redo"];
 const FILTER_IMPORT_AUDIT_ROW_CAP_OPTIONS = ["12", "24", "48", "96", "160", "200"];
@@ -643,8 +645,8 @@ function buildFilterImportAuditDeepLinkBundle(payload) {
     }
   })();
   return {
-    schema_version: 1,
-    kind: "graph_lab_contract_overlay_filter_import_audit_deeplink",
+    schema_version: FILTER_IMPORT_AUDIT_DEEPLINK_SCHEMA_VERSION,
+    kind: FILTER_IMPORT_AUDIT_DEEPLINK_KIND,
     exported_at_iso: new Date().toISOString(),
     deep_link: deepLink,
     active_entry_id: String(selectedEntry?.id || ""),
@@ -688,8 +690,16 @@ function parseFilterImportAuditDeepLinkBundleText(rawText) {
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error("import root must be object");
   }
-  if (String(parsed.kind || "") !== "graph_lab_contract_overlay_filter_import_audit_deeplink") {
+  if (String(parsed.kind || "") !== FILTER_IMPORT_AUDIT_DEEPLINK_KIND) {
     throw new Error("kind mismatch: expected audit deeplink bundle");
+  }
+  const schemaVersionRaw = Number(parsed.schema_version);
+  if (!Number.isFinite(schemaVersionRaw)) {
+    throw new Error("schema_version missing");
+  }
+  const schemaVersion = Math.floor(schemaVersionRaw);
+  if (schemaVersion !== FILTER_IMPORT_AUDIT_DEEPLINK_SCHEMA_VERSION) {
+    throw new Error(`unsupported schema_version (${schemaVersion})`);
   }
   const query = parsed.query && typeof parsed.query === "object" && !Array.isArray(parsed.query)
     ? parsed.query
@@ -712,6 +722,8 @@ function parseFilterImportAuditDeepLinkBundleText(rawText) {
   const isKnownPreset = (id) =>
     Boolean(id) && FILTER_IMPORT_AUDIT_QUERY_PRESETS.some((row) => String(row?.id || "") === id);
   return {
+    schema_version: schemaVersion,
+    kind: FILTER_IMPORT_AUDIT_DEEPLINK_KIND,
     query: {
       search: String(query.search || ""),
       kind,
@@ -2126,9 +2138,10 @@ export function ContractWarningOverlay({
       return `audit bundle: invalid payload (${parsedFilterImportAuditDeepLinkPayload.error})`;
     }
     const bundle = parsedFilterImportAuditDeepLinkPayload.bundle;
+    const schemaVersion = Number(bundle?.schema_version || 0);
     const pinned = String(bundle?.pinned_preset_id || "-");
     const entry = String(bundle?.active_entry_id || "-");
-    return `audit bundle: valid (pinned:${pinned}, entry:${entry})`;
+    return `audit bundle: valid (schema:${schemaVersion}, pinned:${pinned}, entry:${entry})`;
   }, [parsedFilterImportAuditDeepLinkPayload.bundle, parsedFilterImportAuditDeepLinkPayload.empty, parsedFilterImportAuditDeepLinkPayload.error]);
   const filterImportRows = React.useMemo(() => {
     const imported = parsedFilterImportPayload.imported;
@@ -2582,7 +2595,7 @@ export function ContractWarningOverlay({
     if (activeEntryId) {
       setActiveFilterImportAuditId(activeEntryId);
     }
-    setFilterTransferStatus("audit deep-link bundle applied");
+    setFilterTransferStatus(`audit deep-link bundle applied (schema:${Number(bundle.schema_version || 0)})`);
   }, [parsedFilterImportAuditDeepLinkPayload]);
   const applyFilterImportAuditQueryPreset = React.useCallback((presetId) => {
     const pid = String(presetId || "").trim();
@@ -3418,6 +3431,11 @@ export function ContractWarningOverlay({
         },
       }, filterImportAuditDeepLinkPreview),
       h("span", {
+        key: "co_filter_import_audit_bundle_schema_hint",
+        className: "hint",
+        style: { color: "#8eb6ca" },
+      }, `audit bundle expects kind=${FILTER_IMPORT_AUDIT_DEEPLINK_KIND}, schema=${FILTER_IMPORT_AUDIT_DEEPLINK_SCHEMA_VERSION}`),
+      h("span", {
         key: "co_filter_import_history_depth",
         className: "hint",
         style: { color: "#8eb6ca" },
@@ -3521,6 +3539,16 @@ export function ContractWarningOverlay({
               className: "hint",
               style: { color: "#8eb6ca" },
             }, `pinned:${filterImportAuditPinnedPresetId || "-"}`),
+            h("span", {
+              key: "co_filter_import_audit_preset_active_hint",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, `active:${activeFilterImportAuditQueryPresetId}`),
+            h("span", {
+              key: "co_filter_import_audit_shortcut_hint",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, `pin shortcut:${normalizeShortcutToken(shortcutBindings.audit_pin_toggle) || "-"}`),
             h("label", { key: "co_filter_import_prune_label", className: "hint", style: { color: "#8eb6ca" } }, "keep:"),
             h("input", {
               className: "input",

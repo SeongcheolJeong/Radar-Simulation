@@ -147,6 +147,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.36: Audit row pagination cap + query preset shortcuts
 - [x] M17.37: Audit deep-link copy bundle + preset pinning ergonomics
 - [x] M17.38: Audit bundle import/restore + pinned preset quick toggle shortcut
+- [x] M17.39: Audit bundle schema guardrails + operator hints
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -159,7 +160,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.38 frontend hardening track: add bundle schema version guardrails and audit preset/shortcut operator hints while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.39 frontend hardening track: add audit-bundle partial-restore toggles and preset pin state chips while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1363,3 +1364,18 @@ M17.38 outcome (2026-02-23):
   - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
   - bundle kind mismatch/JSON parse errors surfaced via status (`audit bundle apply failed: ...`)
   - restore scope: query (`search/kind/mode`) + paging (`cap/offset`) + pinned preset + active entry id
+
+M17.39 outcome (2026-02-23):
+
+- audit deep-link schema guardrails tightened:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - constants: `FILTER_IMPORT_AUDIT_DEEPLINK_KIND`, `FILTER_IMPORT_AUDIT_DEEPLINK_SCHEMA_VERSION`
+  - parser guards: missing/unsupported `schema_version` now explicit errors
+- operator-facing bundle expectation hint added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - key: `co_filter_import_audit_bundle_schema_hint`
+  - shows expected `kind/schema` for import payload
+- audit preset/shortcut operator hints added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - keys: `co_filter_import_audit_preset_active_hint`, `co_filter_import_audit_shortcut_hint`
+  - shows current active query preset + pin-toggle shortcut token
