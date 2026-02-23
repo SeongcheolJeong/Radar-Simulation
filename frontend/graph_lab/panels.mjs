@@ -332,6 +332,13 @@ const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
   { id: "overwrite_builtin", label: "builtin" },
   { id: "overwrite_custom", label: "custom" },
 ];
+const QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS = [
+  { id: "all", label: "flt:all", conflict_only: false, conflict_filter: "all", name_query: "" },
+  { id: "changed", label: "flt:changed", conflict_only: true, conflict_filter: "overwrite_changed", name_query: "" },
+  { id: "builtin", label: "flt:builtin", conflict_only: true, conflict_filter: "overwrite_builtin", name_query: "" },
+  { id: "custom", label: "flt:custom", conflict_only: true, conflict_filter: "overwrite_custom", name_query: "" },
+  { id: "new", label: "flt:new", conflict_only: false, conflict_filter: "new", name_query: "" },
+];
 
 function resolveFilterImportAuditQueryPreset(rawPresetId) {
   const pid = String(rawPresetId || "").trim();
@@ -359,6 +366,13 @@ function resolveFilterImportAuditQuickDrilldownPreset(rawPresetId) {
   if (!pid) return FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS[0];
   return FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS.find((row) => String(row?.id || "") === pid)
     || FILTER_IMPORT_AUDIT_QUICK_DRILLDOWN_PRESETS[0];
+}
+
+function resolveQuickTelemetryDrilldownImportFilterPreset(rawPresetId) {
+  const pid = String(rawPresetId || "").trim();
+  if (!pid) return QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS[0];
+  return QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS.find((row) => String(row?.id || "") === pid)
+    || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS[0];
 }
 
 function clampInteger(raw, minValue, maxValue, fallback) {
@@ -2594,6 +2608,47 @@ export function ContractWarningOverlay({
     }
     return counts;
   }, [quickTelemetryDrilldownImportRowsByQuery]);
+  const quickTelemetryDrilldownImportFilterPresetCounts = React.useMemo(() => {
+    const counts = {};
+    QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS.forEach((preset) => {
+      const pid = String(preset?.id || "");
+      if (!pid) return;
+      const rowsScope = Boolean(preset?.conflict_only)
+        ? quickTelemetryDrilldownImportRows.filter((row) => String(row?.conflict || "") !== "new")
+        : quickTelemetryDrilldownImportRows;
+      const q = String(preset?.name_query || "").trim().toLowerCase();
+      const rowsByQuery = q
+        ? rowsScope.filter((row) => String(row?.name || "").toLowerCase().includes(q))
+        : rowsScope;
+      const conflictFilter = normalizeQuickTelemetryDrilldownImportConflictFilter(preset?.conflict_filter || "all");
+      counts[pid] = rowsByQuery.filter((row) =>
+        matchQuickTelemetryDrilldownImportConflictFilter(row, conflictFilter)
+      ).length;
+    });
+    return counts;
+  }, [quickTelemetryDrilldownImportRows]);
+  const activeQuickTelemetryDrilldownImportFilterPresetId = React.useMemo(() => {
+    const hit = QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS.find((preset) =>
+      Boolean(preset?.conflict_only) === Boolean(quickTelemetryDrilldownImportConflictOnlyChecked)
+      && normalizeQuickTelemetryDrilldownImportConflictFilter(preset?.conflict_filter || "all")
+        === normalizeQuickTelemetryDrilldownImportConflictFilter(quickTelemetryDrilldownImportConflictFilter)
+      && String(preset?.name_query || "").trim().toLowerCase() === quickTelemetryDrilldownImportNameQueryNormalized
+    );
+    return hit ? String(hit.id || "all") : "custom";
+  }, [
+    quickTelemetryDrilldownImportConflictFilter,
+    quickTelemetryDrilldownImportConflictOnlyChecked,
+    quickTelemetryDrilldownImportNameQueryNormalized,
+  ]);
+  const quickTelemetryDrilldownImportFilterBundleHint = React.useMemo(
+    () => `filter bundle active:${activeQuickTelemetryDrilldownImportFilterPresetId} conflict-only:${quickTelemetryDrilldownImportConflictOnlyChecked ? "on" : "off"} conflict:${quickTelemetryDrilldownImportConflictFilter} query:${quickTelemetryDrilldownImportNameQueryNormalized || "-"}`,
+    [
+      activeQuickTelemetryDrilldownImportFilterPresetId,
+      quickTelemetryDrilldownImportConflictFilter,
+      quickTelemetryDrilldownImportConflictOnlyChecked,
+      quickTelemetryDrilldownImportNameQueryNormalized,
+    ]
+  );
   const quickTelemetryDrilldownImportRowsVisible = React.useMemo(
     () =>
       quickTelemetryDrilldownImportRowsByQuery.filter((row) =>
@@ -2668,6 +2723,34 @@ export function ContractWarningOverlay({
   const quickTelemetryDrilldownImportSelectedOffPageCount = Math.max(
     0,
     selectedQuickTelemetryDrilldownImportNames.length - quickTelemetryDrilldownImportSelectedPageCount
+  );
+  const quickTelemetryDrilldownImportFilterBundleIsDefault = React.useMemo(
+    () =>
+      !quickTelemetryDrilldownImportNameQueryNormalized
+      && normalizeQuickTelemetryDrilldownImportConflictFilter(quickTelemetryDrilldownImportConflictFilter)
+        === normalizeQuickTelemetryDrilldownImportConflictFilter(
+          CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictFilter
+        )
+      && Boolean(quickTelemetryDrilldownImportConflictOnlyChecked)
+        === Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictOnly)
+      && quickTelemetryDrilldownImportRowOffset <= 0,
+    [
+      quickTelemetryDrilldownImportConflictFilter,
+      quickTelemetryDrilldownImportConflictOnlyChecked,
+      quickTelemetryDrilldownImportNameQueryNormalized,
+      quickTelemetryDrilldownImportRowOffset,
+    ]
+  );
+  const quickTelemetryDrilldownImportSafetyBundleIsDefault = React.useMemo(
+    () =>
+      quickTelemetryDrilldownImportFilterBundleIsDefault
+      && quickTelemetryDrilldownImportSelectedAllCount === 0
+      && !quickTelemetryDrilldownImportOverwriteConfirmChecked,
+    [
+      quickTelemetryDrilldownImportFilterBundleIsDefault,
+      quickTelemetryDrilldownImportOverwriteConfirmChecked,
+      quickTelemetryDrilldownImportSelectedAllCount,
+    ]
   );
   const quickTelemetryDrilldownImportSelectionSafetyHint = React.useMemo(() => {
     if (parsedQuickTelemetryDrilldownProfileImportPayload.empty) {
@@ -2793,6 +2876,56 @@ export function ContractWarningOverlay({
     quickTelemetryDrilldownImportHasChangedOverwrite,
     quickTelemetryDrilldownImportOverwriteConfirmChecked,
   ]);
+  const applyQuickTelemetryDrilldownImportFilterPreset = React.useCallback((presetId) => {
+    const preset = resolveQuickTelemetryDrilldownImportFilterPreset(presetId);
+    setQuickTelemetryDrilldownImportConflictOnlyChecked(Boolean(preset?.conflict_only));
+    setQuickTelemetryDrilldownImportConflictFilter(
+      normalizeQuickTelemetryDrilldownImportConflictFilter(preset?.conflict_filter || "all")
+    );
+    setQuickTelemetryDrilldownImportNameQuery(
+      String(preset?.name_query || "").slice(0, QUICK_TELEMETRY_DRILLDOWN_IMPORT_NAME_QUERY_MAX)
+    );
+    setQuickTelemetryDrilldownImportRowOffset(0);
+    setQuickTelemetryDrilldownTransferStatus(`import filter preset applied: ${String(preset?.id || "all")}`);
+  }, []);
+  const resetQuickTelemetryDrilldownImportFilterBundle = React.useCallback(() => {
+    setQuickTelemetryDrilldownImportConflictOnlyChecked(
+      Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictOnly)
+    );
+    setQuickTelemetryDrilldownImportConflictFilter(
+      normalizeQuickTelemetryDrilldownImportConflictFilter(
+        CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictFilter
+      )
+    );
+    setQuickTelemetryDrilldownImportNameQuery(
+      String(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportNameQuery || "")
+    );
+    setQuickTelemetryDrilldownImportRowOffset(0);
+    setQuickTelemetryDrilldownTransferStatus("import filter bundle reset");
+  }, []);
+  const resetQuickTelemetryDrilldownImportSafetyBundle = React.useCallback(() => {
+    setQuickTelemetryDrilldownImportConflictOnlyChecked(
+      Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictOnly)
+    );
+    setQuickTelemetryDrilldownImportConflictFilter(
+      normalizeQuickTelemetryDrilldownImportConflictFilter(
+        CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportConflictFilter
+      )
+    );
+    setQuickTelemetryDrilldownImportNameQuery(
+      String(CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportNameQuery || "")
+    );
+    const nextSelection = {};
+    quickTelemetryDrilldownImportRows.forEach((row) => {
+      const name = String(row?.name || "");
+      if (!name) return;
+      nextSelection[name] = false;
+    });
+    setQuickTelemetryDrilldownImportSelection(nextSelection);
+    setQuickTelemetryDrilldownImportOverwriteConfirmChecked(false);
+    setQuickTelemetryDrilldownImportRowOffset(0);
+    setQuickTelemetryDrilldownTransferStatus("import safety bundle reset (filters + selection + overwrite confirm)");
+  }, [quickTelemetryDrilldownImportRows]);
   const toggleQuickTelemetryDrilldownImportSelection = React.useCallback((profileName) => {
     const name = String(profileName || "").trim();
     if (!name) return;
@@ -5551,6 +5684,40 @@ export function ContractWarningOverlay({
               }),
               "conflict-only view",
             ]),
+            h("div", {
+              key: "co_filter_import_audit_quick_telemetry_profile_import_filter_presets",
+              style: {
+                flexBasis: "100%",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px",
+                alignItems: "center",
+              },
+            }, [
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_preset_label",
+                className: "hint",
+                style: { color: "#8eb6ca" },
+              }, "filter presets:"),
+              ...QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS.map((preset) => {
+                const pid = String(preset?.id || "");
+                const selected = pid === activeQuickTelemetryDrilldownImportFilterPresetId;
+                const count = Number(quickTelemetryDrilldownImportFilterPresetCounts[pid] || 0);
+                return h("button", {
+                  className: "btn",
+                  key: `co_filter_import_audit_quick_telemetry_profile_import_filter_preset_chip_${pid}`,
+                  onClick: () => applyQuickTelemetryDrilldownImportFilterPreset(pid),
+                  style: selected
+                    ? { borderColor: "#4d7a93", background: "rgba(46, 86, 106, 0.42)" }
+                    : undefined,
+                }, `${String(preset?.label || pid)}:${count}`);
+              }),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_preset_active",
+                className: "hint",
+                style: { marginLeft: "auto", color: "#8eb6ca" },
+              }, `active:${activeQuickTelemetryDrilldownImportFilterPresetId}`),
+            ]),
             h("label", {
               key: "co_filter_import_audit_quick_telemetry_profile_import_name_query_label",
               className: "hint",
@@ -5567,17 +5734,15 @@ export function ContractWarningOverlay({
             h("button", {
               className: "btn",
               key: "co_filter_import_audit_quick_telemetry_profile_import_filter_reset",
-              onClick: () => {
-                setQuickTelemetryDrilldownImportNameQuery("");
-                setQuickTelemetryDrilldownImportConflictFilter("all");
-                setQuickTelemetryDrilldownImportRowOffset(0);
-              },
-              disabled: (
-                !quickTelemetryDrilldownImportNameQueryNormalized
-                && quickTelemetryDrilldownImportConflictFilter === "all"
-                && quickTelemetryDrilldownImportRowOffset <= 0
-              ),
-            }, "Reset Filters"),
+              onClick: resetQuickTelemetryDrilldownImportFilterBundle,
+              disabled: quickTelemetryDrilldownImportFilterBundleIsDefault,
+            }, "Reset Filter Bundle"),
+            h("button", {
+              className: "btn",
+              key: "co_filter_import_audit_quick_telemetry_profile_import_safety_bundle_reset",
+              onClick: resetQuickTelemetryDrilldownImportSafetyBundle,
+              disabled: quickTelemetryDrilldownImportSafetyBundleIsDefault,
+            }, "Reset Safety Bundle"),
             h("label", {
               key: "co_filter_import_audit_quick_telemetry_profile_import_row_cap_label",
               className: "hint",
@@ -5686,6 +5851,11 @@ export function ContractWarningOverlay({
                 }, `${String(opt?.label || oid)}:${count}`);
               }),
             ]),
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_hint",
+              className: "hint",
+              style: { flexBasis: "100%", color: "#8eb6ca" },
+            }, quickTelemetryDrilldownImportFilterBundleHint),
             h("span", {
               key: "co_filter_import_audit_quick_telemetry_profile_import_selection_safety",
               className: "hint",

@@ -3197,3 +3197,34 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_reset`
     - `co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chips`
     - `co_filter_import_audit_quick_telemetry_profile_import_conflict_filter_chip_`
+
+## Web E2E Graph Audit Quick Telemetry Profile Import Filter Presets + Reset Bundles (M17.53)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-profile-import-filter-presets frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `rg -n "QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS|resolveQuickTelemetryDrilldownImportFilterPreset|quickTelemetryDrilldownImportFilterPresetCounts|activeQuickTelemetryDrilldownImportFilterPresetId|quickTelemetryDrilldownImportFilterBundleHint|quickTelemetryDrilldownImportFilterBundleIsDefault|quickTelemetryDrilldownImportSafetyBundleIsDefault|applyQuickTelemetryDrilldownImportFilterPreset|resetQuickTelemetryDrilldownImportFilterBundle|resetQuickTelemetryDrilldownImportSafetyBundle|co_filter_import_audit_quick_telemetry_profile_import_filter_presets|co_filter_import_audit_quick_telemetry_profile_import_filter_preset_chip_|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_hint|co_filter_import_audit_quick_telemetry_profile_import_safety_bundle_reset" /Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - preset/bundle derivation tokens confirmed:
+    - `QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS`
+    - `resolveQuickTelemetryDrilldownImportFilterPreset`
+    - `quickTelemetryDrilldownImportFilterPresetCounts`
+    - `activeQuickTelemetryDrilldownImportFilterPresetId`
+    - `quickTelemetryDrilldownImportFilterBundleHint`
+    - `quickTelemetryDrilldownImportFilterBundleIsDefault`
+    - `quickTelemetryDrilldownImportSafetyBundleIsDefault`
+    - `applyQuickTelemetryDrilldownImportFilterPreset`
+    - `resetQuickTelemetryDrilldownImportFilterBundle`
+    - `resetQuickTelemetryDrilldownImportSafetyBundle`
+  - UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_presets`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_preset_chip_`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_reset`
+    - `co_filter_import_audit_quick_telemetry_profile_import_safety_bundle_reset`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_hint`
