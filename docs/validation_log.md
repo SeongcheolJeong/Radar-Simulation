@@ -3101,3 +3101,34 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_rollback_hint`
     - `co_filter_import_audit_quick_telemetry_profile_import_undo`
     - `co_filter_import_audit_quick_telemetry_profile_import_preview_row_`
+
+## Web E2E Graph Audit Quick Telemetry Profile Selective Import + Conflict-Only View (M17.50)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-profile-selective-import frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `rg -n "quickTelemetryDrilldownImportSelection|quickTelemetryDrilldownImportConflictOnlyChecked|quickTelemetryDrilldownImportRowsVisible|quickTelemetryDrilldownImportSelectionRows|selectedQuickTelemetryDrilldownImportNames|toggleQuickTelemetryDrilldownImportSelection|selectAllQuickTelemetryDrilldownImportRowsVisible|clearQuickTelemetryDrilldownImportSelection|import skipped: select profiles|co_filter_import_audit_quick_telemetry_profile_import_conflict_only|co_filter_import_audit_quick_telemetry_profile_import_select_all|co_filter_import_audit_quick_telemetry_profile_import_select_none|co_filter_import_audit_quick_telemetry_profile_import_rows|import rows: no matches in current view" /Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - selective-import/conflict-only derivation tokens confirmed:
+    - `quickTelemetryDrilldownImportSelection`
+    - `quickTelemetryDrilldownImportConflictOnlyChecked`
+    - `quickTelemetryDrilldownImportRowsVisible`
+    - `quickTelemetryDrilldownImportSelectionRows`
+    - `selectedQuickTelemetryDrilldownImportNames`
+    - `toggleQuickTelemetryDrilldownImportSelection`
+    - `selectAllQuickTelemetryDrilldownImportRowsVisible`
+    - `clearQuickTelemetryDrilldownImportSelection`
+    - `import skipped: select profiles`
+  - UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_conflict_only`
+    - `co_filter_import_audit_quick_telemetry_profile_import_select_all`
+    - `co_filter_import_audit_quick_telemetry_profile_import_select_none`
+    - `co_filter_import_audit_quick_telemetry_profile_import_rows`
+    - `co_filter_import_audit_quick_telemetry_profile_import_rows_empty`
+    - `import rows: no matches in current view`
