@@ -294,6 +294,7 @@ const FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS = [
   { id: "paging_entry", label: "apply:paging+entry", query: false, paging: true, pinned: false, entry: true },
 ];
 const FILTER_IMPORT_AUDIT_QUICK_TELEMETRY_LIMIT = 64;
+const FILTER_IMPORT_AUDIT_QUICK_TREND_WINDOW = 8;
 const FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS = 20_000;
 
 function resolveFilterImportAuditQueryPreset(rawPresetId) {
@@ -1531,6 +1532,7 @@ export function ContractWarningOverlay({
   );
   const [filterImportAuditResetArmedChecked, setFilterImportAuditResetArmedChecked] = React.useState(false);
   const [filterImportAuditResetArmedAtMs, setFilterImportAuditResetArmedAtMs] = React.useState(0);
+  const [filterImportAuditResetTickMs, setFilterImportAuditResetTickMs] = React.useState(0);
   const [filterImportAuditQuickApplyTelemetry, setFilterImportAuditQuickApplyTelemetry] = React.useState([]);
   const [filterImportHistoryKeepText, setFilterImportHistoryKeepText] = React.useState("8");
   const [filterImportAuditRowCapText, setFilterImportAuditRowCapText] = React.useState(
@@ -1695,10 +1697,23 @@ export function ContractWarningOverlay({
   }, [filterImportAuditPinnedPresetId]);
 
   React.useEffect(() => {
+    if (!filterImportAuditResetArmedChecked) {
+      setFilterImportAuditResetTickMs(0);
+      return;
+    }
+    setFilterImportAuditResetTickMs(Date.now());
+    const timer = setInterval(() => {
+      setFilterImportAuditResetTickMs(Date.now());
+    }, 1_000);
+    return () => clearInterval(timer);
+  }, [filterImportAuditResetArmedChecked]);
+
+  React.useEffect(() => {
     if (!filterImportAuditResetArmedChecked) return;
     const timeout = setTimeout(() => {
       setFilterImportAuditResetArmedChecked(false);
       setFilterImportAuditResetArmedAtMs(0);
+      setFilterImportAuditResetTickMs(0);
       setFilterTransferStatus("reset arm expired: re-arm to execute reset");
     }, FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS);
     return () => clearTimeout(timeout);
@@ -2585,16 +2600,57 @@ export function ContractWarningOverlay({
     const failed = total - success;
     const latest = total > 0 ? rows[0] : null;
     const latestOption = String(latest?.option_id || "-");
-    return `quick-telemetry total:${total} ok:${success} fail:${failed} latest:${latestOption}`;
+    const recentRows = rows.slice(0, FILTER_IMPORT_AUDIT_QUICK_TREND_WINDOW);
+    const recentTotal = recentRows.length;
+    const recentSuccess = recentRows.filter((row) => Boolean(row?.apply_ok)).length;
+    return `quick-telemetry total:${total} ok:${success} fail:${failed} latest:${latestOption} recent:${recentSuccess}/${recentTotal}`;
+  }, [filterImportAuditQuickApplyTelemetry]);
+  const filterImportAuditQuickTelemetryTrend = React.useMemo(() => {
+    const rows = Array.isArray(filterImportAuditQuickApplyTelemetry) ? filterImportAuditQuickApplyTelemetry : [];
+    const recentRows = rows.slice(0, FILTER_IMPORT_AUDIT_QUICK_TREND_WINDOW);
+    const recentCount = recentRows.length;
+    const recentOk = recentRows.filter((row) => Boolean(row?.apply_ok)).length;
+    const recentFail = recentCount - recentOk;
+    let failStreak = 0;
+    for (let idx = 0; idx < recentRows.length; idx += 1) {
+      if (Boolean(recentRows[idx]?.apply_ok)) break;
+      failStreak += 1;
+    }
+    const syncApplied = recentRows.filter((row) => Boolean(row?.sync_applied)).length;
+    const latest = recentCount > 0 ? recentRows[0] : null;
+    const recentOkPct = recentCount > 0 ? Math.round((recentOk / recentCount) * 100) : 0;
+    const syncAppliedPct = recentCount > 0 ? Math.round((syncApplied / recentCount) * 100) : 0;
+    const latestReasonRaw = String(latest?.apply_reason || "-").trim();
+    const latestReason = latestReasonRaw.length > 36
+      ? `${latestReasonRaw.slice(0, 36)}...`
+      : (latestReasonRaw || "-");
+    const latestOption = String(latest?.option_id || "-").trim() || "-";
+    return {
+      recentCount,
+      recentOk,
+      recentFail,
+      recentOkPct,
+      failStreak,
+      syncApplied,
+      syncAppliedPct,
+      latestReason,
+      latestOption,
+    };
   }, [filterImportAuditQuickApplyTelemetry]);
   const filterImportAuditResetGuidedHint = React.useMemo(() => {
     if (!filterImportAuditResetArmedChecked) {
       return `safe reset guide: arm reset -> choose action (auto-disarm ${Math.floor(FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS / 1000)}s)`;
     }
     const armedAt = Number(filterImportAuditResetArmedAtMs || 0);
-    const elapsedSec = armedAt > 0 ? Math.max(0, Math.floor((Date.now() - armedAt) / 1000)) : 0;
-    return `safe reset guide: armed (${elapsedSec}s) -> next reset executes then disarms`;
-  }, [filterImportAuditResetArmedAtMs, filterImportAuditResetArmedChecked]);
+    const tickMs = Number(filterImportAuditResetTickMs || 0);
+    const nowMs = tickMs > 0 ? tickMs : Date.now();
+    const elapsedMs = armedAt > 0 ? Math.max(0, nowMs - armedAt) : 0;
+    const remainingSec = Math.max(0, Math.ceil((FILTER_IMPORT_AUDIT_RESET_ARM_TIMEOUT_MS - elapsedMs) / 1000));
+    if (remainingSec <= 5) {
+      return `safe reset guide: armed (${remainingSec}s left) -> execute one reset action now`;
+    }
+    return `safe reset guide: armed (${remainingSec}s left) -> next reset executes then disarms`;
+  }, [filterImportAuditResetArmedAtMs, filterImportAuditResetArmedChecked, filterImportAuditResetTickMs]);
   const filterImportAuditRowCap = React.useMemo(
     () => clampInteger(filterImportAuditRowCapText, 6, 200, 24),
     [filterImportAuditRowCapText]
@@ -3050,7 +3106,7 @@ export function ContractWarningOverlay({
   ]);
   const resetFilterImportAuditRestoreScope = React.useCallback(() => {
     if (!filterImportAuditResetArmedChecked) {
-      setFilterTransferStatus("reset blocked: arm reset first");
+      setFilterTransferStatus("reset blocked: arm reset first (safe window required)");
       return;
     }
     setFilterImportAuditRestoreQueryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreQuery));
@@ -3059,11 +3115,12 @@ export function ContractWarningOverlay({
     setFilterImportAuditRestoreActiveEntryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreActiveEntry));
     setFilterImportAuditResetArmedChecked(false);
     setFilterImportAuditResetArmedAtMs(0);
-    setFilterTransferStatus("audit restore scope reset");
+    setFilterImportAuditResetTickMs(0);
+    setFilterTransferStatus("audit restore scope reset (safe reset consumed)");
   }, [filterImportAuditResetArmedChecked]);
   const resetFilterImportAuditPinContext = React.useCallback(() => {
     if (!filterImportAuditResetArmedChecked) {
-      setFilterTransferStatus("reset blocked: arm reset first");
+      setFilterTransferStatus("reset blocked: arm reset first (safe window required)");
       return;
     }
     setFilterImportAuditPinnedPresetId(String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditPinnedPreset || ""));
@@ -3072,11 +3129,12 @@ export function ContractWarningOverlay({
     );
     setFilterImportAuditResetArmedChecked(false);
     setFilterImportAuditResetArmedAtMs(0);
-    setFilterTransferStatus("audit pin context reset");
+    setFilterImportAuditResetTickMs(0);
+    setFilterTransferStatus("audit pin context reset (safe reset consumed)");
   }, [filterImportAuditResetArmedChecked]);
   const resetFilterImportAuditOperatorContext = React.useCallback(() => {
     if (!filterImportAuditResetArmedChecked) {
-      setFilterTransferStatus("reset blocked: arm reset first");
+      setFilterTransferStatus("reset blocked: arm reset first (safe window required)");
       return;
     }
     setFilterImportAuditRestoreQueryChecked(Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRestoreQuery));
@@ -3092,7 +3150,8 @@ export function ContractWarningOverlay({
     );
     setFilterImportAuditResetArmedChecked(false);
     setFilterImportAuditResetArmedAtMs(0);
-    setFilterTransferStatus("audit operator context reset");
+    setFilterImportAuditResetTickMs(0);
+    setFilterTransferStatus("audit operator context reset (safe reset consumed)");
   }, [filterImportAuditResetArmedChecked]);
   const applyFilterImportAuditRestorePreset = React.useCallback((presetId) => {
     const preset = resolveFilterImportAuditRestorePreset(presetId);
@@ -4177,6 +4236,52 @@ export function ContractWarningOverlay({
               style: { marginLeft: "auto", color: "#8eb6ca" },
             }, filterImportAuditQuickApplyTelemetrySummary),
           ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_quick_telemetry_trend_chips", style: { gap: "6px", flexWrap: "wrap" } }, [
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_chip_recent_rate",
+              className: "hint",
+              style: {
+                border: "1px solid #31576b",
+                borderRadius: "999px",
+                padding: "2px 7px",
+                color: filterImportAuditQuickTelemetryTrend.recentOkPct >= 70 ? "#b2e7bf" : (filterImportAuditQuickTelemetryTrend.recentOkPct >= 40 ? "#e4cf98" : "#efb0a6"),
+                background: filterImportAuditQuickTelemetryTrend.recentOkPct >= 70 ? "rgba(21, 72, 38, 0.38)" : "rgba(20, 37, 47, 0.42)",
+              },
+            }, `recent-ok:${filterImportAuditQuickTelemetryTrend.recentOk}/${filterImportAuditQuickTelemetryTrend.recentCount} (${filterImportAuditQuickTelemetryTrend.recentOkPct}%)`),
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_chip_fail_streak",
+              className: "hint",
+              style: {
+                border: "1px solid #31576b",
+                borderRadius: "999px",
+                padding: "2px 7px",
+                color: filterImportAuditQuickTelemetryTrend.failStreak > 0 ? "#efb0a6" : "#8eb6ca",
+                background: filterImportAuditQuickTelemetryTrend.failStreak > 0 ? "rgba(94, 44, 36, 0.38)" : "rgba(20, 37, 47, 0.42)",
+              },
+            }, `fail-streak:${filterImportAuditQuickTelemetryTrend.failStreak}`),
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_chip_sync_rate",
+              className: "hint",
+              style: {
+                border: "1px solid #31576b",
+                borderRadius: "999px",
+                padding: "2px 7px",
+                color: "#8eb6ca",
+                background: "rgba(20, 37, 47, 0.42)",
+              },
+            }, `sync-applied:${filterImportAuditQuickTelemetryTrend.syncApplied}/${filterImportAuditQuickTelemetryTrend.recentCount} (${filterImportAuditQuickTelemetryTrend.syncAppliedPct}%)`),
+            h("span", {
+              key: "co_filter_import_audit_quick_telemetry_chip_latest_reason",
+              className: "hint",
+              style: {
+                border: "1px solid #31576b",
+                borderRadius: "999px",
+                padding: "2px 7px",
+                color: "#8eb6ca",
+                background: "rgba(20, 37, 47, 0.42)",
+              },
+            }, `latest:${filterImportAuditQuickTelemetryTrend.latestOption}/${filterImportAuditQuickTelemetryTrend.latestReason}`),
+          ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_safe_reset_controls", style: { gap: "6px", flexWrap: "wrap" } }, [
             h("label", {
               key: "co_filter_import_audit_reset_arm",
@@ -4190,7 +4295,12 @@ export function ContractWarningOverlay({
                   const next = Boolean(e.target.checked);
                   setFilterImportAuditResetArmedChecked(next);
                   setFilterImportAuditResetArmedAtMs(next ? Date.now() : 0);
-                  setFilterTransferStatus(next ? "reset armed: choose reset action within 20s" : "reset disarmed");
+                  setFilterImportAuditResetTickMs(next ? Date.now() : 0);
+                  setFilterTransferStatus(
+                    next
+                      ? "reset armed: choose reset action within 20s (safe window active)"
+                      : "reset disarmed: safe reset idle"
+                  );
                 },
               }),
               "arm reset",
@@ -4217,7 +4327,7 @@ export function ContractWarningOverlay({
               key: "co_filter_import_audit_reset_hint",
               className: "hint",
               style: { marginLeft: "auto", color: filterImportAuditResetArmedChecked ? "#e6cf95" : "#8eb6ca" },
-            }, filterImportAuditResetArmedChecked ? "reset armed" : "safe reset: arm required"),
+            }, filterImportAuditResetArmedChecked ? "safe reset armed" : "safe reset: arm required"),
             h("span", {
               key: "co_filter_import_audit_reset_guided_hint",
               className: "hint",

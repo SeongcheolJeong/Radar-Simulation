@@ -2930,3 +2930,37 @@
     - `reset arm expired: re-arm to execute reset`
     - `reset armed: choose reset action within 20s`
     - `quick-telemetry total:`
+
+## Web E2E Graph Audit Telemetry Trend Chips + Safe Reset Copy Refinement (M17.45)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-trend/reset-copy frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - telemetry trend chip tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_QUICK_TREND_WINDOW`
+    - `filterImportAuditQuickTelemetryTrend`
+    - `co_filter_import_audit_quick_telemetry_trend_chips`
+    - `co_filter_import_audit_quick_telemetry_chip_recent_rate`
+    - `co_filter_import_audit_quick_telemetry_chip_fail_streak`
+    - `co_filter_import_audit_quick_telemetry_chip_sync_rate`
+    - `co_filter_import_audit_quick_telemetry_chip_latest_reason`
+    - `recent-ok:`
+    - `fail-streak:`
+    - `sync-applied:`
+  - safe reset copy/countdown tokens confirmed:
+    - `safe reset guide: armed (`
+    - `safe reset armed`
+    - `reset blocked: arm reset first (safe window required)`
+    - `reset armed: choose reset action within 20s (safe window active)`
+    - `reset disarmed: safe reset idle`
+    - `audit restore scope reset (safe reset consumed)`
+    - `audit pin context reset (safe reset consumed)`
+    - `audit operator context reset (safe reset consumed)`
