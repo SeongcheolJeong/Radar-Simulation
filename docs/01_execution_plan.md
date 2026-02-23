@@ -150,6 +150,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.39: Audit bundle schema guardrails + operator hints
 - [x] M17.40: Audit bundle partial-restore toggles + pin state chips
 - [x] M17.41: Audit restore preset shortcuts + pin-chip filter controls
+- [x] M17.42: Audit scoped quick-apply actions + restore/pin operator hints
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -162,7 +163,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Continue post-M17.41 frontend hardening track: add scoped deep-link apply quick actions and restore/pin operator hint refinements while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
+Continue post-M17.42 frontend hardening track: add deep-link quick-apply/preset coupling refinements and operator-safe reset affordances while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling), and continue M14.6 Linux strict pilot closure in parallel.
 
 ## M10.19 Decision Gate
 
@@ -1444,3 +1445,27 @@ M17.41 outcome (2026-02-23):
 - prefs persistence/reset updated for chip filter mode:
   - state: `filterImportAuditPinChipFilter`
   - persisted key: `filterImportAuditPinChipFilter`
+
+M17.42 outcome (2026-02-23):
+
+- scoped deep-link quick-apply actions added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - constants/helpers:
+    - `FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS`
+    - `resolveFilterImportAuditQuickApplyOption`
+    - `applyFilterImportAuditDeepLinkBundleWithScopes`
+    - `applyFilterImportAuditDeepLinkQuickScope`
+  - controls/keys:
+    - `co_filter_import_audit_apply_quick_scopes`
+    - `co_filter_import_audit_apply_quick_<id>` (`all/query/paging/pinned/entry/query_pin/paging_entry`)
+    - `co_filter_import_audit_apply_quick_hint`
+- deep-link apply behavior unified under scoped apply helper:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - current restore-toggle apply and quick-apply actions now share the same payload parse/apply path
+  - applied status continues schema/scope reporting and includes restore tag (`restore:<preset|quick:...|custom>`)
+- restore/pin operator hint refinements added:
+  - `/Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+  - keys:
+    - `co_filter_import_audit_restore_scope_hint`
+    - `co_filter_import_audit_pin_operator_hint`
+  - hints summarize effective restore toggle vector and pin/chip operator state

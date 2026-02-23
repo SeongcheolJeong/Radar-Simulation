@@ -2837,3 +2837,30 @@
     - `co_filter_import_audit_pin_chip_filter_context`
     - `co_filter_import_audit_pin_chip_filter_shortcut`
     - `co_filter_import_audit_pin_chip_filter_active`
+
+## Web E2E Graph Audit Scoped Quick-Apply + Operator Hints (M17.42)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - audit-quick-apply/operator-hint frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - scoped quick-apply tokens confirmed:
+    - `FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS`
+    - `resolveFilterImportAuditQuickApplyOption`
+    - `applyFilterImportAuditDeepLinkBundleWithScopes`
+    - `applyFilterImportAuditDeepLinkQuickScope`
+    - `co_filter_import_audit_apply_quick_scopes`
+    - `co_filter_import_audit_apply_quick_`
+    - `co_filter_import_audit_apply_quick_hint`
+    - `quick apply overrides restore scope for this action`
+  - restore/pin operator hint tokens confirmed:
+    - `co_filter_import_audit_restore_scope_hint`
+    - `co_filter_import_audit_pin_operator_hint`
+    - `restore:q`

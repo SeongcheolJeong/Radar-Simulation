@@ -283,6 +283,15 @@ const FILTER_IMPORT_AUDIT_PIN_CHIP_FILTER_OPTIONS = [
   { id: "context", label: "chips:context" },
   { id: "shortcut", label: "chips:shortcut" },
 ];
+const FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS = [
+  { id: "all", label: "apply:all", query: true, paging: true, pinned: true, entry: true },
+  { id: "query", label: "apply:query", query: true, paging: false, pinned: false, entry: false },
+  { id: "paging", label: "apply:paging", query: false, paging: true, pinned: false, entry: false },
+  { id: "pinned", label: "apply:pinned", query: false, paging: false, pinned: true, entry: false },
+  { id: "entry", label: "apply:entry", query: false, paging: false, pinned: false, entry: true },
+  { id: "query_pin", label: "apply:query+pin", query: true, paging: false, pinned: true, entry: false },
+  { id: "paging_entry", label: "apply:paging+entry", query: false, paging: true, pinned: false, entry: true },
+];
 
 function resolveFilterImportAuditQueryPreset(rawPresetId) {
   const pid = String(rawPresetId || "").trim();
@@ -296,6 +305,13 @@ function resolveFilterImportAuditRestorePreset(rawPresetId) {
   if (!pid) return FILTER_IMPORT_AUDIT_RESTORE_PRESETS[0];
   return FILTER_IMPORT_AUDIT_RESTORE_PRESETS.find((row) => String(row?.id || "") === pid)
     || FILTER_IMPORT_AUDIT_RESTORE_PRESETS[0];
+}
+
+function resolveFilterImportAuditQuickApplyOption(rawOptionId) {
+  const oid = String(rawOptionId || "").trim();
+  if (!oid) return FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS[0];
+  return FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS.find((row) => String(row?.id || "") === oid)
+    || FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS[0];
 }
 
 function clampInteger(raw, minValue, maxValue, fallback) {
@@ -2432,6 +2448,19 @@ export function ContractWarningOverlay({
     filterImportAuditRestorePinnedPresetChecked,
     filterImportAuditRestoreQueryChecked,
   ]);
+  const filterImportAuditRestoreScopeHint = React.useMemo(() => [
+    `restore:q${filterImportAuditRestoreQueryChecked ? 1 : 0}`,
+    `p${filterImportAuditRestorePagingChecked ? 1 : 0}`,
+    `pin${filterImportAuditRestorePinnedPresetChecked ? 1 : 0}`,
+    `e${filterImportAuditRestoreActiveEntryChecked ? 1 : 0}`,
+    `preset:${activeFilterImportAuditRestorePresetId}`,
+  ].join(" "), [
+    activeFilterImportAuditRestorePresetId,
+    filterImportAuditRestoreActiveEntryChecked,
+    filterImportAuditRestorePagingChecked,
+    filterImportAuditRestorePinnedPresetChecked,
+    filterImportAuditRestoreQueryChecked,
+  ]);
   const filterImportAuditPinChipVisibility = React.useMemo(() => {
     const mode = normalizeFilterImportAuditPinChipFilter(filterImportAuditPinChipFilter);
     const showCustom = activeFilterImportAuditQueryPresetId === "custom";
@@ -2446,6 +2475,17 @@ export function ContractWarningOverlay({
     }
     return { pinned: true, active: true, custom: showCustom, shortcut: true };
   }, [activeFilterImportAuditQueryPresetId, filterImportAuditPinChipFilter]);
+  const filterImportAuditPinOperatorHint = React.useMemo(() => [
+    `pin-op:pinned:${filterImportAuditPinnedPresetId || "-"}`,
+    `active:${activeFilterImportAuditQueryPresetId}`,
+    `state:${filterImportAuditPinnedPresetActive ? "active" : "idle"}`,
+    `chips:${filterImportAuditPinChipFilter}`,
+  ].join(" "), [
+    activeFilterImportAuditQueryPresetId,
+    filterImportAuditPinChipFilter,
+    filterImportAuditPinnedPresetActive,
+    filterImportAuditPinnedPresetId,
+  ]);
   const filterImportAuditRowCap = React.useMemo(
     () => clampInteger(filterImportAuditRowCapText, 6, 200, 24),
     [filterImportAuditRowCapText]
@@ -2711,39 +2751,44 @@ export function ContractWarningOverlay({
     filterImportAuditSearchText,
     filterImportAuditTrail.length,
   ]);
-  const applyFilterImportAuditDeepLinkBundleFromText = React.useCallback(() => {
+  const applyFilterImportAuditDeepLinkBundleWithScopes = React.useCallback((scopeConfig, restoreTag) => {
     if (parsedFilterImportAuditDeepLinkPayload.empty) {
       setFilterTransferStatus("audit bundle apply failed: empty import payload");
-      return;
+      return false;
     }
     if (parsedFilterImportAuditDeepLinkPayload.error) {
       setFilterTransferStatus(`audit bundle apply failed: ${parsedFilterImportAuditDeepLinkPayload.error}`);
-      return;
+      return false;
     }
     const bundle = parsedFilterImportAuditDeepLinkPayload.bundle;
     if (!bundle || typeof bundle !== "object") {
       setFilterTransferStatus("audit bundle apply failed: invalid payload");
-      return;
+      return false;
     }
     const query = bundle.query && typeof bundle.query === "object" ? bundle.query : {};
     const paging = bundle.paging && typeof bundle.paging === "object" ? bundle.paging : {};
     const appliedScopes = [];
-    if (filterImportAuditRestoreQueryChecked) {
+    const scope = scopeConfig && typeof scopeConfig === "object" ? scopeConfig : {};
+    const shouldQuery = Boolean(scope.query);
+    const shouldPaging = Boolean(scope.paging);
+    const shouldPinned = Boolean(scope.pinned);
+    const shouldEntry = Boolean(scope.entry);
+    if (shouldQuery) {
       setFilterImportAuditSearchText(String(query.search || ""));
       setFilterImportAuditKindFilter(String(query.kind || "all"));
       setFilterImportAuditModeFilter(String(query.mode || "all"));
       appliedScopes.push("query");
     }
-    if (filterImportAuditRestorePagingChecked) {
+    if (shouldPaging) {
       setFilterImportAuditRowCapText(String(paging.cap || CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditRowCap));
       setFilterImportAuditRowOffset(clampInteger(paging.offset, 0, 1_000_000, 0));
       appliedScopes.push("paging");
     }
-    if (filterImportAuditRestorePinnedPresetChecked) {
+    if (shouldPinned) {
       setFilterImportAuditPinnedPresetId(String(bundle.pinned_preset_id || ""));
       appliedScopes.push("pinned");
     }
-    if (filterImportAuditRestoreActiveEntryChecked) {
+    if (shouldEntry) {
       const activeEntryId = String(bundle.active_entry_id || "").trim();
       if (activeEntryId) {
         setActiveFilterImportAuditId(activeEntryId);
@@ -2752,19 +2797,38 @@ export function ContractWarningOverlay({
     }
     if (appliedScopes.length === 0) {
       setFilterTransferStatus("audit bundle apply skipped: no restore scope enabled");
-      return;
+      return false;
     }
+    const normalizedRestoreTag = String(restoreTag || "custom").trim() || "custom";
     setFilterTransferStatus(
-      `audit deep-link bundle applied (schema:${Number(bundle.schema_version || 0)}, scope:${appliedScopes.join("/")}, restore:${activeFilterImportAuditRestorePresetId})`
+      `audit deep-link bundle applied (schema:${Number(bundle.schema_version || 0)}, scope:${appliedScopes.join("/")}, restore:${normalizedRestoreTag})`
     );
+    return true;
+  }, [parsedFilterImportAuditDeepLinkPayload]);
+  const applyFilterImportAuditDeepLinkBundleFromText = React.useCallback(() => {
+    applyFilterImportAuditDeepLinkBundleWithScopes({
+      query: filterImportAuditRestoreQueryChecked,
+      paging: filterImportAuditRestorePagingChecked,
+      pinned: filterImportAuditRestorePinnedPresetChecked,
+      entry: filterImportAuditRestoreActiveEntryChecked,
+    }, activeFilterImportAuditRestorePresetId);
   }, [
     activeFilterImportAuditRestorePresetId,
+    applyFilterImportAuditDeepLinkBundleWithScopes,
     filterImportAuditRestoreActiveEntryChecked,
     filterImportAuditRestorePagingChecked,
     filterImportAuditRestorePinnedPresetChecked,
     filterImportAuditRestoreQueryChecked,
-    parsedFilterImportAuditDeepLinkPayload,
   ]);
+  const applyFilterImportAuditDeepLinkQuickScope = React.useCallback((optionId) => {
+    const option = resolveFilterImportAuditQuickApplyOption(optionId);
+    applyFilterImportAuditDeepLinkBundleWithScopes({
+      query: Boolean(option.query),
+      paging: Boolean(option.paging),
+      pinned: Boolean(option.pinned),
+      entry: Boolean(option.entry),
+    }, `quick:${String(option.id || "all")}`);
+  }, [applyFilterImportAuditDeepLinkBundleWithScopes]);
   const applyFilterImportAuditRestorePreset = React.useCallback((presetId) => {
     const preset = resolveFilterImportAuditRestorePreset(presetId);
     setFilterImportAuditRestoreQueryChecked(Boolean(preset.query));
@@ -3785,6 +3849,23 @@ export function ContractWarningOverlay({
               style: { marginLeft: "auto", color: "#8eb6ca" },
             }, `filtered ${filterImportAuditRowsFiltered.length}/${filterImportAuditTrail.length}`),
           ]),
+          h("div", { className: "btn-row", key: "co_filter_import_audit_apply_quick_scopes", style: { gap: "6px", flexWrap: "wrap" } }, [
+            h("span", { key: "co_filter_import_audit_apply_quick_label", className: "hint", style: { color: "#8eb6ca" } }, "quick apply:"),
+            ...FILTER_IMPORT_AUDIT_QUICK_APPLY_OPTIONS.map((opt) => {
+              const oid = String(opt?.id || "");
+              return h("button", {
+                className: "btn",
+                key: `co_filter_import_audit_apply_quick_${oid}`,
+                onClick: () => applyFilterImportAuditDeepLinkQuickScope(oid),
+                disabled: parsedFilterImportAuditDeepLinkPayload.empty || Boolean(parsedFilterImportAuditDeepLinkPayload.error),
+              }, String(opt?.label || oid));
+            }),
+            h("span", {
+              key: "co_filter_import_audit_apply_quick_hint",
+              className: "hint",
+              style: { color: "#8eb6ca" },
+            }, "quick apply overrides restore scope for this action"),
+          ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_restore_scopes", style: { gap: "8px", flexWrap: "wrap" } }, [
             h("span", { key: "co_filter_import_audit_restore_label", className: "hint", style: { color: "#8eb6ca" } }, "restore scope:"),
             h("label", {
@@ -3835,6 +3916,11 @@ export function ContractWarningOverlay({
               }),
               "entry",
             ]),
+            h("span", {
+              key: "co_filter_import_audit_restore_scope_hint",
+              className: "hint",
+              style: { marginLeft: "auto", color: "#8eb6ca" },
+            }, filterImportAuditRestoreScopeHint),
           ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_restore_presets", style: { gap: "6px", flexWrap: "wrap" } }, [
             h("span", { key: "co_filter_import_audit_restore_preset_label", className: "hint", style: { color: "#8eb6ca" } }, "restore preset:"),
@@ -3875,6 +3961,11 @@ export function ContractWarningOverlay({
               className: "hint",
               style: { color: "#8eb6ca" },
             }, `active:${filterImportAuditPinChipFilter}`),
+            h("span", {
+              key: "co_filter_import_audit_pin_operator_hint",
+              className: "hint",
+              style: { marginLeft: "auto", color: "#8eb6ca" },
+            }, filterImportAuditPinOperatorHint),
           ]),
           h("div", { className: "btn-row", key: "co_filter_import_audit_pin_state_chips", style: { gap: "6px", flexWrap: "wrap" } }, [
             filterImportAuditPinChipVisibility.pinned ? h("span", {
