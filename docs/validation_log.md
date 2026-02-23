@@ -3228,3 +3228,36 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_reset`
     - `co_filter_import_audit_quick_telemetry_profile_import_safety_bundle_reset`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_hint`
+
+## Web E2E Graph Audit Quick Telemetry Import Filter-Bundle Transfer (M17.54)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-import-filter-bundle-transfer frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `rg -n "buildQuickTelemetryDrilldownImportFilterBundle|serializeQuickTelemetryDrilldownImportFilterBundle|parseQuickTelemetryDrilldownImportFilterBundleText|quickTelemetryDrilldownImportFilterBundleText|quickTelemetryDrilldownImportFilterBundleStatus|parsedQuickTelemetryDrilldownImportFilterBundlePayload|quickTelemetryDrilldownImportFilterBundlePreview|exportQuickTelemetryDrilldownImportFilterBundleToJson|copyQuickTelemetryDrilldownImportFilterBundleJson|importQuickTelemetryDrilldownImportFilterBundleFromText|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_transfer|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_export|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_copy|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_import|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_text|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_status|co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_preview" /Users/seongcheoljeong/Documents/Codex_test/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - transfer helper/state tokens confirmed:
+    - `buildQuickTelemetryDrilldownImportFilterBundle`
+    - `serializeQuickTelemetryDrilldownImportFilterBundle`
+    - `parseQuickTelemetryDrilldownImportFilterBundleText`
+    - `quickTelemetryDrilldownImportFilterBundleText`
+    - `quickTelemetryDrilldownImportFilterBundleStatus`
+    - `parsedQuickTelemetryDrilldownImportFilterBundlePayload`
+    - `quickTelemetryDrilldownImportFilterBundlePreview`
+  - transfer action/UI tokens confirmed:
+    - `exportQuickTelemetryDrilldownImportFilterBundleToJson`
+    - `copyQuickTelemetryDrilldownImportFilterBundleJson`
+    - `importQuickTelemetryDrilldownImportFilterBundleFromText`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_transfer`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_export`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_copy`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_import`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_text`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_status`
