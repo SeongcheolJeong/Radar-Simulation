@@ -3030,3 +3030,42 @@
     - `Copy Drilldown JSON`
     - `Export Drilldown JSON`
     - `drilldown preset:`
+
+## Web E2E Graph Audit Quick Telemetry Custom Profile Save/Load + Team Transfer (M17.48)
+
+- Date: 2026-02-23
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - telemetry-drilldown-profile frontend 변경 이후에도 graph run/cancel/retry/baseline/policy/regression API regression suite pass
+  - backend API contracts and response schema stability 유지 확인
+
+- Date: 2026-02-23
+- Command: `python3 api/ui local smoke (8171/8151)` + token grep (`curl /health`, `curl /frontend/graph_lab/panels.mjs`)
+- Result: pass
+- Notes:
+  - custom profile model/save-load tokens confirmed:
+    - `CONTRACT_OVERLAY_QUICK_TELEMETRY_DRILLDOWN_PROFILES_KEY`
+    - `DEFAULT_FILTER_IMPORT_AUDIT_QUICK_TELEMETRY_DRILLDOWN_PROFILES`
+    - `normalizeQuickTelemetryDrilldownProfileName`
+    - `normalizeQuickTelemetryDrilldownProfile`
+    - `loadQuickTelemetryDrilldownProfiles`
+    - `saveQuickTelemetryDrilldownProfiles`
+    - `quickTelemetryDrilldownProfiles`
+    - `activeQuickTelemetryDrilldownProfile`
+    - `quickTelemetryDrilldownProfileDraft`
+    - `applyActiveQuickTelemetryDrilldownProfile`
+    - `saveCurrentQuickTelemetryDrilldownProfile`
+    - `deleteActiveQuickTelemetryDrilldownProfile`
+  - team transfer tokens confirmed:
+    - `buildQuickTelemetryDrilldownProfileExportBundle`
+    - `serializeQuickTelemetryDrilldownProfileExportBundle`
+    - `parseQuickTelemetryDrilldownProfileImportText`
+    - `graph_lab_contract_overlay_quick_telemetry_drilldown_profiles`
+    - `co_filter_import_audit_quick_telemetry_profile_transfer_cfg`
+    - `co_filter_import_audit_quick_telemetry_profile_export`
+    - `co_filter_import_audit_quick_telemetry_profile_copy`
+    - `co_filter_import_audit_quick_telemetry_profile_load_json`
+    - `co_filter_import_audit_quick_telemetry_profile_import`
+    - `co_filter_import_audit_quick_telemetry_profile_transfer_text`
+    - `drilldown profile transfer:`
