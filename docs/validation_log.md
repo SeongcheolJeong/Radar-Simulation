@@ -3486,3 +3486,34 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_report_copy`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_report_preview`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_status`
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Replay Helper (M17.63)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - strict-rollback package replay helper frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability confirmed across sync/async run + retry/cancel endpoints
+  - async cancel assertion in this suite is timing-sensitive; pass confirmed via bounded retries (`attempt 4`)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_replay_helper.py`
+- Result: pass
+- Notes:
+  - strict-rollback package replay helper tokens confirmed:
+    - `parseQuickTelemetryStrictRollbackDrillPackageText`
+    - `parsedQuickTelemetryStrictRollbackDrillPackagePayload`
+    - `quickTelemetryStrictRollbackPackageChecklistDeltaGuard`
+    - `quickTelemetryStrictRollbackPackageChecklistDeltaHint`
+    - `quickTelemetryStrictRollbackPackageReplayPreview`
+    - `replayQuickTelemetryStrictRollbackPackageFromText`
+    - `quickTelemetryDrilldownStrictRollbackPackageReplayText`
+    - `quickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked`
+  - replay helper UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_replay_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_delta_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_delta_confirm`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_delta_confirm_checkbox`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_replay`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_replay_text`

@@ -171,7 +171,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.60: Quick telemetry strict-cutover timeline ledger (apply/fallback event rows + export-ready status trail)
 - [x] M17.61: Quick telemetry strict-cutover rollback drill helper (failure-tagged fallback presets + operator checklist)
 - [x] M17.62: Quick telemetry strict-cutover rollback drill package (preset snapshot + checklist report export)
-- [ ] M17.63: Quick telemetry strict-cutover rollback package replay helper (package import preview + checklist delta guard)
+- [x] M17.63: Quick telemetry strict-cutover rollback package replay helper (package import preview + checklist delta guard)
+- [ ] M17.64: Quick telemetry strict-cutover rollback package provenance guard (source stamp + checksum hint)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -184,7 +185,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.62 frontend hardening track: add strict-cutover rollback package replay helper (package import preview + checklist delta guard) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.63 frontend hardening track: add strict-cutover rollback package provenance guard (source stamp + checksum hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1638,3 +1639,15 @@ M17.62 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/197_web_e2e_graph_audit_quick_telemetry_strict_rollback_drill_package.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_drill_package.py`
+
+M17.63 outcome (2026-02-28):
+
+- strict-rollback package replay helper added:
+  - rollback package JSON parser with schema/kind validation and import preview surface
+  - checklist delta guard added (`status/pass/item/fail/item-ok-diff`) before replay
+  - delta override confirm checkbox blocks replay when drift exists until explicit operator confirmation
+- replay action now applies imported snapshot/filter state and rehydrates cutover timeline entries for operator drill replay
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/198_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_replay_helper.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_replay_helper.py`
