@@ -3397,3 +3397,32 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_compat`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_reminder`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_status`
+
+## Web E2E Graph Audit Quick Telemetry Strict-Cutover Timeline Ledger (M17.60)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - strict-cutover timeline ledger frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability confirmed across sync/async run + retry/cancel endpoints
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_cutover_timeline.py`
+- Result: pass
+- Notes:
+  - strict-cutover timeline ledger tokens confirmed:
+    - `QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_LIMIT`
+    - `QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_SCHEMA_VERSION`
+    - `QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_KIND`
+    - `buildQuickTelemetryDrilldownStrictAdoptionChecklist`
+    - `normalizeQuickTelemetryDrilldownStrictCutoverLedgerEntry`
+    - `buildQuickTelemetryDrilldownStrictCutoverLedgerBundle`
+    - `serializeQuickTelemetryDrilldownStrictCutoverLedgerBundle`
+  - timeline UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_export`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_copy`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_reset`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_status`

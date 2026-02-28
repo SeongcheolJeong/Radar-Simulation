@@ -168,7 +168,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.57: Quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints)
 - [x] M17.58: Quick telemetry strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist)
 - [x] M17.59: Quick telemetry strict-default cutover helper (default-on preset + compat fallback reminder)
-- [ ] M17.60: Quick telemetry strict-cutover timeline ledger (apply/fallback event rows + export-ready status trail)
+- [x] M17.60: Quick telemetry strict-cutover timeline ledger (apply/fallback event rows + export-ready status trail)
+- [ ] M17.61: Quick telemetry strict-cutover rollback drill helper (failure-tagged fallback presets + operator checklist)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -181,7 +182,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.59 frontend hardening track: add strict-cutover timeline ledger (apply/fallback event rows + export-ready status trail) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.60 frontend hardening track: add strict-cutover rollback drill helper (failure-tagged fallback presets + operator checklist) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1597,3 +1598,16 @@ M17.59 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/194_web_e2e_graph_audit_quick_telemetry_strict_default_cutover_helper.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_cutover_helper.py`
+
+M17.60 outcome (2026-02-28):
+
+- strict-cutover timeline ledger added:
+  - apply/fallback helper actions now append timeline events with checklist snapshot (`READY|HOLD`, pass count, strict signal counters)
+  - timeline hint/preview surface added in transfer panel for rapid operator audit
+- timeline export controls added:
+  - one-click `Export Cutover Timeline` / `Copy Cutover Timeline` / `Reset Cutover Timeline`
+  - status trail messages added for event logging/export/copy/reset outcomes
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/195_web_e2e_graph_audit_quick_telemetry_strict_cutover_timeline_ledger.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_cutover_timeline.py`

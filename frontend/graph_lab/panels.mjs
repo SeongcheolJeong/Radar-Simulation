@@ -333,6 +333,10 @@ const QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_MODE_OPTIONS = [
   { id: "strict", label: "strict (wrapped payload only)" },
 ];
 const QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT = 3;
+const QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_LIMIT = 24;
+const QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_SCHEMA_VERSION = 1;
+const QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_KIND =
+  "graph_lab_contract_overlay_quick_telemetry_strict_cutover_timeline";
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
   { id: "all", label: "all" },
   { id: "new", label: "new" },
@@ -497,6 +501,80 @@ function normalizeQuickTelemetryDrilldownStrictAdoptionSignals(raw, fallback) {
     ),
     last_event_ts_ms: clampInteger(source.last_event_ts_ms ?? base.last_event_ts_ms ?? 0, 0, 9_999_999_999_999, 0),
   };
+}
+
+function buildQuickTelemetryDrilldownStrictAdoptionChecklist(rawSignals, importMode) {
+  const sig = normalizeQuickTelemetryDrilldownStrictAdoptionSignals(rawSignals, null);
+  const modeStrict = normalizeQuickTelemetryDrilldownImportFilterBundleMode(importMode) === "strict";
+  const enoughStrictAttempts = Number(sig.attempt_count || 0) >= QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT;
+  const strictSuccessStable = Number(sig.attempt_count || 0) > 0
+    && Number(sig.success_count || 0) >= Number(sig.attempt_count || 0);
+  const noLegacyWrapUsage = Number(sig.legacy_wrap_use_count || 0) === 0;
+  const noLegacyParseBlock = Number(sig.legacy_parse_block_count || 0) === 0;
+  const items = [
+    { id: "mode_strict", label: "strict mode active", ok: modeStrict },
+    {
+      id: "strict_attempts",
+      label: `strict import attempts >= ${QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT}`,
+      ok: enoughStrictAttempts,
+    },
+    { id: "strict_success_stable", label: "strict import success stable", ok: strictSuccessStable },
+    { id: "no_legacy_wrap_usage", label: "legacy wrap helper usage = 0", ok: noLegacyWrapUsage },
+    { id: "no_legacy_parse_block", label: "strict parse legacy-block count = 0", ok: noLegacyParseBlock },
+  ];
+  const passCount = items.filter((row) => Boolean(row.ok)).length;
+  const ready = passCount === items.length;
+  return {
+    ready,
+    pass_count: passCount,
+    item_count: items.length,
+    items,
+    signals: sig,
+    last_event_iso: formatTimestampIso(Number(sig.last_event_ts_ms || 0)),
+  };
+}
+
+function normalizeQuickTelemetryDrilldownStrictCutoverLedgerEntry(raw, idx = 0) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const eventId = String(raw.event_id || "").trim().toLowerCase();
+  const eventKind = eventId === "compat_fallback" ? "compat_fallback" : "apply_strict_default";
+  const importMode = normalizeQuickTelemetryDrilldownImportFilterBundleMode(raw.import_mode || "compat");
+  const statusRaw = String(raw.checklist_status || "").trim().toUpperCase();
+  const status = statusRaw === "READY" ? "READY" : "HOLD";
+  const timestampMs = clampInteger(raw.timestamp_ms, 0, 9_999_999_999_999, 0);
+  return {
+    id: String(raw.id || `qt_cutover_${idx}`),
+    event_id: eventKind,
+    import_mode: importMode,
+    checklist_status: status,
+    pass_count: clampInteger(raw.pass_count, 0, 128, 0),
+    item_count: clampInteger(raw.item_count, 0, 128, 0),
+    attempt_count: clampInteger(raw.attempt_count, 0, 1_000_000, 0),
+    success_count: clampInteger(raw.success_count, 0, 1_000_000, 0),
+    legacy_wrap_use_count: clampInteger(raw.legacy_wrap_use_count, 0, 1_000_000, 0),
+    legacy_parse_block_count: clampInteger(raw.legacy_parse_block_count, 0, 1_000_000, 0),
+    timestamp_ms: timestampMs,
+    timestamp_iso: String(raw.timestamp_iso || formatTimestampIso(timestampMs)),
+  };
+}
+
+function buildQuickTelemetryDrilldownStrictCutoverLedgerBundle(entries) {
+  const rows = Array.isArray(entries) ? entries : [];
+  const normalized = rows
+    .map((row, idx) => normalizeQuickTelemetryDrilldownStrictCutoverLedgerEntry(row, idx))
+    .filter(Boolean)
+    .slice(0, QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_LIMIT);
+  return {
+    schema_version: QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_SCHEMA_VERSION,
+    kind: QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_KIND,
+    exported_at_iso: new Date().toISOString(),
+    entry_count: normalized.length,
+    entries: normalized,
+  };
+}
+
+function serializeQuickTelemetryDrilldownStrictCutoverLedgerBundle(entries) {
+  return JSON.stringify(buildQuickTelemetryDrilldownStrictCutoverLedgerBundle(entries), null, 2);
 }
 
 function matchQuickTelemetryDrilldownImportConflictFilter(row, filterId) {
@@ -1999,6 +2077,8 @@ export function ContractWarningOverlay({
   );
   const [quickTelemetryDrilldownStrictAdoptionGateStatus, setQuickTelemetryDrilldownStrictAdoptionGateStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictCutoverStatus, setQuickTelemetryDrilldownStrictCutoverStatus] = React.useState("");
+  const [quickTelemetryDrilldownStrictCutoverLedger, setQuickTelemetryDrilldownStrictCutoverLedger] = React.useState([]);
+  const [quickTelemetryDrilldownStrictCutoverLedgerStatus, setQuickTelemetryDrilldownStrictCutoverLedgerStatus] = React.useState("");
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2094,6 +2174,8 @@ export function ContractWarningOverlay({
       );
       setQuickTelemetryDrilldownStrictAdoptionGateStatus("");
       setQuickTelemetryDrilldownStrictCutoverStatus("");
+      setQuickTelemetryDrilldownStrictCutoverLedger([]);
+      setQuickTelemetryDrilldownStrictCutoverLedgerStatus("");
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -3001,39 +3083,13 @@ export function ContractWarningOverlay({
     );
     setQuickTelemetryDrilldownStrictAdoptionGateStatus("strict adoption gate signals reset");
     setQuickTelemetryDrilldownStrictCutoverStatus("");
+    setQuickTelemetryDrilldownStrictCutoverLedgerStatus("");
   }, []);
   const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
-    const sig = normalizeQuickTelemetryDrilldownStrictAdoptionSignals(
+    return buildQuickTelemetryDrilldownStrictAdoptionChecklist(
       quickTelemetryDrilldownStrictAdoptionSignals,
-      null
+      quickTelemetryDrilldownImportFilterBundleMode
     );
-    const modeStrict = quickTelemetryDrilldownImportFilterBundleMode === "strict";
-    const enoughStrictAttempts = Number(sig.attempt_count || 0) >= QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT;
-    const strictSuccessStable = Number(sig.attempt_count || 0) > 0
-      && Number(sig.success_count || 0) >= Number(sig.attempt_count || 0);
-    const noLegacyWrapUsage = Number(sig.legacy_wrap_use_count || 0) === 0;
-    const noLegacyParseBlock = Number(sig.legacy_parse_block_count || 0) === 0;
-    const items = [
-      { id: "mode_strict", label: "strict mode active", ok: modeStrict },
-      {
-        id: "strict_attempts",
-        label: `strict import attempts >= ${QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT}`,
-        ok: enoughStrictAttempts,
-      },
-      { id: "strict_success_stable", label: "strict import success stable", ok: strictSuccessStable },
-      { id: "no_legacy_wrap_usage", label: "legacy wrap helper usage = 0", ok: noLegacyWrapUsage },
-      { id: "no_legacy_parse_block", label: "strict parse legacy-block count = 0", ok: noLegacyParseBlock },
-    ];
-    const passCount = items.filter((row) => Boolean(row.ok)).length;
-    const ready = passCount === items.length;
-    return {
-      ready,
-      pass_count: passCount,
-      item_count: items.length,
-      items,
-      signals: sig,
-      last_event_iso: formatTimestampIso(Number(sig.last_event_ts_ms || 0)),
-    };
   }, [
     quickTelemetryDrilldownImportFilterBundleMode,
     quickTelemetryDrilldownStrictAdoptionSignals,
@@ -3079,6 +3135,40 @@ export function ContractWarningOverlay({
     }
     return "compat fallback reminder: compat mode is active (legacy payload support on).";
   }, [quickTelemetryDrilldownImportFilterBundleMode]);
+  const quickTelemetryDrilldownStrictCutoverLedgerRows = React.useMemo(
+    () => buildQuickTelemetryDrilldownStrictCutoverLedgerBundle(quickTelemetryDrilldownStrictCutoverLedger).entries,
+    [quickTelemetryDrilldownStrictCutoverLedger]
+  );
+  const quickTelemetryDrilldownStrictCutoverTimelineHint = React.useMemo(() => {
+    if (quickTelemetryDrilldownStrictCutoverLedgerRows.length === 0) {
+      return `cutover timeline: 0/${QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_LIMIT} events`;
+    }
+    const latest = quickTelemetryDrilldownStrictCutoverLedgerRows[0] || {};
+    return [
+      `cutover timeline: ${quickTelemetryDrilldownStrictCutoverLedgerRows.length}/${QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_LIMIT} events`,
+      `latest ${String(latest.event_id || "-")}`,
+      `mode ${String(latest.import_mode || "-")}`,
+      `checklist ${String(latest.checklist_status || "HOLD")}`,
+    ].join(", ");
+  }, [quickTelemetryDrilldownStrictCutoverLedgerRows]);
+  const quickTelemetryDrilldownStrictCutoverTimelinePreview = React.useMemo(() => {
+    if (quickTelemetryDrilldownStrictCutoverLedgerRows.length === 0) {
+      return "timeline preview: no strict cutover events yet";
+    }
+    return quickTelemetryDrilldownStrictCutoverLedgerRows
+      .map((row, idx) => [
+        `#${idx + 1}`,
+        String(row.timestamp_iso || "-"),
+        String(row.event_id || "-"),
+        `mode=${String(row.import_mode || "-")}`,
+        `checklist=${String(row.checklist_status || "HOLD")}(${Number(row.pass_count || 0)}/${Number(row.item_count || 0)})`,
+        `attempts=${Number(row.attempt_count || 0)}`,
+        `success=${Number(row.success_count || 0)}`,
+        `legacy_wrap=${Number(row.legacy_wrap_use_count || 0)}`,
+        `legacy_parse_block=${Number(row.legacy_parse_block_count || 0)}`,
+      ].join(" | "))
+      .join("\n");
+  }, [quickTelemetryDrilldownStrictCutoverLedgerRows]);
   const quickTelemetryDrilldownImportFilterBundlePreview = React.useMemo(() => {
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) {
       return "filter bundle preview: waiting for JSON payload";
@@ -3381,6 +3471,40 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownImportRowOffset(0);
     setQuickTelemetryDrilldownTransferStatus("import safety bundle reset (filters + selection + overwrite confirm)");
   }, [quickTelemetryDrilldownImportRows]);
+  const appendQuickTelemetryDrilldownStrictCutoverLedgerEvent = React.useCallback((eventId, nextMode) => {
+    const eventKind = String(eventId || "").trim().toLowerCase() === "compat_fallback"
+      ? "compat_fallback"
+      : "apply_strict_default";
+    const mode = normalizeQuickTelemetryDrilldownImportFilterBundleMode(nextMode || "compat");
+    const checklist = buildQuickTelemetryDrilldownStrictAdoptionChecklist(
+      quickTelemetryDrilldownStrictAdoptionSignals,
+      mode
+    );
+    const sig = checklist.signals || {};
+    const timestampMs = Date.now();
+    const entry = normalizeQuickTelemetryDrilldownStrictCutoverLedgerEntry({
+      id: `qt_cutover_${timestampMs}_${eventKind}`,
+      event_id: eventKind,
+      import_mode: mode,
+      checklist_status: checklist.ready ? "READY" : "HOLD",
+      pass_count: checklist.pass_count,
+      item_count: checklist.item_count,
+      attempt_count: Number(sig.attempt_count || 0),
+      success_count: Number(sig.success_count || 0),
+      legacy_wrap_use_count: Number(sig.legacy_wrap_use_count || 0),
+      legacy_parse_block_count: Number(sig.legacy_parse_block_count || 0),
+      timestamp_ms: timestampMs,
+      timestamp_iso: formatTimestampIso(timestampMs),
+    });
+    if (!entry) return;
+    setQuickTelemetryDrilldownStrictCutoverLedger((prev) => [
+      entry,
+      ...buildQuickTelemetryDrilldownStrictCutoverLedgerBundle(prev).entries,
+    ].slice(0, QUICK_TELEMETRY_STRICT_CUTOVER_LEDGER_LIMIT));
+    setQuickTelemetryDrilldownStrictCutoverLedgerStatus(
+      `cutover timeline event logged: ${eventKind} (${entry.checklist_status} ${entry.pass_count}/${entry.item_count})`
+    );
+  }, [quickTelemetryDrilldownStrictAdoptionSignals]);
   const applyQuickTelemetryStrictDefaultCutoverPreset = React.useCallback(() => {
     setQuickTelemetryDrilldownImportFilterBundleMode("strict");
     setQuickTelemetryDrilldownImportFilterBundleStatus(
@@ -3392,7 +3516,9 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictCutoverStatus(
       `strict default cutover applied (${quickTelemetryDrilldownStrictAdoptionChecklist.ready ? "READY" : "HOLD"} ${quickTelemetryDrilldownStrictAdoptionChecklist.pass_count}/${quickTelemetryDrilldownStrictAdoptionChecklist.item_count})`
     );
+    appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("apply_strict_default", "strict");
   }, [
+    appendQuickTelemetryDrilldownStrictCutoverLedgerEvent,
     quickTelemetryDrilldownStrictAdoptionChecklist.item_count,
     quickTelemetryDrilldownStrictAdoptionChecklist.pass_count,
     quickTelemetryDrilldownStrictAdoptionChecklist.ready,
@@ -3408,7 +3534,55 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictCutoverStatus(
       "compat fallback applied; strict-default cutover is paused"
     );
+    appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
+  }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
+  const resetQuickTelemetryDrilldownStrictCutoverLedger = React.useCallback(() => {
+    setQuickTelemetryDrilldownStrictCutoverLedger([]);
+    setQuickTelemetryDrilldownStrictCutoverLedgerStatus("cutover timeline reset");
   }, []);
+  const exportQuickTelemetryDrilldownStrictCutoverLedgerToJson = React.useCallback(() => {
+    const jsonText = serializeQuickTelemetryDrilldownStrictCutoverLedgerBundle(
+      quickTelemetryDrilldownStrictCutoverLedgerRows
+    );
+    try {
+      if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
+        setQuickTelemetryDrilldownStrictCutoverLedgerStatus("cutover timeline export ready in memory");
+        return;
+      }
+      const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `graph_lab_quick_telemetry_strict_cutover_timeline_${ts}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      setQuickTelemetryDrilldownStrictCutoverLedgerStatus(
+        `cutover timeline export complete (${quickTelemetryDrilldownStrictCutoverLedgerRows.length} events)`
+      );
+    } catch (_) {
+      setQuickTelemetryDrilldownStrictCutoverLedgerStatus("cutover timeline export failed");
+    }
+  }, [quickTelemetryDrilldownStrictCutoverLedgerRows]);
+  const copyQuickTelemetryDrilldownStrictCutoverLedgerJson = React.useCallback(async () => {
+    const jsonText = serializeQuickTelemetryDrilldownStrictCutoverLedgerBundle(
+      quickTelemetryDrilldownStrictCutoverLedgerRows
+    );
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(jsonText);
+        setQuickTelemetryDrilldownStrictCutoverLedgerStatus(
+          `cutover timeline copied (${quickTelemetryDrilldownStrictCutoverLedgerRows.length} events)`
+        );
+        return;
+      }
+      throw new Error("clipboard unavailable");
+    } catch (_) {
+      setQuickTelemetryDrilldownStrictCutoverLedgerStatus("cutover timeline copy failed");
+    }
+  }, [quickTelemetryDrilldownStrictCutoverLedgerRows]);
   const exportQuickTelemetryDrilldownImportFilterBundleToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryDrilldownImportFilterBundle({
       preset_id: activeQuickTelemetryDrilldownImportFilterPresetId,
@@ -6604,6 +6778,48 @@ export function ContractWarningOverlay({
                   className: "hint",
                   style: { flexBasis: "100%", color: "#8eb6ca" },
                 }, quickTelemetryDrilldownStrictCutoverStatus)
+                : null,
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryDrilldownStrictCutoverTimelineHint),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_export",
+                onClick: exportQuickTelemetryDrilldownStrictCutoverLedgerToJson,
+              }, "Export Cutover Timeline"),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_copy",
+                onClick: copyQuickTelemetryDrilldownStrictCutoverLedgerJson,
+              }, "Copy Cutover Timeline"),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_reset",
+                onClick: resetQuickTelemetryDrilldownStrictCutoverLedger,
+              }, "Reset Cutover Timeline"),
+              h("textarea", {
+                className: "textarea",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_preview",
+                value: quickTelemetryDrilldownStrictCutoverTimelinePreview,
+                readOnly: true,
+                placeholder: "cutover timeline events appear here",
+                style: {
+                  flexBasis: "100%",
+                  minHeight: "58px",
+                  padding: "6px 7px",
+                  fontSize: "10px",
+                  lineHeight: "1.3",
+                  opacity: 0.9,
+                },
+              }),
+              quickTelemetryDrilldownStrictCutoverLedgerStatus
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_status",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#8eb6ca" },
+                }, quickTelemetryDrilldownStrictCutoverLedgerStatus)
                 : null,
               h("button", {
                 className: "btn",
