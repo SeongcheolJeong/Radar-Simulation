@@ -3517,3 +3517,31 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_delta_confirm_checkbox`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_replay`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_replay_text`
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Provenance Guard (M17.64)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - strict-rollback package provenance-guard frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability confirmed across sync/async run + retry/cancel endpoints
+  - async cancel/status polling path is timing-sensitive; pass confirmed via bounded retry (`attempt 2`, initial run saw transient `GET /api/graph/runs/<id> -> 400`)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_provenance_guard.py`
+- Result: pass
+- Notes:
+  - strict-rollback package provenance guard tokens confirmed:
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SOURCE_STAMP`
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_CHECKSUM_ALGO`
+    - `stableStringifyForChecksum`
+    - `computeFnv1a32Hex`
+    - `computeQuickTelemetryStrictRollbackDrillPackageChecksum`
+    - `normalizeQuickTelemetryStrictRollbackDrillPackageProvenance`
+    - `provenance_guard`
+    - `quickTelemetryStrictRollbackPackageProvenanceGuard`
+    - `quickTelemetryStrictRollbackPackageProvenanceHint`
+  - provenance guard UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_provenance_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_delta_confirm`

@@ -172,7 +172,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.61: Quick telemetry strict-cutover rollback drill helper (failure-tagged fallback presets + operator checklist)
 - [x] M17.62: Quick telemetry strict-cutover rollback drill package (preset snapshot + checklist report export)
 - [x] M17.63: Quick telemetry strict-cutover rollback package replay helper (package import preview + checklist delta guard)
-- [ ] M17.64: Quick telemetry strict-cutover rollback package provenance guard (source stamp + checksum hint)
+- [x] M17.64: Quick telemetry strict-cutover rollback package provenance guard (source stamp + checksum hint)
+- [ ] M17.65: Quick telemetry strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -185,7 +186,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.63 frontend hardening track: add strict-cutover rollback package provenance guard (source stamp + checksum hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.64 frontend hardening track: add strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1651,3 +1652,16 @@ M17.63 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/198_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_replay_helper.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_replay_helper.py`
+
+M17.64 outcome (2026-02-28):
+
+- strict-rollback package provenance guard added:
+  - export payload now includes `provenance.source_stamp` + checksum fields/hints
+  - replay parser now normalizes provenance guard state (`source_match`, `checksum_match`, missing-field detection)
+- replay guard behavior strengthened:
+  - provenance issue is treated as replay guard condition alongside checklist delta guard
+  - confirmation copy updated to reflect combined guard (`delta/provenance`)
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/199_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_provenance_guard.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_provenance_guard.py`
