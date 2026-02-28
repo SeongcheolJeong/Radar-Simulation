@@ -183,7 +183,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.72: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package (summary export + copy)
 - [x] M17.73: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package parser (schema guard + import preview)
 - [x] M17.74: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply helper (imported snapshot hydrate + status)
-- [ ] M17.75: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety gate (hydrate-overwrite confirm + operator hint)
+- [x] M17.75: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety gate (hydrate-overwrite confirm + operator hint)
+- [ ] M17.76: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety auto-disarm (confirm timer + countdown hint)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -196,7 +197,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.74 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety gate (hydrate-overwrite confirm + operator hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.75 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety auto-disarm (confirm timer + countdown hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1805,3 +1806,16 @@ M17.74 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/209_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_helper.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_helper.py`
+
+M17.75 outcome (2026-02-28):
+
+- dry-run handoff hydrate safety gate added:
+  - apply helper now compares incoming handoff payload against existing hydrated snapshot to detect replacement risk
+  - hydrate action now blocks with explicit status until replace-confirm is checked when overwrite risk exists
+- hydrate safety hint/confirm controls added:
+  - safety hint line summarizes replacement-risk state near dry-run handoff import/apply controls
+  - replace-confirm checkbox is auto-cleared when risk is removed (payload/hydrated-state reset)
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/210_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_gate.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_gate.py`
