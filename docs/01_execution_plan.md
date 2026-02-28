@@ -185,7 +185,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.74: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply helper (imported snapshot hydrate + status)
 - [x] M17.75: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety gate (hydrate-overwrite confirm + operator hint)
 - [x] M17.76: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety auto-disarm (confirm timer + countdown hint)
-- [ ] M17.77: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity trail (confirm arm/disarm timeline + hint)
+- [x] M17.77: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity trail (confirm arm/disarm timeline + hint)
+- [ ] M17.78: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity controls (trail reset + export/copy)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -198,7 +199,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.76 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity trail (confirm arm/disarm timeline + hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.77 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity controls (trail reset + export/copy) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1833,3 +1834,16 @@ M17.76 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/211_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_auto_disarm.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_auto_disarm.py`
+
+M17.77 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity trail added:
+  - bounded activity trail now records confirm arm/disarm events across manual toggles, auto-disarm timeout, and flow-driven disarm paths
+  - activity row retention is capped by a dedicated limit constant to keep UI timeline bounded
+- operator activity hint/preview surfaces added:
+  - activity hint line now summarizes trail usage and latest event timestamp near hydrate confirm controls
+  - multiline preview now lists newest-first confirm activity rows (`time | event | detail`) for local operator audit
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/212_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_trail.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_trail.py`
