@@ -1998,6 +1998,7 @@ export function ContractWarningOverlay({
     )
   );
   const [quickTelemetryDrilldownStrictAdoptionGateStatus, setQuickTelemetryDrilldownStrictAdoptionGateStatus] = React.useState("");
+  const [quickTelemetryDrilldownStrictCutoverStatus, setQuickTelemetryDrilldownStrictCutoverStatus] = React.useState("");
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2092,6 +2093,7 @@ export function ContractWarningOverlay({
         )
       );
       setQuickTelemetryDrilldownStrictAdoptionGateStatus("");
+      setQuickTelemetryDrilldownStrictCutoverStatus("");
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -2998,6 +3000,7 @@ export function ContractWarningOverlay({
       )
     );
     setQuickTelemetryDrilldownStrictAdoptionGateStatus("strict adoption gate signals reset");
+    setQuickTelemetryDrilldownStrictCutoverStatus("");
   }, []);
   const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
     const sig = normalizeQuickTelemetryDrilldownStrictAdoptionSignals(
@@ -3053,6 +3056,29 @@ export function ContractWarningOverlay({
       itemTokens,
     ].join(" | ");
   }, [quickTelemetryDrilldownStrictAdoptionChecklist]);
+  const quickTelemetryDrilldownStrictCutoverHint = React.useMemo(() => {
+    const row = quickTelemetryDrilldownStrictAdoptionChecklist;
+    const modeStrict = quickTelemetryDrilldownImportFilterBundleMode === "strict";
+    if (row.ready && modeStrict) {
+      return "cutover helper: strict default is active and checklist is READY";
+    }
+    if (row.ready) {
+      return "cutover helper: checklist READY, apply strict default when team is ready";
+    }
+    if (modeStrict) {
+      return "cutover helper: strict mode active but checklist is HOLD";
+    }
+    return "cutover helper: compat mode active, strict default cutover not applied";
+  }, [
+    quickTelemetryDrilldownImportFilterBundleMode,
+    quickTelemetryDrilldownStrictAdoptionChecklist,
+  ]);
+  const quickTelemetryDrilldownCompatFallbackReminder = React.useMemo(() => {
+    if (quickTelemetryDrilldownImportFilterBundleMode === "strict") {
+      return "compat fallback reminder: if strict import fails on legacy payload, click 'Switch to Compat Fallback'.";
+    }
+    return "compat fallback reminder: compat mode is active (legacy payload support on).";
+  }, [quickTelemetryDrilldownImportFilterBundleMode]);
   const quickTelemetryDrilldownImportFilterBundlePreview = React.useMemo(() => {
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) {
       return "filter bundle preview: waiting for JSON payload";
@@ -3355,6 +3381,34 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownImportRowOffset(0);
     setQuickTelemetryDrilldownTransferStatus("import safety bundle reset (filters + selection + overwrite confirm)");
   }, [quickTelemetryDrilldownImportRows]);
+  const applyQuickTelemetryStrictDefaultCutoverPreset = React.useCallback(() => {
+    setQuickTelemetryDrilldownImportFilterBundleMode("strict");
+    setQuickTelemetryDrilldownImportFilterBundleStatus(
+      "strict default cutover preset applied (mode=strict)"
+    );
+    setQuickTelemetryDrilldownStrictAdoptionGateStatus(
+      "strict adoption gate signal: strict-default cutover helper applied"
+    );
+    setQuickTelemetryDrilldownStrictCutoverStatus(
+      `strict default cutover applied (${quickTelemetryDrilldownStrictAdoptionChecklist.ready ? "READY" : "HOLD"} ${quickTelemetryDrilldownStrictAdoptionChecklist.pass_count}/${quickTelemetryDrilldownStrictAdoptionChecklist.item_count})`
+    );
+  }, [
+    quickTelemetryDrilldownStrictAdoptionChecklist.item_count,
+    quickTelemetryDrilldownStrictAdoptionChecklist.pass_count,
+    quickTelemetryDrilldownStrictAdoptionChecklist.ready,
+  ]);
+  const switchQuickTelemetryToCompatFallback = React.useCallback(() => {
+    setQuickTelemetryDrilldownImportFilterBundleMode("compat");
+    setQuickTelemetryDrilldownImportFilterBundleStatus(
+      "compat fallback preset applied (legacy payload support restored)"
+    );
+    setQuickTelemetryDrilldownStrictAdoptionGateStatus(
+      "strict adoption gate signal: switched to compat fallback"
+    );
+    setQuickTelemetryDrilldownStrictCutoverStatus(
+      "compat fallback applied; strict-default cutover is paused"
+    );
+  }, []);
   const exportQuickTelemetryDrilldownImportFilterBundleToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryDrilldownImportFilterBundle({
       preset_id: activeQuickTelemetryDrilldownImportFilterPresetId,
@@ -6520,6 +6574,36 @@ export function ContractWarningOverlay({
                   className: "hint",
                   style: { flexBasis: "100%", color: "#8eb6ca" },
                 }, quickTelemetryDrilldownStrictAdoptionGateStatus)
+                : null,
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryDrilldownStrictAdoptionChecklist.ready ? "#9ad6b5" : "#e4cf98",
+                },
+              }, quickTelemetryDrilldownStrictCutoverHint),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_apply",
+                onClick: applyQuickTelemetryStrictDefaultCutoverPreset,
+              }, "Apply Strict Default"),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_compat",
+                onClick: switchQuickTelemetryToCompatFallback,
+              }, "Switch to Compat Fallback"),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_reminder",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryDrilldownCompatFallbackReminder),
+              quickTelemetryDrilldownStrictCutoverStatus
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_status",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#8eb6ca" },
+                }, quickTelemetryDrilldownStrictCutoverStatus)
                 : null,
               h("button", {
                 className: "btn",

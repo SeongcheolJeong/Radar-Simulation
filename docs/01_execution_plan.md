@@ -167,7 +167,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.56: Quick telemetry import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload)
 - [x] M17.57: Quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints)
 - [x] M17.58: Quick telemetry strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist)
-- [ ] M17.59: Quick telemetry strict-default cutover helper (default-on preset + compat fallback reminder)
+- [x] M17.59: Quick telemetry strict-default cutover helper (default-on preset + compat fallback reminder)
+- [ ] M17.60: Quick telemetry strict-cutover timeline ledger (apply/fallback event rows + export-ready status trail)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -180,7 +181,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.58 frontend hardening track: add strict-default cutover helper (default-on preset + compat fallback reminder) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.59 frontend hardening track: add strict-cutover timeline ledger (apply/fallback event rows + export-ready status trail) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1584,3 +1585,15 @@ M17.58 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/193_web_e2e_graph_audit_quick_telemetry_strict_adoption_gate.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_adoption_gate.py`
+
+M17.59 outcome (2026-02-28):
+
+- strict-default cutover helper controls added:
+  - one-click `Apply Strict Default` action (`mode=strict`)
+  - one-click `Switch to Compat Fallback` action (`mode=compat`)
+- cutover hint/reminder/status surface added next to strict-adoption gate summary
+- cutover status reset integrated with adoption-gate reset and transfer reset flows
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/194_web_e2e_graph_audit_quick_telemetry_strict_default_cutover_helper.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_cutover_helper.py`
