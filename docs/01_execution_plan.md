@@ -181,7 +181,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.70: Quick telemetry strict-cutover rollback trust audit bundle apply safety auto-disarm (confirm reset timer + countdown hint)
 - [x] M17.71: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run diff summary (incoming vs live policy/log snapshot)
 - [x] M17.72: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package (summary export + copy)
-- [ ] M17.73: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package parser (schema guard + import preview)
+- [x] M17.73: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package parser (schema guard + import preview)
+- [ ] M17.74: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply helper (imported snapshot hydrate + status)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -194,7 +195,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.72 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package parser (schema guard + import preview) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.73 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply helper (imported snapshot hydrate + status) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1777,3 +1778,16 @@ M17.72 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/207_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package.py`
+
+M17.73 outcome (2026-02-28):
+
+- trust-audit apply dry-run handoff package parser added:
+  - strict parser validates handoff package kind/schema and required sections (`dry_run_summary`, `apply_safety`, `trust_audit_bundle_snapshot`)
+  - parser guidance now returns actionable hints for kind/schema/structure errors
+- dry-run handoff import preview surfaces added:
+  - parser-aware import preview line summarizes parsed dry-run policy/diff/safety and bundle metadata
+  - dedicated import textarea + schema-hint block added near dry-run handoff copy/export controls
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/208_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_parser.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_parser.py`

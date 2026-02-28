@@ -847,6 +847,72 @@ function serializeQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoff
   return JSON.stringify(buildQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackage(rawPackage), null, 2);
 }
 
+function parseQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackageText(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text) {
+    throw new Error("empty import payload");
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_) {
+    throw new Error("invalid JSON");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("import root must be object");
+  }
+  const parsedKind = String(parsed.kind || "").trim();
+  if (!parsedKind) {
+    throw new Error(
+      `dry-run handoff package requires kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_KIND}`
+    );
+  }
+  if (parsedKind !== QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_KIND) {
+    throw new Error(
+      `unexpected kind (expected ${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_KIND})`
+    );
+  }
+  if (parsed.schema_version === undefined) {
+    throw new Error(
+      `dry-run handoff package requires schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_SCHEMA_VERSION}`
+    );
+  }
+  const schemaVersion = Math.floor(Number(parsed.schema_version || 0));
+  if (schemaVersion !== QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_SCHEMA_VERSION) {
+    throw new Error(
+      `unsupported schema_version (expected ${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_SCHEMA_VERSION})`
+    );
+  }
+  const summaryRaw = parsed.dry_run_summary;
+  if (!summaryRaw || typeof summaryRaw !== "object" || Array.isArray(summaryRaw)) {
+    throw new Error("dry-run handoff package missing dry_run_summary");
+  }
+  const safetyRaw = parsed.apply_safety;
+  if (!safetyRaw || typeof safetyRaw !== "object" || Array.isArray(safetyRaw)) {
+    throw new Error("dry-run handoff package missing apply_safety");
+  }
+  const snapshotRaw = parsed.trust_audit_bundle_snapshot;
+  if (!snapshotRaw || typeof snapshotRaw !== "object" || Array.isArray(snapshotRaw)) {
+    throw new Error("dry-run handoff package missing trust_audit_bundle_snapshot");
+  }
+  const pkg = buildQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackage({
+    dry_run_summary: summaryRaw,
+    apply_safety: safetyRaw,
+    import_preview: parsed.import_preview,
+    trust_audit_bundle_kind: snapshotRaw.kind,
+    trust_audit_bundle_schema_version: snapshotRaw.schema_version,
+    trust_audit_bundle_policy_mode: snapshotRaw.trust_policy_mode,
+    trust_audit_bundle_override_event_count: snapshotRaw.override_event_count,
+    trust_audit_bundle_parse_state: snapshotRaw.parse_state,
+  });
+  return {
+    ...pkg,
+    schema_version: schemaVersion,
+    kind: parsedKind,
+    exported_at_iso: String(parsed.exported_at_iso || "-"),
+  };
+}
+
 function parseQuickTelemetryStrictRollbackTrustAuditBundleText(rawText) {
   const text = String(rawText || "").trim();
   if (!text) {
@@ -2589,6 +2655,7 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus, setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus] = React.useState("");
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked] = React.useState(false);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs] = React.useState(0);
@@ -2704,6 +2771,7 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus("");
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
@@ -3634,6 +3702,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
@@ -6388,6 +6457,87 @@ export function ContractWarningOverlay({
       `import_preview=${String(pkg.import_preview || "-")}`,
     ].join("\n");
   }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload]);
+  const parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload = React.useMemo(() => {
+    const text = String(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText || "").trim();
+    if (!text) {
+      return {
+        pkg: null,
+        error: "",
+        empty: true,
+      };
+    }
+    try {
+      return {
+        pkg: parseQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackageText(text),
+        error: "",
+        empty: false,
+      };
+    } catch (err) {
+      return {
+        pkg: null,
+        error: String(err?.message || "parse error"),
+        empty: false,
+      };
+    }
+  }, [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffImportSchemaHint = React.useMemo(
+    () =>
+      `dry-run handoff package expects kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_KIND}, schema=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_SCHEMA_VERSION}`,
+    []
+  );
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffImportGuidance = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.empty) return "";
+    const err = String(parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.error || "");
+    if (!err) return "";
+    if (err.includes("unexpected kind")) {
+      return `guidance: set kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_KIND}`;
+    }
+    if (err.includes("requires kind=")) {
+      return `guidance: dry-run handoff package requires kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_KIND}`;
+    }
+    if (err.includes("unsupported schema_version")) {
+      return `guidance: set schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_SCHEMA_VERSION}`;
+    }
+    if (err.includes("requires schema_version=")) {
+      return `guidance: dry-run handoff package requires schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_SCHEMA_VERSION}`;
+    }
+    if (err.includes("missing dry_run_summary")) {
+      return "guidance: include dry_run_summary object";
+    }
+    if (err.includes("missing apply_safety")) {
+      return "guidance: include apply_safety object";
+    }
+    if (err.includes("missing trust_audit_bundle_snapshot")) {
+      return "guidance: include trust_audit_bundle_snapshot object";
+    }
+    return "";
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.error,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffImportPreview = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.empty) {
+      return "dry-run handoff import preview: waiting for JSON payload";
+    }
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.error) {
+      return `dry-run handoff import preview: invalid payload (${parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.error})`;
+    }
+    const pkg = parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.pkg || {};
+    const summary = pkg.dry_run_summary || {};
+    const safety = pkg.apply_safety || {};
+    const snapshot = pkg.trust_audit_bundle_snapshot || {};
+    return [
+      `dry-run handoff import preview: parse ${String(summary.parse_state || "empty")}`,
+      `policy ${String(summary.existing_policy || "strict_reject")}->${String(summary.incoming_policy || "strict_reject")}`,
+      `diff +${Number(summary.added_override_count || 0)}/-${Number(summary.removed_override_count || 0)}/~${Number(summary.changed_override_count || 0)}`,
+      `confirm ${Boolean(safety.needs_confirm) ? "required" : "not_required"}`,
+      `bundle ${String(snapshot.kind || QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND)}@${Number(snapshot.schema_version || QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION)}`,
+    ].join(", ");
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.error,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.pkg,
+  ]);
   const copyQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackageJson = React.useCallback(async () => {
     const jsonText = serializeQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackage(
       quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload
@@ -9293,6 +9443,43 @@ export function ContractWarningOverlay({
                   style: { flexBasis: "100%", color: "#8eb6ca" },
                 }, quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus)
                 : null,
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_schema_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffImportSchemaHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_preview",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackagePayload.error ? "#f39b9b" : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffImportPreview),
+              quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffImportGuidance
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_guidance",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#e4cf98" },
+                }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffImportGuidance)
+                : null,
+              h("textarea", {
+                className: "textarea",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_text",
+                value: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText,
+                onChange: (e) => {
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText(String(e.target.value || ""));
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus("");
+                },
+                placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle_apply_dry_run_handoff_package\",\"dry_run_summary\":{},\"apply_safety\":{},\"trust_audit_bundle_snapshot\":{}}",
+                style: {
+                  flexBasis: "100%",
+                  minHeight: "58px",
+                  padding: "6px 7px",
+                  fontSize: "10px",
+                  lineHeight: "1.3",
+                },
+              }),
               h("label", {
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_confirm",
                 className: "hint",
