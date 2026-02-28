@@ -4730,3 +4730,136 @@
 - Result: pass
 - Notes:
   - Graph Lab frontend transfer panel JS syntax valid after trust-audit apply dry-run handoff safety activity-controls integration
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Trust Audit Bundle Apply Dry-Run Handoff Package Apply Safety Activity Replay (M17.79)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - trust-audit apply dry-run handoff safety activity-replay frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability reconfirmed across sync/async run + retry/cancel endpoints after bounded retry (`attempt 3`)
+    - `attempt 1`: transient async-cancel race (`status != canceled`)
+    - `attempt 2`: transient async-cancel race (`status != canceled`)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay.py`
+- Result: pass
+- Notes:
+  - dry-run handoff hydrate confirm activity-replay tokens confirmed:
+    - `parseQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityText`
+    - `parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload`
+    - `quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityImportSchemaHint`
+    - `quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityImportPreview`
+    - `quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityImportGuidance`
+    - `replayQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrailFromText`
+  - replay UI/status tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_schema_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_text`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_replay`
+    - `dry-run handoff apply confirm activity replay skipped: empty payload`
+    - `dry-run handoff apply confirm activity replay failed:`
+    - `dry-run handoff apply confirm activity replayed (`
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_controls.py`
+- Result: pass
+- Notes:
+  - dry-run handoff safety activity-controls token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_trail.py`
+- Result: pass
+- Notes:
+  - dry-run handoff safety activity-trail token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_auto_disarm.py`
+- Result: pass
+- Notes:
+  - dry-run handoff safety auto-disarm token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_gate.py`
+- Result: pass
+- Notes:
+  - dry-run handoff hydrate safety-gate token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_helper.py`
+- Result: pass
+- Notes:
+  - dry-run handoff apply-helper token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_parser.py`
+- Result: pass
+- Notes:
+  - dry-run handoff parser token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package.py`
+- Result: pass
+- Notes:
+  - dry-run handoff package export/copy token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_summary.py`
+- Result: pass
+- Notes:
+  - dry-run summary token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_auto_disarm.py`
+- Result: pass
+- Notes:
+  - trust-audit apply safety auto-disarm token path remains stable
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_gate.py`
+- Result: pass
+- Notes:
+  - trust-audit apply safety-gate token path remains stable
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_helper.py`
+- Result: pass
+- Notes:
+  - trust-audit apply-helper token path remains stable
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_handoff_parser.py`
+- Result: pass
+- Notes:
+  - trust-audit handoff parser token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle.py`
+- Result: pass
+- Notes:
+  - trust-audit export token path remains stable after activity-replay layering
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_policy.py`
+- Result: pass
+- Notes:
+  - trust policy + override log token path remains stable
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_provenance_guard.py`
+- Result: pass
+- Notes:
+  - provenance guard token path remains stable
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_replay_helper.py`
+- Result: pass
+- Notes:
+  - rollback package replay helper token path remains stable
+
+- Date: 2026-02-28
+- Command: `node --check /home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - Graph Lab frontend transfer panel JS syntax valid after trust-audit apply dry-run handoff safety activity-replay integration
