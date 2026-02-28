@@ -7473,7 +7473,35 @@ export function ContractWarningOverlay({
     if (status.includes("event snapshot reset")) {
       return `continuity-echo lifecycle stamp after reset: ${continuityState} (${status})`;
     }
+    if (status.includes("replacement confirm auto-disarmed")) {
+      return `continuity-echo lifecycle stamp after confirm auto-disarm: ${continuityState} (${status})`;
+    }
+    if (status.includes("replacement confirm armed")) {
+      return `continuity-echo lifecycle stamp after confirm arm: ${continuityState} (${status})`;
+    }
+    if (status.includes("replacement confirm disarmed")) {
+      return `continuity-echo lifecycle stamp after confirm disarm: ${continuityState} (${status})`;
+    }
     return `continuity-echo lifecycle stamp after lifecycle update: ${continuityState} (${status})`;
+  }, [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardContinuityHint = React.useMemo(() => {
+    const status = String(
+      quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus || ""
+    ).trim();
+    if (!status) {
+      return "import confirm trail controls-trail guard continuity: waiting for confirm arm/disarm/auto-disarm lifecycle action";
+    }
+    const continuityState = status.includes("continuity echo aligned") ? "aligned" : "pending";
+    if (status.includes("replacement confirm auto-disarmed")) {
+      return `import confirm trail controls-trail guard continuity: auto-disarm ${continuityState} (${status})`;
+    }
+    if (status.includes("replacement confirm armed")) {
+      return `import confirm trail controls-trail guard continuity: confirm-arm ${continuityState} (${status})`;
+    }
+    if (status.includes("replacement confirm disarmed")) {
+      return `import confirm trail controls-trail guard continuity: confirm-disarm ${continuityState} (${status})`;
+    }
+    return `import confirm trail controls-trail guard continuity: lifecycle ${continuityState} (${status})`;
   }, [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus]);
   const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailPreview = React.useMemo(() => {
     const rows = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows;
@@ -7727,7 +7755,7 @@ export function ContractWarningOverlay({
       `replacement-risk requirement cleared for import confirm trail apply (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
     );
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-      "import confirm trail controls: replacement confirm disarmed (risk cleared)"
+      "import confirm trail controls: replacement confirm disarmed (risk cleared), continuity echo aligned"
     );
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       "dry-run handoff apply confirm activity replay trail import confirm trail import confirm disarmed"
@@ -7782,7 +7810,7 @@ export function ContractWarningOverlay({
         `import confirm trail replacement-confirm timer elapsed (20s); ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint}`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        "import confirm trail controls: replacement confirm auto-disarmed (timer elapsed)"
+        "import confirm trail controls: replacement confirm auto-disarmed (timer elapsed), continuity echo aligned"
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail import confirm auto-disarmed: re-check confirm to apply import confirm trail"
@@ -11765,7 +11793,7 @@ export function ContractWarningOverlay({
                       `import confirm trail payload changed; replacement confirm disarmed (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
                     );
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-                      "import confirm trail controls: replacement confirm disarmed (payload edit)"
+                      "import confirm trail controls: replacement confirm disarmed (payload edit), continuity echo aligned"
                     );
                   }
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
@@ -11815,8 +11843,8 @@ export function ContractWarningOverlay({
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(next ? nowMs : 0);
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
                       next
-                        ? "import confirm trail controls: replacement confirm armed"
-                        : "import confirm trail controls: replacement confirm disarmed (manual)"
+                        ? "import confirm trail controls: replacement confirm armed, continuity echo aligned"
+                        : "import confirm trail controls: replacement confirm disarmed (manual), continuity echo aligned"
                     );
                     appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
                       next ? "import_confirm_trail_import_arm_manual" : "import_confirm_trail_import_disarm_manual",
@@ -11901,6 +11929,11 @@ export function ContractWarningOverlay({
                 className: "hint",
                 style: { flexBasis: "100%", color: "#8eb6ca" },
               }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailApplyTrailContinuityStamp),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_controls_trail_guard_continuity_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardContinuityHint),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_copy",
