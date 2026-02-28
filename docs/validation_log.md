@@ -3426,3 +3426,33 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_reset`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_preview`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_cutover_timeline_status`
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Drill Helper (M17.61)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - strict-rollback drill helper frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability confirmed across sync/async run + retry/cancel endpoints
+  - async cancel assertion in this suite is timing-sensitive; pass confirmed via bounded retries (`attempt 3`)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_drill_helper.py`
+- Result: pass
+- Notes:
+  - strict-rollback drill helper tokens confirmed:
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PRESETS`
+    - `resolveQuickTelemetryStrictRollbackDrillPreset`
+    - `activeQuickTelemetryStrictRollbackDrillPresetId`
+    - `quickTelemetryDrilldownStrictRollbackChecklist`
+    - `quickTelemetryDrilldownStrictRollbackChecklistHint`
+    - `quickTelemetryDrilldownStrictRollbackChecklistPreview`
+    - `applyQuickTelemetryStrictRollbackDrillPreset`
+    - `resetQuickTelemetryStrictRollbackDrillPreset`
+  - rollback helper UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_checklist_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_checklist_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_preset_chip_`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_reset`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_status`

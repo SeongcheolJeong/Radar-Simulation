@@ -169,7 +169,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.58: Quick telemetry strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist)
 - [x] M17.59: Quick telemetry strict-default cutover helper (default-on preset + compat fallback reminder)
 - [x] M17.60: Quick telemetry strict-cutover timeline ledger (apply/fallback event rows + export-ready status trail)
-- [ ] M17.61: Quick telemetry strict-cutover rollback drill helper (failure-tagged fallback presets + operator checklist)
+- [x] M17.61: Quick telemetry strict-cutover rollback drill helper (failure-tagged fallback presets + operator checklist)
+- [ ] M17.62: Quick telemetry strict-cutover rollback drill package (preset snapshot + checklist report export)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -182,7 +183,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.60 frontend hardening track: add strict-cutover rollback drill helper (failure-tagged fallback presets + operator checklist) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.61 frontend hardening track: add strict-cutover rollback drill package (preset snapshot + checklist report export) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1611,3 +1612,14 @@ M17.60 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/195_web_e2e_graph_audit_quick_telemetry_strict_cutover_timeline_ledger.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_cutover_timeline.py`
+
+M17.61 outcome (2026-02-28):
+
+- strict-cutover rollback drill helper added:
+  - failure-tagged rollback presets (`parse_error`, `invalid_payload`, `no_scope`) now switch to compat fallback with one click
+  - rollback drill checklist added (`mode_compat`, `failure_only`, `reason_query`, `failure_rows`) with `READY|HOLD` summary
+- rollback drill status trail wired with cutover helper actions for operator rehearsal feedback
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/196_web_e2e_graph_audit_quick_telemetry_strict_rollback_drill_helper.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_drill_helper.py`

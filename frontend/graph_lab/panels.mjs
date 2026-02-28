@@ -353,6 +353,11 @@ const QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS = [
   { id: "custom", label: "flt:custom", conflict_only: true, conflict_filter: "overwrite_custom", name_query: "" },
   { id: "new", label: "flt:new", conflict_only: false, conflict_filter: "new", name_query: "" },
 ];
+const QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PRESETS = [
+  { id: "parse_error", label: "drill:parse_error", failure_only: true, reason_query: "parse_error" },
+  { id: "invalid_payload", label: "drill:invalid_payload", failure_only: true, reason_query: "invalid_payload" },
+  { id: "no_scope", label: "drill:no_scope", failure_only: true, reason_query: "no_scope_enabled" },
+];
 
 function resolveFilterImportAuditQueryPreset(rawPresetId) {
   const pid = String(rawPresetId || "").trim();
@@ -387,6 +392,13 @@ function resolveQuickTelemetryDrilldownImportFilterPreset(rawPresetId) {
   if (!pid) return QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS[0];
   return QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS.find((row) => String(row?.id || "") === pid)
     || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_PRESETS[0];
+}
+
+function resolveQuickTelemetryStrictRollbackDrillPreset(rawPresetId) {
+  const pid = String(rawPresetId || "").trim();
+  if (!pid) return QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PRESETS[0];
+  return QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PRESETS.find((row) => String(row?.id || "") === pid)
+    || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PRESETS[0];
 }
 
 function clampInteger(raw, minValue, maxValue, fallback) {
@@ -2079,6 +2091,7 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictCutoverStatus, setQuickTelemetryDrilldownStrictCutoverStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictCutoverLedger, setQuickTelemetryDrilldownStrictCutoverLedger] = React.useState([]);
   const [quickTelemetryDrilldownStrictCutoverLedgerStatus, setQuickTelemetryDrilldownStrictCutoverLedgerStatus] = React.useState("");
+  const [quickTelemetryDrilldownStrictRollbackDrillStatus, setQuickTelemetryDrilldownStrictRollbackDrillStatus] = React.useState("");
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2176,6 +2189,7 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictCutoverStatus("");
       setQuickTelemetryDrilldownStrictCutoverLedger([]);
       setQuickTelemetryDrilldownStrictCutoverLedgerStatus("");
+      setQuickTelemetryDrilldownStrictRollbackDrillStatus("");
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -3084,6 +3098,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictAdoptionGateStatus("strict adoption gate signals reset");
     setQuickTelemetryDrilldownStrictCutoverStatus("");
     setQuickTelemetryDrilldownStrictCutoverLedgerStatus("");
+    setQuickTelemetryDrilldownStrictRollbackDrillStatus("");
   }, []);
   const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
     return buildQuickTelemetryDrilldownStrictAdoptionChecklist(
@@ -3516,6 +3531,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictCutoverStatus(
       `strict default cutover applied (${quickTelemetryDrilldownStrictAdoptionChecklist.ready ? "READY" : "HOLD"} ${quickTelemetryDrilldownStrictAdoptionChecklist.pass_count}/${quickTelemetryDrilldownStrictAdoptionChecklist.item_count})`
     );
+    setQuickTelemetryDrilldownStrictRollbackDrillStatus("");
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("apply_strict_default", "strict");
   }, [
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent,
@@ -3534,8 +3550,39 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictCutoverStatus(
       "compat fallback applied; strict-default cutover is paused"
     );
+    setQuickTelemetryDrilldownStrictRollbackDrillStatus("");
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
   }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
+  const applyQuickTelemetryStrictRollbackDrillPreset = React.useCallback((presetId) => {
+    const preset = resolveQuickTelemetryStrictRollbackDrillPreset(presetId);
+    setQuickTelemetryDrilldownImportFilterBundleMode("compat");
+    setFilterImportAuditQuickTelemetryFailureOnlyChecked(Boolean(preset?.failure_only));
+    setFilterImportAuditQuickTelemetryReasonQuery(
+      String(preset?.reason_query || "").slice(0, FILTER_IMPORT_AUDIT_QUICK_REASON_QUERY_MAX)
+    );
+    setQuickTelemetryDrilldownImportFilterBundleStatus(
+      `rollback drill preset applied (${String(preset?.id || "parse_error")} -> mode=compat)`
+    );
+    setQuickTelemetryDrilldownStrictAdoptionGateStatus(
+      "strict adoption gate signal: rollback drill preset switched to compat fallback"
+    );
+    setQuickTelemetryDrilldownStrictCutoverStatus(
+      "compat fallback applied via rollback drill helper"
+    );
+    setQuickTelemetryDrilldownStrictRollbackDrillStatus(
+      `rollback drill preset: ${String(preset?.id || "parse_error")} (reason=${String(preset?.reason_query || "-")})`
+    );
+    appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
+  }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
+  const resetQuickTelemetryStrictRollbackDrillPreset = React.useCallback(() => {
+    setFilterImportAuditQuickTelemetryFailureOnlyChecked(
+      Boolean(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickTelemetryFailureOnly)
+    );
+    setFilterImportAuditQuickTelemetryReasonQuery(
+      String(CONTRACT_OVERLAY_DEFAULT_PREFS.filterImportAuditQuickTelemetryReasonQuery || "")
+    );
+    setQuickTelemetryDrilldownStrictRollbackDrillStatus("rollback drill filter reset");
+  }, []);
   const resetQuickTelemetryDrilldownStrictCutoverLedger = React.useCallback(() => {
     setQuickTelemetryDrilldownStrictCutoverLedger([]);
     setQuickTelemetryDrilldownStrictCutoverLedgerStatus("cutover timeline reset");
@@ -4618,6 +4665,86 @@ export function ContractWarningOverlay({
     filterImportAuditQuickApplyTelemetry,
     filterImportAuditQuickTelemetryReasonQueryNormalized,
     filterImportAuditQuickTelemetryRowsDrilldown,
+  ]);
+  const activeQuickTelemetryStrictRollbackDrillPresetId = React.useMemo(() => {
+    const match = QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PRESETS.find((preset) => (
+      Boolean(preset?.failure_only) === Boolean(filterImportAuditQuickTelemetryFailureOnlyChecked)
+      && String(preset?.reason_query || "").trim().toLowerCase() === filterImportAuditQuickTelemetryReasonQueryNormalized
+    ));
+    return match ? String(match.id || "") : "custom";
+  }, [
+    filterImportAuditQuickTelemetryFailureOnlyChecked,
+    filterImportAuditQuickTelemetryReasonQueryNormalized,
+  ]);
+  const quickTelemetryDrilldownStrictRollbackChecklist = React.useMemo(() => {
+    const visibleRows = Array.isArray(filterImportAuditQuickTelemetryRowsDrilldown)
+      ? filterImportAuditQuickTelemetryRowsDrilldown
+      : [];
+    const failedVisible = visibleRows.filter((row) => !Boolean(row?.apply_ok)).length;
+    const items = [
+      {
+        id: "mode_compat",
+        label: "compat fallback mode active",
+        ok: quickTelemetryDrilldownImportFilterBundleMode === "compat",
+      },
+      {
+        id: "failure_only",
+        label: "failure-only drilldown enabled",
+        ok: Boolean(filterImportAuditQuickTelemetryFailureOnlyChecked),
+      },
+      {
+        id: "reason_query",
+        label: "failure tag query selected",
+        ok: String(filterImportAuditQuickTelemetryReasonQueryNormalized || "").length > 0,
+      },
+      {
+        id: "failure_rows",
+        label: "matching failure rows > 0",
+        ok: failedVisible > 0,
+      },
+    ];
+    const passCount = items.filter((row) => Boolean(row.ok)).length;
+    const ready = passCount === items.length;
+    return {
+      ready,
+      pass_count: passCount,
+      item_count: items.length,
+      items,
+      failed_visible_count: failedVisible,
+      visible_count: visibleRows.length,
+      active_preset_id: activeQuickTelemetryStrictRollbackDrillPresetId,
+    };
+  }, [
+    activeQuickTelemetryStrictRollbackDrillPresetId,
+    filterImportAuditQuickTelemetryFailureOnlyChecked,
+    filterImportAuditQuickTelemetryReasonQueryNormalized,
+    filterImportAuditQuickTelemetryRowsDrilldown,
+    quickTelemetryDrilldownImportFilterBundleMode,
+  ]);
+  const quickTelemetryDrilldownStrictRollbackChecklistHint = React.useMemo(() => {
+    const row = quickTelemetryDrilldownStrictRollbackChecklist;
+    const status = row.ready ? "READY" : "HOLD";
+    return [
+      `rollback drill checklist: ${status} (${row.pass_count}/${row.item_count})`,
+      `preset ${String(row.active_preset_id || "custom")}`,
+      `fail ${Number(row.failed_visible_count || 0)}/${Number(row.visible_count || 0)}`,
+    ].join(", ");
+  }, [quickTelemetryDrilldownStrictRollbackChecklist]);
+  const quickTelemetryDrilldownStrictRollbackChecklistPreview = React.useMemo(() => {
+    const row = quickTelemetryDrilldownStrictRollbackChecklist;
+    const itemTokens = row.items.map((x) => `${x.ok ? "ok" : "hold"}:${x.id}`).join(", ");
+    return [
+      `mode ${quickTelemetryDrilldownImportFilterBundleMode}`,
+      `failure_only ${Boolean(filterImportAuditQuickTelemetryFailureOnlyChecked) ? "on" : "off"}`,
+      `reason ${filterImportAuditQuickTelemetryReasonQueryNormalized || "-"}`,
+      `visible_fail ${Number(row.failed_visible_count || 0)}`,
+      itemTokens,
+    ].join(" | ");
+  }, [
+    filterImportAuditQuickTelemetryFailureOnlyChecked,
+    filterImportAuditQuickTelemetryReasonQueryNormalized,
+    quickTelemetryDrilldownImportFilterBundleMode,
+    quickTelemetryDrilldownStrictRollbackChecklist,
   ]);
   const filterImportAuditResetGuidedHint = React.useMemo(() => {
     if (!filterImportAuditResetArmedChecked) {
@@ -6820,6 +6947,43 @@ export function ContractWarningOverlay({
                   className: "hint",
                   style: { flexBasis: "100%", color: "#8eb6ca" },
                 }, quickTelemetryDrilldownStrictCutoverLedgerStatus)
+                : null,
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_checklist_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryDrilldownStrictRollbackChecklist.ready ? "#9ad6b5" : "#e4cf98",
+                },
+              }, quickTelemetryDrilldownStrictRollbackChecklistHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_checklist_preview",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryDrilldownStrictRollbackChecklistPreview),
+              ...QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PRESETS.map((preset) => {
+                const pid = String(preset?.id || "");
+                const selected = pid === activeQuickTelemetryStrictRollbackDrillPresetId;
+                return h("button", {
+                  className: "btn",
+                  key: `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_preset_chip_${pid}`,
+                  onClick: () => applyQuickTelemetryStrictRollbackDrillPreset(pid),
+                  style: selected
+                    ? { borderColor: "#4d7a93", background: "rgba(46, 86, 106, 0.42)" }
+                    : undefined,
+                }, String(preset?.label || pid));
+              }),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_reset",
+                onClick: resetQuickTelemetryStrictRollbackDrillPreset,
+              }, "Reset Rollback Drill"),
+              quickTelemetryDrilldownStrictRollbackDrillStatus
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_status",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#8eb6ca" },
+                }, quickTelemetryDrilldownStrictRollbackDrillStatus)
                 : null,
               h("button", {
                 className: "btn",
