@@ -182,7 +182,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.71: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run diff summary (incoming vs live policy/log snapshot)
 - [x] M17.72: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package (summary export + copy)
 - [x] M17.73: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package parser (schema guard + import preview)
-- [ ] M17.74: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply helper (imported snapshot hydrate + status)
+- [x] M17.74: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply helper (imported snapshot hydrate + status)
+- [ ] M17.75: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety gate (hydrate-overwrite confirm + operator hint)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -195,7 +196,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.73 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply helper (imported snapshot hydrate + status) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.74 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety gate (hydrate-overwrite confirm + operator hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1791,3 +1792,16 @@ M17.73 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/208_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_parser.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_parser.py`
+
+M17.74 outcome (2026-02-28):
+
+- dry-run handoff apply helper added:
+  - one-click apply action hydrates imported dry-run handoff snapshot state from parsed payload
+  - hydrated snapshot captures imported package details plus `hydrated_at_iso` for operator traceability
+- hydrated status/preview surfaces added:
+  - apply helper now emits explicit status paths for empty payload / parse error / invalid payload / successful hydrate
+  - dedicated hydrated hint + multiline preview block plus reset action added near dry-run handoff import controls
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/209_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_helper.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_helper.py`
