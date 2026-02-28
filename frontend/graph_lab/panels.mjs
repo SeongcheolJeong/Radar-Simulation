@@ -2754,6 +2754,7 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs] = React.useState(0);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail] = React.useState([]);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityImportText] = React.useState("");
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked] = React.useState(false);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked] = React.useState(false);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs] = React.useState(0);
@@ -4250,6 +4251,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot(null);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail([]);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
@@ -4331,6 +4333,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot(null);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail([]);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
@@ -4447,6 +4450,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot(null);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail([]);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
@@ -6873,6 +6877,65 @@ export function ContractWarningOverlay({
     parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.empty,
     parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.error,
   ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety = React.useMemo(() => {
+    const existingRows = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityRows;
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.empty) {
+      return {
+        needs_confirm: false,
+        trail_replaced: false,
+        parse_state: "empty",
+        existing_entry_count: existingRows.length,
+        incoming_entry_count: 0,
+      };
+    }
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.error) {
+      return {
+        needs_confirm: false,
+        trail_replaced: false,
+        parse_state: "error",
+        existing_entry_count: existingRows.length,
+        incoming_entry_count: 0,
+      };
+    }
+    const bundle = parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.bundle || {};
+    const incomingRows = Array.isArray(bundle.entries) ? bundle.entries : [];
+    const existingSignature = JSON.stringify(existingRows);
+    const incomingSignature = JSON.stringify(incomingRows);
+    const trailReplaced = existingRows.length > 0 && existingSignature !== incomingSignature;
+    return {
+      needs_confirm: trailReplaced,
+      trail_replaced: trailReplaced,
+      parse_state: "ready",
+      existing_entry_count: existingRows.length,
+      incoming_entry_count: incomingRows.length,
+    };
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.bundle,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.error,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityRows,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafetyHint = React.useMemo(() => {
+    const safety = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety;
+    if (safety.parse_state === "empty") {
+      return "confirm activity replay safety: waiting for replay payload";
+    }
+    if (safety.parse_state === "error") {
+      return "confirm activity replay safety: blocked by parse error";
+    }
+    if (!safety.needs_confirm) {
+      return "confirm activity replay safety: no replacement risk detected (replay enabled)";
+    }
+    return `confirm activity replay safety: confirm required (replace trail ${safety.existing_entry_count}->${safety.incoming_entry_count} events)`;
+  }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety]);
+  React.useEffect(() => {
+    if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked) return;
+    if (quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety.needs_confirm) return;
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(false);
+  }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety.needs_confirm,
+  ]);
   const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedHint = React.useMemo(() => {
     const hydrated = quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot;
     if (!hydrated || typeof hydrated !== "object") {
@@ -7146,6 +7209,7 @@ export function ContractWarningOverlay({
   }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityRows]);
   const resetQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail = React.useCallback(() => {
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail([]);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       "dry-run handoff apply confirm activity reset"
     );
@@ -7170,15 +7234,27 @@ export function ContractWarningOverlay({
       );
       return;
     }
+    if (
+      quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety.needs_confirm
+      && !quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked
+    ) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
+        "dry-run handoff apply confirm activity replay blocked: replacement confirm required"
+      );
+      return;
+    }
     const rows = Array.isArray(bundle.entries) ? bundle.entries : [];
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityTrail(rows);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       `dry-run handoff apply confirm activity replayed (${rows.length} events)`
     );
   }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked,
     parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.bundle,
     parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.empty,
     parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.error,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety.needs_confirm,
   ]);
   const quickTelemetryStrictRollbackTrustAuditBundleApplyConfirmCountdownHint = React.useMemo(() => {
     const safety = quickTelemetryStrictRollbackTrustAuditBundleApplySafety;
@@ -10185,6 +10261,7 @@ export function ContractWarningOverlay({
                 value: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityImportText,
                 onChange: (e) => {
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityImportText(String(e.target.value || ""));
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(false);
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus("");
                 },
                 placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle_apply_dry_run_handoff_hydrate_confirm_activity\",\"entries\":[]}",
@@ -10196,6 +10273,42 @@ export function ContractWarningOverlay({
                   lineHeight: "1.3",
                 },
               }),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_safety_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety.needs_confirm
+                    ? "#e4cf98"
+                    : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafetyHint),
+              h("label", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm",
+                className: "hint",
+                style: { flexBasis: "100%", display: "inline-flex", alignItems: "center", gap: "6px", color: "#8eb6ca" },
+              }, [
+                h("input", {
+                  type: "checkbox",
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_checkbox",
+                  checked: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked,
+                  onChange: (e) => {
+                    const next = Boolean(e.target.checked);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmChecked(next);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
+                      next
+                        ? "dry-run handoff apply confirm activity replay confirm armed"
+                        : "dry-run handoff apply confirm activity replay confirm disarmed"
+                    );
+                  },
+                  disabled: (
+                    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.empty
+                    || Boolean(parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityBundlePayload.error)
+                    || !quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplaySafety.needs_confirm
+                  ),
+                }),
+                "confirm replace existing confirm activity trail",
+              ]),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_replay",
