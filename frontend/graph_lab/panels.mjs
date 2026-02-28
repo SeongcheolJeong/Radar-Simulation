@@ -7626,6 +7626,10 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(0);
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+      "import_confirm_trail_import_disarm_risk_cleared",
+      `replacement-risk requirement cleared for import confirm trail apply (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
+    );
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       "dry-run handoff apply confirm activity replay trail import confirm trail import confirm disarmed"
     );
@@ -7634,6 +7638,8 @@ export function ContractWarningOverlay({
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked,
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety.needs_confirm,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint,
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent,
   ]);
   React.useEffect(() => {
     if (
@@ -7672,6 +7678,10 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked(false);
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs(0);
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(0);
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+        "import_confirm_trail_import_auto_disarm_timeout",
+        `import confirm trail replacement-confirm timer elapsed (20s); ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint}`
+      );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail import confirm auto-disarmed: re-check confirm to apply import confirm trail"
       );
@@ -7681,6 +7691,8 @@ export function ContractWarningOverlay({
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs,
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety.needs_confirm,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint,
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent,
   ]);
   React.useEffect(() => {
     if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmChecked) return;
@@ -8248,6 +8260,12 @@ export function ContractWarningOverlay({
     }
     const rows = Array.isArray(bundle.entries) ? bundle.entries : [];
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrail(rows);
+    if (quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked) {
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+        "import_confirm_trail_import_disarm_after_apply",
+        "import confirm trail import applied; replacement confirm disarmed"
+      );
+    }
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(0);
@@ -8260,6 +8278,7 @@ export function ContractWarningOverlay({
     parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.empty,
     parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety.needs_confirm,
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent,
   ]);
   const applyQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailFromText = React.useCallback(() => {
     if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportPayload.empty) {
@@ -11600,6 +11619,12 @@ export function ContractWarningOverlay({
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked(false);
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs(0);
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(0);
+                  if (hadImportConfirm) {
+                    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+                      "import_confirm_trail_import_disarm_payload_edit",
+                      `import confirm trail payload changed; replacement confirm disarmed (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
+                    );
+                  }
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
                     hadImportConfirm
                       ? "dry-run handoff apply confirm activity replay trail import confirm trail import payload changed; replacement confirm disarmed"
@@ -11645,6 +11670,12 @@ export function ContractWarningOverlay({
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked(next);
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs(next ? nowMs : 0);
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(next ? nowMs : 0);
+                    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+                      next ? "import_confirm_trail_import_arm_manual" : "import_confirm_trail_import_disarm_manual",
+                      next
+                        ? `operator enabled import confirm trail replacement confirm (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
+                        : `operator disabled import confirm trail replacement confirm (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
+                    );
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
                       next
                         ? "dry-run handoff apply confirm activity replay trail import confirm trail import confirm armed"
