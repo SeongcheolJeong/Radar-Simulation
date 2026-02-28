@@ -355,6 +355,7 @@ const QUICK_TELEMETRY_STRICT_ROLLBACK_OVERRIDE_LOG_KIND =
 const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION = 1;
 const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND =
   "graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle";
+const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_CONFIRM_TIMEOUT_MS = 20_000;
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
   { id: "all", label: "all" },
   { id: "new", label: "new" },
@@ -2508,6 +2509,8 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked] = React.useState(false);
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs] = React.useState(0);
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs] = React.useState(0);
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2620,6 +2623,8 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -3547,6 +3552,8 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
   }, []);
   const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
     return buildQuickTelemetryDrilldownStrictAdoptionChecklist(
@@ -3985,6 +3992,8 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("apply_strict_default", "strict");
   }, [
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent,
@@ -4009,6 +4018,8 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
   }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
   const applyQuickTelemetryStrictRollbackDrillPreset = React.useCallback((presetId) => {
@@ -4035,6 +4046,8 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
   }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
   const resetQuickTelemetryStrictRollbackDrillPreset = React.useCallback(() => {
@@ -4050,6 +4063,8 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
   }, []);
   const exportQuickTelemetryStrictRollbackDrillPackageToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryStrictRollbackDrillPackage(
@@ -4160,6 +4175,8 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("override log reset");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
   }, []);
   const copyQuickTelemetryStrictRollbackTrustAuditBundleJson = React.useCallback(async () => {
     const jsonText = serializeQuickTelemetryStrictRollbackTrustAuditBundle(
@@ -4255,6 +4272,8 @@ export function ContractWarningOverlay({
       `trust audit bundle applied (policy=${policyMode}, overrides=${overrideEntries.length}, parse=${snapshot.parse_state})`
     );
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
   }, [
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
     quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm,
@@ -4379,6 +4398,8 @@ export function ContractWarningOverlay({
     }
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
     setQuickTelemetryDrilldownStrictRollbackPackageStatus(
       [
         allowProvenanceOverride ? "rollback package override replayed" : "rollback package replayed",
@@ -4416,6 +4437,8 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
   }, []);
   const exportQuickTelemetryDrilldownStrictCutoverLedgerToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryDrilldownStrictCutoverLedgerBundle(
@@ -6064,11 +6087,95 @@ export function ContractWarningOverlay({
       : `override log unchanged (${safety.incoming_override_count})`;
     return `apply safety: confirm required (${policyToken}, ${overrideToken})`;
   }, [quickTelemetryStrictRollbackTrustAuditBundleApplySafety]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyConfirmCountdownHint = React.useMemo(() => {
+    const safety = quickTelemetryStrictRollbackTrustAuditBundleApplySafety;
+    if (safety.parse_state === "empty") {
+      return "apply confirm timer: waiting for trust-audit payload";
+    }
+    if (safety.parse_state === "error") {
+      return "apply confirm timer: blocked by parse error";
+    }
+    if (!safety.needs_confirm) {
+      return "apply confirm timer: no replacement-risk confirmation required";
+    }
+    const timeoutSec = Math.floor(
+      QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_CONFIRM_TIMEOUT_MS / 1000
+    );
+    if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked) {
+      return `apply confirm timer: check confirm to arm (${timeoutSec}s auto-disarm)`;
+    }
+    const armedAt = Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs || 0);
+    const tickMs = Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs || 0);
+    const nowMs = tickMs > 0 ? tickMs : Date.now();
+    const elapsedMs = armedAt > 0 ? Math.max(0, nowMs - armedAt) : 0;
+    const remainingSec = Math.max(
+      0,
+      Math.ceil((QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_CONFIRM_TIMEOUT_MS - elapsedMs) / 1000)
+    );
+    if (remainingSec <= 5) {
+      return `apply confirm timer: armed (${remainingSec}s left, auto-disarm soon)`;
+    }
+    return `apply confirm timer: armed (${remainingSec}s left)`;
+  }, [
+    quickTelemetryStrictRollbackTrustAuditBundleApplySafety,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs,
+  ]);
   React.useEffect(() => {
     if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked) return;
     if (quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm) return;
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
   }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs,
+    quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm,
+  ]);
+  React.useEffect(() => {
+    if (
+      !quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked
+      || !quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm
+    ) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
+      return;
+    }
+    const nowMs = Date.now();
+    if (Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs || 0) <= 0) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(nowMs);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(nowMs);
+    }
+    const timer = setInterval(() => {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(Date.now());
+    }, 1_000);
+    return () => clearInterval(timer);
+  }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
+    quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm,
+  ]);
+  React.useEffect(() => {
+    if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked) return;
+    if (!quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm) return;
+    const armedAt = Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs || 0);
+    if (armedAt <= 0) return;
+    const timeoutMs = QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_CONFIRM_TIMEOUT_MS;
+    const elapsedMs = Math.max(0, Date.now() - armedAt);
+    const remainingMs = Math.max(0, timeoutMs - elapsedMs);
+    const timeout = setTimeout(() => {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+        "trust audit apply confirm auto-disarmed: re-check confirm to apply"
+      );
+    }, remainingMs);
+    return () => clearTimeout(timeout);
+  }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs,
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
     quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm,
   ]);
@@ -8776,7 +8883,18 @@ export function ContractWarningOverlay({
                   type: "checkbox",
                   key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_confirm_checkbox",
                   checked: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
-                  onChange: (e) => setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(Boolean(e.target.checked)),
+                  onChange: (e) => {
+                    const next = Boolean(e.target.checked);
+                    const nowMs = Date.now();
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(next);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(next ? nowMs : 0);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(next ? nowMs : 0);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+                      next
+                        ? "trust audit apply confirm armed: apply within 20s or it auto-disarms"
+                        : "trust audit apply confirm disarmed"
+                    );
+                  },
                   disabled: (
                     parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty
                     || Boolean(parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error)
@@ -8785,6 +8903,14 @@ export function ContractWarningOverlay({
                 }),
                 "confirm replace trust policy/override log from trust-audit handoff",
               ]),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_confirm_countdown_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked ? "#e6cf95" : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyConfirmCountdownHint),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_apply",

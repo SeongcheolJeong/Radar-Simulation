@@ -178,7 +178,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.67: Quick telemetry strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview)
 - [x] M17.68: Quick telemetry strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff)
 - [x] M17.69: Quick telemetry strict-cutover rollback trust audit bundle apply safety gate (replace-confirm + operator hint)
-- [ ] M17.70: Quick telemetry strict-cutover rollback trust audit bundle apply safety auto-disarm (confirm reset timer + countdown hint)
+- [x] M17.70: Quick telemetry strict-cutover rollback trust audit bundle apply safety auto-disarm (confirm reset timer + countdown hint)
+- [ ] M17.71: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run diff summary (incoming vs live policy/log snapshot)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -191,7 +192,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.69 frontend hardening track: add strict-cutover rollback trust audit bundle apply safety auto-disarm (confirm reset timer + countdown hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.70 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run diff summary (incoming vs live policy/log snapshot) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1735,3 +1736,16 @@ M17.69 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/204_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_gate.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_gate.py`
+
+M17.70 outcome (2026-02-28):
+
+- trust-audit apply confirm auto-disarm added:
+  - apply confirm arm now tracks `armed_at`/tick timer with bounded safety window (`20s`)
+  - armed confirm auto-resets after timer expiry with explicit status message
+- operator countdown hint added:
+  - transfer panel now shows live confirm countdown hint (`armed Xs left`, auto-disarm warning near expiry)
+  - timer state is cleared on payload/reset/apply flows where confirm is disarmed
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/205_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_auto_disarm.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_auto_disarm.py`
