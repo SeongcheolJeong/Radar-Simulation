@@ -358,6 +358,7 @@ const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND =
 const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_SCHEMA_VERSION = 1;
 const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_KIND =
   "graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle_apply_dry_run_handoff_package";
+const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_TIMEOUT_MS = 20_000;
 const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_CONFIRM_TIMEOUT_MS = 20_000;
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
   { id: "all", label: "all" },
@@ -2658,6 +2659,8 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffImportText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot] = React.useState(null);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked] = React.useState(false);
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs] = React.useState(0);
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs] = React.useState(0);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked] = React.useState(false);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs] = React.useState(0);
@@ -6622,6 +6625,41 @@ export function ContractWarningOverlay({
       `replace hydrated snapshot exported_at ${safety.existing_exported_at_iso} -> ${safety.incoming_exported_at_iso}`,
     ].join(" (") + ")";
   }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmCountdownHint = React.useMemo(() => {
+    const safety = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety;
+    if (safety.parse_state === "empty") {
+      return "dry-run handoff apply confirm timer: waiting for handoff payload";
+    }
+    if (safety.parse_state === "error") {
+      return "dry-run handoff apply confirm timer: blocked by parse error";
+    }
+    if (!safety.needs_confirm) {
+      return "dry-run handoff apply confirm timer: no replacement-risk confirmation required";
+    }
+    const timeoutSec = Math.floor(
+      QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_TIMEOUT_MS / 1000
+    );
+    if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked) {
+      return `dry-run handoff apply confirm timer: check confirm to arm (${timeoutSec}s auto-disarm)`;
+    }
+    const armedAt = Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs || 0);
+    const tickMs = Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs || 0);
+    const nowMs = tickMs > 0 ? tickMs : Date.now();
+    const elapsedMs = armedAt > 0 ? Math.max(0, nowMs - armedAt) : 0;
+    const remainingSec = Math.max(
+      0,
+      Math.ceil((QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_TIMEOUT_MS - elapsedMs) / 1000)
+    );
+    if (remainingSec <= 5) {
+      return `dry-run handoff apply confirm timer: armed (${remainingSec}s left, auto-disarm soon)`;
+    }
+    return `dry-run handoff apply confirm timer: armed (${remainingSec}s left)`;
+  }, [
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs,
+  ]);
   const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedHint = React.useMemo(() => {
     const hydrated = quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot;
     if (!hydrated || typeof hydrated !== "object") {
@@ -6691,6 +6729,8 @@ export function ContractWarningOverlay({
       pkg,
     });
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       `dry-run handoff snapshot hydrated (parse=${String(summary.parse_state || "empty")}, diff +${Number(summary.added_override_count || 0)}/-${Number(summary.removed_override_count || 0)}/~${Number(summary.changed_override_count || 0)})`
     );
@@ -6704,6 +6744,8 @@ export function ContractWarningOverlay({
   const resetQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot = React.useCallback(() => {
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydratedSnapshot(null);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       "dry-run handoff snapshot reset"
     );
@@ -6712,7 +6754,54 @@ export function ContractWarningOverlay({
     if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked) return;
     if (quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety.needs_confirm) return;
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(false);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs(0);
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(0);
   }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety.needs_confirm,
+  ]);
+  React.useEffect(() => {
+    if (
+      !quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked
+      || !quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety.needs_confirm
+    ) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs(0);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(0);
+      return;
+    }
+    const nowMs = Date.now();
+    if (Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs || 0) <= 0) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs(nowMs);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(nowMs);
+    }
+    const timer = setInterval(() => {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(Date.now());
+    }, 1_000);
+    return () => clearInterval(timer);
+  }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety.needs_confirm,
+  ]);
+  React.useEffect(() => {
+    if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked) return;
+    if (!quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety.needs_confirm) return;
+    const armedAt = Number(quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs || 0);
+    if (armedAt <= 0) return;
+    const timeoutMs = QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_TIMEOUT_MS;
+    const elapsedMs = Math.max(0, Date.now() - armedAt);
+    const remainingMs = Math.max(0, timeoutMs - elapsedMs);
+    const timeout = setTimeout(() => {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(false);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs(0);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(0);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
+        "dry-run handoff apply confirm auto-disarmed: re-check confirm to hydrate"
+      );
+    }, remainingMs);
+    return () => clearTimeout(timeout);
+  }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs,
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateSafety.needs_confirm,
   ]);
@@ -9685,10 +9774,13 @@ export function ContractWarningOverlay({
                   checked: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked,
                   onChange: (e) => {
                     const next = Boolean(e.target.checked);
+                    const nowMs = Date.now();
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked(next);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmArmedAtMs(next ? nowMs : 0);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmTickMs(next ? nowMs : 0);
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
                       next
-                        ? "dry-run handoff apply confirm armed: hydrate overwrite is enabled"
+                        ? "dry-run handoff apply confirm armed: hydrate overwrite is enabled (within 20s or it auto-disarms)"
                         : "dry-run handoff apply confirm disarmed"
                     );
                   },
@@ -9700,6 +9792,14 @@ export function ContractWarningOverlay({
                 }),
                 "confirm replace existing hydrated dry-run handoff snapshot",
               ]),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_countdown_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmChecked ? "#e6cf95" : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmCountdownHint),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply",
