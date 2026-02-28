@@ -3456,3 +3456,33 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_preset_chip_`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_reset`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_status`
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Drill Package (M17.62)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - strict-rollback drill package frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability confirmed across sync/async run + retry/cancel endpoints
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_drill_package.py`
+- Result: pass
+- Notes:
+  - strict-rollback drill package tokens confirmed:
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SCHEMA_VERSION`
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_KIND`
+    - `buildQuickTelemetryStrictRollbackDrillPackage`
+    - `serializeQuickTelemetryStrictRollbackDrillPackage`
+    - `quickTelemetryStrictRollbackDrillPackagePayload`
+    - `quickTelemetryDrilldownStrictRollbackChecklistReport`
+    - `quickTelemetryDrilldownStrictRollbackChecklistReportPreview`
+    - `quickTelemetryDrilldownStrictRollbackPackagePreview`
+  - package/report UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_export`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_copy`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_report_copy`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_report_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_status`
