@@ -165,7 +165,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.54: Quick telemetry import filter-bundle transfer (copy/export/import + preview)
 - [x] M17.55: Quick telemetry import filter-bundle schema guardrails (kind/schema checks + operator hints)
 - [x] M17.56: Quick telemetry import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload)
-- [ ] M17.57: Quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints)
+- [x] M17.57: Quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints)
+- [ ] M17.58: Quick telemetry strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -178,7 +179,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.56 frontend hardening track: add quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.57 frontend hardening track: add strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1560,3 +1561,13 @@ M17.56 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/191_web_e2e_graph_audit_quick_telemetry_import_filter_bundle_mode_toggle.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_import_filter_bundle_mode.py`
+
+M17.57 outcome (2026-02-28):
+
+- strict-mode rollout helper added to detect legacy bare-object payload and generate strict wrapped auto-wrap preview
+- one-click helper action added (`Wrap Legacy -> Strict`) to replace import text with wrapped payload (`kind/schema/filter_bundle`)
+- rollout hints now report migration status (`mode_not_strict`, `already_wrapped`, parse/root issues) for operator guidance
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/192_web_e2e_graph_audit_quick_telemetry_strict_rollout_helper.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_import_filter_bundle_rollout_helper.py`

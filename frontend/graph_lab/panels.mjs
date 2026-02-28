@@ -1339,6 +1339,37 @@ function parseQuickTelemetryDrilldownImportFilterBundleText(rawText, opts = null
   };
 }
 
+function buildQuickTelemetryDrilldownImportFilterBundleStrictWrapCandidate(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text) {
+    return { available: false, reason: "empty", wrapped_text: "" };
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_) {
+    return { available: false, reason: "invalid_json", wrapped_text: "" };
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { available: false, reason: "import_root_not_object", wrapped_text: "" };
+  }
+  const hasFilterBundleWrapper = Boolean(
+    parsed.filter_bundle
+    && typeof parsed.filter_bundle === "object"
+    && !Array.isArray(parsed.filter_bundle)
+  );
+  if (hasFilterBundleWrapper) {
+    return { available: false, reason: "already_wrapped", wrapped_text: "" };
+  }
+  const wrapped = buildQuickTelemetryDrilldownImportFilterBundle(parsed);
+  return {
+    available: true,
+    reason: "legacy_payload_detected",
+    wrapped_payload: wrapped,
+    wrapped_text: JSON.stringify(wrapped, null, 2),
+  };
+}
+
 function isEditableElementTarget(target) {
   const t = target && typeof target === "object" ? target : null;
   if (!t) return false;
@@ -2818,7 +2849,7 @@ export function ContractWarningOverlay({
       return `guidance: set schema_version=${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION}`;
     }
     if (err.includes("strict mode requires filter_bundle wrapper")) {
-      return "guidance: strict mode requires wrapped payload ({\"filter_bundle\": {...}})";
+      return "guidance: strict mode requires wrapped payload ({\"filter_bundle\": {...}}); use Wrap Legacy -> Strict helper";
     }
     if (err.includes("strict mode requires kind=")) {
       return `guidance: strict mode requires kind=${QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_KIND}`;
@@ -2839,6 +2870,52 @@ export function ContractWarningOverlay({
   }, [
     parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty,
     parsedQuickTelemetryDrilldownImportFilterBundlePayload.error,
+  ]);
+  const quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate = React.useMemo(() => {
+    if (quickTelemetryDrilldownImportFilterBundleMode !== "strict") {
+      return { available: false, reason: "mode_not_strict", wrapped_text: "" };
+    }
+    return buildQuickTelemetryDrilldownImportFilterBundleStrictWrapCandidate(
+      quickTelemetryDrilldownImportFilterBundleText
+    );
+  }, [
+    quickTelemetryDrilldownImportFilterBundleMode,
+    quickTelemetryDrilldownImportFilterBundleText,
+  ]);
+  const quickTelemetryDrilldownImportFilterBundleStrictWrapHint = React.useMemo(() => {
+    if (quickTelemetryDrilldownImportFilterBundleMode !== "strict") {
+      return "rollout helper: compat mode keeps legacy bare-object payload support";
+    }
+    if (quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available) {
+      return "rollout helper: legacy bare-object payload detected, ready to auto-wrap for strict mode";
+    }
+    const reason = String(quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.reason || "");
+    if (reason === "already_wrapped") {
+      return "rollout helper: payload already wrapped for strict mode";
+    }
+    if (reason === "invalid_json") {
+      return "rollout helper: payload must be valid JSON before auto-wrap";
+    }
+    if (reason === "import_root_not_object") {
+      return "rollout helper: payload root must be object for auto-wrap";
+    }
+    if (reason === "empty") {
+      return "rollout helper: paste legacy payload to generate strict wrap preview";
+    }
+    return "rollout helper: strict migration helper ready";
+  }, [
+    quickTelemetryDrilldownImportFilterBundleMode,
+    quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available,
+    quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.reason,
+  ]);
+  const quickTelemetryDrilldownImportFilterBundleStrictWrapPreview = React.useMemo(() => {
+    if (!quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available) {
+      return "";
+    }
+    return String(quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.wrapped_text || "");
+  }, [
+    quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available,
+    quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.wrapped_text,
   ]);
   const quickTelemetryDrilldownImportFilterBundlePreview = React.useMemo(() => {
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) {
@@ -3202,6 +3279,31 @@ export function ContractWarningOverlay({
     quickTelemetryDrilldownImportConflictOnlyChecked,
     quickTelemetryDrilldownImportNameQuery,
     quickTelemetryDrilldownImportRowCap,
+  ]);
+  const wrapQuickTelemetryDrilldownImportFilterBundleLegacyPayload = React.useCallback(() => {
+    if (quickTelemetryDrilldownImportFilterBundleMode !== "strict") {
+      setQuickTelemetryDrilldownImportFilterBundleStatus(
+        "legacy wrap skipped: switch import mode to strict"
+      );
+      return;
+    }
+    if (!quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available) {
+      setQuickTelemetryDrilldownImportFilterBundleStatus(
+        `legacy wrap skipped: ${String(quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.reason || "no candidate")}`
+      );
+      return;
+    }
+    setQuickTelemetryDrilldownImportFilterBundleText(
+      String(quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.wrapped_text || "")
+    );
+    setQuickTelemetryDrilldownImportFilterBundleStatus(
+      "legacy payload wrapped to strict bundle preview (kind/schema/filter_bundle)"
+    );
+  }, [
+    quickTelemetryDrilldownImportFilterBundleMode,
+    quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available,
+    quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.reason,
+    quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.wrapped_text,
   ]);
   const importQuickTelemetryDrilldownImportFilterBundleFromText = React.useCallback(() => {
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) {
@@ -6203,6 +6305,35 @@ export function ContractWarningOverlay({
                 className: "hint",
                 style: { flexBasis: "100%", color: "#8eb6ca" },
               }, `import mode active:${quickTelemetryDrilldownImportFilterBundleMode}`),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollout_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available ? "#e4cf98" : "#8eb6ca",
+                },
+              }, quickTelemetryDrilldownImportFilterBundleStrictWrapHint),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_wrap_legacy",
+                onClick: wrapQuickTelemetryDrilldownImportFilterBundleLegacyPayload,
+                disabled: !quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available,
+              }, "Wrap Legacy -> Strict"),
+              h("textarea", {
+                className: "textarea",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_wrap_legacy_preview",
+                value: quickTelemetryDrilldownImportFilterBundleStrictWrapPreview,
+                readOnly: true,
+                placeholder: "strict-wrap preview appears here when strict mode detects legacy payload",
+                style: {
+                  flexBasis: "100%",
+                  minHeight: "44px",
+                  padding: "6px 7px",
+                  fontSize: "10px",
+                  lineHeight: "1.3",
+                  opacity: quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available ? 1 : 0.75,
+                },
+              }),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_export",
