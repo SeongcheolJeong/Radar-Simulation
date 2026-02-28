@@ -9,3 +9,13 @@ data/
 external/*
 !external/README.md
 !external/reference-locks.md
+
+# local runtime environments
+.venv/
+.venv-po-sbr/
+
+# local migration staging
+migration_bundles/
+
+# local preflight diagnostics (non-closure evidence)
+docs/reports/scene_runtime_po_sbr_pilot_m14_6_myproject_preflight_*.json
