@@ -3345,3 +3345,29 @@
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollout_hint`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_wrap_legacy`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_wrap_legacy_preview`
+
+## Web E2E Graph Audit Quick Telemetry Strict-Mode Adoption Readiness Gate (M17.58)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - frontend strict-adoption gate changes did not alter backend API contracts
+  - async cancel/retry assertion in this regression suite is timing-sensitive; pass was confirmed via bounded retries (`attempt 3`)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_adoption_gate.py`
+- Result: pass
+- Notes:
+  - strict-adoption gate tokens confirmed:
+    - `QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT`
+    - `quickTelemetryDrilldownStrictAdoptionSignals`
+    - `bumpQuickTelemetryDrilldownStrictAdoptionSignals`
+    - `quickTelemetryDrilldownStrictAdoptionChecklist`
+    - `quickTelemetryDrilldownStrictAdoptionChecklistHint`
+    - `quickTelemetryDrilldownStrictAdoptionChecklistPreview`
+  - gate UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_reset`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_status`

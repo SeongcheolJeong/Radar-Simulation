@@ -137,6 +137,7 @@ const CONTRACT_OVERLAY_DEFAULT_PREFS = {
   quickTelemetryDrilldownImportConflictFilter: "all",
   quickTelemetryDrilldownImportRowCap: "16",
   quickTelemetryDrilldownImportFilterBundleMode: "compat",
+  quickTelemetryDrilldownStrictAdoptionSignals: null,
   activeQuickTelemetryDrilldownProfile: "default",
   quickTelemetryDrilldownProfileDraft: "custom_drilldown",
   filterImportAuditPinChipFilter: "all",
@@ -331,6 +332,7 @@ const QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_MODE_OPTIONS = [
   { id: "compat", label: "compat (legacy bare-object allowed)" },
   { id: "strict", label: "strict (wrapped payload only)" },
 ];
+const QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT = 3;
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
   { id: "all", label: "all" },
   { id: "new", label: "new" },
@@ -471,6 +473,30 @@ function normalizeQuickTelemetryDrilldownImportFilterBundleMode(raw) {
   const text = String(raw || "").trim().toLowerCase();
   const allowed = new Set(QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_MODE_OPTIONS.map((x) => String(x.id || "")));
   return allowed.has(text) ? text : CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportFilterBundleMode;
+}
+
+function normalizeQuickTelemetryDrilldownStrictAdoptionSignals(raw, fallback) {
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const base = fallback && typeof fallback === "object" && !Array.isArray(fallback)
+    ? fallback
+    : {};
+  return {
+    attempt_count: clampInteger(source.attempt_count ?? base.attempt_count ?? 0, 0, 1_000_000, 0),
+    success_count: clampInteger(source.success_count ?? base.success_count ?? 0, 0, 1_000_000, 0),
+    legacy_wrap_use_count: clampInteger(
+      source.legacy_wrap_use_count ?? base.legacy_wrap_use_count ?? 0,
+      0,
+      1_000_000,
+      0
+    ),
+    legacy_parse_block_count: clampInteger(
+      source.legacy_parse_block_count ?? base.legacy_parse_block_count ?? 0,
+      0,
+      1_000_000,
+      0
+    ),
+    last_event_ts_ms: clampInteger(source.last_event_ts_ms ?? base.last_event_ts_ms ?? 0, 0, 9_999_999_999_999, 0),
+  };
 }
 
 function matchQuickTelemetryDrilldownImportConflictFilter(row, filterId) {
@@ -1965,6 +1991,13 @@ export function ContractWarningOverlay({
       || CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportFilterBundleMode
     )
   );
+  const [quickTelemetryDrilldownStrictAdoptionSignals, setQuickTelemetryDrilldownStrictAdoptionSignals] = React.useState(
+    () => normalizeQuickTelemetryDrilldownStrictAdoptionSignals(
+      initialPrefs.quickTelemetryDrilldownStrictAdoptionSignals,
+      null
+    )
+  );
+  const [quickTelemetryDrilldownStrictAdoptionGateStatus, setQuickTelemetryDrilldownStrictAdoptionGateStatus] = React.useState("");
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2052,6 +2085,13 @@ export function ContractWarningOverlay({
           CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportFilterBundleMode
         )
       );
+      setQuickTelemetryDrilldownStrictAdoptionSignals(
+        normalizeQuickTelemetryDrilldownStrictAdoptionSignals(
+          CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownStrictAdoptionSignals,
+          null
+        )
+      );
+      setQuickTelemetryDrilldownStrictAdoptionGateStatus("");
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -2243,6 +2283,15 @@ export function ContractWarningOverlay({
   }, [quickTelemetryDrilldownImportFilterBundleMode]);
 
   React.useEffect(() => {
+    const normalized = normalizeQuickTelemetryDrilldownStrictAdoptionSignals(
+      quickTelemetryDrilldownStrictAdoptionSignals,
+      null
+    );
+    if (JSON.stringify(normalized) === JSON.stringify(quickTelemetryDrilldownStrictAdoptionSignals || {})) return;
+    setQuickTelemetryDrilldownStrictAdoptionSignals(normalized);
+  }, [quickTelemetryDrilldownStrictAdoptionSignals]);
+
+  React.useEffect(() => {
     const normalizedRaw = clampInteger(quickTelemetryDrilldownImportRowCapText, 4, 200, 16);
     const normalized = QUICK_TELEMETRY_DRILLDOWN_IMPORT_ROW_CAP_OPTIONS.includes(String(normalizedRaw))
       ? normalizedRaw
@@ -2370,6 +2419,7 @@ export function ContractWarningOverlay({
       quickTelemetryDrilldownImportConflictFilter: quickTelemetryDrilldownImportConflictFilter,
       quickTelemetryDrilldownImportRowCap: quickTelemetryDrilldownImportRowCapText,
       quickTelemetryDrilldownImportFilterBundleMode: quickTelemetryDrilldownImportFilterBundleMode,
+      quickTelemetryDrilldownStrictAdoptionSignals: quickTelemetryDrilldownStrictAdoptionSignals,
       activeQuickTelemetryDrilldownProfile,
       quickTelemetryDrilldownProfileDraft,
       filterImportAuditPinChipFilter,
@@ -2391,6 +2441,7 @@ export function ContractWarningOverlay({
     quickTelemetryDrilldownImportConflictFilter,
     quickTelemetryDrilldownImportRowCapText,
     quickTelemetryDrilldownImportFilterBundleMode,
+    quickTelemetryDrilldownStrictAdoptionSignals,
     activeQuickTelemetryDrilldownProfile,
     quickTelemetryDrilldownProfileDraft,
     filterImportAuditPinChipFilter,
@@ -2917,6 +2968,91 @@ export function ContractWarningOverlay({
     quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available,
     quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.wrapped_text,
   ]);
+  const bumpQuickTelemetryDrilldownStrictAdoptionSignals = React.useCallback((delta) => {
+    const src = delta && typeof delta === "object" && !Array.isArray(delta) ? delta : {};
+    setQuickTelemetryDrilldownStrictAdoptionSignals((prev) => {
+      const base = normalizeQuickTelemetryDrilldownStrictAdoptionSignals(prev, null);
+      const addAttempt = Number.isFinite(Number(src.attempt_count)) ? Math.floor(Number(src.attempt_count)) : 0;
+      const addSuccess = Number.isFinite(Number(src.success_count)) ? Math.floor(Number(src.success_count)) : 0;
+      const addLegacyWrapUse = Number.isFinite(Number(src.legacy_wrap_use_count))
+        ? Math.floor(Number(src.legacy_wrap_use_count))
+        : 0;
+      const addLegacyParseBlock = Number.isFinite(Number(src.legacy_parse_block_count))
+        ? Math.floor(Number(src.legacy_parse_block_count))
+        : 0;
+      const touched = addAttempt !== 0 || addSuccess !== 0 || addLegacyWrapUse !== 0 || addLegacyParseBlock !== 0;
+      return normalizeQuickTelemetryDrilldownStrictAdoptionSignals({
+        attempt_count: Math.max(0, Number(base.attempt_count || 0) + addAttempt),
+        success_count: Math.max(0, Number(base.success_count || 0) + addSuccess),
+        legacy_wrap_use_count: Math.max(0, Number(base.legacy_wrap_use_count || 0) + addLegacyWrapUse),
+        legacy_parse_block_count: Math.max(0, Number(base.legacy_parse_block_count || 0) + addLegacyParseBlock),
+        last_event_ts_ms: touched ? Date.now() : Number(base.last_event_ts_ms || 0),
+      }, base);
+    });
+  }, []);
+  const resetQuickTelemetryDrilldownStrictAdoptionSignals = React.useCallback(() => {
+    setQuickTelemetryDrilldownStrictAdoptionSignals(
+      normalizeQuickTelemetryDrilldownStrictAdoptionSignals(
+        CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownStrictAdoptionSignals,
+        null
+      )
+    );
+    setQuickTelemetryDrilldownStrictAdoptionGateStatus("strict adoption gate signals reset");
+  }, []);
+  const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
+    const sig = normalizeQuickTelemetryDrilldownStrictAdoptionSignals(
+      quickTelemetryDrilldownStrictAdoptionSignals,
+      null
+    );
+    const modeStrict = quickTelemetryDrilldownImportFilterBundleMode === "strict";
+    const enoughStrictAttempts = Number(sig.attempt_count || 0) >= QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT;
+    const strictSuccessStable = Number(sig.attempt_count || 0) > 0
+      && Number(sig.success_count || 0) >= Number(sig.attempt_count || 0);
+    const noLegacyWrapUsage = Number(sig.legacy_wrap_use_count || 0) === 0;
+    const noLegacyParseBlock = Number(sig.legacy_parse_block_count || 0) === 0;
+    const items = [
+      { id: "mode_strict", label: "strict mode active", ok: modeStrict },
+      {
+        id: "strict_attempts",
+        label: `strict import attempts >= ${QUICK_TELEMETRY_STRICT_ADOPTION_MIN_SUCCESS_COUNT}`,
+        ok: enoughStrictAttempts,
+      },
+      { id: "strict_success_stable", label: "strict import success stable", ok: strictSuccessStable },
+      { id: "no_legacy_wrap_usage", label: "legacy wrap helper usage = 0", ok: noLegacyWrapUsage },
+      { id: "no_legacy_parse_block", label: "strict parse legacy-block count = 0", ok: noLegacyParseBlock },
+    ];
+    const passCount = items.filter((row) => Boolean(row.ok)).length;
+    const ready = passCount === items.length;
+    return {
+      ready,
+      pass_count: passCount,
+      item_count: items.length,
+      items,
+      signals: sig,
+      last_event_iso: formatTimestampIso(Number(sig.last_event_ts_ms || 0)),
+    };
+  }, [
+    quickTelemetryDrilldownImportFilterBundleMode,
+    quickTelemetryDrilldownStrictAdoptionSignals,
+  ]);
+  const quickTelemetryDrilldownStrictAdoptionChecklistHint = React.useMemo(() => {
+    const row = quickTelemetryDrilldownStrictAdoptionChecklist;
+    const status = row.ready ? "READY" : "HOLD";
+    return `strict default-switch checklist: ${status} (${row.pass_count}/${row.item_count})`;
+  }, [quickTelemetryDrilldownStrictAdoptionChecklist]);
+  const quickTelemetryDrilldownStrictAdoptionChecklistPreview = React.useMemo(() => {
+    const row = quickTelemetryDrilldownStrictAdoptionChecklist;
+    const sig = row.signals || {};
+    const itemTokens = row.items.map((x) => `${x.ok ? "ok" : "hold"}:${x.id}`).join(", ");
+    return [
+      `attempts=${Number(sig.attempt_count || 0)}`,
+      `success=${Number(sig.success_count || 0)}`,
+      `legacy_wrap_use=${Number(sig.legacy_wrap_use_count || 0)}`,
+      `legacy_parse_block=${Number(sig.legacy_parse_block_count || 0)}`,
+      `last_event=${String(row.last_event_iso || "-")}`,
+      itemTokens,
+    ].join(" | ");
+  }, [quickTelemetryDrilldownStrictAdoptionChecklist]);
   const quickTelemetryDrilldownImportFilterBundlePreview = React.useMemo(() => {
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) {
       return "filter bundle preview: waiting for JSON payload";
@@ -3296,21 +3432,37 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownImportFilterBundleText(
       String(quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.wrapped_text || "")
     );
+    bumpQuickTelemetryDrilldownStrictAdoptionSignals({ legacy_wrap_use_count: 1 });
+    setQuickTelemetryDrilldownStrictAdoptionGateStatus(
+      "strict adoption gate signal: legacy wrap helper used (+1)"
+    );
     setQuickTelemetryDrilldownImportFilterBundleStatus(
       "legacy payload wrapped to strict bundle preview (kind/schema/filter_bundle)"
     );
   }, [
+    bumpQuickTelemetryDrilldownStrictAdoptionSignals,
     quickTelemetryDrilldownImportFilterBundleMode,
     quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available,
     quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.reason,
     quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.wrapped_text,
   ]);
   const importQuickTelemetryDrilldownImportFilterBundleFromText = React.useCallback(() => {
+    const strictMode = quickTelemetryDrilldownImportFilterBundleMode === "strict";
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.empty) {
       setQuickTelemetryDrilldownImportFilterBundleStatus("filter bundle import skipped: empty payload");
       return;
     }
     if (parsedQuickTelemetryDrilldownImportFilterBundlePayload.error) {
+      if (strictMode) {
+        const errText = String(parsedQuickTelemetryDrilldownImportFilterBundlePayload.error || "");
+        bumpQuickTelemetryDrilldownStrictAdoptionSignals({
+          attempt_count: 1,
+          legacy_parse_block_count: errText.includes("strict mode requires filter_bundle wrapper") ? 1 : 0,
+        });
+        setQuickTelemetryDrilldownStrictAdoptionGateStatus(
+          "strict adoption gate signal: strict import failure recorded"
+        );
+      }
       setQuickTelemetryDrilldownImportFilterBundleStatus(
         [
           `filter bundle import failed: ${parsedQuickTelemetryDrilldownImportFilterBundlePayload.error}`,
@@ -3329,10 +3481,20 @@ export function ContractWarningOverlay({
     );
     setQuickTelemetryDrilldownImportRowCapText(String(bundle.row_cap || CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryDrilldownImportRowCap));
     setQuickTelemetryDrilldownImportRowOffset(0);
+    if (strictMode) {
+      bumpQuickTelemetryDrilldownStrictAdoptionSignals({
+        attempt_count: 1,
+        success_count: 1,
+      });
+      setQuickTelemetryDrilldownStrictAdoptionGateStatus(
+        "strict adoption gate signal: strict import success recorded"
+      );
+    }
     setQuickTelemetryDrilldownImportFilterBundleStatus(
       `filter bundle imported (preset:${String(bundle.preset_id || "custom")}, schema:${Number(bundle.schema_version || QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_SCHEMA_VERSION)}, wrapper:${Boolean(bundle.has_wrapper) ? "on" : "off"}, mode:${String(bundle.import_mode || quickTelemetryDrilldownImportFilterBundleMode)})`
     );
   }, [
+    bumpQuickTelemetryDrilldownStrictAdoptionSignals,
     quickTelemetryDrilldownImportFilterBundleMode,
     quickTelemetryDrilldownImportFilterBundleInvalidGuidance,
     parsedQuickTelemetryDrilldownImportFilterBundlePayload.bundle,
@@ -6334,6 +6496,31 @@ export function ContractWarningOverlay({
                   opacity: quickTelemetryDrilldownImportFilterBundleStrictWrapCandidate.available ? 1 : 0.75,
                 },
               }),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryDrilldownStrictAdoptionChecklist.ready ? "#9ad6b5" : "#e4cf98",
+                },
+              }, quickTelemetryDrilldownStrictAdoptionChecklistHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_preview",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryDrilldownStrictAdoptionChecklistPreview),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_reset",
+                onClick: resetQuickTelemetryDrilldownStrictAdoptionSignals,
+              }, "Reset Adoption Gate"),
+              quickTelemetryDrilldownStrictAdoptionGateStatus
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_adoption_gate_status",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#8eb6ca" },
+                }, quickTelemetryDrilldownStrictAdoptionGateStatus)
+                : null,
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_export",

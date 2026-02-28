@@ -166,7 +166,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.55: Quick telemetry import filter-bundle schema guardrails (kind/schema checks + operator hints)
 - [x] M17.56: Quick telemetry import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload)
 - [x] M17.57: Quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints)
-- [ ] M17.58: Quick telemetry strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist)
+- [x] M17.58: Quick telemetry strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist)
+- [ ] M17.59: Quick telemetry strict-default cutover helper (default-on preset + compat fallback reminder)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -179,7 +180,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.57 frontend hardening track: add strict-mode adoption readiness gate (legacy-wrap usage signal + default-switch checklist) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.58 frontend hardening track: add strict-default cutover helper (default-on preset + compat fallback reminder) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1571,3 +1572,15 @@ M17.57 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/192_web_e2e_graph_audit_quick_telemetry_strict_rollout_helper.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_import_filter_bundle_rollout_helper.py`
+
+M17.58 outcome (2026-02-28):
+
+- strict-adoption readiness gate added with signal counters:
+  - `attempt_count`, `success_count`, `legacy_wrap_use_count`, `legacy_parse_block_count`
+- default-switch checklist summary (`READY|HOLD`) added with pass-count visibility
+- gate reset control added for fresh rollout measurement windows
+- import/wrap actions now update strict-adoption signals for rollout evidence
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/193_web_e2e_graph_audit_quick_telemetry_strict_adoption_gate.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_adoption_gate.py`
