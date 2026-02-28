@@ -177,7 +177,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.66: Quick telemetry strict-cutover rollback trust audit bundle (override log + provenance snapshot export package)
 - [x] M17.67: Quick telemetry strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview)
 - [x] M17.68: Quick telemetry strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff)
-- [ ] M17.69: Quick telemetry strict-cutover rollback trust audit bundle apply safety gate (replace-confirm + operator hint)
+- [x] M17.69: Quick telemetry strict-cutover rollback trust audit bundle apply safety gate (replace-confirm + operator hint)
+- [ ] M17.70: Quick telemetry strict-cutover rollback trust audit bundle apply safety auto-disarm (confirm reset timer + countdown hint)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -190,7 +191,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.68 frontend hardening track: add strict-cutover rollback trust audit bundle apply safety gate (replace-confirm + operator hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.69 frontend hardening track: add strict-cutover rollback trust audit bundle apply safety auto-disarm (confirm reset timer + countdown hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1721,3 +1722,16 @@ M17.68 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/203_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_helper.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_helper.py`
+
+M17.69 outcome (2026-02-28):
+
+- strict rollback trust-audit apply safety gate added:
+  - apply safety memo now compares incoming trust policy + override log against live state to detect replacement risk
+  - `Apply Trust Audit Bundle` now blocks with explicit status until replace-confirm is checked when risk exists
+- safety hint/confirm controls added:
+  - apply-safety hint surfaces risk breakdown (`policy change`, `override log replacement`) in transfer panel
+  - replace-confirm checkbox is auto-cleared when risk is removed (payload/state change)
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/204_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_gate.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_gate.py`

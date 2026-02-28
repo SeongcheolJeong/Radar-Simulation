@@ -2507,6 +2507,7 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus, setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText] = React.useState("");
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked] = React.useState(false);
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2618,6 +2619,7 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -3544,6 +3546,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
   }, []);
   const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
     return buildQuickTelemetryDrilldownStrictAdoptionChecklist(
@@ -3981,6 +3984,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("apply_strict_default", "strict");
   }, [
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent,
@@ -4004,6 +4008,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
   }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
   const applyQuickTelemetryStrictRollbackDrillPreset = React.useCallback((presetId) => {
@@ -4029,6 +4034,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
   }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
   const resetQuickTelemetryStrictRollbackDrillPreset = React.useCallback(() => {
@@ -4043,6 +4049,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
   }, []);
   const exportQuickTelemetryStrictRollbackDrillPackageToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryStrictRollbackDrillPackage(
@@ -4152,6 +4159,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("override log reset");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
   }, []);
   const copyQuickTelemetryStrictRollbackTrustAuditBundleJson = React.useCallback(async () => {
     const jsonText = serializeQuickTelemetryStrictRollbackTrustAuditBundle(
@@ -4220,6 +4228,15 @@ export function ContractWarningOverlay({
       );
       return;
     }
+    if (
+      quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm
+      && !quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked
+    ) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+        "trust audit bundle apply blocked: replacement safety confirm required"
+      );
+      return;
+    }
     const policyMode = normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(bundle.trust_policy_mode);
     const overrideEntries = buildQuickTelemetryStrictRollbackOverrideLogBundle(
       bundle.override_log?.entries
@@ -4237,7 +4254,10 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
       `trust audit bundle applied (policy=${policyMode}, overrides=${overrideEntries.length}, parse=${snapshot.parse_state})`
     );
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
   }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
+    quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm,
     parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle,
     parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty,
     parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error,
@@ -4358,6 +4378,7 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     }
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageStatus(
       [
         allowProvenanceOverride ? "rollback package override replayed" : "rollback package replayed",
@@ -4394,6 +4415,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
   }, []);
   const exportQuickTelemetryDrilldownStrictCutoverLedgerToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryDrilldownStrictCutoverLedgerBundle(
@@ -5959,6 +5981,96 @@ export function ContractWarningOverlay({
     parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle,
     parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty,
     parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplySafety = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty) {
+      return {
+        needs_confirm: false,
+        policy_changed: false,
+        overrides_replaced: false,
+        incoming_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        existing_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        incoming_override_count: 0,
+        existing_override_count: quickTelemetryStrictRollbackPackageOverrideLogRows.length,
+        parse_state: "empty",
+      };
+    }
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error) {
+      return {
+        needs_confirm: false,
+        policy_changed: false,
+        overrides_replaced: false,
+        incoming_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        existing_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        incoming_override_count: 0,
+        existing_override_count: quickTelemetryStrictRollbackPackageOverrideLogRows.length,
+        parse_state: "error",
+      };
+    }
+    const bundle = parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle || {};
+    const incomingPolicy = normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(bundle.trust_policy_mode);
+    const existingPolicy = normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+      quickTelemetryStrictRollbackPackageTrustPolicy
+    );
+    const incomingEntries = buildQuickTelemetryStrictRollbackOverrideLogBundle(
+      bundle.override_log?.entries
+    ).entries;
+    const existingEntries = quickTelemetryStrictRollbackPackageOverrideLogRows;
+    const incomingSignature = JSON.stringify(incomingEntries);
+    const existingSignature = JSON.stringify(existingEntries);
+    const policyChanged = incomingPolicy !== existingPolicy;
+    const overridesReplaced = existingEntries.length > 0 && incomingSignature !== existingSignature;
+    return {
+      needs_confirm: policyChanged || overridesReplaced,
+      policy_changed: policyChanged,
+      overrides_replaced: overridesReplaced,
+      incoming_policy: incomingPolicy,
+      existing_policy: existingPolicy,
+      incoming_override_count: incomingEntries.length,
+      existing_override_count: existingEntries.length,
+      parse_state: "ready",
+    };
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error,
+    quickTelemetryStrictRollbackPackageOverrideLogRows,
+    quickTelemetryStrictRollbackPackageTrustPolicy,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplySafetyHint = React.useMemo(() => {
+    const safety = quickTelemetryStrictRollbackTrustAuditBundleApplySafety;
+    if (safety.parse_state === "empty") {
+      return "apply safety: waiting for trust-audit handoff payload";
+    }
+    if (safety.parse_state === "error") {
+      return "apply safety: blocked by parse error";
+    }
+    if (!safety.needs_confirm) {
+      return "apply safety: no replacement risk detected (apply enabled)";
+    }
+    const policyToken = safety.policy_changed
+      ? `policy ${safety.existing_policy} -> ${safety.incoming_policy}`
+      : "policy unchanged";
+    const overrideToken = safety.overrides_replaced
+      ? `override log ${safety.existing_override_count} -> ${safety.incoming_override_count}`
+      : `override log unchanged (${safety.incoming_override_count})`;
+    return `apply safety: confirm required (${policyToken}, ${overrideToken})`;
+  }, [quickTelemetryStrictRollbackTrustAuditBundleApplySafety]);
+  React.useEffect(() => {
+    if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked) return;
+    if (quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm) return;
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+  }, [
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
+    quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm,
   ]);
   const quickTelemetryStrictRollbackPackageChecklistDeltaGuard = React.useMemo(() => {
     if (parsedQuickTelemetryStrictRollbackDrillPackagePayload.empty) {
@@ -8636,6 +8748,7 @@ export function ContractWarningOverlay({
                 onChange: (e) => {
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText(String(e.target.value || ""));
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
                 },
                 placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle\",\"trust_policy_mode\":\"strict_reject\",\"override_log\":{\"entries\":[]},\"provenance_snapshot\":{}}",
                 style: {
@@ -8646,6 +8759,32 @@ export function ContractWarningOverlay({
                   lineHeight: "1.3",
                 },
               }),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_safety_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm ? "#e4cf98" : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplySafetyHint),
+              h("label", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_confirm",
+                className: "hint",
+                style: { flexBasis: "100%", display: "inline-flex", alignItems: "center", gap: "6px", color: "#8eb6ca" },
+              }, [
+                h("input", {
+                  type: "checkbox",
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_confirm_checkbox",
+                  checked: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked,
+                  onChange: (e) => setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(Boolean(e.target.checked)),
+                  disabled: (
+                    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty
+                    || Boolean(parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error)
+                    || !quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm
+                  ),
+                }),
+                "confirm replace trust policy/override log from trust-audit handoff",
+              ]),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_apply",
