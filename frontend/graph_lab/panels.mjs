@@ -7506,21 +7506,24 @@ export function ContractWarningOverlay({
   const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailPreview = React.useMemo(() => {
     const rows = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows;
     const controlsEcho = `controls continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint}`;
+    const controlsTrailGuardEcho = `controls-trail guard continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardContinuityHint}`;
     const applyTrailStamp = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailApplyTrailContinuityStamp;
     if (!rows.length) {
       return [
         "confirm activity replay trail import confirm trail appears here",
         controlsEcho,
+        controlsTrailGuardEcho,
         `apply-trail continuity stamp: ${applyTrailStamp}`,
       ].join("\n");
     }
     const detailLines = rows.map((row, idx) => (
       `${idx + 1}. ${formatTimeOfDay(Number(row?.timestamp_ms || 0))} | ${String(row?.event_id || "-")} | ${String(row?.detail || "-")}`
     ));
-    return [...detailLines, `-- ${controlsEcho}`, `-- apply-trail continuity stamp: ${applyTrailStamp}`].join("\n");
+    return [...detailLines, `-- ${controlsEcho}`, `-- ${controlsTrailGuardEcho}`, `-- apply-trail continuity stamp: ${applyTrailStamp}`].join("\n");
   }, [
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailApplyTrailContinuityStamp,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardContinuityHint,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint,
   ]);
   const parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload = React.useMemo(() => {

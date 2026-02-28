@@ -7143,3 +7143,42 @@
 - Result: pass
 - Notes:
   - API orchestration endpoints remain healthy after timeline-import-audit controls-trail guard apply refresh integration
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Trust Audit Bundle Apply Dry-Run Handoff Package Apply Safety Activity Replay Timeline Import Audit Controls-Trail Guard Trail Refresh (M17.105)
+
+- Date: 2026-03-01
+- Command: `node --check /home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - Graph Lab panel syntax valid after timeline-import-audit controls-trail guard trail refresh wiring
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_trail_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard trail refresh tokens verified for guard continuity echo parity in empty/populated preview states
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail_refresh.py`
+- Result: pass
+- Notes:
+  - baseline trail refresh continuity contract remains stable after controls-trail guard trail layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard continuity contract remains stable after trail preview layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_apply_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard apply contract remains stable after trail preview layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - initial two attempts hit transient async-cancel status race (`expected canceled`); third immediate rerun passed
+  - API orchestration endpoints remain healthy after timeline-import-audit controls-trail guard trail refresh integration
