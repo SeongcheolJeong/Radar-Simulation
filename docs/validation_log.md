@@ -7221,3 +7221,48 @@
 - Notes:
   - initial attempt failed with transient HTTP 400 on async run fetch; second attempt hit transient async-cancel status race (`expected canceled`); third immediate rerun passed
   - API orchestration endpoints remain healthy after timeline-import-audit controls-trail guard controls refresh integration
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Trust Audit Bundle Apply Dry-Run Handoff Package Apply Safety Activity Replay Timeline Import Audit Controls-Trail Guard Controls Parser Refresh (M17.107)
+
+- Date: 2026-03-01
+- Command: `node --check /home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - Graph Lab panel syntax valid after timeline-import-audit controls-trail guard controls parser refresh wiring
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_controls_parser_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard controls parser refresh tokens verified for guard-controls parser guidance parity across import preview states
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_controls_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard controls continuity baseline remains stable after parser guidance layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_parser_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard parser baseline contract remains stable after guard-controls parser layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_parser_refresh.py`
+- Result: pass
+- Notes:
+  - parser refresh baseline contract remains stable after controls-trail guard controls parser layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard continuity contract remains stable after guard-controls parser layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - initial attempts hit transient HTTP 400 async-run fetch and async-cancel status race (`expected canceled`); immediate rerun passed
+  - API orchestration endpoints remain healthy after timeline-import-audit controls-trail guard controls parser refresh integration
