@@ -207,7 +207,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.96: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit parser refresh (import-confirm control snapshot guidance + preview continuity)
 - [x] M17.97: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply refresh (control snapshot status alignment + post-apply continuity hint)
 - [x] M17.98: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions)
-- [ ] M17.99: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview)
+- [x] M17.99: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview)
+- [ ] M17.100: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls refresh (continuity-echo status alignment for copy/export/reset lifecycle)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -220,7 +221,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.98 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.99 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls refresh (continuity-echo status alignment for copy/export/reset lifecycle) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -2141,3 +2142,16 @@ M17.98 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/233_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_safety_refresh.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_safety_refresh.py`
+
+M17.99 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit trail refresh added:
+  - import-confirm trail preview now echoes controls-status continuity text for both empty and populated preview states
+  - populated trail preview now appends explicit controls continuity echo line to preserve audit detail context at read time
+- additive trail continuity contract preserved:
+  - existing trail preview key/path and baseline hint semantics remain unchanged
+  - controls continuity echo is additive and sourced from existing controls-hint status stream
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/234_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail_refresh.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail_refresh.py`

@@ -7426,15 +7426,6 @@ export function ContractWarningOverlay({
       `latest ${String(latest.event_id || "-")} @ ${formatTimeOfDay(Number(latest.timestamp_ms || 0))}`,
     ].join(" (") + ")";
   }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows]);
-  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailPreview = React.useMemo(() => {
-    const rows = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows;
-    if (!rows.length) {
-      return "confirm activity replay trail import confirm trail appears here";
-    }
-    return rows.map((row, idx) => (
-      `${idx + 1}. ${formatTimeOfDay(Number(row?.timestamp_ms || 0))} | ${String(row?.event_id || "-")} | ${String(row?.detail || "-")}`
-    )).join("\n");
-  }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows]);
   const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint = React.useMemo(() => {
     const status = String(
       quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus || ""
@@ -7445,6 +7436,23 @@ export function ContractWarningOverlay({
   }, [
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailPreview = React.useMemo(() => {
+    const rows = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows;
+    const controlsEcho = `controls continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint}`;
+    if (!rows.length) {
+      return [
+        "confirm activity replay trail import confirm trail appears here",
+        controlsEcho,
+      ].join("\n");
+    }
+    const detailLines = rows.map((row, idx) => (
+      `${idx + 1}. ${formatTimeOfDay(Number(row?.timestamp_ms || 0))} | ${String(row?.event_id || "-")} | ${String(row?.detail || "-")}`
+    ));
+    return [...detailLines, `-- ${controlsEcho}`].join("\n");
+  }, [
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint,
   ]);
   const parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload = React.useMemo(() => {
     const text = String(
