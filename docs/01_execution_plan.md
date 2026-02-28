@@ -216,7 +216,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.105: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard trail refresh (continuity-echo guard guidance parity in trail preview states)
 - [x] M17.106: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls refresh (continuity-echo guard guidance parity in controls status lifecycle)
 - [x] M17.107: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls parser refresh (continuity-echo guard-controls guidance parity in parser/import preview states)
-- [ ] M17.108: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls apply refresh (continuity-echo guard-controls guidance parity in apply continuity states)
+- [x] M17.108: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls apply refresh (continuity-echo guard-controls guidance parity in apply continuity states)
+- [ ] M17.109: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls trail refresh (continuity-echo guard-controls guidance parity in trail preview states)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -229,7 +230,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.107 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls apply refresh (continuity-echo guard-controls guidance parity in apply continuity states) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.108 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls trail refresh (continuity-echo guard-controls guidance parity in trail preview states) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -2267,3 +2268,16 @@ M17.107 outcome (2026-03-01):
   - `/home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/242_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_controls_parser_refresh.md`
   - `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_controls_parser_refresh.py`
+
+M17.108 outcome (2026-03-01):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit controls-trail guard controls apply refresh added:
+  - import-confirm apply continuity hint now appends controls-trail guard controls continuity context for `empty/error/confirm-required/apply-ready` states
+  - import-confirm apply block now includes dedicated apply guard-controls continuity hint for fast guard-controls state readability during apply decisions
+- additive apply continuity contract preserved:
+  - existing apply continuity prefixes and controls snapshot/controls-trail guard continuity semantics remain unchanged
+  - new apply guard-controls guidance is additive and reuses existing controls-trail guard controls continuity signal
+- implementation files:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/243_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_controls_apply_refresh.md`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_controls_apply_refresh.py`

@@ -7781,19 +7781,21 @@ export function ContractWarningOverlay({
   const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportApplyContinuityHint = React.useMemo(() => {
     const controlsHint = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint;
     const guardHint = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardContinuityHint;
+    const guardControlsHint = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsContinuityHint;
     const safety = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety;
     if (safety.parse_state === "empty") {
-      return `apply continuity: waiting for payload; controls snapshot unchanged (${controlsHint}); controls-trail guard continuity active (${guardHint})`;
+      return `apply continuity: waiting for payload; controls snapshot unchanged (${controlsHint}); controls-trail guard continuity active (${guardHint}); controls-trail guard controls continuity active (${guardControlsHint})`;
     }
     if (safety.parse_state === "error") {
-      return `apply continuity: parser blocked; controls snapshot unchanged (${controlsHint}); controls-trail guard continuity preserved (${guardHint})`;
+      return `apply continuity: parser blocked; controls snapshot unchanged (${controlsHint}); controls-trail guard continuity preserved (${guardHint}); controls-trail guard controls continuity preserved (${guardControlsHint})`;
     }
     if (safety.needs_confirm && !quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked) {
-      return `apply continuity: replacement confirm required before alignment (${controlsHint}); controls-trail guard continuity pending (${guardHint})`;
+      return `apply continuity: replacement confirm required before alignment (${controlsHint}); controls-trail guard continuity pending (${guardHint}); controls-trail guard controls continuity pending (${guardControlsHint})`;
     }
-    return `apply continuity: apply will align controls snapshot after hydrate (${controlsHint}); controls-trail guard continuity aligned (${guardHint})`;
+    return `apply continuity: apply will align controls snapshot after hydrate (${controlsHint}); controls-trail guard continuity aligned (${guardHint}); controls-trail guard controls continuity aligned (${guardControlsHint})`;
   }, [
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsContinuityHint,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardContinuityHint,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety,
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked,
@@ -7813,6 +7815,24 @@ export function ContractWarningOverlay({
     return `apply guard continuity: apply-ready alignment (${guardHint})`;
   }, [
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardContinuityHint,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety,
+    quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportApplyControlsTrailGuardControlsContinuityHint = React.useMemo(() => {
+    const guardControlsHint = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsContinuityHint;
+    const safety = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety;
+    if (safety.parse_state === "empty") {
+      return `apply guard-controls continuity: waiting for payload (${guardControlsHint})`;
+    }
+    if (safety.parse_state === "error") {
+      return `apply guard-controls continuity: parser blocked (${guardControlsHint})`;
+    }
+    if (safety.needs_confirm && !quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked) {
+      return `apply guard-controls continuity: replacement confirm required (${guardControlsHint})`;
+    }
+    return `apply guard-controls continuity: apply-ready alignment (${guardControlsHint})`;
+  }, [
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsContinuityHint,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSafety,
     quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked,
   ]);
@@ -11981,6 +12001,11 @@ export function ContractWarningOverlay({
                 className: "hint",
                 style: { flexBasis: "100%", color: "#8eb6ca" },
               }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportApplyControlsTrailGuardContinuityHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_import_apply_controls_trail_guard_controls_continuity_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportApplyControlsTrailGuardControlsContinuityHint),
               h("span", {
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_hint",
                 className: "hint",
