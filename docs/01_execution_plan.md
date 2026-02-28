@@ -190,7 +190,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.79: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay (schema guard + import preview)
 - [x] M17.80: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay gate (replacement confirm + operator hint)
 - [x] M17.81: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay auto-disarm (confirm timer + countdown hint)
-- [ ] M17.82: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline trail (arm/disarm/auto-disarm event log + hint)
+- [x] M17.82: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline trail (arm/disarm/auto-disarm event log + hint)
+- [ ] M17.83: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline controls (reset + export/copy)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -203,7 +204,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.81 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline trail (arm/disarm/auto-disarm event log + hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.82 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline controls (reset + export/copy) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1903,3 +1904,16 @@ M17.81 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/216_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_auto_disarm.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_auto_disarm.py`
+
+M17.82 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline trail added:
+  - replay replacement-confirm flow now records bounded timeline events for manual arm/disarm, replacement-risk auto-disarm, payload-edit disarm, timeout auto-disarm, and replay-success disarm
+  - replay timeline state is cleared on strict-cutover/rollback reset paths to avoid stale carry-over across mode transitions
+- replay timeline hint/preview surfaces added:
+  - replay trail hint now summarizes latest replay-confirm event and bounded capacity usage
+  - multiline replay trail preview now renders newest-first replay confirm events (`time | event | detail`) near replay controls
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/217_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_trail.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_trail.py`
