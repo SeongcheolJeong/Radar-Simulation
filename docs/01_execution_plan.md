@@ -173,7 +173,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.62: Quick telemetry strict-cutover rollback drill package (preset snapshot + checklist report export)
 - [x] M17.63: Quick telemetry strict-cutover rollback package replay helper (package import preview + checklist delta guard)
 - [x] M17.64: Quick telemetry strict-cutover rollback package provenance guard (source stamp + checksum hint)
-- [ ] M17.65: Quick telemetry strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log)
+- [x] M17.65: Quick telemetry strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log)
+- [ ] M17.66: Quick telemetry strict-cutover rollback trust audit bundle (override log + provenance snapshot export package)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -186,7 +187,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.64 frontend hardening track: add strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.65 frontend hardening track: add strict-cutover rollback trust audit bundle (override log + provenance snapshot export package) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1665,3 +1666,16 @@ M17.64 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/199_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_provenance_guard.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_provenance_guard.py`
+
+M17.65 outcome (2026-02-28):
+
+- strict rollback package trust policy added:
+  - policy modes added (`strict_reject`, `compat_confirm`)
+  - `strict_reject` blocks normal replay when provenance guard fails
+- operator override replay/logging added:
+  - one-click `Override Reject + Replay` action for strict policy bypass
+  - override events logged with policy/provenance metadata and export/copy/reset controls
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/200_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_policy.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_policy.py`

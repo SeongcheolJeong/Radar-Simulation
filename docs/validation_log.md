@@ -3545,3 +3545,44 @@
   - provenance guard UI tokens confirmed:
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_provenance_hint`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_delta_confirm`
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Trust Policy (M17.65)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - strict-rollback package trust-policy frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability confirmed across sync/async run + retry/cancel endpoints
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_policy.py`
+- Result: pass
+- Notes:
+  - strict-rollback trust policy tokens confirmed:
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_POLICY_OPTIONS`
+    - `normalizeQuickTelemetryStrictRollbackPackageTrustPolicy`
+    - `quickTelemetryStrictRollbackPackageTrustPolicy`
+    - `quickTelemetryStrictRollbackPackageTrustPolicyHint`
+  - override log tokens confirmed:
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_OVERRIDE_LOG_LIMIT`
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_OVERRIDE_LOG_SCHEMA_VERSION`
+    - `QUICK_TELEMETRY_STRICT_ROLLBACK_OVERRIDE_LOG_KIND`
+    - `normalizeQuickTelemetryStrictRollbackOverrideLogEntry`
+    - `buildQuickTelemetryStrictRollbackOverrideLogBundle`
+    - `serializeQuickTelemetryStrictRollbackOverrideLogBundle`
+    - `quickTelemetryStrictRollbackPackageOverrideLogRows`
+    - `quickTelemetryStrictRollbackPackageOverrideLogPreview`
+    - `quickTelemetryStrictRollbackPackageOverrideLogHint`
+    - `overrideReplayQuickTelemetryStrictRollbackPackageFromText`
+  - trust/override UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_policy_label`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_policy_chip_`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_policy_hint`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_override_replay`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_override_reason`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_override_log_copy`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_override_log_export`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_override_log_reset`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_override_log_preview`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_override_log_status`
