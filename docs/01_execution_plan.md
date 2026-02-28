@@ -179,7 +179,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.68: Quick telemetry strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff)
 - [x] M17.69: Quick telemetry strict-cutover rollback trust audit bundle apply safety gate (replace-confirm + operator hint)
 - [x] M17.70: Quick telemetry strict-cutover rollback trust audit bundle apply safety auto-disarm (confirm reset timer + countdown hint)
-- [ ] M17.71: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run diff summary (incoming vs live policy/log snapshot)
+- [x] M17.71: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run diff summary (incoming vs live policy/log snapshot)
+- [ ] M17.72: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package (summary export + copy)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -192,7 +193,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.70 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run diff summary (incoming vs live policy/log snapshot) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.71 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package (summary export + copy) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1749,3 +1750,16 @@ M17.70 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/205_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_auto_disarm.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_safety_auto_disarm.py`
+
+M17.71 outcome (2026-02-28):
+
+- trust-audit apply dry-run diff summary added:
+  - incoming handoff payload is now compared against live trust policy + override log snapshot before apply
+  - dry-run summary tracks policy-change flag plus override-log diff counts (`added`, `removed`, `changed`, `unchanged`)
+- dry-run operator surfaces added:
+  - one-line dry-run hint added near apply safety controls
+  - multiline dry-run preview block added (`policy`, `override_count`, `override_diff`, latest live/incoming override rows)
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/206_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_summary.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_summary.py`

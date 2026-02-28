@@ -6087,6 +6087,165 @@ export function ContractWarningOverlay({
       : `override log unchanged (${safety.incoming_override_count})`;
     return `apply safety: confirm required (${policyToken}, ${overrideToken})`;
   }, [quickTelemetryStrictRollbackTrustAuditBundleApplySafety]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunSummary = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty) {
+      return {
+        parse_state: "empty",
+        policy_changed: false,
+        existing_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        incoming_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        existing_override_count: quickTelemetryStrictRollbackPackageOverrideLogRows.length,
+        incoming_override_count: 0,
+        added_override_count: 0,
+        removed_override_count: 0,
+        changed_override_count: 0,
+        unchanged_override_count: 0,
+        existing_latest_override_id: "-",
+        existing_latest_override_ts: "-",
+        existing_latest_override_preset: "-",
+        incoming_latest_override_id: "-",
+        incoming_latest_override_ts: "-",
+        incoming_latest_override_preset: "-",
+      };
+    }
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error) {
+      return {
+        parse_state: "error",
+        policy_changed: false,
+        existing_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        incoming_policy: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+          quickTelemetryStrictRollbackPackageTrustPolicy
+        ),
+        existing_override_count: quickTelemetryStrictRollbackPackageOverrideLogRows.length,
+        incoming_override_count: 0,
+        added_override_count: 0,
+        removed_override_count: 0,
+        changed_override_count: 0,
+        unchanged_override_count: 0,
+        existing_latest_override_id: "-",
+        existing_latest_override_ts: "-",
+        existing_latest_override_preset: "-",
+        incoming_latest_override_id: "-",
+        incoming_latest_override_ts: "-",
+        incoming_latest_override_preset: "-",
+      };
+    }
+    const bundle = parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle || {};
+    const incomingPolicy = normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(bundle.trust_policy_mode);
+    const existingPolicy = normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+      quickTelemetryStrictRollbackPackageTrustPolicy
+    );
+    const incomingEntries = buildQuickTelemetryStrictRollbackOverrideLogBundle(
+      bundle.override_log?.entries
+    ).entries;
+    const existingEntries = quickTelemetryStrictRollbackPackageOverrideLogRows;
+    const existingById = new Map();
+    existingEntries.forEach((row) => {
+      const id = String(row?.id || "").trim();
+      if (!id) return;
+      existingById.set(id, row);
+    });
+    const incomingById = new Map();
+    incomingEntries.forEach((row) => {
+      const id = String(row?.id || "").trim();
+      if (!id) return;
+      incomingById.set(id, row);
+    });
+    let addedCount = 0;
+    let changedCount = 0;
+    let unchangedCount = 0;
+    const entrySignature = (row) => [
+      String(row?.event_kind || ""),
+      String(row?.policy_mode || ""),
+      String(row?.source_stamp || ""),
+      String(row?.payload_checksum || ""),
+      String(row?.computed_checksum || ""),
+      String(Boolean(row?.provenance_issue)),
+      String(Boolean(row?.checklist_delta)),
+      String(Boolean(row?.delta_confirmed)),
+      String(row?.override_reason || ""),
+      String(row?.preset_id || ""),
+      String(row?.timestamp_iso || ""),
+    ].join("|");
+    incomingById.forEach((incomingRow, id) => {
+      const existingRow = existingById.get(id);
+      if (!existingRow) {
+        addedCount += 1;
+        return;
+      }
+      if (entrySignature(incomingRow) === entrySignature(existingRow)) {
+        unchangedCount += 1;
+        return;
+      }
+      changedCount += 1;
+    });
+    let removedCount = 0;
+    existingById.forEach((_, id) => {
+      if (!incomingById.has(id)) removedCount += 1;
+    });
+    const existingLatest = existingEntries[0] || {};
+    const incomingLatest = incomingEntries[0] || {};
+    return {
+      parse_state: "ready",
+      policy_changed: incomingPolicy !== existingPolicy,
+      existing_policy: existingPolicy,
+      incoming_policy: incomingPolicy,
+      existing_override_count: existingEntries.length,
+      incoming_override_count: incomingEntries.length,
+      added_override_count: addedCount,
+      removed_override_count: removedCount,
+      changed_override_count: changedCount,
+      unchanged_override_count: unchangedCount,
+      existing_latest_override_id: String(existingLatest.id || "-"),
+      existing_latest_override_ts: String(existingLatest.timestamp_iso || "-"),
+      existing_latest_override_preset: String(existingLatest.preset_id || "-"),
+      incoming_latest_override_id: String(incomingLatest.id || "-"),
+      incoming_latest_override_ts: String(incomingLatest.timestamp_iso || "-"),
+      incoming_latest_override_preset: String(incomingLatest.preset_id || "-"),
+    };
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error,
+    quickTelemetryStrictRollbackPackageOverrideLogRows,
+    quickTelemetryStrictRollbackPackageTrustPolicy,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHint = React.useMemo(() => {
+    const summary = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunSummary;
+    if (summary.parse_state === "empty") {
+      return "apply dry-run: waiting for trust-audit handoff payload";
+    }
+    if (summary.parse_state === "error") {
+      return "apply dry-run: blocked by parse error";
+    }
+    return [
+      `apply dry-run: policy ${summary.existing_policy}->${summary.incoming_policy} ${summary.policy_changed ? "changed" : "same"}`,
+      `override live ${summary.existing_override_count} incoming ${summary.incoming_override_count}`,
+      `diff +${summary.added_override_count}/-${summary.removed_override_count}/~${summary.changed_override_count}`,
+    ].join(", ");
+  }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunSummary]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunPreview = React.useMemo(() => {
+    const summary = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunSummary;
+    if (summary.parse_state === "empty") {
+      return "apply dry-run preview: waiting for trust-audit handoff payload";
+    }
+    if (summary.parse_state === "error") {
+      return "apply dry-run preview: blocked by parse error";
+    }
+    return [
+      `policy live=${summary.existing_policy} incoming=${summary.incoming_policy} changed=${summary.policy_changed ? "yes" : "no"}`,
+      `override_count live=${summary.existing_override_count} incoming=${summary.incoming_override_count}`,
+      `override_diff added=${summary.added_override_count} removed=${summary.removed_override_count} changed=${summary.changed_override_count} unchanged=${summary.unchanged_override_count}`,
+      `live_latest id=${summary.existing_latest_override_id} ts=${summary.existing_latest_override_ts} preset=${summary.existing_latest_override_preset}`,
+      `incoming_latest id=${summary.incoming_latest_override_id} ts=${summary.incoming_latest_override_ts} preset=${summary.incoming_latest_override_preset}`,
+    ].join("\n");
+  }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunSummary]);
   const quickTelemetryStrictRollbackTrustAuditBundleApplyConfirmCountdownHint = React.useMemo(() => {
     const safety = quickTelemetryStrictRollbackTrustAuditBundleApplySafety;
     if (safety.parse_state === "empty") {
@@ -8856,6 +9015,8 @@ export function ContractWarningOverlay({
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText(String(e.target.value || ""));
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmChecked(false);
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmArmedAtMs(0);
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyConfirmTickMs(0);
                 },
                 placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle\",\"trust_policy_mode\":\"strict_reject\",\"override_log\":{\"entries\":[]},\"provenance_snapshot\":{}}",
                 style: {
@@ -8874,6 +9035,29 @@ export function ContractWarningOverlay({
                   color: quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm ? "#e4cf98" : "#8eb6ca",
                 },
               }, quickTelemetryStrictRollbackTrustAuditBundleApplySafetyHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_hint",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: quickTelemetryStrictRollbackTrustAuditBundleApplySafety.needs_confirm ? "#e4cf98" : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHint),
+              h("textarea", {
+                className: "textarea",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_preview",
+                value: quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunPreview,
+                readOnly: true,
+                placeholder: "apply dry-run diff preview appears here",
+                style: {
+                  flexBasis: "100%",
+                  minHeight: "58px",
+                  padding: "6px 7px",
+                  fontSize: "10px",
+                  lineHeight: "1.3",
+                  opacity: 0.9,
+                },
+              }),
               h("label", {
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_confirm",
                 className: "hint",
