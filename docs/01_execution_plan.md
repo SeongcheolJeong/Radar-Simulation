@@ -175,7 +175,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.64: Quick telemetry strict-cutover rollback package provenance guard (source stamp + checksum hint)
 - [x] M17.65: Quick telemetry strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log)
 - [x] M17.66: Quick telemetry strict-cutover rollback trust audit bundle (override log + provenance snapshot export package)
-- [ ] M17.67: Quick telemetry strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview)
+- [x] M17.67: Quick telemetry strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview)
+- [ ] M17.68: Quick telemetry strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -188,7 +189,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.66 frontend hardening track: add strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.67 frontend hardening track: add strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1693,3 +1694,16 @@ M17.66 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/201_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle.py`
+
+M17.67 outcome (2026-02-28):
+
+- strict rollback trust-audit handoff parser added:
+  - strict parser validates trust-audit kind/schema before import preview
+  - parser now enforces required trust-audit sections (`override_log.entries[]`, `provenance_snapshot`)
+- import preview guardrails added:
+  - transfer panel now shows trust-audit schema hint + invalid guidance strings for kind/schema/structure errors
+  - handoff import preview line summarizes parsed policy/override-count/provenance snapshot metadata
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/202_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_handoff_parser.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_handoff_parser.py`

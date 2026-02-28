@@ -765,6 +765,72 @@ function serializeQuickTelemetryStrictRollbackTrustAuditBundle(rawBundle) {
   return JSON.stringify(buildQuickTelemetryStrictRollbackTrustAuditBundle(rawBundle), null, 2);
 }
 
+function parseQuickTelemetryStrictRollbackTrustAuditBundleText(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text) {
+    throw new Error("empty import payload");
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_) {
+    throw new Error("invalid JSON");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("import root must be object");
+  }
+  const parsedKind = String(parsed.kind || "").trim();
+  if (!parsedKind) {
+    throw new Error(
+      `trust audit bundle requires kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND}`
+    );
+  }
+  if (parsedKind !== QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND) {
+    throw new Error(
+      `unexpected kind (expected ${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND})`
+    );
+  }
+  if (parsed.schema_version === undefined) {
+    throw new Error(
+      `trust audit bundle requires schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION}`
+    );
+  }
+  const schemaVersion = Math.floor(Number(parsed.schema_version || 0));
+  if (schemaVersion !== QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION) {
+    throw new Error(
+      `unsupported schema_version (expected ${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION})`
+    );
+  }
+  const overrideLogRaw = parsed.override_log;
+  if (!overrideLogRaw || typeof overrideLogRaw !== "object" || Array.isArray(overrideLogRaw)) {
+    throw new Error("trust audit bundle missing override_log");
+  }
+  const overrideEntries = overrideLogRaw.entries;
+  if (!Array.isArray(overrideEntries)) {
+    throw new Error("trust audit bundle override_log.entries must be array");
+  }
+  const provenanceRaw = parsed.provenance_snapshot;
+  if (!provenanceRaw || typeof provenanceRaw !== "object" || Array.isArray(provenanceRaw)) {
+    throw new Error("trust audit bundle missing provenance_snapshot");
+  }
+  const overrideLog = buildQuickTelemetryStrictRollbackOverrideLogBundle(overrideEntries);
+  return {
+    schema_version: schemaVersion,
+    kind: parsedKind,
+    exported_at_iso: String(parsed.exported_at_iso || "-"),
+    trust_policy_mode: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+      parsed.trust_policy_mode
+    ),
+    override_log: {
+      schema_version: overrideLog.schema_version,
+      kind: overrideLog.kind,
+      entry_count: overrideLog.entry_count,
+      entries: overrideLog.entries,
+    },
+    provenance_snapshot: normalizeQuickTelemetryStrictRollbackTrustAuditProvenanceSnapshot(provenanceRaw),
+  };
+}
+
 function buildQuickTelemetryStrictRollbackDrillPackage(rawPackage) {
   const src = rawPackage && typeof rawPackage === "object" && !Array.isArray(rawPackage)
     ? rawPackage
@@ -2440,6 +2506,7 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackPackageOverrideLog, setQuickTelemetryDrilldownStrictRollbackPackageOverrideLog] = React.useState([]);
   const [quickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus, setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus] = React.useState("");
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText] = React.useState("");
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2550,6 +2617,7 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideLog([]);
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -3475,6 +3543,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText("");
   }, []);
   const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
     return buildQuickTelemetryDrilldownStrictAdoptionChecklist(
@@ -5767,6 +5836,88 @@ export function ContractWarningOverlay({
     }
     return lines.join("\n");
   }, [quickTelemetryStrictRollbackTrustAuditBundle]);
+  const parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload = React.useMemo(() => {
+    const text = String(quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText || "").trim();
+    if (!text) {
+      return {
+        bundle: null,
+        error: "",
+        empty: true,
+      };
+    }
+    try {
+      return {
+        bundle: parseQuickTelemetryStrictRollbackTrustAuditBundleText(text),
+        error: "",
+        empty: false,
+      };
+    } catch (err) {
+      return {
+        bundle: null,
+        error: String(err?.message || "parse error"),
+        empty: false,
+      };
+    }
+  }, [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText]);
+  const quickTelemetryStrictRollbackTrustAuditBundleImportSchemaHint = React.useMemo(
+    () =>
+      `trust audit bundle expects kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND}, schema=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION}`,
+    []
+  );
+  const quickTelemetryStrictRollbackTrustAuditBundleImportGuidance = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty) return "";
+    const err = String(parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error || "");
+    if (!err) return "";
+    if (err.includes("unexpected kind")) {
+      return `guidance: set kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND}`;
+    }
+    if (err.includes("requires kind=")) {
+      return `guidance: trust audit bundle requires kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND}`;
+    }
+    if (err.includes("unsupported schema_version")) {
+      return `guidance: set schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION}`;
+    }
+    if (err.includes("requires schema_version=")) {
+      return `guidance: trust audit bundle requires schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION}`;
+    }
+    if (err.includes("missing override_log")) {
+      return "guidance: include override_log wrapper with entries array";
+    }
+    if (err.includes("override_log.entries must be array")) {
+      return "guidance: override_log.entries must be an array";
+    }
+    if (err.includes("missing provenance_snapshot")) {
+      return "guidance: include provenance_snapshot object";
+    }
+    return "";
+  }, [parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty, parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error]);
+  const quickTelemetryStrictRollbackTrustAuditBundleImportPreview = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty) {
+      return "trust audit import preview: waiting for JSON payload";
+    }
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error) {
+      return `trust audit import preview: invalid payload (${parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error})`;
+    }
+    const bundle = parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle || {};
+    const snapshot = bundle.provenance_snapshot || {};
+    const overrideLog = bundle.override_log || {};
+    const latest = Array.isArray(overrideLog.entries) && overrideLog.entries.length > 0
+      ? overrideLog.entries[0]
+      : {};
+    return [
+      `trust audit import preview: policy ${String(bundle.trust_policy_mode || "strict_reject")}`,
+      `override_events ${Number(overrideLog.entry_count || 0)}`,
+      `parse ${String(snapshot.parse_state || "empty")}`,
+      `provenance_issue ${Boolean(snapshot.has_guard_issue) ? "yes" : "no"}`,
+      `source ${String(snapshot.source_stamp || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SOURCE_STAMP)}`,
+      `package ${String(snapshot.package_kind || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_KIND)}@${Number(snapshot.package_schema_version || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SCHEMA_VERSION)}`,
+      `latest_override_preset ${String(latest.preset_id || "-")}`,
+    ].join(", ");
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error,
+  ]);
   const quickTelemetryStrictRollbackPackageChecklistDeltaGuard = React.useMemo(() => {
     if (parsedQuickTelemetryStrictRollbackDrillPackagePayload.empty) {
       return {
@@ -8416,6 +8567,40 @@ export function ContractWarningOverlay({
                   style: { flexBasis: "100%", color: "#8eb6ca" },
                 }, quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus)
                 : null,
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_schema_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryStrictRollbackTrustAuditBundleImportSchemaHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_preview",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error ? "#f39b9b" : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleImportPreview),
+              quickTelemetryStrictRollbackTrustAuditBundleImportGuidance
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_guidance",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#e4cf98" },
+                }, quickTelemetryStrictRollbackTrustAuditBundleImportGuidance)
+                : null,
+              h("textarea", {
+                className: "textarea",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_text",
+                value: quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText,
+                onChange: (e) => setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText(String(e.target.value || "")),
+                placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle\",\"trust_policy_mode\":\"strict_reject\",\"override_log\":{\"entries\":[]},\"provenance_snapshot\":{}}",
+                style: {
+                  flexBasis: "100%",
+                  minHeight: "58px",
+                  padding: "6px 7px",
+                  fontSize: "10px",
+                  lineHeight: "1.3",
+                },
+              }),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_export",
