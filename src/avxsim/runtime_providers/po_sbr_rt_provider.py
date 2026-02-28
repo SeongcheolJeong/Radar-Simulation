@@ -42,6 +42,7 @@ def generate_po_sbr_like_paths_from_posbr(context: Mapping[str, Any]) -> Dict[st
     min_range_m = max(float(runtime_input.get("min_range_m", 1.0e-6)), 1.0e-6)
 
     _assert_po_sbr_runtime_prereqs()
+    _apply_igl_compat()
     po = _load_po_solver_module(repo_root=repo_root)
     v, f = po.build(str(geometry_path))
 
@@ -91,6 +92,26 @@ def _assert_po_sbr_runtime_prereqs() -> None:
         raise RuntimeError(f"missing required PO-SBR runtime modules: {', '.join(missing)}")
 
 
+def _apply_igl_compat() -> None:
+    igl = importlib.import_module("igl")
+    if hasattr(igl, "bounding_box_diagonal"):
+        return
+    if not hasattr(igl, "bounding_box"):
+        return
+
+    # Some libigl wheels expose `bounding_box` but not `bounding_box_diagonal`.
+    def _bounding_box_diagonal(v: Any) -> float:
+        bv, _ = igl.bounding_box(v)
+        mins = bv.min(axis=0)
+        maxs = bv.max(axis=0)
+        dx = float(maxs[0] - mins[0])
+        dy = float(maxs[1] - mins[1])
+        dz = float(maxs[2] - mins[2])
+        return float(math.sqrt(dx * dx + dy * dy + dz * dz))
+
+    setattr(igl, "bounding_box_diagonal", _bounding_box_diagonal)
+
+
 def _resolve_repo_root(runtime_input: Mapping[str, Any]) -> Path:
     raw = str(runtime_input.get("po_sbr_repo_root", "external/PO-SBR-Python")).strip()
     if raw == "":
@@ -128,7 +149,22 @@ def _load_po_solver_module(repo_root: Path) -> ModuleType:
     spec.loader.exec_module(module)
     if not hasattr(module, "build") or not hasattr(module, "simulate"):
         raise RuntimeError("POsolver module must define build() and simulate()")
+    _apply_po_solver_compat(module)
     return module
+
+
+def _apply_po_solver_compat(module: ModuleType) -> None:
+    shoot_fn = getattr(module, "shoot_and_record", None)
+    if not callable(shoot_fn):
+        return
+    if bool(getattr(shoot_fn, "__avxsim_numrays_cast_compat__", False)):
+        return
+
+    def _shoot_and_record_compat(hits_1: Any, ray_pos: Any, ray_dict: Any, numrays: Any) -> Any:
+        return shoot_fn(hits_1, ray_pos, ray_dict, int(numrays))
+
+    setattr(_shoot_and_record_compat, "__avxsim_numrays_cast_compat__", True)
+    setattr(module, "shoot_and_record", _shoot_and_record_compat)
 
 
 def _unit_direction_from_angles(phi_deg: float, theta_deg: float) -> Tuple[float, float, float]:

@@ -1,0 +1,58 @@
+{
+  "scene_id": "po_sbr_runtime_pilot_v1",
+  "pilot_status": "executed",
+  "blockers": [],
+  "diagnostics": {
+    "platform": "Linux",
+    "repo_root": "/home/seongcheoljeong/workspace/myproject/external/PO-SBR-Python",
+    "repo_exists": true,
+    "geometry_path": "/home/seongcheoljeong/workspace/myproject/external/PO-SBR-Python/geometries/plate.obj",
+    "geometry_exists": true,
+    "module_report": {
+      "rtxpy": {
+        "available": true,
+        "module_name": "rtxpy",
+        "module_version": null
+      },
+      "igl": {
+        "available": true,
+        "module_name": "igl",
+        "module_version": null
+      }
+    },
+    "missing_modules": [],
+    "nvidia_runtime_available": true
+  },
+  "recommended_linux_command": "PYTHONPATH=src python3 scripts/run_scene_runtime_po_sbr_pilot.py --output-root /home/seongcheoljeong/workspace/myproject/data/runtime_pilot/po_sbr_runtime_pilot_v1 --output-summary-json /home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json --po-sbr-repo-root /home/seongcheoljeong/workspace/myproject/external/PO-SBR-Python --geometry-path geometries/plate.obj",
+  "scene_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_pilot/po_sbr_runtime_pilot_v1/scene_po_sbr_runtime_pilot.json",
+  "output_dir": "/home/seongcheoljeong/workspace/myproject/data/runtime_pilot/po_sbr_runtime_pilot_v1/pipeline_outputs",
+  "path_list_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_pilot/po_sbr_runtime_pilot_v1/pipeline_outputs/path_list.json",
+  "adc_cube_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_pilot/po_sbr_runtime_pilot_v1/pipeline_outputs/adc_cube.npz",
+  "radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_pilot/po_sbr_runtime_pilot_v1/pipeline_outputs/radar_map.npz",
+  "frame_count": 8,
+  "path_count": 8,
+  "runtime_resolution": {
+    "mode": "runtime_provider",
+    "backend_type": "po_sbr_rt",
+    "runtime_provider": "avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr",
+    "runtime_info": {
+      "provider_spec": "avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr",
+      "required_modules": [
+        "rtxpy",
+        "igl"
+      ],
+      "module_report": {
+        "rtxpy": {
+          "available": true,
+          "module_name": "rtxpy",
+          "module_version": null
+        },
+        "igl": {
+          "available": true,
+          "module_name": "igl",
+          "module_version": null
+        }
+      }
+    }
+  }
+}

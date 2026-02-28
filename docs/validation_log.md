@@ -3285,3 +3285,13 @@
   - UI tokens confirmed:
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_schema_hint`
     - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_operator_hint`
+
+
+## PO-SBR Runtime Pilot Closure (M14.6)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_m14_6_from_linux_report.py --linux-summary-json /home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json --closure-summary-json /home/seongcheoljeong/workspace/myproject/docs/reports/m14_6_closure_readiness_linux.json --apply`
+- Result: pass
+- Notes:
+  - Linux strict runtime pilot report validated (`pilot_status=executed`)
+  - closure readiness switched to `ready=true`

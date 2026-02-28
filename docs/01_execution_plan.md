@@ -86,7 +86,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M14.3: Runtime blocker gate + `sionna` PHY runtime sanity enablement
 - [x] M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock
 - [x] M14.5: `sionna.rt` full runtime enablement (working LLVM backend on target host)
-- [ ] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment
+- [x] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment
 - [x] M15.0: Web E2E orchestration API phase-0 skeleton (`/health`, `/api/runs`, run summary quicklook)
 - [x] M15.1: Web run summary schema v2 (frontend-compatible `outputs/path_summary/adc_summary/radar_map_summary`)
 - [x] M15.2: Dashboard API-run mode (`POST /api/runs` + polling + summary auto-load) and dual-server local launcher
@@ -176,7 +176,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.55 frontend hardening track: add drilldown import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable and continue M14.6 Linux strict pilot closure in parallel.
+Advance post-M17.55 frontend hardening track: add drilldown import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -501,8 +501,9 @@ M14.6 progress (2026-02-22):
 - closure readiness report:
   - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_2026_02_22.json`
   - current state: `ready=false`, missing only `linux_executed_report_missing`
-- remaining to close M14.6:
-  - execute strict pilot on Linux+NVIDIA host and archive `pilot_status=executed` report
+- M14.6 closure status (2026-02-28):
+  - strict pilot executed on Linux+NVIDIA host and archived with `pilot_status=executed`
+  - closure readiness is `ready=true`
 
 M15.0 outcome (2026-02-22):
 
@@ -1539,3 +1540,10 @@ M17.44 outcome (2026-02-23):
     - `filterImportAuditResetGuidedHint`
     - `co_filter_import_audit_reset_guided_hint`
   - reset arm now includes timeout expiry status (`reset arm expired: re-arm to execute reset`)
+
+
+M14.6 outcome (2026-02-28):
+
+- strict Linux+NVIDIA PO-SBR runtime pilot executed and archived
+- executed report: `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json`
+- closure readiness: `/home/seongcheoljeong/workspace/myproject/docs/reports/m14_6_closure_readiness_linux.json` (`ready=true`)
