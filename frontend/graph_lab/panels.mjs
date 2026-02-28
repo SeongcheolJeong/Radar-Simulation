@@ -1047,6 +1047,58 @@ function parseQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydr
   };
 }
 
+function parseQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailText(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text) {
+    throw new Error("empty import payload");
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_) {
+    throw new Error("invalid JSON");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("import root must be object");
+  }
+  const parsedKind = String(parsed.kind || "").trim();
+  if (!parsedKind) {
+    throw new Error(
+      `confirm activity replay trail import confirm trail bundle requires kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_KIND}`
+    );
+  }
+  if (parsedKind !== QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_KIND) {
+    throw new Error(
+      `unexpected kind (expected ${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_KIND})`
+    );
+  }
+  if (parsed.schema_version === undefined) {
+    throw new Error(
+      `confirm activity replay trail import confirm trail bundle requires schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_SCHEMA_VERSION}`
+    );
+  }
+  const schemaVersion = Math.floor(Number(parsed.schema_version || 0));
+  if (schemaVersion !== QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_SCHEMA_VERSION) {
+    throw new Error(
+      `unsupported schema_version (expected ${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_SCHEMA_VERSION})`
+    );
+  }
+  if (!Array.isArray(parsed.entries)) {
+    throw new Error("confirm activity replay trail import confirm trail bundle missing entries array");
+  }
+  const rows = parsed.entries
+    .map((row, idx) => normalizeQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityEntry(row, idx))
+    .filter(Boolean)
+    .slice(0, QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_LIMIT);
+  return {
+    schema_version: schemaVersion,
+    kind: parsedKind,
+    exported_at_iso: String(parsed.exported_at_iso || "-"),
+    entry_count: rows.length,
+    entries: rows,
+  };
+}
+
 function parseQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffPackageText(rawText) {
   const text = String(rawText || "").trim();
   if (!text) {
@@ -2869,6 +2921,7 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmChecked, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmChecked] = React.useState(false);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmArmedAtMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmArmedAtMs] = React.useState(0);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTickMs, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTickMs] = React.useState(0);
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrail, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrail] = React.useState([]);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrail, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrail] = React.useState([]);
   const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText] = React.useState("");
@@ -7377,6 +7430,83 @@ export function ContractWarningOverlay({
       `${idx + 1}. ${formatTimeOfDay(Number(row?.timestamp_ms || 0))} | ${String(row?.event_id || "-")} | ${String(row?.detail || "-")}`
     )).join("\n");
   }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows]);
+  const parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload = React.useMemo(() => {
+    const text = String(
+      quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportText || ""
+    ).trim();
+    if (!text) {
+      return {
+        bundle: null,
+        error: "",
+        empty: true,
+      };
+    }
+    try {
+      return {
+        bundle: parseQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailText(text),
+        error: "",
+        empty: false,
+      };
+    } catch (err) {
+      return {
+        bundle: null,
+        error: String(err?.message || "parse error"),
+        empty: false,
+      };
+    }
+  }, [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportText]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSchemaHint = React.useMemo(
+    () => (
+      `confirm activity replay trail import confirm trail bundle expects kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_KIND}, `
+      + `schema=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_SCHEMA_VERSION}`
+    ),
+    []
+  );
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportGuidance = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.empty) return "";
+    const err = String(parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error || "");
+    if (!err) return "";
+    if (err.includes("unexpected kind")) {
+      return `guidance: set kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_KIND}`;
+    }
+    if (err.includes("requires kind=")) {
+      return `guidance: confirm activity replay trail import confirm trail bundle requires kind=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_KIND}`;
+    }
+    if (err.includes("unsupported schema_version")) {
+      return `guidance: set schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_SCHEMA_VERSION}`;
+    }
+    if (err.includes("requires schema_version=")) {
+      return `guidance: confirm activity replay trail import confirm trail bundle requires schema_version=${QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_SCHEMA_VERSION}`;
+    }
+    if (err.includes("missing entries array")) {
+      return "guidance: include entries array";
+    }
+    return "";
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPreview = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.empty) {
+      return "confirm activity replay trail import confirm trail import preview: waiting for JSON payload";
+    }
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error) {
+      return `confirm activity replay trail import confirm trail import preview: invalid payload (${parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error})`;
+    }
+    const bundle = parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.bundle || {};
+    const rows = Array.isArray(bundle.entries) ? bundle.entries : [];
+    const latest = rows[0] || {};
+    return [
+      `confirm activity replay trail import confirm trail import preview: ${String(bundle.kind || QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_KIND)}@${Number(bundle.schema_version || QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_APPLY_DRY_RUN_HANDOFF_HYDRATE_CONFIRM_ACTIVITY_REPLAY_CONFIRM_TRAIL_IMPORT_CONFIRM_TRAIL_SCHEMA_VERSION)}`,
+      `events ${rows.length}`,
+      `latest ${String(latest.event_id || "-")} @ ${formatTimeOfDay(Number(latest.timestamp_ms || 0))}`,
+      `exported_at ${String(bundle.exported_at_iso || "-")}`,
+    ].join(", ");
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.bundle,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error,
+  ]);
   React.useEffect(() => {
     if (!quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmChecked) return;
     if (quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportSafety.needs_confirm) return;
@@ -11219,6 +11349,45 @@ export function ContractWarningOverlay({
                     : "#8eb6ca",
                 },
               }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmCountdownHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_import_schema_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportSchemaHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_import_preview",
+                className: "hint",
+                style: {
+                  flexBasis: "100%",
+                  color: parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error
+                    ? "#f39b9b"
+                    : "#8eb6ca",
+                },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPreview),
+              quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportGuidance
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_import_guidance",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#e4cf98" },
+                }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportGuidance)
+                : null,
+              h("textarea", {
+                className: "textarea",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_import_text",
+                value: quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportText,
+                onChange: (e) => {
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportText(String(e.target.value || ""));
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus("");
+                },
+                placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle_apply_dry_run_handoff_hydrate_confirm_activity_replay_confirm_trail_import_confirm_trail\",\"entries\":[]}",
+                style: {
+                  flexBasis: "100%",
+                  minHeight: "52px",
+                  padding: "6px 7px",
+                  fontSize: "10px",
+                  lineHeight: "1.3",
+                },
+              }),
               h("span", {
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_hint",
                 className: "hint",
