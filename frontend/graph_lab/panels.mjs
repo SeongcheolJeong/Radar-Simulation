@@ -4200,6 +4200,48 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("trust audit bundle export failed");
     }
   }, [quickTelemetryStrictRollbackTrustAuditBundle]);
+  const applyQuickTelemetryStrictRollbackTrustAuditBundleFromText = React.useCallback(() => {
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+        "trust audit bundle apply skipped: empty payload"
+      );
+      return;
+    }
+    if (parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+        `trust audit bundle apply failed: ${parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error}`
+      );
+      return;
+    }
+    const bundle = parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle || null;
+    if (!bundle || typeof bundle !== "object") {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+        "trust audit bundle apply failed: invalid payload"
+      );
+      return;
+    }
+    const policyMode = normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(bundle.trust_policy_mode);
+    const overrideEntries = buildQuickTelemetryStrictRollbackOverrideLogBundle(
+      bundle.override_log?.entries
+    ).entries;
+    const snapshot = normalizeQuickTelemetryStrictRollbackTrustAuditProvenanceSnapshot(
+      bundle.provenance_snapshot
+    );
+    setQuickTelemetryStrictRollbackPackageTrustPolicy(policyMode);
+    setQuickTelemetryDrilldownStrictRollbackPackageOverrideLog(overrideEntries);
+    setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
+    setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus(
+      `override log hydrated from trust audit bundle (${overrideEntries.length} events)`
+    );
+    setQuickTelemetryDrilldownStrictRollbackPackageStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+      `trust audit bundle applied (policy=${policyMode}, overrides=${overrideEntries.length}, parse=${snapshot.parse_state})`
+    );
+  }, [
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.bundle,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty,
+    parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error,
+  ]);
   const applyQuickTelemetryStrictRollbackPackageReplay = React.useCallback((opts = null) => {
     const options = opts && typeof opts === "object" && !Array.isArray(opts) ? opts : {};
     const allowProvenanceOverride = Boolean(options.allow_provenance_override);
@@ -8591,7 +8633,10 @@ export function ContractWarningOverlay({
                 className: "textarea",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_text",
                 value: quickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText,
-                onChange: (e) => setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText(String(e.target.value || "")),
+                onChange: (e) => {
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleImportText(String(e.target.value || ""));
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
+                },
                 placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle\",\"trust_policy_mode\":\"strict_reject\",\"override_log\":{\"entries\":[]},\"provenance_snapshot\":{}}",
                 style: {
                   flexBasis: "100%",
@@ -8601,6 +8646,15 @@ export function ContractWarningOverlay({
                   lineHeight: "1.3",
                 },
               }),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_import_apply",
+                onClick: applyQuickTelemetryStrictRollbackTrustAuditBundleFromText,
+                disabled: (
+                  parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.empty
+                  || Boolean(parsedQuickTelemetryStrictRollbackTrustAuditBundlePayload.error)
+                ),
+              }, "Apply Trust Audit Bundle"),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_export",

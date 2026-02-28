@@ -176,7 +176,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.65: Quick telemetry strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log)
 - [x] M17.66: Quick telemetry strict-cutover rollback trust audit bundle (override log + provenance snapshot export package)
 - [x] M17.67: Quick telemetry strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview)
-- [ ] M17.68: Quick telemetry strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff)
+- [x] M17.68: Quick telemetry strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff)
+- [ ] M17.69: Quick telemetry strict-cutover rollback trust audit bundle apply safety gate (replace-confirm + operator hint)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -189,7 +190,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.67 frontend hardening track: add strict-cutover rollback trust audit bundle apply helper (policy/log hydrate from handoff) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.68 frontend hardening track: add strict-cutover rollback trust audit bundle apply safety gate (replace-confirm + operator hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1707,3 +1708,16 @@ M17.67 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/202_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_handoff_parser.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_handoff_parser.py`
+
+M17.68 outcome (2026-02-28):
+
+- strict rollback trust-audit apply helper added:
+  - one-click apply action now hydrates trust policy mode from parsed handoff payload
+  - apply action now hydrates override log rows from handoff `override_log.entries` and clears override-reason draft text
+- apply status wiring added:
+  - explicit apply status paths for empty payload / invalid payload / successful hydrate
+  - import textarea edit now clears stale trust-audit apply/export status
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/203_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_helper.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_helper.py`
