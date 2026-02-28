@@ -193,7 +193,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.82: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline trail (arm/disarm/auto-disarm event log + hint)
 - [x] M17.83: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline controls (reset + export/copy)
 - [x] M17.84: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import parser (schema guard + preview)
-- [ ] M17.85: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import apply helper (replace trail hydrate + status)
+- [x] M17.85: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import apply helper (replace trail hydrate + status)
+- [ ] M17.86: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import safety gate (replace-confirm + operator hint)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -206,7 +207,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.84 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import apply helper (replace trail hydrate + status) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.85 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import safety gate (replace-confirm + operator hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1945,3 +1946,16 @@ M17.84 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/219_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_parser.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_parser.py`
+
+M17.85 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline import apply helper added:
+  - replay timeline import apply action now hydrates live replay timeline trail from parsed import payload with explicit status paths (`empty/error/invalid/hydrated`)
+  - replay timeline import apply control is co-located with parser preview/guidance controls for operator continuity
+- replay timeline import apply status contract added:
+  - apply helper now emits explicit operator-facing status for skipped empty payload, parse error, invalid payload, and successful timeline hydrate
+  - hydrated replay timeline updates bounded trail rows directly from imported entries
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/220_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_apply_helper.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_apply_helper.py`
