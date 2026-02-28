@@ -205,7 +205,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.94: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail (arm/disarm/auto-disarm timeline + operator hint)
 - [x] M17.95: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls (import-confirm event snapshot copy/export/reset status)
 - [x] M17.96: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit parser refresh (import-confirm control snapshot guidance + preview continuity)
-- [ ] M17.97: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply refresh (control snapshot status alignment + post-apply continuity hint)
+- [x] M17.97: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply refresh (control snapshot status alignment + post-apply continuity hint)
+- [ ] M17.98: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -218,7 +219,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.96 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply refresh (control snapshot status alignment + post-apply continuity hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.97 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -2113,3 +2114,16 @@ M17.96 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/231_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_parser_refresh.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_parser_refresh.py`
+
+M17.97 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit apply refresh added:
+  - import-confirm apply helper now aligns controls-status state with all apply outcomes (empty/parse-error/invalid/confirm-block/hydrated)
+  - hydrated apply path now stamps controls-status alignment summary for post-apply snapshot continuity
+- import-confirm apply continuity hint added:
+  - import-confirm apply controls now expose a dedicated continuity hint describing readiness/blocking/alignment expectations
+  - continuity hint remains scoped to control snapshot context and keeps existing global apply status contract unchanged
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/232_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_refresh.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_refresh.py`
