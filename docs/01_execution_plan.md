@@ -164,6 +164,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.53: Quick telemetry profile import filter presets + one-click reset bundles
 - [x] M17.54: Quick telemetry import filter-bundle transfer (copy/export/import + preview)
 - [x] M17.55: Quick telemetry import filter-bundle schema guardrails (kind/schema checks + operator hints)
+- [x] M17.56: Quick telemetry import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload)
+- [ ] M17.57: Quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -176,7 +178,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.55 frontend hardening track: add drilldown import filter-bundle strict/compat mode toggle (legacy bare-object accept vs strict wrapped payload) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.56 frontend hardening track: add quick telemetry strict-mode rollout helper (legacy payload auto-wrap preview + migration hints) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1547,3 +1549,14 @@ M14.6 outcome (2026-02-28):
 - strict Linux+NVIDIA PO-SBR runtime pilot executed and archived
 - executed report: `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json`
 - closure readiness: `/home/seongcheoljeong/workspace/myproject/docs/reports/m14_6_closure_readiness_linux.json` (`ready=true`)
+
+M17.56 outcome (2026-02-28):
+
+- quick telemetry import filter-bundle parser now supports explicit `import_mode` (`compat|strict`)
+- strict mode requires wrapped payload (`filter_bundle`) and explicit `kind/schema_version`
+- compat mode keeps legacy bare-object payload acceptance for transition safety
+- mode selector + hint wiring added in Graph Lab transfer controls
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/191_web_e2e_graph_audit_quick_telemetry_import_filter_bundle_mode_toggle.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_import_filter_bundle_mode.py`

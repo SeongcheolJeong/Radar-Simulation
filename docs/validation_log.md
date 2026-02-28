@@ -3295,3 +3295,29 @@
 - Notes:
   - Linux strict runtime pilot report validated (`pilot_status=executed`)
   - closure readiness switched to `ready=true`
+
+## Web E2E Graph Audit Quick Telemetry Import Filter-Bundle Strict/Compat Mode Toggle (M17.56)
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - strict/compat mode frontend changes did not regress Graph Lab API run/validate/compare/policy/regression flows
+  - orchestrator API contract stability confirmed across sync/async run + retry/cancel endpoints
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_import_filter_bundle_mode.py`
+- Result: pass
+- Notes:
+  - strict/compat mode tokens confirmed:
+    - `QUICK_TELEMETRY_DRILLDOWN_IMPORT_FILTER_BUNDLE_MODE_OPTIONS`
+    - `normalizeQuickTelemetryDrilldownImportFilterBundleMode`
+    - `parseQuickTelemetryDrilldownImportFilterBundleText(rawText, opts = null)`
+  - strict guard error tokens confirmed:
+    - `strict mode requires filter_bundle wrapper`
+    - `strict mode requires kind=`
+    - `strict mode requires schema_version=`
+  - UI tokens confirmed:
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_mode_label`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_mode_chip_`
+    - `co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_mode_hint`
