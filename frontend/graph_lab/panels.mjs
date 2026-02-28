@@ -7677,6 +7677,9 @@ export function ContractWarningOverlay({
       "import_confirm_trail_import_disarm_risk_cleared",
       `replacement-risk requirement cleared for import confirm trail apply (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
     );
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
+      "import confirm trail controls: replacement confirm disarmed (risk cleared)"
+    );
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       "dry-run handoff apply confirm activity replay trail import confirm trail import confirm disarmed"
     );
@@ -7728,6 +7731,9 @@ export function ContractWarningOverlay({
       appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
         "import_confirm_trail_import_auto_disarm_timeout",
         `import confirm trail replacement-confirm timer elapsed (20s); ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint}`
+      );
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
+        "import confirm trail controls: replacement confirm auto-disarmed (timer elapsed)"
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail import confirm auto-disarmed: re-check confirm to apply import confirm trail"
@@ -11709,6 +11715,9 @@ export function ContractWarningOverlay({
                       "import_confirm_trail_import_disarm_payload_edit",
                       `import confirm trail payload changed; replacement confirm disarmed (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportOperatorHint})`
                     );
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
+                      "import confirm trail controls: replacement confirm disarmed (payload edit)"
+                    );
                   }
                   setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
                     hadImportConfirm
@@ -11755,6 +11764,11 @@ export function ContractWarningOverlay({
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked(next);
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs(next ? nowMs : 0);
                     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(next ? nowMs : 0);
+                    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
+                      next
+                        ? "import confirm trail controls: replacement confirm armed"
+                        : "import confirm trail controls: replacement confirm disarmed (manual)"
+                    );
                     appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
                       next ? "import_confirm_trail_import_arm_manual" : "import_confirm_trail_import_disarm_manual",
                       next

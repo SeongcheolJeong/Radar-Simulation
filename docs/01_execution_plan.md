@@ -206,7 +206,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.95: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls (import-confirm event snapshot copy/export/reset status)
 - [x] M17.96: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit parser refresh (import-confirm control snapshot guidance + preview continuity)
 - [x] M17.97: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply refresh (control snapshot status alignment + post-apply continuity hint)
-- [ ] M17.98: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions)
+- [x] M17.98: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions)
+- [ ] M17.99: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -219,7 +220,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.97 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.98 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -2127,3 +2128,16 @@ M17.97 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/232_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_refresh.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_refresh.py`
+
+M17.98 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit safety refresh added:
+  - import-confirm replace-confirm transitions now update controls-status stream for manual arm/disarm, payload-edit disarm, risk-clear disarm, and timeout auto-disarm paths
+  - controls-status continuity now remains aligned with safety lifecycle even when no apply action is executed
+- additive safety continuity contract preserved:
+  - existing safety timers/checks and global handoff status strings remain unchanged
+  - controls-status continuity remains additive and flows through existing controls hint surfaces
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/233_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_safety_refresh.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_safety_refresh.py`
