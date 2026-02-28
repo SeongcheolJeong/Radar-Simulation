@@ -6990,3 +6990,41 @@
 - Notes:
   - API orchestration endpoints remain healthy after timeline-import-audit controls refresh integration
 
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Trust Audit Bundle Apply Dry-Run Handoff Package Apply Safety Activity Replay Timeline Import Audit Apply-Trail Refresh (M17.101)
+
+- Date: 2026-03-01
+- Command: `node --check /home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - Graph Lab panel syntax valid after timeline-import-audit apply-trail continuity-stamp refresh wiring
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.py`
+- Result: pass
+- Notes:
+  - timeline-import-audit apply-trail refresh tokens verified for continuity-echo lifecycle stamps across apply/copy/export/reset
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_refresh.py`
+- Result: pass
+- Notes:
+  - apply refresh baseline contract remains stable after apply-trail continuity-stamp layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail_refresh.py`
+- Result: pass
+- Notes:
+  - trail preview continuity-echo contract remains stable after apply-trail lifecycle stamp layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.py`
+- Result: pass
+- Notes:
+  - controls continuity-echo contract remains stable after apply-trail lifecycle stamp layering
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - initial two attempts hit transient async-cancel status race (`expected canceled`); third immediate rerun passed
+  - API orchestration endpoints remain healthy after timeline-import-audit apply-trail refresh integration

@@ -209,7 +209,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.98: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions)
 - [x] M17.99: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview)
 - [x] M17.100: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls refresh (continuity-echo status alignment for copy/export/reset lifecycle)
-- [ ] M17.101: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply-trail refresh (continuity-echo lifecycle stamp after apply/copy/export/reset)
+- [x] M17.101: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply-trail refresh (continuity-echo lifecycle stamp after apply/copy/export/reset)
+- [ ] M17.102: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard refresh (continuity-echo stamp parity across confirm arm/disarm/auto-disarm lifecycle)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -222,7 +223,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.100 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply-trail refresh (continuity-echo lifecycle stamp after apply/copy/export/reset) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.101 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard refresh (continuity-echo stamp parity across confirm arm/disarm/auto-disarm lifecycle) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -2169,3 +2170,16 @@ M17.100 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/235_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.py`
+
+M17.101 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit apply-trail refresh added:
+  - import-confirm controls status stream now derives continuity-echo lifecycle stamps for apply/copy/export/reset actions
+  - apply-trail preview now includes explicit lifecycle stamp lines so continuity state remains visible for empty and populated trail states
+- import-confirm apply alignment continuity updated:
+  - hydrated apply controls-status now carries continuity-echo alignment marker in addition to prior apply-aligned status text
+  - apply-trail lifecycle stamp is additive and preserves existing controls hint/preview and apply helper contracts
+- implementation files:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/236_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.md`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.py`
