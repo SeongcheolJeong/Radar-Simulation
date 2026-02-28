@@ -196,7 +196,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.85: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import apply helper (replace trail hydrate + status)
 - [x] M17.86: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import safety gate (replace-confirm + operator hint)
 - [x] M17.87: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import auto-disarm (confirm timer + countdown hint)
-- [ ] M17.88: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail (arm/disarm/auto-disarm timeline + operator hint)
+- [x] M17.88: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail (arm/disarm/auto-disarm timeline + operator hint)
+- [ ] M17.89: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls (reset + export/copy)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -209,7 +210,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.87 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail (arm/disarm/auto-disarm timeline + operator hint) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.88 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls (reset + export/copy) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1987,3 +1988,16 @@ M17.87 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/222_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_auto_disarm.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_auto_disarm.py`
+
+M17.88 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit trail added:
+  - timeline-import replace-confirm flow now appends bounded audit events for manual arm/disarm, risk-cleared disarm, timeout auto-disarm, payload-edit disarm, and post-apply disarm
+  - timeline-import replace-confirm trail rows now normalize into bounded operator-facing timeline entries for local audit review
+- timeline-import replace-confirm trail hint/preview added:
+  - timeline-import replace-confirm trail hint now reports latest event summary and trail capacity usage near import confirm controls
+  - timeline-import replace-confirm trail preview now renders multiline timestamp/event/detail rows for operator inspection
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/223_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail.py`
