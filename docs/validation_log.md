@@ -6834,3 +6834,28 @@
 - Notes:
   - API orchestration endpoints remain healthy after timeline-import-audit trail import-confirm event integration
 
+
+- Date: 2026-02-28
+- Command: `node --check /home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - Graph Lab panel syntax valid after timeline-import-audit controls import-confirm status-hint integration
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_import_confirm.py`
+- Result: pass
+- Notes:
+  - timeline-import-audit controls import-confirm status-hint tokens verified
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls.py`
+- Result: pass
+- Notes:
+  - legacy timeline-import-audit controls contract preserved after additive import-confirm controls status hint
+
+- Date: 2026-02-28
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/myproject/scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - initial attempts hit transient async-cancel race/400; subsequent immediate rerun passed fully
+

@@ -203,7 +203,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.92: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety gate (replace-confirm + operator hint)
 - [x] M17.93: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit auto-disarm (confirm timer + countdown hint)
 - [x] M17.94: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail (arm/disarm/auto-disarm timeline + operator hint)
-- [ ] M17.95: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls (import-confirm event snapshot copy/export/reset status)
+- [x] M17.95: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls (import-confirm event snapshot copy/export/reset status)
+- [ ] M17.96: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit parser refresh (import-confirm control snapshot guidance + preview continuity)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -216,7 +217,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.94 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls (import-confirm event snapshot copy/export/reset status) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.95 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit parser refresh (import-confirm control snapshot guidance + preview continuity) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -2085,3 +2086,16 @@ M17.94 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/229_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail_import_confirm.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail_import_confirm.py`
+
+M17.95 outcome (2026-02-28):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit controls import-confirm status added:
+  - import-confirm trail copy/export/reset callbacks now emit dedicated event-snapshot control status strings in addition to existing global control status
+  - import-confirm trail controls now expose a dedicated controls hint surface to show latest control action or default readiness summary
+- backward-compatible control contract preserved:
+  - existing global copy/export/reset status strings remain unchanged for prior timeline-import-audit controls validation compatibility
+  - new control status stream is additive and scoped to import-confirm trail controls only
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/230_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_import_confirm.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_import_confirm.py`
