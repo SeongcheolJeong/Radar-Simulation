@@ -352,6 +352,9 @@ const QUICK_TELEMETRY_STRICT_ROLLBACK_OVERRIDE_LOG_LIMIT = 32;
 const QUICK_TELEMETRY_STRICT_ROLLBACK_OVERRIDE_LOG_SCHEMA_VERSION = 1;
 const QUICK_TELEMETRY_STRICT_ROLLBACK_OVERRIDE_LOG_KIND =
   "graph_lab_contract_overlay_quick_telemetry_strict_rollback_override_log";
+const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION = 1;
+const QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND =
+  "graph_lab_contract_overlay_quick_telemetry_strict_rollback_trust_audit_bundle";
 const QUICK_TELEMETRY_DRILLDOWN_IMPORT_CONFLICT_FILTER_OPTIONS = [
   { id: "all", label: "all" },
   { id: "new", label: "new" },
@@ -510,6 +513,36 @@ function normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(raw) {
   const text = String(raw || "").trim().toLowerCase();
   const allowed = new Set(QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_POLICY_OPTIONS.map((x) => String(x.id || "")));
   return allowed.has(text) ? text : CONTRACT_OVERLAY_DEFAULT_PREFS.quickTelemetryStrictRollbackPackageTrustPolicy;
+}
+
+function normalizeQuickTelemetryStrictRollbackTrustAuditProvenanceSnapshot(raw) {
+  const src = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const parseStateRaw = String(src.parse_state || "").trim().toLowerCase();
+  const parseState = parseStateRaw === "ready" || parseStateRaw === "error" ? parseStateRaw : "empty";
+  return {
+    parse_state: parseState,
+    parse_error: String(src.parse_error || "").slice(0, 220),
+    has_guard_issue: Boolean(src.has_guard_issue),
+    missing_source_stamp: Boolean(src.missing_source_stamp),
+    missing_payload_checksum: Boolean(src.missing_payload_checksum),
+    source_match: Boolean(src.source_match),
+    checksum_match: Boolean(src.checksum_match),
+    source_stamp: String(src.source_stamp || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SOURCE_STAMP).slice(0, 180),
+    payload_checksum: String(src.payload_checksum || "").slice(0, 180),
+    computed_checksum: String(src.computed_checksum || "").slice(0, 180),
+    checksum_hint: String(src.checksum_hint || "").slice(0, 220),
+    package_kind: String(src.package_kind || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_KIND).slice(0, 140),
+    package_schema_version: clampInteger(
+      src.package_schema_version,
+      0,
+      9_999,
+      QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SCHEMA_VERSION
+    ),
+    package_preset_id: String(src.package_preset_id || "custom").slice(0, 80),
+    package_import_mode: normalizeQuickTelemetryDrilldownImportFilterBundleMode(src.package_import_mode || "compat"),
+    package_timeline_entry_count: clampInteger(src.package_timeline_entry_count, 0, 1_000_000, 0),
+    package_exported_at_iso: String(src.package_exported_at_iso || "-").slice(0, 80),
+  };
 }
 
 function normalizeQuickTelemetryDrilldownStrictAdoptionSignals(raw, fallback) {
@@ -702,6 +735,34 @@ function buildQuickTelemetryStrictRollbackOverrideLogBundle(entries) {
 
 function serializeQuickTelemetryStrictRollbackOverrideLogBundle(entries) {
   return JSON.stringify(buildQuickTelemetryStrictRollbackOverrideLogBundle(entries), null, 2);
+}
+
+function buildQuickTelemetryStrictRollbackTrustAuditBundle(rawBundle) {
+  const src = rawBundle && typeof rawBundle === "object" && !Array.isArray(rawBundle)
+    ? rawBundle
+    : {};
+  const overrideLog = buildQuickTelemetryStrictRollbackOverrideLogBundle(src.override_log_entries);
+  return {
+    schema_version: QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION,
+    kind: QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND,
+    exported_at_iso: new Date().toISOString(),
+    trust_policy_mode: normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
+      src.trust_policy_mode
+    ),
+    override_log: {
+      schema_version: overrideLog.schema_version,
+      kind: overrideLog.kind,
+      entry_count: overrideLog.entry_count,
+      entries: overrideLog.entries,
+    },
+    provenance_snapshot: normalizeQuickTelemetryStrictRollbackTrustAuditProvenanceSnapshot(
+      src.provenance_snapshot
+    ),
+  };
+}
+
+function serializeQuickTelemetryStrictRollbackTrustAuditBundle(rawBundle) {
+  return JSON.stringify(buildQuickTelemetryStrictRollbackTrustAuditBundle(rawBundle), null, 2);
 }
 
 function buildQuickTelemetryStrictRollbackDrillPackage(rawPackage) {
@@ -2378,6 +2439,7 @@ export function ContractWarningOverlay({
   const [quickTelemetryDrilldownStrictRollbackPackageOverrideReasonText, setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText] = React.useState("");
   const [quickTelemetryDrilldownStrictRollbackPackageOverrideLog, setQuickTelemetryDrilldownStrictRollbackPackageOverrideLog] = React.useState([]);
   const [quickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus, setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus] = React.useState("");
+  const [quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus, setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus] = React.useState("");
   const [quickTelemetryDrilldownImportSelection, setQuickTelemetryDrilldownImportSelection] = React.useState({});
   const [quickTelemetryDrilldownImportConflictOnlyChecked, setQuickTelemetryDrilldownImportConflictOnlyChecked] = React.useState(
     Boolean(
@@ -2487,6 +2549,7 @@ export function ContractWarningOverlay({
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideLog([]);
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
       setQuickTelemetryDrilldownImportRowOffset(0);
       setActiveQuickTelemetryDrilldownProfile(
         String(CONTRACT_OVERLAY_DEFAULT_PREFS.activeQuickTelemetryDrilldownProfile || "default")
@@ -3411,6 +3474,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
   }, []);
   const quickTelemetryDrilldownStrictAdoptionChecklist = React.useMemo(() => {
     return buildQuickTelemetryDrilldownStrictAdoptionChecklist(
@@ -3847,6 +3911,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageStatus("");
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("apply_strict_default", "strict");
   }, [
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent,
@@ -3869,6 +3934,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageStatus("");
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
   }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
   const applyQuickTelemetryStrictRollbackDrillPreset = React.useCallback((presetId) => {
@@ -3893,6 +3959,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageStatus("");
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     appendQuickTelemetryDrilldownStrictCutoverLedgerEvent("compat_fallback", "compat");
   }, [appendQuickTelemetryDrilldownStrictCutoverLedgerEvent]);
   const resetQuickTelemetryStrictRollbackDrillPreset = React.useCallback(() => {
@@ -3906,6 +3973,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageStatus("");
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
   }, []);
   const exportQuickTelemetryStrictRollbackDrillPackageToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryStrictRollbackDrillPackage(
@@ -4014,7 +4082,55 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLog([]);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("override log reset");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
   }, []);
+  const copyQuickTelemetryStrictRollbackTrustAuditBundleJson = React.useCallback(async () => {
+    const jsonText = serializeQuickTelemetryStrictRollbackTrustAuditBundle(
+      quickTelemetryStrictRollbackTrustAuditBundle
+    );
+    const eventCount = Number(quickTelemetryStrictRollbackTrustAuditBundle?.override_log?.entry_count || 0);
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(jsonText);
+        setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+          `trust audit bundle copied (${eventCount} override events)`
+        );
+        return;
+      }
+      throw new Error("clipboard unavailable");
+    } catch (_) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("trust audit bundle copy failed");
+    }
+  }, [quickTelemetryStrictRollbackTrustAuditBundle]);
+  const exportQuickTelemetryStrictRollbackTrustAuditBundleToJson = React.useCallback(() => {
+    const jsonText = serializeQuickTelemetryStrictRollbackTrustAuditBundle(
+      quickTelemetryStrictRollbackTrustAuditBundle
+    );
+    const eventCount = Number(quickTelemetryStrictRollbackTrustAuditBundle?.override_log?.entry_count || 0);
+    try {
+      if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
+        setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+          "trust audit bundle export prepared in-memory"
+        );
+        return;
+      }
+      const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `graph_lab_quick_telemetry_strict_rollback_trust_audit_bundle_${ts}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus(
+        `trust audit bundle export complete (${eventCount} override events)`
+      );
+    } catch (_) {
+      setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("trust audit bundle export failed");
+    }
+  }, [quickTelemetryStrictRollbackTrustAuditBundle]);
   const applyQuickTelemetryStrictRollbackPackageReplay = React.useCallback((opts = null) => {
     const options = opts && typeof opts === "object" && !Array.isArray(opts) ? opts : {};
     const allowProvenanceOverride = Boolean(options.allow_provenance_override);
@@ -4130,6 +4246,7 @@ export function ContractWarningOverlay({
       );
       setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     }
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
     setQuickTelemetryDrilldownStrictRollbackPackageStatus(
       [
         allowProvenanceOverride ? "rollback package override replayed" : "rollback package replayed",
@@ -4165,6 +4282,7 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideReasonText("");
     setQuickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus("");
+    setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
   }, []);
   const exportQuickTelemetryDrilldownStrictCutoverLedgerToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryDrilldownStrictCutoverLedgerBundle(
@@ -5492,6 +5610,78 @@ export function ContractWarningOverlay({
     parsedQuickTelemetryStrictRollbackDrillPackagePayload.error,
     quickTelemetryStrictRollbackPackageProvenanceGuard,
   ]);
+  const quickTelemetryStrictRollbackTrustAuditProvenanceSnapshot = React.useMemo(() => {
+    if (parsedQuickTelemetryStrictRollbackDrillPackagePayload.empty) {
+      return normalizeQuickTelemetryStrictRollbackTrustAuditProvenanceSnapshot({
+        parse_state: "empty",
+        has_guard_issue: false,
+        missing_source_stamp: false,
+        missing_payload_checksum: false,
+        source_match: true,
+        checksum_match: true,
+        source_stamp: QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SOURCE_STAMP,
+        payload_checksum: "",
+        computed_checksum: "",
+        checksum_hint: "",
+        package_kind: QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_KIND,
+        package_schema_version: QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SCHEMA_VERSION,
+        package_preset_id: "custom",
+        package_import_mode: "compat",
+        package_timeline_entry_count: 0,
+        package_exported_at_iso: "-",
+      });
+    }
+    if (parsedQuickTelemetryStrictRollbackDrillPackagePayload.error) {
+      return normalizeQuickTelemetryStrictRollbackTrustAuditProvenanceSnapshot({
+        parse_state: "error",
+        parse_error: parsedQuickTelemetryStrictRollbackDrillPackagePayload.error,
+        has_guard_issue: true,
+        missing_source_stamp: quickTelemetryStrictRollbackPackageProvenanceGuard.missing_source_stamp,
+        missing_payload_checksum: quickTelemetryStrictRollbackPackageProvenanceGuard.missing_payload_checksum,
+        source_match: quickTelemetryStrictRollbackPackageProvenanceGuard.source_match,
+        checksum_match: quickTelemetryStrictRollbackPackageProvenanceGuard.checksum_match,
+        source_stamp: quickTelemetryStrictRollbackPackageProvenanceGuard.source_stamp,
+        payload_checksum: quickTelemetryStrictRollbackPackageProvenanceGuard.payload_checksum,
+        computed_checksum: quickTelemetryStrictRollbackPackageProvenanceGuard.computed_checksum,
+        checksum_hint: quickTelemetryStrictRollbackPackageProvenanceGuard.checksum_hint,
+        package_kind: QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_KIND,
+        package_schema_version: QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SCHEMA_VERSION,
+        package_preset_id: "custom",
+        package_import_mode: "compat",
+        package_timeline_entry_count: 0,
+        package_exported_at_iso: "-",
+      });
+    }
+    const pkg = parsedQuickTelemetryStrictRollbackDrillPackagePayload.pkg || {};
+    const snapshot = pkg.preset_snapshot && typeof pkg.preset_snapshot === "object"
+      ? pkg.preset_snapshot
+      : {};
+    const timelineRows = Array.isArray(pkg.cutover_timeline_entries) ? pkg.cutover_timeline_entries : [];
+    return normalizeQuickTelemetryStrictRollbackTrustAuditProvenanceSnapshot({
+      parse_state: "ready",
+      parse_error: "",
+      has_guard_issue: quickTelemetryStrictRollbackPackageProvenanceGuard.has_guard_issue,
+      missing_source_stamp: quickTelemetryStrictRollbackPackageProvenanceGuard.missing_source_stamp,
+      missing_payload_checksum: quickTelemetryStrictRollbackPackageProvenanceGuard.missing_payload_checksum,
+      source_match: quickTelemetryStrictRollbackPackageProvenanceGuard.source_match,
+      checksum_match: quickTelemetryStrictRollbackPackageProvenanceGuard.checksum_match,
+      source_stamp: quickTelemetryStrictRollbackPackageProvenanceGuard.source_stamp,
+      payload_checksum: quickTelemetryStrictRollbackPackageProvenanceGuard.payload_checksum,
+      computed_checksum: quickTelemetryStrictRollbackPackageProvenanceGuard.computed_checksum,
+      checksum_hint: quickTelemetryStrictRollbackPackageProvenanceGuard.checksum_hint,
+      package_kind: String(pkg.kind || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_KIND),
+      package_schema_version: Number(pkg.schema_version || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SCHEMA_VERSION),
+      package_preset_id: String(snapshot.preset_id || "custom"),
+      package_import_mode: String(snapshot.import_mode || "compat"),
+      package_timeline_entry_count: timelineRows.length,
+      package_exported_at_iso: String(pkg.exported_at_iso || "-"),
+    });
+  }, [
+    parsedQuickTelemetryStrictRollbackDrillPackagePayload.empty,
+    parsedQuickTelemetryStrictRollbackDrillPackagePayload.error,
+    parsedQuickTelemetryStrictRollbackDrillPackagePayload.pkg,
+    quickTelemetryStrictRollbackPackageProvenanceGuard,
+  ]);
   const quickTelemetryStrictRollbackPackageTrustPolicyHint = React.useMemo(() => {
     const mode = normalizeQuickTelemetryStrictRollbackPackageTrustPolicy(
       quickTelemetryStrictRollbackPackageTrustPolicy
@@ -5536,6 +5726,47 @@ export function ContractWarningOverlay({
       `preset ${String(latest.preset_id || "-")}`,
     ].join(", ");
   }, [quickTelemetryStrictRollbackPackageOverrideLogRows]);
+  const quickTelemetryStrictRollbackTrustAuditBundle = React.useMemo(() => {
+    return buildQuickTelemetryStrictRollbackTrustAuditBundle({
+      trust_policy_mode: quickTelemetryStrictRollbackPackageTrustPolicy,
+      override_log_entries: quickTelemetryStrictRollbackPackageOverrideLogRows,
+      provenance_snapshot: quickTelemetryStrictRollbackTrustAuditProvenanceSnapshot,
+    });
+  }, [
+    quickTelemetryStrictRollbackPackageTrustPolicy,
+    quickTelemetryStrictRollbackPackageOverrideLogRows,
+    quickTelemetryStrictRollbackTrustAuditProvenanceSnapshot,
+  ]);
+  const quickTelemetryStrictRollbackTrustAuditBundleHint = React.useMemo(() => {
+    const bundle = quickTelemetryStrictRollbackTrustAuditBundle;
+    const snapshot = bundle.provenance_snapshot || {};
+    const eventCount = Number(bundle.override_log?.entry_count || 0);
+    return [
+      `trust audit bundle: policy ${String(bundle.trust_policy_mode || "strict_reject")}`,
+      `override_events ${eventCount}`,
+      `parse ${String(snapshot.parse_state || "empty")}`,
+      `provenance_issue ${Boolean(snapshot.has_guard_issue) ? "yes" : "no"}`,
+    ].join(", ");
+  }, [quickTelemetryStrictRollbackTrustAuditBundle]);
+  const quickTelemetryStrictRollbackTrustAuditBundlePreview = React.useMemo(() => {
+    const bundle = quickTelemetryStrictRollbackTrustAuditBundle;
+    const snapshot = bundle.provenance_snapshot || {};
+    const overrideLog = bundle.override_log || {};
+    const lines = [
+      `trust_audit_bundle kind=${String(bundle.kind || QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_KIND)} schema=${Number(bundle.schema_version || QUICK_TELEMETRY_STRICT_ROLLBACK_TRUST_AUDIT_BUNDLE_SCHEMA_VERSION)}`,
+      `exported_at=${String(bundle.exported_at_iso || "-")}`,
+      `policy=${String(bundle.trust_policy_mode || "strict_reject")} override_events=${Number(overrideLog.entry_count || 0)}`,
+      `parse_state=${String(snapshot.parse_state || "empty")} provenance_issue=${Boolean(snapshot.has_guard_issue) ? "yes" : "no"}`,
+      `source=${String(snapshot.source_stamp || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SOURCE_STAMP)}`,
+      `checksum imported=${String(snapshot.payload_checksum || "-")} computed=${String(snapshot.computed_checksum || "-")}`,
+      `package kind=${String(snapshot.package_kind || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_KIND)} schema=${Number(snapshot.package_schema_version || QUICK_TELEMETRY_STRICT_ROLLBACK_DRILL_PACKAGE_SCHEMA_VERSION)} preset=${String(snapshot.package_preset_id || "custom")} mode=${String(snapshot.package_import_mode || "compat")}`,
+      `package timeline_entries=${Number(snapshot.package_timeline_entry_count || 0)} exported_at=${String(snapshot.package_exported_at_iso || "-")}`,
+    ];
+    if (String(snapshot.parse_error || "").trim()) {
+      lines.push(`parse_error=${String(snapshot.parse_error || "")}`);
+    }
+    return lines.join("\n");
+  }, [quickTelemetryStrictRollbackTrustAuditBundle]);
   const quickTelemetryStrictRollbackPackageChecklistDeltaGuard = React.useMemo(() => {
     if (parsedQuickTelemetryStrictRollbackDrillPackagePayload.empty) {
       return {
@@ -8089,6 +8320,7 @@ export function ContractWarningOverlay({
                 onChange: (e) => {
                   setQuickTelemetryDrilldownStrictRollbackPackageReplayText(String(e.target.value || ""));
                   setQuickTelemetryDrilldownStrictRollbackPackageDeltaConfirmChecked(false);
+                  setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus("");
                 },
                 placeholder: "{\"schema_version\":1,\"kind\":\"graph_lab_contract_overlay_quick_telemetry_strict_rollback_drill_package\",\"preset_snapshot\":{},\"checklist_report\":{},\"cutover_timeline_entries\":[]}",
                 style: {
@@ -8146,6 +8378,43 @@ export function ContractWarningOverlay({
                   className: "hint",
                   style: { flexBasis: "100%", color: "#8eb6ca" },
                 }, quickTelemetryDrilldownStrictRollbackPackageOverrideLogStatus)
+                : null,
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryStrictRollbackTrustAuditBundleHint),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_copy",
+                onClick: copyQuickTelemetryStrictRollbackTrustAuditBundleJson,
+              }, "Copy Trust Audit Bundle"),
+              h("button", {
+                className: "btn",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_export",
+                onClick: exportQuickTelemetryStrictRollbackTrustAuditBundleToJson,
+              }, "Export Trust Audit Bundle"),
+              h("textarea", {
+                className: "textarea",
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_preview",
+                value: quickTelemetryStrictRollbackTrustAuditBundlePreview,
+                readOnly: true,
+                placeholder: "trust audit bundle preview appears here",
+                style: {
+                  flexBasis: "100%",
+                  minHeight: "58px",
+                  padding: "6px 7px",
+                  fontSize: "10px",
+                  lineHeight: "1.3",
+                  opacity: 0.9,
+                },
+              }),
+              quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus
+                ? h("span", {
+                  key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_status",
+                  className: "hint",
+                  style: { flexBasis: "100%", color: "#8eb6ca" },
+                }, quickTelemetryDrilldownStrictRollbackTrustAuditBundleStatus)
                 : null,
               h("button", {
                 className: "btn",

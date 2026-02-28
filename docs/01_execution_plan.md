@@ -174,7 +174,8 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.63: Quick telemetry strict-cutover rollback package replay helper (package import preview + checklist delta guard)
 - [x] M17.64: Quick telemetry strict-cutover rollback package provenance guard (source stamp + checksum hint)
 - [x] M17.65: Quick telemetry strict-cutover rollback package trust policy (provenance strict-mode reject + operator override log)
-- [ ] M17.66: Quick telemetry strict-cutover rollback trust audit bundle (override log + provenance snapshot export package)
+- [x] M17.66: Quick telemetry strict-cutover rollback trust audit bundle (override log + provenance snapshot export package)
+- [ ] M17.67: Quick telemetry strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -187,7 +188,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.65 frontend hardening track: add strict-cutover rollback trust audit bundle (override log + provenance snapshot export package) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance post-M17.66 frontend hardening track: add strict-cutover rollback trust audit bundle handoff parser (schema guard + import preview) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
 
 ## M10.19 Decision Gate
 
@@ -1679,3 +1680,16 @@ M17.65 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/200_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_policy.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_policy.py`
+
+M17.66 outcome (2026-02-28):
+
+- strict rollback trust-audit bundle export added:
+  - dedicated trust-audit package now includes trust policy, normalized override log entries, and provenance snapshot fields
+  - provenance snapshot now captures parse state/error + package metadata (`kind`, `schema_version`, preset, import mode, timeline entry count)
+- trust-audit handoff controls added:
+  - one-click `Copy Trust Audit Bundle` / `Export Trust Audit Bundle` actions with preview + status trail
+  - trust-audit status reset wired on rollback replay/reset paths to avoid stale operator messages
+- implementation files:
+  - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/myproject/docs/201_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle.py`
