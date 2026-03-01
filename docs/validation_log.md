@@ -8180,3 +8180,45 @@
 - Result: pass
 - Notes:
   - API orchestration endpoints remain healthy after timeline-import-audit controls-trail guard controls controls controls controls trail refresh integration
+
+## Web E2E Graph Audit Quick Telemetry Strict-Rollback Package Trust Audit Bundle Apply Dry-Run Handoff Package Apply Safety Activity Replay Timeline Import Audit Controls-Trail Guard Controls Controls Controls Controls Controls Parser Refresh (M17.123)
+
+- Date: 2026-03-01
+- Command: `node --check /home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
+- Result: pass
+- Notes:
+  - Graph Lab panel syntax valid after timeline-import-audit controls-trail guard controls controls controls controls controls parser refresh wiring
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src python3 /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_trail_guard_controls_controls_controls_controls_controls_parser_refresh.py`
+- Result: pass
+- Notes:
+  - controls-trail guard controls controls controls controls controls parser guidance and preview tokens verified
+
+## PO-SBR Local Full-Track Self-Hosted Validation
+
+- Date: 2026-03-01
+- Command: `bash /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_m14_6_local_linux_full.sh --skip-bootstrap --summary-json docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux_local_2026_03_01_selfhost.json --closure-json docs/reports/m14_6_closure_readiness_linux_local_2026_03_01_selfhost.json`
+- Result: pass
+- Notes:
+  - local one-shot completed on this Linux PC without macOS<->Linux remote orchestration
+  - strict pilot report: `pilot_status=executed`, `path_count=8`
+  - closure readiness: `ready=true`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_object_scene_po_sbr_backend.py`
+- Result: pass
+- Notes:
+  - canonical PO-SBR backend pipeline contract remains valid (`scene -> path_list -> adc_cube -> radar_map`)
+
+- Date: 2026-03-01
+- Command: `PATH=/home/seongcheoljeong/workspace/Radar-Simulation/.venv-po-sbr/bin:$PATH PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_parity_po_sbr_rt.py`
+- Result: pass
+- Notes:
+  - parity gate between analytic reference and `po_sbr_rt` candidate remains pass
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_object_scene_to_radar_map.py --scene-json data/runtime_pilot/po_sbr_runtime_pilot_v1_local_2026_03_01/scene_po_sbr_runtime_pilot.json --output-dir data/runtime_pilot/po_sbr_runtime_pilot_v1_local_2026_03_01_fulltrack_replay`
+- Result: pass
+- Notes:
+  - full-track developer workflow executed locally from runtime scene (`frame_count=8`)
