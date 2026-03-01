@@ -8,7 +8,8 @@ PY_PO_SBR="${ROOT_DIR}/.venv-po-sbr/bin/python"
 PY_DET="${ROOT_DIR}/.venv/bin/python"
 
 GEN_CHECKPOINT_SCRIPT="${ROOT_DIR}/scripts/generate_po_sbr_physical_full_track_merged_checkpoint.py"
-CHECKPOINT_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json"
+CHECKPOINT_JSON_DEFAULT="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json"
+CHECKPOINT_JSON="${PO_SBR_MERGED_CHECKPOINT_JSON_OVERRIDE:-${CHECKPOINT_JSON_DEFAULT}}"
 MATRIX_JSON="${ROOT_DIR}/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json"
 BUNDLE_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json"
 GATE_LOCK_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3.json"
@@ -33,7 +34,6 @@ if [[ ! -x "${PY_DET}" ]]; then
 fi
 
 require_file "${GEN_CHECKPOINT_SCRIPT}"
-require_file "${CHECKPOINT_JSON}"
 require_file "${MATRIX_JSON}"
 require_file "${BUNDLE_JSON}"
 require_file "${GATE_LOCK_JSON}"
@@ -42,13 +42,15 @@ require_file "${HARDENING_JSON}"
 
 echo "[verify] refresh checkpoint"
 "${PY_PO_SBR}" "${GEN_CHECKPOINT_SCRIPT}" --output-json "${CHECKPOINT_JSON}"
+require_file "${CHECKPOINT_JSON}"
 
 echo "[verify] checkpoint"
-"${PY_PO_SBR}" - <<'PY'
+"${PY_PO_SBR}" - "${CHECKPOINT_JSON}" <<'PY'
 import json
+import sys
 from pathlib import Path
 
-p = Path("docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json")
+p = Path(sys.argv[1]).resolve()
 d = json.loads(p.read_text(encoding="utf-8"))
 ready = bool(d.get("ready", False))
 if not ready:

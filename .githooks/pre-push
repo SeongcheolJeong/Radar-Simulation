@@ -54,8 +54,12 @@ if [[ -z "${PY_BIN}" ]]; then
 fi
 
 REPORT_JSON="${ROOT_DIR}/.git/po_sbr_post_change_gate_hook_latest.json"
+HOOK_CHECKPOINT_JSON="${ROOT_DIR}/.git/po_sbr_physical_full_track_merged_checkpoint_hook_latest.json"
+HOOK_CLOSURE_JSON="${ROOT_DIR}/.git/po_sbr_operator_handoff_closure_hook_latest.json"
 
 echo "[pre-push] PO-SBR post-change gate: base=${BASE_REF} head=${HEAD_REF}"
+PO_SBR_MERGED_CHECKPOINT_JSON_OVERRIDE="${HOOK_CHECKPOINT_JSON}" \
+PO_SBR_CLOSURE_JSON_OVERRIDE="${HOOK_CLOSURE_JSON}" \
 PYTHONPATH=src "${PY_BIN}" scripts/run_po_sbr_post_change_gate.py \
   --base-ref "${BASE_REF}" \
   --head-ref "${HEAD_REF}" \

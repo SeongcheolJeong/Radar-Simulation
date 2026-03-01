@@ -6,10 +6,11 @@ cd "${ROOT_DIR}"
 
 PY_DET="${ROOT_DIR}/.venv/bin/python"
 VERIFY_MERGED_SCRIPT="${ROOT_DIR}/scripts/verify_po_sbr_physical_full_track_merged_ready.sh"
-CHECKPOINT_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json"
+CHECKPOINT_JSON_DEFAULT="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json"
+CHECKPOINT_JSON="${PO_SBR_MERGED_CHECKPOINT_JSON_OVERRIDE:-${CHECKPOINT_JSON_DEFAULT}}"
 STAMP="$(date +%Y_%m_%d)"
 OUT_JSON_DEFAULT="${ROOT_DIR}/docs/reports/po_sbr_operator_handoff_closure_${STAMP}.json"
-OUT_JSON="${1:-${OUT_JSON_DEFAULT}}"
+OUT_JSON="${1:-${PO_SBR_CLOSURE_JSON_OVERRIDE:-${OUT_JSON_DEFAULT}}}"
 
 require_file() {
   local path="$1"
@@ -24,7 +25,6 @@ if [[ ! -x "${PY_DET}" ]]; then
   exit 1
 fi
 require_file "${VERIFY_MERGED_SCRIPT}"
-require_file "${CHECKPOINT_JSON}"
 
 echo "[closure] frontend timeline-import-audit sweep (M17.97~M17.101)"
 PYTHONPATH=src "${PY_DET}" scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_refresh.py
@@ -36,6 +36,7 @@ PYTHONPATH=src "${PY_DET}" scripts/validate_web_e2e_orchestrator_api.py
 
 echo "[closure] merged full-track readiness verifier"
 bash "${VERIFY_MERGED_SCRIPT}"
+require_file "${CHECKPOINT_JSON}"
 
 echo "[closure] write operator handoff snapshot: ${OUT_JSON}"
 PYTHONPATH=src "${PY_DET}" - "${ROOT_DIR}" "${CHECKPOINT_JSON}" "${OUT_JSON}" <<'PY'

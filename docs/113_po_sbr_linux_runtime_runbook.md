@@ -270,7 +270,11 @@ printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-a
   "$(git rev-parse HEAD)" "$(git rev-parse HEAD~1)" | .githooks/pre-push
 ```
 
-Hook report path (local-only, does not dirty tracked files): `.git/po_sbr_post_change_gate_hook_latest.json`.
+Hook local-only artifacts (do not dirty tracked files):
+
+- `.git/po_sbr_post_change_gate_hook_latest.json`
+- `.git/po_sbr_physical_full_track_merged_checkpoint_hook_latest.json`
+- `.git/po_sbr_operator_handoff_closure_hook_latest.json`
 
 Progress snapshot (one command for PO-SBR readiness + myproject migration status + next actions):
 

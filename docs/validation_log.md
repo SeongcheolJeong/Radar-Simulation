@@ -7390,3 +7390,13 @@
   - forced post-change gate passed (`closure_required=true`, `closure_status=pass`, `overall_status=ready`)
   - progress snapshot strict check passed (`6/6 ready`, `overall_ready=true`)
   - refreshed artifacts: `po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`, `po_sbr_operator_handoff_closure_2026_03_01.json`, `po_sbr_post_change_gate_2026_03_01.json`, `po_sbr_progress_snapshot_2026_03_01.json`
+
+## Pre-Push Local Artifact Redirection Hardening (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PO_SBR_MERGED_CHECKPOINT_JSON_OVERRIDE=.git/po_sbr_physical_full_track_merged_checkpoint_hook_force_test.json PO_SBR_CLOSURE_JSON_OVERRIDE=.git/po_sbr_operator_handoff_closure_hook_force_test.json PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --force-run --strict --base-ref HEAD~1 --head-ref HEAD --output-json .git/po_sbr_post_change_gate_hook_force_test.json`
+- Result: pass
+- Notes:
+  - forced closure execution succeeded with hook-local output overrides (`closure_required=true`, `closure_status=pass`, `overall_status=ready`)
+  - generated local-only artifacts under `.git/` instead of tracked `docs/reports/*`
+  - validates that pre-push closure path can run without dirtying tracked readiness reports
