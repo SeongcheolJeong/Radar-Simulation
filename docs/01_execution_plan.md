@@ -2234,6 +2234,8 @@ M14.x migration mirror outcome (2026-03-01):
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json` (`overall_status=ready`, one-command local chain)
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json` (`baseline_status=ready`, `frozen_file_count=8`)
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json` (`drift_verdict=match`, `difference_count=0`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self_head_2129849.json` (`overall_status=ready`, refreshed current-head local chain)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self_head_2129849.json` (`drift_verdict=match`, `difference_count=0`)
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json` (`campaign_status=stable`)
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json` (`hardening_status=hardened`)
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json` (`gate_lock_status=ready`)

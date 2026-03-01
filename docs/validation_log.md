@@ -7464,3 +7464,26 @@
     - `docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_3605f4b.json`
     - `docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_3605f4b.json`
     - `docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_3605f4b.json`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_local_ready_regression.py --strict-ready --output-root data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self_head_2129849 --output-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self_head_2129849.json --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - refreshed current-head local-ready chain finished with `overall_status=ready`
+  - status summary: `golden_path_status=ready`, `kpi_campaign_status=ready`, `kpi_scenario_matrix_status=ready`, `gate_lock_status=ready`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_regression_report.py --summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self_head_2129849.json --require-ready`
+- Result: pass
+- Notes:
+  - local-ready regression report validated for refreshed head run
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/check_po_sbr_local_ready_baseline_drift.py --baseline-manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json --candidate-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self_head_2129849.json --output-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self_head_2129849.json --require-match --require-candidate-ready`
+- Result: pass
+- Notes:
+  - refreshed local-ready candidate matched frozen baseline (`drift_verdict=match`, `difference_count=0`)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_baseline_drift_report.py --report-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self_head_2129849.json --require-match`
+- Result: pass
