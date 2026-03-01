@@ -1,9 +1,9 @@
 {
   "report_name": "po_sbr_operator_handoff_closure",
-  "generated_at_utc": "2026-03-01T07:18:10.781912+00:00",
+  "generated_at_utc": "2026-03-01T07:22:47.266835+00:00",
   "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
   "branch": "codex/hybrid-adapter-real-parser",
-  "head_commit": "7e57fd2e2375f0ae8828d81f881e4c9446db5382",
+  "head_commit": "c31b411355136d1027c7aa04f8ae90bc31f5af34",
   "frontend_timeline_import_audit": {
     "milestones": [
       "M17.97",
@@ -22,7 +22,7 @@
     "full_track_status": "ready",
     "gate_lock_status": "ready",
     "realism_gate_candidate_status": "ready",
-    "generated_from_head_commit": "7e57fd2e2375f0ae8828d81f881e4c9446db5382",
+    "generated_from_head_commit": "c31b411355136d1027c7aa04f8ae90bc31f5af34",
     "merged_readiness_commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6"
   },
   "overall_status": "ready"
