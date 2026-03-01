@@ -281,6 +281,13 @@ PYTHONPATH=src .venv/bin/python scripts/show_po_sbr_progress.py \
   --output-json docs/reports/po_sbr_progress_snapshot_2026_03_01.json
 ```
 
+Full readiness checkpoint refresh (recommended one command):
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+bash scripts/run_po_sbr_readiness_checkpoint.sh
+```
+
 Manual post-change gate run:
 
 ```bash

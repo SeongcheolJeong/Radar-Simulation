@@ -79,6 +79,7 @@ bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
 bash scripts/verify_po_sbr_operator_handoff_closure.sh
 ./scripts/install_po_sbr_pre_push_hook.sh
 git config --get core.hooksPath
+bash scripts/run_po_sbr_readiness_checkpoint.sh
 printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-adapter-real-parser %s\n" \
   "$(git rev-parse HEAD)" "$(git rev-parse HEAD~1)" | .githooks/pre-push
 PYTHONPATH=src .venv/bin/python scripts/show_po_sbr_progress.py --strict-ready --output-json docs/reports/po_sbr_progress_snapshot_2026_03_01.json
@@ -154,6 +155,7 @@ cd /home/seongcheoljeong/workspace/Radar-Simulation
 git status --short
 ./scripts/install_po_sbr_pre_push_hook.sh
 git config --get core.hooksPath
+bash scripts/run_po_sbr_readiness_checkpoint.sh
 bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
 bash scripts/verify_po_sbr_operator_handoff_closure.sh
 printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-adapter-real-parser %s\n" \

@@ -1,6 +1,6 @@
 {
   "report_name": "po_sbr_progress_snapshot",
-  "generated_at_utc": "2026-03-01T07:22:50.670368+00:00",
+  "generated_at_utc": "2026-03-01T07:24:51.711961+00:00",
   "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
   "reports_root": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports",
   "overall_ready": true,
@@ -25,7 +25,7 @@
         "stability_status": "stable",
         "hardening_status": "hardened",
         "realism_gate_candidate_status": "ready",
-        "generated_from_head_commit": "c31b411355136d1027c7aa04f8ae90bc31f5af34"
+        "generated_from_head_commit": "c026dc930cf80a156f316bb4cfe9b6ba38ce9c19"
       }
     },
     {
