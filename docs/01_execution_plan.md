@@ -2191,6 +2191,9 @@ Post-M17 frontend closure and operator handoff gate outcome (2026-03-01):
 - post-change auto gate added:
   - `scripts/run_po_sbr_post_change_gate.py` detects runtime-affecting file changes (`src/avxsim`, `frontend/graph_lab`, PO-SBR/scene-backend runners/validators, closure/merged verifiers)
   - gate runs closure verifier only when required (or `--force-run`) and emits `docs/reports/po_sbr_post_change_gate_YYYY_MM_DD.json`
+- local pre-push enforcement added:
+  - `.githooks/pre-push` now runs the post-change gate automatically on every push (with strict mode + JSON report emission)
+  - `scripts/install_po_sbr_pre_push_hook.sh` installs repo-local git hooks path (`core.hooksPath=.githooks`) for this Linux PC
 - first closure snapshot generated on this Linux PC:
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)
 - runbook/checklist integration completed:

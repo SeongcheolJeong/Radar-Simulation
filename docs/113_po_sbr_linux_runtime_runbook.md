@@ -258,6 +258,22 @@ Post-change automatic gate (runs closure only when runtime-affecting files chang
 
 ```bash
 cd /home/seongcheoljeong/workspace/Radar-Simulation
+./scripts/install_po_sbr_pre_push_hook.sh
+git config --get core.hooksPath
+```
+
+Local pre-push hook smoke check (simulates one branch update line from git pre-push stdin):
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-adapter-real-parser %s\n" \
+  "$(git rev-parse HEAD)" "$(git rev-parse HEAD~1)" | .githooks/pre-push
+```
+
+Manual post-change gate run:
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
 PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py \
   --base-ref HEAD~1 \
   --head-ref HEAD \

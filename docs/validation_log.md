@@ -7299,3 +7299,20 @@
 - Notes:
   - sync run after workflow-scope rollback path
   - current diff scope had no runtime-affecting files; `closure_required=false`, `closure_status=skipped`, `overall_status=ready`
+
+## Local Pre-Push Hook Enforcement (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && ./scripts/install_po_sbr_pre_push_hook.sh && git config --get core.hooksPath`
+- Result: pass
+- Notes:
+  - repo-local git hook path configured as `.githooks`
+  - installer confirmed managed hook file `.githooks/pre-push`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-adapter-real-parser %s\n" "$(git rev-parse HEAD)" "$(git rev-parse HEAD~1)" | .githooks/pre-push`
+- Result: pass
+- Notes:
+  - simulated pre-push stdin flow executed post-change gate through hook entrypoint
+  - emitted `docs/reports/po_sbr_post_change_gate_hook_latest.json`
+  - status confirmed: `closure_required=false`, `closure_status=skipped`, `overall_status=ready`

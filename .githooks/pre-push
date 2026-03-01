@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "${ROOT_DIR}"
+
+HEAD_REF=""
+BASE_REF=""
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Skip empty rows and delete-only updates.
+  if [[ -z "${local_ref:-}" || -z "${local_sha:-}" ]]; then
+    continue
+  fi
+  if [[ "${local_sha}" =~ ^0+$ ]]; then
+    continue
+  fi
+
+  HEAD_REF="${local_sha}"
+  if [[ -n "${remote_sha:-}" && ! "${remote_sha}" =~ ^0+$ ]] && git cat-file -e "${remote_sha}^{commit}" 2>/dev/null; then
+    BASE_REF="${remote_sha}"
+  elif git cat-file -e "${local_sha}~1^{commit}" 2>/dev/null; then
+    BASE_REF="${local_sha}~1"
+  else
+    BASE_REF="${local_sha}"
+  fi
+  break
+done
+
+if [[ -z "${HEAD_REF}" || -z "${BASE_REF}" ]]; then
+  # Nothing push-relevant to validate (e.g., branch deletion only).
+  exit 0
+fi
+
+PY_BIN=""
+for candidate in \
+  "${ROOT_DIR}/.venv/bin/python" \
+  "${ROOT_DIR}/.venv-po-sbr/bin/python" \
+  "python3"; do
+  if [[ "${candidate}" == "python3" ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+      PY_BIN="python3"
+      break
+    fi
+  elif [[ -x "${candidate}" ]]; then
+    PY_BIN="${candidate}"
+    break
+  fi
+done
+
+if [[ -z "${PY_BIN}" ]]; then
+  echo "[pre-push] error: python runtime not found (.venv/.venv-po-sbr/python3)" >&2
+  exit 1
+fi
+
+REPORT_JSON="${ROOT_DIR}/docs/reports/po_sbr_post_change_gate_hook_latest.json"
+
+echo "[pre-push] PO-SBR post-change gate: base=${BASE_REF} head=${HEAD_REF}"
+PYTHONPATH=src "${PY_BIN}" scripts/run_po_sbr_post_change_gate.py \
+  --base-ref "${BASE_REF}" \
+  --head-ref "${HEAD_REF}" \
+  --strict \
+  --output-json "${REPORT_JSON}"
+echo "[pre-push] PO-SBR post-change gate: pass"
