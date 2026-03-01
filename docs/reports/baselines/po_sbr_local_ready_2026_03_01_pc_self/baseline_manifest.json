@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "generated_at_utc": "2026-03-01T05:15:46.521796+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "baseline_status": "ready",
+  "source_local_ready_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json",
+  "source_overall_status": "ready",
+  "output_dir": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self",
+  "manifest_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json",
+  "frozen_files": {
+    "scene_backend_golden_path": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/scene_backend_golden_path.json",
+      "size_bytes": 9301,
+      "sha256": "5d35ccfcf0cb615c45a407bdf3b6da77c40318d2fd5578d1c59cecdda146abb7"
+    },
+    "scene_backend_kpi_campaign": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_campaign.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/scene_backend_kpi_campaign.json",
+      "size_bytes": 5612,
+      "sha256": "22f43c5f5373d81eca0f74eeb8a851e7766a6e701c3c838de09c02d944c4e680"
+    },
+    "scene_backend_kpi_scenario_matrix": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix.json",
+      "size_bytes": 46201,
+      "sha256": "e46c6edf8fb9393337e4f02cb9d34b8a526a315a0aea5876d32748965fc9125e"
+    },
+    "po_sbr_physical_full_track_gate_lock": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock.json",
+      "size_bytes": 4950,
+      "sha256": "4c45e348466f9226b162396b01bc827f1d8ecd83da4d168069a435a7093ef7e8"
+    },
+    "po_sbr_physical_full_track_stability": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/stability_campaign/po_sbr_physical_full_track_stability.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/po_sbr_physical_full_track_stability.json",
+      "size_bytes": 8581,
+      "sha256": "cf3bff1e6a3f27cda19f0fa76590f27e37b4e068fae642366e6f574e77363b56"
+    },
+    "po_sbr_realism_threshold_hardening": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/hardening_campaign/po_sbr_realism_threshold_hardening.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/po_sbr_realism_threshold_hardening.json",
+      "size_bytes": 16789,
+      "sha256": "245937e12c39f62d53eb2d7bf8a1c14074188dc07188935972ec6ac390f270f1"
+    },
+    "po_sbr_physical_full_track_bundle": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/po_sbr_physical_full_track_bundle.json",
+      "size_bytes": 10544,
+      "sha256": "e5a84c4b6fe81e4a010a880fca758de66f609cdfae2c1092a7909b381184a1f0"
+    },
+    "po_sbr_local_ready_regression": {
+      "source_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json",
+      "frozen_path": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/po_sbr_local_ready_regression.json",
+      "size_bytes": 14449,
+      "sha256": "e1cb4dd3777e426c4022a38390598f51cbcc4f66ad6c8f44fc4393a646c16c44"
+    }
+  }
+}

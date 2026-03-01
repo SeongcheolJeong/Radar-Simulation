@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "generated_at_utc": "2026-03-01T03:05:17.788267Z",
+  "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
+  "python_executable": "/usr/bin/python3.12",
+  "gate_lock_status": "ready",
+  "blockers": [],
+  "full_track_bundle_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json",
+  "realism_gate_candidate": "realism_tight_v2",
+  "threshold_profiles": [
+    "realism_tight_v2"
+  ],
+  "stability": {
+    "run": {
+      "ok": true,
+      "return_code": 0,
+      "stdout": "reused_existing_stability_summary",
+      "stderr": "",
+      "cmd": [
+        "reuse",
+        "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json"
+      ]
+    },
+    "summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json",
+    "campaign_status": "stable",
+    "summary": {
+      "requested_runs": 3,
+      "completed_runs": 3,
+      "run_error_count": 0,
+      "full_track_blocked_count": 0,
+      "matrix_not_ready_count": 0,
+      "gate_blocked_run_count": 0,
+      "stable_run_count": 3
+    }
+  },
+  "hardening": {
+    "run": {
+      "ok": true,
+      "return_code": 0,
+      "stdout": "reused_existing_hardening_summary",
+      "stderr": "",
+      "cmd": [
+        "reuse",
+        "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json"
+      ]
+    },
+    "summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json",
+    "hardening_status": "hardened",
+    "realism_gate_candidate": "realism_tight_v2",
+    "realism_gate_candidate_status": "ready",
+    "summary": {
+      "threshold_profile_count": 1,
+      "threshold_ready_count": 1,
+      "threshold_failed_count": 0,
+      "realism_profile_count": 4,
+      "bundle_gate_blocked_profile_count": 0,
+      "realism_gate_candidate_status": "ready"
+    }
+  },
+  "summary": {
+    "stability_runs_requested": 3,
+    "threshold_profile_count": 1,
+    "stability_status": "stable",
+    "hardening_status": "hardened",
+    "realism_gate_candidate_status": "ready",
+    "stable_run_count": 3
+  }
+}

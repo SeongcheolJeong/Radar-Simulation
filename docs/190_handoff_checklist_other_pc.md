@@ -145,3 +145,29 @@ PYTHONPATH=src python3 scripts/validate_object_scene_to_radar_map.py
 ```
 
 If all pass, handoff is complete and work can continue from M14.6.
+
+## 8) Myproject PO-SBR Full-Track Migration Snapshot (2026-03-01)
+
+Must-read added contracts:
+
+1. `docs/251_scene_backend_golden_path_contract.md`
+2. `docs/252_scene_backend_kpi_campaign_contract.md`
+3. `docs/253_scene_backend_kpi_scenario_matrix_contract.md`
+4. `docs/260_po_sbr_physical_full_track_bundle_contract.md`
+5. `docs/261_po_sbr_physical_full_track_stability_contract.md`
+6. `docs/262_po_sbr_realism_threshold_hardening_contract.md`
+7. `docs/263_po_sbr_physical_full_track_gate_lock_contract.md`
+
+Current backend priority on this PC:
+
+- keep `campaign_status=stable` + `hardening_status=hardened` + `gate_lock_status=ready` green in `/home/seongcheoljeong/workspace/myproject/docs/reports`
+- use local Linux execution only (no macOS<->Linux remote orchestration)
+
+Latest local-only execution proof (no cross-PC linkage):
+
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json` (`executed_backends=[analytic_targets,sionna_rt,po_sbr_rt]`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json` (`campaign_status=ready`, `parity_fail_count=0`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json` (`matrix_status=ready`, `profile_count=7`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json` (`gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json` (`overall_status=ready`, one-command local chain)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json` (`baseline_status=ready`, frozen_file_count=8)

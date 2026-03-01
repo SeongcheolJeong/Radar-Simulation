@@ -6990,3 +6990,175 @@
 - Notes:
   - API orchestration endpoints remain healthy after timeline-import-audit controls refresh integration
 
+
+## PO-SBR Full-Track Toolchain Migration from Radar-Simulation (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cp Radar-Simulation -> myproject (scripts/docs/contracts/provider/reports)`
+- Result: pass
+- Notes:
+  - migrated M14.7~M14.14 script set and contracts into `myproject`
+  - synced `src/avxsim/runtime_providers/po_sbr_rt_provider.py` to multi-component capable version
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python -m py_compile <migrated m14 scripts>`
+- Result: pass
+- Notes:
+  - migrated script syntax validation complete
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_runtime_provider_stubbed.py`
+- Result: pass
+- Notes:
+  - runtime provider stub validation confirms multi-component behavior
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_scene_backend_golden_path.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_scene_backend_kpi_campaign.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_scene_backend_kpi_scenario_matrix.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_physical_full_track_bundle.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_physical_full_track_stability_campaign.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_realism_threshold_hardening_campaign.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_physical_full_track_gate_lock.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_stability_report.py --summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json --require-stable`
+- Result: pass
+- Notes:
+  - migrated report status: `campaign_status=stable`, `requested_runs=3`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_realism_threshold_hardening_report.py --summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json --require-hardened`
+- Result: pass
+- Notes:
+  - migrated report status: `hardening_status=hardened`, `threshold_profile_count=1`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json --require-ready`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json --require-ready`
+- Result: pass
+- Notes:
+  - migrated fresh report status: `gate_lock_status=ready`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_physical_full_track_gate_lock.py --strict-ready --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --reuse-stability-summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json --reuse-hardening-summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - myproject-native gate-lock summary generated from migrated local evidence
+  - summary status: `gate_lock_status=ready`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse.json --require-ready`
+- Result: pass
+- Notes:
+  - myproject reuse gate-lock report validated
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/pip install drjit mitsuba`
+- Result: pass
+- Notes:
+  - unblocked local `sionna_rt` runtime modules for myproject
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_scene_backend_golden_path.py --strict-nonexecuted --output-root data/runtime_golden_path/myproject_local_2026_03_01_all3 --output-summary-json docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json`
+- Result: pass
+- Notes:
+  - executed backends: `analytic_targets`, `sionna_rt`, `po_sbr_rt`
+  - summary: `po_sbr_migration_status=closed_local_runtime`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_scene_backend_golden_path_report.py --summary-json docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json --require-backend-executed analytic_targets --require-backend-executed sionna_rt --require-backend-executed po_sbr_rt`
+- Result: pass
+- Notes:
+  - all-backend execution proof validated in myproject context
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_physical_full_track_gate_lock.py --strict-ready --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - myproject-native full chained gate-lock (no reuse) completed locally
+  - summary status: `gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json --require-ready`
+- Result: pass
+- Notes:
+  - fresh gate-lock report validated (`gate_lock_status=ready`)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_stability_report.py --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh/stability_campaign/po_sbr_physical_full_track_stability.json --require-stable`
+- Result: pass
+- Notes:
+  - chained stability campaign validated (`campaign_status=stable`, `requested_runs=3`)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_realism_threshold_hardening_report.py --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh/hardening_campaign/po_sbr_realism_threshold_hardening.json --require-hardened`
+- Result: pass
+- Notes:
+  - chained hardening campaign validated (`hardening_status=hardened`, `threshold_profile_count=1`)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_scene_backend_kpi_campaign.py --golden-path-summary-json docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json --output-summary-json docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json --strict-ready`
+- Result: pass
+- Notes:
+  - local KPI campaign completed with `campaign_status=ready`
+  - compared backend pairs: `2`, parity failures: `0`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_scene_backend_kpi_campaign_report.py --summary-json docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json --require-ready`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_scene_backend_kpi_scenario_matrix.py --output-root data/runtime_golden_path/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3 --output-summary-json docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json --strict-all-ready`
+- Result: pass
+- Notes:
+  - strict scenario matrix completed with `matrix_status=ready`
+  - `profile_count=7`, `ready_profiles=7`, `blocked_profiles=0`, `failed_profiles=0`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_scene_backend_kpi_scenario_matrix_report.py --summary-json docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json --require-ready`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_local_ready_regression.py --strict-ready --output-root data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self --output-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - one-command local PO-SBR readiness chain completed (`golden_path + kpi_campaign + kpi_scenario_matrix + full-track gate-lock`)
+  - status summary: `overall_status=ready`, `golden_path_status=ready`, `kpi_campaign_status=ready`, `kpi_scenario_matrix_status=ready`, `gate_lock_status=ready`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_regression_report.py --summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json --require-ready`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/freeze_po_sbr_local_ready_baseline.py --local-ready-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json --output-dir docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self --manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json --strict-ready`
+- Result: pass
+- Notes:
+  - baseline freeze manifest generated with `baseline_status=ready`
+  - frozen file count: `8`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_baseline_manifest.py --manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json --require-ready`
+- Result: pass

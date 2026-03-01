@@ -75,3 +75,16 @@ Current status:
 
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_2026_02_22.json` -> `ready=false`
 - missing item: `linux_executed_report_missing`
+
+Myproject migration mirror status (2026-03-01):
+
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json` -> `executed_backends=[analytic_targets,sionna_rt,po_sbr_rt]`, `po_sbr_migration_status=closed_local_runtime`
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json` -> `campaign_status=ready`, `parity_fail_count=0`
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json` -> `matrix_status=ready` (`profile_count=7`, `blocked_profiles=0`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json` -> `overall_status=ready` (`golden_path/kpi_campaign/kpi_scenario_matrix/gate_lock` all ready)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json` -> `baseline_status=ready` (`frozen_file_count=8`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json` -> `campaign_status=stable` (`requested_runs=3`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json` -> `hardening_status=hardened` (`realism_gate_candidate=realism_tight_v2`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json` -> `gate_lock_status=ready` (full chained mode)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse.json` -> `gate_lock_status=ready` (myproject runner reuse mode)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json` -> `gate_lock_status=ready` (myproject runner full chained no-reuse mode; `stability_status=stable`, `hardening_status=hardened`)

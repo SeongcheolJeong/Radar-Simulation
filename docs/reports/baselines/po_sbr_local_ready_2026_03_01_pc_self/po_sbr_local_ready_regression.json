@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "generated_at_utc": "2026-03-01T05:15:20.698147+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "python_executable": "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+  "output_root": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self",
+  "full_track_bundle_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json",
+  "failed_steps": [],
+  "blockers": [],
+  "reports": {
+    "golden_path": {
+      "summary_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path.json",
+      "run": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "Scene backend golden-path run completed.\n  requested_backends: ['analytic_targets', 'sionna_rt', 'po_sbr_rt']\n  executed_backends: ['analytic_targets', 'sionna_rt', 'po_sbr_rt']\n  blocked_backends: []\n  failed_backends: []\n  po_sbr_migration_status: closed_local_runtime\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path.json",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/run_scene_backend_golden_path.py",
+          "--strict-nonexecuted",
+          "--n-chirps",
+          "8",
+          "--samples-per-chirp",
+          "1024",
+          "--output-root",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path",
+          "--output-summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path.json"
+        ]
+      },
+      "validate": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "validate_scene_backend_golden_path_report: pass\n  summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path.json\n  requested_backends: ['analytic_targets', 'sionna_rt', 'po_sbr_rt']\n  executed_backends: ['analytic_targets', 'sionna_rt', 'po_sbr_rt']\n  blocked_backends: []\n  failed_backends: []",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/validate_scene_backend_golden_path_report.py",
+          "--summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path.json",
+          "--require-backend-executed",
+          "analytic_targets,sionna_rt,po_sbr_rt"
+        ]
+      },
+      "migration_status": "closed_local_runtime",
+      "executed_count": 3,
+      "requested_count": 3,
+      "status": "ready",
+      "summary": {
+        "requested_count": 3,
+        "executed_count": 3,
+        "blocked_count": 0,
+        "failed_count": 0,
+        "executed_backends": [
+          "analytic_targets",
+          "sionna_rt",
+          "po_sbr_rt"
+        ],
+        "blocked_backends": [],
+        "failed_backends": [],
+        "progress_ratio": 1.0,
+        "po_sbr_migration_status": "closed_local_runtime"
+      }
+    },
+    "kpi_campaign": {
+      "summary_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_campaign.json",
+      "run": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "Scene backend KPI campaign completed.\n  campaign_status: ready\n  blockers: []\n  compared_pair_count: 2\n  parity_fail_count: 0\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_campaign.json",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/run_scene_backend_kpi_campaign.py",
+          "--golden-path-summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_golden_path.json",
+          "--output-summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_campaign.json",
+          "--strict-ready"
+        ]
+      },
+      "validate": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "validate_scene_backend_kpi_campaign_report: pass\n  summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_campaign.json\n  campaign_status: ready\n  compared_pair_count: 2\n  parity_fail_count: 0",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/validate_scene_backend_kpi_campaign_report.py",
+          "--summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_campaign.json",
+          "--require-ready"
+        ]
+      },
+      "campaign_status": "ready",
+      "parity_fail_count": 0,
+      "status": "ready",
+      "summary": {
+        "requested_backend_count": 3,
+        "executed_backend_count": 3,
+        "executed_backends": [
+          "analytic_targets",
+          "sionna_rt",
+          "po_sbr_rt"
+        ],
+        "compared_pair_count": 2,
+        "parity_pass_count": 2,
+        "parity_fail_count": 0,
+        "parity_pass_pairs": [
+          "analytic_targets->sionna_rt",
+          "analytic_targets->po_sbr_rt"
+        ],
+        "parity_fail_pairs": []
+      }
+    },
+    "kpi_scenario_matrix": {
+      "summary_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix.json",
+      "run": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "Scene backend KPI scenario matrix completed.\n  matrix_status: ready\n  profile_count: 7\n  gate_profile_families: ['equivalence_strict']\n  ready_profiles: 7\n  blocked_profiles: 0\n  gate_blocked_profiles: 0\n  failed_profiles: 0\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix.json",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/run_scene_backend_kpi_scenario_matrix.py",
+          "--output-root",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix",
+          "--output-summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix.json",
+          "--n-chirps",
+          "8",
+          "--samples-per-chirp",
+          "1024",
+          "--strict-all-ready"
+        ]
+      },
+      "validate": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "validate_scene_backend_kpi_scenario_matrix_report: pass\n  summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix.json\n  matrix_status: ready\n  profile_count: 7",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/validate_scene_backend_kpi_scenario_matrix_report.py",
+          "--summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/scene_backend_kpi_scenario_matrix.json",
+          "--require-ready"
+        ]
+      },
+      "matrix_status": "ready",
+      "profile_count": 7,
+      "blocked_profile_count": 0,
+      "failed_profile_count": 0,
+      "status": "ready",
+      "summary": {
+        "profile_count": 7,
+        "ready_profile_count": 7,
+        "blocked_profile_count": 0,
+        "failed_profile_count": 0,
+        "gate_profile_count": 3,
+        "gate_ready_profile_count": 3,
+        "gate_blocked_profile_count": 0,
+        "informational_profile_count": 4,
+        "informational_ready_profile_count": 4,
+        "informational_blocked_profile_count": 0
+      }
+    },
+    "gate_lock": {
+      "summary_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock.json",
+      "stability_summary_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/stability_campaign/po_sbr_physical_full_track_stability.json",
+      "hardening_summary_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/hardening_campaign/po_sbr_realism_threshold_hardening.json",
+      "run": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "PO-SBR physical full-track gate lock completed.\n  gate_lock_status: ready\n  blockers: []\n  stability_status: stable\n  hardening_status: hardened\n  realism_gate_candidate: realism_tight_v2\n  realism_gate_candidate_status: ready\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock.json",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/run_po_sbr_physical_full_track_gate_lock.py",
+          "--strict-ready",
+          "--full-track-bundle-summary-json",
+          "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json",
+          "--output-root",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock",
+          "--output-summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock.json",
+          "--stability-runs",
+          "3",
+          "--n-chirps",
+          "8",
+          "--samples-per-chirp",
+          "1024",
+          "--realism-gate-candidate",
+          "realism_tight_v2",
+          "--threshold-profile",
+          "realism_tight_v2"
+        ]
+      },
+      "validate_gate_lock": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "validate_po_sbr_physical_full_track_gate_lock_report: pass\n  summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock.json\n  gate_lock_status: ready\n  threshold_profile_count: 1",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/validate_po_sbr_physical_full_track_gate_lock_report.py",
+          "--summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock.json",
+          "--require-ready"
+        ]
+      },
+      "validate_stability": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "validate_po_sbr_physical_full_track_stability_report: pass\n  summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/stability_campaign/po_sbr_physical_full_track_stability.json\n  campaign_status: stable\n  requested_runs: 3",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/validate_po_sbr_physical_full_track_stability_report.py",
+          "--summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/stability_campaign/po_sbr_physical_full_track_stability.json",
+          "--require-stable"
+        ]
+      },
+      "validate_hardening": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "validate_po_sbr_realism_threshold_hardening_report: pass\n  summary_json: /home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/hardening_campaign/po_sbr_realism_threshold_hardening.json\n  hardening_status: hardened\n  threshold_profile_count: 1",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv-po-sbr/bin/python",
+          "scripts/validate_po_sbr_realism_threshold_hardening_report.py",
+          "--summary-json",
+          "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self/po_sbr_physical_full_track_gate_lock/hardening_campaign/po_sbr_realism_threshold_hardening.json",
+          "--require-hardened"
+        ]
+      },
+      "gate_lock_status": "ready",
+      "stability_status": "stable",
+      "hardening_status": "hardened",
+      "realism_gate_candidate_status": "ready",
+      "status": "ready",
+      "summary": {
+        "stability_runs_requested": 3,
+        "threshold_profile_count": 1,
+        "stability_status": "stable",
+        "hardening_status": "hardened",
+        "realism_gate_candidate_status": "ready",
+        "stable_run_count": 3
+      }
+    }
+  },
+  "summary": {
+    "golden_path_status": "ready",
+    "kpi_campaign_status": "ready",
+    "kpi_scenario_matrix_status": "ready",
+    "gate_lock_status": "ready",
+    "overall_status": "ready"
+  }
+}

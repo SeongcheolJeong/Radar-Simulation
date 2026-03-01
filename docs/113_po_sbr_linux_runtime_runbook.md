@@ -93,3 +93,129 @@ Optional flags:
    - output must include `ready=true`
 4. optional finalization helper:
    - `PYTHONPATH=src python3 /Users/seongcheoljeong/Documents/Codex_test/scripts/finalize_m14_6_from_linux_report.py --linux-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json --closure-summary-json /Users/seongcheoljeong/Documents/Codex_test/docs/reports/m14_6_closure_readiness_linux.json --apply`
+
+## Myproject Local PO-SBR Full-Track Gate Lock (2026-03-01)
+
+Unblock all-backend runtime modules (once):
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/pip install drjit mitsuba
+```
+
+Run local all-backend golden-path proof:
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_scene_backend_golden_path.py \
+  --strict-nonexecuted \
+  --output-root data/runtime_golden_path/myproject_local_2026_03_01_all3 \
+  --output-summary-json docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json
+```
+
+Run local backend KPI readiness and strict scenario matrix:
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_scene_backend_kpi_campaign.py \
+  --golden-path-summary-json docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json \
+  --output-summary-json docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json \
+  --strict-ready
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_scene_backend_kpi_scenario_matrix.py \
+  --output-root data/runtime_golden_path/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3 \
+  --output-summary-json docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json \
+  --strict-all-ready
+```
+
+Validate migrated deterministic toolchain:
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_runtime_provider_stubbed.py
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_physical_full_track_gate_lock.py
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_scene_backend_kpi_campaign_report.py \
+  --summary-json docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json \
+  --require-ready
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_scene_backend_kpi_scenario_matrix_report.py \
+  --summary-json docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json \
+  --require-ready
+```
+
+Generate a myproject gate-lock summary from migrated local evidence:
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_physical_full_track_gate_lock.py \
+  --strict-ready \
+  --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json \
+  --reuse-stability-summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json \
+  --reuse-hardening-summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json \
+  --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse \
+  --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse.json \
+  --stability-runs 3 \
+  --threshold-profile realism_tight_v2 \
+  --realism-gate-candidate realism_tight_v2
+```
+
+Run full chained local gate-lock on this PC (no reused summaries):
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_physical_full_track_gate_lock.py \
+  --strict-ready \
+  --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json \
+  --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh \
+  --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json \
+  --stability-runs 3 \
+  --threshold-profile realism_tight_v2 \
+  --realism-gate-candidate realism_tight_v2
+```
+
+Validate migrated local evidence reports:
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_stability_report.py \
+  --summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json \
+  --require-stable
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_realism_threshold_hardening_report.py \
+  --summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json \
+  --require-hardened
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_gate_lock_report.py \
+  --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse.json \
+  --require-ready
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_gate_lock_report.py \
+  --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json \
+  --require-ready
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_stability_report.py \
+  --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh/stability_campaign/po_sbr_physical_full_track_stability.json \
+  --require-stable
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_realism_threshold_hardening_report.py \
+  --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh/hardening_campaign/po_sbr_realism_threshold_hardening.json \
+  --require-hardened
+```
+
+One-command local readiness regression + baseline freeze:
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_local_ready_regression.py \
+  --strict-ready \
+  --output-root data/runtime_golden_path/po_sbr_local_ready_regression_2026_03_01_pc_self \
+  --output-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json \
+  --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json \
+  --stability-runs 3 \
+  --threshold-profile realism_tight_v2 \
+  --realism-gate-candidate realism_tight_v2
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_regression_report.py \
+  --summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json \
+  --require-ready
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/freeze_po_sbr_local_ready_baseline.py \
+  --local-ready-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json \
+  --output-dir docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self \
+  --manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json \
+  --strict-ready
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_baseline_manifest.py \
+  --manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json \
+  --require-ready
+```

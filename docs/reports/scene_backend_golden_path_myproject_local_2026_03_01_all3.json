@@ -1,0 +1,214 @@
+{
+  "version": 1,
+  "generated_at_utc": "2026-03-01T03:45:30.904827Z",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "python_executable": "/usr/bin/python3.12",
+  "python_version": "3.12.3 (main, Jan 22 2026, 20:57:42) [GCC 13.3.0]",
+  "platform_system": "Linux",
+  "scene_equivalence_profile": "single_target_range25_v1",
+  "scene_profile_family": "equivalence_strict",
+  "equivalence_inputs": {
+    "profile_family": "equivalence_strict",
+    "target_count": 1,
+    "target_range_m": 25.0,
+    "target_az_deg": 0.0,
+    "target_el_deg": 0.0,
+    "target_radial_velocity_mps": 0.0,
+    "sionna_target_radius_m": 0.5,
+    "po_sbr_alpha_deg": 180.0,
+    "po_sbr_phi_deg": 0.0,
+    "po_sbr_theta_deg": 90.0,
+    "po_sbr_min_range_m": 25.0,
+    "po_sbr_amp_floor_abs": 0.0016,
+    "po_sbr_amp_target_abs": 0.0016,
+    "po_sbr_geometry_path": "/home/seongcheoljeong/workspace/myproject/external/PO-SBR-Python/geometries/plate.obj",
+    "components": [
+      {
+        "target_range_m": 25.0,
+        "target_az_deg": 0.0,
+        "target_el_deg": 0.0,
+        "target_radial_velocity_mps": 0.0,
+        "sionna_target_radius_m": 0.5,
+        "po_sbr_alpha_deg": 180.0,
+        "po_sbr_phi_deg": 0.0,
+        "po_sbr_theta_deg": 90.0,
+        "po_sbr_min_range_m": 25.0,
+        "po_sbr_amp_floor_abs": 0.0016,
+        "po_sbr_amp_target_abs": 0.0016,
+        "amp_abs": 1.0,
+        "range_amp_exponent": 2.0,
+        "material_tag": "metal",
+        "reflection_order": 1,
+        "po_sbr_bounces": 2,
+        "po_sbr_rays_per_lambda": 3.0,
+        "path_id_prefix": "golden_path_po_sbr_target0"
+      }
+    ]
+  },
+  "requested_backends": [
+    "analytic_targets",
+    "sionna_rt",
+    "po_sbr_rt"
+  ],
+  "output_root": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3",
+  "results": {
+    "analytic_targets": {
+      "status": "executed",
+      "blockers": [],
+      "diagnostics": {
+        "platform": "Linux",
+        "runtime_provider": null,
+        "required_modules": [],
+        "missing_required_modules": []
+      },
+      "scene_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/analytic_targets/scene_analytic_targets_golden_path.json",
+      "output_dir": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/analytic_targets/pipeline_outputs",
+      "path_list_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/analytic_targets/pipeline_outputs/path_list.json",
+      "adc_cube_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/analytic_targets/pipeline_outputs/adc_cube.npz",
+      "radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/analytic_targets/pipeline_outputs/radar_map.npz",
+      "frame_count": 8,
+      "path_count": 8,
+      "runtime_resolution": null,
+      "error": null
+    },
+    "sionna_rt": {
+      "status": "executed",
+      "blockers": [],
+      "diagnostics": {
+        "platform": "Linux",
+        "runtime_provider": "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba",
+        "required_modules": [
+          "mitsuba",
+          "drjit"
+        ],
+        "module_report": {
+          "mitsuba": {
+            "available": true,
+            "module_name": "mitsuba",
+            "module_version": "3.8.0"
+          },
+          "drjit": {
+            "available": true,
+            "module_name": "drjit",
+            "module_version": "1.3.1"
+          }
+        },
+        "missing_required_modules": []
+      },
+      "scene_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/sionna_rt/scene_sionna_rt_golden_path.json",
+      "output_dir": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/sionna_rt/pipeline_outputs",
+      "path_list_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/sionna_rt/pipeline_outputs/path_list.json",
+      "adc_cube_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/sionna_rt/pipeline_outputs/adc_cube.npz",
+      "radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/sionna_rt/pipeline_outputs/radar_map.npz",
+      "frame_count": 8,
+      "path_count": 8,
+      "runtime_resolution": {
+        "mode": "runtime_provider",
+        "backend_type": "sionna_rt",
+        "runtime_provider": "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba",
+        "runtime_info": {
+          "provider_spec": "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba",
+          "required_modules": [
+            "mitsuba",
+            "drjit"
+          ],
+          "module_report": {
+            "mitsuba": {
+              "available": true,
+              "module_name": "mitsuba",
+              "module_version": "3.8.0"
+            },
+            "drjit": {
+              "available": true,
+              "module_name": "drjit",
+              "module_version": "1.3.1"
+            }
+          }
+        }
+      },
+      "error": null
+    },
+    "po_sbr_rt": {
+      "status": "executed",
+      "blockers": [],
+      "diagnostics": {
+        "platform": "Linux",
+        "runtime_provider": "avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr",
+        "required_modules": [
+          "rtxpy",
+          "igl"
+        ],
+        "module_report": {
+          "rtxpy": {
+            "available": true,
+            "module_name": "rtxpy",
+            "module_version": null
+          },
+          "igl": {
+            "available": true,
+            "module_name": "igl",
+            "module_version": null
+          }
+        },
+        "missing_required_modules": [],
+        "nvidia_runtime": {
+          "available": true,
+          "executable": "/usr/bin/nvidia-smi",
+          "error": null
+        },
+        "po_sbr_repo_root": "/home/seongcheoljeong/workspace/myproject/external/PO-SBR-Python",
+        "po_sbr_repo_exists": true,
+        "po_sbr_geometry_path": "/home/seongcheoljeong/workspace/myproject/external/PO-SBR-Python/geometries/plate.obj",
+        "po_sbr_geometry_exists": true,
+        "native_provider_asset_checks_enabled": true
+      },
+      "scene_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/po_sbr_rt/scene_po_sbr_rt_golden_path.json",
+      "output_dir": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/po_sbr_rt/pipeline_outputs",
+      "path_list_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/po_sbr_rt/pipeline_outputs/path_list.json",
+      "adc_cube_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/po_sbr_rt/pipeline_outputs/adc_cube.npz",
+      "radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/myproject_local_2026_03_01_all3/po_sbr_rt/pipeline_outputs/radar_map.npz",
+      "frame_count": 8,
+      "path_count": 8,
+      "runtime_resolution": {
+        "mode": "runtime_provider",
+        "backend_type": "po_sbr_rt",
+        "runtime_provider": "avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr",
+        "runtime_info": {
+          "provider_spec": "avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr",
+          "required_modules": [
+            "rtxpy",
+            "igl"
+          ],
+          "module_report": {
+            "rtxpy": {
+              "available": true,
+              "module_name": "rtxpy",
+              "module_version": null
+            },
+            "igl": {
+              "available": true,
+              "module_name": "igl",
+              "module_version": null
+            }
+          }
+        }
+      },
+      "error": null
+    }
+  },
+  "summary": {
+    "requested_count": 3,
+    "executed_count": 3,
+    "blocked_count": 0,
+    "failed_count": 0,
+    "executed_backends": [
+      "analytic_targets",
+      "sionna_rt",
+      "po_sbr_rt"
+    ],
+    "blocked_backends": [],
+    "failed_backends": [],
+    "progress_ratio": 1.0,
+    "po_sbr_migration_status": "closed_local_runtime"
+  }
+}

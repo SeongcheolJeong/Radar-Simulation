@@ -2169,3 +2169,32 @@ M17.100 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/235_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.py`
+
+M14.x migration mirror outcome (2026-03-01):
+
+- migrated backend PO-SBR toolchain from Radar-Simulation into this repo:
+  - scene backend runners/validators (`golden_path`, `kpi_campaign`, `scenario_matrix`)
+  - full-track runners/validators (`bundle`, `stability_campaign`, `realism_threshold_hardening`, `gate_lock`)
+  - deterministic runner validators and runtime-provider stub validator
+- synced PO-SBR runtime provider update with multi-component support:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/runtime_providers/po_sbr_rt_provider.py`
+- contract docs added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/251_scene_backend_golden_path_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/252_scene_backend_kpi_campaign_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/253_scene_backend_kpi_scenario_matrix_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/260_po_sbr_physical_full_track_bundle_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/261_po_sbr_physical_full_track_stability_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/262_po_sbr_realism_threshold_hardening_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/263_po_sbr_physical_full_track_gate_lock_contract.md`
+- migrated and validated report artifacts:
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_golden_path_myproject_local_2026_03_01_all3.json` (`executed_backends=[analytic_targets,sionna_rt,po_sbr_rt]`, `po_sbr_migration_status=closed_local_runtime`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json` (`campaign_status=ready`, `parity_fail_count=0`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json` (`matrix_status=ready`, `profile_count=7`, `blocked_profiles=0`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json` (`overall_status=ready`, one-command local chain)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json` (`baseline_status=ready`, `frozen_file_count=8`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json` (`campaign_status=stable`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json` (`hardening_status=hardened`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json` (`gate_lock_status=ready`)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json` (`gate_lock_status=ready`, full chained mode)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse.json` (`gate_lock_status=ready`, myproject runner reuse mode)
+  - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json` (`gate_lock_status=ready`, myproject runner full chained no-reuse mode; `stability_status=stable`, `hardening_status=hardened`)
