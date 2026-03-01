@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "generated_at_utc": "2026-03-01T05:21:42.656285+00:00",
+  "baseline_manifest_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json",
+  "baseline_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/po_sbr_local_ready_regression.json",
+  "candidate_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json",
+  "drift_verdict": "match",
+  "difference_count": 0,
+  "differences": [],
+  "blockers": [],
+  "baseline_status_snapshot": {
+    "overall_status": "ready",
+    "golden_path_status": "ready",
+    "kpi_campaign_status": "ready",
+    "kpi_scenario_matrix_status": "ready",
+    "gate_lock_status": "ready",
+    "golden_migration_status": "closed_local_runtime",
+    "kpi_parity_fail_count": 0,
+    "matrix_blocked_profile_count": 0,
+    "matrix_failed_profile_count": 0,
+    "gate_lock_stability_status": "stable",
+    "gate_lock_hardening_status": "hardened",
+    "gate_lock_realism_gate_candidate_status": "ready"
+  },
+  "candidate_status_snapshot": {
+    "overall_status": "ready",
+    "golden_path_status": "ready",
+    "kpi_campaign_status": "ready",
+    "kpi_scenario_matrix_status": "ready",
+    "gate_lock_status": "ready",
+    "golden_migration_status": "closed_local_runtime",
+    "kpi_parity_fail_count": 0,
+    "matrix_blocked_profile_count": 0,
+    "matrix_failed_profile_count": 0,
+    "gate_lock_stability_status": "stable",
+    "gate_lock_hardening_status": "hardened",
+    "gate_lock_realism_gate_candidate_status": "ready"
+  }
+}
