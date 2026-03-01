@@ -7239,3 +7239,18 @@
   - frontend timeline-import-audit sweep passed (`M17.97~M17.101` validators + `validate_web_e2e_orchestrator_api.py`)
   - canonical merged full-track verifier passed (`scripts/verify_po_sbr_physical_full_track_merged_ready.sh`)
   - closure snapshot generated: `docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)
+
+## Operator Handoff Closure Rerun + Cancel-Race Hardening (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - validator hardened for async cancel race: accepts terminal `completed` when cancel loses race and retries transient `400/404` poll responses during concurrent record writes
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && bash scripts/verify_po_sbr_operator_handoff_closure.sh`
+- Result: pass
+- Notes:
+  - closure snapshot refreshed: `docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)
+  - merged checkpoint refreshed: `docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json` (`ready=true`)

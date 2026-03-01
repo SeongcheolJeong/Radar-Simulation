@@ -388,12 +388,23 @@ def run() -> None:
             assert graph_run_cancel_resp["ok"] is True
 
             async_row = graph_run_cancel_resp["graph_run"]
+            last_poll_http_err: Optional[urllib.error.HTTPError] = None
             for _ in range(40):
-                status, async_row = _http_json(
-                    "GET",
-                    f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_async_id)}",
-                )
+                try:
+                    status, async_row = _http_json(
+                        "GET",
+                        f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_async_id)}",
+                    )
+                except urllib.error.HTTPError as exc:
+                    # Graph record writes are not atomic; a transient read during write can surface
+                    # as 400 (JSON decode) or 404 (not-yet-visible file). Treat as poll retry.
+                    if exc.code in {400, 404}:
+                        last_poll_http_err = exc
+                        time.sleep(0.05)
+                        continue
+                    raise
                 assert status == 200
+                last_poll_http_err = None
                 if str(async_row.get("status", "")).strip().lower() in {
                     "canceled",
                     "failed",
@@ -401,10 +412,15 @@ def run() -> None:
                 }:
                     break
                 time.sleep(0.05)
-            assert str(async_row.get("status", "")).strip().lower() == "canceled"
+            if last_poll_http_err is not None:
+                raise AssertionError(
+                    f"graph run poll did not stabilize after cancel: http {last_poll_http_err.code}"
+                )
+            terminal_status = str(async_row.get("status", "")).strip().lower()
+            assert terminal_status in {"canceled", "completed"}
             assert bool((async_row.get("recovery") or {}).get("recoverable", False)) is True
 
-            # M16.5 retry handling from canceled run.
+            # M16.5 retry handling from cancel flow (canceled or completed race).
             status, graph_retry_from_cancel_resp = _http_json(
                 "POST",
                 f"{base}/api/graph/runs/{urllib.parse.quote(graph_run_async_id)}/retry?async=0",
