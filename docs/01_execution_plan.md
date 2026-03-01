@@ -209,7 +209,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.98: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit safety refresh (controls-status continuity across confirm arm/disarm transitions)
 - [x] M17.99: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview)
 - [x] M17.100: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls refresh (continuity-echo status alignment for copy/export/reset lifecycle)
-- [ ] M17.101: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply-trail refresh (continuity-echo lifecycle stamp after apply/copy/export/reset)
+- [x] M17.101: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply-trail refresh (continuity-echo lifecycle stamp after apply/copy/export/reset)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -222,7 +222,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.100 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply-trail refresh (continuity-echo lifecycle stamp after apply/copy/export/reset) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Consolidate post-M17 frontend hardening closure by running the timeline-import-audit validator sweep (M17.97~M17.101) + Web E2E API regression, then freeze the closure snapshot for PO-SBR local-ready operator handoff.
 
 ## M10.19 Decision Gate
 
@@ -2169,6 +2169,19 @@ M17.100 outcome (2026-02-28):
   - `/home/seongcheoljeong/workspace/myproject/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/myproject/docs/235_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.md`
   - `/home/seongcheoljeong/workspace/myproject/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.py`
+
+M17.101 outcome (2026-03-01):
+
+- dry-run handoff hydrate confirm activity replay timeline import audit apply-trail refresh added:
+  - import-confirm trail apply/copy/export/reset actions now emit continuity-echo lifecycle stamp metadata (`rows + timestamp`) in controls-status updates
+  - lifecycle-stamped actions now append explicit import-confirm event trail entries (`copy/export/reset/apply`) so stamp evidence is retained in audit replay output
+- import-confirm apply-trail continuity hint added:
+  - import-confirm controls block now surfaces a dedicated apply-trail lifecycle hint indicating aligned/pending stamp state
+  - hint remains additive and preserves existing controls-status continuity semantics introduced in M17.100
+- implementation files:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/236_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.md`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.py`
 
 M14.x migration mirror outcome (2026-03-01):
 

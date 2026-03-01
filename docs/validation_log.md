@@ -7199,3 +7199,33 @@
 - Notes:
   - verifier now auto-refreshes merged checkpoint before validation
   - full validator chain remains green (`ready=true`)
+
+## M17.101 Apply-Trail Refresh (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src python3 scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_refresh.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src python3 scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_safety_refresh.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src python3 scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_trail_refresh.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src python3 scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_controls_refresh.py`
+- Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv/bin/python scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.py`
+- Result: pass
+- Notes:
+  - M17.101 lifecycle-stamp contract verified (`apply/copy/export/reset` continuity echo stamp tokens + apply-trail lifecycle hint key)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py`
+- Result: pass
+- Notes:
+  - Web E2E API regression remained stable after timeline-import-audit apply-trail refresh integration

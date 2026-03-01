@@ -7449,6 +7449,18 @@ export function ContractWarningOverlay({
     }
     return `import confirm trail controls continuity: echo pending (${status})`;
   }, [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus]);
+  const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailApplyTrailLifecycleHint = React.useMemo(() => {
+    const status = String(
+      quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus || ""
+    ).trim();
+    if (!status) {
+      return "import confirm trail apply-trail continuity: waiting for apply/copy/export/reset lifecycle stamp";
+    }
+    if (status.includes("continuity echo lifecycle stamp:")) {
+      return `import confirm trail apply-trail continuity: lifecycle stamp aligned (${status})`;
+    }
+    return `import confirm trail apply-trail continuity: lifecycle stamp pending (${status})`;
+  }, [quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus]);
   const quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailPreview = React.useMemo(() => {
     const rows = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows;
     const controlsEcho = `controls continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsHint}`;
@@ -8251,11 +8263,16 @@ export function ContractWarningOverlay({
     const jsonText = serializeQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailBundle(
       quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows
     );
+    const stamp = `continuity echo lifecycle stamp: copy (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows @ ${new Date().toISOString()})`;
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(jsonText);
         setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-          `import confirm trail controls: event snapshot copied (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows), continuity echo aligned`
+          `import confirm trail controls: event snapshot copied (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows), continuity echo aligned, ${stamp}`
+        );
+        appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmEvent(
+          "import_confirm_trail_controls_copy",
+          `copy complete (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows, ${stamp})`
         );
         setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
           `dry-run handoff apply confirm activity replay trail import confirm trail copied (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} events)`
@@ -8265,21 +8282,33 @@ export function ContractWarningOverlay({
       throw new Error("clipboard unavailable");
     } catch (_) {
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        "import confirm trail controls: event snapshot copy failed, continuity echo aligned"
+        `import confirm trail controls: event snapshot copy failed, continuity echo aligned, ${stamp}`
+      );
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmEvent(
+        "import_confirm_trail_controls_copy_failed",
+        `copy failed (${stamp})`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail copy failed"
       );
     }
-  }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows]);
+  }, [
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows,
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmEvent,
+  ]);
   const exportQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailToJson = React.useCallback(() => {
     const jsonText = serializeQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailBundle(
       quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows
     );
+    const stamp = `continuity echo lifecycle stamp: export (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows @ ${new Date().toISOString()})`;
     try {
       if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
         setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-          "import confirm trail controls: event snapshot export prepared in-memory, continuity echo aligned"
+          `import confirm trail controls: event snapshot export prepared in-memory, continuity echo aligned, ${stamp}`
+        );
+        appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmEvent(
+          "import_confirm_trail_controls_export_memory",
+          `export prepared in-memory (${stamp})`
         );
         setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
           "dry-run handoff apply confirm activity replay trail import confirm trail export prepared in-memory"
@@ -8297,33 +8326,54 @@ export function ContractWarningOverlay({
       document.body.removeChild(anchor);
       window.URL.revokeObjectURL(url);
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        `import confirm trail controls: event snapshot export complete (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows), continuity echo aligned`
+        `import confirm trail controls: event snapshot export complete (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows), continuity echo aligned, ${stamp}`
+      );
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmEvent(
+        "import_confirm_trail_controls_export",
+        `export complete (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} rows, ${stamp})`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         `dry-run handoff apply confirm activity replay trail import confirm trail export complete (${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows.length} events)`
       );
     } catch (_) {
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        "import confirm trail controls: event snapshot export failed, continuity echo aligned"
+        `import confirm trail controls: event snapshot export failed, continuity echo aligned, ${stamp}`
+      );
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmEvent(
+        "import_confirm_trail_controls_export_failed",
+        `export failed (${stamp})`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail export failed"
       );
     }
-  }, [quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows]);
+  }, [
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows,
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmEvent,
+  ]);
   const resetQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrail = React.useCallback(() => {
+    const stamp = `continuity echo lifecycle stamp: reset (0 rows @ ${new Date().toISOString()})`;
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrail([]);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-      "import confirm trail controls: event snapshot reset, continuity echo aligned"
+      `import confirm trail controls: event snapshot reset, continuity echo aligned, ${stamp}`
+    );
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+      "import_confirm_trail_controls_reset",
+      `reset complete (${stamp})`
     );
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       "dry-run handoff apply confirm activity replay trail import confirm trail reset"
     );
-  }, []);
+  }, [appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent]);
   const applyQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailFromText = React.useCallback(() => {
+    const stampBase = `continuity echo lifecycle stamp: apply (${new Date().toISOString()})`;
     if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.empty) {
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        "import confirm trail controls: apply skipped (empty payload)"
+        `import confirm trail controls: apply skipped (empty payload), ${stampBase}`
+      );
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+        "import_confirm_trail_apply_skipped_empty",
+        `apply skipped (${stampBase})`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail import skipped: empty payload"
@@ -8332,7 +8382,11 @@ export function ContractWarningOverlay({
     }
     if (parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error) {
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        "import confirm trail controls: apply blocked (parse error)"
+        `import confirm trail controls: apply blocked (parse error), ${stampBase}`
+      );
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+        "import_confirm_trail_apply_blocked_parse",
+        `apply blocked by parse error (${stampBase})`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         `dry-run handoff apply confirm activity replay trail import confirm trail import failed: ${parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.error}`
@@ -8342,7 +8396,11 @@ export function ContractWarningOverlay({
     const bundle = parsedQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportPayload.bundle || null;
     if (!bundle || typeof bundle !== "object") {
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        "import confirm trail controls: apply blocked (invalid payload)"
+        `import confirm trail controls: apply blocked (invalid payload), ${stampBase}`
+      );
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+        "import_confirm_trail_apply_blocked_invalid",
+        `apply blocked by invalid payload (${stampBase})`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail import failed: invalid payload"
@@ -8354,7 +8412,11 @@ export function ContractWarningOverlay({
       && !quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked
     ) {
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-        "import confirm trail controls: apply blocked (replacement confirm required)"
+        `import confirm trail controls: apply blocked (replacement confirm required), ${stampBase}`
+      );
+      appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+        "import_confirm_trail_apply_blocked_confirm",
+        `apply blocked by replacement confirm (${stampBase})`
       );
       setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
         "dry-run handoff apply confirm activity replay trail import confirm trail import blocked: replacement confirm required"
@@ -8362,6 +8424,7 @@ export function ContractWarningOverlay({
       return;
     }
     const rows = Array.isArray(bundle.entries) ? bundle.entries : [];
+    const applyStamp = `continuity echo lifecycle stamp: apply (${rows.length} rows @ ${new Date().toISOString()})`;
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrail(rows);
     if (quickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmChecked) {
       appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
@@ -8373,7 +8436,11 @@ export function ContractWarningOverlay({
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmArmedAtMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailImportConfirmTickMs(0);
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsStatus(
-      `import confirm trail controls: event snapshot aligned after apply (${rows.length} rows)`
+      `import confirm trail controls: event snapshot aligned after apply (${rows.length} rows), ${applyStamp}`
+    );
+    appendQuickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmEvent(
+      "import_confirm_trail_apply_aligned",
+      `apply aligned (${rows.length} rows, ${applyStamp})`
     );
     setQuickTelemetryDrilldownStrictRollbackTrustAuditBundleApplyDryRunHandoffStatus(
       `dry-run handoff apply confirm activity replay trail import confirm trail hydrated (${rows.length} events)`
@@ -11867,6 +11934,11 @@ export function ContractWarningOverlay({
                 className: "hint",
                 style: { flexBasis: "100%", color: "#8eb6ca" },
               }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsContinuityHint),
+              h("span", {
+                key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_apply_trail_lifecycle_hint",
+                className: "hint",
+                style: { flexBasis: "100%", color: "#8eb6ca" },
+              }, quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailApplyTrailLifecycleHint),
               h("button", {
                 className: "btn",
                 key: "co_filter_import_audit_quick_telemetry_profile_import_filter_bundle_rollback_package_trust_audit_bundle_apply_dry_run_handoff_import_apply_confirm_activity_import_confirm_trail_import_confirm_trail_copy",
