@@ -7183,3 +7183,19 @@
   - merged checkpoint parsed from `docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`
   - status confirmed: `matrix_status=ready`, `full_track_status=ready`, `gate_lock_status=ready`
   - validator chain confirmed: matrix/bundle/stability/hardening/gate-lock reports + deterministic runner validators all pass
+
+## Radar-Simulation Merged Full-Track Checkpoint Generator Automation (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv-po-sbr/bin/python scripts/generate_po_sbr_physical_full_track_merged_checkpoint.py --output-json docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`
+- Result: pass
+- Notes:
+  - checkpoint generator emitted canonical report `version=3`
+  - includes `generated_from_head_commit`, merged PR/commit pointers, and snapshot/merged/canonical tags
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh`
+- Result: pass
+- Notes:
+  - verifier now auto-refreshes merged checkpoint before validation
+  - full validator chain remains green (`ready=true`)

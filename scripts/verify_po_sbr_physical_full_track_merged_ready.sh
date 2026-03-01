@@ -7,6 +7,7 @@ cd "${ROOT_DIR}"
 PY_PO_SBR="${ROOT_DIR}/.venv-po-sbr/bin/python"
 PY_DET="${ROOT_DIR}/.venv/bin/python"
 
+GEN_CHECKPOINT_SCRIPT="${ROOT_DIR}/scripts/generate_po_sbr_physical_full_track_merged_checkpoint.py"
 CHECKPOINT_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json"
 MATRIX_JSON="${ROOT_DIR}/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json"
 BUNDLE_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json"
@@ -31,12 +32,16 @@ if [[ ! -x "${PY_DET}" ]]; then
   exit 1
 fi
 
+require_file "${GEN_CHECKPOINT_SCRIPT}"
 require_file "${CHECKPOINT_JSON}"
 require_file "${MATRIX_JSON}"
 require_file "${BUNDLE_JSON}"
 require_file "${GATE_LOCK_JSON}"
 require_file "${STABILITY_JSON}"
 require_file "${HARDENING_JSON}"
+
+echo "[verify] refresh checkpoint"
+"${PY_PO_SBR}" "${GEN_CHECKPOINT_SCRIPT}" --output-json "${CHECKPOINT_JSON}"
 
 echo "[verify] checkpoint"
 "${PY_PO_SBR}" - <<'PY'

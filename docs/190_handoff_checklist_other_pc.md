@@ -225,6 +225,14 @@ cd /home/seongcheoljeong/workspace/Radar-Simulation
 bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
 ```
 
+Checkpoint refresh only:
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/generate_po_sbr_physical_full_track_merged_checkpoint.py \
+  --output-json docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json
+```
+
 Expected green state:
 
 - `matrix_status=ready`

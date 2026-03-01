@@ -1,10 +1,10 @@
 {
-  "version": 2,
+  "version": 3,
   "date_utc": "2026-03-01",
   "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
   "branch": "codex/hybrid-adapter-real-parser",
   "upstream": "origin/codex/hybrid-adapter-real-parser",
-  "generated_from_head_commit": "8d4a3218e4fefecf0c12d2ba8080d8be240f92b8",
+  "generated_from_head_commit": "3f5817ae6c24339b2ed592a8454cac3a8f22fbed",
   "merged_readiness_commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6",
   "merged_readiness_pr": {
     "number": 4,
@@ -19,6 +19,10 @@
     "merged_tag": {
       "name": "po-sbr-physical-full-track-ready-merged-2026-03-01",
       "commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6"
+    },
+    "canonical_tag": {
+      "name": "po-sbr-physical-full-track-canonical-2026-03-01",
+      "commit": "5d03d06fd4b372e71ee08e45f24db3b586127c83"
     }
   },
   "artifacts": {
