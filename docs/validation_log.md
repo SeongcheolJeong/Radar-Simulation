@@ -8248,3 +8248,394 @@
 - Result: pass
 - Notes:
   - controls-trail guard controls controls controls controls controls continuity baseline remains stable after apply guidance layering
+
+## Scene Backend Golden-Path Progress Contract (M14.7)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_golden_path.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode runner validation passed (`analytic_targets`, `sionna_rt`, `po_sbr_rt` all executed)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_golden_path.py --output-root data/runtime_golden_path/local_2026_03_01 --output-summary-json docs/reports/scene_backend_golden_path_local_2026_03_01.json`
+- Result: pass
+- Notes:
+  - local progress snapshot generated on this Linux PC
+  - executed: `analytic_targets`, `po_sbr_rt`
+  - blocked: `sionna_rt` (`missing_required_modules`)
+  - `po_sbr_migration_status=closed_local_runtime`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_golden_path_report.py --summary-json docs/reports/scene_backend_golden_path_local_2026_03_01.json --require-backend-executed analytic_targets --require-backend-executed po_sbr_rt`
+- Result: pass
+- Notes:
+  - report schema + progress counters + artifact paths validated for local runtime snapshot
+
+## Backend Golden-Path All-Backend Execution + KPI Campaign (M14.8)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/pip install drjit mitsuba`
+- Result: pass
+- Notes:
+  - local runtime env unblocked for `sionna_rt` Mitsuba provider (`drjit`, `mitsuba` installed in `.venv-po-sbr`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_golden_path.py --strict-nonexecuted --output-root data/runtime_golden_path/local_2026_03_01_all3 --output-summary-json docs/reports/scene_backend_golden_path_local_2026_03_01_all3.json`
+- Result: pass
+- Notes:
+  - all requested backends executed locally (`analytic_targets`, `sionna_rt`, `po_sbr_rt`)
+  - `po_sbr_migration_status=closed_local_runtime`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_golden_path_report.py --summary-json docs/reports/scene_backend_golden_path_local_2026_03_01_all3.json --require-backend-executed analytic_targets --require-backend-executed sionna_rt --require-backend-executed po_sbr_rt`
+- Result: pass
+- Notes:
+  - all-backend execution report schema and artifact consistency validated
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_kpi_campaign.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode KPI campaign runner validation passed
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_kpi_campaign.py --golden-path-summary-json docs/reports/scene_backend_golden_path_local_2026_03_01_all3.json --output-summary-json docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3.json`
+- Result: pass
+- Notes:
+  - KPI campaign report generated from local all-backend execution snapshot
+  - campaign status: `blocked` (`parity_failure_detected`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_kpi_campaign_report.py --summary-json docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3.json`
+- Result: pass
+- Notes:
+  - KPI campaign report schema and summary counters validated
+
+## Backend Scene Equivalence Alignment + KPI Gate Closure (M14.8a)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_golden_path.py --strict-nonexecuted --output-root data/runtime_golden_path/local_2026_03_01_all3_eqv2 --output-summary-json docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv2.json`
+- Result: pass
+- Notes:
+  - scene-equivalence profile `single_target_range25_v1` applied (`sionna` surface range align, `po_sbr` direction/range align, amp floor)
+  - all backends executed locally (`analytic_targets`, `sionna_rt`, `po_sbr_rt`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_golden_path_report.py --summary-json docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv2.json --require-backend-executed analytic_targets --require-backend-executed sionna_rt --require-backend-executed po_sbr_rt`
+- Result: pass
+- Notes:
+  - `all3_eqv2` report schema/paths validated
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_kpi_campaign.py --strict-ready --golden-path-summary-json docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv2.json --output-summary-json docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3_eqv2.json`
+- Result: pass
+- Notes:
+  - KPI campaign strict gate closed (`campaign_status=ready`, `parity_fail_count=0`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_kpi_campaign_report.py --summary-json docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3_eqv2.json --require-ready`
+- Result: pass
+- Notes:
+  - KPI campaign readiness report validated under strict-ready requirement
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_golden_path.py && PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_kpi_campaign.py`
+- Result: pass
+- Notes:
+  - deterministic validation runners remain green after equivalence-policy alignment and PO-SBR amp-floor support
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_runtime_provider_stubbed.py`
+- Result: pass
+- Notes:
+  - PO-SBR runtime provider stub validation extended for `runtime_input.amp_floor_abs` fallback behavior
+
+## Backend KPI Scenario-Matrix Expansion (M14.9)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_kpi_scenario_matrix.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode scenario-matrix runner validation passed (`matrix_status=ready`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_kpi_scenario_matrix.py --output-root data/runtime_golden_path/scenario_matrix_local_2026_03_01 --output-summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01.json`
+- Result: pass
+- Notes:
+  - scenario-matrix report generated for default profile family (`range25`, `az20`, `vel3`)
+  - matrix status: `blocked` (`ready=2`, `blocked=1`, `failed=0`)
+  - remaining divergence profile: `single_target_az20_range25_v1` (`analytic->po_sbr` peak-power delta)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_kpi_scenario_matrix_report.py --summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01.json`
+- Result: pass
+- Notes:
+  - scenario-matrix report schema and status counters validated
+
+## Backend Scenario-Family Gate Split + Realism Profile Expansion (M14.10)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_runtime_provider_stubbed.py`
+- Result: pass
+- Notes:
+  - PO-SBR runtime provider supports multi-component runtime input (`runtime_input.components`)
+  - stub validation covers per-component path IDs and amplitude target/floor behavior
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_kpi_scenario_matrix.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode matrix validation passed with gate-family semantics
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_kpi_scenario_matrix.py --strict-all-ready --output-root data/runtime_golden_path/scenario_matrix_local_2026_03_01_v3 --output-summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v3.json`
+- Result: pass
+- Notes:
+  - default profile family expanded to 5 profiles (3 strict equivalence + 2 realism informational)
+  - matrix status: `ready`
+  - summary: `gate_profile_count=3`, `gate_blocked_profile_count=0`, `informational_profile_count=2`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_kpi_scenario_matrix_report.py --summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v3.json --require-ready`
+- Result: pass
+- Notes:
+  - scenario-matrix report validator passes under strict-ready requirement
+  - validator remains backward-compatible with older matrix reports lacking gate-family keys
+
+## PO-SBR Physical Full-Track Bundle Lock (M14.11)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_bundle.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode full-track bundle runner validation passed
+  - includes strict + realism mesh/material profiles
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_bundle.py --strict-ready --output-root data/runtime_golden_path/po_sbr_full_track_local_2026_03_01 --matrix-summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v4.json --output-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json`
+- Result: pass
+- Notes:
+  - physical full-track bundle status: `ready`
+  - matrix status: `ready`
+  - profile coverage: `required_profile_count=7`, `missing_profile_count=0`
+  - PO-SBR execution evidence: `po_sbr_executed_profile_count=7`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_kpi_scenario_matrix_report.py --summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v4.json --require-ready`
+- Result: pass
+- Notes:
+  - scenario-matrix report validated (`profile_count=7`, `gate_blocked_profile_count=0`, `informational_profile_count=4`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_bundle_report.py --summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --require-ready`
+- Result: pass
+- Notes:
+  - full-track bundle report schema and ready-state validated
+
+## PO-SBR Physical Full-Track Stability Campaign Lock (M14.12)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_stability_campaign.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode repeated full-track campaign validation passed (`requested_runs=2`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_stability_campaign.py --strict-stable --runs 2 --output-root data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01 --output-summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01.json`
+- Result: pass
+- Notes:
+  - stability campaign status: `stable`
+  - summary: `requested_runs=2`, `run_error_count=0`, `full_track_blocked_count=0`, `gate_blocked_run_count=0`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_stability_report.py --summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01.json --require-stable`
+- Result: pass
+- Notes:
+  - stability campaign report schema + stable-state requirement validated
+
+## PO-SBR Realism KPI Threshold-Hardening Lock (M14.13)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_realism_threshold_hardening_campaign.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode threshold-hardening campaign validation passed
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_realism_threshold_hardening_campaign.py --strict-hardened --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --stability-summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01.json --output-root data/runtime_golden_path/po_sbr_realism_threshold_hardening_local_2026_03_01 --output-summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01.json`
+- Result: pass
+- Notes:
+  - hardening status: `hardened`
+  - threshold profiles: `realism_tight_v1/v2/v3` all `ready`
+  - summary: `threshold_profile_count=3`, `threshold_ready_count=3`, `threshold_failed_count=0`, `realism_profile_count=4`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_realism_threshold_hardening_report.py --summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01.json --require-hardened`
+- Result: pass
+- Notes:
+  - threshold-hardening report schema and hardened-state requirement validated
+
+## PO-SBR Physical Full-Track Gate-Lock Automation (M14.14)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_stability_report.py --summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json --require-stable`
+- Result: pass
+- Notes:
+  - extended stability evidence validated (`requested_runs=3`, `campaign_status=stable`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_realism_threshold_hardening_campaign.py --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --stability-summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json --output-root data/runtime_golden_path/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2 --output-summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2 --strict-hardened`
+- Result: pass
+- Notes:
+  - candidate-focused hardening lock passed (`realism_gate_candidate=realism_tight_v2`, `realism_gate_candidate_status=ready`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_realism_threshold_hardening_report.py --summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json --require-hardened`
+- Result: pass
+- Notes:
+  - hardening report validated in candidate-lock mode (`threshold_profile_count=1`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_gate_lock.py`
+- Result: pass
+- Notes:
+  - deterministic fixture-mode gate-lock runner validation passed
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_gate_lock.py --strict-ready --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --reuse-stability-summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json --reuse-hardening-summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01 --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - one-command gate-lock summary generated from already-validated local evidence
+  - summary status: `gate_lock_status=ready`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json --require-ready`
+- Result: pass
+- Notes:
+  - gate-lock report validated (`stability_status=stable`, `hardening_status=hardened`, `realism_gate_candidate_status=ready`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_gate_lock.py --strict-ready --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - full chained mode executed (no reuse)
+  - gate-lock summary: `gate_lock_status=ready`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json --require-ready`
+- Result: pass
+- Notes:
+  - fresh gate-lock report validated
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_stability_report.py --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh/stability_campaign/po_sbr_physical_full_track_stability.json --require-stable`
+- Result: pass
+- Notes:
+  - chained stability phase validated (`requested_runs=3`, `campaign_status=stable`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_realism_threshold_hardening_report.py --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh/hardening_campaign/po_sbr_realism_threshold_hardening.json --require-hardened`
+- Result: pass
+- Notes:
+  - chained hardening phase validated (`hardening_status=hardened`, `threshold_profile_count=1`)
+
+## PO-SBR Physical Full-Track Fresh Re-Verification (Current PC, M14.14 follow-up)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_kpi_scenario_matrix.py --strict-all-ready --output-root data/runtime_golden_path/scenario_matrix_local_2026_03_01_fresh --output-summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json`
+- Result: pass
+- Notes:
+  - matrix summary: `matrix_status=ready`, `profile_count=7`, `gate_blocked_profile_count=0`, `informational_blocked_profile_count=0`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_bundle.py --strict-ready --output-root data/runtime_golden_path/po_sbr_full_track_local_2026_03_01_fresh --matrix-summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json --output-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json`
+- Result: pass
+- Notes:
+  - bundle summary: `full_track_status=ready`, `required_profile_count=7`, `missing_profile_count=0`
+  - PO-SBR execution evidence: `po_sbr_executed_profile_count=7`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_gate_lock.py --strict-ready --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json --reuse-stability-summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json --reuse-hardening-summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh2 --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh2.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - gate-lock summary: `gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`
+  - candidate lock: `realism_gate_candidate=realism_tight_v2`, `realism_gate_candidate_status=ready`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_bundle_report.py --summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json --require-ready`
+- Result: pass
+- Notes:
+  - fresh bundle report validated
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_stability_report.py --summary-json docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json --require-stable`
+- Result: pass
+- Notes:
+  - reused stability evidence validated (`requested_runs=3`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_realism_threshold_hardening_report.py --summary-json docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json --require-hardened`
+- Result: pass
+- Notes:
+  - reused candidate-lock hardening evidence validated (`threshold_profile_count=1`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh2.json --require-ready`
+- Result: pass
+- Notes:
+  - fresh2 gate-lock report validated
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_bundle.py`
+- Result: pass
+- Notes:
+  - deterministic runner validation passed
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_stability_campaign.py`
+- Result: pass
+- Notes:
+  - deterministic runner validation passed
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_realism_threshold_hardening_campaign.py`
+- Result: pass
+- Notes:
+  - deterministic runner validation passed
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_gate_lock.py`
+- Result: pass
+- Notes:
+  - deterministic runner validation passed
+
+## PO-SBR Physical Full-Track No-Reuse Re-Run (Current PC, M14.14 endurance follow-up)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_gate_lock.py --strict-ready --full-track-bundle-summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json --output-root data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3 --output-summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3.json --stability-runs 3 --threshold-profile realism_tight_v2 --realism-gate-candidate realism_tight_v2`
+- Result: pass
+- Notes:
+  - full chained execution mode (no reused evidence)
+  - gate-lock summary: `gate_lock_status=ready`
+  - stability phase: `campaign_status=stable` (`requested_runs=3`)
+  - hardening phase: `hardening_status=hardened`
+  - candidate lock: `realism_gate_candidate=realism_tight_v2`, `realism_gate_candidate_status=ready`
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_gate_lock_report.py --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3.json --require-ready`
+- Result: pass
+- Notes:
+  - fresh3 gate-lock report validated
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_stability_report.py --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3/stability_campaign/po_sbr_physical_full_track_stability.json --require-stable`
+- Result: pass
+- Notes:
+  - chained stability report validated in no-reuse run (`requested_runs=3`)
+
+- Date: 2026-03-01
+- Command: `PYTHONPATH=src .venv-po-sbr/bin/python /home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_realism_threshold_hardening_report.py --summary-json data/runtime_golden_path/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3/hardening_campaign/po_sbr_realism_threshold_hardening.json --require-hardened`
+- Result: pass
+- Notes:
+  - chained hardening report validated in no-reuse run (`threshold_profile_count=1`)

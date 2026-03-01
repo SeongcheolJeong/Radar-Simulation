@@ -87,6 +87,14 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock
 - [x] M14.5: `sionna.rt` full runtime enablement (working LLVM backend on target host)
 - [x] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment
+- [x] M14.7: Local scene backend golden-path progress runner/report (`analytic_targets`/`sionna_rt`/`po_sbr_rt`)
+- [x] M14.8: Backend KPI/parity campaign report from golden-path runtime outputs
+- [x] M14.9: Backend KPI scenario-matrix expansion and divergence tracker
+- [x] M14.10: Scenario-family gate split (`equivalence_strict` vs `realism_informational`) + multi-target/material profile expansion
+- [x] M14.11: Physical full-track PO-SBR bundle lock (strict-gate + realism mesh evidence in one local report)
+- [x] M14.12: Physical full-track stability campaign lock (repeated local runs, stable verdict report)
+- [x] M14.13: Realism KPI threshold-hardening campaign lock (stepwise tighter thresholds, preserved stability)
+- [x] M14.14: Physical full-track gate-lock automation (single command + candidate lock report, local-only evidence reuse support)
 - [x] M15.0: Web E2E orchestration API phase-0 skeleton (`/health`, `/api/runs`, run summary quicklook)
 - [x] M15.1: Web run summary schema v2 (frontend-compatible `outputs/path_summary/adc_summary/radar_map_summary`)
 - [x] M15.2: Dashboard API-run mode (`POST /api/runs` + polling + summary auto-load) and dual-server local launcher
@@ -246,7 +254,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Advance post-M17.124 frontend hardening track: add strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls-trail guard controls controls controls controls controls trail refresh (continuity-echo guard-controls-controls-controls-controls-controls guidance parity in trail preview states) while keeping M16.5+M17.0 semantics (cache/cancel/retry/async polling) stable.
+Advance backend physics evidence scale-up (M14.x): keep strict equivalence gate profiles green while realism profiles evolve, and convert hardened realism thresholds into operational defaults only when repeated stability campaigns remain `stable`.
 
 ## M10.19 Decision Gate
 
@@ -1621,6 +1629,130 @@ M14.6 outcome (2026-02-28):
   - script: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_m14_6_local_linux_full.sh`
   - strict report: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux_local_2026_03_01_selfhost.json` (`pilot_status=executed`, `path_count=8`)
   - closure report: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/m14_6_closure_readiness_linux_local_2026_03_01_selfhost.json` (`ready=true`)
+
+M14.7 outcome (2026-03-01):
+
+- backend golden-path runner/report added for local migration visibility:
+  - runner: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_golden_path.py`
+  - report validator: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_golden_path_report.py`
+  - deterministic runner validation: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_golden_path.py`
+  - contract: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/251_scene_backend_golden_path_contract.md`
+- local runtime progress report archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01.json`
+  - summary: `executed_backends=[analytic_targets, po_sbr_rt]`, `blocked_backends=[sionna_rt]`
+  - `po_sbr_migration_status=closed_local_runtime`, `progress_ratio=0.6667`
+
+M14.8 outcome (2026-03-01):
+
+- backend KPI/parity campaign tooling added:
+  - runner: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_kpi_campaign.py`
+  - validator: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_kpi_campaign_report.py`
+  - deterministic runner validation: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_kpi_campaign.py`
+  - contract: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/252_scene_backend_kpi_campaign_contract.md`
+- all-backend local execution snapshot updated:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3.json`
+  - summary: `executed_backends=[analytic_targets, sionna_rt, po_sbr_rt]`, `blocked_backends=[]`, `po_sbr_migration_status=closed_local_runtime`
+- first KPI campaign report archived (pre-equivalence tuning):
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3.json`
+  - campaign status: `blocked` (`parity_failure_detected`)
+  - key deltas: `analytic->sionna rd_peak_range_bin_abs_error=4`, `analytic->po_sbr rd_peak_range_bin_abs_error=157`
+- scene-equivalence profile `single_target_range25_v1` applied in golden-path runner:
+  - `sionna_rt` center/radius set to align effective surface range (`25m`)
+  - `po_sbr_rt` direction/min-range aligned to `+x` / `25m`
+  - PO-SBR runtime provider supports `runtime_input.amp_floor_abs` to avoid zero-amplitude degenerate parity maps
+- post-equivalence closure reports archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv2.json`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3_eqv2.json`
+  - campaign status: `ready` (`parity_fail_count=0`, strict validator pass)
+
+M14.9 outcome (2026-03-01):
+
+- scenario-matrix runner/validator added for profile-family expansion:
+  - runner: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_scene_backend_kpi_scenario_matrix.py`
+  - validator: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_scene_backend_kpi_scenario_matrix_report.py`
+  - deterministic runner validation: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_scene_backend_kpi_scenario_matrix.py`
+  - contract: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/253_scene_backend_kpi_scenario_matrix_contract.md`
+- local scenario-matrix report archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01.json`
+  - first pass matrix status: `blocked` (`ready=2`, `blocked=1`, `failed=0`)
+  - blocked profile (first pass): `single_target_az20_range25_v1` (`analytic->po_sbr` peak-power delta)
+- PO-SBR runtime amplitude-target normalization policy applied for equivalence profiles (`runtime_input.amp_target_abs`)
+- updated matrix closure report:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v2.json`
+  - matrix status: `ready` (`ready=3`, `blocked=0`, `failed=0`)
+
+M14.10 outcome (2026-03-01):
+
+- profile-family split added to backend scene profile library:
+  - `equivalence_strict`: `single_target_range25_v1`, `single_target_az20_range25_v1`, `single_target_vel3_range25_v1`
+  - `realism_informational`: `dual_target_split_range25_v1`, `single_target_material_loss_range25_v1`
+- PO-SBR runtime provider extended with multi-component runtime input (`runtime_input.components`) for multi-target/material scene execution without remote orchestration
+- scenario-matrix gate semantics updated:
+  - matrix `ready|blocked` now keyed by gate-required profile families (`equivalence_strict` default)
+  - informational profile divergence remains visible in report but does not block strict release gate
+- updated local scenario-matrix report archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v3.json`
+  - matrix status: `ready` (`profile_count=5`, `gate_profile_count=3`, `gate_blocked_profile_count=0`, `informational_profile_count=2`)
+
+M14.11 outcome (2026-03-01):
+
+- realism mesh profiles added to default scenario matrix:
+  - `mesh_dihedral_range25_v1`
+  - `mesh_trihedral_range25_v1`
+- local full-track scenario-matrix report updated:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v4.json`
+  - matrix status: `ready` (`profile_count=7`, `gate_profile_count=3`, `gate_blocked_profile_count=0`, `informational_profile_count=4`)
+- physical full-track bundle runner/validator added:
+  - runner: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_bundle.py`
+  - validator: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_bundle_report.py`
+  - deterministic runner validation: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_bundle.py`
+  - contract: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/260_po_sbr_physical_full_track_bundle_contract.md`
+- local full-track bundle report archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json`
+  - full-track status: `ready` (`required_profile_count=7`, `missing_profile_count=0`, `po_sbr_executed_profile_count=7`)
+
+M14.12 outcome (2026-03-01):
+
+- repeated full-track stability tooling added:
+  - runner: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_stability_campaign.py`
+  - validator: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_stability_report.py`
+  - deterministic runner validation: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_stability_campaign.py`
+  - contract: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/261_po_sbr_physical_full_track_stability_contract.md`
+- local stability report archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01.json`
+  - campaign status: `stable` (`requested_runs=2`, `stable_run_count=2`, `gate_blocked_run_count=0`)
+
+M14.13 outcome (2026-03-01):
+
+- realism KPI threshold-hardening tooling added:
+  - runner: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_realism_threshold_hardening_campaign.py`
+  - validator: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_realism_threshold_hardening_report.py`
+  - deterministic runner validation: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_realism_threshold_hardening_campaign.py`
+  - contract: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/262_po_sbr_realism_threshold_hardening_contract.md`
+- hardening campaign report archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01.json`
+  - hardening status: `hardened`
+  - summary: `threshold_profile_count=3`, `threshold_ready_count=3`, `threshold_failed_count=0`, `realism_profile_count=4`
+
+M14.14 outcome (2026-03-01):
+
+- physical full-track gate-lock automation added:
+  - runner: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/run_po_sbr_physical_full_track_gate_lock.py`
+  - validator: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_po_sbr_physical_full_track_gate_lock_report.py`
+  - deterministic runner validation: `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_run_po_sbr_physical_full_track_gate_lock.py`
+  - contract: `/home/seongcheoljeong/workspace/Radar-Simulation/docs/263_po_sbr_physical_full_track_gate_lock_contract.md`
+- gate-lock runner supports local evidence reuse mode to avoid redundant heavy reruns when stable/hardened reports are already validated:
+  - `--reuse-stability-summary-json`
+  - `--reuse-hardening-summary-json`
+- extended stability/hardening lock evidence archived:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json`
+    - campaign status: `stable` (`requested_runs=3`, `stable_run_count=3`, `gate_blocked_run_count=0`)
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json`
+    - hardening status: `hardened` (`realism_gate_candidate=realism_tight_v2`, `realism_gate_candidate_status=ready`, `threshold_profile_count=1`)
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json`
+    - gate-lock status: `ready` (`stability_status=stable`, `hardening_status=hardened`, `realism_gate_candidate_status=ready`)
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json`
+    - gate-lock status: `ready` (full chained mode, no reuse; `stability_status=stable`, `hardening_status=hardened`, `realism_gate_candidate_status=ready`)
 
 M17.56 outcome (2026-02-28):
 

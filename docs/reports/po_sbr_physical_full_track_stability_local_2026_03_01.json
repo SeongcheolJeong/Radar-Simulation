@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "generated_at_utc": "2026-03-01T02:13:56.642555Z",
+  "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
+  "python_executable": "/usr/bin/python3.12",
+  "campaign_status": "stable",
+  "blockers": [],
+  "requested_runs": 2,
+  "rows": [
+    {
+      "run_index": 1,
+      "run_root": "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_01",
+      "matrix_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_01/scene_backend_kpi_scenario_matrix.json",
+      "bundle_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_01/po_sbr_physical_full_track_bundle.json",
+      "run_bundle": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "PO-SBR physical full-track bundle completed.\n  full_track_status: ready\n  blockers: []\n  matrix_status: ready\n  required_profile_count: 7\n  missing_profile_count: 0\n  output_summary_json: /home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_01/po_sbr_physical_full_track_bundle.json",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/Radar-Simulation/.venv-po-sbr/bin/python",
+          "scripts/run_po_sbr_physical_full_track_bundle.py",
+          "--output-root",
+          "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_01/bundle_outputs",
+          "--matrix-summary-json",
+          "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_01/scene_backend_kpi_scenario_matrix.json",
+          "--output-summary-json",
+          "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_01/po_sbr_physical_full_track_bundle.json",
+          "--n-chirps",
+          "8",
+          "--samples-per-chirp",
+          "1024"
+        ]
+      },
+      "run_ok": true,
+      "full_track_status": "ready",
+      "matrix_status": "ready",
+      "gate_blocked_profile_count": 0,
+      "informational_blocked_profile_count": 0,
+      "po_sbr_executed_profile_count": 7,
+      "required_profile_count": 7,
+      "missing_profile_count": 0
+    },
+    {
+      "run_index": 2,
+      "run_root": "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_02",
+      "matrix_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_02/scene_backend_kpi_scenario_matrix.json",
+      "bundle_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_02/po_sbr_physical_full_track_bundle.json",
+      "run_bundle": {
+        "ok": true,
+        "return_code": 0,
+        "stdout": "PO-SBR physical full-track bundle completed.\n  full_track_status: ready\n  blockers: []\n  matrix_status: ready\n  required_profile_count: 7\n  missing_profile_count: 0\n  output_summary_json: /home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_02/po_sbr_physical_full_track_bundle.json",
+        "stderr": "",
+        "cmd": [
+          "/home/seongcheoljeong/workspace/Radar-Simulation/.venv-po-sbr/bin/python",
+          "scripts/run_po_sbr_physical_full_track_bundle.py",
+          "--output-root",
+          "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_02/bundle_outputs",
+          "--matrix-summary-json",
+          "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_02/scene_backend_kpi_scenario_matrix.json",
+          "--output-summary-json",
+          "/home/seongcheoljeong/workspace/Radar-Simulation/data/runtime_golden_path/po_sbr_full_track_stability_local_2026_03_01/run_02/po_sbr_physical_full_track_bundle.json",
+          "--n-chirps",
+          "8",
+          "--samples-per-chirp",
+          "1024"
+        ]
+      },
+      "run_ok": true,
+      "full_track_status": "ready",
+      "matrix_status": "ready",
+      "gate_blocked_profile_count": 0,
+      "informational_blocked_profile_count": 0,
+      "po_sbr_executed_profile_count": 7,
+      "required_profile_count": 7,
+      "missing_profile_count": 0
+    }
+  ],
+  "summary": {
+    "requested_runs": 2,
+    "completed_runs": 2,
+    "run_error_count": 0,
+    "full_track_blocked_count": 0,
+    "matrix_not_ready_count": 0,
+    "gate_blocked_run_count": 0,
+    "stable_run_count": 2
+  }
+}

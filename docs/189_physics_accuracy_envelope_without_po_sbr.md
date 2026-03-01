@@ -21,6 +21,24 @@ Scope:
 - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/scene_runtime_po_sbr_pilot_m14_6_2026_02_22.json`
 - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json`
 - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/m14_6_closure_readiness_linux.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv2.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3_eqv2.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv3.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3_eqv3.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v2.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v3.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v4.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json`
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux_2026_03_01_abs.json`
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/m14_6_closure_readiness_linux_2026_03_01_abs.json`
 
@@ -28,6 +46,10 @@ Scope:
 
 - Current stack is usable for E2E algorithm development, regression, and pipeline validation.
 - PO-SBR strict runtime baseline (M14.6) is now closed on Linux+NVIDIA (`pilot_status=executed`, `ready=true`).
+- Scenario-family matrix gate split is active: strict equivalence profiles are gate-required, realism profiles are informational and tracked separately.
+- Repeated full-track campaign evidence is stable on this PC (`stable_run_count=3/3`), supporting local self-contained execution confidence.
+- Realism KPI thresholds are hardened in stepwise profiles (`realism_tight_v1/v2/v3`) with no parity regressions in the current profile set.
+- Candidate lock is promoted locally with one-command gate summary (`realism_tight_v2`, `gate_lock_status=ready`).
 - Even with M14.6 closed, dense multipath/material-sensitive angle conclusions should remain conservative when PO-SBR runtime is not active in the current environment.
 
 ## Scenario-Class Accuracy Envelope
@@ -80,5 +102,23 @@ Current status:
 
 - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json` -> `pilot_status=executed`, `path_count=8`, `runtime_resolution.mode=runtime_provider`
 - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/m14_6_closure_readiness_linux.json` -> `ready=true`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01.json` -> `executed=[analytic_targets,po_sbr_rt]`, `blocked=[sionna_rt]`, `po_sbr_migration_status=closed_local_runtime`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3.json` -> `executed=[analytic_targets,sionna_rt,po_sbr_rt]`, `blocked=[]`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3.json` -> `campaign_status=blocked` (`parity_failure_detected`, strict RD/RA thresholds)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv2.json` -> `executed=[analytic_targets,sionna_rt,po_sbr_rt]`, `blocked=[]`, `scene_equivalence_profile=single_target_range25_v1`
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3_eqv2.json` -> `campaign_status=ready` (`parity_fail_count=0`, strict KPI gate pass)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01.json` -> `matrix_status=blocked` (`ready=2`, `blocked=1`, divergence at azimuth profile power delta)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_golden_path_local_2026_03_01_all3_eqv3.json` -> `executed=[analytic_targets,sionna_rt,po_sbr_rt]`, `blocked=[]`, `po_sbr_amp_target_abs` policy active
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_campaign_local_2026_03_01_all3_eqv3.json` -> `campaign_status=ready` (`parity_fail_count=0`, strict KPI gate pass)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v2.json` -> `matrix_status=ready` (`ready=3`, `blocked=0`, `failed=0`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v3.json` -> `matrix_status=ready` (`profile_count=5`, `gate_profile_count=3`, `gate_blocked_profile_count=0`, `informational_profile_count=2`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v4.json` -> `matrix_status=ready` (`profile_count=7`, `gate_profile_count=3`, `gate_blocked_profile_count=0`, `informational_profile_count=4`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01.json` -> `full_track_status=ready` (`required_profile_count=7`, `missing_profile_count=0`, `po_sbr_executed_profile_count=7`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01.json` -> `campaign_status=stable` (`requested_runs=2`, `stable_run_count=2`, `gate_blocked_run_count=0`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_stability_local_2026_03_01_r3.json` -> `campaign_status=stable` (`requested_runs=3`, `stable_run_count=3`, `gate_blocked_run_count=0`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01.json` -> `hardening_status=hardened` (`threshold_profile_count=3`, `threshold_ready_count=3`, `threshold_failed_count=0`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_realism_threshold_hardening_local_2026_03_01_gate_lock_v2.json` -> `hardening_status=hardened` (`threshold_profile_count=1`, `realism_gate_candidate=realism_tight_v2`, `realism_gate_candidate_status=ready`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01.json` -> `gate_lock_status=ready` (`stability_status=stable`, `hardening_status=hardened`, `realism_gate_candidate_status=ready`)
+- `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json` -> `gate_lock_status=ready` (`stability_status=stable`, `hardening_status=hardened`, `realism_gate_candidate_status=ready`, chained mode)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux_2026_03_01_abs.json` -> `pilot_status=executed`, `path_count=8`, `runtime_resolution.mode=runtime_provider`
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/m14_6_closure_readiness_linux_2026_03_01_abs.json` -> `ready=true`

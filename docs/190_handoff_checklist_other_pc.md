@@ -25,6 +25,13 @@ Non-portable:
 3. `docs/117_web_e2e_radar_dev_system_plan.md`
 4. `docs/189_physics_accuracy_envelope_without_po_sbr.md`
 5. `docs/113_po_sbr_linux_runtime_runbook.md`
+6. `docs/251_scene_backend_golden_path_contract.md`
+7. `docs/252_scene_backend_kpi_campaign_contract.md`
+8. `docs/253_scene_backend_kpi_scenario_matrix_contract.md`
+9. `docs/260_po_sbr_physical_full_track_bundle_contract.md`
+10. `docs/261_po_sbr_physical_full_track_stability_contract.md`
+11. `docs/262_po_sbr_realism_threshold_hardening_contract.md`
+12. `docs/263_po_sbr_physical_full_track_gate_lock_contract.md`
 
 ## 3) Source Sync from Current PC
 
@@ -72,7 +79,7 @@ Continue work from branch codex/hybrid-adapter-real-parser.
 Read docs/01_execution_plan.md, docs/189_physics_accuracy_envelope_without_po_sbr.md,
 and docs/113_po_sbr_linux_runtime_runbook.md first.
 Use local Linux execution only (no macOS<->Linux remote orchestration).
-Current priority: continue frontend hardening from latest open M17 milestone.
+Current priority: keep local scenario-matrix v4 + full-track bundle + stability + realism hardening + gate-lock summary green (`matrix_status=ready`, `full_track_status=ready`, `campaign_status=stable`, `hardening_status=hardened`, `gate_lock_status=ready`, candidate=`realism_tight_v2`) while expanding realism profile families and keeping PO-SBR runtime migration evidence updated from this PC.
 ```
 
 ## 7) Quick Health Check
