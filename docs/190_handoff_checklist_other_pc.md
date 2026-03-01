@@ -191,6 +191,7 @@ Pinned readiness tags:
 
 - `po-sbr-physical-full-track-ready-2026-03-01` -> commit `6406e9e` (snapshot commit)
 - `po-sbr-physical-full-track-ready-merged-2026-03-01` -> commit `406146d` (merged-base checkpoint)
+- `po-sbr-physical-full-track-canonical-2026-03-01` -> canonical branch tip at tagging time (post-merge ops/docs lock)
 
 Merged checkpoint artifact:
 
@@ -239,7 +240,7 @@ from pathlib import Path
 p = Path('/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json')
 d = json.loads(p.read_text())
 print('ready=', d.get('ready'))
-print('head_commit=', d.get('head_commit'))
+print('generated_from_head_commit=', d.get('generated_from_head_commit'))
 print('merged_readiness_commit=', d.get('merged_readiness_commit'))
 PY
 ```
