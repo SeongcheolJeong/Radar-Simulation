@@ -222,7 +222,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Consolidate post-M17 frontend hardening closure by running the timeline-import-audit validator sweep (M17.97~M17.101) + Web E2E API regression, then freeze the closure snapshot for PO-SBR local-ready operator handoff.
+Promote operator-handoff closure verification to routine gate usage by running `scripts/verify_po_sbr_operator_handoff_closure.sh` after PO-SBR/runtime-affecting changes and keeping the closure snapshot JSON green on this Linux PC.
 
 ## M10.19 Decision Gate
 
@@ -2182,6 +2182,17 @@ M17.101 outcome (2026-03-01):
   - `/home/seongcheoljeong/workspace/Radar-Simulation/frontend/graph_lab/panels.mjs`
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/236_web_e2e_graph_audit_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.md`
   - `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/validate_quick_telemetry_strict_rollback_package_trust_audit_bundle_apply_dry_run_handoff_package_apply_safety_activity_replay_timeline_import_audit_apply_trail_refresh.py`
+
+Post-M17 frontend closure and operator handoff gate outcome (2026-03-01):
+
+- one-command operator handoff closure verifier added:
+  - `scripts/verify_po_sbr_operator_handoff_closure.sh` now runs M17.97~M17.101 validator sweep + Web E2E API regression + canonical merged full-track verifier
+  - verifier emits snapshot JSON for operator handoff evidence (`docs/reports/po_sbr_operator_handoff_closure_YYYY_MM_DD.json`)
+- first closure snapshot generated on this Linux PC:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)
+- runbook/checklist integration completed:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/113_po_sbr_linux_runtime_runbook.md`
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/190_handoff_checklist_other_pc.md`
 
 M14.x migration mirror outcome (2026-03-01):
 

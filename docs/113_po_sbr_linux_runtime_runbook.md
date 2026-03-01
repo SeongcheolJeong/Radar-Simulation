@@ -241,3 +241,15 @@ Canonical merged-state one-command verifier (Radar-Simulation repo):
 cd /home/seongcheoljeong/workspace/Radar-Simulation
 bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
 ```
+
+Operator-handoff closure one-command verifier (frontend M17.97~M17.101 + merged readiness + snapshot):
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+bash scripts/verify_po_sbr_operator_handoff_closure.sh
+```
+
+Expected closure snapshot output:
+
+- `docs/reports/po_sbr_operator_handoff_closure_YYYY_MM_DD.json`
+- `overall_status=ready`

@@ -76,6 +76,7 @@ git log --oneline -n 10
 
 ```bash
 bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
+bash scripts/verify_po_sbr_operator_handoff_closure.sh
 ```
 
 ## 5) If target must rebuild Linux + NVIDIA runtime from scratch
@@ -146,6 +147,7 @@ Run:
 cd /home/seongcheoljeong/workspace/Radar-Simulation
 git status --short
 bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
+bash scripts/verify_po_sbr_operator_handoff_closure.sh
 ```
 
 If all pass, handoff is complete and work can continue from merged full-track readiness baseline.
