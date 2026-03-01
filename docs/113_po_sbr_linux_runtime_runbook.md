@@ -316,6 +316,13 @@ cd /home/seongcheoljeong/workspace/myproject
 bash scripts/run_po_sbr_physical_full_track_function_test.sh
 ```
 
+Myproject one-command readiness checkpoint (validate latest function-test + local-ready + baseline drift):
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+bash scripts/run_po_sbr_myproject_readiness_checkpoint.sh
+```
+
 Manual post-change gate run:
 
 ```bash

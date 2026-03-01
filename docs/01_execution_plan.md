@@ -2262,3 +2262,9 @@ Radar-Simulation canonical merged lock references (2026-03-01):
     - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_3605f4b.json` (`full_track_status=ready`, `matrix_status=ready`)
     - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_3605f4b.json` (`gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`)
     - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_3605f4b.json` (`overall_status=ready`)
+- one-command myproject readiness checkpoint added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - validates latest function-test + local-ready report + baseline drift in one run
+  - checkpoint evidence:
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_myproject_readiness_checkpoint_2026_03_01_b3f39d7.json` (`overall_status=ready`)
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_checkpoint_2026_03_01_b3f39d7.json` (`drift_verdict=match`, `difference_count=0`)

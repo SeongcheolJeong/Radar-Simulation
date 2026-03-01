@@ -81,6 +81,7 @@ bash scripts/verify_po_sbr_operator_handoff_closure.sh
 git config --get core.hooksPath
 bash scripts/run_po_sbr_readiness_checkpoint.sh
 bash scripts/run_po_sbr_physical_full_track_function_test.sh
+bash scripts/run_po_sbr_myproject_readiness_checkpoint.sh
 printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-adapter-real-parser %s\n" \
   "$(git rev-parse HEAD)" "$(git rev-parse HEAD~1)" | .githooks/pre-push
 PYTHONPATH=src .venv/bin/python scripts/show_po_sbr_progress.py --strict-ready --output-json docs/reports/po_sbr_progress_snapshot_2026_03_01.json
@@ -194,6 +195,7 @@ Latest local-only execution proof (no cross-PC linkage):
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self_head_2129849.json` (`overall_status=ready`, refreshed one-command local chain at current head)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json` (`baseline_status=ready`, frozen_file_count=8)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self_head_2129849.json` (`drift_verdict=match`, `difference_count=0`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_myproject_readiness_checkpoint_2026_03_01_b3f39d7.json` (`overall_status=ready`, one-command readiness checkpoint)
 
 ## 9) Current Merged Checkpoint on This Linux PC (2026-03-01)
 

@@ -1,0 +1,15 @@
+{
+  "report_name": "po_sbr_myproject_readiness_checkpoint",
+  "generated_at_utc": "2026-03-01T10:28:35.853041+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "run_id": "2026_03_01_b3f39d7",
+  "branch": "codex/hybrid-adapter-real-parser",
+  "head_commit": "b3f39d719e93672fc6f65ae169bc02c2fd510edf",
+  "function_test_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_3605f4b.json",
+  "bundle_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_3605f4b.json",
+  "gate_lock_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_3605f4b.json",
+  "local_ready_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self_head_2129849.json",
+  "baseline_manifest_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json",
+  "baseline_drift_report_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_checkpoint_2026_03_01_b3f39d7.json",
+  "overall_status": "ready"
+}
