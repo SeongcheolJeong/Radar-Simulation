@@ -1,0 +1,15 @@
+{
+  "report_name": "po_sbr_physical_full_track_function_test",
+  "generated_at_utc": "2026-03-01T08:17:56.476692+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
+  "run_id": "2026_03_01_1fd118a",
+  "branch": "codex/hybrid-adapter-real-parser",
+  "head_commit": "1fd118a840a0fa7b777cb1e953fa2c164f82f47a",
+  "bundle_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_1fd118a.json",
+  "gate_lock_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_1fd118a.json",
+  "progress_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_progress_snapshot_function_test_2026_03_01_1fd118a.json",
+  "full_track_status": "ready",
+  "gate_lock_status": "ready",
+  "progress_overall_ready": true,
+  "overall_status": "ready"
+}

@@ -7422,3 +7422,19 @@
   - forced post-change gate passed (`closure_required=true`, `closure_status=pass`, `overall_status=ready`)
   - integrated hook self-test passed (`tracked_report_changes=0`)
   - refreshed artifacts: `po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`, `po_sbr_operator_handoff_closure_2026_03_01.json`, `po_sbr_post_change_gate_2026_03_01.json`, `po_sbr_progress_snapshot_2026_03_01.json`
+
+## PO-SBR Physical Full-Track Function Test (2026-03-01, commit 1fd118a)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && bash scripts/run_po_sbr_physical_full_track_function_test.sh`
+- Result: pass
+- Notes:
+  - function-test runner executed with `.venv-po-sbr/bin/python`
+  - full-track bundle passed (`full_track_status=ready`, `matrix_status=ready`, `required_profile_count=7`)
+  - gate lock passed (`gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`, `realism_gate_candidate_status=ready`)
+  - strict progress snapshot passed (`overall_ready=true`, `6/6 ready`)
+  - emitted reports:
+    - `docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_1fd118a.json`
+    - `docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_1fd118a.json`
+    - `docs/reports/po_sbr_progress_snapshot_function_test_2026_03_01_1fd118a.json`
+    - `docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_1fd118a.json`

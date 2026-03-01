@@ -2202,6 +2202,9 @@ Post-M17 frontend closure and operator handoff gate outcome (2026-03-01):
 - one-command readiness checkpoint runner added:
   - `scripts/run_po_sbr_readiness_checkpoint.sh` runs merged verifier + operator closure + forced post-change gate + strict progress snapshot + pre-push local-artifact validator in one sequence
   - checkpoint runner emits refreshed `po_sbr_post_change_gate_YYYY_MM_DD.json` and `po_sbr_progress_snapshot_YYYY_MM_DD.json` artifacts for handoff evidence
+- one-command physical full-track function test added:
+  - `scripts/run_po_sbr_physical_full_track_function_test.sh` runs fresh full-track bundle + fresh gate lock + strict validators, then emits dedicated function-test evidence report
+  - function-test report contract: `docs/reports/po_sbr_physical_full_track_function_test_YYYY_MM_DD_<head>.json` (`overall_status=ready`)
 - first closure snapshot generated on this Linux PC:
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)
 - runbook/checklist integration completed:
