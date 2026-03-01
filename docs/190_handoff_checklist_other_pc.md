@@ -1,9 +1,9 @@
 # Cross-PC Handoff Checklist
 
-Updated: 2026-02-28
-Workspace: `/Users/seongcheoljeong/Documents/Codex_test`
+Updated: 2026-03-01
+Workspace: `/home/seongcheoljeong/workspace/Radar-Simulation`
 Branch: `codex/hybrid-adapter-real-parser`
-Anchor commit: `f744f20`
+Anchor commit (canonical tag): `5d03d06` (`po-sbr-physical-full-track-canonical-2026-03-01`)
 
 ## 1) Purpose
 
@@ -23,34 +23,36 @@ What is not reliably portable:
 
 Read these first on the new PC:
 
-1. `/Users/seongcheoljeong/Documents/Codex_test/docs/01_execution_plan.md`
-2. `/Users/seongcheoljeong/Documents/Codex_test/docs/115_radar_sim_midterm_report_2026_02_22.md`
-3. `/Users/seongcheoljeong/Documents/Codex_test/docs/117_web_e2e_radar_dev_system_plan.md`
-4. `/Users/seongcheoljeong/Documents/Codex_test/docs/189_physics_accuracy_envelope_without_po_sbr.md`
-5. `/Users/seongcheoljeong/Documents/Codex_test/docs/113_po_sbr_linux_runtime_runbook.md`
+1. `/home/seongcheoljeong/workspace/Radar-Simulation/docs/01_execution_plan.md`
+2. `/home/seongcheoljeong/workspace/Radar-Simulation/docs/113_po_sbr_linux_runtime_runbook.md`
+3. `/home/seongcheoljeong/workspace/Radar-Simulation/docs/189_physics_accuracy_envelope_without_po_sbr.md`
+4. `/home/seongcheoljeong/workspace/Radar-Simulation/docs/190_handoff_checklist_other_pc.md`
+5. `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`
 
 ## 3) Source sync from current PC
 
 1. Verify clean/known working tree:
 
 ```bash
-cd /Users/seongcheoljeong/Documents/Codex_test
+cd /home/seongcheoljeong/workspace/Radar-Simulation
 git status --short
 ```
 
-2. Decide about local-only file:
+2. Refresh remotes and confirm branch tracking:
 
-- untracked now: `radar_map_front.jsx.rtf`
-- choose one:
-  - keep local-only (do nothing)
-  - commit it
-  - add to `.gitignore`
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+git fetch origin
+git checkout codex/hybrid-adapter-real-parser
+git pull --ff-only origin codex/hybrid-adapter-real-parser
+```
 
 3. Push branch and tags:
 
 ```bash
-cd /Users/seongcheoljeong/Documents/Codex_test
+cd /home/seongcheoljeong/workspace/Radar-Simulation
 git push origin codex/hybrid-adapter-real-parser
+git push origin --tags
 ```
 
 ## 4) Setup on the new PC
@@ -58,8 +60,8 @@ git push origin codex/hybrid-adapter-real-parser
 1. Clone and checkout:
 
 ```bash
-git clone <your-remote-url> /path/to/Codex_test
-cd /path/to/Codex_test
+git clone https://github.com/SeongcheolJeong/Radar-Simulation.git /path/to/Radar-Simulation
+cd /path/to/Radar-Simulation
 git checkout codex/hybrid-adapter-real-parser
 git pull --ff-only
 ```
@@ -73,10 +75,10 @@ git log --oneline -n 10
 3. Validate python entrypoint quickly:
 
 ```bash
-PYTHONPATH=src python3 scripts/validate_step1.py
+bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
 ```
 
-## 5) If target is Linux + NVIDIA for PO-SBR (M14.6)
+## 5) If target must rebuild Linux + NVIDIA runtime from scratch
 
 1. Host prerequisites:
 
@@ -117,10 +119,12 @@ PYTHONPATH=src python3 scripts/run_m14_6_closure_readiness.py \
   --output-summary-json docs/reports/m14_6_closure_readiness_linux.json
 ```
 
-Expected close signal:
+After runtime/bootstrap is rebuilt, run the canonical merged-state verifier:
 
-- `pilot_status=executed`
-- closure `ready=true`
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
+```
 
 ## 6) Codex restart prompt template
 
@@ -130,8 +134,8 @@ Use this on the new PC as the first message:
 Continue AVX-like radar simulator work from branch codex/hybrid-adapter-real-parser.
 Read docs/01_execution_plan.md, docs/189_physics_accuracy_envelope_without_po_sbr.md,
 and docs/113_po_sbr_linux_runtime_runbook.md first.
-Current priority: close M14.6 (PO-SBR Linux+NVIDIA executed evidence),
-then update execution plan and reports.
+Current priority: keep merged PO-SBR physical full-track readiness green on this Linux PC
+using scripts/verify_po_sbr_physical_full_track_merged_ready.sh, then continue feature work.
 ```
 
 ## 7) Quick health check after handoff
@@ -139,12 +143,12 @@ then update execution plan and reports.
 Run:
 
 ```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
 git status --short
-PYTHONPATH=src python3 scripts/validate_step1.py
-PYTHONPATH=src python3 scripts/validate_object_scene_to_radar_map.py
+bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
 ```
 
-If all pass, handoff is complete and work can continue from M14.6.
+If all pass, handoff is complete and work can continue from merged full-track readiness baseline.
 
 ## 8) Myproject PO-SBR Full-Track Migration Snapshot (2026-03-01)
 
