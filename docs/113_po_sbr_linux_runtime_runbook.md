@@ -234,3 +234,10 @@ PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_basel
   --report-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json \
   --require-match
 ```
+
+Canonical merged-state one-command verifier (Radar-Simulation repo):
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
+```

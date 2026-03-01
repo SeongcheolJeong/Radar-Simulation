@@ -2199,3 +2199,17 @@ M14.x migration mirror outcome (2026-03-01):
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh.json` (`gate_lock_status=ready`, full chained mode)
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_reuse.json` (`gate_lock_status=ready`, myproject runner reuse mode)
   - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json` (`gate_lock_status=ready`, myproject runner full chained no-reuse mode; `stability_status=stable`, `hardening_status=hardened`)
+
+Radar-Simulation canonical merged lock references (2026-03-01):
+
+- canonical merged base commit: `406146d` (PR #4 merged)
+- canonical ops/docs checkpoint commit: `5d03d06`
+- canonical readiness verifier log commit: `8d4a321`
+- canonical one-command verifier script:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/scripts/verify_po_sbr_physical_full_track_merged_ready.sh`
+- canonical merged checkpoint artifact:
+  - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`
+- canonical tags:
+  - `po-sbr-physical-full-track-ready-2026-03-01` (snapshot commit `6406e9e`)
+  - `po-sbr-physical-full-track-ready-merged-2026-03-01` (merged-base commit `406146d`)
+  - `po-sbr-physical-full-track-canonical-2026-03-01` (canonical branch tip at lock time, commit `5d03d06`)
