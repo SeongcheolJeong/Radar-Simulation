@@ -217,6 +217,13 @@ PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_tra
   --require-ready
 ```
 
+One-command equivalent:
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
+```
+
 Expected green state:
 
 - `matrix_status=ready`
