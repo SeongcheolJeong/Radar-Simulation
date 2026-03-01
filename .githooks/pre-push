@@ -53,7 +53,7 @@ if [[ -z "${PY_BIN}" ]]; then
   exit 1
 fi
 
-REPORT_JSON="${ROOT_DIR}/docs/reports/po_sbr_post_change_gate_hook_latest.json"
+REPORT_JSON="${ROOT_DIR}/.git/po_sbr_post_change_gate_hook_latest.json"
 
 echo "[pre-push] PO-SBR post-change gate: base=${BASE_REF} head=${HEAD_REF}"
 PYTHONPATH=src "${PY_BIN}" scripts/run_po_sbr_post_change_gate.py \

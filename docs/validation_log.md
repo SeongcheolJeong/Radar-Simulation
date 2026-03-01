@@ -7314,5 +7314,5 @@
 - Result: pass
 - Notes:
   - simulated pre-push stdin flow executed post-change gate through hook entrypoint
-  - emitted `docs/reports/po_sbr_post_change_gate_hook_latest.json`
+  - emitted `.git/po_sbr_post_change_gate_hook_latest.json` (local-only hook report)
   - status confirmed: `closure_required=false`, `closure_status=skipped`, `overall_status=ready`

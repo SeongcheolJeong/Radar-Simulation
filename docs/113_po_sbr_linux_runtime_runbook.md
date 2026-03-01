@@ -270,6 +270,8 @@ printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-a
   "$(git rev-parse HEAD)" "$(git rev-parse HEAD~1)" | .githooks/pre-push
 ```
 
+Hook report path (local-only, does not dirty tracked files): `.git/po_sbr_post_change_gate_hook_latest.json`.
+
 Manual post-change gate run:
 
 ```bash
