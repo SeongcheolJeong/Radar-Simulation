@@ -52,7 +52,13 @@ PYTHONPATH=src "${PY_BIN}" scripts/show_po_sbr_progress.py \
   --strict-ready \
   --output-json "${PROGRESS_JSON}"
 
+if [[ "${PO_SBR_SKIP_HOOK_SELFTEST:-0}" != "1" ]]; then
+  echo "[checkpoint] validate pre-push local-artifact mode"
+  PYTHONPATH=src "${PY_BIN}" scripts/validate_po_sbr_pre_push_hook_local_artifacts.py
+else
+  echo "[checkpoint] skip pre-push local-artifact validator (PO_SBR_SKIP_HOOK_SELFTEST=1)"
+fi
+
 echo "[checkpoint] done"
 echo "[checkpoint] post_change_report=${POST_CHANGE_JSON}"
 echo "[checkpoint] progress_report=${PROGRESS_JSON}"
-

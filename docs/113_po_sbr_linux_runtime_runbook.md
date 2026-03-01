@@ -299,6 +299,9 @@ cd /home/seongcheoljeong/workspace/Radar-Simulation
 bash scripts/run_po_sbr_readiness_checkpoint.sh
 ```
 
+`run_po_sbr_readiness_checkpoint.sh` includes the pre-push local-artifact validator by default.  
+Set `PO_SBR_SKIP_HOOK_SELFTEST=1` only when you explicitly want to skip that sub-check.
+
 Manual post-change gate run:
 
 ```bash

@@ -7410,3 +7410,15 @@
   - simulated pre-push path on `codex/hybrid-adapter-real-parser` (`head=51479ed`, `base=205325e`)
   - hook artifacts confirmed in `.git/po_sbr_*_hook_latest.json`
   - tracked readiness reports unchanged (`tracked_report_changes=0`)
+
+## One-Command Checkpoint Runner With Integrated Hook Self-Test (2026-03-01, commit 0f907ea)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && bash scripts/run_po_sbr_readiness_checkpoint.sh`
+- Result: pass
+- Notes:
+  - runner now includes `scripts/validate_po_sbr_pre_push_hook_local_artifacts.py` by default (unless `PO_SBR_SKIP_HOOK_SELFTEST=1`)
+  - checkpoint rerun completed at head `0f907eac98331d0759338a163c8a19ee71667b8d`
+  - forced post-change gate passed (`closure_required=true`, `closure_status=pass`, `overall_status=ready`)
+  - integrated hook self-test passed (`tracked_report_changes=0`)
+  - refreshed artifacts: `po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`, `po_sbr_operator_handoff_closure_2026_03_01.json`, `po_sbr_post_change_gate_2026_03_01.json`, `po_sbr_progress_snapshot_2026_03_01.json`

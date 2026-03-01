@@ -2200,7 +2200,7 @@ Post-M17 frontend closure and operator handoff gate outcome (2026-03-01):
   - `scripts/show_po_sbr_progress.py` auto-discovers latest PO-SBR reports and prints merged readiness + operator closure + post-change gate + myproject local-ready + baseline drift + hook status
   - strict mode (`--strict-ready`) now provides one command to fail fast when any required readiness stage is missing or blocked
 - one-command readiness checkpoint runner added:
-  - `scripts/run_po_sbr_readiness_checkpoint.sh` runs merged verifier + operator closure + forced post-change gate + strict progress snapshot in one sequence
+  - `scripts/run_po_sbr_readiness_checkpoint.sh` runs merged verifier + operator closure + forced post-change gate + strict progress snapshot + pre-push local-artifact validator in one sequence
   - checkpoint runner emits refreshed `po_sbr_post_change_gate_YYYY_MM_DD.json` and `po_sbr_progress_snapshot_YYYY_MM_DD.json` artifacts for handoff evidence
 - first closure snapshot generated on this Linux PC:
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)

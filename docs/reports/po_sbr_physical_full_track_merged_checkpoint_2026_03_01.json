@@ -4,7 +4,7 @@
   "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
   "branch": "codex/hybrid-adapter-real-parser",
   "upstream": "origin/codex/hybrid-adapter-real-parser",
-  "generated_from_head_commit": "fd593bc236834687ca8096c135afbd1a881dbe34",
+  "generated_from_head_commit": "0f907eac98331d0759338a163c8a19ee71667b8d",
   "merged_readiness_commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6",
   "merged_readiness_pr": {
     "number": 4,
