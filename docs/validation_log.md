@@ -7400,3 +7400,13 @@
   - forced closure execution succeeded with hook-local output overrides (`closure_required=true`, `closure_status=pass`, `overall_status=ready`)
   - generated local-only artifacts under `.git/` instead of tracked `docs/reports/*`
   - validates that pre-push closure path can run without dirtying tracked readiness reports
+
+## Pre-Push Local Artifact Validator (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv/bin/python scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+- Result: pass
+- Notes:
+  - simulated pre-push path on `codex/hybrid-adapter-real-parser` (`head=51479ed`, `base=205325e`)
+  - hook artifacts confirmed in `.git/po_sbr_*_hook_latest.json`
+  - tracked readiness reports unchanged (`tracked_report_changes=0`)

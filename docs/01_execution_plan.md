@@ -2195,6 +2195,7 @@ Post-M17 frontend closure and operator handoff gate outcome (2026-03-01):
   - `.githooks/pre-push` now runs the post-change gate automatically on every push (with strict mode + JSON report emission)
   - `scripts/install_po_sbr_pre_push_hook.sh` installs repo-local git hooks path (`core.hooksPath=.githooks`) for this Linux PC
   - hook mode now redirects closure/merged checkpoint outputs to `.git/*_hook_latest.json` to avoid dirtying tracked `docs/reports/*` files during push
+  - `scripts/validate_po_sbr_pre_push_hook_local_artifacts.py` simulates pre-push and verifies tracked report files remain unchanged while `.git/*_hook_latest.json` artifacts stay ready
 - one-command progress snapshot added:
   - `scripts/show_po_sbr_progress.py` auto-discovers latest PO-SBR reports and prints merged readiness + operator closure + post-change gate + myproject local-ready + baseline drift + hook status
   - strict mode (`--strict-ready`) now provides one command to fail fast when any required readiness stage is missing or blocked

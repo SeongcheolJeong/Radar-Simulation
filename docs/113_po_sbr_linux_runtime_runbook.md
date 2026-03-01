@@ -276,6 +276,13 @@ Hook local-only artifacts (do not dirty tracked files):
 - `.git/po_sbr_physical_full_track_merged_checkpoint_hook_latest.json`
 - `.git/po_sbr_operator_handoff_closure_hook_latest.json`
 
+Hook local-artifact validator:
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+PYTHONPATH=src .venv/bin/python scripts/validate_po_sbr_pre_push_hook_local_artifacts.py
+```
+
 Progress snapshot (one command for PO-SBR readiness + myproject migration status + next actions):
 
 ```bash
