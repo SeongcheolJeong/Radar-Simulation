@@ -1,0 +1,17 @@
+{
+  "report_name": "po_sbr_physical_full_track_function_test",
+  "generated_at_utc": "2026-03-01T09:43:49.944860+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "run_id": "2026_03_01_3605f4b",
+  "branch": "codex/hybrid-adapter-real-parser",
+  "head_commit": "3605f4b892ad7e36329fd999511c615ec5f4f247",
+  "bundle_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_3605f4b.json",
+  "gate_lock_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_3605f4b.json",
+  "full_track_status": "ready",
+  "matrix_status": "ready",
+  "gate_lock_status": "ready",
+  "stability_status": "stable",
+  "hardening_status": "hardened",
+  "realism_gate_candidate_status": "ready",
+  "overall_status": "ready"
+}

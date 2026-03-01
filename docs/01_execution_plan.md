@@ -2257,6 +2257,6 @@ Radar-Simulation canonical merged lock references (2026-03-01):
 - one-command physical full-track function test added for myproject local execution:
   - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_physical_full_track_function_test.sh`
   - fresh local function-test reports:
-    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_94825a4.json` (`full_track_status=ready`, `matrix_status=ready`)
-    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_94825a4.json` (`gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`)
-    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_94825a4.json` (`overall_status=ready`)
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_3605f4b.json` (`full_track_status=ready`, `matrix_status=ready`)
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_3605f4b.json` (`gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`)
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_3605f4b.json` (`overall_status=ready`)
