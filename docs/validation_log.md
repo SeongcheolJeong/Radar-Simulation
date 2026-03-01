@@ -7173,3 +7173,13 @@
 - Date: 2026-03-01
 - Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_baseline_drift_report.py --report-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json --require-match`
 - Result: pass
+
+## Radar-Simulation Merged Full-Track One-Command Verifier (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh`
+- Result: pass
+- Notes:
+  - merged checkpoint parsed from `docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`
+  - status confirmed: `matrix_status=ready`, `full_track_status=ready`, `gate_lock_status=ready`
+  - validator chain confirmed: matrix/bundle/stability/hardening/gate-lock reports + deterministic runner validators all pass
