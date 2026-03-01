@@ -172,3 +172,49 @@ Latest local-only execution proof (no cross-PC linkage):
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json` (`overall_status=ready`, one-command local chain)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json` (`baseline_status=ready`, frozen_file_count=8)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json` (`drift_verdict=match`, `difference_count=0`)
+
+## 9) Current Merged Checkpoint on This Linux PC (2026-03-01)
+
+Canonical workspace now:
+
+- `/home/seongcheoljeong/workspace/Radar-Simulation`
+
+Canonical branch now:
+
+- `codex/hybrid-adapter-real-parser` (clean, tracking `origin/codex/hybrid-adapter-real-parser`)
+
+Merged readiness commit:
+
+- merge commit: `406146d` (PR #4 merged into `codex/hybrid-adapter-real-parser`)
+
+Pinned readiness tags:
+
+- `po-sbr-physical-full-track-ready-2026-03-01` -> commit `6406e9e` (snapshot commit)
+- `po-sbr-physical-full-track-ready-merged-2026-03-01` -> commit `406146d` (merged-base checkpoint)
+
+Minimum post-handoff verification on this repo:
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+git checkout codex/hybrid-adapter-real-parser
+git pull --ff-only
+git status --short
+
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_scene_backend_kpi_scenario_matrix_report.py \
+  --summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json \
+  --require-ready
+
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_bundle_report.py \
+  --summary-json docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json \
+  --require-ready
+
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_physical_full_track_gate_lock_report.py \
+  --summary-json docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3.json \
+  --require-ready
+```
+
+Expected green state:
+
+- `matrix_status=ready`
+- `full_track_status=ready`
+- `gate_lock_status=ready`
