@@ -35,7 +35,6 @@ GATE_LOCK_OUTPUT_ROOT="${OUTPUT_ROOT}/gate_lock"
 
 BUNDLE_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_bundle_function_test_${RUN_ID}.json"
 GATE_LOCK_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_${RUN_ID}.json"
-PROGRESS_JSON="${ROOT_DIR}/docs/reports/po_sbr_progress_snapshot_function_test_${RUN_ID}.json"
 FUNCTION_TEST_JSON="${ROOT_DIR}/docs/reports/po_sbr_physical_full_track_function_test_${RUN_ID}.json"
 
 mkdir -p "${BUNDLE_OUTPUT_ROOT}" "${GATE_LOCK_OUTPUT_ROOT}" "${ROOT_DIR}/docs/reports"
@@ -69,18 +68,14 @@ PYTHONPATH=src "${PY_BIN}" scripts/validate_po_sbr_physical_full_track_gate_lock
   --summary-json "${GATE_LOCK_JSON}" \
   --require-ready
 
-echo "[function-test] progress snapshot"
-PYTHONPATH=src "${PY_BIN}" scripts/show_po_sbr_progress.py \
-  --strict-ready \
-  --output-json "${PROGRESS_JSON}"
-
 echo "[function-test] write summary report"
-PYTHONPATH=src "${PY_BIN}" - "${ROOT_DIR}" "${BUNDLE_JSON}" "${GATE_LOCK_JSON}" "${PROGRESS_JSON}" "${FUNCTION_TEST_JSON}" "${RUN_ID}" <<'PY'
+PYTHONPATH=src "${PY_BIN}" - "${ROOT_DIR}" "${BUNDLE_JSON}" "${GATE_LOCK_JSON}" "${FUNCTION_TEST_JSON}" "${RUN_ID}" <<'PY'
 import json
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Mapping, Optional
 
 
 def _load(path: Path) -> dict:
@@ -94,28 +89,37 @@ def _git(root: Path, *args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
 
 
+def _nested_status(payload: Mapping[str, Any], section: str, key: str) -> Optional[str]:
+    candidate = payload.get(section)
+    if not isinstance(candidate, Mapping):
+        return None
+    text = str(candidate.get(key, "")).strip()
+    return text or None
+
+
 def main() -> None:
     root = Path(sys.argv[1]).resolve()
     bundle_json = Path(sys.argv[2]).resolve()
     gate_lock_json = Path(sys.argv[3]).resolve()
-    progress_json = Path(sys.argv[4]).resolve()
-    out_json = Path(sys.argv[5]).resolve()
-    run_id = str(sys.argv[6])
+    out_json = Path(sys.argv[4]).resolve()
+    run_id = str(sys.argv[5])
 
     bundle = _load(bundle_json)
     gate_lock = _load(gate_lock_json)
-    progress = _load(progress_json)
 
     full_track_status = str(bundle.get("full_track_status", "")).strip()
+    matrix_status = str(bundle.get("matrix_status", "")).strip()
     gate_lock_status = str(gate_lock.get("gate_lock_status", "")).strip()
-    progress_ready = bool(progress.get("overall_ready", False))
+    stability_status = _nested_status(gate_lock, "summary", "stability_status")
+    hardening_status = _nested_status(gate_lock, "summary", "hardening_status")
+    realism_gate_candidate_status = _nested_status(gate_lock, "summary", "realism_gate_candidate_status")
 
     overall_status = (
         "ready"
         if (
             full_track_status == "ready"
+            and matrix_status == "ready"
             and gate_lock_status == "ready"
-            and progress_ready
         )
         else "blocked"
     )
@@ -129,10 +133,12 @@ def main() -> None:
         "head_commit": _git(root, "rev-parse", "HEAD"),
         "bundle_summary_json": str(bundle_json),
         "gate_lock_summary_json": str(gate_lock_json),
-        "progress_summary_json": str(progress_json),
         "full_track_status": full_track_status,
+        "matrix_status": matrix_status,
         "gate_lock_status": gate_lock_status,
-        "progress_overall_ready": progress_ready,
+        "stability_status": stability_status,
+        "hardening_status": hardening_status,
+        "realism_gate_candidate_status": realism_gate_candidate_status,
         "overall_status": overall_status,
     }
 
@@ -152,5 +158,4 @@ PY
 echo "[function-test] done"
 echo "[function-test] bundle_json=${BUNDLE_JSON}"
 echo "[function-test] gate_lock_json=${GATE_LOCK_JSON}"
-echo "[function-test] progress_json=${PROGRESS_JSON}"
 echo "[function-test] function_test_json=${FUNCTION_TEST_JSON}"

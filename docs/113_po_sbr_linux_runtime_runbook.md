@@ -309,6 +309,13 @@ cd /home/seongcheoljeong/workspace/Radar-Simulation
 bash scripts/run_po_sbr_physical_full_track_function_test.sh
 ```
 
+Myproject local physical full-track function test (fresh local evidence):
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+bash scripts/run_po_sbr_physical_full_track_function_test.sh
+```
+
 Manual post-change gate run:
 
 ```bash

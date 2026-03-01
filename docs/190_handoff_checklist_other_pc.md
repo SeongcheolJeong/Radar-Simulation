@@ -190,6 +190,7 @@ Latest local-only execution proof (no cross-PC linkage):
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_campaign_myproject_local_2026_03_01_all3.json` (`campaign_status=ready`, `parity_fail_count=0`)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_scenario_matrix_myproject_local_2026_03_01_all3.json` (`matrix_status=ready`, `profile_count=7`)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_myproject_fresh.json` (`gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`)
+- `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_94825a4.json` (`overall_status=ready`, one-command fresh full-track function test)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json` (`overall_status=ready`, one-command local chain)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json` (`baseline_status=ready`, frozen_file_count=8)
 - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json` (`drift_verdict=match`, `difference_count=0`)

@@ -2254,3 +2254,9 @@ Radar-Simulation canonical merged lock references (2026-03-01):
   - `po-sbr-physical-full-track-ready-2026-03-01` (snapshot commit `6406e9e`)
   - `po-sbr-physical-full-track-ready-merged-2026-03-01` (merged-base commit `406146d`)
   - `po-sbr-physical-full-track-canonical-2026-03-01` (canonical branch tip at lock time, commit `5d03d06`)
+- one-command physical full-track function test added for myproject local execution:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_physical_full_track_function_test.sh`
+  - fresh local function-test reports:
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_function_test_2026_03_01_94825a4.json` (`full_track_status=ready`, `matrix_status=ready`)
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_function_test_2026_03_01_94825a4.json` (`gate_lock_status=ready`, `stability_status=stable`, `hardening_status=hardened`)
+    - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_function_test_2026_03_01_94825a4.json` (`overall_status=ready`)
