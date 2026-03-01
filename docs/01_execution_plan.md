@@ -222,7 +222,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Promote operator-handoff closure verification to routine gate usage by running `scripts/verify_po_sbr_operator_handoff_closure.sh` after PO-SBR/runtime-affecting changes and keeping the closure snapshot JSON green on this Linux PC.
+Use the automated post-change gate `scripts/run_po_sbr_post_change_gate.py` (`--strict`) to enforce operator closure verification only when runtime-affecting files changed, and keep both closure and post-change gate reports green on this Linux PC.
 
 ## M10.19 Decision Gate
 
@@ -2188,6 +2188,9 @@ Post-M17 frontend closure and operator handoff gate outcome (2026-03-01):
 - one-command operator handoff closure verifier added:
   - `scripts/verify_po_sbr_operator_handoff_closure.sh` now runs M17.97~M17.101 validator sweep + Web E2E API regression + canonical merged full-track verifier
   - verifier emits snapshot JSON for operator handoff evidence (`docs/reports/po_sbr_operator_handoff_closure_YYYY_MM_DD.json`)
+- post-change auto gate added:
+  - `scripts/run_po_sbr_post_change_gate.py` detects runtime-affecting file changes (`src/avxsim`, `frontend/graph_lab`, PO-SBR/scene-backend runners/validators, closure/merged verifiers)
+  - gate runs closure verifier only when required (or `--force-run`) and emits `docs/reports/po_sbr_post_change_gate_YYYY_MM_DD.json`
 - first closure snapshot generated on this Linux PC:
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)
 - runbook/checklist integration completed:

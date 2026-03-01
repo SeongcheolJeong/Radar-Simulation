@@ -7264,3 +7264,19 @@
   - frontend timeline-import-audit sweep passed (`M17.97~M17.101` + Web E2E API)
   - merged full-track verifier passed (`matrix/full_track/gate_lock=ready`)
   - closure snapshot refreshed: `docs/reports/po_sbr_operator_handoff_closure_2026_03_01.json` (`overall_status=ready`)
+
+## Post-Change Auto Gate (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --base-ref HEAD~1 --head-ref HEAD --strict --output-json docs/reports/po_sbr_post_change_gate_2026_03_01.json`
+- Result: pass
+- Notes:
+  - no runtime-affecting file change detected for this diff scope; closure gate skipped by policy
+  - report emitted with `closure_required=false`, `closure_status=skipped`, `overall_status=ready`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --force-run --strict --base-ref HEAD~1 --head-ref HEAD --output-json docs/reports/po_sbr_post_change_gate_2026_03_01.json`
+- Result: pass
+- Notes:
+  - forced closure execution completed (`closure_status=pass`)
+  - report log capture is truncated for portability (`closure_stdout/closure_stderr` capped)

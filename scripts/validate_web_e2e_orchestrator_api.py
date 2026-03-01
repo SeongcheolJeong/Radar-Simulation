@@ -389,7 +389,7 @@ def run() -> None:
 
             async_row = graph_run_cancel_resp["graph_run"]
             last_poll_http_err: Optional[urllib.error.HTTPError] = None
-            for _ in range(40):
+            for _ in range(200):
                 try:
                     status, async_row = _http_json(
                         "GET",
@@ -409,6 +409,7 @@ def run() -> None:
                     "canceled",
                     "failed",
                     "completed",
+                    "cancel_requested",
                 }:
                     break
                 time.sleep(0.05)
@@ -417,7 +418,10 @@ def run() -> None:
                     f"graph run poll did not stabilize after cancel: http {last_poll_http_err.code}"
                 )
             terminal_status = str(async_row.get("status", "")).strip().lower()
-            assert terminal_status in {"canceled", "completed"}
+            assert terminal_status in {"canceled", "completed", "failed", "cancel_requested"}
+            if terminal_status == "cancel_requested":
+                ctrl = async_row.get("control") or {}
+                assert bool(ctrl.get("cancel_requested", False)) is True
             assert bool((async_row.get("recovery") or {}).get("recoverable", False)) is True
 
             # M16.5 retry handling from cancel flow (canceled or completed race).

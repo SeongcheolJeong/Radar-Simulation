@@ -253,3 +253,26 @@ Expected closure snapshot output:
 
 - `docs/reports/po_sbr_operator_handoff_closure_YYYY_MM_DD.json`
 - `overall_status=ready`
+
+Post-change automatic gate (runs closure only when runtime-affecting files changed):
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py \
+  --base-ref HEAD~1 \
+  --head-ref HEAD \
+  --strict \
+  --output-json docs/reports/po_sbr_post_change_gate_2026_03_01.json
+```
+
+Force-run mode (always execute closure gate):
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py \
+  --force-run \
+  --strict \
+  --base-ref HEAD~1 \
+  --head-ref HEAD \
+  --output-json docs/reports/po_sbr_post_change_gate_2026_03_01.json
+```
