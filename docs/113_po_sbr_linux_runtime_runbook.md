@@ -219,3 +219,18 @@ PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_basel
   --manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json \
   --require-ready
 ```
+
+Baseline drift check (candidate local-ready vs frozen baseline):
+
+```bash
+cd /home/seongcheoljeong/workspace/myproject
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/check_po_sbr_local_ready_baseline_drift.py \
+  --baseline-manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json \
+  --candidate-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json \
+  --output-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json \
+  --require-match \
+  --require-candidate-ready
+PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_baseline_drift_report.py \
+  --report-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json \
+  --require-match
+```

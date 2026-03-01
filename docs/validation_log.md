@@ -7162,3 +7162,14 @@
 - Date: 2026-03-01
 - Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_baseline_manifest.py --manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json --require-ready`
 - Result: pass
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/check_po_sbr_local_ready_baseline_drift.py --baseline-manifest-json docs/reports/baselines/po_sbr_local_ready_2026_03_01_pc_self/baseline_manifest.json --candidate-summary-json docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json --output-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json --require-match --require-candidate-ready`
+- Result: pass
+- Notes:
+  - local-ready candidate vs frozen baseline drift check returned `drift_verdict=match`
+  - difference count: `0`
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_local_ready_baseline_drift_report.py --report-json docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json --require-match`
+- Result: pass
