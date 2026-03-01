@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "date_utc": "2026-03-01",
+  "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
+  "branch": "codex/hybrid-adapter-real-parser",
+  "upstream": "origin/codex/hybrid-adapter-real-parser",
+  "head_commit": "8442fa616f7202540736b289b109b31a76c99627",
+  "merged_readiness_commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6",
+  "merged_readiness_pr": {
+    "number": 4,
+    "url": "https://github.com/SeongcheolJeong/Radar-Simulation/pull/4",
+    "state": "merged"
+  },
+  "tags": {
+    "snapshot_tag": {
+      "name": "po-sbr-physical-full-track-ready-2026-03-01",
+      "commit": "6406e9edf6769957b5c132bc681b527de6a6ef84"
+    },
+    "merged_tag": {
+      "name": "po-sbr-physical-full-track-ready-merged-2026-03-01",
+      "commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6"
+    }
+  },
+  "artifacts": {
+    "matrix_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json",
+    "bundle_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json",
+    "gate_lock_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3.json"
+  },
+  "status": {
+    "matrix_status": "ready",
+    "full_track_status": "ready",
+    "gate_lock_status": "ready",
+    "stability_status": "stable",
+    "hardening_status": "hardened",
+    "realism_gate_candidate": "realism_tight_v2",
+    "realism_gate_candidate_status": "ready"
+  },
+  "ready": true
+}
