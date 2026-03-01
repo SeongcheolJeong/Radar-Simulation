@@ -272,6 +272,15 @@ printf "refs/heads/codex/hybrid-adapter-real-parser %s refs/heads/codex/hybrid-a
 
 Hook report path (local-only, does not dirty tracked files): `.git/po_sbr_post_change_gate_hook_latest.json`.
 
+Progress snapshot (one command for PO-SBR readiness + myproject migration status + next actions):
+
+```bash
+cd /home/seongcheoljeong/workspace/Radar-Simulation
+PYTHONPATH=src .venv/bin/python scripts/show_po_sbr_progress.py \
+  --strict-ready \
+  --output-json docs/reports/po_sbr_progress_snapshot_2026_03_01.json
+```
+
 Manual post-change gate run:
 
 ```bash

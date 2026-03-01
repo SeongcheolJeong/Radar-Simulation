@@ -7325,3 +7325,13 @@
 - Notes:
   - forced closure execution completed (`closure_required=true`, `closure_status=pass`, `overall_status=ready`)
   - refreshed artifacts: `po_sbr_post_change_gate_2026_03_01.json`, `po_sbr_operator_handoff_closure_2026_03_01.json`, `po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`
+
+## PO-SBR Progress Snapshot Command (2026-03-01)
+
+- Date: 2026-03-01
+- Command: `cd /home/seongcheoljeong/workspace/Radar-Simulation && PYTHONPATH=src .venv/bin/python scripts/show_po_sbr_progress.py --strict-ready --output-json docs/reports/po_sbr_progress_snapshot_2026_03_01.json`
+- Result: pass
+- Notes:
+  - auto-discovered latest readiness reports and evaluated six stages
+  - progress summary: `6/6 ready`, `overall_ready=true`
+  - emitted one-command status artifact: `docs/reports/po_sbr_progress_snapshot_2026_03_01.json`
