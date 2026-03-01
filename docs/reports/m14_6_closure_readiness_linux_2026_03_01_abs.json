@@ -1,0 +1,15 @@
+{
+  "repo_root": "/home/seongcheoljeong/workspace/myproject",
+  "linux_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux_2026_03_01_abs.json",
+  "ready": true,
+  "missing_items": [],
+  "required_files_count": 8,
+  "missing_required_files": [],
+  "report_exists": true,
+  "report_validation": {
+    "ok": true,
+    "return_code": 0,
+    "stdout": "validate_scene_runtime_po_sbr_executed_report: pass\n  summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux_2026_03_01_abs.json\n  frame_count: 8\n  path_count: 8",
+    "stderr": ""
+  }
+}

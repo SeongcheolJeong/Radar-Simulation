@@ -65,10 +65,12 @@ def _load_json(path: Path) -> Dict[str, object]:
     return payload
 
 
-def _replace_once(text: str, old: str, new: str, label: str) -> str:
-    if old not in text:
-        raise ValueError(f"expected marker not found for {label}")
-    return text.replace(old, new, 1)
+def _replace_once_or_already_applied(text: str, old: str, new: str, label: str) -> str:
+    if old in text:
+        return text.replace(old, new, 1)
+    if new in text:
+        return text
+    raise ValueError(f"expected marker not found for {label}")
 
 
 def _update_markdown_files(
@@ -83,7 +85,7 @@ def _update_markdown_files(
     validation_log = repo_root / "docs/validation_log.md"
 
     exec_text = exec_plan.read_text(encoding="utf-8")
-    exec_text = _replace_once(
+    exec_text = _replace_once_or_already_applied(
         exec_text,
         "- [ ] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment",
         "- [x] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment",
@@ -112,7 +114,7 @@ def _update_markdown_files(
     exec_plan.write_text(exec_text, encoding="utf-8")
 
     replan_text = replan.read_text(encoding="utf-8")
-    replan_text = _replace_once(
+    replan_text = _replace_once_or_already_applied(
         replan_text,
         "- [ ] M14.6: `po-sbr` runtime pilot (Linux+NVIDIA target)",
         "- [x] M14.6: `po-sbr` runtime pilot (Linux+NVIDIA target)",
@@ -126,8 +128,12 @@ def _update_markdown_files(
         "(`pilot_status=executed` evidence pending)"
     )
     done_line = "- PO-SBR strict runtime pilot execution evidence locked on Linux+NVIDIA host"
-    if pending_line in ref_text:
-        ref_text = ref_text.replace(pending_line, done_line, 1)
+    ref_text = _replace_once_or_already_applied(
+        ref_text,
+        pending_line,
+        done_line,
+        "reference_strategy_m14_6_line",
+    )
     ref_strategy.write_text(ref_text, encoding="utf-8")
 
     log_text = validation_log.read_text(encoding="utf-8")

@@ -54,6 +54,11 @@ bash /Users/seongcheoljeong/Documents/Codex_test/scripts/run_m14_6_po_sbr_linux_
   geometries/plate.obj
 ```
 
+Strict wrapper path handling:
+
+1. script normalizes `output-root`, `summary-json`, and `po-sbr-repo-root` to absolute paths before validation
+2. for reproducible logs across hosts, keep passing explicit absolute paths as shown above
+
 ## macOS -> Linux Remote One-Shot (SSH)
 
 From local macOS, run remote bootstrap + strict pilot + report download:

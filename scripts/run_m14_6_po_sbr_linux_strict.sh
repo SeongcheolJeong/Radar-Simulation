@@ -4,10 +4,23 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
-OUTPUT_ROOT="${1:-$ROOT_DIR/data/runtime_pilot/po_sbr_runtime_pilot_v1_linux}"
-SUMMARY_JSON="${2:-$ROOT_DIR/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json}"
-PO_SBR_REPO_ROOT="${3:-$ROOT_DIR/external/PO-SBR-Python}"
+abspath() {
+  "$PYTHON_BIN" - "$1" <<'PY'
+import os
+import sys
+
+print(os.path.abspath(os.path.expanduser(sys.argv[1])))
+PY
+}
+
+OUTPUT_ROOT_RAW="${1:-$ROOT_DIR/data/runtime_pilot/po_sbr_runtime_pilot_v1_linux}"
+SUMMARY_JSON_RAW="${2:-$ROOT_DIR/docs/reports/scene_runtime_po_sbr_pilot_m14_6_linux.json}"
+PO_SBR_REPO_ROOT_RAW="${3:-$ROOT_DIR/external/PO-SBR-Python}"
 GEOMETRY_PATH="${4:-geometries/plate.obj}"
+
+OUTPUT_ROOT="$(abspath "$OUTPUT_ROOT_RAW")"
+SUMMARY_JSON="$(abspath "$SUMMARY_JSON_RAW")"
+PO_SBR_REPO_ROOT="$(abspath "$PO_SBR_REPO_ROOT_RAW")"
 
 echo "[M14.6] strict PO-SBR runtime pilot start"
 echo "  ROOT_DIR=$ROOT_DIR"
