@@ -7564,6 +7564,7 @@ export function ContractWarningOverlay({
     const controlsTrailGuardControlsEcho = `controls-trail guard controls continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsContinuityHint}`;
     const controlsTrailGuardControlsControlsEcho = `controls-trail guard controls controls continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsControlsContinuityHint}`;
     const controlsTrailGuardControlsControlsControlsEcho = `controls-trail guard controls controls controls continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsControlsControlsContinuityHint}`;
+    const controlsTrailGuardControlsControlsControlsControlsEcho = `controls-trail guard controls controls controls controls continuity echo: ${quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsControlsControlsControlsContinuityHint}`;
     const applyTrailStamp = quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailApplyTrailContinuityStamp;
     if (!rows.length) {
       return [
@@ -7573,16 +7574,18 @@ export function ContractWarningOverlay({
         controlsTrailGuardControlsEcho,
         controlsTrailGuardControlsControlsEcho,
         controlsTrailGuardControlsControlsControlsEcho,
+        controlsTrailGuardControlsControlsControlsControlsEcho,
         `apply-trail continuity stamp: ${applyTrailStamp}`,
       ].join("\n");
     }
     const detailLines = rows.map((row, idx) => (
       `${idx + 1}. ${formatTimeOfDay(Number(row?.timestamp_ms || 0))} | ${String(row?.event_id || "-")} | ${String(row?.detail || "-")}`
     ));
-    return [...detailLines, `-- ${controlsEcho}`, `-- ${controlsTrailGuardEcho}`, `-- ${controlsTrailGuardControlsEcho}`, `-- ${controlsTrailGuardControlsControlsEcho}`, `-- ${controlsTrailGuardControlsControlsControlsEcho}`, `-- apply-trail continuity stamp: ${applyTrailStamp}`].join("\n");
+    return [...detailLines, `-- ${controlsEcho}`, `-- ${controlsTrailGuardEcho}`, `-- ${controlsTrailGuardControlsEcho}`, `-- ${controlsTrailGuardControlsControlsEcho}`, `-- ${controlsTrailGuardControlsControlsControlsEcho}`, `-- ${controlsTrailGuardControlsControlsControlsControlsEcho}`, `-- apply-trail continuity stamp: ${applyTrailStamp}`].join("\n");
   }, [
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmRows,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailApplyTrailContinuityStamp,
+    quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsControlsControlsControlsContinuityHint,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsControlsControlsContinuityHint,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsControlsContinuityHint,
     quickTelemetryStrictRollbackTrustAuditBundleApplyDryRunHandoffHydrateConfirmActivityReplayConfirmTrailImportConfirmTrailControlsTrailGuardControlsContinuityHint,
