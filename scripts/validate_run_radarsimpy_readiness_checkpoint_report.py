@@ -75,6 +75,7 @@ def run() -> None:
             "function_api_stage_ready": True,
             "migration_stage_ready": True,
             "real_e2e_stage_ready": True,
+            "report_contract_validator_pass": True,
         }
         ready_report = {
             "version": 1,
@@ -213,6 +214,26 @@ def run() -> None:
             proc_cmd_missing,
             "cmd_missing report",
             "commands.smoke_gate.cmd must be non-empty list",
+        )
+
+        contract_check_mismatch = copy.deepcopy(ready_report)
+        contract_check_mismatch["checkpoint_checks"]["report_contract_validator_pass"] = False
+        contract_check_mismatch["overall_status"] = "blocked"
+        contract_check_mismatch_path = root / "contract_check_mismatch.json"
+        _write_json(contract_check_mismatch_path, contract_check_mismatch)
+        proc_contract_check_mismatch = _run(
+            repo_root,
+            [
+                str(Path(sys.executable)),
+                str(validator),
+                "--summary-json",
+                str(contract_check_mismatch_path),
+            ],
+        )
+        _must_fail(
+            proc_contract_check_mismatch,
+            "contract_check_mismatch report",
+            "report_contract_validator_pass mismatch with checkpoint_checks.report_contract_validator_pass",
         )
 
         mismatch = copy.deepcopy(ready_report)

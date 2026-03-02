@@ -290,13 +290,22 @@ def main() -> None:
         "function_api_stage_ready": bool(function_stage_ready is True),
         "migration_stage_ready": bool(True if not args.run_runtime_migration else (migration_stage_ready is True)),
         "real_e2e_stage_ready": bool(True if not args.require_real_e2e else (e2e_stage_ready is True)),
+        # Provisional value until report contract validator runs below.
+        "report_contract_validator_pass": True,
     }
 
-    ready = all(bool(v) for v in checks.values())
-    status = "ready" if ready else "blocked"
+    ready_provisional = all(bool(v) for v in checks.values())
+    status_provisional = "ready" if ready_provisional else "blocked"
 
     ok_branch, branch = _git(repo_root, ["rev-parse", "--abbrev-ref", "HEAD"])
     ok_head_full, head_commit = _git(repo_root, ["rev-parse", "HEAD"])
+
+    report_contract_validator_cmd = [
+        py_bin,
+        "scripts/validate_radarsimpy_readiness_checkpoint_report.py",
+        "--summary-json",
+        str(output_path),
+    ]
 
     report: Dict[str, Any] = {
         "version": 1,
@@ -323,33 +332,42 @@ def main() -> None:
             "validate_run_radarsimpy_readiness_checkpoint" in smoke_step_names
         ),
         "smoke_skip_readiness_runner_validator_requested": smoke_skip_flag_requested,
+        # Provisional value; updated after command runs below.
+        "report_contract_validator_pass": True,
         "progress_overall_ready": bool(progress_payload.get("overall_ready", False)),
         "checkpoint_checks": checks,
-        "overall_status": status,
+        "overall_status": status_provisional,
         "commands": {
             "smoke_gate": smoke,
             "wrapper_gate": wrapper,
             "migration_stepwise": migration if migration is not None else {"skipped": True},
             "function_progress": function_progress,
             "progress_snapshot": progress,
+            "report_contract_validator": {
+                "cmd": list(report_contract_validator_cmd),
+                "returncode": 0,
+                "pass": True,
+                "stdout_tail": "",
+                "stderr_tail": "",
+            },
         },
     }
 
     output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
-    report_contract_validator_cmd = [
-        py_bin,
-        "scripts/validate_radarsimpy_readiness_checkpoint_report.py",
-        "--summary-json",
-        str(output_path),
-    ]
     report_contract_validator = _run_cmd(report_contract_validator_cmd, cwd=repo_root, env=env)
     report["commands"]["report_contract_validator"] = report_contract_validator
     report["report_contract_validator_pass"] = bool(report_contract_validator.get("pass", False))
+    report_checks = report.get("checkpoint_checks", {})
+    if isinstance(report_checks, dict):
+        report_checks["report_contract_validator_pass"] = bool(report["report_contract_validator_pass"])
+        report["checkpoint_checks"] = report_checks
+    ready = all(bool(v) for v in report.get("checkpoint_checks", {}).values())
+    report["overall_status"] = "ready" if ready else "blocked"
     output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     print("RadarSimPy readiness checkpoint completed.")
-    print(f"  overall_status: {status}")
+    print(f"  overall_status: {report['overall_status']}")
     print(f"  smoke_gate_status: {report['smoke_gate_status']}")
     print(f"  wrapper_gate_status: {report['wrapper_gate_status']}")
     print(f"  migration_status: {report['migration_status'] or 'skipped'}")

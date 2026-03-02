@@ -49,6 +49,7 @@ def run() -> None:
         assert bool(checks_ready.get("function_api_stage_ready", False)) is True
         assert bool(checks_ready.get("migration_stage_ready", False)) is True
         assert bool(checks_ready.get("real_e2e_stage_ready", False)) is True
+        assert bool(checks_ready.get("report_contract_validator_pass", False)) is True
         assert payload_ready.get("function_status") == "ready"
         assert payload_ready.get("report_contract_validator_pass") is True
         assert payload_ready.get("smoke_contains_readiness_runner_validator") is False
@@ -96,6 +97,7 @@ def run() -> None:
         assert bool(checks_blocked.get("smoke_recursion_guard_active", False)) is True
         assert bool(checks_blocked.get("real_e2e_stage_ready", True)) is False
         assert bool(checks_blocked.get("function_api_stage_ready", False)) is True
+        assert bool(checks_blocked.get("report_contract_validator_pass", False)) is True
 
         # Case 3: allow-blocked should keep return code zero.
         blocked_allow_json = reports / "checkpoint_blocked_allow.json"
@@ -123,6 +125,8 @@ def run() -> None:
         assert payload_blocked_allow.get("overall_status") == "blocked"
         assert payload_blocked_allow.get("function_status") == "ready"
         assert payload_blocked_allow.get("report_contract_validator_pass") is True
+        checks_blocked_allow = dict(payload_blocked_allow.get("checkpoint_checks") or {})
+        assert bool(checks_blocked_allow.get("report_contract_validator_pass", False)) is True
         assert payload_blocked_allow.get("smoke_contains_readiness_runner_validator") is False
         assert payload_blocked_allow.get("smoke_skip_readiness_runner_validator_requested") is True
         contract_cmd_blocked_allow = (

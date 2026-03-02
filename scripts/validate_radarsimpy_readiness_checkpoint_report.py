@@ -20,6 +20,7 @@ REQUIRED_CHECK_KEYS = (
     "function_api_stage_ready",
     "migration_stage_ready",
     "real_e2e_stage_ready",
+    "report_contract_validator_pass",
 )
 
 
@@ -173,18 +174,20 @@ def main() -> None:
     _validate_command_block(commands, "migration_stepwise", allow_skipped=True)
     _validate_command_block(commands, "function_progress")
     report_contract_row = commands.get("report_contract_validator")
-    if report_contract_row is not None:
-        if not isinstance(report_contract_row, Mapping):
-            raise ValueError("commands.report_contract_validator must be object when present")
-        _validate_command_block(commands, "report_contract_validator")
-        report_contract_pass = payload.get("report_contract_validator_pass")
-        if report_contract_pass is not None:
-            if not isinstance(report_contract_pass, bool):
-                raise ValueError("report_contract_validator_pass must be bool when present")
-            if bool(report_contract_pass) != bool(report_contract_row.get("pass", False)):
-                raise ValueError(
-                    "report_contract_validator_pass mismatch with commands.report_contract_validator.pass"
-                )
+    if not isinstance(report_contract_row, Mapping):
+        raise ValueError("commands.report_contract_validator must be object")
+    _validate_command_block(commands, "report_contract_validator")
+    report_contract_pass = payload.get("report_contract_validator_pass")
+    if not isinstance(report_contract_pass, bool):
+        raise ValueError("report_contract_validator_pass must be bool")
+    if bool(report_contract_pass) != bool(check_map["report_contract_validator_pass"]):
+        raise ValueError(
+            "report_contract_validator_pass mismatch with checkpoint_checks.report_contract_validator_pass"
+        )
+    if bool(report_contract_pass) != bool(report_contract_row.get("pass", False)):
+        raise ValueError(
+            "report_contract_validator_pass mismatch with commands.report_contract_validator.pass"
+        )
 
     smoke_gate_row = commands.get("smoke_gate")
     if not isinstance(smoke_gate_row, Mapping):
