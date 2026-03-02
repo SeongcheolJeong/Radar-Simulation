@@ -148,6 +148,7 @@ def main() -> None:
     wrapper_json = reports_root / f"radarsimpy_wrapper_integration_gate_checkpoint_{run_id}.json"
     migration_root = reports_root / f"radarsimpy_migration_stepwise_checkpoint_{run_id}"
     migration_summary = migration_root / "summary.json"
+    function_summary = reports_root / f"radarsimpy_function_progress_checkpoint_{run_id}.json"
     progress_json = reports_root / f"radarsimpy_progress_snapshot_{run_id}.json"
 
     smoke_cmd = [
@@ -211,6 +212,17 @@ def main() -> None:
         migration = _run_cmd(migration_cmd, cwd=repo_root, env=env)
         migration_payload = _load_json_if_exists(migration_summary) or {}
 
+    function_cmd = [
+        py_bin,
+        "scripts/show_radarsimpy_function_progress.py",
+        "--repo-root",
+        str(repo_root),
+        "--output-json",
+        str(function_summary),
+    ]
+    function_progress = _run_cmd(function_cmd, cwd=repo_root, env=env)
+    function_payload = _load_json_if_exists(function_summary) or {}
+
     progress_cmd = [
         py_bin,
         "scripts/show_radarsimpy_progress.py",
@@ -220,6 +232,8 @@ def main() -> None:
         str(smoke_json),
         "--wrapper-summary-json",
         str(wrapper_json),
+        "--function-summary-json",
+        str(function_summary),
         "--output-json",
         str(progress_json),
     ]
@@ -239,6 +253,7 @@ def main() -> None:
     wrapper_pass = bool(wrapper_payload.get("pass", False)) and bool(wrapper.get("pass", False))
     integration_stage_ready = _find_stage_ready(progress_payload, "integration_smoke_gate")
     wrapper_stage_ready = _find_stage_ready(progress_payload, "wrapper_integration_gate")
+    function_stage_ready = _find_stage_ready(progress_payload, "function_api_coverage")
     migration_stage_ready = _find_stage_ready(progress_payload, "migration_stepwise")
     e2e_stage_ready = _find_stage_ready(progress_payload, "real_e2e")
 
@@ -248,6 +263,7 @@ def main() -> None:
         "progress_snapshot_generated": bool(progress_payload),
         "progress_integration_stage_ready": bool(integration_stage_ready is True),
         "progress_wrapper_stage_ready": bool(wrapper_stage_ready is True),
+        "function_api_stage_ready": bool(function_stage_ready is True),
         "migration_stage_ready": bool(True if not args.run_runtime_migration else (migration_stage_ready is True)),
         "real_e2e_stage_ready": bool(True if not args.require_real_e2e else (e2e_stage_ready is True)),
     }
@@ -272,10 +288,12 @@ def main() -> None:
         "smoke_gate_summary_json": str(smoke_json.resolve()),
         "wrapper_gate_summary_json": str(wrapper_json.resolve()),
         "migration_summary_json": str(migration_summary.resolve()) if args.run_runtime_migration else "",
+        "function_summary_json": str(function_summary.resolve()),
         "progress_snapshot_json": str(progress_json.resolve()),
         "smoke_gate_status": "ready" if smoke_pass else "blocked",
         "wrapper_gate_status": "ready" if wrapper_pass else "blocked",
         "migration_status": _status_str(migration_payload.get("migration_status", "")),
+        "function_status": "ready" if bool(function_payload.get("ready", False)) else "blocked",
         "progress_overall_ready": bool(progress_payload.get("overall_ready", False)),
         "checkpoint_checks": checks,
         "overall_status": status,
@@ -283,6 +301,7 @@ def main() -> None:
             "smoke_gate": smoke,
             "wrapper_gate": wrapper,
             "migration_stepwise": migration if migration is not None else {"skipped": True},
+            "function_progress": function_progress,
             "progress_snapshot": progress,
         },
     }
@@ -294,6 +313,7 @@ def main() -> None:
     print(f"  smoke_gate_status: {report['smoke_gate_status']}")
     print(f"  wrapper_gate_status: {report['wrapper_gate_status']}")
     print(f"  migration_status: {report['migration_status'] or 'skipped'}")
+    print(f"  function_status: {report['function_status']}")
     print(f"  progress_overall_ready: {report['progress_overall_ready']}")
     print(f"  output_json: {output_path}")
 

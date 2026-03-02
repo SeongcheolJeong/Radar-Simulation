@@ -56,10 +56,12 @@ def run() -> None:
         smoke_json = root / "smoke.json"
         wrapper_json = root / "wrapper.json"
         progress_json = root / "progress.json"
+        function_json = root / "function.json"
         migration_json = root / "migration.json"
         _write_json(smoke_json, {"fixture": "smoke"})
         _write_json(wrapper_json, {"fixture": "wrapper"})
         _write_json(progress_json, {"fixture": "progress"})
+        _write_json(function_json, {"fixture": "function"})
         _write_json(migration_json, {"fixture": "migration"})
 
         ready_checks = {
@@ -68,6 +70,7 @@ def run() -> None:
             "progress_snapshot_generated": True,
             "progress_integration_stage_ready": True,
             "progress_wrapper_stage_ready": True,
+            "function_api_stage_ready": True,
             "migration_stage_ready": True,
             "real_e2e_stage_ready": True,
         }
@@ -81,9 +84,11 @@ def run() -> None:
             "smoke_gate_summary_json": str(smoke_json.resolve()),
             "wrapper_gate_summary_json": str(wrapper_json.resolve()),
             "migration_summary_json": str(migration_json.resolve()),
+            "function_summary_json": str(function_json.resolve()),
             "progress_snapshot_json": str(progress_json.resolve()),
             "smoke_gate_status": "ready",
             "wrapper_gate_status": "ready",
+            "function_status": "ready",
             "migration_status": "ready",
             "progress_overall_ready": True,
             "checkpoint_checks": ready_checks,
@@ -92,6 +97,7 @@ def run() -> None:
                 "smoke_gate": {"returncode": 0, "pass": True},
                 "wrapper_gate": {"returncode": 0, "pass": True},
                 "migration_stepwise": {"returncode": 0, "pass": True},
+                "function_progress": {"returncode": 0, "pass": True},
                 "progress_snapshot": {"returncode": 0, "pass": True},
             },
         }
@@ -129,6 +135,7 @@ def run() -> None:
         blocked["checkpoint_checks"]["real_e2e_stage_ready"] = False
         blocked["overall_status"] = "blocked"
         blocked["wrapper_gate_status"] = "ready"
+        blocked["function_status"] = "ready"
         blocked_path = root / "blocked.json"
         _write_json(blocked_path, blocked)
         proc_blocked = _run(

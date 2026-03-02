@@ -22,6 +22,7 @@ def run() -> None:
         wrapper_json = root / "radarsimpy_wrapper_integration_gate_hook_latest.json"
         migration_json = reports_root / "radarsimpy_migration_stepwise_case" / "summary.json"
         e2e_rollup_json = reports_root / "integration_full_real_e2e_case" / "_status_rollup.json"
+        function_json = reports_root / "radarsimpy_function_progress_case.json"
         out_json = root / "snapshot.json"
 
         _write_json(
@@ -56,6 +57,18 @@ def run() -> None:
             },
         )
         _write_json(
+            function_json,
+            {
+                "report_name": "radarsimpy_function_progress",
+                "ready": True,
+                "supported_count": 20,
+                "implemented_supported_count": 20,
+                "missing_supported": [],
+                "unexported_supported": [],
+                "excluded_violations": [],
+            },
+        )
+        _write_json(
             e2e_rollup_json,
             {
                 "all_steps_passed": True,
@@ -84,6 +97,8 @@ def run() -> None:
                 str(migration_json),
                 "--e2e-rollup-json",
                 str(e2e_rollup_json),
+                "--function-summary-json",
+                str(function_json),
                 "--output-json",
                 str(out_json),
                 "--strict-ready",
@@ -104,6 +119,7 @@ def run() -> None:
         expected = {
             "integration_smoke_gate",
             "wrapper_integration_gate",
+            "function_api_coverage",
             "migration_stepwise",
             "real_e2e",
         }

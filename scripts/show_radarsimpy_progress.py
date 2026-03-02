@@ -7,6 +7,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -84,6 +85,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--wrapper-summary-json", default="")
     p.add_argument("--migration-summary-json", default="")
     p.add_argument("--e2e-rollup-json", default="")
+    p.add_argument("--function-summary-json", default="")
     p.add_argument("--output-json", default="")
     p.add_argument("--strict-ready", action="store_true")
     return p.parse_args()
@@ -99,6 +101,54 @@ def _resolve_optional_path(raw: str, repo_root: Path) -> Optional[Path]:
     else:
         p = p.resolve()
     return p
+
+
+def _probe_function_progress(repo_root: Path) -> Dict[str, Any]:
+    script_path = repo_root / "scripts" / "show_radarsimpy_function_progress.py"
+    if not script_path.exists():
+        return {
+            "ready": False,
+            "reason": "function_progress_script_not_found",
+        }
+    with tempfile.TemporaryDirectory(prefix="radarsimpy_function_progress_probe_") as td:
+        out_json = Path(td) / "function_progress.json"
+        proc = subprocess.run(
+            [
+                str(Path(sys.executable)),
+                str(script_path),
+                "--repo-root",
+                str(repo_root),
+                "--output-json",
+                str(out_json),
+            ],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return {
+                "ready": False,
+                "reason": "function_progress_probe_failed",
+                "returncode": int(proc.returncode),
+                "stderr_tail": "\n".join((proc.stderr or "").splitlines()[-80:]),
+            }
+        try:
+            payload = _load_json(out_json)
+        except Exception as exc:  # pragma: no cover - defensive
+            return {
+                "ready": False,
+                "reason": f"function_progress_probe_load_failed: {exc}",
+            }
+        return {
+            "ready": bool(payload.get("ready", False)),
+            "supported_count": int(payload.get("supported_count", 0)),
+            "implemented_supported_count": int(payload.get("implemented_supported_count", 0)),
+            "missing_supported_count": int(len(payload.get("missing_supported", []))),
+            "unexported_supported_count": int(len(payload.get("unexported_supported", []))),
+            "excluded_violations_count": int(len(payload.get("excluded_violations", []))),
+            "source_mode": "live_probe",
+        }
 
 
 def main() -> None:
@@ -161,6 +211,16 @@ def main() -> None:
             reports_root,
             [
                 "integration_full_real_e2e_*/_status_rollup.json",
+            ],
+        )
+
+    function_progress_path = _resolve_optional_path(args.function_summary_json, repo_root=repo_root)
+    if function_progress_path is None:
+        function_progress_path = _glob_latest(
+            reports_root,
+            [
+                "radarsimpy_function_progress*.json",
+                "**/radarsimpy_function_progress*.json",
             ],
         )
 
@@ -236,6 +296,55 @@ def main() -> None:
             next_actions.append(
                 "Run: PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_wrapper_integration_gate.py "
                 "--output-summary-json docs/reports/radarsimpy_wrapper_integration_gate_manual.json"
+            )
+
+    if function_progress_path is None:
+        probe = _probe_function_progress(repo_root)
+        stage_ready = bool(probe.get("ready", False))
+        stages.append(
+            _build_stage(
+                name="function_api_coverage",
+                source_json=None,
+                ready=stage_ready,
+                details=probe,
+            )
+        )
+        if not stage_ready:
+            next_actions.append(
+                "Run: PYTHONPATH=src .venv/bin/python scripts/show_radarsimpy_function_progress.py "
+                "--repo-root . --output-json docs/reports/radarsimpy_function_progress_manual.json --strict-ready"
+            )
+    else:
+        function_payload = _load_json(function_progress_path)
+        function_ready = _bool(function_payload.get("ready"))
+        stages.append(
+            _build_stage(
+                name="function_api_coverage",
+                source_json=function_progress_path,
+                ready=function_ready,
+                details={
+                    "ready": _bool(function_payload.get("ready", False)),
+                    "supported_count": int(function_payload.get("supported_count", 0)),
+                    "implemented_supported_count": int(
+                        function_payload.get("implemented_supported_count", 0)
+                    ),
+                    "missing_supported_count": int(
+                        len(function_payload.get("missing_supported", []))
+                    ),
+                    "unexported_supported_count": int(
+                        len(function_payload.get("unexported_supported", []))
+                    ),
+                    "excluded_violations_count": int(
+                        len(function_payload.get("excluded_violations", []))
+                    ),
+                    "source_mode": "report_json",
+                },
+            )
+        )
+        if not function_ready:
+            next_actions.append(
+                "Run: PYTHONPATH=src .venv/bin/python scripts/show_radarsimpy_function_progress.py "
+                "--repo-root . --output-json docs/reports/radarsimpy_function_progress_manual.json --strict-ready"
             )
 
     if migration_path is None:

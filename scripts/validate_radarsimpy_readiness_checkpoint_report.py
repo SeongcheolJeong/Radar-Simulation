@@ -15,6 +15,7 @@ REQUIRED_CHECK_KEYS = (
     "progress_snapshot_generated",
     "progress_integration_stage_ready",
     "progress_wrapper_stage_ready",
+    "function_api_stage_ready",
     "migration_stage_ready",
     "real_e2e_stage_ready",
 )
@@ -97,11 +98,15 @@ def main() -> None:
     wrapper_gate_status = _require_str(payload, "wrapper_gate_status")
     if wrapper_gate_status not in {"ready", "blocked"}:
         raise ValueError("wrapper_gate_status must be ready|blocked")
+    function_status = _require_str(payload, "function_status")
+    if function_status not in {"ready", "blocked"}:
+        raise ValueError("function_status must be ready|blocked")
 
     _require_str(payload, "run_id")
     _require_str(payload, "workspace_root")
     _require_abs_existing_path(payload.get("smoke_gate_summary_json"), "smoke_gate_summary_json")
     _require_abs_existing_path(payload.get("wrapper_gate_summary_json"), "wrapper_gate_summary_json")
+    _require_abs_existing_path(payload.get("function_summary_json"), "function_summary_json")
     _require_abs_existing_path(payload.get("progress_snapshot_json"), "progress_snapshot_json")
     _require_abs_existing_path(
         payload.get("migration_summary_json"),
@@ -130,6 +135,8 @@ def main() -> None:
         raise ValueError("smoke_gate_status mismatch with checkpoint_checks.smoke_gate_pass")
     if wrapper_gate_status != ("ready" if bool(check_map["wrapper_gate_pass"]) else "blocked"):
         raise ValueError("wrapper_gate_status mismatch with checkpoint_checks.wrapper_gate_pass")
+    if function_status != ("ready" if bool(check_map["function_api_stage_ready"]) else "blocked"):
+        raise ValueError("function_status mismatch with checkpoint_checks.function_api_stage_ready")
 
     commands = payload.get("commands")
     if not isinstance(commands, Mapping):
@@ -138,6 +145,7 @@ def main() -> None:
     _validate_command_block(commands, "wrapper_gate")
     _validate_command_block(commands, "progress_snapshot")
     _validate_command_block(commands, "migration_stepwise", allow_skipped=True)
+    _validate_command_block(commands, "function_progress")
 
     if args.require_ready and overall_status != "ready":
         raise ValueError("overall_status must be ready when --require-ready is set")
@@ -147,6 +155,7 @@ def main() -> None:
     print(f"  overall_status: {overall_status}")
     print(f"  smoke_gate_status: {smoke_gate_status}")
     print(f"  wrapper_gate_status: {wrapper_gate_status}")
+    print(f"  function_status: {function_status}")
 
 
 if __name__ == "__main__":
