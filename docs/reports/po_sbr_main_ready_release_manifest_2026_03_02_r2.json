@@ -1,0 +1,31 @@
+{
+  "report_name": "po_sbr_main_ready_release_manifest",
+  "version": 3,
+  "generated_at_utc": "2026-03-02T13:42:47Z",
+  "branch": "main",
+  "main_head_commit": "eec64a228c388e311e135fe9b533c8427cf12929",
+  "main_head_short": "eec64a2",
+  "release": {
+    "tag": "po-sbr-main-ready-2026-03-02-r2",
+    "tag_commit": "eec64a228c388e311e135fe9b533c8427cf12929",
+    "name": "PO-SBR Main Ready 2026-03-02 (r2)",
+    "url": "https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r2",
+    "published_at_utc": "2026-03-02T13:42:32Z"
+  },
+  "supersedes": {
+    "tag": "po-sbr-main-ready-2026-03-02-r1",
+    "tag_commit": "13b3a53978fbb8111fa777d569c9af213c36843f",
+    "url": "https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r1"
+  },
+  "added_commits_since_base": [
+    "eec64a2"
+  ],
+  "readiness_validation": {
+    "status": "pass",
+    "validators": [
+      "validate_run_po_sbr_post_change_gate.py",
+      "validate_run_po_sbr_operator_handoff_closure_report.py",
+      "show_po_sbr_progress.py --strict-ready"
+    ]
+  }
+}
