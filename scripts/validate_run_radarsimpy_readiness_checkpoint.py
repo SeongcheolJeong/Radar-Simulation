@@ -50,8 +50,15 @@ def run() -> None:
         assert bool(checks_ready.get("migration_stage_ready", False)) is True
         assert bool(checks_ready.get("real_e2e_stage_ready", False)) is True
         assert payload_ready.get("function_status") == "ready"
+        assert payload_ready.get("report_contract_validator_pass") is True
         assert payload_ready.get("smoke_contains_readiness_runner_validator") is False
         assert payload_ready.get("smoke_skip_readiness_runner_validator_requested") is True
+        contract_cmd_ready = (
+            payload_ready.get("commands", {})
+            .get("report_contract_validator", {})
+        )
+        assert bool(contract_cmd_ready.get("pass", False)) is True
+        assert int(contract_cmd_ready.get("returncode", -1)) == 0
         cmd_ready = (
             payload_ready.get("commands", {})
             .get("smoke_gate", {})
@@ -84,6 +91,7 @@ def run() -> None:
         payload_blocked = json.loads(blocked_json.read_text(encoding="utf-8"))
         assert payload_blocked.get("overall_status") == "blocked"
         checks_blocked = dict(payload_blocked.get("checkpoint_checks") or {})
+        assert payload_blocked.get("report_contract_validator_pass") is True
         assert bool(checks_blocked.get("smoke_skip_flag_applied", False)) is True
         assert bool(checks_blocked.get("smoke_recursion_guard_active", False)) is True
         assert bool(checks_blocked.get("real_e2e_stage_ready", True)) is False
@@ -114,8 +122,15 @@ def run() -> None:
         payload_blocked_allow = json.loads(blocked_allow_json.read_text(encoding="utf-8"))
         assert payload_blocked_allow.get("overall_status") == "blocked"
         assert payload_blocked_allow.get("function_status") == "ready"
+        assert payload_blocked_allow.get("report_contract_validator_pass") is True
         assert payload_blocked_allow.get("smoke_contains_readiness_runner_validator") is False
         assert payload_blocked_allow.get("smoke_skip_readiness_runner_validator_requested") is True
+        contract_cmd_blocked_allow = (
+            payload_blocked_allow.get("commands", {})
+            .get("report_contract_validator", {})
+        )
+        assert bool(contract_cmd_blocked_allow.get("pass", False)) is True
+        assert int(contract_cmd_blocked_allow.get("returncode", -1)) == 0
         cmd_blocked_allow = (
             payload_blocked_allow.get("commands", {})
             .get("smoke_gate", {})

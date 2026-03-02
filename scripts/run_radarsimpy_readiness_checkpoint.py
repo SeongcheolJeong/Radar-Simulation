@@ -337,15 +337,29 @@ def main() -> None:
 
     output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
+    report_contract_validator_cmd = [
+        py_bin,
+        "scripts/validate_radarsimpy_readiness_checkpoint_report.py",
+        "--summary-json",
+        str(output_path),
+    ]
+    report_contract_validator = _run_cmd(report_contract_validator_cmd, cwd=repo_root, env=env)
+    report["commands"]["report_contract_validator"] = report_contract_validator
+    report["report_contract_validator_pass"] = bool(report_contract_validator.get("pass", False))
+    output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
     print("RadarSimPy readiness checkpoint completed.")
     print(f"  overall_status: {status}")
     print(f"  smoke_gate_status: {report['smoke_gate_status']}")
     print(f"  wrapper_gate_status: {report['wrapper_gate_status']}")
     print(f"  migration_status: {report['migration_status'] or 'skipped'}")
     print(f"  function_status: {report['function_status']}")
+    print(f"  report_contract_validator_pass: {report['report_contract_validator_pass']}")
     print(f"  progress_overall_ready: {report['progress_overall_ready']}")
     print(f"  output_json: {output_path}")
 
+    if not bool(report["report_contract_validator_pass"]):
+        sys.exit(3)
     if (not ready) and (not bool(args.allow_blocked)):
         sys.exit(2)
     sys.exit(0)

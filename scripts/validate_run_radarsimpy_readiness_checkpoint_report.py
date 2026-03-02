@@ -95,6 +95,7 @@ def run() -> None:
             "smoke_gate_step_count": 9,
             "smoke_contains_readiness_runner_validator": False,
             "smoke_skip_readiness_runner_validator_requested": True,
+            "report_contract_validator_pass": True,
             "progress_overall_ready": True,
             "checkpoint_checks": ready_checks,
             "overall_status": "ready",
@@ -114,6 +115,7 @@ def run() -> None:
                 "migration_stepwise": {"returncode": 0, "pass": True},
                 "function_progress": {"returncode": 0, "pass": True},
                 "progress_snapshot": {"returncode": 0, "pass": True},
+                "report_contract_validator": {"returncode": 0, "pass": True},
             },
         }
         ready_path = root / "ready.json"
