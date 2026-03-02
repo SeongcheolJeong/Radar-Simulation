@@ -7649,6 +7649,20 @@
   - release tag points to validated mainline snapshot:
     - `po-sbr-main-ready-2026-03-02` -> `99ebbc0`
 
+## Main Branch Release Manifest Artifact (2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && <collect git/gh metadata> && jq -n ... > docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json && jq . docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json`
+- Result: pass
+- Notes:
+  - generated release manifest artifact:
+    - `docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json`
+  - manifest records:
+    - `main_head_commit=94cfd9c07bc15a96dd4ac3831945423f7e444d04`
+    - release tag/url/publication timestamp (`po-sbr-main-ready-2026-03-02`)
+    - merged PR #5 metadata and merge commit
+    - readiness validation command set with overall `pass`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02

@@ -1,0 +1,32 @@
+{
+  "report_name": "po_sbr_main_ready_release_manifest",
+  "version": 1,
+  "generated_at_utc": "2026-03-02T13:40:06Z",
+  "branch": "main",
+  "main_head_commit": "94cfd9c07bc15a96dd4ac3831945423f7e444d04",
+  "main_head_short": "94cfd9c",
+  "release": {
+    "tag": "po-sbr-main-ready-2026-03-02",
+    "tag_commit": "99ebbc069323e2cc2de0e619f8402c7ff605840d",
+    "name": "PO-SBR Main Ready 2026-03-02",
+    "url": "https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02",
+    "published_at_utc": "2026-03-02T13:38:26Z"
+  },
+  "merged_pull_request": {
+    "number": 5,
+    "url": "https://github.com/SeongcheolJeong/Radar-Simulation/pull/5",
+    "merged_at_utc": "2026-03-02T13:31:13Z",
+    "merge_commit": "82d602dcfcfb0b89e4eb4abb3947e2adf350567f"
+  },
+  "readiness_validation": {
+    "status": "pass",
+    "validators": [
+      "validate_po_sbr_pre_push_hook_local_artifacts.py",
+      "validate_run_po_sbr_readiness_checkpoint.py",
+      "validate_run_po_sbr_myproject_readiness_checkpoint.py",
+      "run_po_sbr_myproject_readiness_checkpoint.sh",
+      "validate_po_sbr_myproject_readiness_checkpoint_report.py --require-ready",
+      "run_po_sbr_post_change_gate.py --strict"
+    ]
+  }
+}
