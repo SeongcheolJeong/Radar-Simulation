@@ -16,6 +16,13 @@ Check-only mode (for local/CI policy checks):
 python scripts/install_radarsimpy_ci_workflow.py --check
 ```
 
+RadarSimPy readiness checkpoint (single report with ready/blocked status):
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_readiness_checkpoint.py \
+  --output-json docs/reports/radarsimpy_readiness_checkpoint_latest.json
+```
+
 Notes:
 
 - Writing `.github/workflows/*` on GitHub requires a token with `workflow` scope.
