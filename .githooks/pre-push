@@ -56,13 +56,74 @@ fi
 REPORT_JSON="${ROOT_DIR}/.git/po_sbr_post_change_gate_hook_latest.json"
 HOOK_CHECKPOINT_JSON="${ROOT_DIR}/.git/po_sbr_physical_full_track_merged_checkpoint_hook_latest.json"
 HOOK_CLOSURE_JSON="${ROOT_DIR}/.git/po_sbr_operator_handoff_closure_hook_latest.json"
+HOOK_AVX_GATE_JSON="${ROOT_DIR}/.git/po_sbr_avx_developer_gate_hook_latest.json"
+HOOK_AVX_GATE_MATRIX_JSON="${ROOT_DIR}/.git/avx_export_benchmark_matrix_hook_latest/summary.json"
+HOOK_PROGRESS_JSON="${ROOT_DIR}/.git/po_sbr_progress_snapshot_hook_latest.json"
+HOOK_RADARSIMPY_WRAPPER_GATE_JSON="${ROOT_DIR}/.git/radarsimpy_wrapper_integration_gate_hook_latest.json"
 
 echo "[pre-push] PO-SBR post-change gate: base=${BASE_REF} head=${HEAD_REF}"
 PO_SBR_MERGED_CHECKPOINT_JSON_OVERRIDE="${HOOK_CHECKPOINT_JSON}" \
 PO_SBR_CLOSURE_JSON_OVERRIDE="${HOOK_CLOSURE_JSON}" \
+PO_SBR_AVX_DEVELOPER_GATE_SUMMARY_JSON_OVERRIDE="${HOOK_AVX_GATE_JSON}" \
+PO_SBR_AVX_DEVELOPER_GATE_MATRIX_SUMMARY_JSON_OVERRIDE="${HOOK_AVX_GATE_MATRIX_JSON}" \
 PYTHONPATH=src "${PY_BIN}" scripts/run_po_sbr_post_change_gate.py \
   --base-ref "${BASE_REF}" \
   --head-ref "${HEAD_REF}" \
   --strict \
   --output-json "${REPORT_JSON}"
+
+if [[ "${PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR:-0}" != "1" ]]; then
+  echo "[pre-push] validate post-change deterministic gate"
+  PYTHONPATH=src "${PY_BIN}" scripts/validate_run_po_sbr_post_change_gate.py
+else
+  echo "[pre-push] skip post-change deterministic validator (PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1)"
+fi
+
+if [[ "${PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR:-0}" != "1" ]]; then
+  echo "[pre-push] validate operator-closure report deterministic runner"
+  PYTHONPATH=src "${PY_BIN}" scripts/validate_run_po_sbr_operator_handoff_closure_report.py
+else
+  echo "[pre-push] skip operator-closure report deterministic validator (PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR=1)"
+fi
+
+if [[ "${PO_SBR_SKIP_PROGRESS_SNAPSHOT:-0}" != "1" ]]; then
+  echo "[pre-push] generate strict progress snapshot"
+  PYTHONPATH=src "${PY_BIN}" scripts/show_po_sbr_progress.py \
+    --strict-ready \
+    --output-json "${HOOK_PROGRESS_JSON}"
+  echo "[pre-push] strict progress snapshot: ${HOOK_PROGRESS_JSON}"
+else
+  echo "[pre-push] skip strict progress snapshot (PO_SBR_SKIP_PROGRESS_SNAPSHOT=1)"
+  mkdir -p "$(dirname "${HOOK_PROGRESS_JSON}")"
+  cat > "${HOOK_PROGRESS_JSON}" <<'JSON'
+{
+  "report_name": "po_sbr_progress_snapshot",
+  "hook_progress_snapshot_status": "skipped",
+  "overall_ready": null
+}
+JSON
+  echo "[pre-push] strict progress snapshot skipped artifact: ${HOOK_PROGRESS_JSON}"
+fi
+
+if [[ "${RADARSIMPY_SKIP_WRAPPER_INTEGRATION_GATE:-0}" != "1" ]]; then
+  echo "[pre-push] run RadarSimPy wrapper integration gate"
+  RS_GATE_ARGS=(
+    --output-summary-json
+    "${HOOK_RADARSIMPY_WRAPPER_GATE_JSON}"
+  )
+  if [[ "${RADARSIMPY_WRAPPER_GATE_WITH_REAL_RUNTIME:-0}" == "1" ]]; then
+    RS_GATE_ARGS+=(--with-real-runtime)
+    if [[ -n "${RADARSIMPY_TRIAL_PACKAGE_ROOT:-}" ]]; then
+      RS_GATE_ARGS+=(--trial-package-root "${RADARSIMPY_TRIAL_PACKAGE_ROOT}")
+    fi
+    if [[ -n "${RADARSIMPY_LIBCOMPAT_DIR:-}" ]]; then
+      RS_GATE_ARGS+=(--libcompat-dir "${RADARSIMPY_LIBCOMPAT_DIR}")
+    fi
+  fi
+  PYTHONPATH=src "${PY_BIN}" scripts/run_radarsimpy_wrapper_integration_gate.py "${RS_GATE_ARGS[@]}"
+  echo "[pre-push] RadarSimPy wrapper integration gate summary: ${HOOK_RADARSIMPY_WRAPPER_GATE_JSON}"
+else
+  echo "[pre-push] skip RadarSimPy wrapper integration gate (RADARSIMPY_SKIP_WRAPPER_INTEGRATION_GATE=1)"
+fi
+
 echo "[pre-push] PO-SBR post-change gate: pass"

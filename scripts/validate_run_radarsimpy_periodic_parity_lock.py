@@ -2,6 +2,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -67,7 +68,7 @@ def run() -> None:
         summary_pass_json = root / "summary_pass.json"
         proc_pass = subprocess.run(
             [
-                "python3",
+                sys.executable,
                 "scripts/run_radarsimpy_periodic_parity_lock.py",
                 "--manifest-json",
                 str(manifest_pass_json),
@@ -125,7 +126,7 @@ def run() -> None:
         summary_mixed_json = root / "summary_mixed.json"
         proc_mixed = subprocess.run(
             [
-                "python3",
+                sys.executable,
                 "scripts/run_radarsimpy_periodic_parity_lock.py",
                 "--manifest-json",
                 str(manifest_mixed_json),

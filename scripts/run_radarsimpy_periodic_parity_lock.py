@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 
+from avxsim import load_radarsimpy_module
 from avxsim.radarsimpy_periodic_lock import (
     evaluate_radarsimpy_periodic_manifest,
     load_radarsimpy_periodic_manifest_json,
@@ -45,7 +46,7 @@ def _load_thresholds(path: Optional[str]) -> Optional[Dict[str, float]]:
 
 def _detect_radarsimpy_runtime() -> Dict[str, Any]:
     try:
-        import radarsimpy  # type: ignore
+        radarsimpy = load_radarsimpy_module()
 
         return {
             "available": True,
