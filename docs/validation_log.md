@@ -7617,6 +7617,24 @@
     - `tracked_report_changes: 0`
   - main/myproject readiness deterministic validators passed on merged `main`
 
+## Main Branch One-command Readiness + Strict Post-change Run (2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && bash scripts/run_po_sbr_myproject_readiness_checkpoint.sh && latest_ckpt=$(ls -1t docs/reports/po_sbr_myproject_readiness_checkpoint_*.json | head -n 1) && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py --summary-json "$latest_ckpt" --require-ready && PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_po_sbr_post_change_gate.py --base-ref HEAD~1 --head-ref HEAD --strict --output-json .git/po_sbr_post_change_gate_manual_latest.json`
+- Result: pass
+- Notes:
+  - one-command checkpoint completed on `HEAD=6c25dc5`
+  - checkpoint output:
+    - `docs/reports/po_sbr_myproject_readiness_checkpoint_2026_03_02_6c25dc5.json`
+    - `overall_status=ready`
+    - `closure_report_validator_status=pass`
+    - `em_policy_validator_status=pass`
+  - strict post-change gate output:
+    - `.git/po_sbr_post_change_gate_manual_latest.json`
+    - `closure_required=False`
+    - `closure_status=skipped`
+    - `overall_status=ready`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02
