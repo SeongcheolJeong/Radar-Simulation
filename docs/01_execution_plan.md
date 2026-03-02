@@ -87,6 +87,7 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M14.4: `sionna.rt` LLVM candidate probe + blocker evidence lock
 - [x] M14.5: `sionna.rt` full runtime enablement (working LLVM backend on target host)
 - [x] M14.6: `po-sbr` runtime pilot on Linux+NVIDIA environment
+- [x] M14.7: RadarSimPy runtime integration track (`radarsimpy_rt` backend + provider + runtime pilot/validators)
 - [x] M15.0: Web E2E orchestration API phase-0 skeleton (`/health`, `/api/runs`, run summary quicklook)
 - [x] M15.1: Web run summary schema v2 (frontend-compatible `outputs/path_summary/adc_summary/radar_map_summary`)
 - [x] M15.2: Dashboard API-run mode (`POST /api/runs` + polling + summary auto-load) and dual-server local launcher
@@ -210,6 +211,53 @@ Build an AVX-like offline radar simulator for FMCW + TDM-MIMO that can emit:
 - [x] M17.99: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit trail refresh (controls-status continuity echo in audit detail preview)
 - [x] M17.100: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit controls refresh (continuity-echo status alignment for copy/export/reset lifecycle)
 - [x] M17.101: Quick telemetry strict-cutover rollback trust audit bundle apply dry-run handoff package apply safety activity replay timeline import audit apply-trail refresh (continuity-echo lifecycle stamp after apply/copy/export/reset)
+- [x] M18.0: No-coupling AVX export benchmark harness (`candidate/reference/truth` export compare for physics + function/usability claim)
+- [x] M18.1: AVX export benchmark developer calibration mode + matrix orchestrator (`auto-tuned PO-SBR transform, no coupling, aggregate better/equivalent/worse report`)
+- [x] M18.2: PO-SBR AVX developer strict gate (`one-command ready/blocked policy over matrix benchmark with strict no-worse physics + function-better checks`)
+- [x] M18.3: MyProject readiness-checkpoint hardening with AVX gate inclusion + deterministic validator (`checkpoint now requires AVX gate ready and records AVX gate artifacts`)
+- [x] M18.4: Pre-push/operator-closure AVX gate wiring (`closure snapshot includes AVX gate state and hook local-artifact validator enforces AVX hook artifacts`)
+- [x] M18.5: Operator-closure deterministic guard for AVX gate wiring (`closure runner override controls + deterministic validator script`)
+- [x] M18.6: Main readiness-checkpoint deterministic guard (`run_po_sbr_readiness_checkpoint skip/fallback mode + deterministic validator`)
+- [x] M18.7: Post-change gate deterministic guard (`validate_run_po_sbr_post_change_gate.py` verifies skip/force-run/strict pass-fail semantics)
+- [x] M18.8: Main readiness-checkpoint post-change deterministic chain integration (`run_po_sbr_readiness_checkpoint.sh` runs post-change gate validator with skip toggle and deterministic assertion`)
+- [x] M18.9: MyProject readiness-checkpoint post-change deterministic chain integration (`run_po_sbr_myproject_readiness_checkpoint.sh` runs post-change validator and emits checkpoint status field`)
+- [x] M18.10: Post-change runtime-affecting coverage hardening (`run_po_sbr_post_change_gate.py` now treats `.githooks/*` and `validate_run_*` checkpoints as runtime-affecting)
+- [x] M18.11: Pre-push deterministic post-change guard integration (`.githooks/pre-push` runs `validate_run_po_sbr_post_change_gate.py` and hook self-test enforces execution)
+- [x] M18.12: Progress snapshot deterministic guard integration (`show_po_sbr_progress.py` adds optional myproject checkpoint stage and checkpoint runner executes deterministic validator)
+- [x] M18.13: Local hook activation + strict progress green (`install_po_sbr_pre_push_hook.sh` applied and `show_po_sbr_progress.py --strict-ready` reaches 100% required readiness)
+- [x] M18.14: Pre-push strict progress artifact integration (`.githooks/pre-push` emits `.git/po_sbr_progress_snapshot_hook_latest.json` and hook self-test enforces `overall_ready=true`)
+- [x] M18.15: Pre-push strict progress execution-trace guard (`validate_po_sbr_pre_push_hook_local_artifacts.py` enforces hook stdout evidence for strict progress step + artifact-path log)
+- [x] M18.16: Post-change runtime-affecting classifier includes progress gate script (`run_po_sbr_post_change_gate.py` treats `scripts/show_po_sbr_progress.py` as runtime-affecting and deterministic validator enforces it)
+- [x] M18.17: Checkpoint deterministic skip-mode coverage (`validate_run_po_sbr_myproject_readiness_checkpoint.py` and `validate_run_po_sbr_readiness_checkpoint.py` now verify both default and skip-toggle branches)
+- [x] M18.18: Pre-push deterministic skip-mode coverage (`validate_po_sbr_pre_push_hook_local_artifacts.py` now verifies both skip-mode and default-mode hook runs)
+- [x] M18.19: Main checkpoint hook-selftest branch coverage (`validate_run_po_sbr_readiness_checkpoint.py` now verifies both hook-selftest execute and skip branches)
+- [x] M18.20: Pre-push progress skip-artifact hygiene (`.githooks/pre-push` now emits explicit skipped progress artifact and hook self-test validates its schema/status)
+- [x] M18.21: Pre-push skip-toggle matrix coverage (`validate_po_sbr_pre_push_hook_local_artifacts.py` now verifies both-skip, post-change-skip-only, progress-skip-only, and default-mode branches)
+- [x] M18.22: Main checkpoint hook-selftest evidence tightening (`validate_run_po_sbr_readiness_checkpoint.py` now requires pre-push selftest matrix markers in execute branch and forbids them in skip branch)
+- [x] M18.23: MyProject checkpoint branch artifact isolation (`validate_run_po_sbr_myproject_readiness_checkpoint.py` now writes/validates distinct default vs skip checkpoint report paths)
+- [x] M18.24: MyProject checkpoint progress/hook deterministic parity (`run_po_sbr_myproject_readiness_checkpoint.sh` now runs progress + hook-selftest validators with skip toggles and checkpoint payload status fields)
+- [x] M18.25: MyProject checkpoint computed-status hardening (`run_po_sbr_myproject_readiness_checkpoint.sh` now derives checkpoint status from real report payloads and enforces run-id progress artifact isolation)
+- [x] M18.26: MyProject checkpoint report validator integration (`validate_po_sbr_myproject_readiness_checkpoint_report.py` added and wired into checkpoint runner + deterministic branch coverage)
+- [x] M18.27: MyProject checkpoint report-validator failure-branch coverage (`validate_run_po_sbr_myproject_readiness_checkpoint_report.py` added for ready/mismatch/blocked semantics)
+- [x] M18.28: Progress snapshot computed-checkpoint semantic parity (`show_po_sbr_progress.py` now evaluates myproject checkpoint using function/local/drift/check-map fields with blocked-optional deterministic coverage)
+- [x] M18.29: MyProject checkpoint schema-version hardening (`version=1` added to checkpoint report and enforced across report/deterministic validators)
+- [x] M18.30: MyProject checkpoint cross-report consistency hardening (`validate_po_sbr_myproject_readiness_checkpoint_report.py` now verifies checkpoint fields against referenced source reports)
+- [x] M18.31: MyProject checkpoint run-id provenance hardening (`run_id` tail/head commit consistency and run-id-tagged drift/progress artifact enforcement)
+- [x] M18.32: AVx-lite open-source architecture alignment (`Scene/RT/Baseband/Processing layering + path contract hardening kickoff`)
+- [x] M18.33: CARLA exporter bridge integration (`carla_export -> asset_manifest -> scene pipeline canonical artifacts`)
+- [x] M18.34: Radar compensation layer boundary (`RCS/wideband/manifold/diffuse/clutter`) integrated into scene pipeline
+- [x] M18.35: Multipath/ghost-focused KPI matrix profile expansion (`single_target_ghost_comp_v1`, `single_target_clutter_comp_v1`)
+- [x] M18.36: Radar compensation measured-reference tuning + profile-lock freeze (`candidate scoring + profile lock override path in golden/matrix runners`)
+- [x] M18.37: Antenna complex-manifold asset loader integration (`openEMS/gprMax-style manifold asset ingestion + compensation manifold binding`)
+- [x] M18.38: EM solver packaging/license boundary notes (`openEMS/CSXCAD/gprMax policy + reference-lock tracking + deterministic validator`)
+- [x] M18.39: MyProject checkpoint EM policy validator integration (`checkpoint/report schemas now require EM policy validation status + deterministic skip/default coverage`)
+- [x] M18.40: Closure/main-checkpoint EM policy chain integration (`operator closure emits EM policy provenance/status; main deterministic checkpoint and pre-push/post-change classifiers enforce EM policy artifacts`)
+- [x] M18.41: Operator-closure report schema validator integration (`closure runner self-validates JSON contract; deterministic closure/main-checkpoint chains require validator pass evidence`)
+- [x] M18.42: Operator-closure report deterministic branch coverage integration (`ready/mismatch/blocked validator harness + main checkpoint deterministic skip-toggle wiring`)
+- [x] M18.43: MyProject checkpoint closure-report deterministic guard integration (`checkpoint status/check schema includes closure-report-validator status with default/skip deterministic branch coverage`)
+- [x] M18.44: Pre-push closure-report deterministic guard integration (`pre-push hook runs closure-report deterministic validator with skip-toggle matrix coverage in local-artifact selftest`)
+- [x] M18.45: Readiness-chain closure-report skip-only evidence tightening (`pre-push selftest emits dedicated closure-report-skip-only marker and readiness deterministic validators require it in default branch`)
+- [x] M18.46: Contract explicit marker lock (`AVX/EM contracts explicitly require closure-report-skip-only pre-push evidence markers`)
 
 ## Iteration Rule (One-by-One Verification)
 
@@ -222,7 +270,7 @@ Each milestone is accepted only if:
 
 ## Immediate Next Step
 
-Use the automated post-change gate `scripts/run_po_sbr_post_change_gate.py` (`--strict`) to enforce operator closure verification only when runtime-affecting files changed, and keep both closure and post-change gate reports green on this Linux PC.
+Keep the post-change gate chain green on this Linux PC by running `scripts/run_po_sbr_post_change_gate.py --strict` and `scripts/validate_run_po_sbr_post_change_gate.py` in the local readiness/closure sweep whenever runtime-affecting files change.
 
 ## M10.19 Decision Gate
 
@@ -2211,6 +2259,351 @@ Post-M17 frontend closure and operator handoff gate outcome (2026-03-01):
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/113_po_sbr_linux_runtime_runbook.md`
   - `/home/seongcheoljeong/workspace/Radar-Simulation/docs/190_handoff_checklist_other_pc.md`
 
+M18.7 post-change deterministic gate outcome (2026-03-02):
+
+- added deterministic validator:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_post_change_gate.py`
+- validator now asserts all core gate modes in one run:
+  - no-change strict path stays `closure_status=skipped` + `overall_status=ready`
+  - force-run pass path stays `closure_status=pass` + `overall_status=ready`
+  - force-run fail path stays `closure_status=fail` + `overall_status=blocked` (non-strict)
+  - force-run fail + strict returns non-zero as required
+
+M18.8 readiness-checkpoint post-change deterministic chain integration outcome (2026-03-02):
+
+- checkpoint chain now runs deterministic post-change gate validator by default:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_readiness_checkpoint.sh`
+  - new skip toggle: `PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1`
+- deterministic checkpoint validator now asserts execution of this step:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+  - required log evidence: `validate post-change deterministic gate`
+
+M18.9 myproject readiness-checkpoint post-change deterministic chain integration outcome (2026-03-02):
+
+- myproject checkpoint chain now runs deterministic post-change validator by default:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - new skip toggle: `PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1`
+- checkpoint report now records validator outcome field:
+  - `post_change_gate_validator_status` (`pass|skipped`)
+- deterministic myproject checkpoint validator now asserts:
+  - execution log evidence: `validate post-change deterministic gate`
+  - checkpoint payload field: `post_change_gate_validator_status=pass`
+
+M18.10 post-change runtime-affecting coverage hardening outcome (2026-03-02):
+
+- post-change gate runtime-affecting detection expanded:
+  - `.githooks/*` changes now trigger closure gate execution
+  - `scripts/validate_run_po_sbr_*` and `scripts/validate_run_avx_*` changes now trigger closure gate execution
+- deterministic validator coverage expanded:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_post_change_gate.py`
+  - now asserts runtime-affecting classifier behavior for hook paths + deterministic validator paths and keeps `docs/*` non-runtime
+
+M18.11 pre-push deterministic post-change guard integration outcome (2026-03-02):
+
+- pre-push hook now runs deterministic post-change validator by default:
+  - `/home/seongcheoljeong/workspace/myproject/.githooks/pre-push`
+  - skip toggle: `PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1`
+- hook self-test now asserts this step executed:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - required hook stdout evidence: `[pre-push] validate post-change deterministic gate`
+
+M18.12 progress snapshot deterministic guard integration outcome (2026-03-02):
+
+- progress snapshot now includes optional myproject checkpoint stage:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/show_po_sbr_progress.py`
+  - stage name: `myproject_readiness_checkpoint` (`required=false`)
+  - captures `overall_status`, `avx_developer_gate_status`, `post_change_gate_validator_status`
+  - strict readiness remains based on required stages only
+- deterministic progress-snapshot validator added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_progress_snapshot.py`
+  - verifies strict-ready succeeds both when optional myproject stage is missing and when it is ready
+- main readiness checkpoint chain now executes this validator:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_readiness_checkpoint.sh`
+  - skip toggle: `PO_SBR_SKIP_PROGRESS_SNAPSHOT_VALIDATOR=1`
+  - deterministic checkpoint validator asserts log evidence: `validate progress snapshot deterministic runner`
+
+M18.13 local hook activation + strict progress green outcome (2026-03-02):
+
+- repo-local git hook path activated:
+  - command: `bash scripts/install_po_sbr_pre_push_hook.sh`
+  - resulting git config: `core.hooksPath=.githooks`
+- strict progress snapshot is now fully ready:
+  - command: `PYTHONPATH=src .venv-po-sbr/bin/python scripts/show_po_sbr_progress.py --strict-ready --output-json docs/reports/po_sbr_progress_snapshot_2026_03_02.json`
+  - result: `overall_ready=True`, required progress `6/6 ready (100.0%)`
+  - required stage `local_pre_push_hook` now reports `ready`
+
+M18.14 pre-push strict progress artifact integration outcome (2026-03-02):
+
+- pre-push hook now emits strict progress artifact in `.git`:
+  - `/home/seongcheoljeong/workspace/myproject/.githooks/pre-push`
+  - output path: `.git/po_sbr_progress_snapshot_hook_latest.json`
+  - skip toggle: `PO_SBR_SKIP_PROGRESS_SNAPSHOT=1`
+- hook self-test now enforces progress artifact and readiness:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - required checks:
+    - hook artifact exists: `.git/po_sbr_progress_snapshot_hook_latest.json`
+    - `report_name=po_sbr_progress_snapshot`
+    - `overall_ready=true`
+
+M18.15 pre-push strict progress execution-trace guard outcome (2026-03-02):
+
+- pre-push hook now prints strict progress artifact log line:
+  - `/home/seongcheoljeong/workspace/myproject/.githooks/pre-push`
+  - emitted line: `[pre-push] strict progress snapshot: .git/po_sbr_progress_snapshot_hook_latest.json`
+- hook self-test now enforces execution-trace evidence (not only artifact existence):
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - required hook stdout evidence:
+    - `[pre-push] generate strict progress snapshot`
+    - `[pre-push] strict progress snapshot:`
+
+M18.16 post-change runtime-affecting classifier includes progress gate script outcome (2026-03-02):
+
+- post-change runtime-affecting classifier expanded:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_post_change_gate.py`
+  - `scripts/show_po_sbr_progress.py` is now included as runtime-affecting exact file
+- deterministic post-change validator expanded:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_post_change_gate.py`
+  - now asserts `_is_runtime_affecting(\"scripts/show_po_sbr_progress.py\") == True`
+
+M18.17 checkpoint deterministic skip-mode coverage outcome (2026-03-02):
+
+- myproject readiness-checkpoint deterministic validator now verifies both branches:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+  - default branch asserts `post_change_gate_validator_status=pass`
+  - skip branch (`PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1`) asserts skip log + `post_change_gate_validator_status=skipped`
+- main readiness-checkpoint deterministic validator now verifies both branches:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+  - default branch asserts validator execution logs for post-change + progress snapshot deterministic runners
+  - skip branch (`PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1`, `PO_SBR_SKIP_PROGRESS_SNAPSHOT_VALIDATOR=1`) asserts corresponding skip logs
+
+M18.18 pre-push deterministic skip-mode coverage outcome (2026-03-02):
+
+- pre-push hook self-test now verifies two hook-run branches:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - skip-mode run:
+    - env toggles: `PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1`, `PO_SBR_SKIP_PROGRESS_SNAPSHOT=1`
+    - asserts skip logs and confirms strict progress artifact is not generated in skip run
+  - default-mode run:
+    - asserts deterministic validator/progress execution logs
+    - asserts hook artifacts remain ready and tracked reports unchanged
+
+M18.19 main checkpoint hook-selftest branch coverage outcome (2026-03-02):
+
+- main readiness-checkpoint deterministic validator now verifies both hook-selftest branches:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+  - default branch:
+    - runs pre-push local-artifact validator
+    - asserts log evidence: `validate pre-push local-artifact mode`
+  - skip branch:
+    - env toggle: `PO_SBR_SKIP_HOOK_SELFTEST=1`
+    - asserts log evidence: `skip pre-push local-artifact validator (PO_SBR_SKIP_HOOK_SELFTEST=1)`
+- existing post-change/progress deterministic skip-branch assertions remain preserved in the same validator run
+
+M18.20 pre-push progress skip-artifact hygiene outcome (2026-03-02):
+
+- pre-push skip path now emits explicit skipped progress artifact:
+  - `/home/seongcheoljeong/workspace/myproject/.githooks/pre-push`
+  - when `PO_SBR_SKIP_PROGRESS_SNAPSHOT=1`, writes:
+    - `report_name=po_sbr_progress_snapshot`
+    - `hook_progress_snapshot_status=skipped`
+    - `overall_ready=null`
+  - emits log evidence: `[pre-push] strict progress snapshot skipped artifact: ...`
+- hook self-test now validates skip-artifact schema/status:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - skip-mode branch asserts skipped artifact log + payload fields above
+  - default-mode branch still requires strict progress artifact with `overall_ready=true`
+
+M18.21 pre-push skip-toggle matrix coverage outcome (2026-03-02):
+
+- pre-push hook self-test now verifies four branch combinations in one deterministic run:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - both-skip: `PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1` + `PO_SBR_SKIP_PROGRESS_SNAPSHOT=1`
+  - post-change-skip-only: `PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1`
+  - progress-skip-only: `PO_SBR_SKIP_PROGRESS_SNAPSHOT=1`
+  - default-mode: no skip toggles
+- matrix assertions include:
+  - expected skip/execute log tokens per branch
+  - expected progress artifact schema per branch (`overall_ready=true` vs skipped payload)
+  - tracked reports remain unchanged across full matrix run
+  - validator output marker: `hook_skip_mode_matrix_verified: true`
+
+M18.22 main checkpoint hook-selftest evidence tightening outcome (2026-03-02):
+
+- main checkpoint deterministic validator now requires concrete pre-push selftest evidence in execute branch:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+  - required markers in `out_default`:
+    - `hook_skip_mode_matrix_verified: true`
+    - `tracked_report_changes: 0`
+- main checkpoint deterministic validator now forbids pre-push selftest marker in skip branch:
+  - when `PO_SBR_SKIP_HOOK_SELFTEST=1`, `out_skip` must not contain:
+    - `hook_skip_mode_matrix_verified: true`
+
+M18.23 myproject checkpoint branch artifact isolation outcome (2026-03-02):
+
+- myproject checkpoint deterministic validator now uses branch-specific run ids:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+  - default branch run-id date: `2026_03_02_default`
+  - skip branch run-id date: `2026_03_02_skip`
+- overwrite masking guard added:
+  - validator now asserts `checkpoint_json_default != checkpoint_json_skip`
+  - ensures default/skip branch assertions are evaluated on distinct output artifacts
+
+M18.24 myproject checkpoint progress/hook deterministic parity outcome (2026-03-02):
+
+- myproject checkpoint runner now includes progress/hook deterministic gate steps:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - always emits progress snapshot report:
+    - `progress_json=docs/reports/po_sbr_progress_snapshot_<run_id>.json` (path upgraded in M18.25)
+  - validator steps with skip toggles:
+    - `PO_SBR_SKIP_PROGRESS_SNAPSHOT_VALIDATOR=1`
+    - `PO_SBR_SKIP_HOOK_SELFTEST=1`
+  - checkpoint report now records:
+    - `progress_snapshot_json`
+    - `progress_snapshot_validator_status` (`pass|skipped`)
+    - `hook_selftest_validator_status` (`pass|skipped`)
+- myproject deterministic validator now enforces execute/skip evidence for all three checkpoint validators:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+  - default branch requires:
+    - post-change/progress/hook validator execution logs
+    - pre-push selftest markers: `hook_skip_mode_matrix_verified: true`, `tracked_report_changes: 0`
+  - skip branch requires:
+    - explicit skip logs for post-change/progress/hook validators
+    - forbids pre-push selftest marker in skip branch
+- progress parser/validator updated for expanded myproject checkpoint status fields:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/show_po_sbr_progress.py`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_progress_snapshot.py`
+
+M18.25 myproject checkpoint computed-status hardening outcome (2026-03-02):
+
+- myproject checkpoint runner now computes status from real payload values (no hardcoded ready):
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - reads and records:
+    - `function_test_overall_status`
+    - `local_ready_overall_status`
+    - `baseline_drift_verdict`
+    - `baseline_drift_difference_count`
+    - `avx_developer_gate_status` (from AVX gate report)
+    - `progress_snapshot_overall_ready`
+  - adds boolean checkpoint gate map:
+    - `checkpoint_checks.*` (`function_test_ready`, `baseline_drift_match`, `progress_snapshot_validator_ok`, etc.)
+  - computes `overall_status=ready|blocked` from those checks and exits non-zero when blocked
+- myproject progress artifact now uses run-id path (overwrite-masking guard at artifact level):
+  - `progress_json=docs/reports/po_sbr_progress_snapshot_<run_id>.json`
+  - validator now asserts:
+    - `progress_snapshot_json_default != progress_snapshot_json_skip`
+    - `checkpoint_json_default != checkpoint_json_skip`
+- deterministic myproject validator now asserts computed-status fields/checks for both default and skip branches:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+
+M18.26 myproject checkpoint report validator integration outcome (2026-03-02):
+
+- new checkpoint report validator added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py`
+  - validates schema + path existence + status consistency:
+    - `function_test_overall_status`, `local_ready_overall_status`
+    - `baseline_drift_verdict`, `baseline_drift_difference_count`
+    - `progress_snapshot_overall_ready`
+    - `checkpoint_checks.*` boolean map
+    - computed `overall_status` consistency (`ready|blocked`)
+- checkpoint runner now executes report validator step:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - added step:
+    - `[myproject-checkpoint] validate myproject checkpoint report`
+    - `scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py --summary-json ... --require-ready`
+- deterministic checkpoint validator now enforces new validator-step execution in both branches:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+  - requires `validate myproject checkpoint report` token in:
+    - default branch output
+    - skip-toggle branch output
+
+M18.27 myproject checkpoint report-validator failure-branch coverage outcome (2026-03-02):
+
+- added deterministic validator-of-validator for checkpoint report schema/policy:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint_report.py`
+  - fixture matrix coverage:
+    - ready report: must pass with `--require-ready`
+    - mismatch report (`checkpoint_checks.avx_developer_gate_ready=false` while status ready): must fail with mismatch token
+    - blocked report: must pass without `--require-ready`, must fail with `--require-ready`
+- tightened deterministic myproject checkpoint runner validator evidence:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+  - both default/skip branches now require checkpoint report validator pass marker:
+    - `validate_po_sbr_myproject_readiness_checkpoint_report: pass`
+
+M18.28 progress snapshot computed-checkpoint semantic parity outcome (2026-03-02):
+
+- progress snapshot now derives optional myproject stage readiness from full computed checkpoint semantics:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/show_po_sbr_progress.py`
+  - added readiness inputs:
+    - `function_test_overall_status`
+    - `local_ready_overall_status`
+    - `baseline_drift_verdict`
+    - `baseline_drift_difference_count`
+    - `progress_snapshot_overall_ready`
+    - `checkpoint_checks.*` aggregate gate
+  - stage details now expose the above fields plus:
+    - `checkpoint_checks_ready`
+- deterministic progress validator now includes blocked optional-stage fixture:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_progress_snapshot.py`
+  - coverage now verifies:
+    - missing optional myproject stage => `status=missing`, `overall_ready=true`
+    - ready myproject stage with full computed fields => `status=ready`
+    - blocked myproject stage (e.g., AVX blocked/check-map false) => `status=blocked`, `overall_ready=true` (optional stage remains non-blocking for strict required readiness)
+
+M18.29 myproject checkpoint schema-version hardening outcome (2026-03-02):
+
+- myproject checkpoint writer now stamps explicit schema version:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - report field added:
+    - `version=1`
+- checkpoint report validator now enforces schema version + metadata presence:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py`
+  - new required constraints:
+    - `version==1`
+    - non-empty `generated_at_utc`, `run_id`, `branch`, `head_commit`
+    - absolute `workspace_root`
+- deterministic validators updated for version-aware coverage:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint_report.py`
+    - fixture now emits `version=1`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+    - default/skip branch payload assertions now require `version==1` and non-empty `run_id`
+
+M18.30 myproject checkpoint cross-report consistency hardening outcome (2026-03-02):
+
+- checkpoint report validator now enforces source-report consistency (anti-tamper coherence):
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py`
+  - validates checkpoint fields against referenced reports:
+    - `function_test_overall_status` vs function-test `overall_status`
+    - `local_ready_overall_status` vs local-ready `summary.overall_status`
+    - `baseline_drift_verdict`/`baseline_drift_difference_count` vs drift report
+    - `avx_developer_gate_status` vs AVX gate report
+    - `progress_snapshot_overall_ready` vs progress snapshot report
+  - `checkpoint_checks.*` and `overall_status` are now derived/checked against source-report semantics
+- deterministic report-validator fixture coverage expanded:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint_report.py`
+  - added source-mismatch negative case:
+    - `function_test_overall_status` intentionally diverges from referenced function-test report and must fail with expected mismatch token
+  - blocked-case now uses blocked AVX source report (not only checkpoint field mutation) for semantic coherence
+
+M18.31 myproject checkpoint run-id provenance hardening outcome (2026-03-02):
+
+- checkpoint report validator now enforces run-id provenance constraints:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py`
+  - required relations:
+    - `head_commit` must start with `run_id` tail token (short commit provenance)
+    - `baseline_drift_report_json` filename must include `run_id`
+    - `progress_snapshot_json` filename must include `run_id`
+- deterministic report-validator fixture now uses run-id-tagged source artifacts:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint_report.py`
+  - fixture updates:
+    - `run_id=2026_03_02_fixture`
+    - `head_commit=fixture_commit_hash` (run-id tail prefix)
+    - drift/progress fixture filenames include run-id
+- deterministic myproject checkpoint runner validator now enforces run-id provenance on live artifacts:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+  - default/skip branch assertions added:
+    - `head_commit.startswith(run_id_tail)`
+    - progress/drift filenames include branch `run_id`
+
 M14.x migration mirror outcome (2026-03-01):
 
 - migrated backend PO-SBR toolchain from Radar-Simulation into this repo:
@@ -2268,3 +2661,402 @@ Radar-Simulation canonical merged lock references (2026-03-01):
   - checkpoint evidence:
     - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_myproject_readiness_checkpoint_2026_03_01_b3f39d7.json` (`overall_status=ready`)
     - `/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_checkpoint_2026_03_01_b3f39d7.json` (`drift_verdict=match`, `difference_count=0`)
+
+M18.32 AVx-lite open-source architecture alignment outcome (2026-03-02):
+
+- master-plan scope expanded for AVx-lite layering:
+  - `(Scene/Traffic) + (Multipath RT) + (Radar Baseband/ADC) + (Processing/V&V)`
+  - HFSS-alternative antenna asset path included (`openEMS` / `gprMax` -> complex manifold assets)
+- architecture one-page spec added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/267_avx_lite_open_source_architecture_spec.md`
+- contract hardening workstream added (step 1 of immediate plan):
+  - new path contract validator module:
+    - `/home/seongcheoljeong/workspace/myproject/src/avxsim/path_contract.py`
+  - enforcement integrated into scene/runtime synthesis path:
+    - `/home/seongcheoljeong/workspace/myproject/src/avxsim/synth.py`
+    - `/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py`
+    - `/home/seongcheoljeong/workspace/myproject/src/avxsim/io.py`
+  - output contract doc tightened for serialized path metadata requirements:
+    - `/home/seongcheoljeong/workspace/myproject/docs/02_output_contracts.md`
+  - deterministic contract validator added:
+    - `/home/seongcheoljeong/workspace/myproject/scripts/validate_path_list_contract.py`
+- next execution phases from this point:
+  1. CARLA exporter bridge into scene payload ingestion.
+  2. radar compensation layer (`RCS/clutter/wideband/manifold`) as explicit module boundary.
+  3. multipath/ghost-focused profile additions to KPI scenario matrix.
+
+M18.33 CARLA exporter bridge integration outcome (2026-03-02):
+
+- CARLA export parser bridge added:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/carla_export_bridge.py`
+  - normalizes `carla_export.json` actor snapshots into existing `asset_manifest` contract
+  - default filtering:
+    - excludes `sensor.*` actors
+    - excludes ego actor unless explicitly included
+  - preserves parser diagnostics:
+    - actor/object/exclusion counts
+    - actor type histogram
+    - auto mesh-area derivation metadata
+- integration CLIs added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/build_asset_manifest_from_carla_export.py`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/build_mesh_scene_from_carla_export.py`
+- package exports updated:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/__init__.py`
+    - `load_carla_export_json`
+    - `build_asset_manifest_from_carla_export`
+    - `DEFAULT_CARLA_EXPORT_PROFILE`
+    - `DEFAULT_CARLA_EXPORT_VERSION`
+- bridge contract doc added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/268_carla_export_bridge_contract.md`
+- deterministic end-to-end validator added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_carla_export_bridge.py`
+  - validates full flow:
+    - `carla_export -> asset_manifest -> scene_json -> path_list/adc_cube/radar_map`
+
+- remaining execution phases from this point:
+  1. radar compensation layer (`RCS/clutter/wideband/manifold`) as explicit module boundary.
+  2. multipath/ghost-focused profile additions to KPI scenario matrix.
+
+M18.34 radar compensation layer boundary integration outcome (2026-03-02):
+
+- explicit radar compensation module added:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/radar_compensation.py`
+  - compensation scope:
+    - material/RCS scaling
+    - wideband FMCW correction
+    - manifold complex gain injection
+    - diffuse path spawning
+    - clutter path spawning
+- scene pipeline integration completed:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py`
+  - applied before synthesis for:
+    - `analytic_targets`
+    - `mesh_material_stub`
+    - `sionna_rt`
+    - `po_sbr_rt`
+    - `radarsimpy_rt`
+  - `radar_map.npz` metadata now includes `compensation_summary` when configured
+- package export added:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/__init__.py`
+  - exported API: `apply_radar_compensation`
+- contract/validator added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/269_radar_compensation_layer_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_scene_radar_compensation_layer.py`
+
+M18.35 multipath/ghost-focused KPI scenario-matrix profile expansion outcome (2026-03-02):
+
+- golden-path profile catalog expanded with compensation-focused informational profiles:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_scene_backend_golden_path.py`
+  - added:
+    - `single_target_ghost_comp_v1`
+    - `single_target_clutter_comp_v1`
+- profile runner now forwards optional `radar_compensation` payload into backend scene payloads for all backends
+- scenario-matrix default profile map expanded:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_scene_backend_kpi_scenario_matrix.py`
+  - both new profiles mapped to `realism_informational`
+- scenario-matrix contract doc updated:
+  - `/home/seongcheoljeong/workspace/myproject/docs/253_scene_backend_kpi_scenario_matrix_contract.md`
+
+- remaining execution phases from this point:
+  1. tune compensation parameter presets against measured references and freeze profile-level defaults.
+
+M18.36 radar compensation measured-reference tuning + profile-lock freeze outcome (2026-03-02):
+
+- compensation tuning core added:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/radar_compensation_tuning.py`
+  - supports candidate patch evaluation against reference `radar_map.npz` and weighted metric scoring
+- tuning + freeze CLI added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/tune_radar_compensation_presets.py`
+  - outputs:
+    - tuning report JSON (ranked candidates + selected config)
+    - profile lock JSON (`profiles.<id>.radar_compensation`)
+- golden-path/matrix lock-consumption integration added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_scene_backend_golden_path.py`
+    - new option: `--radar-compensation-lock-json`
+    - lock override provenance emitted:
+      - `equivalence_inputs.radar_compensation_source`
+      - `equivalence_inputs.radar_compensation_lock_json`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_scene_backend_kpi_scenario_matrix.py`
+    - lock option pass-through to golden-path runner
+- package exports expanded:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/__init__.py`
+  - new APIs:
+    - `tune_radar_compensation_candidates`
+    - `build_profile_compensation_lock_payload`
+    - `load_profile_compensation_lock_json`
+    - related candidate/report helpers
+- contract + deterministic validator added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/270_radar_compensation_profile_lock_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_tune_radar_compensation_presets.py`
+
+- remaining execution phases from this point:
+  1. implement antenna complex-manifold asset loader (`openEMS/gprMax asset ingestion`) and bind it to compensation/manifold path.
+
+M18.37 antenna complex-manifold asset loader integration outcome (2026-03-02):
+
+- new manifold asset loader module added:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/antenna_manifold_asset.py`
+  - supports `.npz` and optional `.h5/.hdf5` (with `h5py`) manifold tables
+  - canonical fields:
+    - axes: `freq_hz`, `theta_deg`, `phi_deg`
+    - complex fields: `tx_etheta`, `tx_ephi`, `rx_etheta`, `rx_ephi`
+  - includes periodic-phi trilinear interpolation and monostatic complex gain sampling
+- compensation manifold binding completed:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/radar_compensation.py`
+  - new manifold config options:
+    - `asset_path`
+    - `asset_frequency_hz`
+    - `asset_gain_scale`
+    - `asset_tx_pol_weights`
+    - `asset_rx_pol_weights`
+  - `compensation_summary` now reports manifold asset provenance fields
+- scene-json relative asset path resolution added:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py`
+  - `backend.radar_compensation.manifold.asset_path` resolves relative to scene JSON directory
+- package exports expanded:
+  - `/home/seongcheoljeong/workspace/myproject/src/avxsim/__init__.py`
+  - exports:
+    - `ComplexManifoldAsset`
+    - `load_complex_manifold_asset`
+- contract + deterministic validator added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/271_antenna_complex_manifold_asset_loader_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_antenna_complex_manifold_asset_loader.py`
+
+- remaining execution phases from this point:
+  1. track packaging/license boundary notes for EM solver selection (`openEMS`/`gprMax`) before distributable packaging.
+
+M18.38 EM solver packaging/license boundary notes outcome (2026-03-02):
+
+- packaging/license boundary contract added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/272_em_solver_packaging_license_boundary_contract.md`
+- machine-readable policy artifact added:
+  - `/home/seongcheoljeong/workspace/myproject/docs/em_solver_packaging_policy.json`
+  - captures:
+    - source/license inventory (`openEMS`, `CSXCAD`, `gprMax`)
+    - distribution boundary defaults (no solver bundling in distributable package)
+    - compliance controls and risk classification
+- deterministic policy validator added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_em_solver_packaging_policy.py`
+  - validates policy schema/content + solver commit locks in `external/reference-locks.md`
+- reference lock fetch/update path extended:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/fetch_references.sh`
+  - now tracks:
+    - `openEMS`
+    - `CSXCAD`
+    - `gprMax`
+- architecture/status docs aligned:
+  - `/home/seongcheoljeong/workspace/myproject/docs/267_avx_lite_open_source_architecture_spec.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/07_reference_repo_strategy.md`
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.45 readiness-chain closure-report skip-only evidence tightening outcome (2026-03-02):
+
+- pre-push local-artifact deterministic validator now emits explicit closure-report-skip-only evidence marker:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - new marker:
+    - `hook_closure_report_skip_only_verified: true`
+- main readiness deterministic validator now requires/forbids the new marker by branch:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+  - default branch requires marker presence
+  - hook-selftest skip branch forbids marker presence
+- myproject readiness deterministic validator now requires/forbids the new marker by branch:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+  - default branch requires marker presence
+  - hook-selftest skip branch forbids marker presence
+- regression confirmation:
+  - pre-push local-artifact validator remains green with closure-report-skip-only branch coverage
+  - main/myproject checkpoint deterministic chains remain green
+  - post-change and closure deterministic chains remain green
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.46 contract explicit marker lock outcome (2026-03-02):
+
+- AVX developer gate contract now explicitly requires pre-push closure-report skip-only marker evidence:
+  - `/home/seongcheoljeong/workspace/myproject/docs/265_po_sbr_avx_developer_gate_contract.md`
+  - explicit required markers:
+    - `hook_skip_mode_matrix_verified: true`
+    - `hook_closure_report_skip_only_verified: true`
+    - `tracked_report_changes: 0`
+- EM solver packaging/license boundary contract now explicitly requires the same marker evidence:
+  - `/home/seongcheoljeong/workspace/myproject/docs/272_em_solver_packaging_license_boundary_contract.md`
+- regression confirmation:
+  - pre-push local-artifact deterministic validator remains green with explicit marker output
+  - main/myproject readiness deterministic validators remain green with marker presence/absence branch enforcement
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.39 myproject checkpoint EM policy validator integration outcome (2026-03-02):
+
+- myproject checkpoint runner now enforces EM packaging policy validation:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - added step:
+    - `[myproject-checkpoint] validate EM solver packaging policy`
+    - `scripts/validate_em_solver_packaging_policy.py --policy-json ... --reference-locks-md ...`
+  - skip toggle:
+    - `PO_SBR_SKIP_EM_POLICY_VALIDATOR=1`
+  - checkpoint report payload now records:
+    - `em_solver_policy_json`
+    - `em_solver_reference_locks_md`
+    - `em_policy_validator_status`
+    - `checkpoint_checks.em_policy_validator_ok`
+- checkpoint report validator updated for new EM policy fields:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py`
+  - now requires:
+    - absolute existing `em_solver_policy_json`
+    - absolute existing `em_solver_reference_locks_md`
+    - status `em_policy_validator_status in {pass, skipped, fail}`
+    - `checkpoint_checks.em_policy_validator_ok`
+- deterministic validator coverage updated:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+    - default branch asserts EM policy validator execute/pass evidence
+    - skip branch asserts EM policy validator skip evidence (`PO_SBR_SKIP_EM_POLICY_VALIDATOR=1`)
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint_report.py`
+    - fixture report schema now includes EM policy paths/status/check field
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.40 closure/main-checkpoint EM policy chain integration outcome (2026-03-02):
+
+- operator closure now enforces EM packaging policy validation and emits provenance:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/verify_po_sbr_operator_handoff_closure.sh`
+  - closure payload fields:
+    - `em_solver_packaging_policy.policy_json`
+    - `em_solver_packaging_policy.reference_locks_md`
+    - `em_solver_packaging_policy.validator_status` (`pass|skipped`)
+  - skip toggle:
+    - `PO_SBR_SKIP_EM_POLICY_VALIDATOR=1`
+- deterministic closure validator expanded for EM default/skip branches:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_operator_handoff_closure.py`
+  - validates:
+    - default run emits EM validator pass evidence
+    - skip run emits EM skip evidence
+    - closure payload keeps absolute existing EM policy/reference-lock paths
+- main readiness checkpoint deterministic validator now enforces closure EM guard evidence:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+  - default branch:
+    - requires closure EM validator execution/pass markers
+  - skip branch:
+    - requires closure EM validator skip marker via `PO_SBR_SKIP_EM_POLICY_VALIDATOR=1`
+  - validates closure payload EM provenance/status in both branches
+- pre-push hook local-artifact deterministic validator now requires closure EM provenance:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - checks:
+    - `em_solver_packaging_policy.validator_status in {pass, skipped}`
+    - closure EM policy/reference-lock paths exist
+- post-change runtime-affecting classifier expanded for EM policy artifacts:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_post_change_gate.py`
+  - now treats as runtime-affecting:
+    - `scripts/validate_em_solver_packaging_policy.py`
+    - `docs/em_solver_packaging_policy.json`
+    - `external/reference-locks.md`
+  - deterministic coverage:
+    - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_post_change_gate.py`
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.41 operator-closure report schema validator integration outcome (2026-03-02):
+
+- dedicated closure report validator added:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_operator_handoff_closure_report.py`
+  - validates:
+    - closure report schema
+    - AVX/merged-checkpoint cross-report status coherence
+    - EM policy provenance/status consistency
+    - computed policy parity for `overall_status`
+- closure runner now self-validates emitted report:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/verify_po_sbr_operator_handoff_closure.sh`
+  - new step:
+    - `[closure] validate operator handoff closure report`
+    - `validate_po_sbr_operator_handoff_closure_report: pass`
+- deterministic validators now require closure report-validator pass evidence:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_operator_handoff_closure.py`
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+- contract alignment:
+  - `/home/seongcheoljeong/workspace/myproject/docs/265_po_sbr_avx_developer_gate_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/272_em_solver_packaging_license_boundary_contract.md`
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.42 operator-closure report deterministic branch coverage integration outcome (2026-03-02):
+
+- deterministic validator-of-validator added for operator closure report:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_operator_handoff_closure_report.py`
+  - covers:
+    - ready report pass (`--require-ready`)
+    - checkpoint-ready mismatch fail branch
+    - blocked report pass/fail semantics with and without `--require-ready`
+- main readiness checkpoint runner now includes deterministic closure report-validator step:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_readiness_checkpoint.sh`
+  - new step:
+    - `[checkpoint] validate operator-closure report deterministic runner`
+  - new skip toggle:
+    - `PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR=1`
+- deterministic main readiness validator expanded for new step:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_readiness_checkpoint.py`
+  - default branch requires:
+    - `validate_run_po_sbr_operator_handoff_closure_report: pass`
+  - skip branch requires:
+    - `skip operator-closure report deterministic validator (PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR=1)`
+- contract alignment:
+  - `/home/seongcheoljeong/workspace/myproject/docs/265_po_sbr_avx_developer_gate_contract.md`
+  - `/home/seongcheoljeong/workspace/myproject/docs/272_em_solver_packaging_license_boundary_contract.md`
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.43 myproject checkpoint closure-report deterministic guard integration outcome (2026-03-02):
+
+- myproject checkpoint runner now executes closure-report deterministic validator with skip toggle:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/run_po_sbr_myproject_readiness_checkpoint.sh`
+  - new step:
+    - `[myproject-checkpoint] validate operator-closure report deterministic runner`
+  - new skip toggle:
+    - `PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR=1`
+- myproject checkpoint payload schema expanded:
+  - `closure_report_validator_status`
+  - `checkpoint_checks.closure_report_validator_ok`
+- myproject checkpoint report validator updated:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_myproject_readiness_checkpoint_report.py`
+  - now enforces:
+    - status `closure_report_validator_status in {pass, skipped, fail}`
+    - `checkpoint_checks.closure_report_validator_ok`
+- deterministic validator coverage updated:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+    - default branch requires closure-report deterministic validator execute/pass evidence
+    - skip branch requires closure-report deterministic validator skip evidence
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_run_po_sbr_myproject_readiness_checkpoint_report.py`
+    - fixture schema now includes closure-report validator status/check field
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
+
+M18.44 pre-push closure-report deterministic guard integration outcome (2026-03-02):
+
+- pre-push hook now executes closure-report deterministic validator by default:
+  - `/home/seongcheoljeong/workspace/myproject/.githooks/pre-push`
+  - new step:
+    - `[pre-push] validate operator-closure report deterministic runner`
+  - new skip toggle:
+    - `PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR=1`
+- hook local-artifact deterministic validator expanded:
+  - `/home/seongcheoljeong/workspace/myproject/scripts/validate_po_sbr_pre_push_hook_local_artifacts.py`
+  - now enforces closure-report deterministic validator evidence across skip-matrix branches:
+    - both-skip branch requires closure-report deterministic skip log
+    - post-change-skip-only branch requires closure-report deterministic execute log + pass marker
+    - progress-skip-only branch requires closure-report deterministic execute log + pass marker
+    - closure-report-skip-only branch requires closure-report deterministic skip log while keeping post-change/progress steps active
+    - default-mode branch requires closure-report deterministic execute log + pass marker
+- regression confirmation:
+  - main/myproject checkpoint deterministic chains remain green with updated pre-push behavior
+  - post-change and closure deterministic chains unchanged/green
+
+- remaining execution phases from this point:
+  1. none in AVx-lite architecture step list (1-7 complete); continue normal readiness/post-change gate operation.
