@@ -186,6 +186,15 @@ def parse_args() -> argparse.Namespace:
         help="Override JSON for RadarSimPy-view ADC parity thresholds",
     )
     p.add_argument(
+        "--parity-gain-normalization",
+        default="complex_l2",
+        choices=("none", "complex_l2"),
+        help=(
+            "Optional global gain normalization before RD/RA + ADC parity. "
+            "complex_l2 scales candidate by least-squares complex gain."
+        ),
+    )
+    p.add_argument(
         "--allow-failures",
         action="store_true",
         help="Return 0 even when migration status is blocked",
@@ -756,6 +765,30 @@ def _compute_adc_view_metrics(reference: np.ndarray, candidate: np.ndarray) -> D
     }
 
 
+def _estimate_complex_l2_gain(reference: np.ndarray, candidate: np.ndarray) -> complex:
+    ref = np.asarray(reference, dtype=np.complex128).reshape(-1)
+    cand = np.asarray(candidate, dtype=np.complex128).reshape(-1)
+    denom = np.vdot(cand, cand)
+    if abs(denom) <= 1.0e-30:
+        return complex(1.0, 0.0)
+    gain = np.vdot(cand, ref) / denom
+    return complex(gain)
+
+
+def _apply_gain_to_radar_map_payload(
+    radar_map_payload: Mapping[str, Any],
+    gain: complex,
+) -> Dict[str, Any]:
+    power_scale = float(abs(complex(gain)) ** 2)
+    out: Dict[str, Any] = {}
+    for key, value in radar_map_payload.items():
+        if key in ("fx_dop_win", "fx_ang"):
+            out[str(key)] = np.asarray(value) * power_scale
+        else:
+            out[str(key)] = value
+    return out
+
+
 def _apply_metric_thresholds(metrics: Mapping[str, float], thresholds: Mapping[str, float]) -> List[Dict[str, Any]]:
     failures: List[Dict[str, Any]] = []
     for key, limit in thresholds.items():
@@ -983,6 +1016,7 @@ def main() -> None:
         row["rdra_parity"] = None
         row["adc_view_parity"] = None
         row["parity_pass"] = False
+        row["parity_normalization"] = None
         row["gate_blockers"] = []
 
         if not reference_gate_pass:
@@ -1002,14 +1036,42 @@ def main() -> None:
                 row["gate_blockers"].append("candidate_runtime_mode_not_runtime_provider")
 
         try:
+            ref_adc_sctr = np.asarray(reference_report["_adc_sctr"])
+            cand_adc_sctr = np.asarray(run_report["_adc_sctr"])
+            ref_view = np.asarray(to_radarsimpy_view(ref_adc_sctr), dtype=np.complex128)
+            cand_view = np.asarray(to_radarsimpy_view(cand_adc_sctr), dtype=np.complex128)
+            if ref_view.shape != cand_view.shape:
+                raise ValueError(
+                    f"adc view shape mismatch during normalization: {cand_view.shape} != {ref_view.shape}"
+                )
+
+            gain_mode = str(args.parity_gain_normalization).strip().lower()
+            gain = complex(1.0, 0.0)
+            if gain_mode == "complex_l2":
+                gain = _estimate_complex_l2_gain(reference=ref_view, candidate=cand_view)
+            elif gain_mode != "none":
+                raise ValueError(f"unsupported --parity-gain-normalization: {gain_mode}")
+
+            cand_adc_eval = cand_adc_sctr * gain
+            cand_radar_map_eval = _apply_gain_to_radar_map_payload(
+                radar_map_payload=run_report["_radar_map_payload"],
+                gain=gain,
+            )
+            row["parity_normalization"] = {
+                "mode": gain_mode,
+                "gain_complex": {"re": float(gain.real), "im": float(gain.imag)},
+                "gain_abs": float(abs(gain)),
+                "gain_db": float(20.0 * np.log10(max(abs(gain), 1.0e-30))),
+            }
+
             rdra_parity = compare_hybrid_estimation_payloads(
                 reference=reference_report["_radar_map_payload"],
-                candidate=run_report["_radar_map_payload"],
+                candidate=cand_radar_map_eval,
                 thresholds=rdra_threshold_overrides,
             )
             adc_view_parity = _compute_adc_view_parity(
-                reference_adc_sctr=np.asarray(reference_report["_adc_sctr"]),
-                candidate_adc_sctr=np.asarray(run_report["_adc_sctr"]),
+                reference_adc_sctr=ref_adc_sctr,
+                candidate_adc_sctr=cand_adc_eval,
                 thresholds_override=adc_threshold_overrides,
             )
             row["rdra_parity"] = rdra_parity
