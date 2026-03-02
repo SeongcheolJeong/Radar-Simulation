@@ -116,6 +116,10 @@ def main() -> None:
             "name": "validate_install_radarsimpy_ci_workflow",
             "cmd": [py_bin, "scripts/validate_install_radarsimpy_ci_workflow.py"],
         },
+        {
+            "name": "validate_show_radarsimpy_progress",
+            "cmd": [py_bin, "scripts/validate_show_radarsimpy_progress.py"],
+        },
     ]
 
     if bool(args.with_real_runtime):
