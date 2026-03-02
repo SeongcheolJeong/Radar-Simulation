@@ -236,6 +236,49 @@ def run() -> None:
             "report_contract_validator_pass mismatch with checkpoint_checks.report_contract_validator_pass",
         )
 
+        contract_cmd_missing = copy.deepcopy(ready_report)
+        del contract_cmd_missing["commands"]["report_contract_validator"]
+        contract_cmd_missing["overall_status"] = "blocked"
+        contract_cmd_missing["checkpoint_checks"]["report_contract_validator_pass"] = False
+        contract_cmd_missing["report_contract_validator_pass"] = False
+        contract_cmd_missing_path = root / "contract_cmd_missing.json"
+        _write_json(contract_cmd_missing_path, contract_cmd_missing)
+        proc_contract_cmd_missing = _run(
+            repo_root,
+            [
+                str(Path(sys.executable)),
+                str(validator),
+                "--summary-json",
+                str(contract_cmd_missing_path),
+            ],
+        )
+        _must_fail(
+            proc_contract_cmd_missing,
+            "contract_cmd_missing report",
+            "commands.report_contract_validator must be object",
+        )
+
+        contract_top_vs_cmd_mismatch = copy.deepcopy(ready_report)
+        contract_top_vs_cmd_mismatch["report_contract_validator_pass"] = False
+        contract_top_vs_cmd_mismatch["overall_status"] = "blocked"
+        contract_top_vs_cmd_mismatch["checkpoint_checks"]["report_contract_validator_pass"] = False
+        contract_top_vs_cmd_mismatch_path = root / "contract_top_vs_cmd_mismatch.json"
+        _write_json(contract_top_vs_cmd_mismatch_path, contract_top_vs_cmd_mismatch)
+        proc_contract_top_vs_cmd_mismatch = _run(
+            repo_root,
+            [
+                str(Path(sys.executable)),
+                str(validator),
+                "--summary-json",
+                str(contract_top_vs_cmd_mismatch_path),
+            ],
+        )
+        _must_fail(
+            proc_contract_top_vs_cmd_mismatch,
+            "contract_top_vs_cmd_mismatch report",
+            "report_contract_validator_pass mismatch with commands.report_contract_validator.pass",
+        )
+
         mismatch = copy.deepcopy(ready_report)
         mismatch["overall_status"] = "blocked"
         mismatch_path = root / "mismatch.json"
