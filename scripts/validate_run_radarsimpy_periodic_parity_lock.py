@@ -122,6 +122,20 @@ def run() -> None:
             ),
             encoding="utf-8",
         )
+        thresholds_norm_json = root / "strict_thresholds_normalized.json"
+        thresholds_norm_json.write_text(
+            json.dumps(
+                {
+                    "view_nmse_max": 1e-10,
+                    "power_nmse_max": 1e-10,
+                    "mean_abs_error_max": 1e-7,
+                    "max_abs_error_max": 1e-6,
+                    "complex_corr_abs_min": 0.999999,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
 
         summary_mixed_json = root / "summary_mixed.json"
         proc_mixed = subprocess.run(
@@ -147,7 +161,37 @@ def run() -> None:
         assert summary_mixed["pass"] is False
         assert summary_mixed["pass_count"] == 1
         assert summary_mixed["fail_count"] == 1
+        assert summary_mixed["normalization_mode"] == "none"
         assert summary_mixed["runtime_info"]["radarsimpy"]["available"] is False
+
+        # Case 3: same mixed manifest should pass when complex gain normalization is enabled.
+        summary_norm_json = root / "summary_norm.json"
+        proc_norm = subprocess.run(
+            [
+                sys.executable,
+                "scripts/run_radarsimpy_periodic_parity_lock.py",
+                "--manifest-json",
+                str(manifest_mixed_json),
+                "--thresholds-json",
+                str(thresholds_norm_json),
+                "--normalization-mode",
+                "complex_l2",
+                "--output-summary-json",
+                str(summary_norm_json),
+            ],
+            cwd=str(repo_root),
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert "RadarSimPy periodic parity lock completed." in proc_norm.stdout, proc_norm.stdout
+        summary_norm = json.loads(summary_norm_json.read_text(encoding="utf-8"))
+        assert summary_norm["pass"] is True
+        assert summary_norm["pass_count"] == 2
+        assert summary_norm["fail_count"] == 0
+        assert summary_norm["normalization_mode"] == "complex_l2"
+        assert summary_norm["runtime_info"]["radarsimpy"]["available"] is False
 
     print("validate_run_radarsimpy_periodic_parity_lock: pass")
 

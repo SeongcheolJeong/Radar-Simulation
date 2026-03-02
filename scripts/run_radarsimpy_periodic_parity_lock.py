@@ -24,6 +24,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output-summary-json", required=True)
     p.add_argument("--thresholds-json", default=None)
     p.add_argument(
+        "--normalization-mode",
+        default="none",
+        choices=("none", "complex_l2"),
+        help="Optional normalization mode before parity metrics",
+    )
+    p.add_argument(
         "--allow-failures",
         action="store_true",
         help="Return 0 even when periodic parity gate fails.",
@@ -69,6 +75,7 @@ def main() -> None:
     summary = evaluate_radarsimpy_periodic_manifest(
         manifest_payload=manifest,
         thresholds=thresholds,
+        normalization_mode=str(args.normalization_mode),
     )
     summary["manifest_json"] = str(manifest_json)
     summary["runtime_info"] = {

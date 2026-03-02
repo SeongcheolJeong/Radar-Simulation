@@ -31,6 +31,7 @@ def save_radarsimpy_periodic_summary_json(path: str, payload: Mapping[str, Any])
 def evaluate_radarsimpy_periodic_manifest(
     manifest_payload: Mapping[str, Any],
     thresholds: Optional[Mapping[str, float]] = None,
+    normalization_mode: str = "none",
 ) -> Dict[str, Any]:
     cases_raw = manifest_payload.get("cases")
     if not isinstance(cases_raw, Sequence) or isinstance(cases_raw, (str, bytes)):
@@ -43,13 +44,22 @@ def evaluate_radarsimpy_periodic_manifest(
         for k, v in thresholds.items():
             threshold_map[str(k)] = float(v)
 
+    norm_mode = str(normalization_mode).strip().lower()
+    if norm_mode not in ("none", "complex_l2"):
+        raise ValueError("normalization_mode must be one of: none, complex_l2")
+
     case_reports = []
     pass_count = 0
     fail_count = 0
     for idx, item in enumerate(cases_raw):
         if not isinstance(item, Mapping):
             raise ValueError(f"cases[{idx}] must be object")
-        report = _evaluate_single_case(item, threshold_map, idx=idx)
+        report = _evaluate_single_case(
+            item,
+            threshold_map,
+            idx=idx,
+            normalization_mode=norm_mode,
+        )
         case_reports.append(report)
         if bool(report["pass"]):
             pass_count += 1
@@ -64,6 +74,7 @@ def evaluate_radarsimpy_periodic_manifest(
         "pass_rate": float(pass_count / max(len(case_reports), 1)),
         "pass": bool(fail_count == 0),
         "thresholds": threshold_map,
+        "normalization_mode": norm_mode,
         "cases": case_reports,
     }
     return summary
@@ -73,6 +84,7 @@ def _evaluate_single_case(
     case_payload: Mapping[str, Any],
     thresholds: Mapping[str, float],
     idx: int,
+    normalization_mode: str,
 ) -> Dict[str, Any]:
     case_id = str(case_payload.get("case_id", f"case_{idx:03d}"))
     candidate_adc_npz = str(case_payload["candidate_adc_npz"])
@@ -97,7 +109,13 @@ def _evaluate_single_case(
             f"case {case_id}: shape mismatch {cand_view.shape} != {ref_view.shape}"
         )
 
-    metrics = _compute_view_metrics(reference=ref_view, candidate=cand_view)
+    gain = complex(1.0, 0.0)
+    cand_view_eval = np.asarray(cand_view, dtype=np.complex128)
+    if normalization_mode == "complex_l2":
+        gain = _estimate_complex_l2_gain(reference=ref_view, candidate=cand_view_eval)
+        cand_view_eval = cand_view_eval * complex(gain)
+
+    metrics = _compute_view_metrics(reference=ref_view, candidate=cand_view_eval)
     failures = _apply_thresholds(metrics=metrics, thresholds=thresholds)
     case_report = {
         "case_id": case_id,
@@ -106,6 +124,12 @@ def _evaluate_single_case(
         "adc_shape_sctr": [int(x) for x in adc_sctr.shape],
         "view_shape": [int(x) for x in cand_view.shape],
         "candidate_adc_meta": adc_meta,
+        "normalization": {
+            "mode": normalization_mode,
+            "gain_complex": {"re": float(gain.real), "im": float(gain.imag)},
+            "gain_abs": float(abs(gain)),
+            "gain_db": float(20.0 * np.log10(max(abs(gain), 1.0e-30))),
+        },
         "metrics": metrics,
         "pass": bool(len(failures) == 0),
         "failures": failures,
@@ -140,6 +164,16 @@ def _compute_view_metrics(reference: np.ndarray, candidate: np.ndarray) -> Dict[
         "max_abs_error": max_abs_error,
         "complex_corr_abs": complex_corr_abs,
     }
+
+
+def _estimate_complex_l2_gain(reference: np.ndarray, candidate: np.ndarray) -> complex:
+    ref = np.asarray(reference, dtype=np.complex128).reshape(-1)
+    cand = np.asarray(candidate, dtype=np.complex128).reshape(-1)
+    denom = np.vdot(cand, cand)
+    if abs(denom) <= 1.0e-30:
+        return complex(1.0, 0.0)
+    gain = np.vdot(cand, ref) / denom
+    return complex(gain)
 
 
 def _apply_thresholds(metrics: Mapping[str, float], thresholds: Mapping[str, float]) -> list:
