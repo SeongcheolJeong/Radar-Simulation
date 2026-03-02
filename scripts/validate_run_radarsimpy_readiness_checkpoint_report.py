@@ -194,6 +194,25 @@ def run() -> None:
             "commands.smoke_gate.cmd skip-flag mismatch",
         )
 
+        cmd_missing = copy.deepcopy(ready_report)
+        del cmd_missing["commands"]["smoke_gate"]["cmd"]
+        cmd_missing_path = root / "cmd_missing.json"
+        _write_json(cmd_missing_path, cmd_missing)
+        proc_cmd_missing = _run(
+            repo_root,
+            [
+                str(Path(sys.executable)),
+                str(validator),
+                "--summary-json",
+                str(cmd_missing_path),
+            ],
+        )
+        _must_fail(
+            proc_cmd_missing,
+            "cmd_missing report",
+            "commands.smoke_gate.cmd must be non-empty list",
+        )
+
         mismatch = copy.deepcopy(ready_report)
         mismatch["overall_status"] = "blocked"
         mismatch_path = root / "mismatch.json"
