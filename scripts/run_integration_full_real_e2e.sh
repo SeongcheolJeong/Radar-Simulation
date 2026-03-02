@@ -56,6 +56,8 @@ RADARSIMPY_LIB_ROOT_RAW="${RADARSIMPY_LIB_ROOT:-${ROOT_DIR}/external/radarsimpy_
 RADARSIMPY_PACKAGE_ROOT="$(abspath "${RADARSIMPY_PACKAGE_ROOT_RAW}")"
 RADARSIMPY_LIB_ROOT="$(abspath "${RADARSIMPY_LIB_ROOT_RAW}")"
 RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY="${RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY:-1}"
+RUN_RADARSIMPY_MIGRATION_STEPWISE="${RUN_RADARSIMPY_MIGRATION_STEPWISE:-1}"
+RADARSIMPY_MIGRATION_TRIAL_FREE_TIER_GEOMETRY="${RADARSIMPY_MIGRATION_TRIAL_FREE_TIER_GEOMETRY:-${RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY}}"
 
 log() {
   echo "[real-e2e] $*"
@@ -159,6 +161,7 @@ require_script() {
 require_script "scripts/run_scene_runtime_env_probe.py"
 require_script "scripts/run_scene_runtime_blocker_report.py"
 require_script "scripts/run_scene_runtime_radarsimpy_pilot.py"
+require_script "scripts/run_radarsimpy_migration_stepwise.py"
 require_script "scripts/run_scene_runtime_mitsuba_pilot.py"
 require_script "scripts/run_scene_runtime_po_sbr_pilot.py"
 require_script "scripts/run_scene_backend_golden_path.py"
@@ -277,6 +280,21 @@ run_step radarsimpy_pilot \
   --output-summary-json "${OUTPUT_ROOT}/radarsimpy_pilot_summary.json" \
   --runtime-failure-policy error \
   $([[ "${RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY}" == "1" ]] && echo "--trial-free-tier-geometry")
+
+if [[ "${RUN_RADARSIMPY_MIGRATION_STEPWISE}" == "1" ]]; then
+  run_step radarsimpy_migration_stepwise \
+    "${PYTHON_BIN}" scripts/run_radarsimpy_migration_stepwise.py \
+    --output-root "${OUTPUT_ROOT}/radarsimpy_migration_stepwise" \
+    --output-summary-json "${OUTPUT_ROOT}/radarsimpy_migration_stepwise_summary.json" \
+    --n-chirps 6 \
+    --samples-per-chirp 512 \
+    --runtime-failure-policy error \
+    --require-runtime-provider-mode \
+    --require-radarsimpy-simulation-used \
+    $([[ "${RADARSIMPY_MIGRATION_TRIAL_FREE_TIER_GEOMETRY}" == "1" ]] && echo "--trial-free-tier-geometry")
+else
+  log "skip radarsimpy migration stepwise gate (RUN_RADARSIMPY_MIGRATION_STEPWISE=${RUN_RADARSIMPY_MIGRATION_STEPWISE})"
+fi
 
 run_step mitsuba_pilot \
   "${PYTHON_BIN}" scripts/run_scene_runtime_mitsuba_pilot.py \
