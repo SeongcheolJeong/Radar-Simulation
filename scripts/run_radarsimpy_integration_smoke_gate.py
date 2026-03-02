@@ -112,6 +112,10 @@ def main() -> None:
             "name": "validate_build_radarsimpy_periodic_manifest_from_migration",
             "cmd": [py_bin, "scripts/validate_build_radarsimpy_periodic_manifest_from_migration.py"],
         },
+        {
+            "name": "validate_install_radarsimpy_ci_workflow",
+            "cmd": [py_bin, "scripts/validate_install_radarsimpy_ci_workflow.py"],
+        },
     ]
 
     if bool(args.with_real_runtime):
