@@ -173,6 +173,7 @@ def main() -> None:
         str(smoke_json),
         "--skip-readiness-runner-validator",
     ]
+    smoke_skip_flag_requested = bool("--skip-readiness-runner-validator" in smoke_cmd)
     if bool(args.with_real_runtime):
         smoke_cmd.extend(
             [
@@ -280,6 +281,7 @@ def main() -> None:
 
     checks = {
         "smoke_gate_pass": smoke_pass,
+        "smoke_skip_flag_applied": smoke_skip_flag_requested,
         "smoke_recursion_guard_active": smoke_recursion_guard_active,
         "wrapper_gate_pass": wrapper_pass,
         "progress_snapshot_generated": bool(progress_payload),
@@ -320,6 +322,7 @@ def main() -> None:
         "smoke_contains_readiness_runner_validator": bool(
             "validate_run_radarsimpy_readiness_checkpoint" in smoke_step_names
         ),
+        "smoke_skip_readiness_runner_validator_requested": smoke_skip_flag_requested,
         "progress_overall_ready": bool(progress_payload.get("overall_ready", False)),
         "checkpoint_checks": checks,
         "overall_status": status,

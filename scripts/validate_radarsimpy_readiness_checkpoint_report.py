@@ -11,6 +11,7 @@ from typing import Any, Dict, Mapping
 
 REQUIRED_CHECK_KEYS = (
     "smoke_gate_pass",
+    "smoke_skip_flag_applied",
     "smoke_recursion_guard_active",
     "wrapper_gate_pass",
     "progress_snapshot_generated",
@@ -134,6 +135,8 @@ def main() -> None:
 
     if smoke_gate_status != ("ready" if bool(check_map["smoke_gate_pass"]) else "blocked"):
         raise ValueError("smoke_gate_status mismatch with checkpoint_checks.smoke_gate_pass")
+    if bool(check_map["smoke_recursion_guard_active"]) and (not bool(check_map["smoke_skip_flag_applied"])):
+        raise ValueError("smoke_recursion_guard_active requires smoke_skip_flag_applied=true")
     if bool(check_map["smoke_recursion_guard_active"]) and (not bool(check_map["smoke_gate_pass"])):
         raise ValueError("smoke_recursion_guard_active cannot be true when smoke_gate_pass is false")
     if wrapper_gate_status != ("ready" if bool(check_map["wrapper_gate_pass"]) else "blocked"):
@@ -151,6 +154,16 @@ def main() -> None:
                 "smoke_contains_readiness_runner_validator when present"
             )
 
+    smoke_skip_requested = payload.get("smoke_skip_readiness_runner_validator_requested")
+    if smoke_skip_requested is not None:
+        if not isinstance(smoke_skip_requested, bool):
+            raise ValueError("smoke_skip_readiness_runner_validator_requested must be bool when present")
+        if bool(smoke_skip_requested) != bool(check_map["smoke_skip_flag_applied"]):
+            raise ValueError(
+                "smoke_skip_readiness_runner_validator_requested mismatch with "
+                "checkpoint_checks.smoke_skip_flag_applied"
+            )
+
     commands = payload.get("commands")
     if not isinstance(commands, Mapping):
         raise ValueError("commands must be object")
@@ -159,6 +172,14 @@ def main() -> None:
     _validate_command_block(commands, "progress_snapshot")
     _validate_command_block(commands, "migration_stepwise", allow_skipped=True)
     _validate_command_block(commands, "function_progress")
+
+    smoke_cmd = commands.get("smoke_gate", {}).get("cmd")
+    if isinstance(smoke_cmd, list):
+        contains_skip = "--skip-readiness-runner-validator" in [str(v) for v in smoke_cmd]
+        if contains_skip != bool(check_map["smoke_skip_flag_applied"]):
+            raise ValueError(
+                "commands.smoke_gate.cmd skip-flag mismatch with checkpoint_checks.smoke_skip_flag_applied"
+            )
 
     if args.require_ready and overall_status != "ready":
         raise ValueError("overall_status must be ready when --require-ready is set")

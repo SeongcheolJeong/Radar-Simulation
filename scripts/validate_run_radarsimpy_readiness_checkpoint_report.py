@@ -66,6 +66,7 @@ def run() -> None:
 
         ready_checks = {
             "smoke_gate_pass": True,
+            "smoke_skip_flag_applied": True,
             "smoke_recursion_guard_active": True,
             "wrapper_gate_pass": True,
             "progress_snapshot_generated": True,
@@ -93,11 +94,22 @@ def run() -> None:
             "migration_status": "ready",
             "smoke_gate_step_count": 9,
             "smoke_contains_readiness_runner_validator": False,
+            "smoke_skip_readiness_runner_validator_requested": True,
             "progress_overall_ready": True,
             "checkpoint_checks": ready_checks,
             "overall_status": "ready",
             "commands": {
-                "smoke_gate": {"returncode": 0, "pass": True},
+                "smoke_gate": {
+                    "cmd": [
+                        "python",
+                        "scripts/run_radarsimpy_integration_smoke_gate.py",
+                        "--output-summary-json",
+                        "/tmp/smoke.json",
+                        "--skip-readiness-runner-validator",
+                    ],
+                    "returncode": 0,
+                    "pass": True,
+                },
                 "wrapper_gate": {"returncode": 0, "pass": True},
                 "migration_stepwise": {"returncode": 0, "pass": True},
                 "function_progress": {"returncode": 0, "pass": True},
