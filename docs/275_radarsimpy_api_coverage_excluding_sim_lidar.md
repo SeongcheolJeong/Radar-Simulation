@@ -69,3 +69,11 @@
 - Script: `scripts/validate_run_radarsimpy_wrapper_integration_gate.py`
 - Checks:
   - Gate runner executes successfully and includes required checks.
+- Script: `scripts/show_radarsimpy_function_progress.py`
+- Purpose:
+  - Prints function-level status for all supported API symbols and excluded symbols.
+- Script: `scripts/validate_show_radarsimpy_function_progress.py`
+- Checks:
+  - Function-level progress report is `ready`.
+  - All supported symbols are implemented/exported.
+  - `sim_lidar` remains excluded and not exported.

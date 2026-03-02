@@ -121,6 +121,10 @@ def main() -> None:
             "cmd": [py_bin, "scripts/validate_show_radarsimpy_progress.py"],
         },
         {
+            "name": "validate_show_radarsimpy_function_progress",
+            "cmd": [py_bin, "scripts/validate_show_radarsimpy_function_progress.py"],
+        },
+        {
             "name": "validate_run_radarsimpy_readiness_checkpoint_report",
             "cmd": [py_bin, "scripts/validate_run_radarsimpy_readiness_checkpoint_report.py"],
         },
