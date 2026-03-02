@@ -1,0 +1,7 @@
+# PO-SBR main ready release r3 checksums
+# generated_at_utc=2026-03-02T13:45:17Z
+# release_tag=po-sbr-main-ready-2026-03-02-r3
+# release_url=https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r3
+eb59ec2b23c2ef1dc67411908a672d4b623003e679efa0ad543c1f6388eb81af  docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json
+4a0a23fe73039c865f4a449a707d3caddd325da2777cdc0e8926b97750425588  docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json
+4eea0ed0645a714b274f5c431755d9b306e35f3e15a20142ae4ac7f049da0dca  docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r2.json

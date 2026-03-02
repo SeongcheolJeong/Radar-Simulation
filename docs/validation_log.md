@@ -7721,6 +7721,30 @@
     - superseded base release metadata (`po-sbr-main-ready-2026-03-02-r1`)
     - added commit since base release: `eec64a2`
 
+## Main Branch Ready Patch Release Asset Upload (r3, 2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && gh release upload po-sbr-main-ready-2026-03-02-r3 docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r2.json /tmp/po_sbr_main_ready_2026_03_02_r3_checksums.txt --clobber && gh release view po-sbr-main-ready-2026-03-02-r3 --json tagName,url,assets`
+- Result: pass
+- Notes:
+  - release URL:
+    - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r3`
+  - uploaded release assets:
+    - `po_sbr_main_ready_release_manifest_2026_03_02.json`
+    - `po_sbr_main_ready_release_manifest_2026_03_02_r1.json`
+    - `po_sbr_main_ready_release_manifest_2026_03_02_r2.json`
+    - `po_sbr_main_ready_2026_03_02_r3_checksums.txt`
+
+## Main Branch Release Checksum Artifact (r3, 2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && sha256sum docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r2.json > docs/reports/po_sbr_main_ready_2026_03_02_r3_checksums.txt`
+- Result: pass
+- Notes:
+  - generated tracked checksum artifact:
+    - `docs/reports/po_sbr_main_ready_2026_03_02_r3_checksums.txt`
+  - checksum artifact is aligned with uploaded release assets for `r3`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02
