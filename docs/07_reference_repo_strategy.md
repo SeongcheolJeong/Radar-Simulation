@@ -17,6 +17,9 @@ Use references via local adapters, not by merging third-party internals into cor
 - sionna: propagation/RT reference
 - PO-SBR-Python: high-fidelity scattering/SBR reference
 - radarsimpy: signal-chain cross-check reference
+- openEMS: EM solver reference for antenna manifold precompute
+- CSXCAD: openEMS dependency/reference
+- gprMax: EM solver reference for antenna manifold precompute
 - Raw_ADC_radar_dataset_for_automotive_object_detection: public measured raw-ADC schema reference
 
 ## Integration Pattern

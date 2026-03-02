@@ -15,11 +15,14 @@ from typing import List
 RUNTIME_AFFECTING_PREFIXES = (
     "src/avxsim/",
     "frontend/graph_lab/",
+    ".githooks/",
 )
 
 RUNTIME_AFFECTING_FILE_PREFIXES = (
     "scripts/run_po_sbr_",
     "scripts/validate_po_sbr_",
+    "scripts/validate_run_po_sbr_",
+    "scripts/validate_run_avx_",
     "scripts/verify_po_sbr_",
     "scripts/run_scene_backend_",
     "scripts/validate_scene_backend_",
@@ -27,9 +30,13 @@ RUNTIME_AFFECTING_FILE_PREFIXES = (
 
 RUNTIME_AFFECTING_EXACT_FILES = {
     "scripts/validate_web_e2e_orchestrator_api.py",
+    "scripts/validate_em_solver_packaging_policy.py",
     "scripts/generate_po_sbr_physical_full_track_merged_checkpoint.py",
+    "scripts/show_po_sbr_progress.py",
     "scripts/verify_po_sbr_operator_handoff_closure.sh",
     "scripts/verify_po_sbr_physical_full_track_merged_ready.sh",
+    "docs/em_solver_packaging_policy.json",
+    "external/reference-locks.md",
     "src/avxsim/web_e2e_api.py",
 }
 
@@ -69,10 +76,10 @@ def _changed_files(repo_root: Path, base_ref: str, head_ref: str) -> List[str]:
 
 
 def _is_runtime_affecting(path: str) -> bool:
-    if path.startswith("docs/") or path.startswith("data/"):
-        return False
     if path in RUNTIME_AFFECTING_EXACT_FILES:
         return True
+    if path.startswith("docs/") or path.startswith("data/"):
+        return False
     for pref in RUNTIME_AFFECTING_PREFIXES:
         if path.startswith(pref):
             return True

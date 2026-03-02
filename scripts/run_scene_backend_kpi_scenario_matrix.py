@@ -15,6 +15,8 @@ PROFILE_FAMILY_BY_ID: Dict[str, str] = {
     "single_target_material_loss_range25_v1": "realism_informational",
     "mesh_dihedral_range25_v1": "realism_informational",
     "mesh_trihedral_range25_v1": "realism_informational",
+    "single_target_ghost_comp_v1": "realism_informational",
+    "single_target_clutter_comp_v1": "realism_informational",
 }
 DEFAULT_PROFILES = tuple(PROFILE_FAMILY_BY_ID.keys())
 DEFAULT_GATE_FAMILIES = ("equivalence_strict",)
@@ -86,6 +88,11 @@ def parse_args() -> argparse.Namespace:
         "--po-sbr-geometry-path",
         default=None,
         help="Optional override for PO-SBR geometry path",
+    )
+    p.add_argument(
+        "--radar-compensation-lock-json",
+        default=None,
+        help="Optional profile compensation lock JSON passed through to golden-path runner",
     )
     return p.parse_args()
 
@@ -175,6 +182,7 @@ def _build_optional_golden_overrides(args: argparse.Namespace) -> List[str]:
     )
     add_opt("--po-sbr-repo-root", args.po_sbr_repo_root)
     add_opt("--po-sbr-geometry-path", args.po_sbr_geometry_path)
+    add_opt("--radar-compensation-lock-json", args.radar_compensation_lock_json)
     return out
 
 
@@ -276,7 +284,9 @@ def main() -> None:
 
     python_path = Path(str(args.python_bin)).expanduser()
     if not python_path.is_absolute():
-        python_path = (cwd / python_path).resolve()
+        # Preserve venv launcher paths: resolving symlinks here can collapse
+        # to the system interpreter and lose venv-installed dependencies.
+        python_path = cwd / python_path
     python_bin = str(python_path)
     golden_overrides = _build_optional_golden_overrides(args=args)
 

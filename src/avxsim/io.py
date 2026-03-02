@@ -4,11 +4,17 @@ from typing import Any, Dict, List, Sequence
 
 import numpy as np
 
+from .path_contract import validate_paths_by_chirp
 from .types import Path as RadarPath
 from .types import RadarConfig
 
 
 def save_paths_by_chirp_json(paths_by_chirp: Sequence[Sequence[RadarPath]], out_json: str) -> None:
+    validate_paths_by_chirp(
+        paths_by_chirp=paths_by_chirp,
+        n_chirps=None,
+        require_metadata=True,
+    )
     out: List[List[Dict[str, Any]]] = []
     for chirp_paths in paths_by_chirp:
         row: List[Dict[str, Any]] = []

@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 import numpy as np
 
+from avxsim.radar_compensation_tuning import load_profile_compensation_lock_json
 from avxsim.runtime_coupling import detect_runtime_modules
 from avxsim.scene_pipeline import run_object_scene_to_radar_map_json
 
@@ -203,6 +204,150 @@ EQUIVALENCE_PROFILES: Dict[str, Dict[str, Any]] = {
             },
         ],
     },
+    "single_target_ghost_comp_v1": {
+        "profile_family": "realism_informational",
+        "radar_compensation": {
+            "enabled": True,
+            "random_seed": 20260302,
+            "default_material_model": {
+                "reflectivity": 1.0,
+                "rcs_scale_linear": 1.0,
+                "reflection_decay": 1.0,
+                "wideband_slope_db_per_ghz": 0.0,
+            },
+            "material_models": {
+                "ghost_panel": {
+                    "reflectivity": 0.88,
+                    "rcs_scale_linear": 1.3,
+                    "reflection_decay": 0.92,
+                    "wideband_slope_db_per_ghz": -0.55,
+                }
+            },
+            "wideband": {"enabled": True, "phase_weight": 1.0},
+            "manifold": {
+                "enabled": True,
+                "mag_db_bias": -0.15,
+                "mag_db_per_abs_az_deg": -0.0035,
+                "mag_db_per_abs_el_deg": -0.0015,
+                "phase_deg_bias": 2.5,
+                "phase_deg_per_az_deg": 0.25,
+                "phase_deg_per_el_deg": 0.1,
+                "phase_deg_per_reflection_order": 5.0,
+            },
+            "diffuse": {
+                "enabled": True,
+                "paths_per_specular": 2,
+                "amp_ratio": 0.2,
+                "delay_jitter_std": 0.01,
+                "doppler_sigma_hz": 3.0,
+                "direction_sigma_deg": 3.5,
+            },
+            "clutter": {
+                "enabled": True,
+                "paths_per_chirp": 1,
+                "range_min_m": 6.0,
+                "range_max_m": 35.0,
+                "az_min_deg": -25.0,
+                "az_max_deg": 25.0,
+                "el_mean_deg": 0.0,
+                "el_sigma_deg": 1.0,
+                "doppler_sigma_hz": 10.0,
+                "amp_abs": 1.0e-4,
+                "amp_db_sigma": 1.5,
+                "material_tag": "clutter",
+                "reflection_order": 1,
+            },
+        },
+        "components": [
+            {
+                "target_range_m": 26.0,
+                "target_az_deg": 10.0,
+                "target_el_deg": 0.0,
+                "target_radial_velocity_mps": 0.0,
+                "sionna_target_radius_m": 0.5,
+                "po_sbr_alpha_deg": 180.0,
+                "amp_abs": 0.95,
+                "range_amp_exponent": 2.0,
+                "material_tag": "ghost_panel",
+                "reflection_order": 2,
+                "po_sbr_bounces": 3,
+                "po_sbr_rays_per_lambda": 3.5,
+                "path_id_prefix": "golden_path_po_sbr_ghost_comp",
+            }
+        ],
+    },
+    "single_target_clutter_comp_v1": {
+        "profile_family": "realism_informational",
+        "radar_compensation": {
+            "enabled": True,
+            "random_seed": 20260303,
+            "default_material_model": {
+                "reflectivity": 1.0,
+                "rcs_scale_linear": 1.0,
+                "reflection_decay": 1.0,
+                "wideband_slope_db_per_ghz": 0.0,
+            },
+            "material_models": {
+                "roadside_metal": {
+                    "reflectivity": 0.8,
+                    "rcs_scale_linear": 1.05,
+                    "reflection_decay": 0.9,
+                    "wideband_slope_db_per_ghz": -0.3,
+                }
+            },
+            "wideband": {"enabled": True, "phase_weight": 0.8},
+            "manifold": {
+                "enabled": True,
+                "mag_db_bias": -0.25,
+                "mag_db_per_abs_az_deg": -0.002,
+                "mag_db_per_abs_el_deg": -0.001,
+                "phase_deg_bias": 1.0,
+                "phase_deg_per_az_deg": 0.18,
+                "phase_deg_per_el_deg": 0.06,
+                "phase_deg_per_reflection_order": 4.0,
+            },
+            "diffuse": {
+                "enabled": True,
+                "paths_per_specular": 1,
+                "amp_ratio": 0.16,
+                "delay_jitter_std": 0.008,
+                "doppler_sigma_hz": 2.5,
+                "direction_sigma_deg": 4.0,
+            },
+            "clutter": {
+                "enabled": True,
+                "paths_per_chirp": 4,
+                "range_min_m": 4.0,
+                "range_max_m": 45.0,
+                "az_min_deg": -40.0,
+                "az_max_deg": 40.0,
+                "el_mean_deg": 0.0,
+                "el_sigma_deg": 1.7,
+                "doppler_sigma_hz": 16.0,
+                "amp_abs": 1.8e-4,
+                "amp_db_sigma": 2.0,
+                "material_tag": "clutter",
+                "reflection_order": 1,
+            },
+        },
+        "components": [
+            {
+                "target_range_m": 22.0,
+                "target_az_deg": -7.0,
+                "target_el_deg": 0.0,
+                "target_radial_velocity_mps": 1.2,
+                "sionna_target_radius_m": 0.45,
+                "po_sbr_alpha_deg": 180.0,
+                "amp_abs": 0.9,
+                "range_amp_exponent": 2.0,
+                "material_tag": "roadside_metal",
+                "reflection_order": 2,
+                "po_sbr_bounces": 3,
+                "po_sbr_rays_per_lambda": 3.2,
+                "path_id_prefix": "golden_path_po_sbr_clutter_comp",
+            }
+        ],
+    },
 }
 SUPPORTED_EQV_PROFILE_IDS = tuple(EQUIVALENCE_PROFILES.keys())
 
@@ -233,6 +378,14 @@ def parse_args() -> argparse.Namespace:
         default="single_target_range25_v1",
         help=(
             "Scene profile id. Supported: " + ", ".join(SUPPORTED_EQV_PROFILE_IDS)
+        ),
+    )
+    p.add_argument(
+        "--radar-compensation-lock-json",
+        default=None,
+        help=(
+            "Optional profile compensation lock JSON. When profile id exists in lock, "
+            "its radar_compensation overrides built-in profile defaults."
         ),
     )
     p.add_argument(
@@ -380,13 +533,29 @@ def _unit_direction_to_po_angles(unit_direction: Sequence[float]) -> Dict[str, f
     return {"phi_deg": phi_deg, "theta_deg": theta_deg}
 
 
-def _resolve_scene_equivalence_inputs(args: argparse.Namespace) -> Dict[str, Any]:
+def _resolve_scene_equivalence_inputs(
+    args: argparse.Namespace,
+    radar_compensation_lock: Optional[Mapping[str, Any]] = None,
+) -> Dict[str, Any]:
     profile = str(args.scene_equivalence_profile).strip()
     if profile not in EQUIVALENCE_PROFILES:
         raise ValueError(f"unsupported --scene-equivalence-profile: {profile}")
 
     raw_profile = dict(EQUIVALENCE_PROFILES[profile])
     profile_family = str(raw_profile.get("profile_family", "equivalence_strict")).strip() or "equivalence_strict"
+    radar_compensation_raw = raw_profile.get("radar_compensation")
+    radar_compensation = None
+    if radar_compensation_raw is not None:
+        if not isinstance(radar_compensation_raw, Mapping):
+            raise ValueError("profile radar_compensation must be object when provided")
+        radar_compensation = json.loads(json.dumps(radar_compensation_raw))
+    radar_compensation_source = "profile_default"
+    if isinstance(radar_compensation_lock, Mapping) and profile in radar_compensation_lock:
+        lock_cfg = radar_compensation_lock.get(profile)
+        if not isinstance(lock_cfg, Mapping):
+            raise ValueError(f"radar compensation lock entry must be object for profile: {profile}")
+        radar_compensation = json.loads(json.dumps(lock_cfg))
+        radar_compensation_source = "profile_lock_override"
     po_sbr_geometry_path_override_raw = raw_profile.get("po_sbr_geometry_path")
     po_sbr_geometry_path_override = None
     if po_sbr_geometry_path_override_raw is not None:
@@ -522,6 +691,8 @@ def _resolve_scene_equivalence_inputs(args: argparse.Namespace) -> Dict[str, Any
     primary = resolved_components[0]
     return {
         "profile_family": profile_family,
+        "radar_compensation": radar_compensation,
+        "radar_compensation_source": radar_compensation_source,
         "po_sbr_geometry_path_override": po_sbr_geometry_path_override,
         "components": resolved_components,
         "target_count": int(len(resolved_components)),
@@ -692,6 +863,7 @@ def _build_analytic_scene(
     n_chirps: int,
     samples_per_chirp: int,
     components: Sequence[Mapping[str, Any]],
+    radar_compensation: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     targets: List[Dict[str, Any]] = []
     for comp in components:
@@ -706,17 +878,20 @@ def _build_analytic_scene(
                 "material_tag": str(comp["material_tag"]),
             }
         )
+    backend = {
+        "type": "analytic_targets",
+        "n_chirps": int(n_chirps),
+        "chirp_interval_s": 4.0e-5,
+        "tx_pos_m": DEFAULT_TX_POS_M,
+        "rx_pos_m": DEFAULT_RX_POS_M,
+        "targets": targets,
+        "noise_sigma": 0.0,
+    }
+    if isinstance(radar_compensation, Mapping):
+        backend["radar_compensation"] = json.loads(json.dumps(dict(radar_compensation)))
     return {
         "scene_id": scene_id,
-        "backend": {
-            "type": "analytic_targets",
-            "n_chirps": int(n_chirps),
-            "chirp_interval_s": 4.0e-5,
-            "tx_pos_m": DEFAULT_TX_POS_M,
-            "rx_pos_m": DEFAULT_RX_POS_M,
-            "targets": targets,
-            "noise_sigma": 0.0,
-        },
+        "backend": backend,
         "radar": _base_radar(samples_per_chirp=samples_per_chirp),
         "map_config": _base_map_config(samples_per_chirp=samples_per_chirp),
     }
@@ -729,6 +904,7 @@ def _build_sionna_scene(
     components: Sequence[Mapping[str, Any]],
     runtime_provider: str,
     runtime_required_modules: Sequence[str],
+    radar_compensation: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     spheres: List[Dict[str, Any]] = []
     for idx, comp in enumerate(components):
@@ -754,23 +930,26 @@ def _build_sionna_scene(
                 "reflection_order": int(comp["reflection_order"]),
             }
         )
+    backend = {
+        "type": "sionna_rt",
+        "n_chirps": int(n_chirps),
+        "tx_pos_m": DEFAULT_TX_POS_M,
+        "rx_pos_m": DEFAULT_RX_POS_M,
+        "runtime_provider": str(runtime_provider),
+        "runtime_required_modules": [str(x) for x in runtime_required_modules],
+        "runtime_failure_policy": "error",
+        "runtime_input": {
+            "ego_origin_m": [0.0, 0.0, 0.0],
+            "chirp_interval_s": 4.0e-5,
+            "spheres": spheres,
+        },
+        "noise_sigma": 0.0,
+    }
+    if isinstance(radar_compensation, Mapping):
+        backend["radar_compensation"] = json.loads(json.dumps(dict(radar_compensation)))
     return {
         "scene_id": scene_id,
-        "backend": {
-            "type": "sionna_rt",
-            "n_chirps": int(n_chirps),
-            "tx_pos_m": DEFAULT_TX_POS_M,
-            "rx_pos_m": DEFAULT_RX_POS_M,
-            "runtime_provider": str(runtime_provider),
-            "runtime_required_modules": [str(x) for x in runtime_required_modules],
-            "runtime_failure_policy": "error",
-            "runtime_input": {
-                "ego_origin_m": [0.0, 0.0, 0.0],
-                "chirp_interval_s": 4.0e-5,
-                "spheres": spheres,
-            },
-            "noise_sigma": 0.0,
-        },
+        "backend": backend,
         "radar": _base_radar(samples_per_chirp=samples_per_chirp),
         "map_config": _base_map_config(samples_per_chirp=samples_per_chirp),
     }
@@ -785,6 +964,7 @@ def _build_po_sbr_scene(
     runtime_required_modules: Sequence[str],
     repo_root: Path,
     geometry_path: Path,
+    radar_compensation: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     if len(components) == 0:
         raise ValueError("po_sbr scene requires at least one component")
@@ -808,36 +988,39 @@ def _build_po_sbr_scene(
                 "path_id_prefix": str(comp["path_id_prefix"]),
             }
         )
+    backend = {
+        "type": "po_sbr_rt",
+        "n_chirps": int(n_chirps),
+        "tx_pos_m": DEFAULT_TX_POS_M,
+        "rx_pos_m": DEFAULT_RX_POS_M,
+        "runtime_provider": str(runtime_provider),
+        "runtime_required_modules": [str(x) for x in runtime_required_modules],
+        "runtime_failure_policy": "error",
+        "runtime_input": {
+            "po_sbr_repo_root": str(repo_root),
+            "geometry_path": str(geometry_path),
+            "alpha_deg": float(primary["po_sbr_alpha_deg"]),
+            "phi_deg": float(primary["po_sbr_phi_deg"]),
+            "theta_deg": float(primary["po_sbr_theta_deg"]),
+            "freq_hz": 77e9,
+            "rays_per_lambda": float(primary["po_sbr_rays_per_lambda"]),
+            "bounces": int(primary["po_sbr_bounces"]),
+            "radial_velocity_mps": float(primary["target_radial_velocity_mps"]),
+            "min_range_m": float(max(primary["po_sbr_min_range_m"], primary["target_range_m"])),
+            "amp_floor_abs": float(primary["po_sbr_amp_floor_abs"]),
+            "amp_target_abs": float(primary["po_sbr_amp_target_abs"]),
+            "material_tag": str(primary["material_tag"]),
+            "reflection_order": int(primary["reflection_order"]),
+            "path_id_prefix": str(primary["path_id_prefix"]),
+            "components": runtime_components,
+        },
+        "noise_sigma": 0.0,
+    }
+    if isinstance(radar_compensation, Mapping):
+        backend["radar_compensation"] = json.loads(json.dumps(dict(radar_compensation)))
     return {
         "scene_id": scene_id,
-        "backend": {
-            "type": "po_sbr_rt",
-            "n_chirps": int(n_chirps),
-            "tx_pos_m": DEFAULT_TX_POS_M,
-            "rx_pos_m": DEFAULT_RX_POS_M,
-            "runtime_provider": str(runtime_provider),
-            "runtime_required_modules": [str(x) for x in runtime_required_modules],
-            "runtime_failure_policy": "error",
-            "runtime_input": {
-                "po_sbr_repo_root": str(repo_root),
-                "geometry_path": str(geometry_path),
-                "alpha_deg": float(primary["po_sbr_alpha_deg"]),
-                "phi_deg": float(primary["po_sbr_phi_deg"]),
-                "theta_deg": float(primary["po_sbr_theta_deg"]),
-                "freq_hz": 77e9,
-                "rays_per_lambda": float(primary["po_sbr_rays_per_lambda"]),
-                "bounces": int(primary["po_sbr_bounces"]),
-                "radial_velocity_mps": float(primary["target_radial_velocity_mps"]),
-                "min_range_m": float(max(primary["po_sbr_min_range_m"], primary["target_range_m"])),
-                "amp_floor_abs": float(primary["po_sbr_amp_floor_abs"]),
-                "amp_target_abs": float(primary["po_sbr_amp_target_abs"]),
-                "material_tag": str(primary["material_tag"]),
-                "reflection_order": int(primary["reflection_order"]),
-                "path_id_prefix": str(primary["path_id_prefix"]),
-                "components": runtime_components,
-            },
-            "noise_sigma": 0.0,
-        },
+        "backend": backend,
         "radar": _base_radar(samples_per_chirp=samples_per_chirp),
         "map_config": _base_map_config(samples_per_chirp=samples_per_chirp),
     }
@@ -953,7 +1136,17 @@ def main() -> None:
     if int(args.samples_per_chirp) <= 0:
         raise ValueError("--samples-per-chirp must be > 0")
     profile = str(args.scene_equivalence_profile).strip()
-    eqv = _resolve_scene_equivalence_inputs(args=args)
+    radar_comp_lock = None
+    radar_comp_lock_json = None
+    if args.radar_compensation_lock_json is not None:
+        radar_comp_lock_json = str(
+            Path(args.radar_compensation_lock_json).expanduser().resolve()
+        )
+        radar_comp_lock = load_profile_compensation_lock_json(radar_comp_lock_json)
+    eqv = _resolve_scene_equivalence_inputs(
+        args=args,
+        radar_compensation_lock=radar_comp_lock,
+    )
 
     cwd = Path.cwd().resolve()
     out_root = Path(args.output_root).expanduser()
@@ -998,6 +1191,7 @@ def main() -> None:
                 n_chirps=int(args.n_chirps),
                 samples_per_chirp=int(args.samples_per_chirp),
                 components=eqv["components"],
+                radar_compensation=eqv["radar_compensation"],
             )
         elif backend_name == "sionna_rt":
             preflight = _preflight_sionna(
@@ -1012,6 +1206,7 @@ def main() -> None:
                 components=eqv["components"],
                 runtime_provider=str(args.sionna_runtime_provider),
                 runtime_required_modules=sionna_required_modules,
+                radar_compensation=eqv["radar_compensation"],
             )
         elif backend_name == "po_sbr_rt":
             preflight = _preflight_po_sbr(
@@ -1030,6 +1225,7 @@ def main() -> None:
                 runtime_required_modules=po_sbr_required_modules,
                 repo_root=po_sbr_repo_root,
                 geometry_path=po_sbr_geometry_path_effective,
+                radar_compensation=eqv["radar_compensation"],
             )
         else:  # pragma: no cover - guarded by _parse_backends
             raise ValueError(f"unsupported backend: {backend_name}")
@@ -1084,6 +1280,9 @@ def main() -> None:
             "po_sbr_amp_floor_abs": float(eqv["po_sbr_amp_floor_abs"]),
             "po_sbr_amp_target_abs": float(eqv["po_sbr_amp_target_abs"]),
             "po_sbr_geometry_path": str(po_sbr_geometry_path_effective),
+            "radar_compensation": eqv["radar_compensation"],
+            "radar_compensation_source": str(eqv["radar_compensation_source"]),
+            "radar_compensation_lock_json": radar_comp_lock_json,
             "components": [
                 {
                     "target_range_m": float(comp["target_range_m"]),

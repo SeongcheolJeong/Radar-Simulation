@@ -29,12 +29,23 @@ fi
 
 POST_CHANGE_JSON="docs/reports/po_sbr_post_change_gate_${DATE_STAMP}.json"
 PROGRESS_JSON="docs/reports/po_sbr_progress_snapshot_${DATE_STAMP}.json"
+CHECKPOINT_JSON_DEFAULT="docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json"
+CHECKPOINT_JSON="${PO_SBR_MERGED_CHECKPOINT_JSON_OVERRIDE:-${CHECKPOINT_JSON_DEFAULT}}"
 
 echo "[checkpoint] start date_stamp=${DATE_STAMP}"
 echo "[checkpoint] python=${PY_BIN}"
+echo "[checkpoint] merged_checkpoint_json=${CHECKPOINT_JSON}"
 
 echo "[checkpoint] verify merged full-track readiness"
-bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
+if [[ "${PO_SBR_SKIP_MERGED_FULL_TRACK_VERIFIER:-0}" == "1" ]]; then
+  if [[ ! -f "${CHECKPOINT_JSON}" ]]; then
+    echo "[checkpoint] error: merged checkpoint missing while skip enabled: ${CHECKPOINT_JSON}" >&2
+    exit 1
+  fi
+  echo "[checkpoint] skip merged full-track verifier (PO_SBR_SKIP_MERGED_FULL_TRACK_VERIFIER=1)"
+else
+  bash scripts/verify_po_sbr_physical_full_track_merged_ready.sh
+fi
 
 echo "[checkpoint] verify operator handoff closure"
 bash scripts/verify_po_sbr_operator_handoff_closure.sh
@@ -47,10 +58,31 @@ PYTHONPATH=src "${PY_BIN}" scripts/run_po_sbr_post_change_gate.py \
   --head-ref HEAD \
   --output-json "${POST_CHANGE_JSON}"
 
+if [[ "${PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR:-0}" != "1" ]]; then
+  echo "[checkpoint] validate post-change deterministic gate"
+  PYTHONPATH=src "${PY_BIN}" scripts/validate_run_po_sbr_post_change_gate.py
+else
+  echo "[checkpoint] skip post-change deterministic validator (PO_SBR_SKIP_POST_CHANGE_GATE_VALIDATOR=1)"
+fi
+
+if [[ "${PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR:-0}" != "1" ]]; then
+  echo "[checkpoint] validate operator-closure report deterministic runner"
+  PYTHONPATH=src "${PY_BIN}" scripts/validate_run_po_sbr_operator_handoff_closure_report.py
+else
+  echo "[checkpoint] skip operator-closure report deterministic validator (PO_SBR_SKIP_CLOSURE_REPORT_VALIDATOR=1)"
+fi
+
 echo "[checkpoint] progress snapshot"
 PYTHONPATH=src "${PY_BIN}" scripts/show_po_sbr_progress.py \
   --strict-ready \
   --output-json "${PROGRESS_JSON}"
+
+if [[ "${PO_SBR_SKIP_PROGRESS_SNAPSHOT_VALIDATOR:-0}" != "1" ]]; then
+  echo "[checkpoint] validate progress snapshot deterministic runner"
+  PYTHONPATH=src "${PY_BIN}" scripts/validate_run_po_sbr_progress_snapshot.py
+else
+  echo "[checkpoint] skip progress snapshot deterministic validator (PO_SBR_SKIP_PROGRESS_SNAPSHOT_VALIDATOR=1)"
+fi
 
 if [[ "${PO_SBR_SKIP_HOOK_SELFTEST:-0}" != "1" ]]; then
   echo "[checkpoint] validate pre-push local-artifact mode"

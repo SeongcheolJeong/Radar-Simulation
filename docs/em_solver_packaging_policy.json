@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "policy_id": "em_solver_packaging_license_boundary_v1",
+  "generated_at_utc": "2026-03-02T00:00:00Z",
+  "scope": "Packaging/distribution boundary for optional EM solvers used for antenna manifold asset generation.",
+  "sources": [
+    {
+      "name": "openEMS",
+      "role": "FDTD EM solver",
+      "repository": "https://github.com/thliebig/openEMS",
+      "license": "GPL-3.0"
+    },
+    {
+      "name": "CSXCAD",
+      "role": "openEMS geometry/dependency layer",
+      "repository": "https://github.com/thliebig/CSXCAD",
+      "license": "LGPL-3.0"
+    },
+    {
+      "name": "gprMax",
+      "role": "FDTD EM solver",
+      "repository": "https://github.com/gprMax/gprMax",
+      "license": "GPL-3.0-or-later"
+    }
+  ],
+  "distribution_policy": {
+    "product_binary_may_bundle_em_solver": false,
+    "solver_invocation_mode": [
+      "external_process",
+      "offline_precompute_pipeline"
+    ],
+    "service_boundary_required": true,
+    "shipping_manifold_assets_only_allowed": true,
+    "runtime_solver_dependency_in_core_pipeline": false
+  },
+  "compliance_controls": {
+    "must_track_solver_commits_in_reference_locks": true,
+    "must_record_solver_license_snapshot": true,
+    "must_run_legal_review_before_distributable_packaging": true,
+    "must_keep_solver_optional_in_runtime": true
+  },
+  "risk_classification": {
+    "openems": "strong_copyleft",
+    "gprmax": "strong_copyleft",
+    "csxcad": "library_dependency_copyleft"
+  },
+  "operator_notes": [
+    "This policy is engineering guidance, not legal advice.",
+    "Distributable packaging must not include openEMS/gprMax binaries in-core by default.",
+    "Preferred deployment is offline manifold precompute and shipping only generated manifold assets."
+  ]
+}

@@ -49,7 +49,20 @@ def _status_str(v: Any) -> str:
     return str(v).strip()
 
 
-def _build_stage(name: str, source_json: Optional[Path], ready: bool, details: Dict[str, Any]) -> Dict[str, Any]:
+def _int_or_default(v: Any, default: int) -> int:
+    try:
+        return int(v)
+    except Exception:
+        return default
+
+
+def _build_stage(
+    name: str,
+    source_json: Optional[Path],
+    ready: bool,
+    details: Dict[str, Any],
+    required: bool = True,
+) -> Dict[str, Any]:
     status = "ready" if ready else "blocked"
     if source_json is None and _status_str(details.get("reason", "")) == "report_not_found":
         status = "missing"
@@ -57,6 +70,7 @@ def _build_stage(name: str, source_json: Optional[Path], ready: bool, details: D
         "name": name,
         "status": status,
         "ready": bool(ready),
+        "required": bool(required),
         "source_json": str(source_json) if source_json is not None else None,
         "details": details,
     }
@@ -100,6 +114,9 @@ def main() -> None:
     merged_path = _latest_json(reports_root, "po_sbr_physical_full_track_merged_checkpoint_*.json")
     closure_path = _latest_json(reports_root, "po_sbr_operator_handoff_closure_*.json")
     gate_path = _latest_json(reports_root, "po_sbr_post_change_gate_*.json")
+    myproject_checkpoint_path = _latest_json(
+        reports_root, "po_sbr_myproject_readiness_checkpoint_*.json"
+    )
     local_ready_path = _latest_json(reports_root, "po_sbr_local_ready_regression_*_pc_self.json")
     drift_path = _latest_json(reports_root, "po_sbr_local_ready_baseline_drift_*_pc_self.json")
 
@@ -219,6 +236,104 @@ def main() -> None:
                 "--output-json docs/reports/po_sbr_post_change_gate_$(date -u +%Y_%m_%d).json"
             )
 
+    if myproject_checkpoint_path is None:
+        stages.append(
+            _build_stage(
+                name="myproject_readiness_checkpoint",
+                source_json=None,
+                ready=False,
+                details={"reason": "report_not_found"},
+                required=False,
+            )
+        )
+        next_actions.append("Run (myproject): bash scripts/run_po_sbr_myproject_readiness_checkpoint.sh")
+    else:
+        myproject_checkpoint = _load_json(myproject_checkpoint_path)
+        myproject_overall_status = _status_str(myproject_checkpoint.get("overall_status", ""))
+        myproject_avx_status = _status_str(
+            myproject_checkpoint.get("avx_developer_gate_status", "")
+        )
+        myproject_function_test_status = _status_str(
+            myproject_checkpoint.get("function_test_overall_status", "")
+        )
+        myproject_local_ready_status = _status_str(
+            myproject_checkpoint.get("local_ready_overall_status", "")
+        )
+        myproject_baseline_drift_verdict = _status_str(
+            myproject_checkpoint.get("baseline_drift_verdict", "")
+        )
+        myproject_baseline_drift_difference_count = _int_or_default(
+            myproject_checkpoint.get("baseline_drift_difference_count", -1),
+            -1,
+        )
+        myproject_progress_snapshot_overall_ready = bool(
+            myproject_checkpoint.get("progress_snapshot_overall_ready", False)
+        )
+        checkpoint_checks_raw = myproject_checkpoint.get("checkpoint_checks")
+        checkpoint_checks = (
+            dict(checkpoint_checks_raw)
+            if isinstance(checkpoint_checks_raw, Mapping)
+            else {}
+        )
+        checkpoint_checks_ready = all(
+            bool(checkpoint_checks.get(key, False))
+            for key in (
+                "function_test_ready",
+                "local_ready_ready",
+                "baseline_drift_match",
+                "avx_developer_gate_ready",
+                "post_change_gate_validator_ok",
+                "progress_snapshot_overall_ready",
+                "progress_snapshot_validator_ok",
+                "hook_selftest_validator_ok",
+            )
+        )
+        myproject_post_change_validator_status = _status_str(
+            myproject_checkpoint.get("post_change_gate_validator_status", "")
+        )
+        myproject_progress_validator_status = _status_str(
+            myproject_checkpoint.get("progress_snapshot_validator_status", "")
+        )
+        myproject_hook_selftest_validator_status = _status_str(
+            myproject_checkpoint.get("hook_selftest_validator_status", "")
+        )
+        myproject_ready = (
+            myproject_overall_status == "ready"
+            and myproject_avx_status == "ready"
+            and myproject_function_test_status == "ready"
+            and myproject_local_ready_status == "ready"
+            and myproject_baseline_drift_verdict == "match"
+            and myproject_baseline_drift_difference_count == 0
+            and myproject_progress_snapshot_overall_ready
+            and myproject_post_change_validator_status in {"", "pass", "skipped"}
+            and myproject_progress_validator_status in {"", "pass", "skipped"}
+            and myproject_hook_selftest_validator_status in {"", "pass", "skipped"}
+            and checkpoint_checks_ready
+        )
+        stages.append(
+            _build_stage(
+                name="myproject_readiness_checkpoint",
+                source_json=myproject_checkpoint_path,
+                ready=myproject_ready,
+                required=False,
+                details={
+                    "overall_status": myproject_overall_status,
+                    "avx_developer_gate_status": myproject_avx_status,
+                    "function_test_overall_status": myproject_function_test_status,
+                    "local_ready_overall_status": myproject_local_ready_status,
+                    "baseline_drift_verdict": myproject_baseline_drift_verdict,
+                    "baseline_drift_difference_count": myproject_baseline_drift_difference_count,
+                    "progress_snapshot_overall_ready": myproject_progress_snapshot_overall_ready,
+                    "post_change_gate_validator_status": myproject_post_change_validator_status,
+                    "progress_snapshot_validator_status": myproject_progress_validator_status,
+                    "hook_selftest_validator_status": myproject_hook_selftest_validator_status,
+                    "checkpoint_checks_ready": checkpoint_checks_ready,
+                },
+            )
+        )
+        if not myproject_ready:
+            next_actions.append("Run (myproject): bash scripts/run_po_sbr_myproject_readiness_checkpoint.sh")
+
     if local_ready_path is None:
         stages.append(
             _build_stage(
@@ -312,9 +427,12 @@ def main() -> None:
     if not hook_ready:
         next_actions.append("Run: ./scripts/install_po_sbr_pre_push_hook.sh")
 
-    total = len(stages)
-    ready_count = sum(1 for stage in stages if stage["status"] == "ready")
-    missing_count = sum(1 for stage in stages if stage["status"] == "missing")
+    required_stages = [stage for stage in stages if bool(stage.get("required", True))]
+    optional_stages = [stage for stage in stages if not bool(stage.get("required", True))]
+
+    total = len(required_stages)
+    ready_count = sum(1 for stage in required_stages if stage["status"] == "ready")
+    missing_count = sum(1 for stage in required_stages if stage["status"] == "missing")
     blocked_count = total - ready_count - missing_count
     progress_ratio = (float(ready_count) / float(total)) if total > 0 else 0.0
     overall_ready = ready_count == total
@@ -344,6 +462,13 @@ def main() -> None:
             "missing_count": missing_count,
             "total_count": total,
             "progress_ratio": progress_ratio,
+            "optional_total_count": len(optional_stages),
+            "optional_ready_count": sum(
+                1 for stage in optional_stages if stage.get("status") == "ready"
+            ),
+            "optional_missing_count": sum(
+                1 for stage in optional_stages if stage.get("status") == "missing"
+            ),
         },
         "stages": stages,
         "next_actions": dedup_next_actions,
@@ -360,7 +485,11 @@ def main() -> None:
     for stage in stages:
         source = stage.get("source_json")
         source_text = str(source) if source else "-"
-        print(f"- {stage['name']}: {stage['status']} (source={source_text})")
+        required = bool(stage.get("required", True))
+        print(
+            f"- {stage['name']}: {stage['status']} "
+            f"(required={required}, source={source_text})"
+        )
     print("next_actions:")
     for action in dedup_next_actions:
         print(f"- {action}")

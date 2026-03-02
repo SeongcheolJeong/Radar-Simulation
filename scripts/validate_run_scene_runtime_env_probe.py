@@ -50,12 +50,14 @@ def run() -> None:
         assert "sionna_runtime" in runtime_report
         assert "sionna_rt_full_runtime" in runtime_report
         assert "po_sbr_runtime" in runtime_report
+        assert "radarsimpy_runtime" in runtime_report
 
         for runtime_name in (
             "sionna_rt_mitsuba_runtime",
             "sionna_runtime",
             "sionna_rt_full_runtime",
             "po_sbr_runtime",
+            "radarsimpy_runtime",
         ):
             info = runtime_report[runtime_name]
             assert isinstance(info, dict)

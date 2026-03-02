@@ -41,6 +41,12 @@ DEFAULT_RUNTIME_SPECS: Dict[str, Dict[str, Any]] = {
         "supported_systems": ("Linux",),
         "requires_nvidia": True,
     },
+    "radarsimpy_runtime": {
+        "required_modules": ("radarsimpy",),
+        "repo_candidates": ("external/radarsimpy",),
+        "supported_systems": ("Darwin", "Linux", "Windows"),
+        "requires_nvidia": False,
+    },
 }
 
 

@@ -26,6 +26,7 @@ This command must run on this PC without macOS-to-Linux remote orchestration and
 
 ```bash
 PYTHONPATH=src python3 scripts/run_scene_backend_golden_path.py \
+  --radar-compensation-lock-json /path/to/radar_comp_profile_lock.json \
   --output-root data/runtime_golden_path/default \
   --output-summary-json docs/reports/scene_backend_golden_path_default.json
 ```
@@ -94,6 +95,14 @@ Supported profile ids:
 5. `single_target_material_loss_range25_v1` (material-loss realism informational profile)
 6. `mesh_dihedral_range25_v1` (dihedral mesh realism informational profile)
 7. `mesh_trihedral_range25_v1` (trihedral mesh realism informational profile)
+8. `single_target_ghost_comp_v1` (multipath/ghost-focused informational profile)
+9. `single_target_clutter_comp_v1` (diffuse/clutter-focused informational profile)
+
+Optional compensation lock override:
+
+- `--radar-compensation-lock-json`:
+  - when provided, profile-level compensation settings are overridden from lock payload for matching profile ids
+  - report captures source in `equivalence_inputs.radar_compensation_source` and lock path in `equivalence_inputs.radar_compensation_lock_json`
 
 ## Validation
 

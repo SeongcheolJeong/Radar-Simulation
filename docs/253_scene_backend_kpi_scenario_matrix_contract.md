@@ -19,6 +19,8 @@ Scale backend KPI/parity evidence from one equivalence scene to multiple profile
 5. `single_target_material_loss_range25_v1` (`realism_informational`)
 6. `mesh_dihedral_range25_v1` (`realism_informational`)
 7. `mesh_trihedral_range25_v1` (`realism_informational`)
+8. `single_target_ghost_comp_v1` (`realism_informational`, multipath/ghost-focused compensation profile)
+9. `single_target_clutter_comp_v1` (`realism_informational`, diffuse/clutter-focused compensation profile)
 
 ## Runner Contract
 
@@ -27,9 +29,15 @@ Scale backend KPI/parity evidence from one equivalence scene to multiple profile
 ```bash
 PYTHONPATH=src .venv-po-sbr/bin/python scripts/run_scene_backend_kpi_scenario_matrix.py \
   --strict-all-ready \
+  --radar-compensation-lock-json /path/to/radar_comp_profile_lock.json \
   --output-root data/runtime_golden_path/scenario_matrix_local_2026_03_01_v4 \
   --output-summary-json docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_v4.json
 ```
+
+Optional:
+
+- `--radar-compensation-lock-json`:
+  - overrides profile-default compensation presets through golden-path runner for profiles present in lock.
 
 ### Required output keys
 

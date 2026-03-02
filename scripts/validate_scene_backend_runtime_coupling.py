@@ -74,6 +74,30 @@ def po_sbr_provider(context):
     return {"paths": paths}
 
 
+def radarsimpy_provider(context):
+    n = int(context["n_chirps"])
+    inp = dict(context.get("runtime_input") or {})
+    rng = float(inp.get("range_m", 24.0))
+    amp = float(inp.get("amp", 1.0 / (rng * rng)))
+    delay = 2.0 * rng / C0
+    out = []
+    for k in range(n):
+        out.append(
+            [
+                {
+                    "delay_s": delay,
+                    "doppler_hz": 0.0,
+                    "unit_direction": [1.0, 0.0, 0.0],
+                    "amp": amp,
+                    "path_id": f"runtime_radarsimpy_{k}",
+                    "material_tag": "runtime_radarsimpy",
+                    "reflection_order": 1,
+                }
+            ]
+        )
+    return {"paths_by_chirp": out}
+
+
 def failing_provider(context):
     raise RuntimeError("intentional runtime provider failure")
 """.strip()
@@ -176,6 +200,32 @@ def run() -> None:
             assert p2[0][0]["path_id"] == "runtime_po_0"
             r2 = _load_runtime_resolution(o2 / "radar_map.npz")
             assert r2["mode"] == "runtime_provider"
+
+            # Case 2.5: RadarSimPy runtime provider direct path
+            s25 = _write_scene(
+                root / "scene_radarsimpy_runtime.json",
+                {
+                    "scene_id": "radarsimpy_runtime_case",
+                    "backend": {
+                        "type": "radarsimpy_rt",
+                        "n_chirps": 3,
+                        "tx_pos_m": tx_pos,
+                        "rx_pos_m": rx_pos,
+                        "runtime_provider": f"{fixture_module}:radarsimpy_provider",
+                        "runtime_required_modules": [],
+                        "runtime_input": {"range_m": 24.0},
+                        "noise_sigma": 0.0,
+                    },
+                    "radar": _base_radar(),
+                    "map_config": {"nfft_range": 512, "range_bin_limit": 64},
+                },
+            )
+            o25 = root / "out_radarsimpy_runtime"
+            run_object_scene_to_radar_map_json(str(s25), str(o25), run_hybrid_estimation=False)
+            p25 = json.loads((o25 / "path_list.json").read_text(encoding="utf-8"))
+            assert p25[0][0]["path_id"] == "runtime_radarsimpy_0"
+            r25 = _load_runtime_resolution(o25 / "radar_map.npz")
+            assert r25["mode"] == "runtime_provider"
 
             # Case 3: runtime failure with static fallback
             static_paths = {

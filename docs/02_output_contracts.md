@@ -9,16 +9,16 @@ Required fields per path:
 - `delay_s: float`
 - `doppler_hz: float`
 - `unit_direction: [ux, uy, uz]` (normalized)
-- `amp: complex`
+- `amp_complex: {re, im}` (serialized form; in-memory field is `amp: complex`)
+- `path_id: str` (non-empty)
+- `material_tag: str` (non-empty)
+- `reflection_order: int` (`>= 0`)
 
 Recommended optional fields:
 
 - `aod_az_deg`, `aod_el_deg`
 - `aoa_az_deg`, `aoa_el_deg`
 - `pol_matrix` (`2x2` complex, flattened in row-major `[m00,m01,m10,m11]`)
-- `path_id`
-- `material_tag`
-- `reflection_order` (integer, bounce/order metadata)
 
 Container:
 
@@ -51,6 +51,11 @@ Minimum metadata keys:
 - `tx_pos_m`
 - `rx_pos_m`
 - `timestamp_ref_s`
+
+Scene-pipeline `radar_map.npz` metadata extensions:
+
+- `path_contract_summary` (validator counts for serialized `PathList`)
+- `compensation_summary` (optional; present when `backend.radar_compensation` is configured)
 
 ## 4) Derived Views
 

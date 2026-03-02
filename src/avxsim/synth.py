@@ -4,6 +4,7 @@ import numpy as np
 
 from .antenna import AntennaModel, IsotropicAntenna
 from .constants import C0
+from .path_contract import validate_paths_by_chirp
 from .types import Path, RadarConfig
 
 
@@ -44,6 +45,11 @@ def synth_fmcw_tdm(
     n_chirps = len(radar.tx_schedule)
     n_samp = int(radar.samples_per_chirp)
 
+    validate_paths_by_chirp(
+        paths_by_chirp=paths_by_chirp,
+        n_chirps=n_chirps,
+        require_metadata=False,
+    )
     if len(paths_by_chirp) != n_chirps:
         raise ValueError("paths_by_chirp length must match tx_schedule length")
     if global_jones_matrix is not None and not use_jones_polarization:

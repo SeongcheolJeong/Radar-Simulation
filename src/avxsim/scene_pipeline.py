@@ -6,14 +6,18 @@ import numpy as np
 
 from .adapters import (
     adapt_po_sbr_paths_payload_to_paths_by_chirp,
+    adapt_radarsimpy_paths_payload_to_paths_by_chirp,
     adapt_sionna_paths_payload_to_paths_by_chirp,
     load_po_sbr_paths_json,
+    load_radarsimpy_paths_json,
     load_sionna_paths_json,
 )
 from .adc_pack_builder import estimate_rd_ra_from_adc
 from .constants import C0
 from .io import save_adc_npz, save_paths_by_chirp_json
+from .path_contract import validate_paths_by_chirp
 from .pipeline import run_hybrid_frames_pipeline
+from .radar_compensation import apply_radar_compensation
 from .runtime_coupling import invoke_runtime_paths_provider
 from .synth import synth_fmcw_tdm
 from .types import Path as RadarPath
@@ -68,10 +72,25 @@ def run_object_scene_to_radar_map(
             radar=radar,
             output_dir=output_dir,
         )
+    elif backend_type == "radarsimpy_rt":
+        result = _run_backend_radarsimpy_rt(
+            backend=backend,
+            radar=radar,
+            output_dir=output_dir,
+        )
     else:
         raise ValueError(
-            "supported backend.type: hybrid_frames, analytic_targets, mesh_material_stub, sionna_rt, po_sbr_rt"
+            "supported backend.type: hybrid_frames, analytic_targets, mesh_material_stub, "
+            "sionna_rt, po_sbr_rt, radarsimpy_rt"
         )
+
+    if "paths_by_chirp" not in result:
+        raise ValueError("backend result missing paths_by_chirp")
+    path_contract_summary = validate_paths_by_chirp(
+        paths_by_chirp=result["paths_by_chirp"],
+        n_chirps=len(result["tx_schedule"]),
+        require_metadata=True,
+    )
 
     adc = np.asarray(result["adc"])
     est = estimate_rd_ra_from_adc(
@@ -97,6 +116,9 @@ def run_object_scene_to_radar_map(
     }
     if "runtime_resolution" in result:
         meta["runtime_resolution"] = result["runtime_resolution"]
+    if "compensation_summary" in result and isinstance(result["compensation_summary"], Mapping):
+        meta["compensation_summary"] = dict(result["compensation_summary"])
+    meta["path_contract_summary"] = dict(path_contract_summary)
     np.savez_compressed(
         str(map_npz),
         fx_dop_win=np.asarray(est["fx_dop_win"], dtype=np.float64),
@@ -111,6 +133,7 @@ def run_object_scene_to_radar_map(
         "tx_schedule": [int(x) for x in result["tx_schedule"]],
         "frame_count": int(result.get("frame_count", len(result["tx_schedule"]))),
         "hybrid_estimation_npz": result.get("hybrid_estimation_npz"),
+        "path_contract_summary": dict(path_contract_summary),
     }
 
 
@@ -120,6 +143,10 @@ def run_object_scene_to_radar_map_json(
     run_hybrid_estimation: bool = False,
 ) -> Dict[str, Any]:
     payload = load_object_scene_json(scene_json_path)
+    payload = _resolve_scene_relative_paths(
+        payload=payload,
+        scene_json_path=scene_json_path,
+    )
     return run_object_scene_to_radar_map(
         scene_payload=payload,
         output_dir=output_dir,
@@ -144,6 +171,40 @@ def _resolve_frame_indices(backend: Mapping[str, Any]) -> List[int]:
     if e < s:
         raise ValueError("backend.frame_end must be >= frame_start")
     return list(range(s, e + 1))
+
+
+def _resolve_scene_relative_paths(payload: Mapping[str, Any], scene_json_path: str) -> Dict[str, Any]:
+    out = json.loads(json.dumps(dict(payload)))
+    backend = out.get("backend")
+    if not isinstance(backend, dict):
+        return out
+    radar_comp = backend.get("radar_compensation")
+    if not isinstance(radar_comp, dict):
+        return out
+    manifold = radar_comp.get("manifold")
+    if not isinstance(manifold, dict):
+        return out
+
+    raw_path = manifold.get("asset_path", manifold.get("asset_npz", manifold.get("asset_h5")))
+    if raw_path is None:
+        return out
+    text = str(raw_path).strip()
+    if text == "":
+        manifold.pop("asset_path", None)
+        manifold.pop("asset_npz", None)
+        manifold.pop("asset_h5", None)
+        return out
+    p = Path(text).expanduser()
+    if p.is_absolute():
+        manifold["asset_path"] = str(p.resolve())
+        manifold.pop("asset_npz", None)
+        manifold.pop("asset_h5", None)
+        return out
+    scene_dir = Path(scene_json_path).expanduser().resolve().parent
+    manifold["asset_path"] = str((scene_dir / p).resolve())
+    manifold.pop("asset_npz", None)
+    manifold.pop("asset_h5", None)
+    return out
 
 
 def _run_backend_hybrid_frames(
@@ -239,6 +300,12 @@ def _run_backend_analytic_targets(
         chirp_interval_s=float(chirp_interval_s),
         min_range_m=max(float(backend.get("min_range_m", 0.1)), 1e-6),
     )
+    paths_by_chirp, compensation_summary = _apply_optional_radar_compensation(
+        paths_by_chirp=paths_by_chirp,
+        backend=backend,
+        radar_cfg=radar_cfg,
+        chirp_interval_s=float(chirp_interval_s),
+    )
 
     adc = synth_fmcw_tdm(
         paths_by_chirp=paths_by_chirp,
@@ -263,6 +330,7 @@ def _run_backend_analytic_targets(
         "adc_cube_npz": str(adc_npz),
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
+        "compensation_summary": compensation_summary,
     }
 
 
@@ -317,6 +385,12 @@ def _run_backend_mesh_material_stub(
         range_amp_exp=float(range_amp_exp),
         ego_pos_m=ego_pos,
     )
+    paths_by_chirp, compensation_summary = _apply_optional_radar_compensation(
+        paths_by_chirp=paths_by_chirp,
+        backend=backend,
+        radar_cfg=radar_cfg,
+        chirp_interval_s=float(chirp_interval_s),
+    )
 
     adc = synth_fmcw_tdm(
         paths_by_chirp=paths_by_chirp,
@@ -341,6 +415,7 @@ def _run_backend_mesh_material_stub(
         "adc_cube_npz": str(adc_npz),
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
+        "compensation_summary": compensation_summary,
     }
 
 
@@ -387,6 +462,13 @@ def _run_backend_sionna_rt(
         payload=paths_payload,
         n_chirps=int(n_chirps),
     )
+    chirp_interval_s = _resolve_backend_chirp_interval_s(backend=backend, radar_cfg=radar_cfg)
+    paths_by_chirp, compensation_summary = _apply_optional_radar_compensation(
+        paths_by_chirp=paths_by_chirp,
+        backend=backend,
+        radar_cfg=radar_cfg,
+        chirp_interval_s=float(chirp_interval_s),
+    )
 
     adc = synth_fmcw_tdm(
         paths_by_chirp=paths_by_chirp,
@@ -412,6 +494,7 @@ def _run_backend_sionna_rt(
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
         "runtime_resolution": runtime_resolution,
+        "compensation_summary": compensation_summary,
     }
 
 
@@ -459,6 +542,13 @@ def _run_backend_po_sbr_rt(
         n_chirps=int(n_chirps),
         fc_hz=float(radar_cfg.fc_hz),
     )
+    chirp_interval_s = _resolve_backend_chirp_interval_s(backend=backend, radar_cfg=radar_cfg)
+    paths_by_chirp, compensation_summary = _apply_optional_radar_compensation(
+        paths_by_chirp=paths_by_chirp,
+        backend=backend,
+        radar_cfg=radar_cfg,
+        chirp_interval_s=float(chirp_interval_s),
+    )
 
     adc = synth_fmcw_tdm(
         paths_by_chirp=paths_by_chirp,
@@ -484,7 +574,134 @@ def _run_backend_po_sbr_rt(
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
         "runtime_resolution": runtime_resolution,
+        "compensation_summary": compensation_summary,
     }
+
+
+def _run_backend_radarsimpy_rt(
+    backend: Mapping[str, Any],
+    radar: Mapping[str, Any],
+    output_dir: str,
+) -> Dict[str, Any]:
+    tx_pos = _resolve_positions_3d(backend, "tx_pos_m")
+    rx_pos = _resolve_positions_3d(backend, "rx_pos_m")
+    n_tx = int(tx_pos.shape[0])
+
+    n_chirps = _resolve_required_int(backend.get("n_chirps"), "backend.n_chirps")
+    tx_schedule = _resolve_tx_schedule(
+        raw=backend.get("tx_schedule"),
+        n_chirps=n_chirps,
+        n_tx=n_tx,
+    )
+    radar_cfg = RadarConfig(
+        fc_hz=float(radar["fc_hz"]),
+        slope_hz_per_s=float(radar["slope_hz_per_s"]),
+        fs_hz=float(radar["fs_hz"]),
+        samples_per_chirp=int(radar["samples_per_chirp"]),
+        tx_schedule=tx_schedule,
+    )
+    static_payload = _resolve_optional_static_paths_payload(
+        backend=backend,
+        backend_type="radarsimpy_rt",
+        paths_json_key="radarsimpy_paths_json",
+        json_loader=load_radarsimpy_paths_json,
+    )
+    backend_runtime = dict(backend)
+    backend_runtime["resolved_tx_schedule"] = [int(x) for x in tx_schedule]
+    payload, runtime_resolution = _resolve_paths_payload_with_runtime(
+        backend=backend_runtime,
+        radar=radar,
+        backend_type="radarsimpy_rt",
+        n_chirps=int(n_chirps),
+        fc_hz=float(radar_cfg.fc_hz),
+        static_payload=static_payload,
+        static_requirement_label="paths_payload, radarsimpy_paths_json",
+        default_runtime_required_modules=("radarsimpy",),
+    )
+    paths_by_chirp = adapt_radarsimpy_paths_payload_to_paths_by_chirp(
+        payload=payload,
+        n_chirps=int(n_chirps),
+        fc_hz=float(radar_cfg.fc_hz),
+    )
+    chirp_interval_s = _resolve_backend_chirp_interval_s(backend=backend, radar_cfg=radar_cfg)
+    paths_by_chirp, compensation_summary = _apply_optional_radar_compensation(
+        paths_by_chirp=paths_by_chirp,
+        backend=backend,
+        radar_cfg=radar_cfg,
+        chirp_interval_s=float(chirp_interval_s),
+    )
+    adc_payload = _resolve_optional_adc_sctr_from_payload(
+        payload=payload,
+        samples_per_chirp=int(radar_cfg.samples_per_chirp),
+        n_chirps=int(n_chirps),
+        n_tx=int(tx_pos.shape[0]),
+        n_rx=int(rx_pos.shape[0]),
+    )
+    compensation_enabled = bool(compensation_summary.get("enabled", False))
+    adc_source = "synth_fmcw_tdm"
+    if (adc_payload is not None) and (not compensation_enabled):
+        adc = np.asarray(adc_payload)
+        adc_source = "runtime_payload_adc_sctr"
+    else:
+        adc = synth_fmcw_tdm(
+            paths_by_chirp=paths_by_chirp,
+            tx_pos_m=tx_pos,
+            rx_pos_m=rx_pos,
+            radar=radar_cfg,
+            noise_sigma=float(backend.get("noise_sigma", 0.0)),
+        )
+        if adc_payload is not None:
+            compensation_summary = dict(compensation_summary)
+            compensation_summary["adc_payload_ignored"] = True
+            compensation_summary["adc_payload_ignored_reason"] = "radar_compensation_enabled"
+
+    runtime_resolution_out = dict(runtime_resolution)
+    runtime_resolution_out["adc_source"] = str(adc_source)
+    runtime_resolution_out["adc_payload_present"] = bool(adc_payload is not None)
+    provider_runtime_info = payload.get("provider_runtime_info")
+    if isinstance(provider_runtime_info, Mapping):
+        runtime_resolution_out["provider_runtime_info"] = dict(provider_runtime_info)
+
+    out_root = Path(output_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+    path_json = out_root / "path_list.json"
+    adc_npz = out_root / "adc_cube.npz"
+    save_paths_by_chirp_json(paths_by_chirp, str(path_json))
+    save_adc_npz(adc, radar_cfg, tx_pos, rx_pos, str(adc_npz))
+
+    return {
+        "paths_by_chirp": paths_by_chirp,
+        "adc": adc,
+        "tx_schedule": tx_schedule,
+        "path_list_json": str(path_json),
+        "adc_cube_npz": str(adc_npz),
+        "hybrid_estimation_npz": None,
+        "frame_count": int(n_chirps),
+        "runtime_resolution": runtime_resolution_out,
+        "compensation_summary": compensation_summary,
+    }
+
+
+def _resolve_optional_adc_sctr_from_payload(
+    payload: Mapping[str, Any],
+    samples_per_chirp: int,
+    n_chirps: int,
+    n_tx: int,
+    n_rx: int,
+) -> Optional[np.ndarray]:
+    raw = payload.get("adc_sctr")
+    if raw is None:
+        return None
+    arr = np.asarray(raw)
+    if arr.ndim != 4:
+        raise ValueError("backend payload adc_sctr must be 4D [sample,chirp,tx,rx]")
+    expected = (int(samples_per_chirp), int(n_chirps), int(n_tx), int(n_rx))
+    if tuple(int(x) for x in arr.shape) != expected:
+        raise ValueError(f"backend payload adc_sctr shape mismatch: {tuple(arr.shape)} != {expected}")
+    arr_c = np.asarray(arr, dtype=np.complex128)
+    if (not np.all(np.isfinite(np.real(arr_c)))) or (not np.all(np.isfinite(np.imag(arr_c)))):
+        raise ValueError("backend payload adc_sctr contains non-finite values")
+    return arr_c
 
 
 def _resolve_optional_static_paths_payload(
@@ -701,6 +918,48 @@ def _generate_mesh_material_paths(
             )
         out.append(chirp_paths)
     return out
+
+
+def _apply_optional_radar_compensation(
+    paths_by_chirp: Sequence[Sequence[RadarPath]],
+    backend: Mapping[str, Any],
+    radar_cfg: RadarConfig,
+    chirp_interval_s: float,
+) -> Tuple[List[List[RadarPath]], Dict[str, Any]]:
+    cfg = backend.get("radar_compensation")
+    if cfg is None:
+        return [list(row) for row in paths_by_chirp], {
+            "enabled": False,
+            "input_path_count": int(sum(len(row) for row in paths_by_chirp)),
+            "output_path_count": int(sum(len(row) for row in paths_by_chirp)),
+            "added_diffuse_path_count": 0,
+            "added_clutter_path_count": 0,
+            "seed": None,
+            "reason": "not_configured",
+        }
+    if not isinstance(cfg, Mapping):
+        raise ValueError("backend.radar_compensation must be object")
+    compensated, summary = apply_radar_compensation(
+        paths_by_chirp=paths_by_chirp,
+        radar=radar_cfg,
+        chirp_interval_s=float(chirp_interval_s),
+        config=cfg,
+    )
+    return [list(row) for row in compensated], dict(summary)
+
+
+def _resolve_backend_chirp_interval_s(backend: Mapping[str, Any], radar_cfg: RadarConfig) -> float:
+    chirp_interval_s = _opt_float(backend.get("chirp_interval_s"))
+    if chirp_interval_s is not None:
+        return float(chirp_interval_s)
+
+    runtime_input = backend.get("runtime_input")
+    if isinstance(runtime_input, Mapping):
+        runtime_chirp = _opt_float(runtime_input.get("chirp_interval_s"))
+        if runtime_chirp is not None:
+            return float(runtime_chirp)
+
+    return float(radar_cfg.samples_per_chirp) / float(radar_cfg.fs_hz)
 
 
 def _resolve_positions_3d(payload: Mapping[str, Any], key: str) -> np.ndarray:

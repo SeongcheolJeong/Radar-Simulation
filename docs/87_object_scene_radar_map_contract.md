@@ -15,6 +15,7 @@ Current backend scope:
 - `mesh_material_stub` (mesh/material-aware candidate backend for M12.0)
 - `sionna_rt` (Sionna-exported path adapter backend for M13.1)
 - `po_sbr_rt` (PO-SBR exported path adapter candidate backend for M13.2)
+- `radarsimpy_rt` (RadarSimPy runtime-provider candidate backend)
 
 ## Core Entry Points
 
@@ -54,6 +55,8 @@ Optional:
 - `scene_id`
 - `map_config` (`nfft_range`, `nfft_doppler`, `nfft_angle`, windows, `range_bin_limit`)
 - pass-through ingest knobs (`mode`, `file_ext`, thresholds, `.ffd`, Jones, path-power fit)
+- backend optional compensation layer:
+  - `radar_compensation` (`material/rcs + wideband + manifold + diffuse + clutter`)
 
 ## Outputs
 
@@ -69,6 +72,7 @@ Under `--output-dir`:
 - `fx_dop_win` (RD power map)
 - `fx_ang` (RA power map)
 - `metadata_json`
+  - includes optional `compensation_summary` when compensation layer is configured
 
 `path_list.json` path metadata (M11.3):
 

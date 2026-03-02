@@ -8,6 +8,7 @@ DEFAULT_RUNTIME_PRIORITY: Tuple[str, ...] = (
     "sionna_rt_mitsuba_runtime",
     "sionna_runtime",
     "po_sbr_runtime",
+    "radarsimpy_runtime",
 )
 
 
@@ -115,5 +116,7 @@ def _recommend_actions(
         actions.append("ensure Dr.Jit LLVM backend is configured (set DRJIT_LIBLLVM_PATH if needed)")
     if runtime_name == "po_sbr_runtime":
         actions.append("install modified `rtxpy` and libigl bindings from PO-SBR reference docs")
+    if runtime_name == "radarsimpy_runtime":
+        actions.append("install `radarsimpy` package and keep `external/radarsimpy` reference checkout in sync")
 
     return actions
