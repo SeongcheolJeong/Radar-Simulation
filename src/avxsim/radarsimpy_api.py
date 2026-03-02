@@ -4,6 +4,12 @@ import importlib
 from types import ModuleType
 from typing import Any, Dict, List, Tuple
 
+from .radarsimpy_core_processing import (
+    core_doppler_fft,
+    core_range_doppler_fft,
+    core_range_fft,
+)
+
 API_INDEX_URL = "https://radarsimx.github.io/radarsimpy/api/index.html"
 API_INDEX_VERSION = "15.0.1"
 
@@ -69,6 +75,20 @@ def _resolve_submodule_attr(submodule_name: str, attr_name: str) -> Any:
     if value is None:
         raise RuntimeError(f"radarsimpy API missing: {submodule_name}.{attr_name}")
     return value
+
+
+def _pop_first(kwargs: Dict[str, Any], names: Tuple[str, ...], *, default: Any = None) -> Any:
+    for name in names:
+        if name in kwargs:
+            return kwargs.pop(name)
+    return default
+
+
+def _resolve_processing_fn_or_fallback(attr_name: str, fallback: Any) -> Any:
+    try:
+        return _resolve_submodule_attr("processing", attr_name)
+    except RuntimeError:
+        return fallback
 
 
 def inspect_radarsimpy_api_coverage(module: ModuleType | None = None) -> Dict[str, Any]:
@@ -191,17 +211,99 @@ def doa_root_music(*args: Any, **kwargs: Any) -> Any:
 
 
 def doppler_fft(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "doppler_fft")
+    fn = _resolve_processing_fn_or_fallback("doppler_fft", core_doppler_fft)
+    if fn is core_doppler_fft:
+        if len(args) == 0:
+            raise TypeError("doppler_fft missing required positional argument: data")
+        data = args[0]
+        rem = list(args[1:])
+        kw = dict(kwargs)
+        if len(rem) > 0 and ("n" not in kw) and ("doppler_n" not in kw):
+            kw["n"] = rem.pop(0)
+        if len(rem) > 0 and ("axis" not in kw) and ("doppler_axis" not in kw):
+            kw["axis"] = rem.pop(0)
+        if len(rem) > 0 and ("window" not in kw) and ("doppler_window" not in kw):
+            kw["window"] = rem.pop(0)
+        if len(rem) > 0:
+            raise TypeError(f"doppler_fft fallback received too many positional args: {len(rem) + 1}")
+
+        axis = _pop_first(kw, ("axis", "doppler_axis"), default=-1)
+        n = _pop_first(kw, ("n", "nfft", "fft_size", "doppler_n"), default=None)
+        window = _pop_first(kw, ("window", "win", "doppler_window"), default=None)
+        if len(kw) > 0:
+            raise TypeError(f"doppler_fft fallback got unexpected kwargs: {sorted(kw.keys())}")
+        return core_doppler_fft(data, axis=axis, n=n, window=window)
     return fn(*args, **kwargs)
 
 
 def range_doppler_fft(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "range_doppler_fft")
+    fn = _resolve_processing_fn_or_fallback("range_doppler_fft", core_range_doppler_fft)
+    if fn is core_range_doppler_fft:
+        if len(args) == 0:
+            raise TypeError("range_doppler_fft missing required positional argument: data")
+        data = args[0]
+        rem = list(args[1:])
+        kw = dict(kwargs)
+        if len(rem) > 0 and ("range_n" not in kw):
+            kw["range_n"] = rem.pop(0)
+        if len(rem) > 0 and ("doppler_n" not in kw):
+            kw["doppler_n"] = rem.pop(0)
+        if len(rem) > 0 and ("range_axis" not in kw):
+            kw["range_axis"] = rem.pop(0)
+        if len(rem) > 0 and ("doppler_axis" not in kw):
+            kw["doppler_axis"] = rem.pop(0)
+        if len(rem) > 0:
+            raise TypeError(
+                f"range_doppler_fft fallback received too many positional args: {len(rem) + 1}"
+            )
+
+        range_axis = _pop_first(kw, ("range_axis", "rng_axis"), default=-1)
+        doppler_axis = _pop_first(kw, ("doppler_axis", "dop_axis"), default=-2)
+        range_n = _pop_first(kw, ("range_n", "range_nfft", "range_fft_size"), default=None)
+        doppler_n = _pop_first(
+            kw,
+            ("doppler_n", "doppler_nfft", "doppler_fft_size"),
+            default=None,
+        )
+        range_window = _pop_first(kw, ("range_window", "range_win"), default=None)
+        doppler_window = _pop_first(kw, ("doppler_window", "doppler_win"), default=None)
+        if len(kw) > 0:
+            raise TypeError(f"range_doppler_fft fallback got unexpected kwargs: {sorted(kw.keys())}")
+        return core_range_doppler_fft(
+            data,
+            range_axis=range_axis,
+            doppler_axis=doppler_axis,
+            range_n=range_n,
+            doppler_n=doppler_n,
+            range_window=range_window,
+            doppler_window=doppler_window,
+        )
     return fn(*args, **kwargs)
 
 
 def range_fft(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "range_fft")
+    fn = _resolve_processing_fn_or_fallback("range_fft", core_range_fft)
+    if fn is core_range_fft:
+        if len(args) == 0:
+            raise TypeError("range_fft missing required positional argument: data")
+        data = args[0]
+        rem = list(args[1:])
+        kw = dict(kwargs)
+        if len(rem) > 0 and ("n" not in kw) and ("range_n" not in kw):
+            kw["n"] = rem.pop(0)
+        if len(rem) > 0 and ("axis" not in kw) and ("range_axis" not in kw):
+            kw["axis"] = rem.pop(0)
+        if len(rem) > 0 and ("window" not in kw) and ("range_window" not in kw):
+            kw["window"] = rem.pop(0)
+        if len(rem) > 0:
+            raise TypeError(f"range_fft fallback received too many positional args: {len(rem) + 1}")
+
+        axis = _pop_first(kw, ("axis", "range_axis", "rng_axis"), default=-1)
+        n = _pop_first(kw, ("n", "nfft", "fft_size", "range_n"), default=None)
+        window = _pop_first(kw, ("window", "win", "range_window"), default=None)
+        if len(kw) > 0:
+            raise TypeError(f"range_fft fallback got unexpected kwargs: {sorted(kw.keys())}")
+        return core_range_fft(data, axis=axis, n=n, window=window)
     return fn(*args, **kwargs)
 
 

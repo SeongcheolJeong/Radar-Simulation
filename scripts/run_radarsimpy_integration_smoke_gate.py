@@ -105,6 +105,10 @@ def main() -> None:
             "cmd": [py_bin, "scripts/validate_radarsimpy_api_coverage_excluding_sim_lidar.py"],
         },
         {
+            "name": "validate_radarsimpy_processing_core_fallback",
+            "cmd": [py_bin, "scripts/validate_radarsimpy_processing_core_fallback.py"],
+        },
+        {
             "name": "validate_run_radarsimpy_wrapper_integration_gate",
             "cmd": [py_bin, "scripts/validate_run_radarsimpy_wrapper_integration_gate.py"],
         },

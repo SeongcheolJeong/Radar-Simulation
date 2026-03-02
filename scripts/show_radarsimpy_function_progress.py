@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
+import importlib
 import json
 import sys
 from datetime import datetime, timezone
@@ -27,15 +27,16 @@ def parse_args() -> argparse.Namespace:
 
 
 def _load_wrapper_module(repo_root: Path) -> ModuleType:
-    module_path = (repo_root / "src" / "avxsim" / "radarsimpy_api.py").resolve()
-    if not module_path.exists():
-        raise FileNotFoundError(f"missing wrapper module: {module_path}")
-    spec = importlib.util.spec_from_file_location("avxsim_radarsimpy_api_standalone", module_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"unable to build module spec: {module_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    src_root = (repo_root / "src").resolve()
+    if not src_root.exists():
+        raise FileNotFoundError(f"missing src root: {src_root}")
+    src_text = str(src_root)
+    if src_text not in sys.path:
+        sys.path.insert(0, src_text)
+    try:
+        return importlib.import_module("avxsim.radarsimpy_api")
+    except Exception as exc:
+        raise RuntimeError(f"unable to import avxsim.radarsimpy_api from {src_root}: {exc}") from exc
 
 
 def _tuple_of_str(module: ModuleType, attr: str) -> Tuple[str, ...]:
