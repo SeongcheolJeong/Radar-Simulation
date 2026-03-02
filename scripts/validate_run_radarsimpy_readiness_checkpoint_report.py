@@ -131,6 +131,69 @@ def run() -> None:
         )
         _must_pass(proc_ready, "ready report")
 
+        guard_without_skip = copy.deepcopy(ready_report)
+        guard_without_skip["checkpoint_checks"]["smoke_skip_flag_applied"] = False
+        guard_without_skip["overall_status"] = "blocked"
+        guard_without_skip_path = root / "guard_without_skip.json"
+        _write_json(guard_without_skip_path, guard_without_skip)
+        proc_guard_without_skip = _run(
+            repo_root,
+            [
+                str(Path(sys.executable)),
+                str(validator),
+                "--summary-json",
+                str(guard_without_skip_path),
+            ],
+        )
+        _must_fail(
+            proc_guard_without_skip,
+            "guard_without_skip report",
+            "smoke_recursion_guard_active requires smoke_skip_flag_applied=true",
+        )
+
+        skip_requested_mismatch = copy.deepcopy(ready_report)
+        skip_requested_mismatch["smoke_skip_readiness_runner_validator_requested"] = False
+        skip_requested_mismatch_path = root / "skip_requested_mismatch.json"
+        _write_json(skip_requested_mismatch_path, skip_requested_mismatch)
+        proc_skip_requested_mismatch = _run(
+            repo_root,
+            [
+                str(Path(sys.executable)),
+                str(validator),
+                "--summary-json",
+                str(skip_requested_mismatch_path),
+            ],
+        )
+        _must_fail(
+            proc_skip_requested_mismatch,
+            "skip_requested_mismatch report",
+            "smoke_skip_readiness_runner_validator_requested mismatch",
+        )
+
+        cmd_skip_mismatch = copy.deepcopy(ready_report)
+        cmd_skip_mismatch["commands"]["smoke_gate"]["cmd"] = [
+            "python",
+            "scripts/run_radarsimpy_integration_smoke_gate.py",
+            "--output-summary-json",
+            "/tmp/smoke.json",
+        ]
+        cmd_skip_mismatch_path = root / "cmd_skip_mismatch.json"
+        _write_json(cmd_skip_mismatch_path, cmd_skip_mismatch)
+        proc_cmd_skip_mismatch = _run(
+            repo_root,
+            [
+                str(Path(sys.executable)),
+                str(validator),
+                "--summary-json",
+                str(cmd_skip_mismatch_path),
+            ],
+        )
+        _must_fail(
+            proc_cmd_skip_mismatch,
+            "cmd_skip_mismatch report",
+            "commands.smoke_gate.cmd skip-flag mismatch",
+        )
+
         mismatch = copy.deepcopy(ready_report)
         mismatch["overall_status"] = "blocked"
         mismatch_path = root / "mismatch.json"

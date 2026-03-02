@@ -173,13 +173,17 @@ def main() -> None:
     _validate_command_block(commands, "migration_stepwise", allow_skipped=True)
     _validate_command_block(commands, "function_progress")
 
-    smoke_cmd = commands.get("smoke_gate", {}).get("cmd")
-    if isinstance(smoke_cmd, list):
-        contains_skip = "--skip-readiness-runner-validator" in [str(v) for v in smoke_cmd]
-        if contains_skip != bool(check_map["smoke_skip_flag_applied"]):
-            raise ValueError(
-                "commands.smoke_gate.cmd skip-flag mismatch with checkpoint_checks.smoke_skip_flag_applied"
-            )
+    smoke_gate_row = commands.get("smoke_gate")
+    if not isinstance(smoke_gate_row, Mapping):
+        raise ValueError("commands.smoke_gate must be object")
+    smoke_cmd = smoke_gate_row.get("cmd")
+    if not isinstance(smoke_cmd, list) or len(smoke_cmd) == 0:
+        raise ValueError("commands.smoke_gate.cmd must be non-empty list")
+    contains_skip = "--skip-readiness-runner-validator" in [str(v) for v in smoke_cmd]
+    if contains_skip != bool(check_map["smoke_skip_flag_applied"]):
+        raise ValueError(
+            "commands.smoke_gate.cmd skip-flag mismatch with checkpoint_checks.smoke_skip_flag_applied"
+        )
 
     if args.require_ready and overall_status != "ready":
         raise ValueError("overall_status must be ready when --require-ready is set")

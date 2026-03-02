@@ -52,6 +52,13 @@ def run() -> None:
         assert payload_ready.get("function_status") == "ready"
         assert payload_ready.get("smoke_contains_readiness_runner_validator") is False
         assert payload_ready.get("smoke_skip_readiness_runner_validator_requested") is True
+        cmd_ready = (
+            payload_ready.get("commands", {})
+            .get("smoke_gate", {})
+            .get("cmd", [])
+        )
+        assert isinstance(cmd_ready, list), type(cmd_ready)
+        assert "--skip-readiness-runner-validator" in [str(v) for v in cmd_ready]
 
         # Case 2: requiring real-e2e without an e2e rollup should block (rc=2).
         blocked_json = reports / "checkpoint_blocked.json"
@@ -109,6 +116,13 @@ def run() -> None:
         assert payload_blocked_allow.get("function_status") == "ready"
         assert payload_blocked_allow.get("smoke_contains_readiness_runner_validator") is False
         assert payload_blocked_allow.get("smoke_skip_readiness_runner_validator_requested") is True
+        cmd_blocked_allow = (
+            payload_blocked_allow.get("commands", {})
+            .get("smoke_gate", {})
+            .get("cmd", [])
+        )
+        assert isinstance(cmd_blocked_allow, list), type(cmd_blocked_allow)
+        assert "--skip-readiness-runner-validator" in [str(v) for v in cmd_blocked_allow]
 
     print("validate_run_radarsimpy_readiness_checkpoint: pass")
 
