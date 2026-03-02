@@ -120,6 +120,10 @@ def main() -> None:
             "name": "validate_show_radarsimpy_progress",
             "cmd": [py_bin, "scripts/validate_show_radarsimpy_progress.py"],
         },
+        {
+            "name": "validate_run_radarsimpy_readiness_checkpoint_report",
+            "cmd": [py_bin, "scripts/validate_run_radarsimpy_readiness_checkpoint_report.py"],
+        },
     ]
 
     if bool(args.with_real_runtime):
