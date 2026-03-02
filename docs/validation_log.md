@@ -7663,6 +7663,35 @@
     - merged PR #5 metadata and merge commit
     - readiness validation command set with overall `pass`
 
+## Main Branch Ready Patch Release Publication (2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && git tag -a po-sbr-main-ready-2026-03-02-r1 -m "Patch release: include release-manifest/evidence updates on main (13b3a53)" && git push origin po-sbr-main-ready-2026-03-02-r1 && gh release create po-sbr-main-ready-2026-03-02-r1 --title "PO-SBR Main Ready 2026-03-02 (r1)" --notes-file /tmp/release_notes_po_sbr_main_ready_2026_03_02_r1.md && gh release view po-sbr-main-ready-2026-03-02-r1 --json tagName,name,url,isDraft,isPrerelease,publishedAt,targetCommitish`
+- Result: pass
+- Notes:
+  - patch release URL:
+    - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r1`
+  - publication status:
+    - `isDraft=false`
+    - `isPrerelease=false`
+  - pre-push gate on tag push remained green:
+    - `closure_required=False`
+    - `overall_status=ready`
+
+## Main Branch Release Manifest Artifact (r1, 2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && <collect git/gh metadata> && jq -n ... > docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json && jq . docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json`
+- Result: pass
+- Notes:
+  - generated patch release manifest artifact:
+    - `docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json`
+  - manifest records:
+    - `main_head_commit=13b3a53978fbb8111fa777d569c9af213c36843f`
+    - patch release tag/url/publication timestamp (`po-sbr-main-ready-2026-03-02-r1`)
+    - superseded base release metadata (`po-sbr-main-ready-2026-03-02`)
+    - added commits since base release: `94cfd9c`, `13b3a53`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02
