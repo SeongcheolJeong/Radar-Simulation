@@ -119,6 +119,21 @@ def _find_stage_ready(progress_payload: Mapping[str, Any], name: str) -> Optiona
     return None
 
 
+def _extract_step_names(payload: Mapping[str, Any]) -> List[str]:
+    rows = payload.get("steps")
+    if not isinstance(rows, list):
+        return []
+    out: List[str] = []
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        name = str(row.get("name", "")).strip()
+        if name == "":
+            continue
+        out.append(name)
+    return out
+
+
 def main() -> None:
     args = parse_args()
     repo_root = Path.cwd().resolve()
@@ -170,6 +185,11 @@ def main() -> None:
         )
     smoke = _run_cmd(smoke_cmd, cwd=repo_root, env=env)
     smoke_payload = _load_json_if_exists(smoke_json) or {}
+    smoke_step_names = _extract_step_names(smoke_payload)
+    smoke_recursion_guard_active = bool(
+        bool(smoke_payload.get("pass", False))
+        and ("validate_run_radarsimpy_readiness_checkpoint" not in smoke_step_names)
+    )
 
     wrapper_cmd = [
         py_bin,
@@ -260,6 +280,7 @@ def main() -> None:
 
     checks = {
         "smoke_gate_pass": smoke_pass,
+        "smoke_recursion_guard_active": smoke_recursion_guard_active,
         "wrapper_gate_pass": wrapper_pass,
         "progress_snapshot_generated": bool(progress_payload),
         "progress_integration_stage_ready": bool(integration_stage_ready is True),
@@ -295,6 +316,10 @@ def main() -> None:
         "wrapper_gate_status": "ready" if wrapper_pass else "blocked",
         "migration_status": _status_str(migration_payload.get("migration_status", "")),
         "function_status": "ready" if bool(function_payload.get("ready", False)) else "blocked",
+        "smoke_gate_step_count": int(len(smoke_step_names)),
+        "smoke_contains_readiness_runner_validator": bool(
+            "validate_run_radarsimpy_readiness_checkpoint" in smoke_step_names
+        ),
         "progress_overall_ready": bool(progress_payload.get("overall_ready", False)),
         "checkpoint_checks": checks,
         "overall_status": status,

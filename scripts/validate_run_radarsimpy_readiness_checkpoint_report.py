@@ -66,6 +66,7 @@ def run() -> None:
 
         ready_checks = {
             "smoke_gate_pass": True,
+            "smoke_recursion_guard_active": True,
             "wrapper_gate_pass": True,
             "progress_snapshot_generated": True,
             "progress_integration_stage_ready": True,
@@ -90,6 +91,8 @@ def run() -> None:
             "wrapper_gate_status": "ready",
             "function_status": "ready",
             "migration_status": "ready",
+            "smoke_gate_step_count": 9,
+            "smoke_contains_readiness_runner_validator": False,
             "progress_overall_ready": True,
             "checkpoint_checks": ready_checks,
             "overall_status": "ready",

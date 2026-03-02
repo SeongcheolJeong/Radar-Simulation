@@ -11,6 +11,7 @@ from typing import Any, Dict, Mapping
 
 REQUIRED_CHECK_KEYS = (
     "smoke_gate_pass",
+    "smoke_recursion_guard_active",
     "wrapper_gate_pass",
     "progress_snapshot_generated",
     "progress_integration_stage_ready",
@@ -133,10 +134,22 @@ def main() -> None:
 
     if smoke_gate_status != ("ready" if bool(check_map["smoke_gate_pass"]) else "blocked"):
         raise ValueError("smoke_gate_status mismatch with checkpoint_checks.smoke_gate_pass")
+    if bool(check_map["smoke_recursion_guard_active"]) and (not bool(check_map["smoke_gate_pass"])):
+        raise ValueError("smoke_recursion_guard_active cannot be true when smoke_gate_pass is false")
     if wrapper_gate_status != ("ready" if bool(check_map["wrapper_gate_pass"]) else "blocked"):
         raise ValueError("wrapper_gate_status mismatch with checkpoint_checks.wrapper_gate_pass")
     if function_status != ("ready" if bool(check_map["function_api_stage_ready"]) else "blocked"):
         raise ValueError("function_status mismatch with checkpoint_checks.function_api_stage_ready")
+
+    smoke_contains = payload.get("smoke_contains_readiness_runner_validator")
+    if smoke_contains is not None:
+        if not isinstance(smoke_contains, bool):
+            raise ValueError("smoke_contains_readiness_runner_validator must be bool when present")
+        if bool(check_map["smoke_recursion_guard_active"]) == bool(smoke_contains):
+            raise ValueError(
+                "smoke_recursion_guard_active must be the inverse of "
+                "smoke_contains_readiness_runner_validator when present"
+            )
 
     commands = payload.get("commands")
     if not isinstance(commands, Mapping):

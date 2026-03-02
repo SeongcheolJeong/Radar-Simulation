@@ -43,11 +43,13 @@ def run() -> None:
         assert payload_ready.get("overall_status") == "ready"
         checks_ready = dict(payload_ready.get("checkpoint_checks") or {})
         assert bool(checks_ready.get("smoke_gate_pass", False)) is True
+        assert bool(checks_ready.get("smoke_recursion_guard_active", False)) is True
         assert bool(checks_ready.get("wrapper_gate_pass", False)) is True
         assert bool(checks_ready.get("function_api_stage_ready", False)) is True
         assert bool(checks_ready.get("migration_stage_ready", False)) is True
         assert bool(checks_ready.get("real_e2e_stage_ready", False)) is True
         assert payload_ready.get("function_status") == "ready"
+        assert payload_ready.get("smoke_contains_readiness_runner_validator") is False
 
         # Case 2: requiring real-e2e without an e2e rollup should block (rc=2).
         blocked_json = reports / "checkpoint_blocked.json"
@@ -73,6 +75,7 @@ def run() -> None:
         payload_blocked = json.loads(blocked_json.read_text(encoding="utf-8"))
         assert payload_blocked.get("overall_status") == "blocked"
         checks_blocked = dict(payload_blocked.get("checkpoint_checks") or {})
+        assert bool(checks_blocked.get("smoke_recursion_guard_active", False)) is True
         assert bool(checks_blocked.get("real_e2e_stage_ready", True)) is False
         assert bool(checks_blocked.get("function_api_stage_ready", False)) is True
 
@@ -101,6 +104,7 @@ def run() -> None:
         payload_blocked_allow = json.loads(blocked_allow_json.read_text(encoding="utf-8"))
         assert payload_blocked_allow.get("overall_status") == "blocked"
         assert payload_blocked_allow.get("function_status") == "ready"
+        assert payload_blocked_allow.get("smoke_contains_readiness_runner_validator") is False
 
     print("validate_run_radarsimpy_readiness_checkpoint: pass")
 
