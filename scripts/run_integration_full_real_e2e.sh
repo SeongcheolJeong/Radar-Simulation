@@ -58,6 +58,14 @@ RADARSIMPY_LIB_ROOT="$(abspath "${RADARSIMPY_LIB_ROOT_RAW}")"
 RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY="${RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY:-1}"
 RUN_RADARSIMPY_MIGRATION_STEPWISE="${RUN_RADARSIMPY_MIGRATION_STEPWISE:-1}"
 RADARSIMPY_MIGRATION_TRIAL_FREE_TIER_GEOMETRY="${RADARSIMPY_MIGRATION_TRIAL_FREE_TIER_GEOMETRY:-${RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY}}"
+RUN_RADARSIMPY_PERIODIC_LOCK="${RUN_RADARSIMPY_PERIODIC_LOCK:-1}"
+RADARSIMPY_PERIODIC_NORMALIZATION_MODE="${RADARSIMPY_PERIODIC_NORMALIZATION_MODE:-complex_l2}"
+RADARSIMPY_PERIODIC_REQUIRE_PARITY_PASS="${RADARSIMPY_PERIODIC_REQUIRE_PARITY_PASS:-1}"
+RADARSIMPY_PERIODIC_THRESHOLDS_JSON_RAW="${RADARSIMPY_PERIODIC_THRESHOLDS_JSON:-}"
+RADARSIMPY_PERIODIC_THRESHOLDS_JSON=""
+if [[ -n "${RADARSIMPY_PERIODIC_THRESHOLDS_JSON_RAW}" ]]; then
+  RADARSIMPY_PERIODIC_THRESHOLDS_JSON="$(abspath "${RADARSIMPY_PERIODIC_THRESHOLDS_JSON_RAW}")"
+fi
 
 log() {
   echo "[real-e2e] $*"
@@ -162,6 +170,8 @@ require_script "scripts/run_scene_runtime_env_probe.py"
 require_script "scripts/run_scene_runtime_blocker_report.py"
 require_script "scripts/run_scene_runtime_radarsimpy_pilot.py"
 require_script "scripts/run_radarsimpy_migration_stepwise.py"
+require_script "scripts/build_radarsimpy_periodic_manifest_from_migration.py"
+require_script "scripts/run_radarsimpy_periodic_parity_lock.py"
 require_script "scripts/run_scene_runtime_mitsuba_pilot.py"
 require_script "scripts/run_scene_runtime_po_sbr_pilot.py"
 require_script "scripts/run_scene_backend_golden_path.py"
@@ -292,6 +302,34 @@ if [[ "${RUN_RADARSIMPY_MIGRATION_STEPWISE}" == "1" ]]; then
     --require-runtime-provider-mode \
     --require-radarsimpy-simulation-used \
     $([[ "${RADARSIMPY_MIGRATION_TRIAL_FREE_TIER_GEOMETRY}" == "1" ]] && echo "--trial-free-tier-geometry")
+
+  if [[ "${RUN_RADARSIMPY_PERIODIC_LOCK}" == "1" ]]; then
+    run_step radarsimpy_periodic_manifest \
+      "${PYTHON_BIN}" scripts/build_radarsimpy_periodic_manifest_from_migration.py \
+      --migration-summary-json "${OUTPUT_ROOT}/radarsimpy_migration_stepwise_summary.json" \
+      --output-manifest-json "${OUTPUT_ROOT}/radarsimpy_periodic_manifest.json" \
+      --output-reference-view-npz "${OUTPUT_ROOT}/radarsimpy_periodic_reference_view.npz" \
+      --require-compared \
+      $([[ "${RADARSIMPY_PERIODIC_REQUIRE_PARITY_PASS}" == "1" ]] && echo "--require-parity-pass") \
+      --strict
+
+    if [[ -n "${RADARSIMPY_PERIODIC_THRESHOLDS_JSON}" ]]; then
+      run_step radarsimpy_periodic_parity_lock \
+        "${PYTHON_BIN}" scripts/run_radarsimpy_periodic_parity_lock.py \
+        --manifest-json "${OUTPUT_ROOT}/radarsimpy_periodic_manifest.json" \
+        --thresholds-json "${RADARSIMPY_PERIODIC_THRESHOLDS_JSON}" \
+        --normalization-mode "${RADARSIMPY_PERIODIC_NORMALIZATION_MODE}" \
+        --output-summary-json "${OUTPUT_ROOT}/radarsimpy_periodic_parity_lock_summary.json"
+    else
+      run_step radarsimpy_periodic_parity_lock \
+        "${PYTHON_BIN}" scripts/run_radarsimpy_periodic_parity_lock.py \
+        --manifest-json "${OUTPUT_ROOT}/radarsimpy_periodic_manifest.json" \
+        --normalization-mode "${RADARSIMPY_PERIODIC_NORMALIZATION_MODE}" \
+        --output-summary-json "${OUTPUT_ROOT}/radarsimpy_periodic_parity_lock_summary.json"
+    fi
+  else
+    log "skip radarsimpy periodic lock gate (RUN_RADARSIMPY_PERIODIC_LOCK=${RUN_RADARSIMPY_PERIODIC_LOCK})"
+  fi
 else
   log "skip radarsimpy migration stepwise gate (RUN_RADARSIMPY_MIGRATION_STEPWISE=${RUN_RADARSIMPY_MIGRATION_STEPWISE})"
 fi
