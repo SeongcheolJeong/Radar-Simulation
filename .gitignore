@@ -19,3 +19,19 @@ migration_bundles/
 
 # local preflight diagnostics (non-closure evidence)
 docs/reports/scene_runtime_po_sbr_pilot_m14_6_myproject_preflight_*.json
+
+# local/generated runtime artifacts
+carla_server.pid
+docs/reports/avx_export_benchmark_matrix_*
+docs/reports/avx_export_benchmark_myproject_local_*.json
+docs/reports/integration_full_*/
+docs/reports/integration_full_real_e2e_*/
+docs/reports/po_sbr_avx_developer_gate_*.json
+docs/reports/po_sbr_local_ready_baseline_drift_checkpoint_*.json
+docs/reports/po_sbr_myproject_readiness_checkpoint_*.json
+docs/reports/po_sbr_post_change_gate_*.json
+docs/reports/po_sbr_progress_snapshot_*.json
+docs/reports/radarsimpy_migration_stepwise_*/
+docs/reports/radarsimpy_runtime_pilot_*/
+docs/reports/radarsimpy_wrapper_integration_gate_*/
+docs/reports/tmp_matrix_arg_test.json
