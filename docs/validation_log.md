@@ -7603,6 +7603,20 @@
 - Command: `cd /home/seongcheoljeong/workspace/myproject && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
 - Result: pass
 
+## Main Branch Post-merge Verification (2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && git pull --ff-only && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_po_sbr_pre_push_hook_local_artifacts.py && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_readiness_checkpoint.py && PYTHONPATH=src .venv-po-sbr/bin/python scripts/validate_run_po_sbr_myproject_readiness_checkpoint.py`
+- Result: pass
+- Notes:
+  - `main` remained up to date (`Already up to date.`)
+  - verification executed on `HEAD=82d602d`
+  - pre-push deterministic validator output included marker evidence:
+    - `hook_skip_mode_matrix_verified: true`
+    - `hook_closure_report_skip_only_verified: true`
+    - `tracked_report_changes: 0`
+  - main/myproject readiness deterministic validators passed on merged `main`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02
