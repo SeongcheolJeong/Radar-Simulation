@@ -55,6 +55,7 @@ RADARSIMPY_PACKAGE_ROOT_RAW="${RADARSIMPY_PACKAGE_ROOT:-${ROOT_DIR}/external/rad
 RADARSIMPY_LIB_ROOT_RAW="${RADARSIMPY_LIB_ROOT:-${ROOT_DIR}/external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu}"
 RADARSIMPY_PACKAGE_ROOT="$(abspath "${RADARSIMPY_PACKAGE_ROOT_RAW}")"
 RADARSIMPY_LIB_ROOT="$(abspath "${RADARSIMPY_LIB_ROOT_RAW}")"
+RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY="${RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY:-1}"
 
 log() {
   echo "[real-e2e] $*"
@@ -274,7 +275,8 @@ run_step radarsimpy_pilot \
   "${PYTHON_BIN}" scripts/run_scene_runtime_radarsimpy_pilot.py \
   --output-root "${OUTPUT_ROOT}/radarsimpy_pilot" \
   --output-summary-json "${OUTPUT_ROOT}/radarsimpy_pilot_summary.json" \
-  --runtime-failure-policy error
+  --runtime-failure-policy error \
+  $([[ "${RADARSIMPY_PILOT_TRIAL_FREE_TIER_GEOMETRY}" == "1" ]] && echo "--trial-free-tier-geometry")
 
 run_step mitsuba_pilot \
   "${PYTHON_BIN}" scripts/run_scene_runtime_mitsuba_pilot.py \
