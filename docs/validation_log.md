@@ -7957,6 +7957,42 @@
   - verified release URL:
     - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r9`
 
+## Main Branch Ready Patch Release Publication (r10, 2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && git tag -a po-sbr-main-ready-2026-03-02-r10 -m "Patch release r10: align release tag with latest main head (4fde230)" && git push origin po-sbr-main-ready-2026-03-02-r10 && gh release create po-sbr-main-ready-2026-03-02-r10 --title "PO-SBR Main Ready 2026-03-02 (r10)" --notes-file /tmp/release_notes_po_sbr_main_ready_2026_03_02_r10.md && gh release upload po-sbr-main-ready-2026-03-02-r10 docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r2.json docs/reports/po_sbr_main_ready_2026_03_02_r3_checksums.txt --clobber && gh release edit po-sbr-main-ready-2026-03-02-r10 --latest`
+- Result: pass
+- Notes:
+  - patch release URL:
+    - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r10`
+  - publication status:
+    - `isDraft=false`
+    - `isPrerelease=false`
+  - latest release status:
+    - `LATEST_TAG=po-sbr-main-ready-2026-03-02-r10`
+  - tag/main alignment:
+    - `TAG_COMMIT=4fde23016deb70f2b504e023410816a730d4e419`
+    - `MAIN_HEAD=4fde23016deb70f2b504e023410816a730d4e419`
+
+## Main Branch Ready Patch Release Asset Integrity Verification (r10, 2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && gh release download po-sbr-main-ready-2026-03-02-r10 --dir /tmp/po_sbr_r10_verify_3HRfuN --pattern 'po_sbr_main_ready_release_manifest_2026_03_02.json' --pattern 'po_sbr_main_ready_release_manifest_2026_03_02_r1.json' --pattern 'po_sbr_main_ready_release_manifest_2026_03_02_r2.json' --pattern 'po_sbr_main_ready_2026_03_02_r3_checksums.txt' && <normalize checksum paths> && sha256sum -c checksums_local.txt && gh release edit po-sbr-main-ready-2026-03-02-r10 --notes-file /tmp/r10_release_notes_with_verification.md`
+- Result: pass
+- Notes:
+  - verification workspace:
+    - `/tmp/po_sbr_r10_verify_3HRfuN`
+  - checksum validation results:
+    - `po_sbr_main_ready_release_manifest_2026_03_02.json: OK`
+    - `po_sbr_main_ready_release_manifest_2026_03_02_r1.json: OK`
+    - `po_sbr_main_ready_release_manifest_2026_03_02_r2.json: OK`
+  - release notes now include post-publish integrity block with:
+    - `verified_at_utc`
+    - `tag_main_aligned=true`
+    - SHA256 verification result lines
+  - verified release URL:
+    - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r10`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02
