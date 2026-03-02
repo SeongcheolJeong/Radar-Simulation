@@ -7635,6 +7635,20 @@
     - `closure_status=skipped`
     - `overall_status=ready`
 
+## Main Branch Ready Release Publication (2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && gh release create po-sbr-main-ready-2026-03-02 --title "PO-SBR Main Ready 2026-03-02" --notes-file /tmp/release_notes_po_sbr_main_ready_2026_03_02.md && gh release view po-sbr-main-ready-2026-03-02 --json tagName,name,url,isDraft,isPrerelease,publishedAt`
+- Result: pass
+- Notes:
+  - release URL:
+    - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02`
+  - publication status:
+    - `isDraft=false`
+    - `isPrerelease=false`
+  - release tag points to validated mainline snapshot:
+    - `po-sbr-main-ready-2026-03-02` -> `99ebbc0`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02
