@@ -7745,6 +7745,38 @@
     - `docs/reports/po_sbr_main_ready_2026_03_02_r3_checksums.txt`
   - checksum artifact is aligned with uploaded release assets for `r3`
 
+## Main Branch Ready Patch Release Publication (r4, 2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && git tag -a po-sbr-main-ready-2026-03-02-r4 -m "Patch release r4: align release tag with latest main head (f141fd3)" && git push origin po-sbr-main-ready-2026-03-02-r4 && gh release create po-sbr-main-ready-2026-03-02-r4 --title "PO-SBR Main Ready 2026-03-02 (r4)" --notes-file /tmp/release_notes_po_sbr_main_ready_2026_03_02_r4.md && gh release upload po-sbr-main-ready-2026-03-02-r4 docs/reports/po_sbr_main_ready_release_manifest_2026_03_02.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r1.json docs/reports/po_sbr_main_ready_release_manifest_2026_03_02_r2.json docs/reports/po_sbr_main_ready_2026_03_02_r3_checksums.txt --clobber && gh release edit po-sbr-main-ready-2026-03-02-r4 --latest`
+- Result: pass
+- Notes:
+  - patch release URL:
+    - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r4`
+  - publication status:
+    - `isDraft=false`
+    - `isPrerelease=false`
+  - latest release status:
+    - `LATEST_TAG=po-sbr-main-ready-2026-03-02-r4`
+  - tag/main alignment:
+    - `TAG_COMMIT=f141fd339e16fa5bac1678741337e26f6568fb62`
+    - `MAIN_HEAD=f141fd339e16fa5bac1678741337e26f6568fb62`
+
+## Main Branch Ready Patch Release Asset Integrity Verification (r4, 2026-03-02)
+
+- Date: 2026-03-02
+- Command: `cd /home/seongcheoljeong/workspace/myproject && gh release download po-sbr-main-ready-2026-03-02-r4 --dir /tmp/po_sbr_r4_verify_HDrtcR --pattern 'po_sbr_main_ready_release_manifest_2026_03_02.json' --pattern 'po_sbr_main_ready_release_manifest_2026_03_02_r1.json' --pattern 'po_sbr_main_ready_release_manifest_2026_03_02_r2.json' --pattern 'po_sbr_main_ready_2026_03_02_r3_checksums.txt' && <normalize checksum paths> && sha256sum -c checksums_local.txt`
+- Result: pass
+- Notes:
+  - verification workspace:
+    - `/tmp/po_sbr_r4_verify_HDrtcR`
+  - checksum validation results:
+    - `po_sbr_main_ready_release_manifest_2026_03_02.json: OK`
+    - `po_sbr_main_ready_release_manifest_2026_03_02_r1.json: OK`
+    - `po_sbr_main_ready_release_manifest_2026_03_02_r2.json: OK`
+  - verified release URL:
+    - `https://github.com/SeongcheolJeong/Radar-Simulation/releases/tag/po-sbr-main-ready-2026-03-02-r4`
+
 ## M18.44 Pre-push Closure-report Skip-only Matrix Hardening (2026-03-02)
 
 - Date: 2026-03-02
