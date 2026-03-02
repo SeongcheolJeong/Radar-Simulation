@@ -32,7 +32,7 @@ def run() -> None:
 
         summary = json.loads(out_json.read_text(encoding="utf-8"))
         assert summary.get("pass") is True
-        assert int(summary.get("step_count", -1)) >= 9
+        assert int(summary.get("step_count", -1)) >= 10
         assert int(summary.get("fail_count", -1)) == 0
         assert int(summary.get("pass_count", -1)) == int(summary.get("step_count", -2))
 
@@ -47,6 +47,7 @@ def run() -> None:
             "validate_show_radarsimpy_progress",
             "validate_show_radarsimpy_function_progress",
             "validate_run_radarsimpy_readiness_checkpoint_report",
+            "validate_run_radarsimpy_readiness_checkpoint",
         }
         assert expected.issubset(names), names
         for row in summary.get("steps", []):

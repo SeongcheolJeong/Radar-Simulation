@@ -42,6 +42,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Return 0 even when one or more steps fail",
     )
+    p.add_argument(
+        "--skip-readiness-runner-validator",
+        action="store_true",
+        help=(
+            "Skip validate_run_radarsimpy_readiness_checkpoint to avoid recursive "
+            "nesting when this smoke gate is executed from the readiness checkpoint runner."
+        ),
+    )
     return p.parse_args()
 
 
@@ -129,6 +137,13 @@ def main() -> None:
             "cmd": [py_bin, "scripts/validate_run_radarsimpy_readiness_checkpoint_report.py"],
         },
     ]
+    if not bool(args.skip_readiness_runner_validator):
+        steps_spec.append(
+            {
+                "name": "validate_run_radarsimpy_readiness_checkpoint",
+                "cmd": [py_bin, "scripts/validate_run_radarsimpy_readiness_checkpoint.py"],
+            }
+        )
 
     if bool(args.with_real_runtime):
         cmd = [

@@ -156,6 +156,7 @@ def main() -> None:
         "scripts/run_radarsimpy_integration_smoke_gate.py",
         "--output-summary-json",
         str(smoke_json),
+        "--skip-readiness-runner-validator",
     ]
     if bool(args.with_real_runtime):
         smoke_cmd.extend(
