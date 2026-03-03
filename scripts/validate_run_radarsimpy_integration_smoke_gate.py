@@ -32,7 +32,7 @@ def run() -> None:
 
         summary = json.loads(out_json.read_text(encoding="utf-8"))
         assert summary.get("pass") is True
-        assert int(summary.get("step_count", -1)) >= 11
+        assert int(summary.get("step_count", -1)) >= 13
         assert int(summary.get("fail_count", -1)) == 0
         assert int(summary.get("pass_count", -1)) == int(summary.get("step_count", -2))
 
@@ -47,6 +47,8 @@ def run() -> None:
             "validate_install_radarsimpy_ci_workflow",
             "validate_show_radarsimpy_progress",
             "validate_show_radarsimpy_function_progress",
+            "validate_build_radarsimpy_signature_manifest",
+            "validate_build_radarsimpy_native_parity_fixtures",
             "validate_run_radarsimpy_readiness_checkpoint_report",
             "validate_run_radarsimpy_readiness_checkpoint",
         }

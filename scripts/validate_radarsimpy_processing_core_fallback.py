@@ -41,10 +41,14 @@ def run() -> None:
         got_range = api.range_fft(x, axis=-1, n=4, window=rw)
         exp_range = np.fft.fft(x * rw.reshape(1, 1, 4), n=4, axis=-1)
         assert np.allclose(got_range, exp_range), "range_fft fallback mismatch"
+        got_range_canon = api.range_fft(x, rw, 4)
+        assert np.allclose(got_range_canon, exp_range), "range_fft canonical fallback mismatch"
 
         got_dop = api.doppler_fft(x, axis=-2, n=3, window=dw)
         exp_dop = np.fft.fft(x * dw.reshape(1, 3, 1), n=3, axis=-2)
         assert np.allclose(got_dop, exp_dop), "doppler_fft fallback mismatch"
+        got_dop_canon = api.doppler_fft(x, dw, 3)
+        assert np.allclose(got_dop_canon, exp_dop), "doppler_fft canonical fallback mismatch"
 
         got_rd = api.range_doppler_fft(
             x,
@@ -61,6 +65,8 @@ def run() -> None:
             axis=-2,
         )
         assert np.allclose(got_rd, exp_rd), "range_doppler_fft fallback mismatch"
+        got_rd_canon = api.range_doppler_fft(x, rw, dw, 4, 3)
+        assert np.allclose(got_rd_canon, exp_rd), "range_doppler_fft canonical fallback mismatch"
 
         # CFAR fallback
         p1 = np.arange(1, 65, dtype=np.float64)

@@ -236,18 +236,20 @@ def doppler_fft(*args: Any, **kwargs: Any) -> Any:
         data = args[0]
         rem = list(args[1:])
         kw = dict(kwargs)
-        if len(rem) > 0 and ("n" not in kw) and ("doppler_n" not in kw):
+        # Canonical RadarSimPy positional order: (data, dwin=None, n=None)
+        if len(rem) > 0 and not any(k in kw for k in ("window", "win", "doppler_window", "dwin")):
+            kw["window"] = rem.pop(0)
+        if len(rem) > 0 and not any(k in kw for k in ("n", "nfft", "fft_size", "doppler_n", "dn")):
             kw["n"] = rem.pop(0)
+        # Optional extension: positional axis as trailing argument
         if len(rem) > 0 and ("axis" not in kw) and ("doppler_axis" not in kw):
             kw["axis"] = rem.pop(0)
-        if len(rem) > 0 and ("window" not in kw) and ("doppler_window" not in kw):
-            kw["window"] = rem.pop(0)
         if len(rem) > 0:
             raise TypeError(f"doppler_fft fallback received too many positional args: {len(rem) + 1}")
 
-        axis = _pop_first(kw, ("axis", "doppler_axis"), default=-1)
-        n = _pop_first(kw, ("n", "nfft", "fft_size", "doppler_n"), default=None)
-        window = _pop_first(kw, ("window", "win", "doppler_window"), default=None)
+        axis = _pop_first(kw, ("axis", "doppler_axis"), default=-2)
+        n = _pop_first(kw, ("n", "nfft", "fft_size", "doppler_n", "dn"), default=None)
+        window = _pop_first(kw, ("window", "win", "doppler_window", "dwin"), default=None)
         if len(kw) > 0:
             raise TypeError(f"doppler_fft fallback got unexpected kwargs: {sorted(kw.keys())}")
         return core_doppler_fft(data, axis=axis, n=n, window=window)
@@ -262,10 +264,18 @@ def range_doppler_fft(*args: Any, **kwargs: Any) -> Any:
         data = args[0]
         rem = list(args[1:])
         kw = dict(kwargs)
-        if len(rem) > 0 and ("range_n" not in kw):
+        # Canonical RadarSimPy positional order: (data, rwin=None, dwin=None, rn=None, dn=None)
+        if len(rem) > 0 and not any(k in kw for k in ("range_window", "range_win", "rwin")):
+            kw["range_window"] = rem.pop(0)
+        if len(rem) > 0 and not any(k in kw for k in ("doppler_window", "doppler_win", "dwin")):
+            kw["doppler_window"] = rem.pop(0)
+        if len(rem) > 0 and not any(k in kw for k in ("range_n", "range_nfft", "range_fft_size", "rn")):
             kw["range_n"] = rem.pop(0)
-        if len(rem) > 0 and ("doppler_n" not in kw):
+        if len(rem) > 0 and not any(
+            k in kw for k in ("doppler_n", "doppler_nfft", "doppler_fft_size", "dn")
+        ):
             kw["doppler_n"] = rem.pop(0)
+        # Optional extensions: explicit axis overrides
         if len(rem) > 0 and ("range_axis" not in kw):
             kw["range_axis"] = rem.pop(0)
         if len(rem) > 0 and ("doppler_axis" not in kw):
@@ -277,14 +287,14 @@ def range_doppler_fft(*args: Any, **kwargs: Any) -> Any:
 
         range_axis = _pop_first(kw, ("range_axis", "rng_axis"), default=-1)
         doppler_axis = _pop_first(kw, ("doppler_axis", "dop_axis"), default=-2)
-        range_n = _pop_first(kw, ("range_n", "range_nfft", "range_fft_size"), default=None)
+        range_n = _pop_first(kw, ("range_n", "range_nfft", "range_fft_size", "rn"), default=None)
         doppler_n = _pop_first(
             kw,
-            ("doppler_n", "doppler_nfft", "doppler_fft_size"),
+            ("doppler_n", "doppler_nfft", "doppler_fft_size", "dn"),
             default=None,
         )
-        range_window = _pop_first(kw, ("range_window", "range_win"), default=None)
-        doppler_window = _pop_first(kw, ("doppler_window", "doppler_win"), default=None)
+        range_window = _pop_first(kw, ("range_window", "range_win", "rwin"), default=None)
+        doppler_window = _pop_first(kw, ("doppler_window", "doppler_win", "dwin"), default=None)
         if len(kw) > 0:
             raise TypeError(f"range_doppler_fft fallback got unexpected kwargs: {sorted(kw.keys())}")
         return core_range_doppler_fft(
@@ -307,18 +317,20 @@ def range_fft(*args: Any, **kwargs: Any) -> Any:
         data = args[0]
         rem = list(args[1:])
         kw = dict(kwargs)
-        if len(rem) > 0 and ("n" not in kw) and ("range_n" not in kw):
+        # Canonical RadarSimPy positional order: (data, rwin=None, n=None)
+        if len(rem) > 0 and not any(k in kw for k in ("window", "win", "range_window", "rwin")):
+            kw["window"] = rem.pop(0)
+        if len(rem) > 0 and not any(k in kw for k in ("n", "nfft", "fft_size", "range_n", "rn")):
             kw["n"] = rem.pop(0)
+        # Optional extension: positional axis as trailing argument
         if len(rem) > 0 and ("axis" not in kw) and ("range_axis" not in kw):
             kw["axis"] = rem.pop(0)
-        if len(rem) > 0 and ("window" not in kw) and ("range_window" not in kw):
-            kw["window"] = rem.pop(0)
         if len(rem) > 0:
             raise TypeError(f"range_fft fallback received too many positional args: {len(rem) + 1}")
 
         axis = _pop_first(kw, ("axis", "range_axis", "rng_axis"), default=-1)
-        n = _pop_first(kw, ("n", "nfft", "fft_size", "range_n"), default=None)
-        window = _pop_first(kw, ("window", "win", "range_window"), default=None)
+        n = _pop_first(kw, ("n", "nfft", "fft_size", "range_n", "rn"), default=None)
+        window = _pop_first(kw, ("window", "win", "range_window", "rwin"), default=None)
         if len(kw) > 0:
             raise TypeError(f"range_fft fallback got unexpected kwargs: {sorted(kw.keys())}")
         return core_range_fft(data, axis=axis, n=n, window=window)

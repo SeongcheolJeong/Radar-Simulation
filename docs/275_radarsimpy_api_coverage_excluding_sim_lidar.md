@@ -77,3 +77,19 @@
   - Function-level progress report is `ready`.
   - All supported symbols are implemented/exported.
   - `sim_lidar` remains excluded and not exported.
+- Script: `scripts/build_radarsimpy_signature_manifest.py`
+- Purpose:
+  - Emits a per-function signature manifest with canonical upstream signatures,
+    wrapper signatures, native-core mappings, and optional runtime-reference signatures.
+- Script: `scripts/validate_build_radarsimpy_signature_manifest.py`
+- Checks:
+  - Manifest contract is valid.
+  - Canonical signatures are defined for all supported API symbols.
+  - Phase-1 native-core migration coverage is complete for processing/tools APIs.
+- Script: `scripts/build_radarsimpy_native_parity_fixtures.py`
+- Purpose:
+  - Generates deterministic golden parity fixtures for native fallback functions.
+- Script: `scripts/validate_build_radarsimpy_native_parity_fixtures.py`
+- Checks:
+  - Fixture pack is generated successfully.
+  - Wrapper fallback execution reproduces fixture outputs exactly (digest + numeric parity).

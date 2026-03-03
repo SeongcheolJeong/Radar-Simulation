@@ -123,7 +123,7 @@ def core_range_fft(
 def core_doppler_fft(
     data: Any,
     *,
-    axis: int = -1,
+    axis: int = -2,
     n: int | None = None,
     window: Any | None = None,
 ) -> np.ndarray:

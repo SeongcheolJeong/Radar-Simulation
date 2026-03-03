@@ -137,6 +137,14 @@ def main() -> None:
             "cmd": [py_bin, "scripts/validate_show_radarsimpy_function_progress.py"],
         },
         {
+            "name": "validate_build_radarsimpy_signature_manifest",
+            "cmd": [py_bin, "scripts/validate_build_radarsimpy_signature_manifest.py"],
+        },
+        {
+            "name": "validate_build_radarsimpy_native_parity_fixtures",
+            "cmd": [py_bin, "scripts/validate_build_radarsimpy_native_parity_fixtures.py"],
+        },
+        {
             "name": "validate_run_radarsimpy_readiness_checkpoint_report",
             "cmd": [py_bin, "scripts/validate_run_radarsimpy_readiness_checkpoint_report.py"],
         },
