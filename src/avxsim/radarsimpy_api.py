@@ -5,10 +5,21 @@ from types import ModuleType
 from typing import Any, Dict, List, Tuple
 
 from .radarsimpy_core_processing import (
+    core_cfar_ca_1d,
+    core_cfar_ca_2d,
+    core_cfar_os_1d,
+    core_cfar_os_2d,
+    core_doa_bartlett,
+    core_doa_capon,
+    core_doa_esprit,
+    core_doa_iaa,
+    core_doa_music,
+    core_doa_root_music,
     core_doppler_fft,
     core_range_doppler_fft,
     core_range_fft,
 )
+from .radarsimpy_core_tools import core_roc_pd, core_roc_snr
 
 API_INDEX_URL = "https://radarsimx.github.io/radarsimpy/api/index.html"
 API_INDEX_VERSION = "15.0.1"
@@ -91,6 +102,13 @@ def _resolve_processing_fn_or_fallback(attr_name: str, fallback: Any) -> Any:
         return fallback
 
 
+def _resolve_tools_fn_or_fallback(attr_name: str, fallback: Any) -> Any:
+    try:
+        return _resolve_submodule_attr("tools", attr_name)
+    except RuntimeError:
+        return fallback
+
+
 def inspect_radarsimpy_api_coverage(module: ModuleType | None = None) -> Dict[str, Any]:
     rs = module if module is not None else _import_radarsimpy_module()
     missing: List[str] = []
@@ -161,52 +179,52 @@ def sim_rcs(*args: Any, **kwargs: Any) -> Any:
 
 
 def cfar_ca_1d(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "cfar_ca_1d")
+    fn = _resolve_processing_fn_or_fallback("cfar_ca_1d", core_cfar_ca_1d)
     return fn(*args, **kwargs)
 
 
 def cfar_ca_2d(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "cfar_ca_2d")
+    fn = _resolve_processing_fn_or_fallback("cfar_ca_2d", core_cfar_ca_2d)
     return fn(*args, **kwargs)
 
 
 def cfar_os_1d(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "cfar_os_1d")
+    fn = _resolve_processing_fn_or_fallback("cfar_os_1d", core_cfar_os_1d)
     return fn(*args, **kwargs)
 
 
 def cfar_os_2d(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "cfar_os_2d")
+    fn = _resolve_processing_fn_or_fallback("cfar_os_2d", core_cfar_os_2d)
     return fn(*args, **kwargs)
 
 
 def doa_bartlett(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "doa_bartlett")
+    fn = _resolve_processing_fn_or_fallback("doa_bartlett", core_doa_bartlett)
     return fn(*args, **kwargs)
 
 
 def doa_capon(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "doa_capon")
+    fn = _resolve_processing_fn_or_fallback("doa_capon", core_doa_capon)
     return fn(*args, **kwargs)
 
 
 def doa_esprit(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "doa_esprit")
+    fn = _resolve_processing_fn_or_fallback("doa_esprit", core_doa_esprit)
     return fn(*args, **kwargs)
 
 
 def doa_iaa(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "doa_iaa")
+    fn = _resolve_processing_fn_or_fallback("doa_iaa", core_doa_iaa)
     return fn(*args, **kwargs)
 
 
 def doa_music(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "doa_music")
+    fn = _resolve_processing_fn_or_fallback("doa_music", core_doa_music)
     return fn(*args, **kwargs)
 
 
 def doa_root_music(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("processing", "doa_root_music")
+    fn = _resolve_processing_fn_or_fallback("doa_root_music", core_doa_root_music)
     return fn(*args, **kwargs)
 
 
@@ -308,12 +326,12 @@ def range_fft(*args: Any, **kwargs: Any) -> Any:
 
 
 def roc_pd(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("tools", "roc_pd")
+    fn = _resolve_tools_fn_or_fallback("roc_pd", core_roc_pd)
     return fn(*args, **kwargs)
 
 
 def roc_snr(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_submodule_attr("tools", "roc_snr")
+    fn = _resolve_tools_fn_or_fallback("roc_snr", core_roc_snr)
     return fn(*args, **kwargs)
 
 
