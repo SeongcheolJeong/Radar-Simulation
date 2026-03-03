@@ -1,0 +1,38 @@
+{
+  "report_name": "radarsimpy_release_signoff_paid_6m",
+  "generated_at_utc": "2026-03-03T08:50:55.118857+00:00",
+  "license_file": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+  "decision": "approved",
+  "overall_ready": true,
+  "blocking_reasons": [],
+  "checks": {
+    "production_release_gate_ready": true,
+    "readiness_checkpoint_ready": true,
+    "reference_parity_pass": true,
+    "layered_parity_paid_pass": true,
+    "ci_workflow_synced": true,
+    "ci_smoke_gate_pass": true,
+    "ci_layered_parity_pass": true
+  },
+  "statuses": {
+    "production_release_gate_status": "ready",
+    "readiness_overall_status": "ready",
+    "reference_parity_pass": true,
+    "layered_parity_paid_pass": true,
+    "layered_parity_paid_required_fail_count": 0,
+    "ci_smoke_gate_pass": true,
+    "ci_layered_parity_pass": true,
+    "ci_layered_parity_required_fail_count": 0,
+    "workflow_synced": true
+  },
+  "sources": {
+    "production_release_gate_paid_6m": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_paid_6m.json",
+    "readiness_checkpoint_paid_6m": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_readiness_checkpoint_paid_6m.json",
+    "simulator_reference_parity_paid_6m": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_paid_6m.json",
+    "layered_parity_suite_paid_6m": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_paid_6m.json",
+    "ci_smoke_gate_policy_paid_6m": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_ci_policy_paid_6m.json",
+    "ci_layered_parity_policy_paid_6m": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_ci_policy_paid_6m.json",
+    "workflow_template": "/home/seongcheoljeong/workspace/myproject/docs/ci/radarsimpy-integration-smoke.workflow.yml",
+    "workflow_output": "/home/seongcheoljeong/workspace/myproject/.github/workflows/radarsimpy-integration-smoke.yml"
+  }
+}
