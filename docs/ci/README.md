@@ -16,11 +16,62 @@ Check-only mode (for local/CI policy checks):
 python scripts/install_radarsimpy_ci_workflow.py --check
 ```
 
+Layered parity suite policy used by CI:
+
+- Trial track is always required:
+  - `--require-runtime-trial`
+- Production track is required only when `RADARSIMPY_LICENSE_FILE` is set:
+  - `--with-production-track --require-runtime-production --license-file "$RADARSIMPY_LICENSE_FILE"`
+
+Example local command (policy-equivalent):
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_layered_parity_suite.py \
+  --output-json docs/reports/radarsimpy_layered_parity_suite_ci_summary.json \
+  --require-runtime-trial \
+  --trial-package-root external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU \
+  --libcompat-dir external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu
+```
+
+Graph Lab frontend strict visual policy used by CI:
+
+- Run Playwright E2E with hard runtime requirement:
+  - `--require-playwright --strict-visual`
+- Output report:
+  - `docs/reports/graph_lab_playwright_e2e_ci_summary.json`
+
+Example local command (policy-equivalent):
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/validate_graph_lab_playwright_e2e.py \
+  --require-playwright \
+  --strict-visual \
+  --output-json docs/reports/graph_lab_playwright_e2e_ci_summary.json
+```
+
 RadarSimPy readiness checkpoint (single report with ready/blocked status):
 
 ```bash
 PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_readiness_checkpoint.py \
   --output-json docs/reports/radarsimpy_readiness_checkpoint_latest.json
+```
+
+RadarSimPy production release gate (auto-discover `.lic`, then run strict production checkpoint):
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_production_release_gate.py \
+  --output-json docs/reports/radarsimpy_production_release_gate_latest.json
+```
+
+RadarSimPy production gate from order URL (parse downloads -> pull assets -> detect `.lic` -> chain production gate):
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_production_gate_from_order.py \
+  --order-received-url "https://radarsimx.com/checkout/order-received/<ID>/?key=wc_order_<KEY>" \
+  --download-label Ubuntu24_x86_64_CPU.zip \
+  --run-production-gate \
+  --allow-blocked \
+  --output-json docs/reports/radarsimpy_production_gate_from_order_latest.json
 ```
 
 Notes:

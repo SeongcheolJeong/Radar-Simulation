@@ -29,13 +29,20 @@ export function normalizeRepoPath(pathValue) {
   const raw = pathValue.trim();
   if (!raw) return null;
   if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
-  const marker = "/Codex_test/";
-  const idx = raw.indexOf(marker);
+  const markers = ["/Codex_test/", "/workspace/myproject/"];
   let candidate = raw;
-  if (idx >= 0) {
-    candidate = raw.slice(idx + marker.length);
+  for (const marker of markers) {
+    const idx = raw.indexOf(marker);
+    if (idx >= 0) {
+      candidate = raw.slice(idx + marker.length);
+      break;
+    }
   }
-  if (candidate.startsWith("/")) return candidate;
+  if (candidate.startsWith("/")) {
+    // Absolute filesystem paths (for example /tmp/...) are not web-served.
+    // Only keep paths that were rewritten through known repo markers.
+    return candidate === raw ? null : candidate;
+  }
   try {
     const u = new URL(candidate, `${window.location.origin}/`);
     if (u.origin === window.location.origin) {

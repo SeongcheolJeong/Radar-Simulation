@@ -21,7 +21,8 @@ jobs:
       - name: Install Minimal Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy
+          python -m pip install numpy playwright
+          python -m playwright install --with-deps chromium
 
       - name: Run RadarSimPy Integration Smoke Gate
         env:
@@ -30,9 +31,45 @@ jobs:
           python scripts/run_radarsimpy_integration_smoke_gate.py \
             --output-summary-json docs/reports/radarsimpy_integration_smoke_gate_ci_summary.json
 
+      - name: Run Layered White-Box vs Black-Box Parity Suite
+        env:
+          PYTHONPATH: src
+          RADARSIMPY_LICENSE_FILE: ${{ env.RADARSIMPY_LICENSE_FILE }}
+        run: |
+          CMD=(
+            python scripts/run_radarsimpy_layered_parity_suite.py
+            --output-json docs/reports/radarsimpy_layered_parity_suite_ci_summary.json
+            --require-runtime-trial
+            --trial-package-root external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU
+            --libcompat-dir external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu
+          )
+          if [ -n "${RADARSIMPY_LICENSE_FILE:-}" ]; then
+            CMD+=(
+              --license-file "${RADARSIMPY_LICENSE_FILE}"
+              --with-production-track
+              --require-runtime-production
+            )
+          fi
+          "${CMD[@]}"
+
+      - name: Run Graph Lab Frontend Playwright Strict Visual Gate
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/validate_graph_lab_playwright_e2e.py \
+            --require-playwright \
+            --strict-visual \
+            --output-json docs/reports/graph_lab_playwright_e2e_ci_summary.json
+
       - name: Upload Smoke Gate Summary
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: radarsimpy-integration-smoke-summary
-          path: docs/reports/radarsimpy_integration_smoke_gate_ci_summary.json
+          path: |
+            docs/reports/radarsimpy_integration_smoke_gate_ci_summary.json
+            docs/reports/radarsimpy_layered_parity_suite_ci_summary.json
+            docs/reports/radarsimpy_layered_parity_trial.json
+            docs/reports/radarsimpy_layered_parity_production.json
+            docs/reports/graph_lab_playwright_e2e_ci_summary.json
+            docs/reports/graph_lab_playwright_snapshots/latest/
