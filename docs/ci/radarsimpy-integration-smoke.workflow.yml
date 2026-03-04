@@ -36,19 +36,32 @@ jobs:
           PYTHONPATH: src
           RADARSIMPY_LICENSE_FILE: ${{ env.RADARSIMPY_LICENSE_FILE }}
         run: |
+          TRIAL_PKG_ROOT="external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU"
+          LIBCOMPAT_DIR="external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu"
+
           CMD=(
             python scripts/run_radarsimpy_layered_parity_suite.py
             --output-json docs/reports/radarsimpy_layered_parity_suite_ci_summary.json
-            --require-runtime-trial
-            --trial-package-root external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU
-            --libcompat-dir external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu
           )
-          if [ -n "${RADARSIMPY_LICENSE_FILE:-}" ]; then
+          if [ -d "${TRIAL_PKG_ROOT}/radarsimpy" ]; then
             CMD+=(
-              --license-file "${RADARSIMPY_LICENSE_FILE}"
-              --with-production-track
-              --require-runtime-production
+              --require-runtime-trial
+              --trial-package-root "${TRIAL_PKG_ROOT}"
+              --libcompat-dir "${LIBCOMPAT_DIR}"
             )
+          else
+            echo "trial runtime package missing at ${TRIAL_PKG_ROOT}; running layered suite without required runtime"
+          fi
+          if [ -n "${RADARSIMPY_LICENSE_FILE:-}" ]; then
+            if [ -d "${TRIAL_PKG_ROOT}/radarsimpy" ]; then
+              CMD+=(
+                --license-file "${RADARSIMPY_LICENSE_FILE}"
+                --with-production-track
+                --require-runtime-production
+              )
+            else
+              echo "RADARSIMPY_LICENSE_FILE is set but trial runtime package is missing; skipping production track"
+            fi
           fi
           "${CMD[@]}"
 

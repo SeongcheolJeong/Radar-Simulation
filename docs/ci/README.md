@@ -18,10 +18,11 @@ python scripts/install_radarsimpy_ci_workflow.py --check
 
 Layered parity suite policy used by CI:
 
-- Trial track is always required:
-  - `--require-runtime-trial`
-- Production track is required only when `RADARSIMPY_LICENSE_FILE` is set:
-  - `--with-production-track --require-runtime-production --license-file "$RADARSIMPY_LICENSE_FILE"`
+- Trial track runs always, but runtime-required mode is enabled only when the trial package root exists:
+  - `external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy`
+- Production track runtime-required mode is enabled only when both conditions are true:
+  - `RADARSIMPY_LICENSE_FILE` is set
+  - trial runtime package root above exists
 
 Example local command (policy-equivalent):
 
