@@ -1,0 +1,325 @@
+{
+  "version": 1,
+  "gate": "radarsimpy_wrapper_integration",
+  "generated_at_utc": "2026-03-03T08:22:58.770329+00:00",
+  "with_real_runtime": true,
+  "runtime_license_tier": "production",
+  "allow_failures": false,
+  "check_count": 16,
+  "pass_count": 16,
+  "fail_count": 0,
+  "pass": true,
+  "checks": [
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_wrapper_entrypoint_guard.py"
+      ],
+      "stdout": "validate_radarsimpy_wrapper_entrypoint_guard: pass",
+      "stderr": "",
+      "check_name": "wrapper_entrypoint_guard"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_runtime_license_policy.py"
+      ],
+      "stdout": "validate_radarsimpy_runtime_license_policy: pass",
+      "stderr": "",
+      "check_name": "runtime_license_policy"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_api_coverage_excluding_sim_lidar.py"
+      ],
+      "stdout": "validate_radarsimpy_api_coverage_excluding_sim_lidar: pass",
+      "stderr": "",
+      "check_name": "api_coverage_excluding_sim_lidar"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_root_model_core_fallback.py"
+      ],
+      "stdout": "validate_radarsimpy_root_model_core_fallback: pass",
+      "stderr": "",
+      "check_name": "root_model_core_fallback"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_core_fallback.py"
+      ],
+      "stdout": "validate_radarsimpy_simulator_core_fallback: pass",
+      "stderr": "",
+      "check_name": "simulator_core_fallback"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_reference_parity_optional.py"
+      ],
+      "stdout": "validate_radarsimpy_simulator_reference_parity_optional: pass (skipped)\nskip_reason=missing required RadarSimPy module: No module named 'radarsimpy'",
+      "stderr": "",
+      "check_name": "simulator_reference_parity_optional"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_layered_parity_suite.py"
+      ],
+      "stdout": "validate_run_radarsimpy_layered_parity_suite: pass",
+      "stderr": "",
+      "check_name": "layered_parity_runner_validator"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_scene_runtime_radarsimpy_provider_integration_stubbed.py"
+      ],
+      "stdout": "validate_scene_runtime_radarsimpy_provider_integration_stubbed: pass",
+      "stderr": "",
+      "check_name": "runtime_provider_integration_stubbed"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_periodic_parity_lock.py"
+      ],
+      "stdout": "validate_run_radarsimpy_periodic_parity_lock: pass",
+      "stderr": "",
+      "check_name": "periodic_parity_lock_runner"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_scene_runtime_radarsimpy_pilot.py"
+      ],
+      "stdout": "validate_run_scene_runtime_radarsimpy_pilot: pass",
+      "stderr": "",
+      "check_name": "runtime_pilot_runner"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_migration_stepwise.py"
+      ],
+      "stdout": "validate_run_radarsimpy_migration_stepwise: pass",
+      "stderr": "",
+      "check_name": "migration_stepwise_runner"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "-c",
+        "from avxsim import inspect_radarsimpy_api_coverage\ncov = inspect_radarsimpy_api_coverage()\nprint(cov['all_supported_available'])\nprint(cov['missing'])\nprint(cov['excluded_api'])\n"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nTrue\n[]\n['sim_lidar']",
+      "stderr": "",
+      "check_name": "real_runtime_api_probe"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "-c",
+        "import os\nimport radarsimpy as rs\nlicense_file = str(os.environ.get('RADARSIMPY_LICENSE_FILE', '')).strip()\nif license_file != '' and hasattr(rs, 'set_license'):\n    rs.set_license(license_file)\nis_licensed = bool(rs.is_licensed()) if hasattr(rs, 'is_licensed') else False\nlicense_info = rs.get_license_info() if hasattr(rs, 'get_license_info') else ''\nprint(is_licensed)\nprint(license_info)\n"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nTrue\nLicensed to: SEONGCHEOL JEONG\nProduct: RadarSimPy\nLicense Platform: All\nCurrent Platform: Linux\nDays Remaining: 184",
+      "stderr": "",
+      "license_activated": true,
+      "check_name": "real_runtime_license_status"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_reference_parity_optional.py",
+        "--require-runtime",
+        "--output-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_radarsimpy_simulator_reference_parity_optional: pass\nrd_range_peak_ref=93, rd_range_peak_fallback=93, diff=0\nrd_doppler_peak_ref=7, rd_doppler_peak_fallback=8, diff=1\nrd_norm_corr_global=0.224043\nrd_norm_corr_aligned=0.669125\nrd_norm_corr_log_aligned=0.667037\nalignment_shift=(-1, 0)",
+      "stderr": "",
+      "check_name": "simulator_reference_parity_real_runtime"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/run_radarsimpy_layered_parity_suite.py",
+        "--output-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_real_runtime.json",
+        "--require-runtime-trial",
+        "--trial-package-root",
+        "external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU",
+        "--libcompat-dir",
+        "external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu",
+        "--license-file",
+        "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+        "--with-production-track",
+        "--require-runtime-production"
+      ],
+      "stdout": "RadarSimPy layered parity suite completed.\n  pass: True\n  pass_count: 2\n  fail_count: 0\n  required_fail_count: 0\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_real_runtime.json",
+      "stderr": "",
+      "check_name": "layered_parity_suite_real_runtime"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/run_scene_runtime_radarsimpy_pilot.py",
+        "--output-root",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257",
+        "--output-summary-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257/summary.json",
+        "--runtime-failure-policy",
+        "error",
+        "--simulation-mode",
+        "radarsimpy_adc",
+        "--require-real-simulation",
+        "--runtime-device",
+        "cpu"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nScene runtime RadarSimPy pilot completed.\n  pilot_status: executed\n  scene_id: radarsimpy_runtime_pilot_v1\n  frame_count: 8\n  path_count: 8\n  runtime_mode: runtime_provider\n  provider_simulation_used: True\n  runtime_fallback_used: False\n  blockers: []\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257/summary.json",
+      "stderr": "",
+      "check_name": "real_runtime_strict_pilot"
+    }
+  ],
+  "real_runtime": {
+    "requested": true,
+    "import_time_license_artifact": {
+      "requested": true,
+      "staged": true,
+      "method": "symlink",
+      "source_path": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+      "staged_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic",
+      "cleanup_required": true,
+      "error": ""
+    },
+    "api_probe": {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "-c",
+        "from avxsim import inspect_radarsimpy_api_coverage\ncov = inspect_radarsimpy_api_coverage()\nprint(cov['all_supported_available'])\nprint(cov['missing'])\nprint(cov['excluded_api'])\n"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nTrue\n[]\n['sim_lidar']",
+      "stderr": "",
+      "check_name": "real_runtime_api_probe"
+    },
+    "runtime_license_tier": "production",
+    "trial_package_root": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU",
+    "libcompat_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu",
+    "license_file": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+    "trial_runtime_path_injection": {
+      "trial_package_root": true,
+      "libcompat_dir": true
+    },
+    "license_status": {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "-c",
+        "import os\nimport radarsimpy as rs\nlicense_file = str(os.environ.get('RADARSIMPY_LICENSE_FILE', '')).strip()\nif license_file != '' and hasattr(rs, 'set_license'):\n    rs.set_license(license_file)\nis_licensed = bool(rs.is_licensed()) if hasattr(rs, 'is_licensed') else False\nlicense_info = rs.get_license_info() if hasattr(rs, 'get_license_info') else ''\nprint(is_licensed)\nprint(license_info)\n"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nTrue\nLicensed to: SEONGCHEOL JEONG\nProduct: RadarSimPy\nLicense Platform: All\nCurrent Platform: Linux\nDays Remaining: 184",
+      "stderr": "",
+      "license_activated": true,
+      "check_name": "real_runtime_license_status"
+    },
+    "simulator_reference_parity": {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_reference_parity_optional.py",
+        "--require-runtime",
+        "--output-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_radarsimpy_simulator_reference_parity_optional: pass\nrd_range_peak_ref=93, rd_range_peak_fallback=93, diff=0\nrd_doppler_peak_ref=7, rd_doppler_peak_fallback=8, diff=1\nrd_norm_corr_global=0.224043\nrd_norm_corr_aligned=0.669125\nrd_norm_corr_log_aligned=0.667037\nalignment_shift=(-1, 0)",
+      "stderr": "",
+      "check_name": "simulator_reference_parity_real_runtime"
+    },
+    "simulator_reference_parity_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json",
+    "layered_parity_suite": {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/run_radarsimpy_layered_parity_suite.py",
+        "--output-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_real_runtime.json",
+        "--require-runtime-trial",
+        "--trial-package-root",
+        "external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU",
+        "--libcompat-dir",
+        "external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu",
+        "--license-file",
+        "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+        "--with-production-track",
+        "--require-runtime-production"
+      ],
+      "stdout": "RadarSimPy layered parity suite completed.\n  pass: True\n  pass_count: 2\n  fail_count: 0\n  required_fail_count: 0\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_real_runtime.json",
+      "stderr": "",
+      "check_name": "layered_parity_suite_real_runtime"
+    },
+    "layered_parity_suite_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_real_runtime.json",
+    "strict_pilot": {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/run_scene_runtime_radarsimpy_pilot.py",
+        "--output-root",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257",
+        "--output-summary-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257/summary.json",
+        "--runtime-failure-policy",
+        "error",
+        "--simulation-mode",
+        "radarsimpy_adc",
+        "--require-real-simulation",
+        "--runtime-device",
+        "cpu"
+      ],
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nScene runtime RadarSimPy pilot completed.\n  pilot_status: executed\n  scene_id: radarsimpy_runtime_pilot_v1\n  frame_count: 8\n  path_count: 8\n  runtime_mode: runtime_provider\n  provider_simulation_used: True\n  runtime_fallback_used: False\n  blockers: []\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257/summary.json",
+      "stderr": "",
+      "check_name": "real_runtime_strict_pilot"
+    },
+    "pilot_output_root": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257",
+    "pilot_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_082257/summary.json"
+  }
+}

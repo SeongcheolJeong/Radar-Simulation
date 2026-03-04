@@ -1,0 +1,32 @@
+{
+  "generated_at_utc": "2026-03-03T03:41:00.613124+00:00",
+  "probe": "paid_checkout_automation",
+  "result": "blocked",
+  "details": {
+    "firefox_cookie_count": 11,
+    "has_local_grecaptcha_token": true,
+    "local_grecaptcha_token_length": 130,
+    "add_to_cart_status": 200,
+    "checkout_status": 200,
+    "payment_methods": [
+      "ppcp-gateway",
+      "stripe"
+    ],
+    "checkout_attempts": [
+      {
+        "payment_method": "ppcp-gateway",
+        "status_code": 200,
+        "response_head": "{\"result\":\"failure\",\"messages\":\"\\n<ul class=\\\"woocommerce-error\\\" role=\\\"alert\\\">\\n\\t\\t\\t<li>\\n\\t\\t\\tPlease complete the CAPTCHA verification.\\t\\t<\\/li>\\n\\t<\\/ul>\\n\",\"refresh\":false,\"reload\":false}"
+      },
+      {
+        "payment_method": "stripe",
+        "status_code": 200,
+        "response_head": "{\"result\":\"failure\",\"messages\":\"\",\"refresh\":false,\"reload\":true}"
+      }
+    ]
+  },
+  "blockers": [
+    "captcha_required",
+    "interactive_stripe_flow_required"
+  ]
+}

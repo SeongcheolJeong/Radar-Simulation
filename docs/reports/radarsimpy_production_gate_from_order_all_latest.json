@@ -1,0 +1,397 @@
+{
+  "version": 1,
+  "report_name": "radarsimpy_production_gate_from_order",
+  "generated_at_utc": "2026-03-03T03:30:45.268395+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "status": "blocked",
+  "allow_blocked": true,
+  "order_source": "https://radarsimx.com/checkout/order-received/10754/?key=wc_order_ZV78H6UrlGKvZ",
+  "order_download_row_count": 8,
+  "order_download_rows": [
+    {
+      "label": "Windows_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=7a6eabe4-6bb2-41d6-9781-19d186c9571e"
+    },
+    {
+      "label": "Windows_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=63b39849-7d66-45a5-ac8e-77f100814d85"
+    },
+    {
+      "label": "Ubuntu22_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ec87184f-3150-4698-84e0-08beb3ab8cef"
+    },
+    {
+      "label": "Ubuntu22_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=0b046c17-eeeb-4350-86c6-561610c8db16"
+    },
+    {
+      "label": "Ubuntu24_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=8b69c359-e588-497d-9367-b6d101c4956d"
+    },
+    {
+      "label": "Ubuntu24_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=24058aad-dcea-41b8-a859-5c4a4e2cbd41"
+    },
+    {
+      "label": "MacOS_ARM_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=39dabe21-07c2-4bb1-8416-ec95ca5bc7eb"
+    },
+    {
+      "label": "MacOS_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ae5d82aa-2707-43bc-85bd-6e2bf9b298c4"
+    }
+  ],
+  "selected_download_count": 8,
+  "selected_download_rows": [
+    {
+      "label": "Windows_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=7a6eabe4-6bb2-41d6-9781-19d186c9571e"
+    },
+    {
+      "label": "Windows_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=63b39849-7d66-45a5-ac8e-77f100814d85"
+    },
+    {
+      "label": "Ubuntu22_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ec87184f-3150-4698-84e0-08beb3ab8cef"
+    },
+    {
+      "label": "Ubuntu22_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=0b046c17-eeeb-4350-86c6-561610c8db16"
+    },
+    {
+      "label": "Ubuntu24_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=8b69c359-e588-497d-9367-b6d101c4956d"
+    },
+    {
+      "label": "Ubuntu24_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=24058aad-dcea-41b8-a859-5c4a4e2cbd41"
+    },
+    {
+      "label": "MacOS_ARM_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=39dabe21-07c2-4bb1-8416-ec95ca5bc7eb"
+    },
+    {
+      "label": "MacOS_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ae5d82aa-2707-43bc-85bd-6e2bf9b298c4"
+    }
+  ],
+  "downloaded_count": 8,
+  "downloaded": [
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=7a6eabe4-6bb2-41d6-9781-19d186c9571e",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Windows_x86_64_CPU.zip",
+      "name": "Windows_x86_64_CPU.zip",
+      "size_bytes": 3170585,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:13 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "3170585",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"Windows_x86_64_CPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=8,cfOrigin;dur=781",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=UXzQXRiLgNSl463MocjNskw1fGZR%2FFT8tdHYWA5vVNmZXTPIk120Sn0fNmWQ5lfrWrDwiBGf4%2Fe5%2ByzXfLN1fAu8ZNRPeEaS7xh2\"}]}",
+        "CF-RAY": "9d658faa6f85b430-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "Windows_x86_64_CPU.zip"
+    },
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=63b39849-7d66-45a5-ac8e-77f100814d85",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Windows_x86_64_GPU.zip",
+      "name": "Windows_x86_64_GPU.zip",
+      "size_bytes": 13951945,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:14 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "13951945",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"Windows_x86_64_GPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=4,cfOrigin;dur=313",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=pdm3UigSbGJdUAIuCDwy3h9LD8DH6a4mBWTMH3n9mg3cWmmcYhf51boAIvq9%2BLLfK7zqo5mggK7dH69F4dowsi0rkUayMbIusDcn\"}]}",
+        "CF-RAY": "9d658fb83926dd67-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "Windows_x86_64_GPU.zip"
+    },
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ec87184f-3150-4698-84e0-08beb3ab8cef",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu22_x86_64_CPU.zip",
+      "name": "Ubuntu22_x86_64_CPU.zip",
+      "size_bytes": 15345186,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:18 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "15345186",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"Ubuntu22_x86_64_CPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=10,cfOrigin;dur=738",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=67ZrEKAN5MCvW%2B02M7WXTt6N8hb6L0hj5zPPPtGD%2FTdV%2BH4MR0O9JROhnFGuRGOQVaSZOqsMMwTWWJ%2FGPueGYgk0hypuaaq9jPLj6Ek%3D\"}]}",
+        "CF-RAY": "9d658fcc29a409f0-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "Ubuntu22_x86_64_CPU.zip"
+    },
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=0b046c17-eeeb-4350-86c6-561610c8db16",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu22_x86_64_GPU.zip",
+      "name": "Ubuntu22_x86_64_GPU.zip",
+      "size_bytes": 26649042,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:23 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "26649042",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"Ubuntu22_x86_64_GPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=12,cfOrigin;dur=772",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=gxu6u4mKUTdw1%2BKZSWNslc0iXqn2QcdrL%2FgtQEafSL2uW95odc2hasNko2M914JKUJJNIcSNWGxeyt%2FxJ%2FMJytcRwxFuuskTW%2FN9XDs%3D\"}]}",
+        "CF-RAY": "9d658feb1d6c8567-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "Ubuntu22_x86_64_GPU.zip"
+    },
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=8b69c359-e588-497d-9367-b6d101c4956d",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu24_x86_64_CPU.zip",
+      "name": "Ubuntu24_x86_64_CPU.zip",
+      "size_bytes": 15370528,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:29 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "15370528",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"Ubuntu24_x86_64_CPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=6,cfOrigin;dur=319",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=qk5msr6Yd6R4309JfRvITYu0Xzdge%2BM5NNJba30cu%2F9LICFc8aeakDdwkV0w2b4W0OowwzUNWcG2STcPVfVoWKu3DaiCi%2B1Ugvv7g78%3D\"}]}",
+        "CF-RAY": "9d659016292eb6a3-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "Ubuntu24_x86_64_CPU.zip"
+    },
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=24058aad-dcea-41b8-a859-5c4a4e2cbd41",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu24_x86_64_GPU.zip",
+      "name": "Ubuntu24_x86_64_GPU.zip",
+      "size_bytes": 26660478,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:34 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "26660478",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"Ubuntu24_x86_64_GPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=7,cfOrigin;dur=794",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=JHmt0%2BHA6Yoa4yUxXz%2BjWQPp7nSPIDEY7gABfyZ1CFfGaYdhkfMgPBEzvsi%2FEmhLFIWlf5dXbMyTgcGHWzGgO3Zpp5a%2B3Zak3Bojfhs%3D\"}]}",
+        "CF-RAY": "9d65902dff2ee2e8-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "Ubuntu24_x86_64_GPU.zip"
+    },
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=39dabe21-07c2-4bb1-8416-ec95ca5bc7eb",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/MacOS_ARM_CPU.zip",
+      "name": "MacOS_ARM_CPU.zip",
+      "size_bytes": 4983301,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:41 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "4983301",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"MacOS_ARM_CPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=6,cfOrigin;dur=306",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=aeijz%2FLOIOQA4ZU0Va0G2D15Qfau1oMa7uzNi9OxkcYUOLjZBDEB5FqzXa3rrR7o8ht60vfyw4xHpsLw1OSNlPP1C3RbNTy6XiikYjk%3D\"}]}",
+        "CF-RAY": "9d65905c8ff0bc74-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "MacOS_ARM_CPU.zip"
+    },
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ae5d82aa-2707-43bc-85bd-6e2bf9b298c4",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/MacOS_x86_64_CPU.zip",
+      "name": "MacOS_x86_64_CPU.zip",
+      "size_bytes": 4773130,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:30:42 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "4773130",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"MacOS_x86_64_CPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=8,cfOrigin;dur=316",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=V4hwK6TLUwWDl3u80l03hVculglA8t%2BxKTJGMhYGOhJpEWjFKlXNoVLo8cwxjdv5XJ9HmX%2BZNtaRTvIJec0aV0D4Czp8pg5MR%2FtCf3g%3D\"}]}",
+        "CF-RAY": "9d659065defe855e-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "MacOS_x86_64_CPU.zip"
+    }
+  ],
+  "download_errors": [],
+  "extract_zips": true,
+  "extracted": [
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Windows_x86_64_CPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/Windows_x86_64_CPU",
+      "file_count": 26
+    },
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Windows_x86_64_GPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/Windows_x86_64_GPU",
+      "file_count": 26
+    },
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu22_x86_64_CPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/Ubuntu22_x86_64_CPU",
+      "file_count": 27
+    },
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu22_x86_64_GPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/Ubuntu22_x86_64_GPU",
+      "file_count": 27
+    },
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu24_x86_64_CPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/Ubuntu24_x86_64_CPU",
+      "file_count": 27
+    },
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/Ubuntu24_x86_64_GPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/Ubuntu24_x86_64_GPU",
+      "file_count": 27
+    },
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/MacOS_ARM_CPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/MacOS_ARM_CPU",
+      "file_count": 27
+    },
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/downloads/MacOS_x86_64_CPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest/extracted/MacOS_x86_64_CPU",
+      "file_count": 27
+    }
+  ],
+  "license_files": [],
+  "selected_license_file": "",
+  "run_production_gate": true,
+  "production_gate_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_all_latest_production_gate.json",
+  "production_gate_status": "blocked",
+  "production_gate_run": {
+    "cmd": [
+      "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+      "scripts/run_radarsimpy_production_release_gate.py",
+      "--output-json",
+      "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_all_latest_production_gate.json",
+      "--allow-blocked"
+    ],
+    "returncode": 0,
+    "pass": true,
+    "stdout_tail": "RadarSimPy production release gate completed.\n  production_gate_status: blocked\n  selected_license_file: (none)\n  checkpoint_output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_all_latest_production_gate_readiness_checkpoint.json\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_all_latest_production_gate.json",
+    "stderr_tail": ""
+  },
+  "blockers": [
+    "license_file_not_found_in_order_assets",
+    "production_gate_not_ready"
+  ],
+  "output_root": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_all_latest"
+}

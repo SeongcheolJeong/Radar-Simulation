@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "report_name": "radarsimpy_production_release_gate",
+  "generated_at_utc": "2026-03-03T03:35:36.869563+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "production_gate_status": "blocked",
+  "allow_blocked": true,
+  "license_discovery": {
+    "selected_path": "",
+    "selection_source": "",
+    "explicit_arg": "",
+    "env_value": "",
+    "search_roots": [
+      "/home/seongcheoljeong/workspace/myproject",
+      "/home/seongcheoljeong/workspace/myproject/external",
+      "/home/seongcheoljeong",
+      "/home/seongcheoljeong/Downloads",
+      "/home/seongcheoljeong/Desktop"
+    ],
+    "search_max_depth": 6,
+    "candidates": [],
+    "errors": []
+  },
+  "selected_license_file": "",
+  "checkpoint_output_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_1622_latest_production_gate_readiness_checkpoint.json",
+  "checkpoint_overall_status": "",
+  "checkpoint_run": {
+    "skipped": true
+  },
+  "blockers": [
+    "license_file_missing"
+  ]
+}

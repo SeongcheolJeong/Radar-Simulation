@@ -1,0 +1,232 @@
+{
+  "version": 1,
+  "gate": "radarsimpy_wrapper_integration",
+  "generated_at_utc": "2026-03-03T02:15:35.094414+00:00",
+  "with_real_runtime": true,
+  "allow_failures": true,
+  "check_count": 13,
+  "pass_count": 10,
+  "fail_count": 3,
+  "pass": false,
+  "checks": [
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_wrapper_entrypoint_guard.py"
+      ],
+      "stdout": "validate_radarsimpy_wrapper_entrypoint_guard: pass",
+      "stderr": "",
+      "check_name": "wrapper_entrypoint_guard"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_runtime_license_policy.py"
+      ],
+      "stdout": "validate_radarsimpy_runtime_license_policy: pass",
+      "stderr": "",
+      "check_name": "runtime_license_policy"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_api_coverage_excluding_sim_lidar.py"
+      ],
+      "stdout": "validate_radarsimpy_api_coverage_excluding_sim_lidar: pass",
+      "stderr": "",
+      "check_name": "api_coverage_excluding_sim_lidar"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_root_model_core_fallback.py"
+      ],
+      "stdout": "validate_radarsimpy_root_model_core_fallback: pass",
+      "stderr": "",
+      "check_name": "root_model_core_fallback"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_core_fallback.py"
+      ],
+      "stdout": "validate_radarsimpy_simulator_core_fallback: pass",
+      "stderr": "",
+      "check_name": "simulator_core_fallback"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_reference_parity_optional.py"
+      ],
+      "stdout": "validate_radarsimpy_simulator_reference_parity_optional: pass (skipped)\nskip_reason=missing required RadarSimPy module: No module named 'radarsimpy'",
+      "stderr": "",
+      "check_name": "simulator_reference_parity_optional"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_scene_runtime_radarsimpy_provider_integration_stubbed.py"
+      ],
+      "stdout": "validate_scene_runtime_radarsimpy_provider_integration_stubbed: pass",
+      "stderr": "",
+      "check_name": "runtime_provider_integration_stubbed"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_periodic_parity_lock.py"
+      ],
+      "stdout": "validate_run_radarsimpy_periodic_parity_lock: pass",
+      "stderr": "",
+      "check_name": "periodic_parity_lock_runner"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_scene_runtime_radarsimpy_pilot.py"
+      ],
+      "stdout": "validate_run_scene_runtime_radarsimpy_pilot: pass",
+      "stderr": "",
+      "check_name": "runtime_pilot_runner"
+    },
+    {
+      "ok": true,
+      "return_code": 0,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_migration_stepwise.py"
+      ],
+      "stdout": "validate_run_radarsimpy_migration_stepwise: pass",
+      "stderr": "",
+      "check_name": "migration_stepwise_runner"
+    },
+    {
+      "ok": false,
+      "return_code": 1,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "-c",
+        "from avxsim import inspect_radarsimpy_api_coverage\ncov = inspect_radarsimpy_api_coverage()\nprint(cov['all_supported_available'])\nprint(cov['missing'])\nprint(cov['excluded_api'])\n"
+      ],
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/radarsimpy_api.py\", line 65, in _import_radarsimpy_module\n    return importlib.import_module(\"radarsimpy\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1324, in _find_and_load_unlocked\nModuleNotFoundError: No module named 'radarsimpy'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/radarsimpy_api.py\", line 122, in inspect_radarsimpy_api_coverage\n    rs = module if module is not None else _import_radarsimpy_module()\n                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/radarsimpy_api.py\", line 67, in _import_radarsimpy_module\n    raise RuntimeError(f\"missing required RadarSimPy module: {exc}\") from exc\nRuntimeError: missing required RadarSimPy module: No module named 'radarsimpy'",
+      "check_name": "real_runtime_api_probe"
+    },
+    {
+      "ok": false,
+      "return_code": 1,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_reference_parity_optional.py",
+        "--require-runtime",
+        "--output-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json"
+      ],
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/validate_radarsimpy_simulator_reference_parity_optional.py\", line 295, in <module>\n    run()\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/validate_radarsimpy_simulator_reference_parity_optional.py\", line 194, in run\n    raise AssertionError(f\"required runtime unavailable: {skip_reason}\")\nAssertionError: required runtime unavailable: missing required RadarSimPy module: No module named 'radarsimpy'",
+      "check_name": "simulator_reference_parity_real_runtime"
+    },
+    {
+      "ok": false,
+      "return_code": 1,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/run_scene_runtime_radarsimpy_pilot.py",
+        "--output-root",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534",
+        "--output-summary-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534/summary.json",
+        "--runtime-failure-policy",
+        "error",
+        "--simulation-mode",
+        "radarsimpy_adc",
+        "--require-real-simulation",
+        "--runtime-device",
+        "cpu"
+      ],
+      "stdout": "Scene runtime RadarSimPy pilot completed.\n  pilot_status: blocked\n  blockers: ['missing_required_modules']\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534/summary.json",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 772, in _resolve_paths_payload_with_runtime\n    payload, runtime_info = invoke_runtime_paths_provider(\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/runtime_coupling.py\", line 56, in invoke_runtime_paths_provider\n    raise RuntimeError(f\"required runtime modules unavailable: {', '.join(sorted(missing))}\")\nRuntimeError: required runtime modules unavailable: radarsimpy\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/run_scene_runtime_radarsimpy_pilot.py\", line 236, in main\n    run_out = run_object_scene_to_radar_map_json(\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 150, in run_object_scene_to_radar_map_json\n    return run_object_scene_to_radar_map(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 76, in run_object_scene_to_radar_map\n    result = _run_backend_radarsimpy_rt(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 611, in _run_backend_radarsimpy_rt\n    payload, runtime_resolution = _resolve_paths_payload_with_runtime(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 800, in _resolve_paths_payload_with_runtime\n    raise ValueError(f\"{backend_type} runtime provider failed: {exc}\") from exc\nValueError: radarsimpy_rt runtime provider failed: required runtime modules unavailable: radarsimpy\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/run_scene_runtime_radarsimpy_pilot.py\", line 329, in <module>\n    main()\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/run_scene_runtime_radarsimpy_pilot.py\", line 268, in main\n    raise RuntimeError(\nRuntimeError: RadarSimPy runtime pilot failed unexpectedly. Use --allow-blocked to keep blocked report.",
+      "check_name": "real_runtime_strict_pilot"
+    }
+  ],
+  "real_runtime": {
+    "requested": true,
+    "api_probe": {
+      "ok": false,
+      "return_code": 1,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "-c",
+        "from avxsim import inspect_radarsimpy_api_coverage\ncov = inspect_radarsimpy_api_coverage()\nprint(cov['all_supported_available'])\nprint(cov['missing'])\nprint(cov['excluded_api'])\n"
+      ],
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/radarsimpy_api.py\", line 65, in _import_radarsimpy_module\n    return importlib.import_module(\"radarsimpy\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1324, in _find_and_load_unlocked\nModuleNotFoundError: No module named 'radarsimpy'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/radarsimpy_api.py\", line 122, in inspect_radarsimpy_api_coverage\n    rs = module if module is not None else _import_radarsimpy_module()\n                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/radarsimpy_api.py\", line 67, in _import_radarsimpy_module\n    raise RuntimeError(f\"missing required RadarSimPy module: {exc}\") from exc\nRuntimeError: missing required RadarSimPy module: No module named 'radarsimpy'",
+      "check_name": "real_runtime_api_probe"
+    },
+    "runtime_license_tier": "production",
+    "trial_package_root": "",
+    "libcompat_dir": "",
+    "trial_runtime_path_injection": {
+      "trial_package_root": false,
+      "libcompat_dir": false
+    },
+    "simulator_reference_parity": {
+      "ok": false,
+      "return_code": 1,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_reference_parity_optional.py",
+        "--require-runtime",
+        "--output-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json"
+      ],
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/validate_radarsimpy_simulator_reference_parity_optional.py\", line 295, in <module>\n    run()\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/validate_radarsimpy_simulator_reference_parity_optional.py\", line 194, in run\n    raise AssertionError(f\"required runtime unavailable: {skip_reason}\")\nAssertionError: required runtime unavailable: missing required RadarSimPy module: No module named 'radarsimpy'",
+      "check_name": "simulator_reference_parity_real_runtime"
+    },
+    "simulator_reference_parity_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json",
+    "strict_pilot": {
+      "ok": false,
+      "return_code": 1,
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/run_scene_runtime_radarsimpy_pilot.py",
+        "--output-root",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534",
+        "--output-summary-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534/summary.json",
+        "--runtime-failure-policy",
+        "error",
+        "--simulation-mode",
+        "radarsimpy_adc",
+        "--require-real-simulation",
+        "--runtime-device",
+        "cpu"
+      ],
+      "stdout": "Scene runtime RadarSimPy pilot completed.\n  pilot_status: blocked\n  blockers: ['missing_required_modules']\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534/summary.json",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 772, in _resolve_paths_payload_with_runtime\n    payload, runtime_info = invoke_runtime_paths_provider(\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/runtime_coupling.py\", line 56, in invoke_runtime_paths_provider\n    raise RuntimeError(f\"required runtime modules unavailable: {', '.join(sorted(missing))}\")\nRuntimeError: required runtime modules unavailable: radarsimpy\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/run_scene_runtime_radarsimpy_pilot.py\", line 236, in main\n    run_out = run_object_scene_to_radar_map_json(\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 150, in run_object_scene_to_radar_map_json\n    return run_object_scene_to_radar_map(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 76, in run_object_scene_to_radar_map\n    result = _run_backend_radarsimpy_rt(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 611, in _run_backend_radarsimpy_rt\n    payload, runtime_resolution = _resolve_paths_payload_with_runtime(\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/seongcheoljeong/workspace/myproject/src/avxsim/scene_pipeline.py\", line 800, in _resolve_paths_payload_with_runtime\n    raise ValueError(f\"{backend_type} runtime provider failed: {exc}\") from exc\nValueError: radarsimpy_rt runtime provider failed: required runtime modules unavailable: radarsimpy\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/run_scene_runtime_radarsimpy_pilot.py\", line 329, in <module>\n    main()\n  File \"/home/seongcheoljeong/workspace/myproject/scripts/run_scene_runtime_radarsimpy_pilot.py\", line 268, in main\n    raise RuntimeError(\nRuntimeError: RadarSimPy runtime pilot failed unexpectedly. Use --allow-blocked to keep blocked report.",
+      "check_name": "real_runtime_strict_pilot"
+    },
+    "pilot_output_root": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534",
+    "pilot_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260303_021534/summary.json"
+  }
+}

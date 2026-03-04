@@ -1,0 +1,43 @@
+{
+  "report_name": "radarsimpy_final_status_latest",
+  "generated_at_utc": "2026-03-03T08:41:57.139411+00:00",
+  "workflow_synced": true,
+  "statuses": {
+    "integration_smoke_gate_production": {
+      "pass": true,
+      "step_count": 20,
+      "pass_count": 20,
+      "fail_count": 0
+    },
+    "wrapper_integration_gate_production": {
+      "pass": true,
+      "check_count": 16,
+      "pass_count": 16,
+      "fail_count": 0
+    },
+    "production_release_gate": {
+      "status": "ready"
+    },
+    "readiness_checkpoint": {
+      "overall_status": "ready",
+      "smoke_gate_status": "ready",
+      "wrapper_gate_status": "ready",
+      "progress_overall_ready": true
+    },
+    "layered_parity_suite": {
+      "pass": true,
+      "track_count": 2,
+      "pass_count": 2,
+      "fail_count": 0,
+      "required_fail_count": 0
+    }
+  },
+  "sources": {
+    "smoke": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_production_latest.json",
+    "wrapper": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_production_latest.json",
+    "gate": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_latest.json",
+    "readiness": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_readiness_checkpoint_latest.json",
+    "layered": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_latest.json"
+  },
+  "overall_ready": true
+}

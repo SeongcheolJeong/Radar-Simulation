@@ -1,0 +1,8 @@
+RadarSimCpp: No license file path provided. Running in free tier mode.
+validate_radarsimpy_simulator_reference_parity_optional: pass
+rd_range_peak_ref=93, rd_range_peak_fallback=93, diff=0
+rd_doppler_peak_ref=7, rd_doppler_peak_fallback=8, diff=1
+rd_norm_corr_global=0.224043
+rd_norm_corr_aligned=0.669125
+rd_norm_corr_log_aligned=0.667037
+alignment_shift=(-1, 0)

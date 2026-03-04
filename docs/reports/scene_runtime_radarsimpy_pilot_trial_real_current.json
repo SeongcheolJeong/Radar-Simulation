@@ -1,0 +1,77 @@
+{
+  "scene_id": "radarsimpy_runtime_pilot_v1",
+  "pilot_status": "executed",
+  "blockers": [],
+  "diagnostics": {
+    "platform": "Linux",
+    "repo_root": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy",
+    "repo_exists": true,
+    "module_report": {
+      "radarsimpy": {
+        "available": true,
+        "module_name": "radarsimpy",
+        "module_version": "15.0.1"
+      }
+    },
+    "missing_modules": [],
+    "preflight_blockers": []
+  },
+  "runtime_failure_policy": "error",
+  "simulation_mode": "radarsimpy_adc",
+  "runtime_device": "cpu",
+  "trial_free_tier_geometry": true,
+  "require_real_simulation": true,
+  "provider_simulation_used": true,
+  "runtime_fallback_used": false,
+  "recommended_command": "PYTHONPATH=src python3 scripts/run_scene_runtime_radarsimpy_pilot.py --output-root data/runtime_pilot/radarsimpy_trial_real_current --output-summary-json docs/reports/scene_runtime_radarsimpy_pilot_trial_real_current.json --radarsimpy-repo-root external/radarsimpy --runtime-failure-policy error --simulation-mode radarsimpy_adc --runtime-device cpu",
+  "scene_json": "data/runtime_pilot/radarsimpy_trial_real_current/scene_radarsimpy_runtime_pilot.json",
+  "output_dir": "data/runtime_pilot/radarsimpy_trial_real_current/pipeline_outputs",
+  "path_list_json": "data/runtime_pilot/radarsimpy_trial_real_current/pipeline_outputs/path_list.json",
+  "adc_cube_npz": "data/runtime_pilot/radarsimpy_trial_real_current/pipeline_outputs/adc_cube.npz",
+  "radar_map_npz": "data/runtime_pilot/radarsimpy_trial_real_current/pipeline_outputs/radar_map.npz",
+  "frame_count": 8,
+  "path_count": 8,
+  "runtime_resolution": {
+    "mode": "runtime_provider",
+    "backend_type": "radarsimpy_rt",
+    "runtime_provider": "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths",
+    "runtime_info": {
+      "provider_spec": "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths",
+      "required_modules": [
+        "radarsimpy"
+      ],
+      "module_report": {
+        "radarsimpy": {
+          "available": true,
+          "module_name": "radarsimpy",
+          "module_version": "15.0.1"
+        }
+      }
+    },
+    "adc_source": "runtime_payload_adc_sctr",
+    "adc_payload_present": true,
+    "provider_runtime_info": {
+      "module_name": "radarsimpy",
+      "module_version": "15.0.1",
+      "generator": "analytic_targets_with_optional_radarsimpy_adc",
+      "simulation_mode": "radarsimpy_adc",
+      "simulation_backend": "radarsimpy.sim_radar",
+      "simulation_device": "cpu",
+      "sim_baseband_shape": [
+        1,
+        8,
+        1024
+      ],
+      "adc_sctr_shape": [
+        1024,
+        8,
+        1,
+        1
+      ],
+      "target_count": 1,
+      "n_tx": 1,
+      "n_rx": 1,
+      "simulation_used": true
+    }
+  }
+}

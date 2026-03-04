@@ -1,0 +1,16 @@
+{
+  "report_name": "radarsimpy_simulator_reference_parity_optional",
+  "generated_at_utc": "2026-03-03T08:47:57.231988+00:00",
+  "require_runtime": false,
+  "runtime_available": false,
+  "skipped": true,
+  "skip_reason": "missing required RadarSimPy module: No module named 'radarsimpy'",
+  "pass": true,
+  "metrics": {},
+  "thresholds": {
+    "range_peak_diff_max": 2,
+    "doppler_peak_diff_max": 2,
+    "rd_norm_corr_aligned_min": 0.6
+  },
+  "error": null
+}

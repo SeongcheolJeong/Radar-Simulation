@@ -1,0 +1,32 @@
+{
+  "scene_id": "radarsimpy_runtime_pilot_v1",
+  "pilot_status": "blocked",
+  "blockers": [
+    "runtime_execution_failed"
+  ],
+  "diagnostics": {
+    "platform": "Linux",
+    "repo_root": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy",
+    "repo_exists": true,
+    "module_report": {
+      "radarsimpy": {
+        "available": true,
+        "module_name": "radarsimpy",
+        "module_version": "15.0.1"
+      }
+    },
+    "missing_modules": [],
+    "preflight_blockers": []
+  },
+  "runtime_failure_policy": "error",
+  "runtime_error": "ValueError: radarsimpy_rt runtime provider failed: \nTrial Version Limitation - Transmitter Channels\n----------------------------------------------\nCurrent limitation: 1 transmitter channel\nYour configuration: 2 channels\n\nTo use multiple transmitter channels, please upgrade to the Standard Version:\n\u2192 https://radarsimx.com/product/radarsimpy/\n",
+  "recommended_command": "PYTHONPATH=src python3 scripts/run_scene_runtime_radarsimpy_pilot.py --output-root data/runtime_pilot/radarsimpy_production_probe_current --output-summary-json docs/reports/scene_runtime_radarsimpy_pilot_production_probe_current.json --radarsimpy-repo-root external/radarsimpy --runtime-failure-policy error --simulation-mode radarsimpy_adc --runtime-device cpu",
+  "scene_json": "data/runtime_pilot/radarsimpy_production_probe_current/scene_radarsimpy_runtime_pilot.json",
+  "output_dir": null,
+  "path_list_json": null,
+  "adc_cube_npz": null,
+  "radar_map_npz": null,
+  "frame_count": 0,
+  "path_count": 0,
+  "runtime_resolution": null
+}

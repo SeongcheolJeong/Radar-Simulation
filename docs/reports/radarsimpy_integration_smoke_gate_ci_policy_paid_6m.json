@@ -1,0 +1,237 @@
+{
+  "version": 1,
+  "generated_at_utc": "2026-03-03T08:50:26.149970+00:00",
+  "repo_root": "/home/seongcheoljeong/workspace/myproject",
+  "python_bin": "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+  "with_real_runtime": false,
+  "runtime_license_tier": "trial",
+  "trial_package_root": "",
+  "libcompat_dir": "",
+  "license_file": "",
+  "import_time_license_artifact": {
+    "requested": false,
+    "staged": false,
+    "method": "",
+    "source_path": "",
+    "staged_path": "",
+    "cleanup_required": false,
+    "error": ""
+  },
+  "step_count": 19,
+  "pass_count": 19,
+  "fail_count": 0,
+  "pass": true,
+  "steps": [
+    {
+      "name": "validate_radarsimpy_api_coverage_excluding_sim_lidar",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_api_coverage_excluding_sim_lidar.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_radarsimpy_api_coverage_excluding_sim_lidar: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_radarsimpy_runtime_license_policy",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_runtime_license_policy.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_radarsimpy_runtime_license_policy: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_radarsimpy_processing_core_fallback",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_processing_core_fallback.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_radarsimpy_processing_core_fallback: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_radarsimpy_root_model_core_fallback",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_root_model_core_fallback.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_radarsimpy_root_model_core_fallback: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_radarsimpy_simulator_core_fallback",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_core_fallback.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_radarsimpy_simulator_core_fallback: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_radarsimpy_simulator_reference_parity_optional",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_radarsimpy_simulator_reference_parity_optional.py",
+        "--output-json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_simulator_reference_parity_from_smoke.json"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_radarsimpy_simulator_reference_parity_optional: pass (skipped)\nskip_reason=missing required RadarSimPy module: No module named 'radarsimpy'",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_run_radarsimpy_simulator_reference_parity_optional",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_simulator_reference_parity_optional.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_run_radarsimpy_simulator_reference_parity_optional: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_run_radarsimpy_layered_parity_suite",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_layered_parity_suite.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_run_radarsimpy_layered_parity_suite: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_run_radarsimpy_wrapper_integration_gate",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_wrapper_integration_gate.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_run_radarsimpy_wrapper_integration_gate: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_run_radarsimpy_migration_stepwise",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_migration_stepwise.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_run_radarsimpy_migration_stepwise: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_run_radarsimpy_periodic_parity_lock",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_periodic_parity_lock.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_run_radarsimpy_periodic_parity_lock: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_build_radarsimpy_periodic_manifest_from_migration",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_build_radarsimpy_periodic_manifest_from_migration.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_build_radarsimpy_periodic_manifest_from_migration: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_install_radarsimpy_ci_workflow",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_install_radarsimpy_ci_workflow.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_install_radarsimpy_ci_workflow: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_show_radarsimpy_progress",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_show_radarsimpy_progress.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_show_radarsimpy_progress: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_show_radarsimpy_function_progress",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_show_radarsimpy_function_progress.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_show_radarsimpy_function_progress: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_build_radarsimpy_signature_manifest",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_build_radarsimpy_signature_manifest.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_build_radarsimpy_signature_manifest: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_build_radarsimpy_native_parity_fixtures",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_build_radarsimpy_native_parity_fixtures.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_build_radarsimpy_native_parity_fixtures: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_run_radarsimpy_readiness_checkpoint_report",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_readiness_checkpoint_report.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_run_radarsimpy_readiness_checkpoint_report: pass",
+      "stderr_tail": ""
+    },
+    {
+      "name": "validate_run_radarsimpy_readiness_checkpoint",
+      "cmd": [
+        "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+        "scripts/validate_run_radarsimpy_readiness_checkpoint.py"
+      ],
+      "returncode": 0,
+      "pass": true,
+      "stdout_tail": "validate_run_radarsimpy_readiness_checkpoint: pass",
+      "stderr_tail": ""
+    }
+  ]
+}

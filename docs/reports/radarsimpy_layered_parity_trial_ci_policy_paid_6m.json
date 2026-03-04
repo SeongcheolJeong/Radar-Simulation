@@ -1,0 +1,452 @@
+{
+  "report_name": "radarsimpy_layered_reference_parity_optional",
+  "generated_at_utc": "2026-03-03T08:50:32.563885+00:00",
+  "track": "trial",
+  "require_runtime": true,
+  "runtime_available": true,
+  "skipped": false,
+  "skip_reason": null,
+  "pass": true,
+  "thresholds": {
+    "range_peak_diff_max": 2.0,
+    "doppler_peak_diff_max": 2.0,
+    "rd_norm_corr_aligned_min": 0.6,
+    "numeric_rtol": 1e-06,
+    "numeric_atol": 1e-08
+  },
+  "sections": {
+    "processing_tools": {
+      "pass": true,
+      "case_count": 15,
+      "cases": [
+        {
+          "case_id": "range_fft_canonical",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3,
+              4
+            ],
+            "dtype": "complex128"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3,
+              4
+            ],
+            "dtype": "complex128"
+          }
+        },
+        {
+          "case_id": "doppler_fft_canonical",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3,
+              4
+            ],
+            "dtype": "complex128"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3,
+              4
+            ],
+            "dtype": "complex128"
+          }
+        },
+        {
+          "case_id": "range_doppler_fft_canonical",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3,
+              4
+            ],
+            "dtype": "complex128"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3,
+              4
+            ],
+            "dtype": "complex128"
+          }
+        },
+        {
+          "case_id": "cfar_ca_1d_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              64
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              64
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "cfar_ca_2d_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              11,
+              12
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              11,
+              12
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "cfar_os_1d_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              64
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              64
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "cfar_os_2d_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              11,
+              12
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              11,
+              12
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "doa_bartlett_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              121
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              121
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "doa_capon_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 4.3429444573916953e-07,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              121
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              121
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "doa_music_basic",
+          "pass": true,
+          "comparator": "peak_index_and_spectrum_corr",
+          "max_abs_diff": 0.11410199583079361,
+          "ref_shape_dtype": {
+            "kind": "tuple",
+            "items": [
+              {
+                "kind": "ndarray",
+                "shape": [
+                  1
+                ],
+                "dtype": "int64"
+              },
+              {
+                "kind": "ndarray",
+                "shape": [
+                  1
+                ],
+                "dtype": "int64"
+              },
+              {
+                "kind": "ndarray",
+                "shape": [
+                  121
+                ],
+                "dtype": "float64"
+              }
+            ]
+          },
+          "core_shape_dtype": {
+            "kind": "tuple",
+            "items": [
+              {
+                "kind": "ndarray",
+                "shape": [
+                  1
+                ],
+                "dtype": "float64"
+              },
+              {
+                "kind": "ndarray",
+                "shape": [
+                  1
+                ],
+                "dtype": "int64"
+              },
+              {
+                "kind": "ndarray",
+                "shape": [
+                  121
+                ],
+                "dtype": "float64"
+              }
+            ]
+          },
+          "metrics": {
+            "peak_index_diff_max": 0,
+            "spectrum_norm_corr": 0.9999999963300769
+          }
+        },
+        {
+          "case_id": "doa_root_music_basic",
+          "pass": true,
+          "comparator": "structural_finite",
+          "max_abs_diff": 19.89042578914749,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              1
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              1
+            ],
+            "dtype": "float64"
+          },
+          "metrics": {
+            "max_abs_diff": 19.89042578914749
+          }
+        },
+        {
+          "case_id": "doa_esprit_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              1
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              1
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "doa_iaa_basic",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              121
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              121
+            ],
+            "dtype": "float64"
+          }
+        },
+        {
+          "case_id": "roc_pd_coherent",
+          "pass": true,
+          "comparator": "bounded_monotonic_corr",
+          "max_abs_diff": 0.9600905734592001,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2,
+              3
+            ],
+            "dtype": "float64"
+          },
+          "metrics": {
+            "norm_corr": 0.8542202378717567,
+            "ref_monotonic_snr": true,
+            "core_monotonic_snr": true
+          }
+        },
+        {
+          "case_id": "roc_snr_coherent",
+          "pass": true,
+          "comparator": "allclose",
+          "max_abs_diff": 0.0,
+          "ref_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2
+            ],
+            "dtype": "float64"
+          },
+          "core_shape_dtype": {
+            "kind": "ndarray",
+            "shape": [
+              2
+            ],
+            "dtype": "float64"
+          }
+        }
+      ]
+    },
+    "sim_rcs": {
+      "pass": true,
+      "case_count": 2,
+      "cases": [
+        {
+          "case_id": "sim_rcs_scalar",
+          "pass": true,
+          "skipped": true,
+          "skip_reason": "missing_mesh_processing_dependency"
+        },
+        {
+          "case_id": "sim_rcs_vector",
+          "pass": true,
+          "skipped": true,
+          "skip_reason": "missing_mesh_processing_dependency"
+        }
+      ]
+    },
+    "sim_radar": {
+      "pass": true,
+      "metrics": {
+        "pass": true,
+        "shape_match": true,
+        "finite_ok": true,
+        "adc_cube_shape": [
+          1,
+          16,
+          100
+        ],
+        "adc_cube_dtype_ref": "complex128",
+        "adc_cube_dtype_core": "complex128",
+        "channel_metrics": [
+          {
+            "channel_index": 0,
+            "rd_range_peak_ref": 93,
+            "rd_range_peak_core": 93,
+            "rd_range_peak_diff": 0,
+            "rd_doppler_peak_ref": 7,
+            "rd_doppler_peak_core": 8,
+            "rd_doppler_peak_diff": 1,
+            "rd_norm_corr_global": 0.22404252907308175,
+            "rd_norm_corr_aligned": 0.6691253603771822,
+            "rd_norm_corr_log_aligned": 0.6670367155003731,
+            "alignment_shift": [
+              -1,
+              0
+            ]
+          }
+        ],
+        "summary_metrics": {
+          "channel_count": 1,
+          "max_range_peak_diff": 0,
+          "max_doppler_peak_diff": 1,
+          "min_rd_norm_corr_aligned": 0.6691253603771822
+        }
+      }
+    }
+  },
+  "error": null,
+  "blocked_reasons": []
+}

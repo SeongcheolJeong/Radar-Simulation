@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "report_name": "radarsimpy_production_release_gate",
+  "generated_at_utc": "2026-03-03T08:36:30.156930+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "production_gate_status": "ready",
+  "allow_blocked": false,
+  "license_discovery": {
+    "selected_path": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+    "selection_source": "explicit_arg",
+    "explicit_arg": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+    "env_value": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+    "search_roots": [],
+    "search_max_depth": 6,
+    "candidates": [
+      "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic"
+    ],
+    "errors": []
+  },
+  "selected_license_file": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+  "checkpoint_output_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_latest_readiness_checkpoint.json",
+  "checkpoint_overall_status": "ready",
+  "checkpoint_run": {
+    "cmd": [
+      "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+      "scripts/run_radarsimpy_readiness_checkpoint.py",
+      "--with-real-runtime",
+      "--runtime-license-tier",
+      "production",
+      "--license-file",
+      "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
+      "--output-json",
+      "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_latest_readiness_checkpoint.json",
+      "--trial-package-root",
+      "external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU",
+      "--libcompat-dir",
+      "external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu"
+    ],
+    "returncode": 0,
+    "pass": true,
+    "stdout_tail": "RadarSimPy readiness checkpoint completed.\n  overall_status: ready\n  smoke_gate_status: ready\n  wrapper_gate_status: ready\n  migration_status: skipped\n  function_status: ready\n  report_contract_validator_pass: True\n  progress_overall_ready: True\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_latest_readiness_checkpoint.json",
+    "stderr_tail": ""
+  },
+  "blockers": []
+}

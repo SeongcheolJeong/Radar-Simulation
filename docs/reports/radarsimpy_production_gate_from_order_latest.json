@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "report_name": "radarsimpy_production_gate_from_order",
+  "generated_at_utc": "2026-03-03T03:29:05.698589+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "status": "blocked",
+  "allow_blocked": true,
+  "order_source": "https://radarsimx.com/checkout/order-received/10754/?key=wc_order_ZV78H6UrlGKvZ",
+  "order_download_row_count": 8,
+  "order_download_rows": [
+    {
+      "label": "Windows_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=7a6eabe4-6bb2-41d6-9781-19d186c9571e"
+    },
+    {
+      "label": "Windows_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=63b39849-7d66-45a5-ac8e-77f100814d85"
+    },
+    {
+      "label": "Ubuntu22_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ec87184f-3150-4698-84e0-08beb3ab8cef"
+    },
+    {
+      "label": "Ubuntu22_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=0b046c17-eeeb-4350-86c6-561610c8db16"
+    },
+    {
+      "label": "Ubuntu24_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=8b69c359-e588-497d-9367-b6d101c4956d"
+    },
+    {
+      "label": "Ubuntu24_x86_64_GPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=24058aad-dcea-41b8-a859-5c4a4e2cbd41"
+    },
+    {
+      "label": "MacOS_ARM_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=39dabe21-07c2-4bb1-8416-ec95ca5bc7eb"
+    },
+    {
+      "label": "MacOS_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=ae5d82aa-2707-43bc-85bd-6e2bf9b298c4"
+    }
+  ],
+  "selected_download_count": 1,
+  "selected_download_rows": [
+    {
+      "label": "Ubuntu24_x86_64_CPU.zip",
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=8b69c359-e588-497d-9367-b6d101c4956d"
+    }
+  ],
+  "downloaded_count": 1,
+  "downloaded": [
+    {
+      "url": "https://radarsimx.com/?download_file=10674&order=wc_order_ZV78H6UrlGKvZ&uid=8001d91a16a350e354a7343b91337628aae01a75fddc9eaf616e883dd1f60caf&key=8b69c359-e588-497d-9367-b6d101c4956d",
+      "path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/downloads/Ubuntu24_x86_64_CPU.zip",
+      "name": "Ubuntu24_x86_64_CPU.zip",
+      "size_bytes": 15370528,
+      "headers": {
+        "Date": "Tue, 03 Mar 2026 03:29:01 GMT",
+        "Content-Type": "application/zip",
+        "Content-Length": "15370528",
+        "Connection": "close",
+        "Cache-Control": "no-cache, must-revalidate, max-age=0, no-store, private",
+        "content-description": "File Transfer",
+        "content-disposition": "attachment; filename=\"Ubuntu24_x86_64_CPU.zip\";",
+        "content-transfer-encoding": "binary",
+        "expires": "Wed, 11 Jan 1984 05:00:00 GMT",
+        "Server": "cloudflare",
+        "wpo-cache-message": "In the settings, caching is disabled for matches for one of the current request's GET parameters",
+        "wpo-cache-status": "not cached",
+        "x-powered-by": "PHP/8.5.3",
+        "x-robots-tag": "noindex, nofollow",
+        "cf-cache-status": "DYNAMIC",
+        "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "Strict-Transport-Security": "max-age=0; includeSubDomains; preload",
+        "Speculation-Rules": "\"/cdn-cgi/speculation\"",
+        "Server-Timing": "cfEdge;dur=10,cfOrigin;dur=785",
+        "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=RTOl8ryVFv%2FtIwJtKZse%2Fzqs%2B5CNsPG%2FEm5RkzacY91bpmBpqnXxp%2Fuvy2tJesKexgSCkQFJGB6jOHXtSQBmnqC2by3OFFgMDvKNPew%3D\"}]}",
+        "CF-RAY": "9d658de9b81e8485-HKG",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "label": "Ubuntu24_x86_64_CPU.zip"
+    }
+  ],
+  "download_errors": [],
+  "extract_zips": true,
+  "extracted": [
+    {
+      "archive_path": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/downloads/Ubuntu24_x86_64_CPU.zip",
+      "extract_dir": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU",
+      "file_count": 27
+    }
+  ],
+  "license_files": [],
+  "selected_license_file": "",
+  "run_production_gate": true,
+  "production_gate_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_latest_production_gate.json",
+  "production_gate_status": "blocked",
+  "production_gate_run": {
+    "cmd": [
+      "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+      "scripts/run_radarsimpy_production_release_gate.py",
+      "--output-json",
+      "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_latest_production_gate.json",
+      "--allow-blocked"
+    ],
+    "returncode": 0,
+    "pass": true,
+    "stdout_tail": "RadarSimPy production release gate completed.\n  production_gate_status: blocked\n  selected_license_file: (none)\n  checkpoint_output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_latest_production_gate_readiness_checkpoint.json\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_latest_production_gate.json",
+    "stderr_tail": ""
+  },
+  "blockers": [
+    "license_file_not_found_in_order_assets",
+    "production_gate_not_ready"
+  ],
+  "output_root": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest"
+}

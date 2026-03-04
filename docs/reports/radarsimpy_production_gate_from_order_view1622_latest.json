@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "report_name": "radarsimpy_production_gate_from_order",
+  "generated_at_utc": "2026-03-03T03:32:12.674143+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "status": "blocked",
+  "allow_blocked": true,
+  "order_source": "https://radarsimx.com/view-order/1622/?key=wc_order_4Q8TcA2f6hYXs",
+  "fetch_errors": [
+    "https://radarsimx.com/view-order/1622/?key=wc_order_4Q8TcA2f6hYXs: HTTP Error 404: Not Found"
+  ],
+  "order_download_row_count": 0,
+  "order_download_rows": [],
+  "selected_download_count": 0,
+  "selected_download_rows": [],
+  "downloaded_count": 0,
+  "downloaded": [],
+  "download_errors": [],
+  "extract_zips": true,
+  "extracted": [],
+  "license_files": [],
+  "selected_license_file": "",
+  "run_production_gate": true,
+  "production_gate_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_view1622_latest_production_gate.json",
+  "production_gate_status": "blocked",
+  "production_gate_run": {
+    "cmd": [
+      "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+      "scripts/run_radarsimpy_production_release_gate.py",
+      "--output-json",
+      "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_view1622_latest_production_gate.json",
+      "--allow-blocked"
+    ],
+    "returncode": 0,
+    "pass": true,
+    "stdout_tail": "RadarSimPy production release gate completed.\n  production_gate_status: blocked\n  selected_license_file: (none)\n  checkpoint_output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_view1622_latest_production_gate_readiness_checkpoint.json\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_gate_from_order_view1622_latest_production_gate.json",
+    "stderr_tail": ""
+  },
+  "blockers": [
+    "license_file_not_found_in_order_assets",
+    "no_download_rows_detected",
+    "no_download_rows_selected",
+    "order_fetch_error",
+    "production_gate_not_ready"
+  ],
+  "output_root": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_view1622"
+}
