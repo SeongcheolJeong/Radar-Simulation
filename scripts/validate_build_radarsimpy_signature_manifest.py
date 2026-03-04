@@ -40,9 +40,11 @@ def run() -> None:
         assert payload.get("report_name") == "radarsimpy_signature_manifest"
         assert payload.get("ready") is True
         assert payload.get("phase1_native_ready") is True
+        assert payload.get("phase2_native_ready") is True
+        assert payload.get("phase2_root_native_ready") is True
         assert int(payload.get("total_count", -1)) == 20
         assert int(payload.get("canonical_defined_count", -1)) == 20
-        assert int(payload.get("native_core_count", -1)) == 15
+        assert int(payload.get("native_core_count", -1)) == 20
         assert int(payload.get("exported_count", -1)) == 20
 
         rows = payload.get("entries")
@@ -59,7 +61,9 @@ def run() -> None:
         assert len(tool_rows) == 2
 
         for row in root_rows:
-            assert row.get("has_native_core") is False
+            assert row.get("has_native_core") is True
+            assert isinstance(row.get("native_core_symbol"), str)
+            assert isinstance(row.get("native_core_signature"), str)
             assert isinstance(row.get("canonical_signature"), str)
             assert isinstance(row.get("wrapper_signature"), str)
 

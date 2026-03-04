@@ -48,7 +48,12 @@ def run() -> None:
         names = [str(item.get("check_name", "")) for item in payload.get("checks", [])]
         expected = {
             "wrapper_entrypoint_guard",
+            "runtime_license_policy",
             "api_coverage_excluding_sim_lidar",
+            "root_model_core_fallback",
+            "simulator_core_fallback",
+            "simulator_reference_parity_optional",
+            "layered_parity_runner_validator",
             "runtime_provider_integration_stubbed",
             "periodic_parity_lock_runner",
             "runtime_pilot_runner",

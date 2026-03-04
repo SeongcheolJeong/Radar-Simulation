@@ -32,13 +32,14 @@ PROCESSING_APIS: Tuple[str, ...] = (
     "doa_capon",
 )
 TOOLS_APIS: Tuple[str, ...] = ("roc_pd", "roc_snr")
+SIMULATOR_APIS: Tuple[str, ...] = ("sim_radar", "sim_rcs")
 
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description=(
             "Build deterministic golden parity fixtures for RadarSimPy native "
-            "processing/tools fallbacks."
+            "processing/tools/simulator fallbacks."
         )
     )
     p.add_argument("--repo-root", default=".")
@@ -142,6 +143,7 @@ def _reference_callable(rs: ModuleType, api_symbol: str) -> Any:
         if sub is None:
             return None
         return getattr(sub, api_symbol, None)
+    # Simulator/root parity is tracked in dedicated runtime validators.
     return None
 
 
@@ -188,6 +190,87 @@ def _build_context() -> Dict[str, Any]:
     }
 
 
+def _build_sim_fixture_case_inputs(
+    fixture_id: str,
+    *,
+    core_model: ModuleType,
+) -> tuple[list[Any], dict[str, Any]]:
+    tx = core_model.CoreTransmitter(
+        f=[76.8e9, 77.2e9],
+        t=[0.0, 20.0e-6],
+        tx_power=0.0,
+        pulses=16,
+        prp=30.0e-6,
+        channels=[{"location": [0.0, 0.0, 0.0]}],
+    )
+    rx = core_model.CoreReceiver(
+        fs=5.0e6,
+        noise_figure=0.0,
+        rf_gain=0.0,
+        load_resistor=500.0,
+        baseband_gain=0.0,
+        bb_type="complex",
+        channels=[{"location": [0.0, 0.0, 0.0]}],
+    )
+    radar = core_model.CoreRadar(transmitter=tx, receiver=rx, seed=7)
+    targets = [
+        {
+            "location": [35.0, 0.0, 0.0],
+            "speed": [-6.0, 0.0, 0.0],
+            "rcs": 10.0,
+            "phase": 20.0,
+        }
+    ]
+
+    if fixture_id == "sim_radar_basic":
+        return (
+            [radar, targets],
+            {
+                "density": 1.0,
+                "level": None,
+                "interf": None,
+                "ray_filter": None,
+                "back_propagating": False,
+                "device": "cpu",
+                "log_path": None,
+                "dry_run": False,
+            },
+        )
+    if fixture_id == "sim_radar_dry_run":
+        return (
+            [radar, targets],
+            {
+                "density": 1.0,
+                "level": None,
+                "interf": None,
+                "ray_filter": None,
+                "back_propagating": False,
+                "device": "cpu",
+                "log_path": None,
+                "dry_run": True,
+            },
+        )
+    if fixture_id == "sim_rcs_scalar":
+        return (
+            [targets, 77e9, 0.0, 90.0],
+            {
+                "obs_phi": 0.0,
+                "obs_theta": 90.0,
+                "density": 1.0,
+            },
+        )
+    if fixture_id == "sim_rcs_vector":
+        return (
+            [targets, 77e9, [0.0, 20.0, -15.0], [90.0, 90.0, 90.0]],
+            {
+                "obs_phi": [0.0, 20.0, -15.0],
+                "obs_theta": [90.0, 85.0, 95.0],
+                "density": 1.1,
+            },
+        )
+    raise ValueError(f"unknown fixture_id: {fixture_id}")
+
+
 def main() -> None:
     args = parse_args()
     repo_root = Path(str(args.repo_root)).expanduser().resolve()
@@ -200,6 +283,8 @@ def main() -> None:
     wrapper_api = _load_module(repo_root, "avxsim.radarsimpy_api")
     core_proc = _load_module(repo_root, "avxsim.radarsimpy_core_processing")
     core_tools = _load_module(repo_root, "avxsim.radarsimpy_core_tools")
+    core_model = _load_module(repo_root, "avxsim.radarsimpy_core_model")
+    core_simulator = _load_module(repo_root, "avxsim.radarsimpy_core_simulator")
 
     ctx = _build_context()
 
@@ -338,6 +423,26 @@ def main() -> None:
             "kwargs": {"npulses": 8, "stype": "Coherent"},
             "expected": core_tools.core_roc_snr(1e-6, ctx["pd_goal"], npulses=8, stype="Coherent"),
         },
+        {
+            "case_id": "sim_radar_basic",
+            "api": "sim_radar",
+            "fixture_id": "sim_radar_basic",
+        },
+        {
+            "case_id": "sim_radar_dry_run",
+            "api": "sim_radar",
+            "fixture_id": "sim_radar_dry_run",
+        },
+        {
+            "case_id": "sim_rcs_scalar",
+            "api": "sim_rcs",
+            "fixture_id": "sim_rcs_scalar",
+        },
+        {
+            "case_id": "sim_rcs_vector",
+            "api": "sim_rcs",
+            "fixture_id": "sim_rcs_vector",
+        },
     ]
 
     reference_module: ModuleType | None = None
@@ -359,12 +464,33 @@ def main() -> None:
     reference_error_count = 0
 
     for spec in cases_spec:
-        expected_serialized = _serialize_value(spec["expected"])
+        fixture_id = spec.get("fixture_id")
+        args_runtime: list[Any]
+        kwargs_runtime: dict[str, Any]
+        if fixture_id is None:
+            args_runtime = list(spec["args"])
+            kwargs_runtime = dict(spec["kwargs"])
+            expected_value = spec["expected"]
+        else:
+            args_runtime, kwargs_runtime = _build_sim_fixture_case_inputs(
+                str(fixture_id),
+                core_model=core_model,
+            )
+            api_symbol = str(spec["api"])
+            if api_symbol == "sim_radar":
+                expected_value = core_simulator.core_sim_radar(*args_runtime, **kwargs_runtime)
+            elif api_symbol == "sim_rcs":
+                expected_value = core_simulator.core_sim_rcs(*args_runtime, **kwargs_runtime)
+            else:
+                raise ValueError(f"unexpected simulator api symbol: {api_symbol}")
+
+        expected_serialized = _serialize_value(expected_value)
         row: Dict[str, Any] = {
             "case_id": str(spec["case_id"]),
             "api_symbol": str(spec["api"]),
-            "args": _serialize_value(spec["args"]),
-            "kwargs": _serialize_value(spec["kwargs"]),
+            "fixture_id": None if fixture_id is None else str(fixture_id),
+            "args": _serialize_value(spec["args"]) if fixture_id is None else None,
+            "kwargs": _serialize_value(spec["kwargs"]) if fixture_id is None else None,
             "expected_native": expected_serialized,
             "expected_native_digest": _json_digest(expected_serialized),
         }
@@ -375,8 +501,8 @@ def main() -> None:
             if callable(ref_callable):
                 reference_compared_count += 1
                 try:
-                    ref_out = ref_callable(*spec["args"], **spec["kwargs"])
-                    ref_ok = _allclose_any(ref_out, spec["expected"])
+                    ref_out = ref_callable(*args_runtime, **kwargs_runtime)
+                    ref_ok = _allclose_any(ref_out, expected_value)
                     ref_serialized = _serialize_value(ref_out)
                     ref_payload = {
                         "available": True,

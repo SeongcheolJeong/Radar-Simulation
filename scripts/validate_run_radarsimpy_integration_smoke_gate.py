@@ -32,14 +32,20 @@ def run() -> None:
 
         summary = json.loads(out_json.read_text(encoding="utf-8"))
         assert summary.get("pass") is True
-        assert int(summary.get("step_count", -1)) >= 13
+        assert int(summary.get("step_count", -1)) >= 19
         assert int(summary.get("fail_count", -1)) == 0
         assert int(summary.get("pass_count", -1)) == int(summary.get("step_count", -2))
 
         names = {str(row.get("name")) for row in summary.get("steps", [])}
         expected = {
             "validate_radarsimpy_api_coverage_excluding_sim_lidar",
+            "validate_radarsimpy_runtime_license_policy",
             "validate_radarsimpy_processing_core_fallback",
+            "validate_radarsimpy_root_model_core_fallback",
+            "validate_radarsimpy_simulator_core_fallback",
+            "validate_radarsimpy_simulator_reference_parity_optional",
+            "validate_run_radarsimpy_simulator_reference_parity_optional",
+            "validate_run_radarsimpy_layered_parity_suite",
             "validate_run_radarsimpy_wrapper_integration_gate",
             "validate_run_radarsimpy_migration_stepwise",
             "validate_run_radarsimpy_periodic_parity_lock",

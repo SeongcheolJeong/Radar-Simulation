@@ -15,6 +15,87 @@ import numpy as np
 import avxsim.radarsimpy_api as api
 
 
+def _build_sim_fixture_case_inputs(
+    fixture_id: str,
+):
+    from avxsim.radarsimpy_core_model import CoreRadar, CoreReceiver, CoreTransmitter
+
+    tx = CoreTransmitter(
+        f=[76.8e9, 77.2e9],
+        t=[0.0, 20.0e-6],
+        tx_power=0.0,
+        pulses=16,
+        prp=30.0e-6,
+        channels=[{"location": [0.0, 0.0, 0.0]}],
+    )
+    rx = CoreReceiver(
+        fs=5.0e6,
+        noise_figure=0.0,
+        rf_gain=0.0,
+        load_resistor=500.0,
+        baseband_gain=0.0,
+        bb_type="complex",
+        channels=[{"location": [0.0, 0.0, 0.0]}],
+    )
+    radar = CoreRadar(transmitter=tx, receiver=rx, seed=7)
+    targets = [
+        {
+            "location": [35.0, 0.0, 0.0],
+            "speed": [-6.0, 0.0, 0.0],
+            "rcs": 10.0,
+            "phase": 20.0,
+        }
+    ]
+
+    if fixture_id == "sim_radar_basic":
+        return (
+            [radar, targets],
+            {
+                "density": 1.0,
+                "level": None,
+                "interf": None,
+                "ray_filter": None,
+                "back_propagating": False,
+                "device": "cpu",
+                "log_path": None,
+                "dry_run": False,
+            },
+        )
+    if fixture_id == "sim_radar_dry_run":
+        return (
+            [radar, targets],
+            {
+                "density": 1.0,
+                "level": None,
+                "interf": None,
+                "ray_filter": None,
+                "back_propagating": False,
+                "device": "cpu",
+                "log_path": None,
+                "dry_run": True,
+            },
+        )
+    if fixture_id == "sim_rcs_scalar":
+        return (
+            [targets, 77e9, 0.0, 90.0],
+            {
+                "obs_phi": 0.0,
+                "obs_theta": 90.0,
+                "density": 1.0,
+            },
+        )
+    if fixture_id == "sim_rcs_vector":
+        return (
+            [targets, 77e9, [0.0, 20.0, -15.0], [90.0, 90.0, 90.0]],
+            {
+                "obs_phi": [0.0, 20.0, -15.0],
+                "obs_theta": [90.0, 85.0, 95.0],
+                "density": 1.1,
+            },
+        )
+    raise ValueError(f"unknown fixture_id: {fixture_id}")
+
+
 def _deserialize_value(value: Any) -> Any:
     if isinstance(value, list):
         return [_deserialize_value(v) for v in value]
@@ -138,16 +219,18 @@ def run() -> None:
         payload = json.loads(out_json.read_text(encoding="utf-8"))
         assert payload.get("report_name") == "radarsimpy_native_parity_fixtures"
         assert payload.get("ready") is True
-        assert int(payload.get("case_count", -1)) >= 16
-        assert int(payload.get("native_api_count", -1)) == 15
+        assert int(payload.get("case_count", -1)) >= 20
+        assert int(payload.get("native_api_count", -1)) == 17
 
         cases = payload.get("cases")
         assert isinstance(cases, list)
         assert len(cases) == int(payload.get("case_count", -2))
 
         old_resolve = api._resolve_submodule_attr
+        old_resolve_root = api._resolve_root_attr
         forced_processing = set(api.RADARSIMPY_PROCESSING_API)
         forced_tools = set(api.RADARSIMPY_TOOLS_API)
+        forced_root = {"sim_radar", "sim_rcs"}
 
         def _resolve_with_forced_missing(submodule_name: str, attr_name: str):
             if submodule_name == "processing" and attr_name in forced_processing:
@@ -156,8 +239,14 @@ def run() -> None:
                 raise RuntimeError(f"forced missing tools attr: {attr_name}")
             return old_resolve(submodule_name, attr_name)
 
+        def _resolve_root_with_forced_missing(name: str):
+            if name in forced_root:
+                raise RuntimeError(f"forced missing root attr: {name}")
+            return old_resolve_root(name)
+
         try:
             api._resolve_submodule_attr = _resolve_with_forced_missing
+            api._resolve_root_attr = _resolve_root_with_forced_missing
 
             for row in cases:
                 case = dict(row)
@@ -165,10 +254,14 @@ def run() -> None:
                 fn = getattr(api, api_symbol, None)
                 assert callable(fn), api_symbol
 
-                args = _deserialize_value(case.get("args"))
-                kwargs = _deserialize_value(case.get("kwargs"))
-                assert isinstance(args, list), type(args)
-                assert isinstance(kwargs, dict), type(kwargs)
+                fixture_id_raw = case.get("fixture_id")
+                if isinstance(fixture_id_raw, str) and fixture_id_raw.strip() != "":
+                    args, kwargs = _build_sim_fixture_case_inputs(str(fixture_id_raw).strip())
+                else:
+                    args = _deserialize_value(case.get("args"))
+                    kwargs = _deserialize_value(case.get("kwargs"))
+                    assert isinstance(args, list), type(args)
+                    assert isinstance(kwargs, dict), type(kwargs)
 
                 got = fn(*args, **kwargs)
                 expected = _deserialize_value(case.get("expected_native"))
@@ -181,6 +274,7 @@ def run() -> None:
                 assert got_digest == exp_digest, f"digest mismatch: {case.get('case_id')}"
         finally:
             api._resolve_submodule_attr = old_resolve
+            api._resolve_root_attr = old_resolve_root
 
     print("validate_build_radarsimpy_native_parity_fixtures: pass")
 

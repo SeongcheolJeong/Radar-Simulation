@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build RadarSimPy Phase-1 signature manifest (wrapper/core/reference)."""
+"""Build RadarSimPy signature manifest (wrapper/core/reference)."""
 
 from __future__ import annotations
 
@@ -110,6 +110,13 @@ CANONICAL_SIGNATURES: Mapping[str, str] = {
 
 
 NATIVE_CORE_MAP: Mapping[str, str] = {
+    # Root API
+    "Transmitter": "CoreTransmitter",
+    "Receiver": "CoreReceiver",
+    "Radar": "CoreRadar",
+    "sim_radar": "core_sim_radar",
+    "sim_rcs": "core_sim_rcs",
+    # Processing + tools API
     "range_fft": "core_range_fft",
     "doppler_fft": "core_doppler_fft",
     "range_doppler_fft": "core_range_doppler_fft",
@@ -192,6 +199,8 @@ def _build_rows(
     wrapper: ModuleType,
     core_processing: ModuleType,
     core_tools: ModuleType,
+    core_model: ModuleType,
+    core_simulator: ModuleType,
     reference_module: Optional[ModuleType],
 ) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
@@ -219,6 +228,10 @@ def _build_rows(
                 native_callable = getattr(core_processing, native_symbol, None)
                 if native_callable is None:
                     native_callable = getattr(core_tools, native_symbol, None)
+                if native_callable is None:
+                    native_callable = getattr(core_model, native_symbol, None)
+                if native_callable is None:
+                    native_callable = getattr(core_simulator, native_symbol, None)
                 native_sig = _safe_signature(native_callable)
 
             reference_sig: Optional[str] = None
@@ -257,12 +270,16 @@ def main() -> None:
     wrapper = _load_module(repo_root, "avxsim.radarsimpy_api")
     core_processing = _load_module(repo_root, "avxsim.radarsimpy_core_processing")
     core_tools = _load_module(repo_root, "avxsim.radarsimpy_core_tools")
+    core_model = _load_module(repo_root, "avxsim.radarsimpy_core_model")
+    core_simulator = _load_module(repo_root, "avxsim.radarsimpy_core_simulator")
 
     reference_module, reference_error = _try_load_reference_module(wrapper)
     rows = _build_rows(
         wrapper=wrapper,
         core_processing=core_processing,
         core_tools=core_tools,
+        core_model=core_model,
+        core_simulator=core_simulator,
         reference_module=reference_module,
     )
 
@@ -277,7 +294,9 @@ def main() -> None:
     processing_tools_rows = [
         row for row in rows if str(row.get("category")) in {"processing", "tools"}
     ]
+    root_rows = [row for row in rows if str(row.get("category")) == "root"]
     phase1_native_ready = bool(all(bool(row.get("has_native_core")) for row in processing_tools_rows))
+    phase2_native_ready = bool(all(bool(row.get("has_native_core")) for row in rows))
 
     report = {
         "report_name": "radarsimpy_signature_manifest",
@@ -293,9 +312,11 @@ def main() -> None:
         "reference_runtime_import_error": reference_error,
         "reference_signature_available_count": reference_signature_available_count,
         "phase1_native_ready": phase1_native_ready,
+        "phase2_native_ready": phase2_native_ready,
+        "phase2_root_native_ready": bool(all(bool(row.get("has_native_core")) for row in root_rows)),
         "ready": bool(
             canonical_defined_count == total_count
-            and phase1_native_ready
+            and phase2_native_ready
         ),
         "entries": rows,
     }
@@ -313,6 +334,7 @@ def main() -> None:
         f"reference_signatures={report['reference_signature_available_count']}"
     )
     print(f"phase1_native_ready={report['phase1_native_ready']}")
+    print(f"phase2_native_ready={report['phase2_native_ready']}")
     print(f"reference_runtime_available={report['reference_runtime_available']}")
 
     output_json = Path(str(args.output_json)).expanduser()

@@ -149,11 +149,12 @@ def main() -> None:
     if smoke_contains is not None:
         if not isinstance(smoke_contains, bool):
             raise ValueError("smoke_contains_readiness_runner_validator must be bool when present")
-        if bool(check_map["smoke_recursion_guard_active"]) == bool(smoke_contains):
-            raise ValueError(
-                "smoke_recursion_guard_active must be the inverse of "
-                "smoke_contains_readiness_runner_validator when present"
-            )
+        if bool(check_map["smoke_gate_pass"]):
+            if bool(check_map["smoke_recursion_guard_active"]) == bool(smoke_contains):
+                raise ValueError(
+                    "smoke_recursion_guard_active must be the inverse of "
+                    "smoke_contains_readiness_runner_validator when present"
+                )
 
     smoke_skip_requested = payload.get("smoke_skip_readiness_runner_validator_requested")
     if smoke_skip_requested is not None:

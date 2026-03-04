@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 DEFAULT_TRIAL_PACKAGE_ROOT = "external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU"
 DEFAULT_LIBCOMPAT_DIR = "external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu"
+RADARSIMPY_LICENSE_FILE_ENV = "RADARSIMPY_LICENSE_FILE"
 
 
 def parse_args() -> argparse.Namespace:
@@ -29,11 +30,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output-json", default="")
     p.add_argument("--python-bin", default="")
     p.add_argument("--with-real-runtime", action="store_true")
+    p.add_argument("--runtime-license-tier", choices=("trial", "production"), default="trial")
     p.add_argument("--run-runtime-migration", action="store_true")
     p.add_argument("--require-real-e2e", action="store_true")
     p.add_argument("--e2e-rollup-json", default="")
-    p.add_argument("--trial-package-root", default=DEFAULT_TRIAL_PACKAGE_ROOT)
-    p.add_argument("--libcompat-dir", default=DEFAULT_LIBCOMPAT_DIR)
+    p.add_argument("--trial-package-root", default="")
+    p.add_argument("--libcompat-dir", default="")
+    p.add_argument("--license-file", default="")
     p.add_argument("--allow-blocked", action="store_true")
     return p.parse_args()
 
@@ -144,9 +147,9 @@ def main() -> None:
     ok_head, head_short = _git(repo_root, ["rev-parse", "--short", "HEAD"])
     run_id = str(args.run_id).strip()
     if run_id == "":
-        stamp = datetime.now(timezone.utc).strftime("%Y_%m_%d")
+        stamp = datetime.now(timezone.utc).strftime("%Y_%m_%dT%H%M%S_%fZ")
         head = head_short if ok_head else "unknown"
-        run_id = f"{stamp}_{head}"
+        run_id = f"{stamp}_{head}_pid{os.getpid()}"
 
     output_json = str(args.output_json).strip()
     if output_json == "":
@@ -166,6 +169,15 @@ def main() -> None:
     function_summary = reports_root / f"radarsimpy_function_progress_checkpoint_{run_id}.json"
     progress_json = reports_root / f"radarsimpy_progress_snapshot_{run_id}.json"
 
+    trial_pkg_root_value = str(args.trial_package_root).strip()
+    libcompat_dir_value = str(args.libcompat_dir).strip()
+    license_file_value = str(args.license_file).strip()
+    if bool(args.with_real_runtime) and str(args.runtime_license_tier).strip().lower() == "trial":
+        if trial_pkg_root_value == "":
+            trial_pkg_root_value = DEFAULT_TRIAL_PACKAGE_ROOT
+        if libcompat_dir_value == "":
+            libcompat_dir_value = DEFAULT_LIBCOMPAT_DIR
+
     smoke_cmd = [
         py_bin,
         "scripts/run_radarsimpy_integration_smoke_gate.py",
@@ -178,12 +190,16 @@ def main() -> None:
         smoke_cmd.extend(
             [
                 "--with-real-runtime",
-                "--trial-package-root",
-                str(args.trial_package_root),
-                "--libcompat-dir",
-                str(args.libcompat_dir),
+                "--runtime-license-tier",
+                str(args.runtime_license_tier),
             ]
         )
+        if trial_pkg_root_value != "":
+            smoke_cmd.extend(["--trial-package-root", trial_pkg_root_value])
+        if libcompat_dir_value != "":
+            smoke_cmd.extend(["--libcompat-dir", libcompat_dir_value])
+        if license_file_value != "":
+            smoke_cmd.extend(["--license-file", license_file_value])
     smoke = _run_cmd(smoke_cmd, cwd=repo_root, env=env)
     smoke_payload = _load_json_if_exists(smoke_json) or {}
     smoke_step_names = _extract_step_names(smoke_payload)
@@ -202,12 +218,16 @@ def main() -> None:
         wrapper_cmd.extend(
             [
                 "--with-real-runtime",
-                "--trial-package-root",
-                str(args.trial_package_root),
-                "--libcompat-dir",
-                str(args.libcompat_dir),
+                "--runtime-license-tier",
+                str(args.runtime_license_tier),
             ]
         )
+        if trial_pkg_root_value != "":
+            wrapper_cmd.extend(["--trial-package-root", trial_pkg_root_value])
+        if libcompat_dir_value != "":
+            wrapper_cmd.extend(["--libcompat-dir", libcompat_dir_value])
+        if license_file_value != "":
+            wrapper_cmd.extend(["--license-file", license_file_value])
     wrapper = _run_cmd(wrapper_cmd, cwd=repo_root, env=env)
     wrapper_payload = _load_json_if_exists(wrapper_json) or {}
 
@@ -316,6 +336,10 @@ def main() -> None:
         "branch": branch if ok_branch else "",
         "head_commit": head_commit if ok_head_full else "",
         "with_real_runtime": bool(args.with_real_runtime),
+        "runtime_license_tier": str(args.runtime_license_tier),
+        "trial_package_root": str(trial_pkg_root_value),
+        "libcompat_dir": str(libcompat_dir_value),
+        "license_file": str(license_file_value),
         "run_runtime_migration": bool(args.run_runtime_migration),
         "require_real_e2e": bool(args.require_real_e2e),
         "smoke_gate_summary_json": str(smoke_json.resolve()),
