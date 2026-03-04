@@ -108,9 +108,10 @@ export function useGateOps(opts) {
   const runPolicyGateForGraphRun = React.useCallback(async () => {
     const summaryPath = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
     const bId = String(baselineId || "").trim();
-    const candidateRunId = String(
+    const candidateRunIdRaw = String(
       graphRunSummary?.graph_run_id || graphRunSummary?.run_id || ""
     ).trim();
+    const candidateRunId = candidateRunIdRaw.startsWith("run_") ? candidateRunIdRaw : "";
     const beforeContractSnapshot = getContractWarningSnapshot();
     if (!summaryPath) {
       setStatus("run graph first to evaluate gate", "status-warn");

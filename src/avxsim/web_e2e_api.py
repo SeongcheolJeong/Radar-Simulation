@@ -383,6 +383,10 @@ class WebE2EOrchestrator:
                 "scene_json_path",
                 source_req.get("scene_json_path"),
             ),
+            "scene_overrides": request_payload.get(
+                "scene_overrides",
+                source_req.get("scene_overrides"),
+            ),
             "profile": request_payload.get("profile", source_req.get("profile")),
             "run_hybrid_estimation": request_payload.get(
                 "run_hybrid_estimation",
@@ -1301,6 +1305,14 @@ class WebE2EOrchestrator:
         if debug_delay_s > 60.0:
             raise ValueError("execution_options.debug_delay_s must be <= 60")
 
+        scene_overrides_raw = request_payload.get("scene_overrides")
+        if scene_overrides_raw is None:
+            scene_overrides: dict[str, Any] = {}
+        elif isinstance(scene_overrides_raw, Mapping):
+            scene_overrides = self._normalize_scene_overrides(scene_overrides_raw)
+        else:
+            raise ValueError("scene_overrides must be object when provided")
+
         scene_json_raw = str(request_payload.get("scene_json_path", "")).strip()
         if scene_json_raw == "":
             for node in normalized_graph.get("nodes", []):
@@ -1324,6 +1336,7 @@ class WebE2EOrchestrator:
             "graph_topological_order": list(gv["normalized"].get("topological_order", [])),
             "scene_json_path": str(scene_json_abs),
             "scene_json_input": scene_json_raw,
+            "scene_overrides": scene_overrides,
             "profile": profile,
             "run_hybrid_estimation": bool(request_payload.get("run_hybrid_estimation", False)),
             "output_subdir": output_subdir,
@@ -1374,17 +1387,18 @@ class WebE2EOrchestrator:
 
     def _build_graph_cache_key(self, req: Mapping[str, Any]) -> str:
         payload = {
-            "version": "graph_cache_key_v1",
+            "version": "graph_cache_key_v2",
             "graph": req.get("graph"),
             "graph_topological_order": req.get("graph_topological_order"),
             "scene_json_path": str(req.get("scene_json_path", "")),
             "scene_revision": self._scene_revision_token(str(req.get("scene_json_path", ""))),
+            "scene_overrides": req.get("scene_overrides"),
             "profile": str(req.get("profile", "")),
             "run_hybrid_estimation": bool(req.get("run_hybrid_estimation", False)),
         }
         raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=_json_default)
         digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
-        return f"gcache_v1_{digest}"
+        return f"gcache_v2_{digest}"
 
     def _load_graph_summary_from_record(self, record: Mapping[str, Any]) -> dict[str, Any]:
         paths = record.get("paths")
@@ -1603,6 +1617,64 @@ class WebE2EOrchestrator:
         if not path.exists() or not path.is_file():
             raise FileNotFoundError(f"scene json not found: {path}")
         return path
+
+    @staticmethod
+    def _merge_nested_mapping(base: Mapping[str, Any], patch: Mapping[str, Any]) -> dict[str, Any]:
+        out = dict(base)
+        for key, value in patch.items():
+            if isinstance(value, Mapping) and isinstance(out.get(key), Mapping):
+                out[str(key)] = WebE2EOrchestrator._merge_nested_mapping(
+                    dict(out.get(key, {})),
+                    value,
+                )
+            else:
+                out[str(key)] = value
+        return out
+
+    def _normalize_scene_overrides(self, raw: Mapping[str, Any]) -> dict[str, Any]:
+        out: dict[str, Any] = {}
+        for section in ("backend", "radar"):
+            value = raw.get(section)
+            if value is None:
+                continue
+            if not isinstance(value, Mapping):
+                raise ValueError(f"scene_overrides.{section} must be object")
+            out[section] = json.loads(json.dumps(dict(value), default=_json_default))
+        return out
+
+    def _materialize_graph_run_scene_json(
+        self,
+        *,
+        req: Mapping[str, Any],
+        output_dir: Path,
+    ) -> tuple[str, bool]:
+        original_scene = str(req.get("scene_json_path", "")).strip()
+        scene_overrides = req.get("scene_overrides")
+        if (not isinstance(scene_overrides, Mapping)) or len(scene_overrides) == 0:
+            return original_scene, False
+
+        source_path = Path(original_scene).expanduser().resolve()
+        payload = json.loads(source_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError("scene json must be object")
+        scene_mut: dict[str, Any] = dict(payload)
+
+        for section in ("backend", "radar"):
+            patch = scene_overrides.get(section)
+            if patch is None:
+                continue
+            if not isinstance(patch, Mapping):
+                raise ValueError(f"scene_overrides.{section} must be object")
+            existing = scene_mut.get(section)
+            if isinstance(existing, Mapping):
+                scene_mut[section] = self._merge_nested_mapping(dict(existing), patch)
+            else:
+                scene_mut[section] = dict(patch)
+
+        out_path = (output_dir / "scene_overrides_applied.json").resolve()
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(scene_mut, indent=2, default=_json_default), encoding="utf-8")
+        return str(out_path), True
 
     def _resolve_json_path(self, path_text: str, field_name: str) -> Path:
         path = Path(path_text).expanduser()
@@ -2055,16 +2127,23 @@ class WebE2EOrchestrator:
                     cache_meta["hit_scope"] = "full"
 
             if run_out is None:
+                scene_json_path_effective, scene_overrides_applied = self._materialize_graph_run_scene_json(
+                    req=req,
+                    output_dir=out_dir,
+                )
                 run_out = run_object_scene_to_radar_map_json(
-                    scene_json_path=str(req["scene_json_path"]),
+                    scene_json_path=str(scene_json_path_effective),
                     output_dir=str(out_dir),
                     run_hybrid_estimation=bool(req.get("run_hybrid_estimation", False)),
                 )
+            else:
+                scene_json_path_effective = str(req["scene_json_path"])
+                scene_overrides_applied = False
 
             self._raise_if_graph_run_canceled(graph_run_id, "after_execution")
 
             summary_body = self._build_summary_payload(
-                scene_json_path=str(req["scene_json_path"]),
+                scene_json_path=str(scene_json_path_effective),
                 output_dir=out_dir,
                 run_out=run_out,
             )
@@ -2142,6 +2221,9 @@ class WebE2EOrchestrator:
                 "execution": {
                     "bridge_mode": bridge_mode,
                     "cache": cache_meta,
+                    "scene_json_requested": str(req.get("scene_json_path", "")),
+                    "scene_json_effective": str(scene_json_path_effective),
+                    "scene_overrides_applied": bool(scene_overrides_applied),
                     "node_results": node_results,
                 },
             }

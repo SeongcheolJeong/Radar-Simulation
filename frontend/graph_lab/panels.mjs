@@ -8,6 +8,10 @@ import {
 import { NODE_TYPES } from "./constants.mjs";
 import { normalizeGraphInputsPanelModel } from "./contracts.mjs";
 import { normalizeRepoPath } from "./graph_helpers.mjs";
+import { RuntimeConfigSection } from "./panels/runtime.mjs";
+import { ArtifactInspectorPanel } from "./panels/artifact.mjs";
+import { DecisionPane } from "./panels/gate.mjs";
+import { ContractDiagnosticsPanel } from "./panels/audit.mjs";
 
 const h = React.createElement;
 
@@ -2296,11 +2300,217 @@ function isEditableElementTarget(target) {
   return tag === "input" || tag === "textarea" || tag === "select";
 }
 
-function renderArtifactInspector(graphRunSummary) {
+function normalizeShape(rawShape) {
+  if (!Array.isArray(rawShape)) return [];
+  return rawShape
+    .map((x) => Number(x))
+    .filter((x) => Number.isFinite(x) && x >= 0)
+    .map((x) => Math.floor(x));
+}
+
+function normalizePeakList(rawPeaks, rowKey, colKey) {
+  const rows = Array.isArray(rawPeaks) ? rawPeaks : [];
+  return rows
+    .map((peak, idx) => {
+      const row = Number(peak?.[rowKey]);
+      const col = Number(peak?.[colKey]);
+      if (!Number.isFinite(row) || !Number.isFinite(col)) return null;
+      return {
+        index: Number(idx),
+        row: Math.floor(row),
+        col: Math.floor(col),
+        power: Number(peak?.power || 0),
+        relDb: Number(peak?.rel_db || 0),
+      };
+    })
+    .filter(Boolean);
+}
+
+function clampBin(value, maxSize) {
+  const maxIdx = Math.max(0, Number(maxSize || 0) - 1);
+  const raw = Number(value);
+  const candidate = Number.isFinite(raw) ? Math.floor(raw) : 0;
+  return Math.max(0, Math.min(maxIdx, candidate));
+}
+
+function parseBinText(rawText, fallback) {
+  const raw = Number(rawText);
+  if (!Number.isFinite(raw)) return Number(fallback || 0);
+  return Math.floor(raw);
+}
+
+function safeShapeLabel(shape) {
+  return Array.isArray(shape) && shape.length > 0 ? shape.join("x") : "-";
+}
+
+function computeProbe(peaks, rowBin, colBin, shape) {
+  const rows = Number(shape?.[0] || 0);
+  const cols = Number(shape?.[1] || 0);
+  const hasBounds = rows > 0 && cols > 0;
+  const clampedRow = hasBounds ? clampBin(rowBin, rows) : Math.max(0, Number(rowBin || 0));
+  const clampedCol = hasBounds ? clampBin(colBin, cols) : Math.max(0, Number(colBin || 0));
+  const exact = peaks.find((peak) => peak.row === clampedRow && peak.col === clampedCol) || null;
+  let nearest = null;
+  let nearestDist = Number.POSITIVE_INFINITY;
+  peaks.forEach((peak) => {
+    const dist = Math.abs(Number(peak.row) - clampedRow) + Math.abs(Number(peak.col) - clampedCol);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearest = peak;
+    }
+  });
+  return {
+    row: clampedRow,
+    col: clampedCol,
+    hasBounds,
+    exact,
+    nearest,
+    nearestDist: Number.isFinite(nearestDist) ? nearestDist : null,
+    rowNorm: hasBounds ? clampedRow / Math.max(rows - 1, 1) : 0,
+    colNorm: hasBounds ? clampedCol / Math.max(cols - 1, 1) : 0,
+  };
+}
+
+function computeRunDiffOverlay(currentSummary, compareSummary) {
+  const current = currentSummary && typeof currentSummary === "object" ? currentSummary : null;
+  const baseline = compareSummary && typeof compareSummary === "object" ? compareSummary : null;
+  if (!current || !baseline) return null;
+
+  const currentAdcShape = normalizeShape(current?.adc_summary?.shape);
+  const currentRdShape = normalizeShape(current?.radar_map_summary?.rd_shape);
+  const currentRaShape = normalizeShape(current?.radar_map_summary?.ra_shape);
+  const baselineAdcShape = normalizeShape(baseline?.adc_summary?.shape);
+  const baselineRdShape = normalizeShape(baseline?.radar_map_summary?.rd_shape);
+  const baselineRaShape = normalizeShape(baseline?.radar_map_summary?.ra_shape);
+
+  const currentRdPeak = normalizePeakList(current?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin")[0] || null;
+  const baselineRdPeak = normalizePeakList(baseline?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin")[0] || null;
+  const currentRaPeak = normalizePeakList(current?.quicklook?.ra_top_peaks, "angle_bin", "range_bin")[0] || null;
+  const baselineRaPeak = normalizePeakList(baseline?.quicklook?.ra_top_peaks, "angle_bin", "range_bin")[0] || null;
+
+  const currentPathCount = Number(current?.path_summary?.path_count_total || 0);
+  const baselinePathCount = Number(baseline?.path_summary?.path_count_total || 0);
+
+  const toSigned = (value) => {
+    const n = Number(value || 0);
+    return `${n >= 0 ? "+" : ""}${n}`;
+  };
+
+  return {
+    currentGraphRunId: String(current?.graph_run_id || "-"),
+    compareGraphRunId: String(baseline?.graph_run_id || "-"),
+    shapeEq: {
+      adc: safeShapeLabel(currentAdcShape) === safeShapeLabel(baselineAdcShape),
+      rd: safeShapeLabel(currentRdShape) === safeShapeLabel(baselineRdShape),
+      ra: safeShapeLabel(currentRaShape) === safeShapeLabel(baselineRaShape),
+    },
+    shapeText: {
+      adc: `${safeShapeLabel(currentAdcShape)} vs ${safeShapeLabel(baselineAdcShape)}`,
+      rd: `${safeShapeLabel(currentRdShape)} vs ${safeShapeLabel(baselineRdShape)}`,
+      ra: `${safeShapeLabel(currentRaShape)} vs ${safeShapeLabel(baselineRaShape)}`,
+    },
+    pathCountDelta: currentPathCount - baselinePathCount,
+    rdPeakDelta: currentRdPeak && baselineRdPeak ? {
+      rangeBinDelta: Number(currentRdPeak.col || 0) - Number(baselineRdPeak.col || 0),
+      dopplerBinDelta: Number(currentRdPeak.row || 0) - Number(baselineRdPeak.row || 0),
+      relDbDelta: Number(currentRdPeak.relDb || 0) - Number(baselineRdPeak.relDb || 0),
+    } : null,
+    raPeakDelta: currentRaPeak && baselineRaPeak ? {
+      rangeBinDelta: Number(currentRaPeak.col || 0) - Number(baselineRaPeak.col || 0),
+      angleBinDelta: Number(currentRaPeak.row || 0) - Number(baselineRaPeak.row || 0),
+      relDbDelta: Number(currentRaPeak.relDb || 0) - Number(baselineRaPeak.relDb || 0),
+    } : null,
+    toSigned,
+  };
+}
+
+function ArtifactInspector({ graphRunSummary, compareGraphRunSummary, compareRunStatusText }) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
   }
+
   const runtimeContract = graphRunSummary?.runtime_contract_diagnostics || null;
+  const rdShape = normalizeShape(
+    graphRunSummary?.radar_map_summary?.rd_shape || graphRunSummary?.quicklook?.rd_shape
+  );
+  const raShape = normalizeShape(
+    graphRunSummary?.radar_map_summary?.ra_shape || graphRunSummary?.quicklook?.ra_shape
+  );
+  const rdPeaks = normalizePeakList(graphRunSummary?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin");
+  const raPeaks = normalizePeakList(graphRunSummary?.quicklook?.ra_top_peaks, "angle_bin", "range_bin");
+
+  const [rdRangeBinText, setRdRangeBinText] = React.useState("0");
+  const [rdDopplerBinText, setRdDopplerBinText] = React.useState("0");
+  const [raRangeBinText, setRaRangeBinText] = React.useState("0");
+  const [raAngleBinText, setRaAngleBinText] = React.useState("0");
+  const [rdPeakSelectText, setRdPeakSelectText] = React.useState("-1");
+  const [raPeakSelectText, setRaPeakSelectText] = React.useState("-1");
+  const [rdPeakLock, setRdPeakLock] = React.useState(false);
+  const [raPeakLock, setRaPeakLock] = React.useState(false);
+
+  React.useEffect(() => {
+    const primaryRd = rdPeaks[0] || null;
+    const primaryRa = raPeaks[0] || null;
+    setRdRangeBinText(String(primaryRd ? primaryRd.col : 0));
+    setRdDopplerBinText(String(primaryRd ? primaryRd.row : 0));
+    setRaRangeBinText(String(primaryRa ? primaryRa.col : 0));
+    setRaAngleBinText(String(primaryRa ? primaryRa.row : 0));
+    setRdPeakSelectText(primaryRd ? "0" : "-1");
+    setRaPeakSelectText(primaryRa ? "0" : "-1");
+    setRdPeakLock(false);
+    setRaPeakLock(false);
+  }, [graphRunSummary, rdPeaks, raPeaks]);
+
+  React.useEffect(() => {
+    if (!rdPeakLock) return;
+    const idx = Number(rdPeakSelectText);
+    const peak = Number.isFinite(idx) && idx >= 0 ? rdPeaks[Math.floor(idx)] : null;
+    if (!peak) return;
+    setRdRangeBinText(String(peak.col));
+    setRdDopplerBinText(String(peak.row));
+  }, [rdPeakLock, rdPeakSelectText, rdPeaks]);
+
+  React.useEffect(() => {
+    if (!raPeakLock) return;
+    const idx = Number(raPeakSelectText);
+    const peak = Number.isFinite(idx) && idx >= 0 ? raPeaks[Math.floor(idx)] : null;
+    if (!peak) return;
+    setRaRangeBinText(String(peak.col));
+    setRaAngleBinText(String(peak.row));
+  }, [raPeakLock, raPeakSelectText, raPeaks]);
+
+  const rdProbe = React.useMemo(() => {
+    const rangeBin = parseBinText(rdRangeBinText, 0);
+    const dopplerBin = parseBinText(rdDopplerBinText, 0);
+    return computeProbe(rdPeaks, dopplerBin, rangeBin, rdShape);
+  }, [rdDopplerBinText, rdPeaks, rdRangeBinText, rdShape]);
+
+  const raProbe = React.useMemo(() => {
+    const rangeBin = parseBinText(raRangeBinText, 0);
+    const angleBin = parseBinText(raAngleBinText, 0);
+    return computeProbe(raPeaks, angleBin, rangeBin, raShape);
+  }, [raAngleBinText, raPeaks, raRangeBinText, raShape]);
+
+  const runDiff = React.useMemo(
+    () => computeRunDiffOverlay(graphRunSummary, compareGraphRunSummary),
+    [compareGraphRunSummary, graphRunSummary]
+  );
+
+  const renderProbeSummary = (probe) => {
+    const exact = probe.exact;
+    const nearest = probe.nearest;
+    const nearestPart = nearest
+      ? `nearest_peak=#${nearest.index} d=${Number(probe.nearestDist)} rel_db=${Number(nearest.relDb).toFixed(2)}`
+      : "nearest_peak=none";
+    const exactPart = exact
+      ? `exact_peak=#${exact.index} rel_db=${Number(exact.relDb).toFixed(2)}`
+      : "exact_peak=none";
+    return [
+      `${exactPart} | ${nearestPart}`,
+      `cursor_norm=(${Number(probe.rowNorm).toFixed(3)}, ${Number(probe.colNorm).toFixed(3)})`,
+    ];
+  };
+
   return h("div", { className: "result-box", key: "aibox" }, [
     h("div", { key: "kpi", style: { marginBottom: "8px" } }, [
       `paths=${Number(graphRunSummary?.path_summary?.path_count_total || 0)} | `,
@@ -2314,6 +2524,155 @@ function renderArtifactInspector(graphRunSummary) {
           `contract_total(unique/attempt): ${Number(runtimeContract?.snapshot?.unique_warning_count || 0)}/${Number(runtimeContract?.snapshot?.attempt_count_total || 0)}`,
         ])
       : null,
+    h("div", { key: "diff_overlay", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
+      h("div", { key: "diff_title", style: { marginBottom: "5px", color: "#8fb3c9" } }, "run-to-run diff overlay:"),
+      runDiff
+        ? h("div", { key: "diff_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, [
+            h("div", { key: "diff_hdr" }, `current=${runDiff.currentGraphRunId} | compare=${runDiff.compareGraphRunId}`),
+            h("div", { key: "diff_shape_adc" }, `shape.adc: ${runDiff.shapeText.adc} | eq=${runDiff.shapeEq.adc}`),
+            h("div", { key: "diff_shape_rd" }, `shape.rd: ${runDiff.shapeText.rd} | eq=${runDiff.shapeEq.rd}`),
+            h("div", { key: "diff_shape_ra" }, `shape.ra: ${runDiff.shapeText.ra} | eq=${runDiff.shapeEq.ra}`),
+            h("div", { key: "diff_paths" }, `path_count_delta: ${runDiff.toSigned(runDiff.pathCountDelta)}`),
+            h(
+              "div",
+              { key: "diff_rd" },
+              runDiff.rdPeakDelta
+                ? `rd_peak_delta(range/doppler/rel_db): ${runDiff.toSigned(runDiff.rdPeakDelta.rangeBinDelta)}/${runDiff.toSigned(runDiff.rdPeakDelta.dopplerBinDelta)}/${runDiff.rdPeakDelta.relDbDelta.toFixed(2)}`
+                : "rd_peak_delta: unavailable"
+            ),
+            h(
+              "div",
+              { key: "diff_ra" },
+              runDiff.raPeakDelta
+                ? `ra_peak_delta(range/angle/rel_db): ${runDiff.toSigned(runDiff.raPeakDelta.rangeBinDelta)}/${runDiff.toSigned(runDiff.raPeakDelta.angleBinDelta)}/${runDiff.raPeakDelta.relDbDelta.toFixed(2)}`
+                : "ra_peak_delta: unavailable"
+            ),
+          ])
+        : h("div", { key: "diff_empty", style: { color: "#86a1b4" } }, String(compareRunStatusText || "compare run not loaded")),
+    ]),
+    h("div", { key: "probe", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
+      h("div", { key: "probe_title", style: { marginBottom: "6px", color: "#8fb3c9" } }, "cursor probe + peak lock:"),
+      h("div", { key: "probe_grid", style: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "8px" } }, [
+        h("div", { key: "probe_rd", style: { border: "1px solid #264758", borderRadius: "6px", padding: "6px" } }, [
+          h("div", { key: "probe_rd_title", style: { marginBottom: "4px", color: "#9fc1d4" } }, `RD probe (shape=${safeShapeLabel(rdShape)})`),
+          h("div", { key: "probe_rd_inputs", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "6px" } }, [
+            h("input", {
+              key: "rd_range_bin",
+              className: "input",
+              value: rdRangeBinText,
+              onChange: (e) => setRdRangeBinText(String(e.target.value || "0")),
+              placeholder: "range_bin",
+            }),
+            h("input", {
+              key: "rd_doppler_bin",
+              className: "input",
+              value: rdDopplerBinText,
+              onChange: (e) => setRdDopplerBinText(String(e.target.value || "0")),
+              placeholder: "doppler_bin",
+            }),
+          ]),
+          h("div", { key: "probe_rd_peakctl", style: { display: "grid", gridTemplateColumns: "1fr auto", gap: "6px", marginBottom: "6px" } }, [
+            h("select", {
+              key: "rd_peak_select",
+              className: "select",
+              value: rdPeakSelectText,
+              onChange: (e) => setRdPeakSelectText(String(e.target.value || "-1")),
+            }, [
+              h("option", { key: "rd_peak_none", value: "-1" }, "RD peak: none"),
+              ...rdPeaks.map((peak) =>
+                h(
+                  "option",
+                  { key: `rd_peak_${peak.index}`, value: String(peak.index) },
+                  `#${peak.index} d=${peak.row} r=${peak.col} rel=${Number(peak.relDb).toFixed(2)}`
+                )
+              ),
+            ]),
+            h("button", {
+              key: "rd_snap",
+              className: "btn",
+              onClick: () => {
+                const idx = Number(rdPeakSelectText);
+                const peak = Number.isFinite(idx) && idx >= 0 ? rdPeaks[Math.floor(idx)] : null;
+                if (!peak) return;
+                setRdRangeBinText(String(peak.col));
+                setRdDopplerBinText(String(peak.row));
+              },
+            }, "Snap"),
+          ]),
+          h("label", { key: "rd_lock_lbl", style: { display: "inline-flex", alignItems: "center", gap: "6px", color: "#8fb3c9" } }, [
+            h("input", {
+              key: "rd_lock_chk",
+              type: "checkbox",
+              checked: Boolean(rdPeakLock),
+              onChange: (e) => setRdPeakLock(Boolean(e.target.checked)),
+            }),
+            "Peak lock",
+          ]),
+          ...renderProbeSummary(rdProbe).map((line, idx) =>
+            h("div", { key: `rd_probe_line_${idx}`, style: { marginTop: idx === 0 ? "6px" : "2px", color: "#b9d5e7" } }, line)
+          ),
+        ]),
+        h("div", { key: "probe_ra", style: { border: "1px solid #264758", borderRadius: "6px", padding: "6px" } }, [
+          h("div", { key: "probe_ra_title", style: { marginBottom: "4px", color: "#9fc1d4" } }, `RA probe (shape=${safeShapeLabel(raShape)})`),
+          h("div", { key: "probe_ra_inputs", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "6px" } }, [
+            h("input", {
+              key: "ra_range_bin",
+              className: "input",
+              value: raRangeBinText,
+              onChange: (e) => setRaRangeBinText(String(e.target.value || "0")),
+              placeholder: "range_bin",
+            }),
+            h("input", {
+              key: "ra_angle_bin",
+              className: "input",
+              value: raAngleBinText,
+              onChange: (e) => setRaAngleBinText(String(e.target.value || "0")),
+              placeholder: "angle_bin",
+            }),
+          ]),
+          h("div", { key: "probe_ra_peakctl", style: { display: "grid", gridTemplateColumns: "1fr auto", gap: "6px", marginBottom: "6px" } }, [
+            h("select", {
+              key: "ra_peak_select",
+              className: "select",
+              value: raPeakSelectText,
+              onChange: (e) => setRaPeakSelectText(String(e.target.value || "-1")),
+            }, [
+              h("option", { key: "ra_peak_none", value: "-1" }, "RA peak: none"),
+              ...raPeaks.map((peak) =>
+                h(
+                  "option",
+                  { key: `ra_peak_${peak.index}`, value: String(peak.index) },
+                  `#${peak.index} a=${peak.row} r=${peak.col} rel=${Number(peak.relDb).toFixed(2)}`
+                )
+              ),
+            ]),
+            h("button", {
+              key: "ra_snap",
+              className: "btn",
+              onClick: () => {
+                const idx = Number(raPeakSelectText);
+                const peak = Number.isFinite(idx) && idx >= 0 ? raPeaks[Math.floor(idx)] : null;
+                if (!peak) return;
+                setRaRangeBinText(String(peak.col));
+                setRaAngleBinText(String(peak.row));
+              },
+            }, "Snap"),
+          ]),
+          h("label", { key: "ra_lock_lbl", style: { display: "inline-flex", alignItems: "center", gap: "6px", color: "#8fb3c9" } }, [
+            h("input", {
+              key: "ra_lock_chk",
+              type: "checkbox",
+              checked: Boolean(raPeakLock),
+              onChange: (e) => setRaPeakLock(Boolean(e.target.checked)),
+            }),
+            "Peak lock",
+          ]),
+          ...renderProbeSummary(raProbe).map((line, idx) =>
+            h("div", { key: `ra_probe_line_${idx}`, style: { marginTop: idx === 0 ? "6px" : "2px", color: "#b9d5e7" } }, line)
+          ),
+        ]),
+      ]),
+    ]),
     h("div", { key: "links", style: { marginBottom: "8px" } }, [
       h("div", { key: "lt" }, "artifacts:"),
       ...[
@@ -2346,17 +2705,37 @@ function renderArtifactInspector(graphRunSummary) {
       ...((Array.isArray(graphRunSummary?.execution?.node_results)
         ? graphRunSummary.execution.node_results
         : []
-      ).slice(0, 16).map((row, idx) =>
-        h(
-          "div",
-          { key: `tr_${idx}` },
-          `- #${Number(idx)} ${String(row?.node_type || "-")} (${String(
-            row?.node_id || "-"
-          )}) | status=${String(row?.status || "-")} | contract=${String(
-            row?.output_contract || "-"
-          )}`
-        )
-      )),
+      ).slice(0, 24).map((row, idx) => {
+        const artifactMap = row?.artifacts && typeof row.artifacts === "object" ? row.artifacts : {};
+        const artifactCount = Object.keys(artifactMap).length;
+        const isCacheHit = Boolean(row?.cache_hit) || String(row?.status || "").toLowerCase() === "cached";
+        const artifactBadge = artifactCount <= 0 ? "n/a" : (isCacheHit ? "cache-hit" : "recomputed");
+        const badgeStyle = artifactBadge === "cache-hit"
+          ? { border: "1px solid #2f6f57", color: "#7ee3b8", background: "rgba(53, 200, 133, 0.1)" }
+          : artifactBadge === "recomputed"
+            ? { border: "1px solid #8a6a2d", color: "#f4c265", background: "rgba(240, 179, 58, 0.1)" }
+            : { border: "1px solid #36586d", color: "#8eb6ca", background: "rgba(58, 103, 129, 0.1)" };
+        const sourceRun = String(row?.cache_source_graph_run_id || "").trim();
+        return h("div", { key: `tr_${idx}` }, [
+          `- #${Number(idx)} ${String(row?.node_type || "-")} (${String(row?.node_id || "-")}) | status=${String(row?.status || "-")} | contract=${String(row?.output_contract || "-")} | artifact=`,
+          h(
+            "span",
+            {
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                borderRadius: "999px",
+                padding: "1px 7px",
+                fontSize: "10px",
+                marginLeft: "5px",
+                ...badgeStyle,
+              },
+            },
+            artifactBadge
+          ),
+          sourceRun && isCacheHit ? ` | source=${sourceRun}` : "",
+        ]);
+      })),
     ]),
     h("div", { key: "visTitle", style: { marginBottom: "4px" } }, "visuals:"),
     h(
@@ -2397,18 +2776,131 @@ function renderArtifactInspector(graphRunSummary) {
   ]);
 }
 
-export function TopBar({ statusTone, statusText, nodeCount, edgeCount }) {
+export function TopBar({
+  statusTone,
+  statusText,
+  nodeCount,
+  edgeCount,
+  runtimeBackendType,
+  runtimeMode,
+  runtimeLicenseTier,
+  runtimeLicenseSet,
+  layoutMode,
+  setLayoutMode,
+  densityMode,
+  setDensityMode,
+  pipelineStages,
+  focusLeftOpen,
+  focusRightOpen,
+  onToggleFocusLeft,
+  onToggleFocusRight,
+}) {
+  const backendLabel = String(runtimeBackendType || "unknown");
+  const modeLabel = String(runtimeMode || "-");
+  const tierLabel = String(runtimeLicenseTier || "trial");
+  const safeLayoutMode = String(layoutMode || "triad");
+  const safeDensityMode = String(densityMode || "comfortable");
+  const safePipeline = Array.isArray(pipelineStages) && pipelineStages.length > 0
+    ? pipelineStages
+    : [
+      { id: "design", label: "Design", done: false, active: true },
+      { id: "run", label: "Run", done: false, active: false },
+      { id: "inspect", label: "Inspect", done: false, active: false },
+      { id: "gate", label: "Gate", done: false, active: false },
+      { id: "export", label: "Export", done: false, active: false },
+    ];
+
   return h("header", { className: "topbar", key: "hd" }, [
-    h("div", { className: "brand", key: "b1" }, [
-      h("span", { className: "brand-dot", key: "dot" }),
-      h("div", { key: "txt" }, [
-        h("div", { className: "brand-title", key: "t1" }, "Radar Graph Lab"),
-        h("div", { className: "brand-sub", key: "t2" }, "ReactFlow Simulink-Style Workspace"),
+    h("div", { className: "top-main", key: "tm" }, [
+      h("div", { className: "brand", key: "b1" }, [
+        h("span", { className: "brand-dot", key: "dot" }),
+        h("div", { key: "txt" }, [
+          h("div", { className: "brand-title", key: "t1" }, "Radar Graph Lab"),
+          h("div", { className: "brand-sub", key: "t2" }, "Design -> Run -> Inspect -> Gate -> Export"),
+        ]),
       ]),
-    ]),
-    h("div", { className: "top-actions", key: "b2" }, [
-      h("span", { className: `stat ${statusTone}`, key: "s1" }, statusText),
-      h("span", { className: "stat", key: "s2" }, `nodes ${nodeCount} / edges ${edgeCount}`),
+
+      h(
+        "div",
+        { className: "top-pipeline", key: "pipeline" },
+        safePipeline.flatMap((stage, idx) => {
+          const id = String(stage?.id || `stage_${idx}`);
+          const label = String(stage?.label || id);
+          const done = Boolean(stage?.done);
+          const active = Boolean(stage?.active);
+          const step = h(
+            "span",
+            {
+              className: `pipeline-step${done ? " done" : ""}${active ? " active" : ""}`,
+              key: `pipe_step_${id}`,
+            },
+            [
+              h("span", { className: "pipeline-index", key: `pipe_idx_${id}` }, `${idx + 1}`),
+              h("span", { className: "pipeline-label", key: `pipe_lbl_${id}` }, label),
+            ]
+          );
+          if (idx >= safePipeline.length - 1) {
+            return [step];
+          }
+          return [
+            step,
+            h("span", { className: "pipeline-arrow", key: `pipe_arrow_${id}` }, "›"),
+          ];
+        })
+      ),
+
+      h("div", { className: "top-toolbar", key: "b2" }, [
+        h("div", { className: "toolbar-group", key: "layout_group" }, [
+          h("span", { className: "toolbar-label", key: "layout_label" }, "view"),
+          ["triad", "build", "review", "focus"].map((mode) =>
+            h("button", {
+              type: "button",
+              key: `layout_${mode}`,
+              className: `toolbar-btn${safeLayoutMode === mode ? " active" : ""}`,
+              onClick: () => (typeof setLayoutMode === "function" ? setLayoutMode(mode) : null),
+            }, mode)
+          ),
+        ]),
+        h("div", { className: "toolbar-group", key: "density_group" }, [
+          h("span", { className: "toolbar-label", key: "density_label" }, "density"),
+          ["comfortable", "compact"].map((mode) =>
+            h("button", {
+              type: "button",
+              key: `density_${mode}`,
+              className: `toolbar-btn${safeDensityMode === mode ? " active" : ""}`,
+              onClick: () => (typeof setDensityMode === "function" ? setDensityMode(mode) : null),
+            }, mode)
+          ),
+        ]),
+        safeLayoutMode === "focus"
+          ? h("div", { className: "toolbar-group", key: "focus_drawer_group" }, [
+              h("span", { className: "toolbar-label", key: "focus_drawer_label" }, "drawers"),
+              h("button", {
+                type: "button",
+                key: "focus_drawer_left",
+                className: `toolbar-btn${focusLeftOpen ? " active" : ""}`,
+                onClick: () => (typeof onToggleFocusLeft === "function" ? onToggleFocusLeft() : null),
+              }, focusLeftOpen ? "inputs on" : "inputs"),
+              h("button", {
+                type: "button",
+                key: "focus_drawer_right",
+                className: `toolbar-btn${focusRightOpen ? " active" : ""}`,
+                onClick: () => (typeof onToggleFocusRight === "function" ? onToggleFocusRight() : null),
+              }, focusRightOpen ? "inspect on" : "inspect"),
+            ])
+          : null,
+        h("div", { className: "top-actions", key: "actions" }, [
+          h("span", { className: `stat ${statusTone}`, key: "s1" }, statusText),
+          h("span", { className: "stat", key: "s2" }, `nodes ${nodeCount} / edges ${edgeCount}`),
+          h("span", { className: "stat", key: "s3" }, `backend ${backendLabel}`),
+          h("span", { className: "stat", key: "s4" }, `runtime ${modeLabel}`),
+          h(
+            "span",
+            { className: `stat ${runtimeLicenseSet ? "status-ok" : "status-warn"}`, key: "s5" },
+            `license ${tierLabel} ${runtimeLicenseSet ? "set" : "unset"}`
+          ),
+        ]),
+      ]),
     ]),
   ]);
 }
@@ -2430,6 +2922,15 @@ export function GraphInputsPanel({ model }) {
     sceneJsonPath,
     baselineId,
     profile,
+    runtimeBackendType,
+    runtimeProviderSpec,
+    runtimeRequiredModulesText,
+    runtimeFailurePolicy,
+    runtimeSimulationMode,
+    runtimeDevice,
+    runtimeLicenseTier,
+    runtimeLicenseFile,
+    runtimeStatusLine,
     runMode,
     autoPollAsyncRun,
     pollIntervalMsText,
@@ -2447,6 +2948,14 @@ export function GraphInputsPanel({ model }) {
     setSceneJsonPath,
     setBaselineId,
     setProfile,
+    setRuntimeBackendType,
+    setRuntimeProviderSpec,
+    setRuntimeRequiredModulesText,
+    setRuntimeFailurePolicy,
+    setRuntimeSimulationMode,
+    setRuntimeDevice,
+    setRuntimeLicenseTier,
+    setRuntimeLicenseFile,
     setRunMode,
     setAutoPollAsyncRun,
     setPollIntervalMsText,
@@ -2478,7 +2987,7 @@ export function GraphInputsPanel({ model }) {
     clearContractTimeline,
   } = contractActions;
 
-  return h("section", { className: "panel", key: "left" }, [
+  return h("section", { className: "panel panel-left", key: "left" }, [
     h("div", { className: "panel-hd", key: "lhd" }, "Graph Inputs"),
     h("div", { className: "panel-bd", key: "lbd" }, [
       h("div", { className: "field", key: "api" }, [
@@ -2533,6 +3042,26 @@ export function GraphInputsPanel({ model }) {
           h("option", { value: "fidelity_eval", key: "p3" }, "fidelity_eval"),
         ]),
       ]),
+      h(RuntimeConfigSection, {
+        key: "runtime_config_section",
+        runtimeBackendType,
+        setRuntimeBackendType,
+        runtimeProviderSpec,
+        setRuntimeProviderSpec,
+        runtimeRequiredModulesText,
+        setRuntimeRequiredModulesText,
+        runtimeFailurePolicy,
+        setRuntimeFailurePolicy,
+        runtimeSimulationMode,
+        setRuntimeSimulationMode,
+        runtimeDevice,
+        setRuntimeDevice,
+        runtimeLicenseTier,
+        setRuntimeLicenseTier,
+        runtimeLicenseFile,
+        setRuntimeLicenseFile,
+        runtimeStatusLine,
+      }),
       h("div", { className: "field", key: "runmode" }, [
         h("label", { className: "label", key: "lbl_runmode" }, "Run Mode"),
         h("select", {
@@ -2598,11 +3127,7 @@ export function GraphInputsPanel({ model }) {
         h("button", { className: "btn", onClick: pollLastGraphRunOnce, key: "pollrun" }, "Poll Last Run"),
       ]),
       h("div", { className: "hint", key: "lastrunhint" }, `last_graph_run_id: ${String(lastGraphRunId || "-")}`),
-      h("div", { className: "btn-row", key: "gatebtns" }, [
-        h("button", { className: "btn", onClick: pinBaselineFromGraphRun, key: "pinb" }, "Pin Baseline"),
-        h("button", { className: "btn", onClick: runPolicyGateForGraphRun, key: "runpg" }, "Policy Gate"),
-      ]),
-      h("button", { className: "btn", onClick: exportGateReport, key: "xgate" }, "Export Gate Report (.md)"),
+      h("div", { className: "hint", key: "decision_pane_hint" }, "Gate/session/export controls moved to Node Inspector -> Decision Pane."),
       h("div", { className: "field", key: "contractdbg" }, [
         h("label", { className: "label", key: "lblcd" }, "Contract Guard"),
         h("div", { className: "btn-row", key: "contractbtns" }, [
@@ -12977,7 +13502,7 @@ export function GraphCanvasPanel({
   onConnect,
   setSelectedNodeId,
 }) {
-  return h("section", { className: "panel", key: "center" }, [
+  return h("section", { className: "panel panel-center", key: "center" }, [
     h("div", { className: "panel-hd", key: "chd" }, "Graph Canvas"),
     h("div", { className: "panel-bd", style: { padding: "8px" }, key: "cbd" }, [
       h("div", { className: "flow-wrap", style: { height: "100%" }, key: "flow" }, [
@@ -13009,9 +13534,26 @@ export function NodeInspectorPanel({
   graphRunText,
   gateResultText,
   graphRunSummary,
+  compareGraphRunId,
+  setCompareGraphRunId,
+  compareRunStatusText,
+  compareGraphRunSummary,
+  loadCompareGraphRunById,
+  clearCompareGraphRun,
+  baselineId,
+  pinBaselineFromGraphRun,
+  runPolicyGateForGraphRun,
+  runDecisionRegressionSession,
+  exportGateReport,
+  exportDecisionRegressionSession,
+  exportDecisionBriefMd,
+  decisionSummaryText,
+  decisionOpsStatusText,
+  lastRegressionSession,
+  lastRegressionExport,
   contractDebugText,
 }) {
-  return h("section", { className: "panel", key: "right" }, [
+  return h("section", { className: "panel panel-right", key: "right" }, [
     h("div", { className: "panel-hd", key: "rhd" }, "Node Inspector"),
     h("div", { className: "panel-bd", key: "rbd" }, [
       h("div", { className: "field", key: "selnode" }, [
@@ -13052,13 +13594,37 @@ export function NodeInspectorPanel({
         h("label", { className: "label", key: "lblgr" }, "Policy Gate Result"),
         h("pre", { className: "result-box", key: "gatebox" }, gateResultText),
       ]),
-      h("div", { className: "field", key: "contractdiagauto" }, [
-        h("label", { className: "label", key: "lblcda" }, "Contract Diagnostics (Auto)"),
-        h("pre", { className: "result-box", key: "contractboxauto" }, String(contractDebugText || "-")),
-      ]),
+      h(ContractDiagnosticsPanel, {
+        key: "contract_diagnostics_panel",
+        contractDebugText,
+      }),
+      h(DecisionPane, {
+        key: "decision_pane_v1",
+        baselineId,
+        compareGraphRunId,
+        setCompareGraphRunId,
+        loadCompareGraphRunById,
+        clearCompareGraphRun,
+        pinBaselineFromGraphRun,
+        runPolicyGateForGraphRun,
+        runDecisionRegressionSession,
+        exportGateReport,
+        exportDecisionRegressionSession,
+        exportDecisionBriefMd,
+        decisionSummaryText,
+        decisionOpsStatusText,
+        compareRunStatusText,
+        lastRegressionSession,
+        lastRegressionExport,
+      }),
       h("div", { className: "field", key: "artifactinspect" }, [
         h("label", { className: "label", key: "lblai" }, "Artifact Inspector"),
-        renderArtifactInspector(graphRunSummary),
+        h(ArtifactInspectorPanel, {
+          key: "artifact_inspector_v2",
+          graphRunSummary,
+          compareGraphRunSummary,
+          compareRunStatusText,
+        }),
       ]),
     ]),
   ]);

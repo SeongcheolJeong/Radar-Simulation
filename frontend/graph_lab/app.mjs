@@ -11,9 +11,13 @@ import {
 } from "./contracts.mjs";
 import { toFlowNode, toGraphPayload } from "./graph_helpers.mjs";
 import {
+  getGraphRunSummaryMaybe,
   getGraphTemplates,
   getPolicyEval,
+  exportRegressionSession,
+  listGraphRuns,
   listPolicyEvals,
+  runRegressionSession,
   validateGraphContract,
 } from "./api_client.mjs";
 import {
@@ -27,9 +31,29 @@ import { useGateOps } from "./hooks/use_gate_ops.mjs";
 import { useGraphRunOps } from "./hooks/use_graph_run_ops.mjs";
 
 const h = React.createElement;
+const LAYOUT_MODE_SET = new Set(["triad", "build", "review", "focus"]);
+const DENSITY_MODE_SET = new Set(["comfortable", "compact"]);
+
+function normalizeLayoutMode(value) {
+  const mode = String(value || "").trim().toLowerCase();
+  return LAYOUT_MODE_SET.has(mode) ? mode : "triad";
+}
+
+function normalizeDensityMode(value) {
+  const mode = String(value || "").trim().toLowerCase();
+  return DENSITY_MODE_SET.has(mode) ? mode : "comfortable";
+}
 
 export function App() {
   const params = new URLSearchParams(window.location.search);
+  const [layoutMode, setLayoutMode] = React.useState(
+    normalizeLayoutMode(params.get("view") || "triad")
+  );
+  const [densityMode, setDensityMode] = React.useState(
+    normalizeDensityMode(params.get("density") || "comfortable")
+  );
+  const [focusLeftOpen, setFocusLeftOpen] = React.useState(false);
+  const [focusRightOpen, setFocusRightOpen] = React.useState(false);
   const [apiBase, setApiBase] = React.useState(
     String(params.get("api") || "http://127.0.0.1:8099")
   );
@@ -41,6 +65,42 @@ export function App() {
   const [baselineId, setBaselineId] = React.useState(
     String(params.get("baseline_id") || "graph_lab_baseline")
   );
+  const [runtimeBackendType, setRuntimeBackendType] = React.useState(
+    String(params.get("backend") || "analytic_targets")
+  );
+  const [runtimeProviderSpec, setRuntimeProviderSpec] = React.useState(
+    String(params.get("runtime_provider") || "")
+  );
+  const [runtimeRequiredModulesText, setRuntimeRequiredModulesText] = React.useState(
+    String(params.get("runtime_required_modules") || "")
+  );
+  const [runtimeFailurePolicy, setRuntimeFailurePolicy] = React.useState(
+    String(params.get("runtime_failure_policy") || "error")
+  );
+  const [runtimeSimulationMode, setRuntimeSimulationMode] = React.useState(
+    String(params.get("simulation_mode") || "auto")
+  );
+  const [runtimeDevice, setRuntimeDevice] = React.useState(
+    String(params.get("runtime_device") || "cpu")
+  );
+  const [runtimeLicenseTier, setRuntimeLicenseTier] = React.useState(
+    String(params.get("runtime_license_tier") || "trial")
+  );
+  const [runtimeLicenseFile, setRuntimeLicenseFile] = React.useState(
+    String(params.get("runtime_license_file") || "")
+  );
+  const [compareGraphRunId, setCompareGraphRunId] = React.useState(
+    String(params.get("compare_run_id") || "")
+  );
+  const [compareGraphRunSummary, setCompareGraphRunSummary] = React.useState(null);
+  const [compareRunStatusText, setCompareRunStatusText] = React.useState("-");
+  const [compareRunPinnedManual, setCompareRunPinnedManual] = React.useState(
+    String(params.get("compare_run_id") || "").trim() !== ""
+  );
+  const [compareAutoSkipForRunId, setCompareAutoSkipForRunId] = React.useState("");
+  const [lastRegressionSession, setLastRegressionSession] = React.useState(null);
+  const [lastRegressionExport, setLastRegressionExport] = React.useState(null);
+  const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
   const [templates, setTemplates] = React.useState([]);
   const [statusText, setStatusText] = React.useState("idle");
   const [statusTone, setStatusTone] = React.useState("status-neutral");
@@ -84,6 +144,20 @@ export function App() {
     const paramsObj = selectedNode.data && selectedNode.data.params ? selectedNode.data.params : {};
     setSelectedNodeParamsText(JSON.stringify(paramsObj, null, 2));
   }, [selectedNode]);
+
+  React.useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    query.set("view", layoutMode);
+    query.set("density", densityMode);
+    const next = `${window.location.pathname}?${query.toString()}`;
+    window.history.replaceState(null, "", next);
+  }, [densityMode, layoutMode]);
+
+  React.useEffect(() => {
+    if (layoutMode === "focus") return;
+    setFocusLeftOpen(false);
+    setFocusRightOpen(false);
+  }, [layoutMode]);
 
   const setStatus = React.useCallback((text, tone) => {
     setStatusText(String(text || "idle"));
@@ -200,6 +274,77 @@ export function App() {
     }
     return { payload, cacheHit: false };
   }, [apiBase]);
+
+  const loadCompareGraphRunById = React.useCallback(async (graphRunIdInput, options) => {
+    const opts = options && typeof options === "object" ? options : {};
+    const mode = String(opts.mode || "manual");
+    const graphRunId = String(graphRunIdInput || "").trim();
+    const shouldSetStatus = Boolean(opts.setStatus !== false);
+    const pinManual = mode === "manual" || Boolean(opts.pinManual);
+
+    if (!graphRunId) {
+      if (mode === "manual" && shouldSetStatus) {
+        setStatus("compare graph run id is required", "status-warn");
+      }
+      setCompareGraphRunId("");
+      setCompareGraphRunSummary(null);
+      setCompareRunStatusText("compare: not set");
+      setCompareRunPinnedManual(false);
+      return false;
+    }
+
+    if (mode === "manual" && shouldSetStatus) {
+      setStatus(`loading compare graph run: ${graphRunId}`, "status-warn");
+    }
+
+    try {
+      const sumRes = await getGraphRunSummaryMaybe(apiBase, graphRunId);
+      if (!sumRes.ok) {
+        throw new Error(`graph summary request failed (${Number(sumRes.status)})`);
+      }
+      const summary = sumRes.payload || {};
+      const completedAt = String(summary.completed_at || summary.created_at || "-");
+      const status = String(summary.status || "-");
+      setCompareGraphRunId(graphRunId);
+      setCompareGraphRunSummary(summary);
+      setCompareRunPinnedManual(pinManual);
+      setCompareAutoSkipForRunId("");
+      setCompareRunStatusText(
+        `compare_mode=${mode} | run=${graphRunId} | status=${status} | completed_at=${completedAt}`
+      );
+      if (mode === "manual" && shouldSetStatus) {
+        setStatus(`compare graph run loaded: ${graphRunId}`, "status-ok");
+      }
+      return true;
+    } catch (err) {
+      setCompareGraphRunSummary(null);
+      if (pinManual) {
+        setCompareRunPinnedManual(true);
+      }
+      setCompareRunStatusText(
+        `compare_mode=${mode} | run=${graphRunId} | load_failed=${String(err.message || err)}`
+      );
+      if (mode === "manual" && shouldSetStatus) {
+        setStatus(`compare graph run load failed: ${String(err.message || err)}`, "status-err");
+      }
+      return false;
+    }
+  }, [apiBase, setStatus]);
+
+  const clearCompareGraphRun = React.useCallback(() => {
+    setCompareGraphRunId("");
+    setCompareGraphRunSummary(null);
+    setCompareRunPinnedManual(false);
+    setCompareAutoSkipForRunId(String(graphRunSummary?.graph_run_id || "").trim());
+    setCompareRunStatusText("compare: cleared");
+    setStatus("compare graph run cleared", "status-ok");
+  }, [graphRunSummary?.graph_run_id, setStatus]);
+
+  const setCompareGraphRunIdDraft = React.useCallback((nextText) => {
+    const text = String(nextText || "");
+    setCompareGraphRunId(text);
+    setCompareRunPinnedManual(text.trim() !== "");
+  }, []);
 
   const openGateEvidenceFromTimeline = React.useCallback(async (row, lookupOptions) => {
     const eventRow = row && typeof row === "object" ? row : {};
@@ -477,6 +622,77 @@ export function App() {
     refreshContractWarnings();
   }, [graphRunText, gateResultText, validationText, refreshContractWarnings]);
 
+  React.useEffect(() => {
+    const currentGraphRunId = String(graphRunSummary?.graph_run_id || "").trim();
+    if (!currentGraphRunId) return;
+    if (String(compareAutoSkipForRunId || "").trim() === currentGraphRunId) return;
+
+    const compareLockedByUser = Boolean(compareRunPinnedManual);
+    if (compareLockedByUser && String(compareGraphRunId).trim() === currentGraphRunId) {
+      setCompareRunStatusText("compare: same as current run (disabled)");
+      setCompareGraphRunSummary(null);
+      return;
+    }
+    if (compareLockedByUser) return;
+
+    let canceled = false;
+    const loadAutoCompare = async () => {
+      const cacheSourceId = String(
+        graphRunSummary?.execution?.cache?.source_graph_run_id || ""
+      ).trim();
+      if (cacheSourceId && cacheSourceId !== currentGraphRunId) {
+        if (
+          cacheSourceId === String(compareGraphRunId || "").trim()
+          && compareGraphRunSummary
+        ) {
+          return;
+        }
+        if (canceled) return;
+        await loadCompareGraphRunById(cacheSourceId, { mode: "auto_cache_source", setStatus: false });
+        return;
+      }
+
+      const payload = await listGraphRuns(apiBase);
+      const rows = Array.isArray(payload.graph_runs) ? payload.graph_runs : [];
+      const candidate = rows.find((row) => {
+        const rid = String(row?.graph_run_id || "").trim();
+        const status = String(row?.status || "").trim().toLowerCase();
+        return rid !== "" && rid !== currentGraphRunId && status === "completed";
+      });
+      const candidateId = String(candidate?.graph_run_id || "").trim();
+      if (!candidateId) {
+        setCompareGraphRunSummary(null);
+        setCompareRunStatusText("compare_mode=auto_previous | no completed baseline run");
+        return;
+      }
+      if (
+        candidateId === String(compareGraphRunId || "").trim()
+        && compareGraphRunSummary
+      ) {
+        return;
+      }
+      if (canceled) return;
+      await loadCompareGraphRunById(candidateId, { mode: "auto_previous", setStatus: false });
+    };
+
+    loadAutoCompare().catch((err) => {
+      if (canceled) return;
+      setCompareGraphRunSummary(null);
+      setCompareRunStatusText(`compare_mode=auto | load_failed=${String(err.message || err)}`);
+    });
+    return () => {
+      canceled = true;
+    };
+  }, [
+    apiBase,
+    compareGraphRunId,
+    compareGraphRunSummary,
+    compareAutoSkipForRunId,
+    compareRunPinnedManual,
+    graphRunSummary,
+    loadCompareGraphRunById,
+  ]);
+
   const applyGraph = React.useCallback((graph) => {
     const g = graph && typeof graph === "object" ? graph : {};
     setGraphId(String(g.graph_id || "graph_lab"));
@@ -588,6 +804,37 @@ export function App() {
     }
   }, [apiBase, edges, graphId, nodes, profile, setStatus]);
 
+  const runtimeSummary = React.useMemo(() => {
+    const meta = graphRunSummary?.radar_map_summary?.metadata || {};
+    const runtimeResolution = meta?.runtime_resolution && typeof meta.runtime_resolution === "object"
+      ? meta.runtime_resolution
+      : {};
+    const providerInfo = runtimeResolution?.provider_runtime_info && typeof runtimeResolution.provider_runtime_info === "object"
+      ? runtimeResolution.provider_runtime_info
+      : {};
+    const backendTypeObserved = String(meta?.backend_type || "").trim();
+    const runtimeModeObserved = String(runtimeResolution?.mode || "").trim();
+    const simulationBackendObserved = String(
+      providerInfo?.simulation_backend || providerInfo?.generator || ""
+    ).trim();
+    const licenseObserved = String(
+      providerInfo?.license_file || providerInfo?.license_file_hint || ""
+    ).trim();
+    const runtimeStatusLine = [
+      `backend=${backendTypeObserved || runtimeBackendType || "-"}`,
+      `mode=${runtimeModeObserved || "-"}`,
+      `sim=${simulationBackendObserved || "-"}`,
+      `license=${licenseObserved ? "set" : (runtimeLicenseFile ? "requested" : "none")}`,
+    ].join(" | ");
+    return {
+      backendTypeObserved,
+      runtimeModeObserved,
+      simulationBackendObserved,
+      licenseObserved,
+      runtimeStatusLine,
+    };
+  }, [graphRunSummary, runtimeBackendType, runtimeLicenseFile]);
+
   const {
     runGraphViaApi,
     cancelLastGraphRun,
@@ -599,6 +846,14 @@ export function App() {
     profile,
     graphId,
     sceneJsonPath,
+    runtimeBackendType,
+    runtimeProviderSpec,
+    runtimeRequiredModulesText,
+    runtimeFailurePolicy,
+    runtimeSimulationMode,
+    runtimeDevice,
+    runtimeLicenseTier,
+    runtimeLicenseFile,
     nodes,
     edges,
     runMode,
@@ -633,6 +888,261 @@ export function App() {
     onContractDiagnosticsEvent: appendContractDiagnosticsEvent,
   });
 
+  const runDecisionRegressionSession = React.useCallback(async () => {
+    const currentRunIdRaw = String(
+      graphRunSummary?.graph_run_id || graphRunSummary?.run_id || ""
+    ).trim();
+    const currentRunId = currentRunIdRaw.startsWith("run_") ? currentRunIdRaw : "";
+    const currentSummary = String(graphRunSummary?.outputs?.graph_run_summary_json || "").trim();
+    const compareRunIdRaw = String(compareGraphRunId || "").trim();
+    const compareRunId = compareRunIdRaw.startsWith("run_") ? compareRunIdRaw : "";
+    const compareSummary = String(
+      compareGraphRunSummary?.outputs?.graph_run_summary_json || ""
+    ).trim();
+    const baseline = String(baselineId || "").trim();
+
+    if (!baseline) {
+      setStatus("baseline id is required for regression session", "status-warn");
+      return;
+    }
+    if (!currentRunIdRaw && !currentSummary) {
+      setStatus("run graph first before regression session", "status-warn");
+      return;
+    }
+
+    const candidatesRaw = [];
+    if (compareRunId || compareSummary) {
+      candidatesRaw.push({
+        label: "compare",
+        run_id: compareRunId || undefined,
+        summary_json: compareSummary || undefined,
+      });
+    }
+    if (currentRunId || currentSummary) {
+      candidatesRaw.push({
+        label: "current",
+        run_id: currentRunId || undefined,
+        summary_json: currentSummary || undefined,
+      });
+    }
+    const seen = new Set();
+    const candidates = candidatesRaw.filter((row) => {
+      const key = `${String(row.run_id || "")}::${String(row.summary_json || "")}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    if (candidates.length === 0) {
+      setStatus("no candidates available for regression session", "status-warn");
+      return;
+    }
+
+    const sessionId = `dssn_${Date.now()}`;
+    setStatus(`running regression session: ${sessionId}`, "status-warn");
+    try {
+      const payload = await runRegressionSession(apiBase, {
+        session_id: sessionId,
+        baseline_id: baseline,
+        candidates,
+        stop_on_first_fail: false,
+        overwrite: true,
+        note: "decision pane quick session",
+        tag: "graph_lab_decision_pane",
+      });
+      const row = payload.regression_session || {};
+      setLastRegressionSession(row);
+      setDecisionOpsStatusText(
+        `regression_session_id=${String(row.session_id || sessionId)} | evaluated=${Number(row.evaluated_candidate_count || 0)} | held=${Number(row.held_count || 0)} | recommendation=${String(row.recommendation || "-")}`
+      );
+      setStatus(`regression session completed: ${String(row.session_id || sessionId)}`, "status-ok");
+    } catch (err) {
+      setDecisionOpsStatusText(`regression_session_failed: ${String(err.message || err)}`);
+      setStatus(`regression session failed: ${String(err.message || err)}`, "status-err");
+    }
+  }, [
+    apiBase,
+    baselineId,
+    compareGraphRunId,
+    compareGraphRunSummary,
+    graphRunSummary,
+    setStatus,
+  ]);
+
+  const exportDecisionRegressionSession = React.useCallback(async () => {
+    const sessionId = String(lastRegressionSession?.session_id || "").trim();
+    if (!sessionId) {
+      setStatus("run regression session first", "status-warn");
+      return;
+    }
+    setStatus(`exporting regression session: ${sessionId}`, "status-warn");
+    try {
+      const payload = await exportRegressionSession(apiBase, {
+        session_id: sessionId,
+        overwrite: true,
+        include_policy_payload: false,
+        note: "decision pane export",
+        tag: "graph_lab_decision_pane",
+      });
+      const row = payload.regression_export || {};
+      setLastRegressionExport(row);
+      setDecisionOpsStatusText(
+        `regression_export_id=${String(row.export_id || "-")} | rows=${Number(row.row_count || 0)} | recommendation=${String(row.session_recommendation || "-")}`
+      );
+      setStatus(`regression export completed: ${String(row.export_id || "-")}`, "status-ok");
+    } catch (err) {
+      setDecisionOpsStatusText(`regression_export_failed: ${String(err.message || err)}`);
+      setStatus(`regression export failed: ${String(err.message || err)}`, "status-err");
+    }
+  }, [apiBase, lastRegressionSession, setStatus]);
+
+  const decisionSummaryText = React.useMemo(() => {
+    const nowIso = new Date().toISOString();
+    const currentRunId = String(
+      graphRunSummary?.graph_run_id || graphRunSummary?.run_id || ""
+    ).trim() || "-";
+    const compareRunId = String(compareGraphRunSummary?.graph_run_id || compareGraphRunId || "").trim() || "-";
+    const recommendation = String(lastPolicyEval?.recommendation || "unknown");
+    const gateKnown = typeof lastPolicyEval?.gate_failed === "boolean";
+    const gateFailed = gateKnown ? Boolean(lastPolicyEval?.gate_failed) : null;
+    const decision = gateKnown ? (gateFailed ? "HOLD" : "ADOPT") : "UNKNOWN";
+    const failureRows = Array.isArray(lastPolicyEval?.gate_failures) ? lastPolicyEval.gate_failures : [];
+    const currentPathCount = Number(graphRunSummary?.path_summary?.path_count_total || 0);
+    const comparePathCount = Number(compareGraphRunSummary?.path_summary?.path_count_total || 0);
+    const pathDelta = currentPathCount - comparePathCount;
+
+    const currentRdPeak = Array.isArray(graphRunSummary?.quicklook?.rd_top_peaks)
+      ? graphRunSummary.quicklook.rd_top_peaks[0] || null
+      : null;
+    const compareRdPeak = Array.isArray(compareGraphRunSummary?.quicklook?.rd_top_peaks)
+      ? compareGraphRunSummary.quicklook.rd_top_peaks[0] || null
+      : null;
+    const currentRaPeak = Array.isArray(graphRunSummary?.quicklook?.ra_top_peaks)
+      ? graphRunSummary.quicklook.ra_top_peaks[0] || null
+      : null;
+    const compareRaPeak = Array.isArray(compareGraphRunSummary?.quicklook?.ra_top_peaks)
+      ? compareGraphRunSummary.quicklook.ra_top_peaks[0] || null
+      : null;
+    const signed = (value) => {
+      const n = Number(value || 0);
+      return `${n >= 0 ? "+" : ""}${n}`;
+    };
+
+    const lines = [
+      `generated_at_utc: ${nowIso}`,
+      `decision: ${decision}`,
+      `recommendation: ${recommendation}`,
+      `baseline_id: ${String(baselineId || "-")}`,
+      `current_run_id: ${currentRunId}`,
+      `compare_run_id: ${compareRunId}`,
+      `gate_failure_count: ${Number(failureRows.length || 0)}`,
+      `path_count_delta(current-compare): ${signed(pathDelta)}`,
+    ];
+
+    if (currentRdPeak && compareRdPeak) {
+      lines.push(
+        `rd_peak_delta(range/doppler): ${signed(Number(currentRdPeak.range_bin || 0) - Number(compareRdPeak.range_bin || 0))}/${signed(Number(currentRdPeak.doppler_bin || 0) - Number(compareRdPeak.doppler_bin || 0))}`
+      );
+    }
+    if (currentRaPeak && compareRaPeak) {
+      lines.push(
+        `ra_peak_delta(range/angle): ${signed(Number(currentRaPeak.range_bin || 0) - Number(compareRaPeak.range_bin || 0))}/${signed(Number(currentRaPeak.angle_bin || 0) - Number(compareRaPeak.angle_bin || 0))}`
+      );
+    }
+    if (failureRows.length > 0) {
+      lines.push("top_failure_evidence:");
+      failureRows.slice(0, 3).forEach((row, idx) => {
+        const metric = row?.metric ? `(${String(row.metric)})` : "";
+        lines.push(
+          `- [${Number(idx) + 1}] ${String(row?.rule || "unknown_rule")}${metric} value=${String(row?.value ?? "-")} limit=${String(row?.limit ?? "-")}`
+        );
+      });
+    }
+    return lines.join("\n");
+  }, [
+    baselineId,
+    compareGraphRunId,
+    compareGraphRunSummary,
+    graphRunSummary,
+    lastPolicyEval,
+  ]);
+
+  const exportDecisionBriefMd = React.useCallback(() => {
+    const nowIso = new Date().toISOString();
+    const fileStamp = nowIso.slice(0, 19).replace(/[:T]/g, "_");
+    const currentOutputs = graphRunSummary?.outputs && typeof graphRunSummary.outputs === "object"
+      ? graphRunSummary.outputs
+      : {};
+    const compareOutputs = compareGraphRunSummary?.outputs && typeof compareGraphRunSummary.outputs === "object"
+      ? compareGraphRunSummary.outputs
+      : {};
+    const failures = Array.isArray(lastPolicyEval?.gate_failures) ? lastPolicyEval.gate_failures : [];
+    const lines = [
+      "# Radar Decision Brief",
+      "",
+      `- generated_at_utc: ${nowIso}`,
+      `- graph_id: ${String(graphId || "-")}`,
+      "",
+      "## Decision Snapshot",
+      "```text",
+      decisionSummaryText,
+      "```",
+      "",
+      "## Current Artifacts",
+      `- graph_run_summary_json: ${String(currentOutputs.graph_run_summary_json || "-")}`,
+      `- radar_map_npz: ${String(currentOutputs.radar_map_npz || "-")}`,
+      `- adc_cube_npz: ${String(currentOutputs.adc_cube_npz || "-")}`,
+      `- path_list_json: ${String(currentOutputs.path_list_json || "-")}`,
+      "",
+      "## Compare Artifacts",
+      `- graph_run_summary_json: ${String(compareOutputs.graph_run_summary_json || "-")}`,
+      `- radar_map_npz: ${String(compareOutputs.radar_map_npz || "-")}`,
+      `- adc_cube_npz: ${String(compareOutputs.adc_cube_npz || "-")}`,
+      `- path_list_json: ${String(compareOutputs.path_list_json || "-")}`,
+      "",
+      "## Gate Evidence",
+    ];
+    if (failures.length === 0) {
+      lines.push("- none");
+    } else {
+      failures.slice(0, 8).forEach((row, idx) => {
+        const metric = row?.metric ? ` (${String(row.metric)})` : "";
+        lines.push(
+          `- [${Number(idx) + 1}] ${String(row?.rule || "unknown_rule")}${metric}: value=${String(row?.value ?? "-")} limit=${String(row?.limit ?? "-")}`
+        );
+      });
+    }
+    lines.push(
+      "",
+      "## Regression Session",
+      `- session_id: ${String(lastRegressionSession?.session_id || "-")}`,
+      `- session_recommendation: ${String(lastRegressionSession?.recommendation || "-")}`,
+      `- export_id: ${String(lastRegressionExport?.export_id || "-")}`,
+      `- export_package_json: ${String(lastRegressionExport?.artifacts?.package_json || "-")}`
+    );
+
+    const text = lines.join("\n");
+    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = `decision_brief_${String(graphId || "graph")}_${fileStamp}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+    setDecisionOpsStatusText(`decision_brief_exported_at=${nowIso}`);
+    setStatus("decision brief exported", "status-ok");
+  }, [
+    compareGraphRunSummary,
+    decisionSummaryText,
+    graphId,
+    graphRunSummary,
+    lastPolicyEval,
+    lastRegressionExport,
+    lastRegressionSession,
+    setStatus,
+  ]);
+
   const loadTemplateByIndex = React.useCallback((idx) => {
     const i = Math.max(0, Math.floor(Number(idx)));
     const row = templates[i];
@@ -660,6 +1170,73 @@ export function App() {
     setStatus("graph exported", "status-ok");
   }, [edges, graphId, nodes, profile, setStatus]);
 
+  const pipelineStages = React.useMemo(() => {
+    const hasDesign = Number(nodes.length || 0) > 0;
+    const hasRun = Boolean(graphRunSummary && (graphRunSummary.graph_run_id || graphRunSummary.run_id));
+    const hasInspect = Boolean(
+      hasRun && (
+        compareGraphRunSummary
+        || (graphRunSummary && typeof graphRunSummary === "object")
+      )
+    );
+    const hasGate = typeof lastPolicyEval?.gate_failed === "boolean";
+    const hasExport = Boolean(lastRegressionExport || lastRegressionSession);
+    const activeId = hasExport
+      ? "export"
+      : hasGate
+        ? "gate"
+        : hasInspect
+          ? "inspect"
+          : hasRun
+            ? "run"
+            : "design";
+    return [
+      { id: "design", label: "Design", done: hasDesign, active: activeId === "design" },
+      { id: "run", label: "Run", done: hasRun, active: activeId === "run" },
+      { id: "inspect", label: "Inspect", done: hasInspect, active: activeId === "inspect" },
+      { id: "gate", label: "Gate", done: hasGate, active: activeId === "gate" },
+      { id: "export", label: "Export", done: hasExport, active: activeId === "export" },
+    ];
+  }, [
+    compareGraphRunSummary,
+    graphRunSummary,
+    lastPolicyEval,
+    lastRegressionExport,
+    lastRegressionSession,
+    nodes.length,
+  ]);
+
+  const toggleFocusLeftDrawer = React.useCallback(() => {
+    setFocusLeftOpen((prev) => !prev);
+  }, []);
+
+  const toggleFocusRightDrawer = React.useCallback(() => {
+    setFocusRightOpen((prev) => !prev);
+  }, []);
+
+  const closeFocusDrawers = React.useCallback(() => {
+    setFocusLeftOpen(false);
+    setFocusRightOpen(false);
+  }, []);
+
+  const focusAnyOpen = layoutMode === "focus" && (focusLeftOpen || focusRightOpen);
+  React.useEffect(() => {
+    if (layoutMode !== "focus" || !focusAnyOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (String(event?.key || "") !== "Escape") return;
+      const target = event?.target;
+      const tag = String(target?.tagName || "").toLowerCase();
+      if (target?.isContentEditable || tag === "input" || tag === "textarea" || tag === "select") {
+        return;
+      }
+      closeFocusDrawers();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [closeFocusDrawers, focusAnyOpen, layoutMode]);
+
+  const contentClassName = `content view-${layoutMode}${focusLeftOpen ? " focus-left-open" : ""}${focusRightOpen ? " focus-right-open" : ""}${focusAnyOpen ? " focus-any-open" : ""}`;
+
   const inputPanelModel = React.useMemo(() => normalizeGraphInputsPanelModel({
     values: {
       apiBase,
@@ -667,6 +1244,15 @@ export function App() {
       sceneJsonPath,
       baselineId,
       profile,
+      runtimeBackendType,
+      runtimeProviderSpec,
+      runtimeRequiredModulesText,
+      runtimeFailurePolicy,
+      runtimeSimulationMode,
+      runtimeDevice,
+      runtimeLicenseTier,
+      runtimeLicenseFile,
+      runtimeStatusLine: runtimeSummary.runtimeStatusLine,
       runMode,
       autoPollAsyncRun,
       pollIntervalMsText,
@@ -684,6 +1270,14 @@ export function App() {
       setSceneJsonPath,
       setBaselineId,
       setProfile,
+      setRuntimeBackendType,
+      setRuntimeProviderSpec,
+      setRuntimeRequiredModulesText,
+      setRuntimeFailurePolicy,
+      setRuntimeSimulationMode,
+      setRuntimeDevice,
+      setRuntimeLicenseTier,
+      setRuntimeLicenseFile,
       setRunMode,
       setAutoPollAsyncRun,
       setPollIntervalMsText,
@@ -720,6 +1314,15 @@ export function App() {
     sceneJsonPath,
     baselineId,
     profile,
+    runtimeBackendType,
+    runtimeProviderSpec,
+    runtimeRequiredModulesText,
+    runtimeFailurePolicy,
+    runtimeSimulationMode,
+    runtimeDevice,
+    runtimeLicenseTier,
+    runtimeLicenseFile,
+    runtimeSummary.runtimeStatusLine,
     runMode,
     autoPollAsyncRun,
     pollIntervalMsText,
@@ -748,15 +1351,35 @@ export function App() {
     setContractOverlayEnabled,
   ]);
 
-  return h("div", { className: "page" }, [
+  return h("div", { className: `page density-${densityMode}` }, [
     h(TopBar, {
       key: "topbar",
       statusTone,
       statusText,
       nodeCount: nodes.length,
       edgeCount: edges.length,
+      runtimeBackendType: runtimeSummary.backendTypeObserved || runtimeBackendType,
+      runtimeMode: runtimeSummary.runtimeModeObserved || runtimeSimulationMode,
+      runtimeLicenseTier,
+      runtimeLicenseSet: Boolean(runtimeSummary.licenseObserved || runtimeLicenseFile),
+      layoutMode,
+      setLayoutMode,
+      densityMode,
+      setDensityMode,
+      pipelineStages,
+      focusLeftOpen,
+      focusRightOpen,
+      onToggleFocusLeft: toggleFocusLeftDrawer,
+      onToggleFocusRight: toggleFocusRightDrawer,
     }),
-    h("main", { className: "content", key: "ct" }, [
+    h("main", { className: contentClassName, key: "ct" }, [
+      h("button", {
+        type: "button",
+        className: "focus-backdrop",
+        key: "focus_backdrop",
+        onClick: closeFocusDrawers,
+        "aria-label": "Close focus drawers",
+      }),
       h(GraphInputsPanel, {
         key: "left",
         model: inputPanelModel,
@@ -781,6 +1404,23 @@ export function App() {
         graphRunText,
         gateResultText,
         graphRunSummary,
+        compareGraphRunId,
+        setCompareGraphRunId: setCompareGraphRunIdDraft,
+        compareRunStatusText,
+        compareGraphRunSummary,
+        loadCompareGraphRunById,
+        clearCompareGraphRun,
+        baselineId,
+        pinBaselineFromGraphRun,
+        runPolicyGateForGraphRun,
+        runDecisionRegressionSession,
+        exportGateReport,
+        exportDecisionRegressionSession,
+        exportDecisionBriefMd,
+        decisionSummaryText,
+        decisionOpsStatusText,
+        lastRegressionSession,
+        lastRegressionExport,
         contractDebugText,
       }),
     ]),

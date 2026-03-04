@@ -148,6 +148,15 @@ export function resetContractWarnings() {
  * @property {string} sceneJsonPath
  * @property {string} baselineId
  * @property {string} profile
+ * @property {string} runtimeBackendType
+ * @property {string} runtimeProviderSpec
+ * @property {string} runtimeRequiredModulesText
+ * @property {string} runtimeFailurePolicy
+ * @property {string} runtimeSimulationMode
+ * @property {string} runtimeDevice
+ * @property {string} runtimeLicenseTier
+ * @property {string} runtimeLicenseFile
+ * @property {string} runtimeStatusLine
  * @property {string} runMode
  * @property {boolean} autoPollAsyncRun
  * @property {string} pollIntervalMsText
@@ -198,6 +207,15 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       sceneJsonPath: readString(scope, values, "sceneJsonPath", ""),
       baselineId: readString(scope, values, "baselineId", "graph_lab_baseline"),
       profile: readString(scope, values, "profile", "fast_debug"),
+      runtimeBackendType: readString(scope, values, "runtimeBackendType", "analytic_targets"),
+      runtimeProviderSpec: readString(scope, values, "runtimeProviderSpec", ""),
+      runtimeRequiredModulesText: readString(scope, values, "runtimeRequiredModulesText", ""),
+      runtimeFailurePolicy: readString(scope, values, "runtimeFailurePolicy", "error"),
+      runtimeSimulationMode: readString(scope, values, "runtimeSimulationMode", "auto"),
+      runtimeDevice: readString(scope, values, "runtimeDevice", "cpu"),
+      runtimeLicenseTier: readString(scope, values, "runtimeLicenseTier", "trial"),
+      runtimeLicenseFile: readString(scope, values, "runtimeLicenseFile", ""),
+      runtimeStatusLine: readString(scope, values, "runtimeStatusLine", "-"),
       runMode: readString(scope, values, "runMode", "sync"),
       autoPollAsyncRun: readBoolean(scope, values, "autoPollAsyncRun", true),
       pollIntervalMsText: readString(scope, values, "pollIntervalMsText", "400"),
@@ -215,6 +233,14 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       setSceneJsonPath: readFunction(scope, setters, "setSceneJsonPath"),
       setBaselineId: readFunction(scope, setters, "setBaselineId"),
       setProfile: readFunction(scope, setters, "setProfile"),
+      setRuntimeBackendType: readFunction(scope, setters, "setRuntimeBackendType"),
+      setRuntimeProviderSpec: readFunction(scope, setters, "setRuntimeProviderSpec"),
+      setRuntimeRequiredModulesText: readFunction(scope, setters, "setRuntimeRequiredModulesText"),
+      setRuntimeFailurePolicy: readFunction(scope, setters, "setRuntimeFailurePolicy"),
+      setRuntimeSimulationMode: readFunction(scope, setters, "setRuntimeSimulationMode"),
+      setRuntimeDevice: readFunction(scope, setters, "setRuntimeDevice"),
+      setRuntimeLicenseTier: readFunction(scope, setters, "setRuntimeLicenseTier"),
+      setRuntimeLicenseFile: readFunction(scope, setters, "setRuntimeLicenseFile"),
       setRunMode: readFunction(scope, setters, "setRunMode"),
       setAutoPollAsyncRun: readFunction(scope, setters, "setAutoPollAsyncRun"),
       setPollIntervalMsText: readFunction(scope, setters, "setPollIntervalMsText"),
@@ -263,6 +289,14 @@ export function normalizeGraphRunOpsOptions(raw) {
     profile: readString(scope, root, "profile", "fast_debug"),
     graphId: readString(scope, root, "graphId", "graph_lab"),
     sceneJsonPath: readString(scope, root, "sceneJsonPath", ""),
+    runtimeBackendType: readString(scope, root, "runtimeBackendType", "analytic_targets"),
+    runtimeProviderSpec: readString(scope, root, "runtimeProviderSpec", ""),
+    runtimeRequiredModulesText: readString(scope, root, "runtimeRequiredModulesText", ""),
+    runtimeFailurePolicy: readString(scope, root, "runtimeFailurePolicy", "error"),
+    runtimeSimulationMode: readString(scope, root, "runtimeSimulationMode", "auto"),
+    runtimeDevice: readString(scope, root, "runtimeDevice", "cpu"),
+    runtimeLicenseTier: readString(scope, root, "runtimeLicenseTier", "trial"),
+    runtimeLicenseFile: readString(scope, root, "runtimeLicenseFile", ""),
     nodes: readArray(scope, root, "nodes", []),
     edges: readArray(scope, root, "edges", []),
     runMode: readString(scope, root, "runMode", "sync"),

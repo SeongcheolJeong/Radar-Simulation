@@ -1,0 +1,485 @@
+import { React } from "../deps.mjs";
+import { normalizeRepoPath } from "../graph_helpers.mjs";
+
+const h = React.createElement;
+
+function formatSigned(value) {
+  const n = Number(value || 0);
+  return `${n >= 0 ? "+" : ""}${n}`;
+}
+
+function normalizeShape(rawShape) {
+  if (!Array.isArray(rawShape)) return [];
+  return rawShape
+    .map((x) => Number(x))
+    .filter((x) => Number.isFinite(x) && x >= 0)
+    .map((x) => Math.floor(x));
+}
+
+function normalizePeakList(rawPeaks, rowKey, colKey) {
+  const rows = Array.isArray(rawPeaks) ? rawPeaks : [];
+  return rows
+    .map((peak, idx) => {
+      const row = Number(peak?.[rowKey]);
+      const col = Number(peak?.[colKey]);
+      if (!Number.isFinite(row) || !Number.isFinite(col)) return null;
+      return {
+        index: Number(idx),
+        row: Math.floor(row),
+        col: Math.floor(col),
+        power: Number(peak?.power || 0),
+        relDb: Number(peak?.rel_db || 0),
+      };
+    })
+    .filter(Boolean);
+}
+
+function clampBin(value, maxSize) {
+  const maxIdx = Math.max(0, Number(maxSize || 0) - 1);
+  const raw = Number(value);
+  const candidate = Number.isFinite(raw) ? Math.floor(raw) : 0;
+  return Math.max(0, Math.min(maxIdx, candidate));
+}
+
+function parseBinText(rawText, fallback) {
+  const raw = Number(rawText);
+  if (!Number.isFinite(raw)) return Number(fallback || 0);
+  return Math.floor(raw);
+}
+
+function safeShapeLabel(shape) {
+  return Array.isArray(shape) && shape.length > 0 ? shape.join("x") : "-";
+}
+
+function computeProbe(peaks, rowBin, colBin, shape) {
+  const rows = Number(shape?.[0] || 0);
+  const cols = Number(shape?.[1] || 0);
+  const hasBounds = rows > 0 && cols > 0;
+  const clampedRow = hasBounds ? clampBin(rowBin, rows) : Math.max(0, Number(rowBin || 0));
+  const clampedCol = hasBounds ? clampBin(colBin, cols) : Math.max(0, Number(colBin || 0));
+  const exact = peaks.find((peak) => peak.row === clampedRow && peak.col === clampedCol) || null;
+  let nearest = null;
+  let nearestDist = Number.POSITIVE_INFINITY;
+  peaks.forEach((peak) => {
+    const dist = Math.abs(Number(peak.row) - clampedRow) + Math.abs(Number(peak.col) - clampedCol);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearest = peak;
+    }
+  });
+  return {
+    row: clampedRow,
+    col: clampedCol,
+    hasBounds,
+    exact,
+    nearest,
+    nearestDist: Number.isFinite(nearestDist) ? nearestDist : null,
+    rowNorm: hasBounds ? clampedRow / Math.max(rows - 1, 1) : 0,
+    colNorm: hasBounds ? clampedCol / Math.max(cols - 1, 1) : 0,
+  };
+}
+
+function computeRunDiffOverlay(currentSummary, compareSummary) {
+  const current = currentSummary && typeof currentSummary === "object" ? currentSummary : null;
+  const baseline = compareSummary && typeof compareSummary === "object" ? compareSummary : null;
+  if (!current || !baseline) return null;
+
+  const currentAdcShape = normalizeShape(current?.adc_summary?.shape);
+  const currentRdShape = normalizeShape(current?.radar_map_summary?.rd_shape);
+  const currentRaShape = normalizeShape(current?.radar_map_summary?.ra_shape);
+  const baselineAdcShape = normalizeShape(baseline?.adc_summary?.shape);
+  const baselineRdShape = normalizeShape(baseline?.radar_map_summary?.rd_shape);
+  const baselineRaShape = normalizeShape(baseline?.radar_map_summary?.ra_shape);
+
+  const currentRdPeak = normalizePeakList(current?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin")[0] || null;
+  const baselineRdPeak = normalizePeakList(baseline?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin")[0] || null;
+  const currentRaPeak = normalizePeakList(current?.quicklook?.ra_top_peaks, "angle_bin", "range_bin")[0] || null;
+  const baselineRaPeak = normalizePeakList(baseline?.quicklook?.ra_top_peaks, "angle_bin", "range_bin")[0] || null;
+
+  const currentPathCount = Number(current?.path_summary?.path_count_total || 0);
+  const baselinePathCount = Number(baseline?.path_summary?.path_count_total || 0);
+
+  const toSigned = (value) => {
+    const n = Number(value || 0);
+    return `${n >= 0 ? "+" : ""}${n}`;
+  };
+
+  return {
+    currentGraphRunId: String(current?.graph_run_id || "-"),
+    compareGraphRunId: String(baseline?.graph_run_id || "-"),
+    shapeEq: {
+      adc: safeShapeLabel(currentAdcShape) === safeShapeLabel(baselineAdcShape),
+      rd: safeShapeLabel(currentRdShape) === safeShapeLabel(baselineRdShape),
+      ra: safeShapeLabel(currentRaShape) === safeShapeLabel(baselineRaShape),
+    },
+    shapeText: {
+      adc: `${safeShapeLabel(currentAdcShape)} vs ${safeShapeLabel(baselineAdcShape)}`,
+      rd: `${safeShapeLabel(currentRdShape)} vs ${safeShapeLabel(baselineRdShape)}`,
+      ra: `${safeShapeLabel(currentRaShape)} vs ${safeShapeLabel(baselineRaShape)}`,
+    },
+    pathCountDelta: currentPathCount - baselinePathCount,
+    rdPeakDelta: currentRdPeak && baselineRdPeak ? {
+      rangeBinDelta: Number(currentRdPeak.col || 0) - Number(baselineRdPeak.col || 0),
+      dopplerBinDelta: Number(currentRdPeak.row || 0) - Number(baselineRdPeak.row || 0),
+      relDbDelta: Number(currentRdPeak.relDb || 0) - Number(baselineRdPeak.relDb || 0),
+    } : null,
+    raPeakDelta: currentRaPeak && baselineRaPeak ? {
+      rangeBinDelta: Number(currentRaPeak.col || 0) - Number(baselineRaPeak.col || 0),
+      angleBinDelta: Number(currentRaPeak.row || 0) - Number(baselineRaPeak.row || 0),
+      relDbDelta: Number(currentRaPeak.relDb || 0) - Number(baselineRaPeak.relDb || 0),
+    } : null,
+    toSigned,
+  };
+}
+
+export function ArtifactInspectorPanel({ graphRunSummary, compareGraphRunSummary, compareRunStatusText }) {
+  if (!graphRunSummary) {
+    return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
+  }
+
+  const runtimeContract = graphRunSummary?.runtime_contract_diagnostics || null;
+  const rdShape = normalizeShape(
+    graphRunSummary?.radar_map_summary?.rd_shape || graphRunSummary?.quicklook?.rd_shape
+  );
+  const raShape = normalizeShape(
+    graphRunSummary?.radar_map_summary?.ra_shape || graphRunSummary?.quicklook?.ra_shape
+  );
+  const rdPeaks = normalizePeakList(graphRunSummary?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin");
+  const raPeaks = normalizePeakList(graphRunSummary?.quicklook?.ra_top_peaks, "angle_bin", "range_bin");
+
+  const [rdRangeBinText, setRdRangeBinText] = React.useState("0");
+  const [rdDopplerBinText, setRdDopplerBinText] = React.useState("0");
+  const [raRangeBinText, setRaRangeBinText] = React.useState("0");
+  const [raAngleBinText, setRaAngleBinText] = React.useState("0");
+  const [rdPeakSelectText, setRdPeakSelectText] = React.useState("-1");
+  const [raPeakSelectText, setRaPeakSelectText] = React.useState("-1");
+  const [rdPeakLock, setRdPeakLock] = React.useState(false);
+  const [raPeakLock, setRaPeakLock] = React.useState(false);
+
+  React.useEffect(() => {
+    const primaryRd = rdPeaks[0] || null;
+    const primaryRa = raPeaks[0] || null;
+    setRdRangeBinText(String(primaryRd ? primaryRd.col : 0));
+    setRdDopplerBinText(String(primaryRd ? primaryRd.row : 0));
+    setRaRangeBinText(String(primaryRa ? primaryRa.col : 0));
+    setRaAngleBinText(String(primaryRa ? primaryRa.row : 0));
+    setRdPeakSelectText(primaryRd ? "0" : "-1");
+    setRaPeakSelectText(primaryRa ? "0" : "-1");
+    setRdPeakLock(false);
+    setRaPeakLock(false);
+  }, [graphRunSummary, rdPeaks, raPeaks]);
+
+  React.useEffect(() => {
+    if (!rdPeakLock) return;
+    const idx = Number(rdPeakSelectText);
+    const peak = Number.isFinite(idx) && idx >= 0 ? rdPeaks[Math.floor(idx)] : null;
+    if (!peak) return;
+    setRdRangeBinText(String(peak.col));
+    setRdDopplerBinText(String(peak.row));
+  }, [rdPeakLock, rdPeakSelectText, rdPeaks]);
+
+  React.useEffect(() => {
+    if (!raPeakLock) return;
+    const idx = Number(raPeakSelectText);
+    const peak = Number.isFinite(idx) && idx >= 0 ? raPeaks[Math.floor(idx)] : null;
+    if (!peak) return;
+    setRaRangeBinText(String(peak.col));
+    setRaAngleBinText(String(peak.row));
+  }, [raPeakLock, raPeakSelectText, raPeaks]);
+
+  const rdProbe = React.useMemo(() => {
+    const rangeBin = parseBinText(rdRangeBinText, 0);
+    const dopplerBin = parseBinText(rdDopplerBinText, 0);
+    return computeProbe(rdPeaks, dopplerBin, rangeBin, rdShape);
+  }, [rdDopplerBinText, rdPeaks, rdRangeBinText, rdShape]);
+
+  const raProbe = React.useMemo(() => {
+    const rangeBin = parseBinText(raRangeBinText, 0);
+    const angleBin = parseBinText(raAngleBinText, 0);
+    return computeProbe(raPeaks, angleBin, rangeBin, raShape);
+  }, [raAngleBinText, raPeaks, raRangeBinText, raShape]);
+
+  const runDiff = React.useMemo(
+    () => computeRunDiffOverlay(graphRunSummary, compareGraphRunSummary),
+    [compareGraphRunSummary, graphRunSummary]
+  );
+
+  const renderProbeSummary = (probe) => {
+    const exact = probe.exact;
+    const nearest = probe.nearest;
+    const nearestPart = nearest
+      ? `nearest_peak=#${nearest.index} d=${Number(probe.nearestDist)} rel_db=${Number(nearest.relDb).toFixed(2)}`
+      : "nearest_peak=none";
+    const exactPart = exact
+      ? `exact_peak=#${exact.index} rel_db=${Number(exact.relDb).toFixed(2)}`
+      : "exact_peak=none";
+    return [
+      `${exactPart} | ${nearestPart}`,
+      `cursor_norm=(${Number(probe.rowNorm).toFixed(3)}, ${Number(probe.colNorm).toFixed(3)})`,
+    ];
+  };
+
+  return h("div", { className: "result-box", key: "aibox" }, [
+    h("div", { key: "kpi", style: { marginBottom: "8px" } }, [
+      `paths=${Number(graphRunSummary?.path_summary?.path_count_total || 0)} | `,
+      `adc_shape=${Array.isArray(graphRunSummary?.adc_summary?.shape) ? graphRunSummary.adc_summary.shape.join("x") : "-"} | `,
+      `rd=${Array.isArray(graphRunSummary?.radar_map_summary?.rd_shape) ? graphRunSummary.radar_map_summary.rd_shape.join("x") : "-"} | `,
+      `ra=${Array.isArray(graphRunSummary?.radar_map_summary?.ra_shape) ? graphRunSummary.radar_map_summary.ra_shape.join("x") : "-"}`,
+    ]),
+    runtimeContract
+      ? h("div", { key: "contract_runtime", style: { marginBottom: "8px", color: "#8fb3c9" } }, [
+          `contract_delta(unique/attempt): ${formatSigned(runtimeContract?.delta?.unique_warning_count)}/${formatSigned(runtimeContract?.delta?.attempt_count_total)} | `,
+          `contract_total(unique/attempt): ${Number(runtimeContract?.snapshot?.unique_warning_count || 0)}/${Number(runtimeContract?.snapshot?.attempt_count_total || 0)}`,
+        ])
+      : null,
+    h("div", { key: "diff_overlay", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
+      h("div", { key: "diff_title", style: { marginBottom: "5px", color: "#8fb3c9" } }, "run-to-run diff overlay:"),
+      runDiff
+        ? h("div", { key: "diff_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, [
+            h("div", { key: "diff_hdr" }, `current=${runDiff.currentGraphRunId} | compare=${runDiff.compareGraphRunId}`),
+            h("div", { key: "diff_shape_adc" }, `shape.adc: ${runDiff.shapeText.adc} | eq=${runDiff.shapeEq.adc}`),
+            h("div", { key: "diff_shape_rd" }, `shape.rd: ${runDiff.shapeText.rd} | eq=${runDiff.shapeEq.rd}`),
+            h("div", { key: "diff_shape_ra" }, `shape.ra: ${runDiff.shapeText.ra} | eq=${runDiff.shapeEq.ra}`),
+            h("div", { key: "diff_paths" }, `path_count_delta: ${runDiff.toSigned(runDiff.pathCountDelta)}`),
+            h(
+              "div",
+              { key: "diff_rd" },
+              runDiff.rdPeakDelta
+                ? `rd_peak_delta(range/doppler/rel_db): ${runDiff.toSigned(runDiff.rdPeakDelta.rangeBinDelta)}/${runDiff.toSigned(runDiff.rdPeakDelta.dopplerBinDelta)}/${runDiff.rdPeakDelta.relDbDelta.toFixed(2)}`
+                : "rd_peak_delta: unavailable"
+            ),
+            h(
+              "div",
+              { key: "diff_ra" },
+              runDiff.raPeakDelta
+                ? `ra_peak_delta(range/angle/rel_db): ${runDiff.toSigned(runDiff.raPeakDelta.rangeBinDelta)}/${runDiff.toSigned(runDiff.raPeakDelta.angleBinDelta)}/${runDiff.raPeakDelta.relDbDelta.toFixed(2)}`
+                : "ra_peak_delta: unavailable"
+            ),
+          ])
+        : h("div", { key: "diff_empty", style: { color: "#86a1b4" } }, String(compareRunStatusText || "compare run not loaded")),
+    ]),
+    h("div", { key: "probe", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
+      h("div", { key: "probe_title", style: { marginBottom: "6px", color: "#8fb3c9" } }, "cursor probe + peak lock:"),
+      h("div", { key: "probe_grid", style: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "8px" } }, [
+        h("div", { key: "probe_rd", style: { border: "1px solid #264758", borderRadius: "6px", padding: "6px" } }, [
+          h("div", { key: "probe_rd_title", style: { marginBottom: "4px", color: "#9fc1d4" } }, `RD probe (shape=${safeShapeLabel(rdShape)})`),
+          h("div", { key: "probe_rd_inputs", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "6px" } }, [
+            h("input", {
+              key: "rd_range_bin",
+              className: "input",
+              value: rdRangeBinText,
+              onChange: (e) => setRdRangeBinText(String(e.target.value || "0")),
+              placeholder: "range_bin",
+            }),
+            h("input", {
+              key: "rd_doppler_bin",
+              className: "input",
+              value: rdDopplerBinText,
+              onChange: (e) => setRdDopplerBinText(String(e.target.value || "0")),
+              placeholder: "doppler_bin",
+            }),
+          ]),
+          h("div", { key: "probe_rd_peakctl", style: { display: "grid", gridTemplateColumns: "1fr auto", gap: "6px", marginBottom: "6px" } }, [
+            h("select", {
+              key: "rd_peak_select",
+              className: "select",
+              value: rdPeakSelectText,
+              onChange: (e) => setRdPeakSelectText(String(e.target.value || "-1")),
+            }, [
+              h("option", { key: "rd_peak_none", value: "-1" }, "RD peak: none"),
+              ...rdPeaks.map((peak) =>
+                h(
+                  "option",
+                  { key: `rd_peak_${peak.index}`, value: String(peak.index) },
+                  `#${peak.index} d=${peak.row} r=${peak.col} rel=${Number(peak.relDb).toFixed(2)}`
+                )
+              ),
+            ]),
+            h("button", {
+              key: "rd_snap",
+              className: "btn",
+              onClick: () => {
+                const idx = Number(rdPeakSelectText);
+                const peak = Number.isFinite(idx) && idx >= 0 ? rdPeaks[Math.floor(idx)] : null;
+                if (!peak) return;
+                setRdRangeBinText(String(peak.col));
+                setRdDopplerBinText(String(peak.row));
+              },
+            }, "Snap"),
+          ]),
+          h("label", { key: "rd_lock_lbl", style: { display: "inline-flex", alignItems: "center", gap: "6px", color: "#8fb3c9" } }, [
+            h("input", {
+              key: "rd_lock_chk",
+              type: "checkbox",
+              checked: Boolean(rdPeakLock),
+              onChange: (e) => setRdPeakLock(Boolean(e.target.checked)),
+            }),
+            "Peak lock",
+          ]),
+          ...renderProbeSummary(rdProbe).map((line, idx) =>
+            h("div", { key: `rd_probe_line_${idx}`, style: { marginTop: idx === 0 ? "6px" : "2px", color: "#b9d5e7" } }, line)
+          ),
+        ]),
+        h("div", { key: "probe_ra", style: { border: "1px solid #264758", borderRadius: "6px", padding: "6px" } }, [
+          h("div", { key: "probe_ra_title", style: { marginBottom: "4px", color: "#9fc1d4" } }, `RA probe (shape=${safeShapeLabel(raShape)})`),
+          h("div", { key: "probe_ra_inputs", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "6px" } }, [
+            h("input", {
+              key: "ra_range_bin",
+              className: "input",
+              value: raRangeBinText,
+              onChange: (e) => setRaRangeBinText(String(e.target.value || "0")),
+              placeholder: "range_bin",
+            }),
+            h("input", {
+              key: "ra_angle_bin",
+              className: "input",
+              value: raAngleBinText,
+              onChange: (e) => setRaAngleBinText(String(e.target.value || "0")),
+              placeholder: "angle_bin",
+            }),
+          ]),
+          h("div", { key: "probe_ra_peakctl", style: { display: "grid", gridTemplateColumns: "1fr auto", gap: "6px", marginBottom: "6px" } }, [
+            h("select", {
+              key: "ra_peak_select",
+              className: "select",
+              value: raPeakSelectText,
+              onChange: (e) => setRaPeakSelectText(String(e.target.value || "-1")),
+            }, [
+              h("option", { key: "ra_peak_none", value: "-1" }, "RA peak: none"),
+              ...raPeaks.map((peak) =>
+                h(
+                  "option",
+                  { key: `ra_peak_${peak.index}`, value: String(peak.index) },
+                  `#${peak.index} a=${peak.row} r=${peak.col} rel=${Number(peak.relDb).toFixed(2)}`
+                )
+              ),
+            ]),
+            h("button", {
+              key: "ra_snap",
+              className: "btn",
+              onClick: () => {
+                const idx = Number(raPeakSelectText);
+                const peak = Number.isFinite(idx) && idx >= 0 ? raPeaks[Math.floor(idx)] : null;
+                if (!peak) return;
+                setRaRangeBinText(String(peak.col));
+                setRaAngleBinText(String(peak.row));
+              },
+            }, "Snap"),
+          ]),
+          h("label", { key: "ra_lock_lbl", style: { display: "inline-flex", alignItems: "center", gap: "6px", color: "#8fb3c9" } }, [
+            h("input", {
+              key: "ra_lock_chk",
+              type: "checkbox",
+              checked: Boolean(raPeakLock),
+              onChange: (e) => setRaPeakLock(Boolean(e.target.checked)),
+            }),
+            "Peak lock",
+          ]),
+          ...renderProbeSummary(raProbe).map((line, idx) =>
+            h("div", { key: `ra_probe_line_${idx}`, style: { marginTop: idx === 0 ? "6px" : "2px", color: "#b9d5e7" } }, line)
+          ),
+        ]),
+      ]),
+    ]),
+    h("div", { key: "links", style: { marginBottom: "8px" } }, [
+      h("div", { key: "lt" }, "artifacts:"),
+      ...[
+        ["path_list_json", graphRunSummary?.outputs?.path_list_json],
+        ["adc_cube_npz", graphRunSummary?.outputs?.adc_cube_npz],
+        ["radar_map_npz", graphRunSummary?.outputs?.radar_map_npz],
+        ["graph_run_summary_json", graphRunSummary?.outputs?.graph_run_summary_json],
+      ].map(([name, rawPath]) => {
+        const href = normalizeRepoPath(String(rawPath || ""));
+        if (!href) {
+          return h("div", { key: `m_${name}` }, `- ${name}: -`);
+        }
+        return h("div", { key: `l_${name}` }, [
+          `- ${name}: `,
+          h(
+            "a",
+            {
+              href,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              style: { color: "#7ed9ff", textDecoration: "underline" },
+            },
+            "open"
+          ),
+        ]);
+      }),
+    ]),
+    h("div", { key: "trace", style: { marginBottom: "8px" } }, [
+      h("div", { key: "tt" }, "node trace:"),
+      ...((Array.isArray(graphRunSummary?.execution?.node_results)
+        ? graphRunSummary.execution.node_results
+        : []
+      ).slice(0, 24).map((row, idx) => {
+        const artifactMap = row?.artifacts && typeof row.artifacts === "object" ? row.artifacts : {};
+        const artifactCount = Object.keys(artifactMap).length;
+        const isCacheHit = Boolean(row?.cache_hit) || String(row?.status || "").toLowerCase() === "cached";
+        const artifactBadge = artifactCount <= 0 ? "n/a" : (isCacheHit ? "cache-hit" : "recomputed");
+        const badgeStyle = artifactBadge === "cache-hit"
+          ? { border: "1px solid #2f6f57", color: "#7ee3b8", background: "rgba(53, 200, 133, 0.1)" }
+          : artifactBadge === "recomputed"
+            ? { border: "1px solid #8a6a2d", color: "#f4c265", background: "rgba(240, 179, 58, 0.1)" }
+            : { border: "1px solid #36586d", color: "#8eb6ca", background: "rgba(58, 103, 129, 0.1)" };
+        const sourceRun = String(row?.cache_source_graph_run_id || "").trim();
+        return h("div", { key: `tr_${idx}` }, [
+          `- #${Number(idx)} ${String(row?.node_type || "-")} (${String(row?.node_id || "-")}) | status=${String(row?.status || "-")} | contract=${String(row?.output_contract || "-")} | artifact=`,
+          h(
+            "span",
+            {
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                borderRadius: "999px",
+                padding: "1px 7px",
+                fontSize: "10px",
+                marginLeft: "5px",
+                ...badgeStyle,
+              },
+            },
+            artifactBadge
+          ),
+          sourceRun && isCacheHit ? ` | source=${sourceRun}` : "",
+        ]);
+      })),
+    ]),
+    h("div", { key: "visTitle", style: { marginBottom: "4px" } }, "visuals:"),
+    h(
+      "div",
+      {
+        key: "visGrid",
+        style: {
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: "8px",
+        },
+      },
+      [
+        ["rd_map_png", graphRunSummary?.visuals?.rd_map_png],
+        ["ra_map_png", graphRunSummary?.visuals?.ra_map_png],
+        ["adc_tx0_rx0_png", graphRunSummary?.visuals?.adc_tx0_rx0_png],
+        ["path_scatter_chirp0_png", graphRunSummary?.visuals?.path_scatter_chirp0_png],
+      ]
+        .map(([name, rawPath]) => {
+          const src = normalizeRepoPath(String(rawPath || ""));
+          if (!src) return null;
+          return h(
+            "div",
+            { key: `v_${name}`, style: { border: "1px solid #284a5d", borderRadius: "6px", padding: "4px" } },
+            [
+              h("div", { key: `vt_${name}`, style: { fontSize: "10px", marginBottom: "4px", color: "#8fb3c9" } }, name),
+              h("img", {
+                key: `img_${name}`,
+                src,
+                alt: String(name),
+                style: { width: "100%", height: "92px", objectFit: "cover", borderRadius: "4px" },
+              }),
+            ]
+          );
+        })
+        .filter(Boolean)
+    ),
+  ]);
+}

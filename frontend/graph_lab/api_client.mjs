@@ -47,6 +47,10 @@ export async function getGraphTemplates(apiBase) {
   return requestJsonOrThrow(apiBase, "/api/graph/templates");
 }
 
+export async function listGraphRuns(apiBase) {
+  return requestJsonOrThrow(apiBase, "/api/graph/runs");
+}
+
 export async function validateGraphContract(apiBase, graphPayload) {
   return requestJsonOrThrow(apiBase, "/api/graph/validate", {
     method: "POST",
@@ -109,6 +113,22 @@ export async function evaluatePolicyGate(apiBase, policyPayload) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(policyPayload),
+  });
+}
+
+export async function runRegressionSession(apiBase, sessionPayload) {
+  return requestJsonOrThrow(apiBase, "/api/regression-sessions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(sessionPayload),
+  });
+}
+
+export async function exportRegressionSession(apiBase, exportPayload) {
+  return requestJsonOrThrow(apiBase, "/api/regression-exports", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(exportPayload),
   });
 }
 

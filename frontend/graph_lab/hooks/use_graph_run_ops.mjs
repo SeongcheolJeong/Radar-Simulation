@@ -13,6 +13,63 @@ import {
   runGraph,
 } from "../api_client.mjs";
 
+function splitTokenList(rawText) {
+  return String(rawText || "")
+    .split(/[,\n]/)
+    .map((x) => String(x || "").trim())
+    .filter((x) => x.length > 0);
+}
+
+function applyRuntimeBackendToGraph(graph, backendType, runtimeProviderSpec) {
+  const root = graph && typeof graph === "object" ? graph : {};
+  const nodes = Array.isArray(root.nodes) ? root.nodes : [];
+  const normalizedBackend = String(backendType || "").trim().toLowerCase();
+  if (!normalizedBackend) return root;
+  const normalizedProvider = String(runtimeProviderSpec || "").trim();
+  return {
+    ...root,
+    nodes: nodes.map((node) => {
+      if (!node || typeof node !== "object") return node;
+      if (String(node.type || "").trim() !== "Propagation") return node;
+      const params = node.params && typeof node.params === "object" ? { ...node.params } : {};
+      params.backend = normalizedBackend;
+      if (normalizedProvider) {
+        params.runtime_provider = normalizedProvider;
+      }
+      return { ...node, params };
+    }),
+  };
+}
+
+function buildSceneOverrides(options) {
+  const opts = options && typeof options === "object" ? options : {};
+  const backendType = String(opts.runtimeBackendType || "").trim().toLowerCase();
+  if (!backendType) return null;
+  const runtimeProviderSpec = String(opts.runtimeProviderSpec || "").trim();
+  const runtimeFailurePolicy = String(opts.runtimeFailurePolicy || "").trim().toLowerCase();
+  const runtimeSimulationMode = String(opts.runtimeSimulationMode || "").trim().toLowerCase();
+  const runtimeDevice = String(opts.runtimeDevice || "").trim().toLowerCase();
+  const runtimeLicenseTier = String(opts.runtimeLicenseTier || "").trim().toLowerCase();
+  const runtimeLicenseFile = String(opts.runtimeLicenseFile || "").trim();
+  const runtimeRequiredModules = splitTokenList(opts.runtimeRequiredModulesText || "");
+
+  const backend = { type: backendType };
+  if (runtimeProviderSpec) backend.runtime_provider = runtimeProviderSpec;
+  if (runtimeRequiredModules.length > 0) backend.runtime_required_modules = runtimeRequiredModules;
+  if (runtimeFailurePolicy) backend.runtime_failure_policy = runtimeFailurePolicy;
+
+  const runtimeInput = {};
+  if (runtimeSimulationMode) runtimeInput.simulation_mode = runtimeSimulationMode;
+  if (runtimeDevice) runtimeInput.device = runtimeDevice;
+  if (runtimeLicenseTier) runtimeInput.license_tier_hint = runtimeLicenseTier;
+  if (runtimeLicenseFile) runtimeInput.license_file = runtimeLicenseFile;
+  if (Object.keys(runtimeInput).length > 0) {
+    backend.runtime_input = runtimeInput;
+  }
+
+  return { backend };
+}
+
 export function useGraphRunOps(opts) {
   const safeOpts = normalizeGraphRunOpsOptions(opts);
   const {
@@ -20,6 +77,14 @@ export function useGraphRunOps(opts) {
     profile,
     graphId,
     sceneJsonPath,
+    runtimeBackendType,
+    runtimeProviderSpec,
+    runtimeRequiredModulesText,
+    runtimeFailurePolicy,
+    runtimeSimulationMode,
+    runtimeDevice,
+    runtimeLicenseTier,
+    runtimeLicenseFile,
     nodes,
     edges,
     runMode,
@@ -252,7 +317,18 @@ export function useGraphRunOps(opts) {
   ]);
 
   const runGraphViaApi = React.useCallback(async () => {
-    const graph = toGraphPayload({ graphId, profile, nodes, edges });
+    const graphRaw = toGraphPayload({ graphId, profile, nodes, edges });
+    const graph = applyRuntimeBackendToGraph(graphRaw, runtimeBackendType, runtimeProviderSpec);
+    const sceneOverrides = buildSceneOverrides({
+      runtimeBackendType,
+      runtimeProviderSpec,
+      runtimeRequiredModulesText,
+      runtimeFailurePolicy,
+      runtimeSimulationMode,
+      runtimeDevice,
+      runtimeLicenseTier,
+      runtimeLicenseFile,
+    });
     const runAsync = String(runMode || "sync") === "async";
     const beforeContractSnapshot = getContractWarningSnapshot();
     let submittedGraphRunId = "";
@@ -261,15 +337,19 @@ export function useGraphRunOps(opts) {
       "status-warn"
     );
     try {
+      const requestPayload = {
+        graph,
+        scene_json_path: sceneJsonPath,
+        profile,
+        run_hybrid_estimation: false,
+        tag: "graph_lab",
+      };
+      if (sceneOverrides) {
+        requestPayload.scene_overrides = sceneOverrides;
+      }
       const payload = await runGraph(
         apiBase,
-        {
-          graph,
-          scene_json_path: sceneJsonPath,
-          profile,
-          run_hybrid_estimation: false,
-          tag: "graph_lab",
-        },
+        requestPayload,
         runAsync
       );
       const row = payload.graph_run || {};
@@ -348,6 +428,14 @@ export function useGraphRunOps(opts) {
     profile,
     renderGraphRunRecord,
     runMode,
+    runtimeBackendType,
+    runtimeProviderSpec,
+    runtimeRequiredModulesText,
+    runtimeFailurePolicy,
+    runtimeSimulationMode,
+    runtimeDevice,
+    runtimeLicenseTier,
+    runtimeLicenseFile,
     sceneJsonPath,
     setGateResultText,
     setGraphRunSummary,
