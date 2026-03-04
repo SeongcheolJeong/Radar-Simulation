@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "policy_id": "radarsimpy_runtime_license_boundary_v1",
+  "generated_at_utc": "2026-03-03T00:00:00Z",
+  "scope": "RadarSimPy runtime license-tier boundary for integration and production release gating",
+  "runtime_warning_markers": [
+    "No license file path provided",
+    "Running in free tier mode"
+  ],
+  "tier_profiles": {
+    "trial": {
+      "max_tx_channels": 1,
+      "max_rx_channels": 1,
+      "requires_trial_free_tier_geometry": true,
+      "allows_production_release": false
+    },
+    "production": {
+      "min_tx_channels": 2,
+      "min_rx_channels": 2,
+      "requires_trial_free_tier_geometry": false,
+      "allows_production_release": true,
+      "must_not_emit_free_tier_warning_markers": true
+    }
+  },
+  "compliance_controls": {
+    "must_track_license_artifact_source": true,
+    "must_record_runtime_tier_in_gate_reports": true,
+    "must_fail_production_gate_on_free_tier_markers": true,
+    "must_run_multichannel_pilot_for_production_release": true
+  },
+  "operator_notes": [
+    "Trial/free-tier runtime is allowed for developer functional checks only.",
+    "Production release gates must run with runtime-license-tier=production and fail when free-tier markers are observed.",
+    "Production runtime validation must run strict pilot without --trial-free-tier-geometry."
+  ]
+}

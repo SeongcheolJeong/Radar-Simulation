@@ -33,6 +33,14 @@ Move `radarsimpy_rt` from import-check + analytic placeholder behavior to real f
 ### Standard/Production
 - Multi-channel TX/RX is expected to work with proper license tier.
 - The migrated provider/backend path is ready for multi-channel configurations.
+- Integration gates now support explicit runtime license policy:
+  - `--runtime-license-tier trial`: uses `--trial-free-tier-geometry` in strict pilot.
+  - `--runtime-license-tier production`: strict pilot runs without trial geometry and fails
+    when free-tier warning markers are observed.
+  - In `production` tier, default trial runtime path injection is disabled unless
+    runtime paths are explicitly provided.
+  - `--license-file /abs/path/license_RadarSimPy_*.lic` configures licensed mode for
+    all real-runtime subprocesses via `RADARSIMPY_LICENSE_FILE`.
 
 ## Operational Scripts
 
@@ -65,3 +73,5 @@ Move `radarsimpy_rt` from import-check + analytic placeholder behavior to real f
 - Real RadarSimPy reference and analytic/Sionna/PO-SBR candidates will not necessarily match with strict default parity thresholds.
 - Use threshold overrides (`--rdra-thresholds-json`, `--adc-view-thresholds-json`) for pragmatic migration gates.
 - For trial environment runs, use `--trial-free-tier-geometry` for functional execution.
+- For production release gating, run wrapper/smoke gates with
+  `--with-real-runtime --runtime-license-tier production`.
