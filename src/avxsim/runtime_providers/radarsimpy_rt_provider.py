@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import os
 from types import ModuleType
 from typing import Any, Dict, List, Mapping, Sequence, Tuple
 
@@ -19,8 +20,11 @@ def generate_radarsimpy_like_paths(context: Mapping[str, Any]) -> Dict[str, Any]
     if fc_hz <= 0.0:
         raise ValueError("context.fc_hz must be > 0")
 
-    module = _import_radarsimpy_module()
     runtime_input = _as_obj(context, "runtime_input", required=False)
+    runtime_info: Dict[str, Any] = {}
+    _apply_runtime_license_override(runtime_input=runtime_input, runtime_info=runtime_info)
+
+    module = _import_radarsimpy_module()
     chirp_interval_s = _resolve_chirp_interval_s(context=context, runtime_input=runtime_input)
     min_range_m = max(float(runtime_input.get("min_range_m", 1.0e-6)), 1.0e-6)
     lam = C0 / fc_hz
@@ -38,12 +42,12 @@ def generate_radarsimpy_like_paths(context: Mapping[str, Any]) -> Dict[str, Any]
     if simulation_mode not in ("auto", "analytic_paths", "radarsimpy_adc"):
         raise ValueError("runtime_input.simulation_mode must be auto, analytic_paths, or radarsimpy_adc")
 
-    runtime_info: Dict[str, Any] = {
+    runtime_info.update({
         "module_name": str(getattr(module, "__name__", "radarsimpy")),
         "module_version": str(getattr(module, "__version__", "unknown")),
         "generator": "analytic_targets_with_optional_radarsimpy_adc",
         "simulation_mode": simulation_mode,
-    }
+    })
     if simulation_mode == "analytic_paths":
         runtime_info["simulation_used"] = False
         runtime_info["simulation_reason"] = "explicit_analytic_mode"
@@ -471,6 +475,19 @@ def _resolve_chirp_interval_s(context: Mapping[str, Any], runtime_input: Mapping
     if chirp_interval_s <= 0.0:
         raise ValueError("runtime_input.chirp_interval_s must be > 0")
     return chirp_interval_s
+
+
+def _apply_runtime_license_override(runtime_input: Mapping[str, Any], runtime_info: Dict[str, Any]) -> None:
+    runtime_license = str(runtime_input.get("license_file", "")).strip()
+    env_license = str(os.environ.get(rs_api.RADARSIMPY_LICENSE_FILE_ENV, "")).strip()
+    if runtime_license != "":
+        os.environ[rs_api.RADARSIMPY_LICENSE_FILE_ENV] = runtime_license
+        runtime_info["license_file"] = runtime_license
+        runtime_info["license_source"] = "runtime_input"
+        return
+    if env_license != "":
+        runtime_info["license_file"] = env_license
+        runtime_info["license_source"] = "env"
 
 
 def _import_radarsimpy_module() -> ModuleType:

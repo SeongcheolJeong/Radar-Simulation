@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib
+import os
 from types import ModuleType
+from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 from .radarsimpy_core_processing import (
@@ -19,10 +21,13 @@ from .radarsimpy_core_processing import (
     core_range_doppler_fft,
     core_range_fft,
 )
+from .radarsimpy_core_model import CoreRadar, CoreReceiver, CoreTransmitter
+from .radarsimpy_core_simulator import core_sim_radar, core_sim_rcs
 from .radarsimpy_core_tools import core_roc_pd, core_roc_snr
 
 API_INDEX_URL = "https://radarsimx.github.io/radarsimpy/api/index.html"
 API_INDEX_VERSION = "15.0.1"
+RADARSIMPY_LICENSE_FILE_ENV = "RADARSIMPY_LICENSE_FILE"
 
 RADARSIMPY_ROOT_API: Tuple[str, ...] = (
     "Transmitter",
@@ -56,11 +61,41 @@ RADARSIMPY_SUPPORTED_API: Tuple[str, ...] = (
     *RADARSIMPY_PROCESSING_API,
     *RADARSIMPY_TOOLS_API,
 )
+_RADARSIMPY_LICENSE_CONFIGURED_PATH: str | None = None
+
+
+def _configure_radarsimpy_license(module: ModuleType) -> None:
+    global _RADARSIMPY_LICENSE_CONFIGURED_PATH
+    license_file = str(os.environ.get(RADARSIMPY_LICENSE_FILE_ENV, "")).strip()
+    if license_file == "":
+        return
+    license_path = Path(license_file).expanduser()
+    if not license_path.is_absolute():
+        license_path = license_path.resolve()
+    else:
+        license_path = license_path.resolve()
+    license_path_text = str(license_path)
+    if license_path_text == _RADARSIMPY_LICENSE_CONFIGURED_PATH:
+        return
+    if not license_path.exists() or (not license_path.is_file()):
+        raise RuntimeError(
+            f"{RADARSIMPY_LICENSE_FILE_ENV} points to missing file: {license_path_text}"
+        )
+    set_license = getattr(module, "set_license", None)
+    if set_license is None:
+        raise RuntimeError("radarsimpy.set_license is unavailable")
+    try:
+        set_license(license_path_text)
+    except Exception as exc:
+        raise RuntimeError(f"failed to configure RadarSimPy license from {license_path_text}: {exc}") from exc
+    _RADARSIMPY_LICENSE_CONFIGURED_PATH = license_path_text
 
 
 def _import_radarsimpy_module() -> ModuleType:
     try:
-        return importlib.import_module("radarsimpy")
+        module = importlib.import_module("radarsimpy")
+        _configure_radarsimpy_license(module)
+        return module
     except Exception as exc:
         raise RuntimeError(f"missing required RadarSimPy module: {exc}") from exc
 
@@ -75,6 +110,13 @@ def _resolve_root_attr(name: str) -> Any:
     if value is None:
         raise RuntimeError(f"radarsimpy root API missing: {name}")
     return value
+
+
+def _resolve_root_attr_or_fallback(name: str, fallback: Any) -> Any:
+    try:
+        return _resolve_root_attr(name)
+    except RuntimeError:
+        return fallback
 
 
 def _resolve_submodule_attr(submodule_name: str, attr_name: str) -> Any:
@@ -154,27 +196,27 @@ def inspect_radarsimpy_api_coverage(module: ModuleType | None = None) -> Dict[st
 
 
 def Transmitter(*args: Any, **kwargs: Any) -> Any:
-    cls = _resolve_root_attr("Transmitter")
+    cls = _resolve_root_attr_or_fallback("Transmitter", CoreTransmitter)
     return cls(*args, **kwargs)
 
 
 def Receiver(*args: Any, **kwargs: Any) -> Any:
-    cls = _resolve_root_attr("Receiver")
+    cls = _resolve_root_attr_or_fallback("Receiver", CoreReceiver)
     return cls(*args, **kwargs)
 
 
 def Radar(*args: Any, **kwargs: Any) -> Any:
-    cls = _resolve_root_attr("Radar")
+    cls = _resolve_root_attr_or_fallback("Radar", CoreRadar)
     return cls(*args, **kwargs)
 
 
 def sim_radar(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_root_attr("sim_radar")
+    fn = _resolve_root_attr_or_fallback("sim_radar", core_sim_radar)
     return fn(*args, **kwargs)
 
 
 def sim_rcs(*args: Any, **kwargs: Any) -> Any:
-    fn = _resolve_root_attr("sim_rcs")
+    fn = _resolve_root_attr_or_fallback("sim_rcs", core_sim_rcs)
     return fn(*args, **kwargs)
 
 
