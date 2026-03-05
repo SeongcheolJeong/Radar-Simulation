@@ -1,0 +1,44 @@
+name: RadarSimPy Report Retention Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_per_group:
+        description: "Per-group retention count for checkpoint artifacts"
+        required: false
+        default: "8"
+  schedule:
+    - cron: "25 2 * * 1"
+
+jobs:
+  retention-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run retention audit (dry-run)
+        env:
+          PY_BIN: python3
+          REPORTS_ROOT: docs/reports
+          KEEP_PER_GROUP: ${{ github.event.inputs.keep_per_group || '8' }}
+          APPLY_MODE: "0"
+          OUTPUT_JSON: docs/reports/radarsimpy_report_retention_audit_latest.json
+          OUTPUT_MD: docs/reports/radarsimpy_report_retention_audit_latest.md
+        run: |
+          chmod +x scripts/run_radarsimpy_report_retention_audit.sh
+          scripts/run_radarsimpy_report_retention_audit.sh
+
+      - name: Upload retention audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: radarsimpy-report-retention-audit
+          path: |
+            docs/reports/radarsimpy_report_retention_audit_latest.json
+            docs/reports/radarsimpy_report_retention_audit_latest.md
+          if-no-files-found: error

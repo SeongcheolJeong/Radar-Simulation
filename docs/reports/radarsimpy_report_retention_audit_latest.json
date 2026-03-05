@@ -1,0 +1,94 @@
+{
+  "report_name": "radarsimpy_report_retention_audit",
+  "generated_at_utc": "2026-03-05T11:40:41.838479+00:00",
+  "reports_root": "/home/seongcheoljeong/workspace/myproject/docs/reports",
+  "keep_per_group": 8,
+  "apply": false,
+  "summary": {
+    "matched_count": 121,
+    "group_count": 4,
+    "total_size_bytes": 918502,
+    "prunable_count": 89,
+    "prunable_size_bytes": 632032
+  },
+  "groups": [
+    {
+      "group": "radarsimpy_function_progress_checkpoint",
+      "total_count": 25,
+      "kept_count": 8,
+      "prunable_count": 17,
+      "total_size_bytes": 123875,
+      "prunable_size_bytes": 84235,
+      "newest": {
+        "path": "reports/radarsimpy_function_progress_checkpoint_2026_03_05T113318_523899Z_2892691_pid692088.json",
+        "mtime_utc": "2026-03-05T11:34:20.890728+00:00",
+        "size_bytes": 4955
+      },
+      "oldest": {
+        "path": "reports/radarsimpy_function_progress_checkpoint_2026_03_03_48a093e.json",
+        "mtime_utc": "2026-03-03T03:07:54.089405+00:00",
+        "size_bytes": 4955
+      }
+    },
+    {
+      "group": "radarsimpy_integration_smoke_gate_checkpoint",
+      "total_count": 32,
+      "kept_count": 8,
+      "prunable_count": 24,
+      "total_size_bytes": 262345,
+      "prunable_size_bytes": 185079,
+      "newest": {
+        "path": "reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_05T113318_523899Z_2892691_pid692088.json",
+        "mtime_utc": "2026-03-05T11:34:03.798614+00:00",
+        "size_bytes": 9829
+      },
+      "oldest": {
+        "path": "reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_02_88652f2.json",
+        "mtime_utc": "2026-03-02T18:46:28.142277+00:00",
+        "size_bytes": 2997
+      }
+    },
+    {
+      "group": "radarsimpy_progress_snapshot",
+      "total_count": 32,
+      "kept_count": 8,
+      "prunable_count": 24,
+      "total_size_bytes": 87150,
+      "prunable_size_bytes": 64856,
+      "newest": {
+        "path": "reports/radarsimpy_progress_snapshot_2026_03_05T113318_523899Z_2892691_pid692088.json",
+        "mtime_utc": "2026-03-05T11:34:20.993725+00:00",
+        "size_bytes": 2696
+      },
+      "oldest": {
+        "path": "reports/radarsimpy_progress_snapshot_2026_03_02_88652f2.json",
+        "mtime_utc": "2026-03-02T18:46:30.703317+00:00",
+        "size_bytes": 2097
+      }
+    },
+    {
+      "group": "radarsimpy_wrapper_integration_gate_checkpoint",
+      "total_count": 32,
+      "kept_count": 8,
+      "prunable_count": 24,
+      "total_size_bytes": 445132,
+      "prunable_size_bytes": 297862,
+      "newest": {
+        "path": "reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_05T113318_523899Z_2892691_pid692088.json",
+        "mtime_utc": "2026-03-05T11:34:20.148885+00:00",
+        "size_bytes": 17248
+      },
+      "oldest": {
+        "path": "reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_02_88652f2.json",
+        "mtime_utc": "2026-03-02T18:46:30.656840+00:00",
+        "size_bytes": 2495
+      }
+    }
+  ],
+  "action": {
+    "deleted_count": 0,
+    "failed_delete_count": 0,
+    "deleted_paths": [],
+    "failed_paths": []
+  }
+}
