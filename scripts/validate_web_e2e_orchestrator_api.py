@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import csv
+import hashlib
 import json
 import tempfile
 import threading
@@ -9,6 +10,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+import numpy as np
 
 from avxsim.web_e2e_api import WebE2EOrchestrator, create_web_e2e_http_server
 
@@ -153,6 +156,34 @@ def _build_invalid_scene(path: Path) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        while True:
+            chunk = f.read(1 << 16)
+            if not chunk:
+                break
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _load_lgit_npz_summary(path: Path) -> Dict[str, Any]:
+    with np.load(str(path), allow_pickle=False) as payload:
+        adc_virtual = np.asarray(payload["adc_virtual_scv"])
+        rd_power = np.asarray(payload["range_doppler_power_drc"])
+        pair_power = np.asarray(payload["tx_pair_doppler_power_pdr"])
+        tx_pairs = np.asarray(payload["tx_pairs"])
+        meta = json.loads(str(payload["metadata_json"]))
+    return {
+        "adc_virtual_shape": [int(x) for x in adc_virtual.shape],
+        "rd_power_shape": [int(x) for x in rd_power.shape],
+        "pair_power_shape": [int(x) for x in pair_power.shape],
+        "tx_pairs_shape": [int(x) for x in tx_pairs.shape],
+        "tx_pairs": [[int(v) for v in row] for row in tx_pairs.tolist()],
+        "meta": meta,
+    }
+
+
 def run() -> None:
     repo_root = Path(__file__).resolve().parents[1]
 
@@ -284,6 +315,17 @@ def run() -> None:
             assert Path(str(graph_run_summary["outputs"]["path_list_json"])).exists()
             assert Path(str(graph_run_summary["outputs"]["adc_cube_npz"])).exists()
             assert Path(str(graph_run_summary["outputs"]["radar_map_npz"])).exists()
+            assert graph_run_summary["outputs"]["lgit_customized_output_npz"] is not None
+            base_lgit_npz = Path(str(graph_run_summary["outputs"]["lgit_customized_output_npz"])).resolve()
+            assert base_lgit_npz.exists()
+            base_lgit_summary = _load_lgit_npz_summary(base_lgit_npz)
+            assert base_lgit_summary["adc_virtual_shape"] == [256, 4, 4]
+            assert base_lgit_summary["rd_power_shape"] == [4, 128, 4]
+            assert base_lgit_summary["pair_power_shape"] == [2, 4, 128]
+            assert base_lgit_summary["tx_pairs_shape"] == [2, 2]
+            assert base_lgit_summary["meta"]["version"] == "lgit_customized_output_v1"
+            assert base_lgit_summary["meta"]["tx_schedule"] == [0, 1, 0, 1]
+            base_lgit_sha = _sha256_file(base_lgit_npz)
             graph_run_summary_json = str(graph_run_summary["outputs"]["graph_run_summary_json"])
             assert Path(graph_run_summary_json).exists()
             assert graph_run_summary["execution"]["cache"]["hit"] is False
@@ -324,6 +366,12 @@ def run() -> None:
             assert graph_run_cached_summary["execution"]["cache"]["hit"] is True
             assert graph_run_cached_summary["execution"]["cache"]["hit_scope"] == "full"
             assert graph_run_cached_summary["execution"]["bridge_mode"] == "scene_pipeline_cache_full_reuse_v1"
+            assert graph_run_cached_summary["outputs"]["lgit_customized_output_npz"] is not None
+            cached_lgit_npz = Path(
+                str(graph_run_cached_summary["outputs"]["lgit_customized_output_npz"])
+            ).resolve()
+            assert cached_lgit_npz.exists()
+            assert _sha256_file(cached_lgit_npz) == base_lgit_sha
 
             # M16.5 partial rerun from RadarMap node using cached upstream artifacts.
             status, graph_run_partial_created = _http_json(
@@ -363,6 +411,12 @@ def run() -> None:
                 str(row.get("status")) == "cached"
                 for row in graph_run_partial_summary["execution"]["node_results"]
             )
+            assert graph_run_partial_summary["outputs"]["lgit_customized_output_npz"] is not None
+            partial_lgit_npz = Path(
+                str(graph_run_partial_summary["outputs"]["lgit_customized_output_npz"])
+            ).resolve()
+            assert partial_lgit_npz.exists()
+            assert _sha256_file(partial_lgit_npz) == base_lgit_sha
 
             # M16.5 cancel handling on async run.
             status, graph_run_async_created = _http_json(
@@ -544,6 +598,8 @@ def run() -> None:
             assert Path(str(out["path_list_json"])).exists()
             assert Path(str(out["adc_cube_npz"])).exists()
             assert Path(str(out["radar_map_npz"])).exists()
+            assert out["lgit_customized_output_npz"] is not None
+            assert Path(str(out["lgit_customized_output_npz"])).exists()
             assert Path(str(out["run_summary_json"])).exists()
 
             ps = summary["path_summary"]

@@ -1,6 +1,6 @@
 {
   "report_name": "radarsimpy_layered_reference_parity_optional",
-  "generated_at_utc": "2026-03-05T11:34:18.423268+00:00",
+  "generated_at_utc": "2026-03-05T12:17:05.884504+00:00",
   "track": "trial",
   "require_runtime": true,
   "runtime_available": true,
@@ -11,6 +11,7 @@
     "range_peak_diff_max": 2.0,
     "doppler_peak_diff_max": 2.0,
     "rd_norm_corr_aligned_min": 0.6,
+    "rd_norm_corr_aligned_strict_for_shifted_peak": 0.8,
     "numeric_rtol": 1e-06,
     "numeric_atol": 1e-08
   },
@@ -420,6 +421,97 @@
         ],
         "adc_cube_dtype_ref": "complex128",
         "adc_cube_dtype_core": "complex128",
+        "scenario_count": 2,
+        "scenario_ids": [
+          "trial_tdm_1tx1rx_seed7",
+          "trial_custom_1tx1rx_seed9"
+        ],
+        "scenarios": [
+          {
+            "scenario_id": "trial_tdm_1tx1rx_seed7",
+            "multiplexing_mode": "tdm",
+            "pass": true,
+            "shape_match": true,
+            "finite_ok": true,
+            "adc_cube_shape": [
+              1,
+              16,
+              100
+            ],
+            "adc_cube_dtype_ref": "complex128",
+            "adc_cube_dtype_core": "complex128",
+            "channel_metrics": [
+              {
+                "channel_index": 0,
+                "rd_range_peak_ref": 93,
+                "rd_range_peak_core": 93,
+                "rd_range_peak_diff": 0,
+                "rd_doppler_peak_ref": 7,
+                "rd_doppler_peak_core": 8,
+                "rd_doppler_peak_diff": 1,
+                "rd_doppler_peak_diff_circular": 1,
+                "rd_norm_corr_global": 0.22404252907308175,
+                "rd_norm_corr_aligned": 0.6691253603771822,
+                "rd_norm_corr_log_aligned": 0.6670367155003731,
+                "alignment_shift": [
+                  -1,
+                  0
+                ]
+              }
+            ],
+            "summary_metrics": {
+              "channel_count": 1,
+              "max_range_peak_diff": 0,
+              "max_doppler_peak_diff": 1,
+              "max_doppler_peak_diff_circular": 1,
+              "min_rd_norm_corr_aligned": 0.6691253603771822,
+              "doppler_peak_gate": "circular_or_aligned_corr",
+              "doppler_peak_pass": true
+            }
+          },
+          {
+            "scenario_id": "trial_custom_1tx1rx_seed9",
+            "multiplexing_mode": "custom",
+            "pass": true,
+            "shape_match": true,
+            "finite_ok": true,
+            "adc_cube_shape": [
+              1,
+              16,
+              100
+            ],
+            "adc_cube_dtype_ref": "complex128",
+            "adc_cube_dtype_core": "complex128",
+            "channel_metrics": [
+              {
+                "channel_index": 0,
+                "rd_range_peak_ref": 93,
+                "rd_range_peak_core": 93,
+                "rd_range_peak_diff": 0,
+                "rd_doppler_peak_ref": 8,
+                "rd_doppler_peak_core": 9,
+                "rd_doppler_peak_diff": 1,
+                "rd_doppler_peak_diff_circular": 1,
+                "rd_norm_corr_global": 0.22996514918410976,
+                "rd_norm_corr_aligned": 0.6717747531909789,
+                "rd_norm_corr_log_aligned": 0.6704835248856236,
+                "alignment_shift": [
+                  -1,
+                  0
+                ]
+              }
+            ],
+            "summary_metrics": {
+              "channel_count": 1,
+              "max_range_peak_diff": 0,
+              "max_doppler_peak_diff": 1,
+              "max_doppler_peak_diff_circular": 1,
+              "min_rd_norm_corr_aligned": 0.6717747531909789,
+              "doppler_peak_gate": "circular_or_aligned_corr",
+              "doppler_peak_pass": true
+            }
+          }
+        ],
         "channel_metrics": [
           {
             "channel_index": 0,
@@ -429,6 +521,7 @@
             "rd_doppler_peak_ref": 7,
             "rd_doppler_peak_core": 8,
             "rd_doppler_peak_diff": 1,
+            "rd_doppler_peak_diff_circular": 1,
             "rd_norm_corr_global": 0.22404252907308175,
             "rd_norm_corr_aligned": 0.6691253603771822,
             "rd_norm_corr_log_aligned": 0.6670367155003731,
@@ -439,10 +532,13 @@
           }
         ],
         "summary_metrics": {
+          "scenario_count": 2,
           "channel_count": 1,
           "max_range_peak_diff": 0,
           "max_doppler_peak_diff": 1,
-          "min_rd_norm_corr_aligned": 0.6691253603771822
+          "max_doppler_peak_diff_circular": 1,
+          "min_rd_norm_corr_aligned": 0.6691253603771822,
+          "doppler_peak_gate": "circular_or_aligned_corr"
         }
       }
     }

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "report_name": "radarsimpy_production_release_gate",
-  "generated_at_utc": "2026-03-05T11:33:18.486356+00:00",
+  "generated_at_utc": "2026-03-05T12:16:05.845936+00:00",
   "workspace_root": "/home/seongcheoljeong/workspace/myproject",
   "production_gate_status": "ready",
   "allow_blocked": false,
@@ -32,9 +32,9 @@
       "--output-json",
       "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_paid_6m_readiness_checkpoint.json",
       "--trial-package-root",
-      "external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU",
+      "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU",
       "--libcompat-dir",
-      "external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu"
+      "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu"
     ],
     "returncode": 0,
     "pass": true,

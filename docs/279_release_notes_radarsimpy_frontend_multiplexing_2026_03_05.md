@@ -75,8 +75,19 @@ This release delivers:
 - New validators:
   - `scripts/validate_graph_lab_runtime_overrides.mjs`
   - `scripts/validate_lgit_output_adapter.py`
+  - `scripts/validate_frontend_runtime_payload_provider_info_optional.py`
 
-### 5) Documentation updates
+### 5) Additional parity/propagation hardening
+
+- `scripts/validate_radarsimpy_layered_reference_parity_optional.py` now runs deterministic multi-scenario sim-radar parity:
+  - trial: `tdm`, `custom` (fixed seed/modulation)
+  - production: `tdm`, `bpm`, `custom` (fixed seed/modulation)
+- `scripts/validate_web_e2e_orchestrator_api.py` now enforces:
+  - `lgit_customized_output.npz` presence in graph run summaries
+  - LGIT schema/shape checks
+  - full-cache/partial-cache artifact consistency for LGIT output
+
+### 6) Documentation updates
 
 - `docs/03_architecture.md`: TDM-only wording updated to multiplexing-aware synthesizer model.
 - `docs/Frontendref.md`: points to current authoritative runtime guide.

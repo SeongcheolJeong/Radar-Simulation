@@ -1,7 +1,7 @@
 {
   "version": 1,
   "report_name": "radarsimpy_layered_parity_suite",
-  "generated_at_utc": "2026-03-05T11:34:19.336014+00:00",
+  "generated_at_utc": "2026-03-05T12:17:06.821877+00:00",
   "workspace_root": "/home/seongcheoljeong/workspace/myproject",
   "python_bin": "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
   "with_production_track": true,
@@ -40,13 +40,13 @@
         ],
         "returncode": 0,
         "pass": true,
-        "stdout_tail": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_radarsimpy_layered_reference_parity_optional: pass\ntrack=trial\nprocessing_tools_pass=True\nsim_rcs_pass=True\nsim_radar_pass=True\nsim_radar_summary=channels=1, max_range_diff=0, max_doppler_diff=1, min_corr_aligned=0.6691253603771822",
+        "stdout_tail": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_radarsimpy_layered_reference_parity_optional: pass\ntrack=trial\nprocessing_tools_pass=True\nsim_rcs_pass=True\nsim_radar_pass=True\nsim_radar_summary=scenarios=2, channels=1, max_range_diff=0, max_doppler_diff=1, min_corr_aligned=0.6691253603771822",
         "stderr_tail": ""
       },
       "report_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_trial.json",
       "report": {
         "report_name": "radarsimpy_layered_reference_parity_optional",
-        "generated_at_utc": "2026-03-05T11:34:18.423268+00:00",
+        "generated_at_utc": "2026-03-05T12:17:05.884504+00:00",
         "track": "trial",
         "require_runtime": true,
         "runtime_available": true,
@@ -57,6 +57,7 @@
           "range_peak_diff_max": 2.0,
           "doppler_peak_diff_max": 2.0,
           "rd_norm_corr_aligned_min": 0.6,
+          "rd_norm_corr_aligned_strict_for_shifted_peak": 0.8,
           "numeric_rtol": 1e-06,
           "numeric_atol": 1e-08
         },
@@ -466,6 +467,97 @@
               ],
               "adc_cube_dtype_ref": "complex128",
               "adc_cube_dtype_core": "complex128",
+              "scenario_count": 2,
+              "scenario_ids": [
+                "trial_tdm_1tx1rx_seed7",
+                "trial_custom_1tx1rx_seed9"
+              ],
+              "scenarios": [
+                {
+                  "scenario_id": "trial_tdm_1tx1rx_seed7",
+                  "multiplexing_mode": "tdm",
+                  "pass": true,
+                  "shape_match": true,
+                  "finite_ok": true,
+                  "adc_cube_shape": [
+                    1,
+                    16,
+                    100
+                  ],
+                  "adc_cube_dtype_ref": "complex128",
+                  "adc_cube_dtype_core": "complex128",
+                  "channel_metrics": [
+                    {
+                      "channel_index": 0,
+                      "rd_range_peak_ref": 93,
+                      "rd_range_peak_core": 93,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 7,
+                      "rd_doppler_peak_core": 8,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.22404252907308175,
+                      "rd_norm_corr_aligned": 0.6691253603771822,
+                      "rd_norm_corr_log_aligned": 0.6670367155003731,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    }
+                  ],
+                  "summary_metrics": {
+                    "channel_count": 1,
+                    "max_range_peak_diff": 0,
+                    "max_doppler_peak_diff": 1,
+                    "max_doppler_peak_diff_circular": 1,
+                    "min_rd_norm_corr_aligned": 0.6691253603771822,
+                    "doppler_peak_gate": "circular_or_aligned_corr",
+                    "doppler_peak_pass": true
+                  }
+                },
+                {
+                  "scenario_id": "trial_custom_1tx1rx_seed9",
+                  "multiplexing_mode": "custom",
+                  "pass": true,
+                  "shape_match": true,
+                  "finite_ok": true,
+                  "adc_cube_shape": [
+                    1,
+                    16,
+                    100
+                  ],
+                  "adc_cube_dtype_ref": "complex128",
+                  "adc_cube_dtype_core": "complex128",
+                  "channel_metrics": [
+                    {
+                      "channel_index": 0,
+                      "rd_range_peak_ref": 93,
+                      "rd_range_peak_core": 93,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 8,
+                      "rd_doppler_peak_core": 9,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.22996514918410976,
+                      "rd_norm_corr_aligned": 0.6717747531909789,
+                      "rd_norm_corr_log_aligned": 0.6704835248856236,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    }
+                  ],
+                  "summary_metrics": {
+                    "channel_count": 1,
+                    "max_range_peak_diff": 0,
+                    "max_doppler_peak_diff": 1,
+                    "max_doppler_peak_diff_circular": 1,
+                    "min_rd_norm_corr_aligned": 0.6717747531909789,
+                    "doppler_peak_gate": "circular_or_aligned_corr",
+                    "doppler_peak_pass": true
+                  }
+                }
+              ],
               "channel_metrics": [
                 {
                   "channel_index": 0,
@@ -475,6 +567,7 @@
                   "rd_doppler_peak_ref": 7,
                   "rd_doppler_peak_core": 8,
                   "rd_doppler_peak_diff": 1,
+                  "rd_doppler_peak_diff_circular": 1,
                   "rd_norm_corr_global": 0.22404252907308175,
                   "rd_norm_corr_aligned": 0.6691253603771822,
                   "rd_norm_corr_log_aligned": 0.6670367155003731,
@@ -485,10 +578,13 @@
                 }
               ],
               "summary_metrics": {
+                "scenario_count": 2,
                 "channel_count": 1,
                 "max_range_peak_diff": 0,
                 "max_doppler_peak_diff": 1,
-                "min_rd_norm_corr_aligned": 0.6691253603771822
+                "max_doppler_peak_diff_circular": 1,
+                "min_rd_norm_corr_aligned": 0.6691253603771822,
+                "doppler_peak_gate": "circular_or_aligned_corr"
               }
             }
           }
@@ -512,13 +608,13 @@
         ],
         "returncode": 0,
         "pass": true,
-        "stdout_tail": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_radarsimpy_layered_reference_parity_optional: pass\ntrack=production\nprocessing_tools_pass=True\nsim_rcs_pass=True\nsim_radar_pass=True\nsim_radar_summary=channels=4, max_range_diff=0, max_doppler_diff=1, min_corr_aligned=0.8634062940142493",
+        "stdout_tail": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_radarsimpy_layered_reference_parity_optional: pass\ntrack=production\nprocessing_tools_pass=True\nsim_rcs_pass=True\nsim_radar_pass=True\nsim_radar_summary=scenarios=3, channels=4, max_range_diff=0, max_doppler_diff=11, min_corr_aligned=0.8466292034443842",
         "stderr_tail": ""
       },
       "report_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_production.json",
       "report": {
         "report_name": "radarsimpy_layered_reference_parity_optional",
-        "generated_at_utc": "2026-03-05T11:34:19.217300+00:00",
+        "generated_at_utc": "2026-03-05T12:17:06.690847+00:00",
         "track": "production",
         "require_runtime": true,
         "runtime_available": true,
@@ -529,6 +625,7 @@
           "range_peak_diff_max": 2.0,
           "doppler_peak_diff_max": 2.0,
           "rd_norm_corr_aligned_min": 0.45,
+          "rd_norm_corr_aligned_strict_for_shifted_peak": 0.8,
           "numeric_rtol": 1e-06,
           "numeric_atol": 1e-08
         },
@@ -938,6 +1035,293 @@
               ],
               "adc_cube_dtype_ref": "complex128",
               "adc_cube_dtype_core": "complex128",
+              "scenario_count": 3,
+              "scenario_ids": [
+                "production_tdm_2tx2rx_seed11",
+                "production_bpm_2tx2rx_seed13",
+                "production_custom_2tx2rx_seed17"
+              ],
+              "scenarios": [
+                {
+                  "scenario_id": "production_tdm_2tx2rx_seed11",
+                  "multiplexing_mode": "tdm",
+                  "pass": true,
+                  "shape_match": true,
+                  "finite_ok": true,
+                  "adc_cube_shape": [
+                    4,
+                    12,
+                    100
+                  ],
+                  "adc_cube_dtype_ref": "complex128",
+                  "adc_cube_dtype_core": "complex128",
+                  "channel_metrics": [
+                    {
+                      "channel_index": 0,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 5,
+                      "rd_doppler_peak_core": 6,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.35824372460296905,
+                      "rd_norm_corr_aligned": 0.8662446753632959,
+                      "rd_norm_corr_log_aligned": 0.8595881267929618,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 1,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 11,
+                      "rd_doppler_peak_core": 6,
+                      "rd_doppler_peak_diff": 5,
+                      "rd_doppler_peak_diff_circular": 5,
+                      "rd_norm_corr_global": 0.35920335978535967,
+                      "rd_norm_corr_aligned": 0.8657485306701361,
+                      "rd_norm_corr_log_aligned": 0.8590477301964096,
+                      "alignment_shift": [
+                        5,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 2,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 5,
+                      "rd_doppler_peak_core": 0,
+                      "rd_doppler_peak_diff": 5,
+                      "rd_doppler_peak_diff_circular": 5,
+                      "rd_norm_corr_global": 0.3586664643243881,
+                      "rd_norm_corr_aligned": 0.8661522776926819,
+                      "rd_norm_corr_log_aligned": 0.8596513182611792,
+                      "alignment_shift": [
+                        5,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 3,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 5,
+                      "rd_doppler_peak_core": 6,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.35874513348583376,
+                      "rd_norm_corr_aligned": 0.8662109948304928,
+                      "rd_norm_corr_log_aligned": 0.8598351433530492,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    }
+                  ],
+                  "summary_metrics": {
+                    "channel_count": 4,
+                    "max_range_peak_diff": 0,
+                    "max_doppler_peak_diff": 5,
+                    "max_doppler_peak_diff_circular": 5,
+                    "min_rd_norm_corr_aligned": 0.8657485306701361,
+                    "doppler_peak_gate": "circular_or_aligned_corr",
+                    "doppler_peak_pass": true
+                  }
+                },
+                {
+                  "scenario_id": "production_bpm_2tx2rx_seed13",
+                  "multiplexing_mode": "bpm",
+                  "pass": true,
+                  "shape_match": true,
+                  "finite_ok": true,
+                  "adc_cube_shape": [
+                    4,
+                    12,
+                    100
+                  ],
+                  "adc_cube_dtype_ref": "complex128",
+                  "adc_cube_dtype_core": "complex128",
+                  "channel_metrics": [
+                    {
+                      "channel_index": 0,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 5,
+                      "rd_doppler_peak_core": 6,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.35243936461964015,
+                      "rd_norm_corr_aligned": 0.8638520267944225,
+                      "rd_norm_corr_log_aligned": 0.850778583849459,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 1,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 5,
+                      "rd_doppler_peak_core": 6,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.35329279200443453,
+                      "rd_norm_corr_aligned": 0.8634062940142493,
+                      "rd_norm_corr_log_aligned": 0.8502800649616337,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 2,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 11,
+                      "rd_doppler_peak_core": 0,
+                      "rd_doppler_peak_diff": 11,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.35275048810453175,
+                      "rd_norm_corr_aligned": 0.8637881322053742,
+                      "rd_norm_corr_log_aligned": 0.8507595748969541,
+                      "alignment_shift": [
+                        11,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 3,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 11,
+                      "rd_doppler_peak_core": 0,
+                      "rd_doppler_peak_diff": 11,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.35289894594156745,
+                      "rd_norm_corr_aligned": 0.8638309346797446,
+                      "rd_norm_corr_log_aligned": 0.851031004964485,
+                      "alignment_shift": [
+                        11,
+                        0
+                      ]
+                    }
+                  ],
+                  "summary_metrics": {
+                    "channel_count": 4,
+                    "max_range_peak_diff": 0,
+                    "max_doppler_peak_diff": 11,
+                    "max_doppler_peak_diff_circular": 1,
+                    "min_rd_norm_corr_aligned": 0.8634062940142493,
+                    "doppler_peak_gate": "circular_or_aligned_corr",
+                    "doppler_peak_pass": true
+                  }
+                },
+                {
+                  "scenario_id": "production_custom_2tx2rx_seed17",
+                  "multiplexing_mode": "custom",
+                  "pass": true,
+                  "shape_match": true,
+                  "finite_ok": true,
+                  "adc_cube_shape": [
+                    4,
+                    12,
+                    100
+                  ],
+                  "adc_cube_dtype_ref": "complex128",
+                  "adc_cube_dtype_core": "complex128",
+                  "channel_metrics": [
+                    {
+                      "channel_index": 0,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 6,
+                      "rd_doppler_peak_core": 7,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.35767787201985496,
+                      "rd_norm_corr_aligned": 0.866160812881547,
+                      "rd_norm_corr_log_aligned": 0.8549705435565605,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 1,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 6,
+                      "rd_doppler_peak_core": 7,
+                      "rd_doppler_peak_diff": 1,
+                      "rd_doppler_peak_diff_circular": 1,
+                      "rd_norm_corr_global": 0.3585723822860257,
+                      "rd_norm_corr_aligned": 0.8656931302100034,
+                      "rd_norm_corr_log_aligned": 0.8544638845727313,
+                      "alignment_shift": [
+                        -1,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 2,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 7,
+                      "rd_doppler_peak_core": 7,
+                      "rd_doppler_peak_diff": 0,
+                      "rd_doppler_peak_diff_circular": 0,
+                      "rd_norm_corr_global": 0.8469510616004313,
+                      "rd_norm_corr_aligned": 0.8469510616004313,
+                      "rd_norm_corr_log_aligned": 0.8426201857531269,
+                      "alignment_shift": [
+                        0,
+                        0
+                      ]
+                    },
+                    {
+                      "channel_index": 3,
+                      "rd_range_peak_ref": 80,
+                      "rd_range_peak_core": 80,
+                      "rd_range_peak_diff": 0,
+                      "rd_doppler_peak_ref": 7,
+                      "rd_doppler_peak_core": 7,
+                      "rd_doppler_peak_diff": 0,
+                      "rd_doppler_peak_diff_circular": 0,
+                      "rd_norm_corr_global": 0.8466292034443842,
+                      "rd_norm_corr_aligned": 0.8466292034443842,
+                      "rd_norm_corr_log_aligned": 0.8423243437889806,
+                      "alignment_shift": [
+                        0,
+                        0
+                      ]
+                    }
+                  ],
+                  "summary_metrics": {
+                    "channel_count": 4,
+                    "max_range_peak_diff": 0,
+                    "max_doppler_peak_diff": 1,
+                    "max_doppler_peak_diff_circular": 1,
+                    "min_rd_norm_corr_aligned": 0.8466292034443842,
+                    "doppler_peak_gate": "circular_or_aligned_corr",
+                    "doppler_peak_pass": true
+                  }
+                }
+              ],
               "channel_metrics": [
                 {
                   "channel_index": 0,
@@ -947,9 +1331,10 @@
                   "rd_doppler_peak_ref": 5,
                   "rd_doppler_peak_core": 6,
                   "rd_doppler_peak_diff": 1,
-                  "rd_norm_corr_global": 0.35243936461964015,
-                  "rd_norm_corr_aligned": 0.8638520267944225,
-                  "rd_norm_corr_log_aligned": 0.850778583849459,
+                  "rd_doppler_peak_diff_circular": 1,
+                  "rd_norm_corr_global": 0.35824372460296905,
+                  "rd_norm_corr_aligned": 0.8662446753632959,
+                  "rd_norm_corr_log_aligned": 0.8595881267929618,
                   "alignment_shift": [
                     -1,
                     0
@@ -960,14 +1345,15 @@
                   "rd_range_peak_ref": 80,
                   "rd_range_peak_core": 80,
                   "rd_range_peak_diff": 0,
-                  "rd_doppler_peak_ref": 5,
+                  "rd_doppler_peak_ref": 11,
                   "rd_doppler_peak_core": 6,
-                  "rd_doppler_peak_diff": 1,
-                  "rd_norm_corr_global": 0.35329279200443453,
-                  "rd_norm_corr_aligned": 0.8634062940142493,
-                  "rd_norm_corr_log_aligned": 0.8502800649616337,
+                  "rd_doppler_peak_diff": 5,
+                  "rd_doppler_peak_diff_circular": 5,
+                  "rd_norm_corr_global": 0.35920335978535967,
+                  "rd_norm_corr_aligned": 0.8657485306701361,
+                  "rd_norm_corr_log_aligned": 0.8590477301964096,
                   "alignment_shift": [
-                    -1,
+                    5,
                     0
                   ]
                 },
@@ -977,13 +1363,14 @@
                   "rd_range_peak_core": 80,
                   "rd_range_peak_diff": 0,
                   "rd_doppler_peak_ref": 5,
-                  "rd_doppler_peak_core": 6,
-                  "rd_doppler_peak_diff": 1,
-                  "rd_norm_corr_global": 0.3527504881045317,
-                  "rd_norm_corr_aligned": 0.8637881322053738,
-                  "rd_norm_corr_log_aligned": 0.8507595748969541,
+                  "rd_doppler_peak_core": 0,
+                  "rd_doppler_peak_diff": 5,
+                  "rd_doppler_peak_diff_circular": 5,
+                  "rd_norm_corr_global": 0.3586664643243881,
+                  "rd_norm_corr_aligned": 0.8661522776926819,
+                  "rd_norm_corr_log_aligned": 0.8596513182611792,
                   "alignment_shift": [
-                    -1,
+                    5,
                     0
                   ]
                 },
@@ -995,9 +1382,10 @@
                   "rd_doppler_peak_ref": 5,
                   "rd_doppler_peak_core": 6,
                   "rd_doppler_peak_diff": 1,
-                  "rd_norm_corr_global": 0.3528989459415674,
-                  "rd_norm_corr_aligned": 0.8638309346797443,
-                  "rd_norm_corr_log_aligned": 0.851031004964485,
+                  "rd_doppler_peak_diff_circular": 1,
+                  "rd_norm_corr_global": 0.35874513348583376,
+                  "rd_norm_corr_aligned": 0.8662109948304928,
+                  "rd_norm_corr_log_aligned": 0.8598351433530492,
                   "alignment_shift": [
                     -1,
                     0
@@ -1005,10 +1393,13 @@
                 }
               ],
               "summary_metrics": {
+                "scenario_count": 3,
                 "channel_count": 4,
                 "max_range_peak_diff": 0,
-                "max_doppler_peak_diff": 1,
-                "min_rd_norm_corr_aligned": 0.8634062940142493
+                "max_doppler_peak_diff": 11,
+                "max_doppler_peak_diff_circular": 5,
+                "min_rd_norm_corr_aligned": 0.8466292034443842,
+                "doppler_peak_gate": "circular_or_aligned_corr"
               }
             }
           }

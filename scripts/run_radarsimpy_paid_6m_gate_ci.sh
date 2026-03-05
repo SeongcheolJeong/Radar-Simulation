@@ -34,14 +34,14 @@ export RADARSIMPY_LICENSE_FILE
 
 mkdir -p "${REPORTS_ROOT}"
 
-echo "[1/3] production release gate"
+echo "[1/4] production release gate"
 "${PY_BIN}" scripts/run_radarsimpy_production_release_gate.py \
   --license-file "${RADARSIMPY_LICENSE_FILE}" \
   --trial-package-root "${RADARSIMPY_PACKAGE_ROOT}" \
   --libcompat-dir "${RADARSIMPY_LIBCOMPAT_DIR}" \
   --output-json "${REPORTS_ROOT}/radarsimpy_production_release_gate_paid_6m.json"
 
-echo "[2/3] readiness checkpoint"
+echo "[2/4] readiness checkpoint"
 "${PY_BIN}" scripts/run_radarsimpy_readiness_checkpoint.py \
   --with-real-runtime \
   --runtime-license-tier production \
@@ -50,10 +50,14 @@ echo "[2/3] readiness checkpoint"
   --license-file "${RADARSIMPY_LICENSE_FILE}" \
   --output-json "${REPORTS_ROOT}/radarsimpy_readiness_checkpoint_paid_6m.json"
 
-echo "[3/3] simulator reference parity"
+echo "[3/4] simulator reference parity"
 "${PY_BIN}" scripts/validate_radarsimpy_simulator_reference_parity_optional.py \
   --require-runtime \
   --output-json "${REPORTS_ROOT}/radarsimpy_simulator_reference_parity_paid_6m.json"
 
-echo "run_radarsimpy_paid_6m_gate_ci: done"
+echo "[4/4] frontend runtime payload -> provider info contract"
+"${PY_BIN}" scripts/validate_frontend_runtime_payload_provider_info_optional.py \
+  --require-runtime \
+  --output-json "${REPORTS_ROOT}/frontend_runtime_payload_provider_info_paid_6m.json"
 
+echo "run_radarsimpy_paid_6m_gate_ci: done"

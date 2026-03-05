@@ -20,6 +20,7 @@ TRIAL_THRESHOLDS: Dict[str, float] = {
     "range_peak_diff_max": 2.0,
     "doppler_peak_diff_max": 2.0,
     "rd_norm_corr_aligned_min": 0.60,
+    "rd_norm_corr_aligned_strict_for_shifted_peak": 0.80,
     "numeric_rtol": 1e-6,
     "numeric_atol": 1e-8,
 }
@@ -28,6 +29,7 @@ PRODUCTION_THRESHOLDS: Dict[str, float] = {
     "range_peak_diff_max": 2.0,
     "doppler_peak_diff_max": 2.0,
     "rd_norm_corr_aligned_min": 0.45,
+    "rd_norm_corr_aligned_strict_for_shifted_peak": 0.80,
     "numeric_rtol": 1e-6,
     "numeric_atol": 1e-8,
 }
@@ -167,6 +169,13 @@ def _peak_idx(x: np.ndarray) -> tuple[int, int]:
     return int(idx[0]), int(idx[1])
 
 
+def _circular_index_diff(a: int, b: int, size: int) -> int:
+    if size <= 0:
+        return int(abs(int(a) - int(b)))
+    raw = int(abs(int(a) - int(b)))
+    return int(min(raw, int(size) - raw))
+
+
 def _norm_corr(a: np.ndarray, b: np.ndarray) -> float:
     av = np.asarray(a, dtype=np.float64).reshape(-1)
     bv = np.asarray(b, dtype=np.float64).reshape(-1)
@@ -211,32 +220,37 @@ def _call_reference_sim_radar(rs: Any, radar: Any, targets: list[Mapping[str, An
     return fn(radar, targets, **call_kwargs)
 
 
-def _make_sim_case(rs: Any, *, track: str) -> tuple[Any, list[Mapping[str, Any]]]:
+def _build_tx_channels_with_pulse_mod(
+    tx_locations: Sequence[Sequence[float]],
+    pulse_amp: np.ndarray,
+    pulse_phs_deg: np.ndarray,
+) -> list[dict[str, Any]]:
+    amp = np.asarray(pulse_amp, dtype=np.float64)
+    phs = np.asarray(pulse_phs_deg, dtype=np.float64)
+    if amp.shape != phs.shape:
+        raise ValueError("pulse_amp and pulse_phs_deg must share same shape")
+    if amp.ndim != 2:
+        raise ValueError("pulse_amp and pulse_phs_deg must be 2D [n_tx, n_chirps]")
+    if len(tx_locations) != int(amp.shape[0]):
+        raise ValueError("tx_locations length must match pulse matrix n_tx")
+
+    channels: list[dict[str, Any]] = []
+    for tx_idx, loc in enumerate(tx_locations):
+        channels.append(
+            {
+                "location": [float(v) for v in loc],
+                "pulse_amp": np.asarray(amp[tx_idx, :], dtype=np.float64),
+                "pulse_phs": np.asarray(phs[tx_idx, :], dtype=np.float64),
+            }
+        )
+    return channels
+
+
+def _make_sim_cases(rs: Any, *, track: str) -> list[dict[str, Any]]:
     if track == "production":
-        tx = rs.Transmitter(
-            f=[76.8e9, 77.2e9],
-            t=[0.0, 20.0e-6],
-            tx_power=0.0,
-            pulses=12,
-            prp=30.0e-6,
-            channels=[
-                {"location": [0.0, 0.0, 0.0]},
-                {"location": [0.06, 0.0, 0.0]},
-            ],
-        )
-        rx = rs.Receiver(
-            fs=5.0e6,
-            noise_figure=0.0,
-            rf_gain=0.0,
-            load_resistor=500.0,
-            baseband_gain=0.0,
-            bb_type="complex",
-            channels=[
-                {"location": [0.0, 0.0, 0.0]},
-                {"location": [0.0, 0.05, 0.0]},
-            ],
-        )
-        radar = rs.Radar(transmitter=tx, receiver=rx, seed=11)
+        n_chirps = 12
+        tx_locs = [[0.0, 0.0, 0.0], [0.06, 0.0, 0.0]]
+        rx_locs = [[0.0, 0.0, 0.0], [0.0, 0.05, 0.0]]
         targets = [
             {
                 "location": np.asarray([30.0, 0.0, 0.0], dtype=np.float64),
@@ -251,16 +265,69 @@ def _make_sim_case(rs: Any, *, track: str) -> tuple[Any, list[Mapping[str, Any]]
                 "phase": 35.0,
             },
         ]
-        return radar, targets
 
-    tx = rs.Transmitter(
-        f=[76.8e9, 77.2e9],
-        t=[0.0, 20.0e-6],
-        tx_power=0.0,
-        pulses=16,
-        prp=30.0e-6,
-        channels=[{"location": [0.0, 0.0, 0.0]}],
-    )
+        # Deterministic TDM one-hot modulation.
+        tdm_amp = np.zeros((2, n_chirps), dtype=np.float64)
+        tdm_amp[0, 0::2] = 1.0
+        tdm_amp[1, 1::2] = 1.0
+        tdm_phs = np.zeros((2, n_chirps), dtype=np.float64)
+
+        # Deterministic BPM 2TX modulation with phase-code on Tx1.
+        bpm_amp = np.ones((2, n_chirps), dtype=np.float64)
+        bpm_phs = np.zeros((2, n_chirps), dtype=np.float64)
+        bpm_phs[1, :] = np.asarray(
+            [0.0 if (k % 2 == 0) else 180.0 for k in range(n_chirps)],
+            dtype=np.float64,
+        )
+
+        # Deterministic custom modulation (amplitude + phase variation on both Tx).
+        custom_amp = np.vstack(
+            [
+                np.asarray([1.0 if (k % 2 == 0) else 0.6 for k in range(n_chirps)], dtype=np.float64),
+                np.asarray([0.4 if (k % 2 == 0) else 1.0 for k in range(n_chirps)], dtype=np.float64),
+            ]
+        )
+        custom_phs = np.vstack(
+            [
+                np.asarray([(30.0 * k) % 360.0 for k in range(n_chirps)], dtype=np.float64),
+                np.asarray([(90.0 + (45.0 * k)) % 360.0 for k in range(n_chirps)], dtype=np.float64),
+            ]
+        )
+
+        scenario_specs = [
+            ("production_tdm_2tx2rx_seed11", "tdm", tdm_amp, tdm_phs, 11),
+            ("production_bpm_2tx2rx_seed13", "bpm", bpm_amp, bpm_phs, 13),
+            ("production_custom_2tx2rx_seed17", "custom", custom_amp, custom_phs, 17),
+        ]
+    else:
+        n_chirps = 16
+        tx_locs = [[0.0, 0.0, 0.0]]
+        rx_locs = [[0.0, 0.0, 0.0]]
+        targets = [
+            {
+                "location": np.asarray([35.0, 0.0, 0.0], dtype=np.float64),
+                "speed": np.asarray([-6.0, 0.0, 0.0], dtype=np.float64),
+                "rcs": 10.0,
+                "phase": 20.0,
+            }
+        ]
+
+        tdm_amp = np.ones((1, n_chirps), dtype=np.float64)
+        tdm_phs = np.zeros((1, n_chirps), dtype=np.float64)
+        custom_amp = np.asarray(
+            [[1.0 if (k % 2 == 0) else 0.75 for k in range(n_chirps)]],
+            dtype=np.float64,
+        )
+        custom_phs = np.asarray(
+            [[(22.5 * k) % 360.0 for k in range(n_chirps)]],
+            dtype=np.float64,
+        )
+
+        scenario_specs = [
+            ("trial_tdm_1tx1rx_seed7", "tdm", tdm_amp, tdm_phs, 7),
+            ("trial_custom_1tx1rx_seed9", "custom", custom_amp, custom_phs, 9),
+        ]
+
     rx = rs.Receiver(
         fs=5.0e6,
         noise_figure=0.0,
@@ -268,18 +335,33 @@ def _make_sim_case(rs: Any, *, track: str) -> tuple[Any, list[Mapping[str, Any]]
         load_resistor=500.0,
         baseband_gain=0.0,
         bb_type="complex",
-        channels=[{"location": [0.0, 0.0, 0.0]}],
+        channels=[{"location": [float(v) for v in loc]} for loc in rx_locs],
     )
-    radar = rs.Radar(transmitter=tx, receiver=rx, seed=7)
-    targets = [
-        {
-            "location": np.asarray([35.0, 0.0, 0.0], dtype=np.float64),
-            "speed": np.asarray([-6.0, 0.0, 0.0], dtype=np.float64),
-            "rcs": 10.0,
-            "phase": 20.0,
-        }
-    ]
-    return radar, targets
+
+    out: list[dict[str, Any]] = []
+    for scenario_id, mode, pulse_amp, pulse_phs, seed in scenario_specs:
+        tx = rs.Transmitter(
+            f=[76.8e9, 77.2e9],
+            t=[0.0, 20.0e-6],
+            tx_power=0.0,
+            pulses=int(n_chirps),
+            prp=30.0e-6,
+            channels=_build_tx_channels_with_pulse_mod(
+                tx_locations=tx_locs,
+                pulse_amp=np.asarray(pulse_amp, dtype=np.float64),
+                pulse_phs_deg=np.asarray(pulse_phs, dtype=np.float64),
+            ),
+        )
+        radar = rs.Radar(transmitter=tx, receiver=rx, seed=int(seed))
+        out.append(
+            {
+                "scenario_id": str(scenario_id),
+                "multiplexing_mode": str(mode),
+                "radar": radar,
+                "targets": targets,
+            }
+        )
+    return out
 
 
 def _build_context() -> Dict[str, Any]:
@@ -663,92 +745,181 @@ def _run_sim_radar_parity(
     track: str,
     thresholds: Mapping[str, float],
 ) -> Dict[str, Any]:
-    radar, targets = _make_sim_case(rs, track=track)
-    ref_out = _call_reference_sim_radar(rs, radar, targets)
-    core_out = core_sim_radar(
-        radar,
-        targets,
-        density=1.0,
-        level=None,
-        interf=None,
-        ray_filter=None,
-        back_propagating=False,
-        device="cpu",
-        log_path=None,
-        dry_run=False,
-    )
+    scenarios = _make_sim_cases(rs, track=track)
 
-    ref_bb = np.asarray(ref_out.get("baseband"), dtype=np.complex128)
-    core_bb = np.asarray(core_out.get("baseband"), dtype=np.complex128)
-    ref_noise = np.asarray(ref_out.get("noise"), dtype=np.complex128)
-    core_noise = np.asarray(core_out.get("noise"), dtype=np.complex128)
-    ref_ts = np.asarray(ref_out.get("timestamp"), dtype=np.float64)
-    core_ts = np.asarray(core_out.get("timestamp"), dtype=np.float64)
+    scenario_rows: List[Dict[str, Any]] = []
+    all_pass = True
+    all_shape_match = True
+    all_finite = True
+    max_range_diff_overall = 0
+    max_doppler_diff_overall = 0
+    max_doppler_diff_circular_overall = 0
+    min_corr_aligned_overall = float("inf")
+    max_channel_count = 0
+    first_adc_shape: List[int] = []
+    first_adc_dtype_ref = ""
+    first_adc_dtype_core = ""
+    first_channel_metrics: List[Dict[str, Any]] = []
 
-    shape_match = bool(ref_bb.shape == core_bb.shape == ref_noise.shape == core_noise.shape == ref_ts.shape == core_ts.shape)
-    finite_ok = bool(
-        np.all(np.isfinite(np.real(ref_bb)))
-        and np.all(np.isfinite(np.imag(ref_bb)))
-        and np.all(np.isfinite(np.real(core_bb)))
-        and np.all(np.isfinite(np.imag(core_bb)))
-        and np.all(np.isfinite(ref_ts))
-        and np.all(np.isfinite(core_ts))
-    )
+    for idx, scenario in enumerate(scenarios):
+        scenario_id = str(scenario["scenario_id"])
+        mode = str(scenario["multiplexing_mode"])
+        radar = scenario["radar"]
+        targets = list(scenario["targets"])
 
-    channel_count = int(ref_bb.shape[0]) if ref_bb.ndim == 3 else 0
-    channel_metrics: List[Dict[str, Any]] = []
-    for cidx in range(channel_count):
-        rd_ref = _rd_map(ref_bb, cidx)
-        rd_core = _rd_map(core_bb, cidx)
-        d_ref, r_ref = _peak_idx(rd_ref)
-        d_core, r_core = _peak_idx(rd_core)
-        range_diff = abs(int(r_ref) - int(r_core))
-        doppler_diff = abs(int(d_ref) - int(d_core))
-        rd_core_aligned, shift = _align_to_peak(rd_ref, rd_core)
-        corr_global = _norm_corr(rd_ref, rd_core)
-        corr_aligned = _norm_corr(rd_ref, rd_core_aligned)
-        corr_log_aligned = _norm_corr(np.log1p(rd_ref), np.log1p(rd_core_aligned))
-        channel_metrics.append(
+        ref_out = _call_reference_sim_radar(rs, radar, targets)
+        core_out = core_sim_radar(
+            radar,
+            targets,
+            density=1.0,
+            level=None,
+            interf=None,
+            ray_filter=None,
+            back_propagating=False,
+            device="cpu",
+            log_path=None,
+            dry_run=False,
+        )
+
+        ref_bb = np.asarray(ref_out.get("baseband"), dtype=np.complex128)
+        core_bb = np.asarray(core_out.get("baseband"), dtype=np.complex128)
+        ref_noise = np.asarray(ref_out.get("noise"), dtype=np.complex128)
+        core_noise = np.asarray(core_out.get("noise"), dtype=np.complex128)
+        ref_ts = np.asarray(ref_out.get("timestamp"), dtype=np.float64)
+        core_ts = np.asarray(core_out.get("timestamp"), dtype=np.float64)
+
+        shape_match = bool(
+            ref_bb.shape == core_bb.shape == ref_noise.shape == core_noise.shape == ref_ts.shape == core_ts.shape
+        )
+        finite_ok = bool(
+            np.all(np.isfinite(np.real(ref_bb)))
+            and np.all(np.isfinite(np.imag(ref_bb)))
+            and np.all(np.isfinite(np.real(core_bb)))
+            and np.all(np.isfinite(np.imag(core_bb)))
+            and np.all(np.isfinite(ref_ts))
+            and np.all(np.isfinite(core_ts))
+        )
+
+        channel_count = int(ref_bb.shape[0]) if ref_bb.ndim == 3 else 0
+        channel_metrics: List[Dict[str, Any]] = []
+        for cidx in range(channel_count):
+            rd_ref = _rd_map(ref_bb, cidx)
+            rd_core = _rd_map(core_bb, cidx)
+            d_ref, r_ref = _peak_idx(rd_ref)
+            d_core, r_core = _peak_idx(rd_core)
+            range_diff = abs(int(r_ref) - int(r_core))
+            doppler_diff = abs(int(d_ref) - int(d_core))
+            doppler_diff_circular = _circular_index_diff(
+                int(d_ref),
+                int(d_core),
+                int(rd_ref.shape[0]),
+            )
+            rd_core_aligned, shift = _align_to_peak(rd_ref, rd_core)
+            corr_global = _norm_corr(rd_ref, rd_core)
+            corr_aligned = _norm_corr(rd_ref, rd_core_aligned)
+            corr_log_aligned = _norm_corr(np.log1p(rd_ref), np.log1p(rd_core_aligned))
+            channel_metrics.append(
+                {
+                    "channel_index": int(cidx),
+                    "rd_range_peak_ref": int(r_ref),
+                    "rd_range_peak_core": int(r_core),
+                    "rd_range_peak_diff": int(range_diff),
+                    "rd_doppler_peak_ref": int(d_ref),
+                    "rd_doppler_peak_core": int(d_core),
+                    "rd_doppler_peak_diff": int(doppler_diff),
+                    "rd_doppler_peak_diff_circular": int(doppler_diff_circular),
+                    "rd_norm_corr_global": float(corr_global),
+                    "rd_norm_corr_aligned": float(corr_aligned),
+                    "rd_norm_corr_log_aligned": float(corr_log_aligned),
+                    "alignment_shift": [int(shift[0]), int(shift[1])],
+                }
+            )
+
+        max_range_diff = max((int(row["rd_range_peak_diff"]) for row in channel_metrics), default=0)
+        max_doppler_diff = max((int(row["rd_doppler_peak_diff"]) for row in channel_metrics), default=0)
+        max_doppler_diff_circular = max(
+            (int(row["rd_doppler_peak_diff_circular"]) for row in channel_metrics),
+            default=0,
+        )
+        min_corr_aligned = min((float(row["rd_norm_corr_aligned"]) for row in channel_metrics), default=0.0)
+        strict_corr_for_shifted_peak = float(
+            thresholds.get("rd_norm_corr_aligned_strict_for_shifted_peak", 0.80)
+        )
+        doppler_peak_pass = bool(
+            max_doppler_diff_circular <= int(thresholds["doppler_peak_diff_max"])
+            or min_corr_aligned >= strict_corr_for_shifted_peak
+        )
+
+        pass_thresholds = bool(
+            max_range_diff <= int(thresholds["range_peak_diff_max"])
+            and doppler_peak_pass
+            and min_corr_aligned >= float(thresholds["rd_norm_corr_aligned_min"])
+        )
+        scenario_pass = bool(shape_match and finite_ok and pass_thresholds)
+
+        scenario_rows.append(
             {
-                "channel_index": int(cidx),
-                "rd_range_peak_ref": int(r_ref),
-                "rd_range_peak_core": int(r_core),
-                "rd_range_peak_diff": int(range_diff),
-                "rd_doppler_peak_ref": int(d_ref),
-                "rd_doppler_peak_core": int(d_core),
-                "rd_doppler_peak_diff": int(doppler_diff),
-                "rd_norm_corr_global": float(corr_global),
-                "rd_norm_corr_aligned": float(corr_aligned),
-                "rd_norm_corr_log_aligned": float(corr_log_aligned),
-                "alignment_shift": [int(shift[0]), int(shift[1])],
+                "scenario_id": scenario_id,
+                "multiplexing_mode": mode,
+                "pass": bool(scenario_pass),
+                "shape_match": bool(shape_match),
+                "finite_ok": bool(finite_ok),
+                "adc_cube_shape": [int(x) for x in ref_bb.shape],
+                "adc_cube_dtype_ref": str(ref_bb.dtype),
+                "adc_cube_dtype_core": str(core_bb.dtype),
+                "channel_metrics": channel_metrics,
+                "summary_metrics": {
+                    "channel_count": int(channel_count),
+                    "max_range_peak_diff": int(max_range_diff),
+                    "max_doppler_peak_diff": int(max_doppler_diff),
+                    "max_doppler_peak_diff_circular": int(max_doppler_diff_circular),
+                    "min_rd_norm_corr_aligned": float(min_corr_aligned),
+                    "doppler_peak_gate": "circular_or_aligned_corr",
+                    "doppler_peak_pass": bool(doppler_peak_pass),
+                },
             }
         )
 
-    max_range_diff = max((int(row["rd_range_peak_diff"]) for row in channel_metrics), default=0)
-    max_doppler_diff = max((int(row["rd_doppler_peak_diff"]) for row in channel_metrics), default=0)
-    min_corr_aligned = min((float(row["rd_norm_corr_aligned"]) for row in channel_metrics), default=0.0)
+        if idx == 0:
+            first_adc_shape = [int(x) for x in ref_bb.shape]
+            first_adc_dtype_ref = str(ref_bb.dtype)
+            first_adc_dtype_core = str(core_bb.dtype)
+            first_channel_metrics = list(channel_metrics)
 
-    pass_thresholds = bool(
-        max_range_diff <= int(thresholds["range_peak_diff_max"])
-        and max_doppler_diff <= int(thresholds["doppler_peak_diff_max"])
-        and min_corr_aligned >= float(thresholds["rd_norm_corr_aligned_min"])
-    )
+        all_pass = bool(all_pass and scenario_pass)
+        all_shape_match = bool(all_shape_match and shape_match)
+        all_finite = bool(all_finite and finite_ok)
+        max_range_diff_overall = max(int(max_range_diff_overall), int(max_range_diff))
+        max_doppler_diff_overall = max(int(max_doppler_diff_overall), int(max_doppler_diff))
+        max_doppler_diff_circular_overall = max(
+            int(max_doppler_diff_circular_overall),
+            int(max_doppler_diff_circular),
+        )
+        min_corr_aligned_overall = min(float(min_corr_aligned_overall), float(min_corr_aligned))
+        max_channel_count = max(int(max_channel_count), int(channel_count))
 
-    sim_ok = bool(shape_match and finite_ok and pass_thresholds)
+    if min_corr_aligned_overall == float("inf"):
+        min_corr_aligned_overall = 0.0
 
     return {
-        "pass": sim_ok,
-        "shape_match": shape_match,
-        "finite_ok": finite_ok,
-        "adc_cube_shape": [int(x) for x in ref_bb.shape],
-        "adc_cube_dtype_ref": str(ref_bb.dtype),
-        "adc_cube_dtype_core": str(core_bb.dtype),
-        "channel_metrics": channel_metrics,
+        "pass": bool(all_pass),
+        "shape_match": bool(all_shape_match),
+        "finite_ok": bool(all_finite),
+        "adc_cube_shape": list(first_adc_shape),
+        "adc_cube_dtype_ref": str(first_adc_dtype_ref),
+        "adc_cube_dtype_core": str(first_adc_dtype_core),
+        "scenario_count": int(len(scenario_rows)),
+        "scenario_ids": [str(row["scenario_id"]) for row in scenario_rows],
+        "scenarios": scenario_rows,
+        "channel_metrics": list(first_channel_metrics),
         "summary_metrics": {
-            "channel_count": int(channel_count),
-            "max_range_peak_diff": int(max_range_diff),
-            "max_doppler_peak_diff": int(max_doppler_diff),
-            "min_rd_norm_corr_aligned": float(min_corr_aligned),
+            "scenario_count": int(len(scenario_rows)),
+            "channel_count": int(max_channel_count),
+            "max_range_peak_diff": int(max_range_diff_overall),
+            "max_doppler_peak_diff": int(max_doppler_diff_overall),
+            "max_doppler_peak_diff_circular": int(max_doppler_diff_circular_overall),
+            "min_rd_norm_corr_aligned": float(min_corr_aligned_overall),
+            "doppler_peak_gate": "circular_or_aligned_corr",
         },
     }
 
@@ -864,6 +1035,7 @@ def run() -> None:
     if isinstance(sim_summary, dict) and len(sim_summary) > 0:
         print(
             "sim_radar_summary="
+            f"scenarios={sim_summary.get('scenario_count')}, "
             f"channels={sim_summary.get('channel_count')}, "
             f"max_range_diff={sim_summary.get('max_range_peak_diff')}, "
             f"max_doppler_diff={sim_summary.get('max_doppler_peak_diff')}, "

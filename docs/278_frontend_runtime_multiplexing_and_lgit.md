@@ -66,6 +66,58 @@ Validation behavior:
   - `active_tx_per_chirp`
   - pulse matrix shapes
 
+## Concrete Runtime Examples
+
+### TDM
+
+Frontend inputs:
+
+- Multiplexing Mode: `tdm`
+- BPM Phase Code: empty
+- Multiplexing Plan JSON: empty
+
+Expected provider runtime info:
+
+- `multiplexing_mode = "tdm"`
+- `active_tx_per_chirp = [1, 1, ...]`
+- `multiplexing_plan_source = "runtime_input"`
+
+### BPM 2TX
+
+Frontend inputs:
+
+- Multiplexing Mode: `bpm`
+- BPM Phase Code: `0,180,0,180`
+- Multiplexing Plan JSON: empty
+
+Expected provider runtime info:
+
+- `multiplexing_mode = "bpm"`
+- `active_tx_per_chirp = [2, 2, ...]`
+- `pulse_amp_shape = [2, n_chirps]`
+- `pulse_phs_deg_shape = [2, n_chirps]`
+
+### Custom
+
+Frontend inputs:
+
+- Multiplexing Mode: `custom`
+- Multiplexing Plan JSON:
+
+```json
+{
+  "mode": "custom",
+  "pulse_amp": [[1, 0.5, 1, 0.5], [0.5, 1, 0.5, 1]],
+  "pulse_phs_deg": [[0, 45, 90, 135], [180, 225, 270, 315]]
+}
+```
+
+Expected provider runtime info:
+
+- `multiplexing_mode = "custom"`
+- `multiplexing_plan_source = "runtime_input.tx_multiplexing_plan"`
+- `active_tx_per_chirp = [2, 2, ...]`
+
 ## LGIT Output Artifact
 
 Scene pipeline writes optional:
@@ -81,6 +133,14 @@ Key arrays:
 - `metadata_json`
 
 This artifact is included in Graph Run summary output and cached artifact materialization.
+
+Expected schema/shape (2TX/2RX, 4 chirps, 256 samples example):
+
+- `adc_virtual_scv`: `[256, 4, 4]`
+- `range_doppler_power_drc`: `[4, 128, 4]`
+- `tx_pair_doppler_power_pdr`: `[2, 4, 128]`
+- `tx_pairs`: `[2, 2]`
+- `metadata_json.version = "lgit_customized_output_v1"`
 
 ## Production Runtime Command Baseline
 
@@ -101,6 +161,11 @@ A ready-to-run shell template is available:
 ```bash
 scripts/run_radarsimpy_paid_6m_gate_ci.sh
 ```
+
+The CI template also validates frontend-style runtime payload mapping to provider diagnostics:
+
+- `scripts/validate_frontend_runtime_payload_provider_info_optional.py`
+- report: `docs/reports/frontend_runtime_payload_provider_info_paid_6m.json`
 
 Optional env overrides:
 

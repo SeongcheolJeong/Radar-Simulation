@@ -26,6 +26,7 @@ Generated artifacts:
 - Simulator parity (pass): `docs/reports/radarsimpy_simulator_reference_parity_paid_6m.json`
 - Graph Lab Playwright E2E (pass): `docs/reports/graph_lab_playwright_e2e_latest.json`
 - Report retention audit: `docs/reports/radarsimpy_report_retention_audit_latest.json`
+- Frontend payload/provider contract: `docs/reports/frontend_runtime_payload_provider_info_paid_6m.json`
 
 ## Slack Template (EN)
 
