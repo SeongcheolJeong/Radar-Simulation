@@ -6,6 +6,19 @@
 - One-page summary (EN): `docs/280_release_one_pager_radarsimpy_2026_03_05.md`
 - One-page summary (KO): `docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md`
 
+## Auto-Generate Pack
+
+Use:
+
+```bash
+scripts/run_release_announcement_pack.sh
+```
+
+Generated artifacts:
+
+- `docs/reports/release_announcement_pack_latest.json`
+- `docs/reports/release_announcement_pack_latest.md`
+
 ## Evidence Reports
 
 - Production gate (ready): `docs/reports/radarsimpy_production_release_gate_paid_6m.json`
@@ -124,4 +137,3 @@ Radar Simulation Team
 감사합니다.
 Radar Simulation Team
 ```
-
