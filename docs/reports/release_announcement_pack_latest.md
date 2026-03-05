@@ -3,7 +3,7 @@
 - release_date: 2026-03-05
 - overall_ready: True
 - branch: main
-- head_commit: b7e4528
+- head_commit: 2714296
 
 ## Status
 
@@ -34,7 +34,7 @@ Validation status:
 - Graph Lab Playwright E2E: pass
 - Report retention audit: apply=True deleted=89 failed=0
 
-Commit: b7e4528
+Commit: 2714296
 One-pager EN: docs/280_release_one_pager_radarsimpy_2026_03_05.md
 One-pager KO: docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md
 Details: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
@@ -58,7 +58,7 @@ Details: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
 - Graph Lab Playwright E2E: pass
 - 리포트 보존 감사: apply=True deleted=89 failed=0
 
-커밋: b7e4528
+커밋: 2714296
 1페이지 요약(EN): docs/280_release_one_pager_radarsimpy_2026_03_05.md
 1페이지 요약(KO): docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md
 상세: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
