@@ -5,6 +5,7 @@ import {
 } from "../contracts.mjs";
 import { toGraphPayload } from "../graph_helpers.mjs";
 import { buildGraphRunRecordText, clampPollIntervalMs } from "../run_monitor.mjs";
+import { buildSceneOverrides } from "../runtime_overrides.mjs";
 import {
   cancelGraphRun,
   getGraphRunMaybe,
@@ -12,13 +13,6 @@ import {
   retryGraphRun,
   runGraph,
 } from "../api_client.mjs";
-
-function splitTokenList(rawText) {
-  return String(rawText || "")
-    .split(/[,\n]/)
-    .map((x) => String(x || "").trim())
-    .filter((x) => x.length > 0);
-}
 
 function applyRuntimeBackendToGraph(graph, backendType, runtimeProviderSpec) {
   const root = graph && typeof graph === "object" ? graph : {};
@@ -41,35 +35,6 @@ function applyRuntimeBackendToGraph(graph, backendType, runtimeProviderSpec) {
   };
 }
 
-function buildSceneOverrides(options) {
-  const opts = options && typeof options === "object" ? options : {};
-  const backendType = String(opts.runtimeBackendType || "").trim().toLowerCase();
-  if (!backendType) return null;
-  const runtimeProviderSpec = String(opts.runtimeProviderSpec || "").trim();
-  const runtimeFailurePolicy = String(opts.runtimeFailurePolicy || "").trim().toLowerCase();
-  const runtimeSimulationMode = String(opts.runtimeSimulationMode || "").trim().toLowerCase();
-  const runtimeDevice = String(opts.runtimeDevice || "").trim().toLowerCase();
-  const runtimeLicenseTier = String(opts.runtimeLicenseTier || "").trim().toLowerCase();
-  const runtimeLicenseFile = String(opts.runtimeLicenseFile || "").trim();
-  const runtimeRequiredModules = splitTokenList(opts.runtimeRequiredModulesText || "");
-
-  const backend = { type: backendType };
-  if (runtimeProviderSpec) backend.runtime_provider = runtimeProviderSpec;
-  if (runtimeRequiredModules.length > 0) backend.runtime_required_modules = runtimeRequiredModules;
-  if (runtimeFailurePolicy) backend.runtime_failure_policy = runtimeFailurePolicy;
-
-  const runtimeInput = {};
-  if (runtimeSimulationMode) runtimeInput.simulation_mode = runtimeSimulationMode;
-  if (runtimeDevice) runtimeInput.device = runtimeDevice;
-  if (runtimeLicenseTier) runtimeInput.license_tier_hint = runtimeLicenseTier;
-  if (runtimeLicenseFile) runtimeInput.license_file = runtimeLicenseFile;
-  if (Object.keys(runtimeInput).length > 0) {
-    backend.runtime_input = runtimeInput;
-  }
-
-  return { backend };
-}
-
 export function useGraphRunOps(opts) {
   const safeOpts = normalizeGraphRunOpsOptions(opts);
   const {
@@ -82,6 +47,9 @@ export function useGraphRunOps(opts) {
     runtimeRequiredModulesText,
     runtimeFailurePolicy,
     runtimeSimulationMode,
+    runtimeMultiplexingMode,
+    runtimeBpmPhaseCodeText,
+    runtimeMultiplexingPlanJson,
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,
@@ -207,6 +175,7 @@ export function useGraphRunOps(opts) {
       `- path_list_json: ${String(summary?.outputs?.path_list_json || "-")}`,
       `- adc_cube_npz: ${String(summary?.outputs?.adc_cube_npz || "-")}`,
       `- radar_map_npz: ${String(summary?.outputs?.radar_map_npz || "-")}`,
+      `- lgit_customized_output_npz: ${String(summary?.outputs?.lgit_customized_output_npz || "-")}`,
       `- graph_run_summary_json: ${String(summary?.outputs?.graph_run_summary_json || "-")}`,
       "",
       "contract_diagnostics:",
@@ -325,6 +294,9 @@ export function useGraphRunOps(opts) {
       runtimeRequiredModulesText,
       runtimeFailurePolicy,
       runtimeSimulationMode,
+      runtimeMultiplexingMode,
+      runtimeBpmPhaseCodeText,
+      runtimeMultiplexingPlanJson,
       runtimeDevice,
       runtimeLicenseTier,
       runtimeLicenseFile,
@@ -433,6 +405,9 @@ export function useGraphRunOps(opts) {
     runtimeRequiredModulesText,
     runtimeFailurePolicy,
     runtimeSimulationMode,
+    runtimeMultiplexingMode,
+    runtimeBpmPhaseCodeText,
+    runtimeMultiplexingPlanJson,
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,

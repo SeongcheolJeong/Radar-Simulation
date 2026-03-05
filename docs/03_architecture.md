@@ -10,13 +10,13 @@
 - Input: `(tx_id, rx_id, direction, polarization)`
 - Output: complex gains (`g_tx`, `g_rx`)
 
-3. `FmcwTdmSynthesizer`
-- Input: radar params + positions + paths + antenna gains
+3. `FmcwMultiplexingSynthesizer`
+- Input: radar params + positions + paths + antenna gains + multiplexing plan (`tx_schedule`, `pulse_amp`, `pulse_phs`)
 - Output: `adc[sample, chirp, tx, rx]`
 
 4. `OutputWriter`
 - Input: path list + ADC + metadata
-- Output: persisted artifacts (HDF5/Zarr/NPZ depending on phase)
+- Output: persisted artifacts (`path_list.json`, `adc_cube.npz`, `radar_map.npz`, optional `lgit_customized_output.npz`)
 
 ## Dependency Direction
 
@@ -27,6 +27,5 @@
 ## Engineering Constraints
 
 - Keep path and ADC interfaces stable while swapping RT backends.
-- Keep TDM timing explicit via `tx_schedule`.
+- Keep multiplexing timing explicit via `tx_schedule` and optional `pulse_amp` / `pulse_phs`.
 - Handle phase in complex domain from first implementation.
-

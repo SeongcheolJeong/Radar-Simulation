@@ -1,3 +1,5 @@
+> NOTE (2026-03-05): For the current implemented Graph Lab runtime controls and integration status, use `docs/278_frontend_runtime_multiplexing_and_lgit.md` as the authoritative reference.
+
 While I cannot directly generate and download a `.txt` file to your local computer from this chat window, I have compiled and merged our entire architectural design, JSON schemas, React frontend code, and Python backend code into a single, comprehensive Markdown document below.
 
 You can simply click the **"Copy"** button on this response and paste it directly into your preferred text editor (like VS Code, Notepad++, or Obsidian) and save it as `RadarSim_Complete_Project.txt` or `RadarSim_Complete_Project.md`.

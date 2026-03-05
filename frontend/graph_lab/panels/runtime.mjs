@@ -13,6 +13,12 @@ export function RuntimeConfigSection({
   setRuntimeFailurePolicy,
   runtimeSimulationMode,
   setRuntimeSimulationMode,
+  runtimeMultiplexingMode,
+  setRuntimeMultiplexingMode,
+  runtimeBpmPhaseCodeText,
+  setRuntimeBpmPhaseCodeText,
+  runtimeMultiplexingPlanJson,
+  setRuntimeMultiplexingPlanJson,
   runtimeDevice,
   setRuntimeDevice,
   runtimeLicenseTier,
@@ -21,6 +27,26 @@ export function RuntimeConfigSection({
   setRuntimeLicenseFile,
   runtimeStatusLine,
 }) {
+  const applyTdmPreset = () => {
+    setRuntimeMultiplexingMode("tdm");
+    setRuntimeBpmPhaseCodeText("");
+    setRuntimeMultiplexingPlanJson("");
+  };
+
+  const applyBpmPreset = () => {
+    setRuntimeMultiplexingMode("bpm");
+    setRuntimeBpmPhaseCodeText("0,180,0,180");
+    setRuntimeMultiplexingPlanJson("");
+  };
+
+  const applyCustomPreset = () => {
+    setRuntimeMultiplexingMode("custom");
+    setRuntimeBpmPhaseCodeText("");
+    setRuntimeMultiplexingPlanJson(
+      "{\"mode\":\"custom\",\"pulse_amp\":[[1,1,1,1],[1,1,1,1]],\"pulse_phs_deg\":[[0,0,0,0],[0,180,0,180]]}"
+    );
+  };
+
   return h(React.Fragment, null, [
     h("div", { className: "field", key: "runtime_backend" }, [
       h("label", { className: "label", key: "lbl_runtime_backend" }, "Runtime Backend"),
@@ -78,6 +104,18 @@ export function RuntimeConfigSection({
           h("option", { value: "radarsimpy_adc", key: "rsm3" }, "radarsimpy_adc"),
         ]),
       ]),
+      h("div", { className: "field", key: "runtime_multiplexing_mode" }, [
+        h("label", { className: "label", key: "lbl_runtime_multiplexing_mode" }, "Multiplexing Mode"),
+        h("select", {
+          className: "select",
+          value: runtimeMultiplexingMode,
+          onChange: (e) => setRuntimeMultiplexingMode(String(e.target.value || "tdm")),
+        }, [
+          h("option", { value: "tdm", key: "rmm1" }, "tdm"),
+          h("option", { value: "bpm", key: "rmm2" }, "bpm"),
+          h("option", { value: "custom", key: "rmm3" }, "custom"),
+        ]),
+      ]),
     ]),
     h("div", { className: "btn-row", key: "runtime_license_row" }, [
       h("div", { className: "field", key: "runtime_device" }, [
@@ -110,6 +148,48 @@ export function RuntimeConfigSection({
         value: runtimeLicenseFile,
         onChange: (e) => setRuntimeLicenseFile(e.target.value),
         placeholder: "/abs/path/license_RadarSimPy_*.lic",
+      }),
+    ]),
+    h("div", { className: "field", key: "runtime_mux_presets" }, [
+      h("label", { className: "label", key: "lbl_runtime_mux_presets" }, "Multiplexing Presets"),
+      h("div", { className: "btn-row", key: "runtime_mux_preset_row" }, [
+        h("button", {
+          type: "button",
+          className: "btn",
+          key: "mux_preset_tdm",
+          onClick: applyTdmPreset,
+        }, "Preset: TDM"),
+        h("button", {
+          type: "button",
+          className: "btn",
+          key: "mux_preset_bpm",
+          onClick: applyBpmPreset,
+        }, "Preset: BPM 2TX"),
+        h("button", {
+          type: "button",
+          className: "btn",
+          key: "mux_preset_custom",
+          onClick: applyCustomPreset,
+        }, "Preset: Custom"),
+      ]),
+    ]),
+    h("div", { className: "field", key: "runtime_bpm_phase_code" }, [
+      h("label", { className: "label", key: "lbl_runtime_bpm_phase_code" }, "BPM Phase Code (deg, comma/newline)"),
+      h("input", {
+        className: "input",
+        value: runtimeBpmPhaseCodeText,
+        onChange: (e) => setRuntimeBpmPhaseCodeText(e.target.value),
+        placeholder: "0,180,0,180",
+      }),
+    ]),
+    h("div", { className: "field", key: "runtime_multiplexing_plan_json" }, [
+      h("label", { className: "label", key: "lbl_runtime_multiplexing_plan_json" }, "Multiplexing Plan JSON (optional)"),
+      h("textarea", {
+        className: "textarea",
+        value: runtimeMultiplexingPlanJson,
+        onChange: (e) => setRuntimeMultiplexingPlanJson(e.target.value),
+        placeholder: "{\"mode\":\"custom\",\"pulse_amp\":[[1,1,1,1],[1,1,1,1]],\"pulse_phs_deg\":[[0,0,0,0],[0,180,0,180]]}",
+        style: { minHeight: "72px" },
       }),
     ]),
     h("div", { className: "hint", key: "runtime_status_hint" }, `runtime_status: ${String(runtimeStatusLine || "-")}`),

@@ -1490,6 +1490,20 @@ class WebE2EOrchestrator:
             dst = (output_dir / dst_name).resolve()
             shutil.copy2(src, dst)
             copied[src_key] = str(dst)
+
+        optional = [
+            ("lgit_customized_output_npz", "lgit_customized_output.npz"),
+        ]
+        for src_key, dst_name in optional:
+            raw = outputs.get(src_key)
+            if raw is None:
+                continue
+            src = Path(str(raw)).expanduser().resolve()
+            if not src.exists() or not src.is_file():
+                continue
+            dst = (output_dir / dst_name).resolve()
+            shutil.copy2(src, dst)
+            copied[src_key] = str(dst)
         return copied
 
     def _recompute_radar_map_from_cached_adc(
@@ -2326,6 +2340,7 @@ class WebE2EOrchestrator:
         path_json = output_dir / "path_list.json"
         adc_npz = output_dir / "adc_cube.npz"
         map_npz = output_dir / "radar_map.npz"
+        lgit_npz = output_dir / "lgit_customized_output.npz"
 
         if not path_json.exists() or not adc_npz.exists() or not map_npz.exists():
             raise FileNotFoundError("required output artifacts are missing")
@@ -2355,6 +2370,11 @@ class WebE2EOrchestrator:
             "radar_map_npz": str(Path(str((run_out or {}).get("radar_map_npz", map_npz))).resolve()),
             "hybrid_estimation_npz": (
                 str(Path(str(hybrid_estimation)).resolve()) if hybrid_estimation else None
+            ),
+            "lgit_customized_output_npz": (
+                str(Path(str((run_out or {}).get("lgit_customized_output_npz", lgit_npz))).resolve())
+                if ((run_out or {}).get("lgit_customized_output_npz") is not None or lgit_npz.exists())
+                else None
             ),
         }
 

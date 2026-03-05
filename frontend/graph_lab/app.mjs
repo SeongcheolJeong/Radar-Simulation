@@ -80,6 +80,15 @@ export function App() {
   const [runtimeSimulationMode, setRuntimeSimulationMode] = React.useState(
     String(params.get("simulation_mode") || "auto")
   );
+  const [runtimeMultiplexingMode, setRuntimeMultiplexingMode] = React.useState(
+    String(params.get("runtime_multiplexing_mode") || "tdm")
+  );
+  const [runtimeBpmPhaseCodeText, setRuntimeBpmPhaseCodeText] = React.useState(
+    String(params.get("runtime_bpm_phase_code") || "")
+  );
+  const [runtimeMultiplexingPlanJson, setRuntimeMultiplexingPlanJson] = React.useState(
+    String(params.get("runtime_multiplexing_plan_json") || "")
+  );
   const [runtimeDevice, setRuntimeDevice] = React.useState(
     String(params.get("runtime_device") || "cpu")
   );
@@ -817,6 +826,7 @@ export function App() {
     const simulationBackendObserved = String(
       providerInfo?.simulation_backend || providerInfo?.generator || ""
     ).trim();
+    const multiplexingObserved = String(providerInfo?.multiplexing_mode || "").trim();
     const licenseObserved = String(
       providerInfo?.license_file || providerInfo?.license_file_hint || ""
     ).trim();
@@ -824,16 +834,18 @@ export function App() {
       `backend=${backendTypeObserved || runtimeBackendType || "-"}`,
       `mode=${runtimeModeObserved || "-"}`,
       `sim=${simulationBackendObserved || "-"}`,
+      `mux=${multiplexingObserved || runtimeMultiplexingMode || "-"}`,
       `license=${licenseObserved ? "set" : (runtimeLicenseFile ? "requested" : "none")}`,
     ].join(" | ");
     return {
       backendTypeObserved,
       runtimeModeObserved,
       simulationBackendObserved,
+      multiplexingObserved,
       licenseObserved,
       runtimeStatusLine,
     };
-  }, [graphRunSummary, runtimeBackendType, runtimeLicenseFile]);
+  }, [graphRunSummary, runtimeBackendType, runtimeLicenseFile, runtimeMultiplexingMode]);
 
   const {
     runGraphViaApi,
@@ -851,6 +863,9 @@ export function App() {
     runtimeRequiredModulesText,
     runtimeFailurePolicy,
     runtimeSimulationMode,
+    runtimeMultiplexingMode,
+    runtimeBpmPhaseCodeText,
+    runtimeMultiplexingPlanJson,
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,
@@ -1249,6 +1264,9 @@ export function App() {
       runtimeRequiredModulesText,
       runtimeFailurePolicy,
       runtimeSimulationMode,
+      runtimeMultiplexingMode,
+      runtimeBpmPhaseCodeText,
+      runtimeMultiplexingPlanJson,
       runtimeDevice,
       runtimeLicenseTier,
       runtimeLicenseFile,
@@ -1275,6 +1293,9 @@ export function App() {
       setRuntimeRequiredModulesText,
       setRuntimeFailurePolicy,
       setRuntimeSimulationMode,
+      setRuntimeMultiplexingMode,
+      setRuntimeBpmPhaseCodeText,
+      setRuntimeMultiplexingPlanJson,
       setRuntimeDevice,
       setRuntimeLicenseTier,
       setRuntimeLicenseFile,
@@ -1319,6 +1340,9 @@ export function App() {
     runtimeRequiredModulesText,
     runtimeFailurePolicy,
     runtimeSimulationMode,
+    runtimeMultiplexingMode,
+    runtimeBpmPhaseCodeText,
+    runtimeMultiplexingPlanJson,
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,

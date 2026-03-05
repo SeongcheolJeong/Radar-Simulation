@@ -173,10 +173,16 @@ def _simulate_adc_with_radarsimpy(
         n_chirps=int(n_chirps),
         n_tx=int(n_tx),
     )
+    multiplexing_plan = _resolve_runtime_multiplexing_plan(
+        runtime_input=runtime_input,
+        tx_schedule=tx_schedule,
+        n_tx=int(n_tx),
+        n_chirps=int(n_chirps),
+    )
     tx_channels = _build_tx_channels_for_sim(
         tx_pos=tx_pos,
-        tx_schedule=tx_schedule,
-        apply_tdm_schedule=bool(runtime_input.get("apply_tdm_schedule", True)),
+        pulse_amp=np.asarray(multiplexing_plan["pulse_amp"], dtype=np.float64),
+        pulse_phs_deg=np.asarray(multiplexing_plan["pulse_phs_deg"], dtype=np.float64),
     )
     rx_channels = [{"location": [float(x), float(y), float(z)]} for x, y, z in rx_pos.tolist()]
 
@@ -240,28 +246,206 @@ def _simulate_adc_with_radarsimpy(
         "target_count": int(len(point_targets)),
         "n_tx": int(n_tx),
         "n_rx": int(n_rx),
+        "multiplexing_mode": str(multiplexing_plan["mode"]),
+        "multiplexing_plan_source": str(multiplexing_plan["source"]),
+        "active_tx_per_chirp": [int(x) for x in multiplexing_plan["active_tx_per_chirp"]],
+        "pulse_amp_shape": [int(x) for x in np.asarray(multiplexing_plan["pulse_amp"]).shape],
+        "pulse_phs_deg_shape": [int(x) for x in np.asarray(multiplexing_plan["pulse_phs_deg"]).shape],
+        "tx_schedule": [int(x) for x in tx_schedule],
     }
     return adc_sctr, info
 
 
 def _build_tx_channels_for_sim(
     tx_pos: np.ndarray,
-    tx_schedule: Sequence[int],
-    apply_tdm_schedule: bool,
+    pulse_amp: np.ndarray,
+    pulse_phs_deg: np.ndarray,
 ) -> List[Dict[str, Any]]:
     n_tx = int(tx_pos.shape[0])
-    n_chirps = int(len(tx_schedule))
+    if pulse_amp.shape != pulse_phs_deg.shape:
+        raise ValueError("pulse_amp and pulse_phs_deg shapes must match")
+    if pulse_amp.ndim != 2:
+        raise ValueError("pulse_amp must be 2D [n_tx, n_chirps]")
+    if pulse_amp.shape[0] != n_tx:
+        raise ValueError(f"pulse_amp first dimension must equal n_tx ({n_tx})")
     out: List[Dict[str, Any]] = []
     for tx_idx in range(n_tx):
         row: Dict[str, Any] = {
             "location": [float(x) for x in tx_pos[tx_idx].tolist()],
+            "pulse_amp": np.asarray(pulse_amp[tx_idx, :], dtype=np.float64),
+            "pulse_phs": np.asarray(pulse_phs_deg[tx_idx, :], dtype=np.float64),
         }
-        if apply_tdm_schedule and n_tx > 1:
-            pulse_amp = np.zeros(n_chirps, dtype=np.float64)
-            pulse_amp[np.asarray(tx_schedule, dtype=np.int64) == int(tx_idx)] = 1.0
-            row["pulse_amp"] = pulse_amp
         out.append(row)
     return out
+
+
+def _resolve_runtime_multiplexing_plan(
+    runtime_input: Mapping[str, Any],
+    tx_schedule: Sequence[int],
+    n_tx: int,
+    n_chirps: int,
+) -> Dict[str, Any]:
+    mode_raw = str(runtime_input.get("multiplexing_mode", "tdm")).strip().lower()
+    mode = "tdm" if mode_raw in ("", "auto") else mode_raw
+    if mode not in ("tdm", "bpm", "custom"):
+        raise ValueError("runtime_input.multiplexing_mode must be one of: tdm, bpm, custom")
+
+    source = "runtime_input"
+    plan_raw = runtime_input.get("tx_multiplexing_plan")
+    if plan_raw is not None:
+        if not isinstance(plan_raw, Mapping):
+            raise ValueError("runtime_input.tx_multiplexing_plan must be object when provided")
+        source = "runtime_input.tx_multiplexing_plan"
+        plan_mode = str(plan_raw.get("mode", mode)).strip().lower()
+        if plan_mode in ("", "auto"):
+            plan_mode = mode
+        if plan_mode not in ("tdm", "bpm", "custom"):
+            raise ValueError("runtime_input.tx_multiplexing_plan.mode must be one of: tdm, bpm, custom")
+        mode = plan_mode
+        pulse_amp = _resolve_optional_real_matrix(
+            plan_raw.get("pulse_amp"),
+            n_tx=n_tx,
+            n_chirps=n_chirps,
+            key_name="runtime_input.tx_multiplexing_plan.pulse_amp",
+        )
+        pulse_phs_deg = _resolve_optional_real_matrix(
+            plan_raw.get("pulse_phs_deg"),
+            n_tx=n_tx,
+            n_chirps=n_chirps,
+            key_name="runtime_input.tx_multiplexing_plan.pulse_phs_deg",
+        )
+        bpm_code_raw = plan_raw.get("bpm_phase_code_deg", runtime_input.get("bpm_phase_code_deg"))
+    else:
+        pulse_amp = _resolve_optional_real_matrix(
+            runtime_input.get("tx_pulse_amp"),
+            n_tx=n_tx,
+            n_chirps=n_chirps,
+            key_name="runtime_input.tx_pulse_amp",
+        )
+        pulse_phs_deg = _resolve_optional_real_matrix(
+            runtime_input.get("tx_pulse_phs_deg"),
+            n_tx=n_tx,
+            n_chirps=n_chirps,
+            key_name="runtime_input.tx_pulse_phs_deg",
+        )
+        bpm_code_raw = runtime_input.get("bpm_phase_code_deg")
+
+    if mode == "tdm":
+        if pulse_amp is None:
+            pulse_amp = np.zeros((int(n_tx), int(n_chirps)), dtype=np.float64)
+            for chirp_idx, tx_idx in enumerate(tx_schedule):
+                pulse_amp[int(tx_idx), int(chirp_idx)] = 1.0
+        if pulse_phs_deg is None:
+            pulse_phs_deg = np.zeros((int(n_tx), int(n_chirps)), dtype=np.float64)
+    elif mode == "bpm":
+        if pulse_amp is None:
+            pulse_amp = np.zeros((int(n_tx), int(n_chirps)), dtype=np.float64)
+            if int(n_tx) <= 1:
+                pulse_amp[0, :] = 1.0
+            else:
+                pulse_amp[0, :] = 1.0
+                pulse_amp[1, :] = 1.0
+        if pulse_phs_deg is None:
+            pulse_phs_deg = np.zeros((int(n_tx), int(n_chirps)), dtype=np.float64)
+            if int(n_tx) > 1:
+                pulse_phs_deg[1, :] = _resolve_bpm_phase_code_deg(
+                    bpm_code_raw,
+                    n_chirps=int(n_chirps),
+                )
+    else:
+        if pulse_amp is None:
+            pulse_amp = np.ones((int(n_tx), int(n_chirps)), dtype=np.float64)
+        if pulse_phs_deg is None:
+            pulse_phs_deg = np.zeros((int(n_tx), int(n_chirps)), dtype=np.float64)
+
+    pulse_amp = np.asarray(pulse_amp, dtype=np.float64)
+    pulse_phs_deg = np.asarray(pulse_phs_deg, dtype=np.float64)
+    if pulse_amp.shape != (int(n_tx), int(n_chirps)):
+        raise ValueError("resolved pulse_amp shape mismatch")
+    if pulse_phs_deg.shape != (int(n_tx), int(n_chirps)):
+        raise ValueError("resolved pulse_phs_deg shape mismatch")
+
+    active_tx_per_chirp = np.sum(np.abs(pulse_amp) > 1.0e-12, axis=0)
+    return {
+        "mode": str(mode),
+        "source": str(source),
+        "pulse_amp": pulse_amp,
+        "pulse_phs_deg": pulse_phs_deg,
+        "active_tx_per_chirp": [int(x) for x in np.asarray(active_tx_per_chirp, dtype=np.int64).tolist()],
+    }
+
+
+def _resolve_bpm_phase_code_deg(value: Any, n_chirps: int) -> np.ndarray:
+    if value is None:
+        return np.asarray(
+            [0.0 if (int(i) % 2 == 0) else 180.0 for i in range(int(n_chirps))],
+            dtype=np.float64,
+        )
+    arr = np.asarray(value, dtype=np.float64).reshape(-1)
+    if arr.size == 1:
+        return np.full(int(n_chirps), float(arr.item()), dtype=np.float64)
+    if arr.size != int(n_chirps):
+        raise ValueError("bpm_phase_code_deg length must equal n_chirps")
+    return np.asarray(arr, dtype=np.float64)
+
+
+def _resolve_optional_real_matrix(
+    value: Any,
+    n_tx: int,
+    n_chirps: int,
+    key_name: str,
+) -> np.ndarray | None:
+    if value is None:
+        return None
+
+    if isinstance(value, Mapping):
+        out = np.zeros((int(n_tx), int(n_chirps)), dtype=np.float64)
+        has_any = False
+        for tx_idx in range(int(n_tx)):
+            raw = None
+            for k in (str(tx_idx), f"tx{tx_idx}"):
+                if k in value:
+                    raw = value[k]
+                    break
+            if raw is None and tx_idx in value:
+                raw = value[tx_idx]
+            if raw is None:
+                continue
+            has_any = True
+            row = _resolve_optional_real_matrix(
+                raw,
+                n_tx=1,
+                n_chirps=int(n_chirps),
+                key_name=f"{key_name}[{tx_idx}]",
+            )
+            if row is None:
+                continue
+            out[tx_idx, :] = np.asarray(row, dtype=np.float64).reshape(1, int(n_chirps))[0]
+        return out if has_any else None
+
+    arr = np.asarray(value, dtype=np.float64)
+    if arr.ndim == 0:
+        return np.full((int(n_tx), int(n_chirps)), float(arr.item()), dtype=np.float64)
+    if arr.ndim == 1:
+        if arr.size == int(n_chirps):
+            return np.tile(arr.reshape(1, int(n_chirps)), (int(n_tx), 1))
+        if arr.size == int(n_tx):
+            return np.repeat(arr.reshape(int(n_tx), 1), int(n_chirps), axis=1)
+        if arr.size == 1:
+            return np.full((int(n_tx), int(n_chirps)), float(arr.item()), dtype=np.float64)
+        raise ValueError(
+            f"{key_name} 1D length must be 1, n_chirps ({n_chirps}), or n_tx ({n_tx})"
+        )
+    if arr.ndim == 2:
+        if arr.shape == (int(n_tx), int(n_chirps)):
+            return np.asarray(arr, dtype=np.float64)
+        if arr.shape == (int(n_chirps), int(n_tx)):
+            return np.asarray(arr.T, dtype=np.float64)
+        raise ValueError(
+            f"{key_name} 2D shape must be (n_tx,n_chirps) or (n_chirps,n_tx), "
+            f"got {tuple(int(x) for x in arr.shape)}"
+        )
+    raise ValueError(f"{key_name} must be scalar, 1D, 2D, or mapping")
 
 
 def _build_sim_point_targets(

@@ -15,6 +15,7 @@ from .adapters import (
 from .adc_pack_builder import estimate_rd_ra_from_adc
 from .constants import C0
 from .io import save_adc_npz, save_paths_by_chirp_json
+from .lgit_output_adapter import save_lgit_customized_output_npz
 from .path_contract import validate_paths_by_chirp
 from .pipeline import run_hybrid_frames_pipeline
 from .radar_compensation import apply_radar_compensation
@@ -119,6 +120,27 @@ def run_object_scene_to_radar_map(
     if "compensation_summary" in result and isinstance(result["compensation_summary"], Mapping):
         meta["compensation_summary"] = dict(result["compensation_summary"])
     meta["path_contract_summary"] = dict(path_contract_summary)
+
+    lgit_output_npz: Optional[str] = None
+    lgit_cfg = _resolve_lgit_output_adapter_config(scene_payload)
+    if bool(lgit_cfg.get("enabled", False)):
+        lgit_path = (out_root / str(lgit_cfg["filename"])).resolve()
+        lgit_meta = {
+            "scene_id": _opt_str(scene_payload.get("scene_id")),
+            "backend_type": backend_type,
+            "frame_count": int(result.get("frame_count", len(result["tx_schedule"]))),
+        }
+        lgit_summary = save_lgit_customized_output_npz(
+            output_npz=lgit_path,
+            adc_sctr=adc,
+            tx_schedule=[int(x) for x in result["tx_schedule"]],
+            multiplexing_mode=_resolve_result_multiplexing_mode(result),
+            metadata=lgit_meta,
+        )
+        lgit_output_npz = str(lgit_path)
+        meta["lgit_customized_output_npz"] = str(lgit_output_npz)
+        meta["lgit_customized_output_summary"] = dict(lgit_summary)
+
     np.savez_compressed(
         str(map_npz),
         fx_dop_win=np.asarray(est["fx_dop_win"], dtype=np.float64),
@@ -133,6 +155,7 @@ def run_object_scene_to_radar_map(
         "tx_schedule": [int(x) for x in result["tx_schedule"]],
         "frame_count": int(result.get("frame_count", len(result["tx_schedule"]))),
         "hybrid_estimation_npz": result.get("hybrid_estimation_npz"),
+        "lgit_customized_output_npz": lgit_output_npz,
         "path_contract_summary": dict(path_contract_summary),
     }
 
@@ -171,6 +194,51 @@ def _resolve_frame_indices(backend: Mapping[str, Any]) -> List[int]:
     if e < s:
         raise ValueError("backend.frame_end must be >= frame_start")
     return list(range(s, e + 1))
+
+
+def _resolve_lgit_output_adapter_config(scene_payload: Mapping[str, Any]) -> Dict[str, Any]:
+    defaults: Dict[str, Any] = {
+        "enabled": True,
+        "filename": "lgit_customized_output.npz",
+    }
+    output_adapters = scene_payload.get("output_adapters")
+    if not isinstance(output_adapters, Mapping):
+        return defaults
+
+    raw = output_adapters.get("lgit_customized")
+    if raw is None:
+        return defaults
+    if isinstance(raw, bool):
+        out = dict(defaults)
+        out["enabled"] = bool(raw)
+        return out
+    if not isinstance(raw, Mapping):
+        raise ValueError("output_adapters.lgit_customized must be bool or object")
+
+    out = dict(defaults)
+    out["enabled"] = bool(raw.get("enabled", True))
+    filename = _opt_str(raw.get("filename"))
+    if filename is not None:
+        text = str(filename).strip()
+        if text == "":
+            raise ValueError("output_adapters.lgit_customized.filename must be non-empty when set")
+        if ("/" in text) or ("\\" in text):
+            raise ValueError("output_adapters.lgit_customized.filename must be a filename only")
+        out["filename"] = str(text)
+    return out
+
+
+def _resolve_result_multiplexing_mode(result: Mapping[str, Any]) -> str:
+    runtime_resolution = result.get("runtime_resolution")
+    if not isinstance(runtime_resolution, Mapping):
+        return "tdm"
+    provider_info = runtime_resolution.get("provider_runtime_info")
+    if not isinstance(provider_info, Mapping):
+        return "tdm"
+    mode = _opt_str(provider_info.get("multiplexing_mode"))
+    if mode is None:
+        return "tdm"
+    return str(mode)
 
 
 def _resolve_scene_relative_paths(payload: Mapping[str, Any], scene_json_path: str) -> Dict[str, Any]:

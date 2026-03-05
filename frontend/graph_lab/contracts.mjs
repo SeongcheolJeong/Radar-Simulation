@@ -153,6 +153,9 @@ export function resetContractWarnings() {
  * @property {string} runtimeRequiredModulesText
  * @property {string} runtimeFailurePolicy
  * @property {string} runtimeSimulationMode
+ * @property {string} runtimeMultiplexingMode
+ * @property {string} runtimeBpmPhaseCodeText
+ * @property {string} runtimeMultiplexingPlanJson
  * @property {string} runtimeDevice
  * @property {string} runtimeLicenseTier
  * @property {string} runtimeLicenseFile
@@ -212,6 +215,9 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       runtimeRequiredModulesText: readString(scope, values, "runtimeRequiredModulesText", ""),
       runtimeFailurePolicy: readString(scope, values, "runtimeFailurePolicy", "error"),
       runtimeSimulationMode: readString(scope, values, "runtimeSimulationMode", "auto"),
+      runtimeMultiplexingMode: readString(scope, values, "runtimeMultiplexingMode", "tdm"),
+      runtimeBpmPhaseCodeText: readString(scope, values, "runtimeBpmPhaseCodeText", ""),
+      runtimeMultiplexingPlanJson: readString(scope, values, "runtimeMultiplexingPlanJson", ""),
       runtimeDevice: readString(scope, values, "runtimeDevice", "cpu"),
       runtimeLicenseTier: readString(scope, values, "runtimeLicenseTier", "trial"),
       runtimeLicenseFile: readString(scope, values, "runtimeLicenseFile", ""),
@@ -238,6 +244,9 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       setRuntimeRequiredModulesText: readFunction(scope, setters, "setRuntimeRequiredModulesText"),
       setRuntimeFailurePolicy: readFunction(scope, setters, "setRuntimeFailurePolicy"),
       setRuntimeSimulationMode: readFunction(scope, setters, "setRuntimeSimulationMode"),
+      setRuntimeMultiplexingMode: readFunction(scope, setters, "setRuntimeMultiplexingMode"),
+      setRuntimeBpmPhaseCodeText: readFunction(scope, setters, "setRuntimeBpmPhaseCodeText"),
+      setRuntimeMultiplexingPlanJson: readFunction(scope, setters, "setRuntimeMultiplexingPlanJson"),
       setRuntimeDevice: readFunction(scope, setters, "setRuntimeDevice"),
       setRuntimeLicenseTier: readFunction(scope, setters, "setRuntimeLicenseTier"),
       setRuntimeLicenseFile: readFunction(scope, setters, "setRuntimeLicenseFile"),
@@ -294,6 +303,9 @@ export function normalizeGraphRunOpsOptions(raw) {
     runtimeRequiredModulesText: readString(scope, root, "runtimeRequiredModulesText", ""),
     runtimeFailurePolicy: readString(scope, root, "runtimeFailurePolicy", "error"),
     runtimeSimulationMode: readString(scope, root, "runtimeSimulationMode", "auto"),
+    runtimeMultiplexingMode: readString(scope, root, "runtimeMultiplexingMode", "tdm"),
+    runtimeBpmPhaseCodeText: readString(scope, root, "runtimeBpmPhaseCodeText", ""),
+    runtimeMultiplexingPlanJson: readString(scope, root, "runtimeMultiplexingPlanJson", ""),
     runtimeDevice: readString(scope, root, "runtimeDevice", "cpu"),
     runtimeLicenseTier: readString(scope, root, "runtimeLicenseTier", "trial"),
     runtimeLicenseFile: readString(scope, root, "runtimeLicenseFile", ""),
