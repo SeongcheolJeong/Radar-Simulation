@@ -1,9 +1,9 @@
 # RadarSimPy Report Retention Audit
 
-- generated_at_utc: 2026-03-05T11:40:41.838479+00:00
+- generated_at_utc: 2026-03-05T11:44:07.865254+00:00
 - reports_root: /home/seongcheoljeong/workspace/myproject/docs/reports
 - keep_per_group: 8
-- apply: False
+- apply: True
 
 ## Summary
 
@@ -15,7 +15,7 @@
 
 ## Action
 
-- deleted_count: 0
+- deleted_count: 89
 - failed_delete_count: 0
 
 ## Groups
