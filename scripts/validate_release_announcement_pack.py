@@ -26,6 +26,16 @@ def _as_bool(v: Any, key: str) -> bool:
     return bool(v)
 
 
+def _as_nonneg_int(v: Any, key: str) -> int:
+    if isinstance(v, bool):
+        raise ValueError(f"{key} must be integer")
+    if not isinstance(v, int):
+        raise ValueError(f"{key} must be integer")
+    if int(v) < 0:
+        raise ValueError(f"{key} must be >= 0")
+    return int(v)
+
+
 def _resolve_path(repo_root: Path, raw: str) -> Path:
     p = Path(str(raw)).expanduser()
     if not p.is_absolute():
@@ -68,6 +78,17 @@ def main() -> None:
     readiness_ready = _as_bool(status.get("readiness_ready"), "status.readiness_ready")
     parity_pass = _as_bool(status.get("parity_pass"), "status.parity_pass")
     frontend_e2e_pass = _as_bool(status.get("frontend_e2e_pass"), "status.frontend_e2e_pass")
+    _as_bool(status.get("retention_audit_apply"), "status.retention_audit_apply")
+    _as_nonneg_int(
+        status.get("retention_audit_deleted_count"), "status.retention_audit_deleted_count"
+    )
+    _as_nonneg_int(
+        status.get("retention_audit_failed_delete_count"),
+        "status.retention_audit_failed_delete_count",
+    )
+    _as_nonneg_int(
+        status.get("retention_audit_prunable_count"), "status.retention_audit_prunable_count"
+    )
     overall_ready = _as_bool(status.get("overall_ready"), "status.overall_ready")
 
     expected_overall = bool(production_gate_ready and readiness_ready and parity_pass and frontend_e2e_pass)
@@ -81,6 +102,7 @@ def main() -> None:
         "readiness_json",
         "parity_json",
         "frontend_e2e_json",
+        "retention_audit_json",
     ):
         pth = _resolve_path(repo_root, _as_nonempty_str(sources.get(key), f"sources.{key}"))
         if not pth.exists() or not pth.is_file():
@@ -108,4 +130,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

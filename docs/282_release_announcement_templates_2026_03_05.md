@@ -25,6 +25,7 @@ Generated artifacts:
 - Readiness checkpoint (ready): `docs/reports/radarsimpy_readiness_checkpoint_paid_6m.json`
 - Simulator parity (pass): `docs/reports/radarsimpy_simulator_reference_parity_paid_6m.json`
 - Graph Lab Playwright E2E (pass): `docs/reports/graph_lab_playwright_e2e_latest.json`
+- Report retention audit: `docs/reports/radarsimpy_report_retention_audit_latest.json`
 
 ## Slack Template (EN)
 

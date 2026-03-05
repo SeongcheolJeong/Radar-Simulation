@@ -3,7 +3,7 @@
 - release_date: 2026-03-05
 - overall_ready: True
 - branch: main
-- head_commit: 2892691
+- head_commit: 2599f73
 
 ## Status
 
@@ -11,6 +11,10 @@
 - readiness_ready: True
 - parity_pass: True
 - frontend_e2e_pass: True
+- retention_audit_apply: True
+- retention_audit_deleted_count: 89
+- retention_audit_failed_delete_count: 0
+- retention_audit_prunable_count: 89
 
 ## Slack EN
 
@@ -28,8 +32,9 @@ Validation status:
 - Readiness checkpoint: ready
 - Simulator parity: pass
 - Graph Lab Playwright E2E: pass
+- Report retention audit: apply=True deleted=89 failed=0
 
-Commit: 2892691
+Commit: 2599f73
 One-pager EN: docs/280_release_one_pager_radarsimpy_2026_03_05.md
 One-pager KO: docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md
 Details: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
@@ -51,8 +56,9 @@ Details: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
 - Readiness checkpoint: ready
 - Simulator parity: pass
 - Graph Lab Playwright E2E: pass
+- 리포트 보존 감사: apply=True deleted=89 failed=0
 
-커밋: 2892691
+커밋: 2599f73
 1페이지 요약(EN): docs/280_release_one_pager_radarsimpy_2026_03_05.md
 1페이지 요약(KO): docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md
 상세: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md

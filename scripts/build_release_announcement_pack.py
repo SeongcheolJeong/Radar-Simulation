@@ -41,6 +41,9 @@ def _build_templates(status: Mapping[str, Any], docs: Mapping[str, str]) -> Dict
     chk = "ready" if bool(status.get("readiness_ready")) else "blocked"
     par = "pass" if bool(status.get("parity_pass")) else "fail"
     e2e = "pass" if bool(status.get("frontend_e2e_pass")) else "fail"
+    retention_apply = bool(status.get("retention_audit_apply", False))
+    retention_deleted = int(status.get("retention_audit_deleted_count", 0) or 0)
+    retention_failed = int(status.get("retention_audit_failed_delete_count", 0) or 0)
     release_date = str(status.get("release_date", ""))
     commit = str(status.get("head_commit_short", ""))
 
@@ -59,6 +62,7 @@ def _build_templates(status: Mapping[str, Any], docs: Mapping[str, str]) -> Dict
             f"- Readiness checkpoint: {chk}",
             f"- Simulator parity: {par}",
             f"- Graph Lab Playwright E2E: {e2e}",
+            f"- Report retention audit: apply={retention_apply} deleted={retention_deleted} failed={retention_failed}",
             "",
             f"Commit: {commit or '-'}",
             f"One-pager EN: {docs['onepager_en']}",
@@ -82,6 +86,7 @@ def _build_templates(status: Mapping[str, Any], docs: Mapping[str, str]) -> Dict
             f"- Readiness checkpoint: {chk}",
             f"- Simulator parity: {par}",
             f"- Graph Lab Playwright E2E: {e2e}",
+            f"- 리포트 보존 감사: apply={retention_apply} deleted={retention_deleted} failed={retention_failed}",
             "",
             f"커밋: {commit or '-'}",
             f"1페이지 요약(EN): {docs['onepager_en']}",
@@ -108,6 +113,7 @@ def _build_templates(status: Mapping[str, Any], docs: Mapping[str, str]) -> Dict
             f"- readiness checkpoint: {chk}",
             f"- simulator parity: {par}",
             f"- frontend e2e: {e2e}",
+            f"- retention audit: apply={retention_apply}, deleted={retention_deleted}, failed={retention_failed}",
             "",
             f"Commit: {commit or '-'}",
             f"Details: {docs['release_notes']}",
@@ -134,6 +140,7 @@ def _build_templates(status: Mapping[str, Any], docs: Mapping[str, str]) -> Dict
             f"- readiness checkpoint: {chk}",
             f"- simulator parity: {par}",
             f"- frontend e2e: {e2e}",
+            f"- 보존 감사: apply={retention_apply}, deleted={retention_deleted}, failed={retention_failed}",
             "",
             f"커밋: {commit or '-'}",
             f"상세: {docs['release_notes']}",
@@ -161,6 +168,7 @@ def main() -> None:
     p.add_argument("--readiness-json", default="docs/reports/radarsimpy_readiness_checkpoint_paid_6m.json")
     p.add_argument("--parity-json", default="docs/reports/radarsimpy_simulator_reference_parity_paid_6m.json")
     p.add_argument("--frontend-e2e-json", default="docs/reports/graph_lab_playwright_e2e_latest.json")
+    p.add_argument("--retention-audit-json", default="docs/reports/radarsimpy_report_retention_audit_latest.json")
     p.add_argument("--output-json", default="docs/reports/release_announcement_pack_latest.json")
     p.add_argument("--output-md", default="docs/reports/release_announcement_pack_latest.md")
     p.add_argument("--release-date", default="2026-03-05")
@@ -171,6 +179,7 @@ def main() -> None:
     chk_path = _resolve_path(args.readiness_json, repo_root)
     par_path = _resolve_path(args.parity_json, repo_root)
     e2e_path = _resolve_path(args.frontend_e2e_json, repo_root)
+    retention_path = _resolve_path(args.retention_audit_json, repo_root)
     out_json = _resolve_path(args.output_json, repo_root)
     out_md = _resolve_path(args.output_md, repo_root)
 
@@ -178,6 +187,7 @@ def main() -> None:
     chk = _load_json(chk_path)
     par = _load_json(par_path)
     e2e = _load_json(e2e_path)
+    retention = _load_json(retention_path)
 
     status = {
         "release_date": str(args.release_date),
@@ -191,6 +201,16 @@ def main() -> None:
         "frontend_e2e_pass": bool(
             bool(e2e.get("e2e_pass", False))
             and str(e2e.get("status", "")).strip().lower() in ("pass", "passed")
+        ),
+        "retention_audit_apply": bool(retention.get("apply", False)),
+        "retention_audit_deleted_count": int(
+            (retention.get("action") or {}).get("deleted_count", 0) or 0
+        ),
+        "retention_audit_failed_delete_count": int(
+            (retention.get("action") or {}).get("failed_delete_count", 0) or 0
+        ),
+        "retention_audit_prunable_count": int(
+            (retention.get("summary") or {}).get("prunable_count", 0) or 0
         ),
     }
     status["overall_ready"] = bool(
@@ -216,6 +236,7 @@ def main() -> None:
             "readiness_json": str(chk_path),
             "parity_json": str(par_path),
             "frontend_e2e_json": str(e2e_path),
+            "retention_audit_json": str(retention_path),
         },
         "docs": docs,
         "templates": templates,
@@ -239,6 +260,10 @@ def main() -> None:
         f"- readiness_ready: {status['readiness_ready']}",
         f"- parity_pass: {status['parity_pass']}",
         f"- frontend_e2e_pass: {status['frontend_e2e_pass']}",
+        f"- retention_audit_apply: {status['retention_audit_apply']}",
+        f"- retention_audit_deleted_count: {status['retention_audit_deleted_count']}",
+        f"- retention_audit_failed_delete_count: {status['retention_audit_failed_delete_count']}",
+        f"- retention_audit_prunable_count: {status['retention_audit_prunable_count']}",
         "",
         "## Slack EN",
         "",
@@ -271,4 +296,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -120,5 +120,7 @@ scripts/run_radarsimpy_paid_6m_gate_ci.sh
 
 - The runtime package import can fail without `LD_LIBRARY_PATH`/libcompat wiring.
 - The simulator parity path may print an initial free-tier banner before explicit `set_license(...)`; final license state is validated in reports.
-- This release includes report/snapshot artifacts; repository size impact should be considered in future artifact retention policy.
-
+- Report/snapshot retention policy automation is available:
+  - `scripts/run_radarsimpy_report_retention_audit.sh`
+  - `docs/283_radarsimpy_report_retention_policy_2026_03_05.md`
+  - `.github/workflows/radarsimpy-report-retention-audit.yml`
