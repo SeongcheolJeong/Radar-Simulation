@@ -1,7 +1,7 @@
 {
   "version": 1,
   "gate": "radarsimpy_wrapper_integration",
-  "generated_at_utc": "2026-03-05T17:42:36.873206+00:00",
+  "generated_at_utc": "2026-03-05T17:48:17.330047+00:00",
   "with_real_runtime": true,
   "runtime_license_tier": "production",
   "allow_failures": false,
@@ -199,9 +199,9 @@
         "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
         "scripts/run_scene_runtime_radarsimpy_pilot.py",
         "--output-root",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816",
         "--output-summary-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236/summary.json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816/summary.json",
         "--runtime-failure-policy",
         "error",
         "--simulation-mode",
@@ -210,7 +210,7 @@
         "--runtime-device",
         "cpu"
       ],
-      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nScene runtime RadarSimPy pilot completed.\n  pilot_status: executed\n  scene_id: radarsimpy_runtime_pilot_v1\n  frame_count: 8\n  path_count: 8\n  runtime_mode: runtime_provider\n  provider_simulation_used: True\n  runtime_fallback_used: False\n  blockers: []\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236/summary.json",
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nScene runtime RadarSimPy pilot completed.\n  pilot_status: executed\n  scene_id: radarsimpy_runtime_pilot_v1\n  frame_count: 8\n  path_count: 8\n  runtime_mode: runtime_provider\n  provider_simulation_used: True\n  runtime_fallback_used: False\n  blockers: []\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816/summary.json",
       "stderr": "",
       "check_name": "real_runtime_strict_pilot"
     }
@@ -304,9 +304,9 @@
         "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
         "scripts/run_scene_runtime_radarsimpy_pilot.py",
         "--output-root",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816",
         "--output-summary-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236/summary.json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816/summary.json",
         "--runtime-failure-policy",
         "error",
         "--simulation-mode",
@@ -315,11 +315,11 @@
         "--runtime-device",
         "cpu"
       ],
-      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nScene runtime RadarSimPy pilot completed.\n  pilot_status: executed\n  scene_id: radarsimpy_runtime_pilot_v1\n  frame_count: 8\n  path_count: 8\n  runtime_mode: runtime_provider\n  provider_simulation_used: True\n  runtime_fallback_used: False\n  blockers: []\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236/summary.json",
+      "stdout": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU/radarsimpy/license_RadarSimPy_env.lic\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nScene runtime RadarSimPy pilot completed.\n  pilot_status: executed\n  scene_id: radarsimpy_runtime_pilot_v1\n  frame_count: 8\n  path_count: 8\n  runtime_mode: runtime_provider\n  provider_simulation_used: True\n  runtime_fallback_used: False\n  blockers: []\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816/summary.json",
       "stderr": "",
       "check_name": "real_runtime_strict_pilot"
     },
-    "pilot_output_root": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236",
-    "pilot_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174236/summary.json"
+    "pilot_output_root": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816",
+    "pilot_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_runtime_pilot_wrapper_gate_20260305_174816/summary.json"
   }
 }
