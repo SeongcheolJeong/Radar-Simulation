@@ -3,7 +3,7 @@
 - release_date: 2026-03-05
 - overall_ready: True
 - branch: main
-- head_commit: 43eda2d
+- head_commit: 2892691
 
 ## Status
 
@@ -29,7 +29,7 @@ Validation status:
 - Simulator parity: pass
 - Graph Lab Playwright E2E: pass
 
-Commit: 43eda2d
+Commit: 2892691
 One-pager EN: docs/280_release_one_pager_radarsimpy_2026_03_05.md
 One-pager KO: docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md
 Details: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
@@ -52,7 +52,7 @@ Details: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
 - Simulator parity: pass
 - Graph Lab Playwright E2E: pass
 
-커밋: 43eda2d
+커밋: 2892691
 1페이지 요약(EN): docs/280_release_one_pager_radarsimpy_2026_03_05.md
 1페이지 요약(KO): docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md
 상세: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md

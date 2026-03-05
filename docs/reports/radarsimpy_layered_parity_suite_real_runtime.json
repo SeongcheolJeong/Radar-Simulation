@@ -1,7 +1,7 @@
 {
   "version": 1,
   "report_name": "radarsimpy_layered_parity_suite",
-  "generated_at_utc": "2026-03-05T10:58:01.102568+00:00",
+  "generated_at_utc": "2026-03-05T11:34:19.336014+00:00",
   "workspace_root": "/home/seongcheoljeong/workspace/myproject",
   "python_bin": "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
   "with_production_track": true,
@@ -46,7 +46,7 @@
       "report_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_trial.json",
       "report": {
         "report_name": "radarsimpy_layered_reference_parity_optional",
-        "generated_at_utc": "2026-03-05T10:58:00.183518+00:00",
+        "generated_at_utc": "2026-03-05T11:34:18.423268+00:00",
         "track": "trial",
         "require_runtime": true,
         "runtime_available": true,
@@ -518,7 +518,7 @@
       "report_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_production.json",
       "report": {
         "report_name": "radarsimpy_layered_reference_parity_optional",
-        "generated_at_utc": "2026-03-05T10:58:00.985454+00:00",
+        "generated_at_utc": "2026-03-05T11:34:19.217300+00:00",
         "track": "production",
         "require_runtime": true,
         "runtime_available": true,
