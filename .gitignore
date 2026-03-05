@@ -36,6 +36,7 @@ docs/reports/radarsimpy_runtime_pilot_*/
 docs/reports/radarsimpy_wrapper_integration_gate_*/
 docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_*.json
 docs/reports/radarsimpy_integration_smoke_gate_checkpoint_*.json
+docs/reports/radarsimpy_function_progress_checkpoint_*_pid*.json
 docs/reports/radarsimpy_migration_stepwise_checkpoint_*/
 docs/reports/radarsimpy_progress_snapshot_*.json
 docs/reports/radarsimpy_readiness_checkpoint_*.json

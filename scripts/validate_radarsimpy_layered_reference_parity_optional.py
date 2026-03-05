@@ -152,6 +152,32 @@ def _shape_dtype_summary(value: Any) -> Dict[str, Any]:
     }
 
 
+def _shape_summary(value: Any) -> Dict[str, Any]:
+    if isinstance(value, np.ndarray):
+        return {
+            "kind": "ndarray",
+            "shape": [int(x) for x in value.shape],
+        }
+    if isinstance(value, tuple):
+        return {
+            "kind": "tuple",
+            "items": [_shape_summary(v) for v in value],
+        }
+    if isinstance(value, list):
+        return {
+            "kind": "list",
+            "items": [_shape_summary(v) for v in value],
+        }
+    if isinstance(value, dict):
+        return {
+            "kind": "dict",
+            "keys": sorted(str(k) for k in value.keys()),
+        }
+    return {
+        "kind": type(value).__name__,
+    }
+
+
 def _rd_map(baseband: np.ndarray, channel_index: int) -> np.ndarray:
     arr = np.asarray(baseband, dtype=np.complex128)
     if arr.ndim != 3:
@@ -578,7 +604,15 @@ def _run_processing_tools_parity(
     for case_id, ref_fn, core_fn, args, kwargs in cases:
         ref_out = ref_fn(*args, **kwargs)
         core_out = core_fn(*args, **kwargs)
-        parity = _allclose_any(ref_out, core_out, rtol=rtol, atol=atol)
+        ref_shape = _shape_summary(ref_out)
+        core_shape = _shape_summary(core_out)
+        ref_shape_dtype = _shape_dtype_summary(ref_out)
+        core_shape_dtype = _shape_dtype_summary(core_out)
+        shape_match = bool(ref_shape == core_shape)
+        dtype_match = bool(ref_shape_dtype == core_shape_dtype)
+        allow_dtype_mismatch = bool(case_id in {"doa_music_basic"})
+        structural_match = bool(shape_match and (dtype_match or allow_dtype_mismatch))
+        parity = bool(structural_match and _allclose_any(ref_out, core_out, rtol=rtol, atol=atol))
         max_abs = _max_abs_diff_any(ref_out, core_out)
         comparator = "allclose"
         extra_metrics: Dict[str, Any] = {}
@@ -594,7 +628,7 @@ def _run_processing_tools_parity(
                 core_spec = np.asarray(core_out[2], dtype=np.float64).reshape(-1)
                 idx_diff = int(np.max(np.abs(ref_idx - core_idx))) if ref_idx.size > 0 else 0
                 spec_corr = float(_norm_corr(ref_spec, core_spec))
-                parity = bool(idx_diff <= 1 and spec_corr >= 0.99)
+                parity = bool(structural_match and idx_diff <= 1 and spec_corr >= 0.99)
                 extra_metrics = {
                     "peak_index_diff_max": idx_diff,
                     "spectrum_norm_corr": spec_corr,
@@ -608,6 +642,8 @@ def _run_processing_tools_parity(
                 ref_arr = np.asarray(ref_out, dtype=np.float64).reshape(-1)
                 core_arr = np.asarray(core_out, dtype=np.float64).reshape(-1)
                 parity = bool(
+                    structural_match
+                    and
                     ref_arr.shape == core_arr.shape
                     and np.all(np.isfinite(ref_arr))
                     and np.all(np.isfinite(core_arr))
@@ -636,6 +672,8 @@ def _run_processing_tools_parity(
                 ref_monotonic = bool(np.all(np.diff(ref_arr, axis=1) >= -1e-12))
                 core_monotonic = bool(np.all(np.diff(core_arr, axis=1) >= -1e-12))
                 parity = bool(
+                    structural_match
+                    and
                     ref_arr.shape == core_arr.shape
                     and finite
                     and in_range
@@ -655,9 +693,13 @@ def _run_processing_tools_parity(
             "case_id": str(case_id),
             "pass": bool(parity),
             "comparator": comparator,
+            "structural_match": bool(structural_match),
+            "shape_match": bool(shape_match),
+            "dtype_match": bool(dtype_match),
+            "dtype_mismatch_allowed": bool(allow_dtype_mismatch),
             "max_abs_diff": float(max_abs),
-            "ref_shape_dtype": _shape_dtype_summary(ref_out),
-            "core_shape_dtype": _shape_dtype_summary(core_out),
+            "ref_shape_dtype": ref_shape_dtype,
+            "core_shape_dtype": core_shape_dtype,
         }
         if len(extra_metrics) > 0:
             row["metrics"] = extra_metrics
@@ -724,14 +766,18 @@ def _run_sim_rcs_parity(
                 continue
             raise
         core_out = core_sim_rcs(*args, **kwargs)
-        parity = _allclose_any(ref_out, core_out, rtol=rtol, atol=atol)
+        ref_shape_dtype = _shape_dtype_summary(ref_out)
+        core_shape_dtype = _shape_dtype_summary(core_out)
+        structural_match = bool(ref_shape_dtype == core_shape_dtype)
+        parity = bool(structural_match and _allclose_any(ref_out, core_out, rtol=rtol, atol=atol))
         max_abs = _max_abs_diff_any(ref_out, core_out)
         row = {
             "case_id": str(case_id),
             "pass": bool(parity),
+            "structural_match": bool(structural_match),
             "max_abs_diff": float(max_abs),
-            "ref_shape_dtype": _shape_dtype_summary(ref_out),
-            "core_shape_dtype": _shape_dtype_summary(core_out),
+            "ref_shape_dtype": ref_shape_dtype,
+            "core_shape_dtype": core_shape_dtype,
         }
         rows.append(row)
         if not parity:
@@ -750,6 +796,7 @@ def _run_sim_radar_parity(
     scenario_rows: List[Dict[str, Any]] = []
     all_pass = True
     all_shape_match = True
+    all_dtype_match = True
     all_finite = True
     max_range_diff_overall = 0
     max_doppler_diff_overall = 0
@@ -759,6 +806,10 @@ def _run_sim_radar_parity(
     first_adc_shape: List[int] = []
     first_adc_dtype_ref = ""
     first_adc_dtype_core = ""
+    first_noise_dtype_ref = ""
+    first_noise_dtype_core = ""
+    first_timestamp_dtype_ref = ""
+    first_timestamp_dtype_core = ""
     first_channel_metrics: List[Dict[str, Any]] = []
 
     for idx, scenario in enumerate(scenarios):
@@ -781,16 +832,34 @@ def _run_sim_radar_parity(
             dry_run=False,
         )
 
-        ref_bb = np.asarray(ref_out.get("baseband"), dtype=np.complex128)
-        core_bb = np.asarray(core_out.get("baseband"), dtype=np.complex128)
-        ref_noise = np.asarray(ref_out.get("noise"), dtype=np.complex128)
-        core_noise = np.asarray(core_out.get("noise"), dtype=np.complex128)
-        ref_ts = np.asarray(ref_out.get("timestamp"), dtype=np.float64)
-        core_ts = np.asarray(core_out.get("timestamp"), dtype=np.float64)
+        ref_bb_raw = np.asarray(ref_out.get("baseband"))
+        core_bb_raw = np.asarray(core_out.get("baseband"))
+        ref_noise_raw = np.asarray(ref_out.get("noise"))
+        core_noise_raw = np.asarray(core_out.get("noise"))
+        ref_ts_raw = np.asarray(ref_out.get("timestamp"))
+        core_ts_raw = np.asarray(core_out.get("timestamp"))
+
+        ref_bb = np.asarray(ref_bb_raw, dtype=np.complex128)
+        core_bb = np.asarray(core_bb_raw, dtype=np.complex128)
+        ref_noise = np.asarray(ref_noise_raw, dtype=np.complex128)
+        core_noise = np.asarray(core_noise_raw, dtype=np.complex128)
+        ref_ts = np.asarray(ref_ts_raw, dtype=np.float64)
+        core_ts = np.asarray(core_ts_raw, dtype=np.float64)
 
         shape_match = bool(
-            ref_bb.shape == core_bb.shape == ref_noise.shape == core_noise.shape == ref_ts.shape == core_ts.shape
+            ref_bb_raw.shape
+            == core_bb_raw.shape
+            == ref_noise_raw.shape
+            == core_noise_raw.shape
+            == ref_ts_raw.shape
+            == core_ts_raw.shape
         )
+        dtype_match = bool(
+            ref_bb_raw.dtype == core_bb_raw.dtype
+            and ref_noise_raw.dtype == core_noise_raw.dtype
+            and ref_ts_raw.dtype == core_ts_raw.dtype
+        )
+        structural_match = bool(shape_match and dtype_match)
         finite_ok = bool(
             np.all(np.isfinite(np.real(ref_bb)))
             and np.all(np.isfinite(np.imag(ref_bb)))
@@ -855,7 +924,7 @@ def _run_sim_radar_parity(
             and doppler_peak_pass
             and min_corr_aligned >= float(thresholds["rd_norm_corr_aligned_min"])
         )
-        scenario_pass = bool(shape_match and finite_ok and pass_thresholds)
+        scenario_pass = bool(structural_match and finite_ok and pass_thresholds)
 
         scenario_rows.append(
             {
@@ -863,10 +932,16 @@ def _run_sim_radar_parity(
                 "multiplexing_mode": mode,
                 "pass": bool(scenario_pass),
                 "shape_match": bool(shape_match),
+                "dtype_match": bool(dtype_match),
+                "structural_match": bool(structural_match),
                 "finite_ok": bool(finite_ok),
-                "adc_cube_shape": [int(x) for x in ref_bb.shape],
-                "adc_cube_dtype_ref": str(ref_bb.dtype),
-                "adc_cube_dtype_core": str(core_bb.dtype),
+                "adc_cube_shape": [int(x) for x in ref_bb_raw.shape],
+                "adc_cube_dtype_ref": str(ref_bb_raw.dtype),
+                "adc_cube_dtype_core": str(core_bb_raw.dtype),
+                "noise_cube_dtype_ref": str(ref_noise_raw.dtype),
+                "noise_cube_dtype_core": str(core_noise_raw.dtype),
+                "timestamp_dtype_ref": str(ref_ts_raw.dtype),
+                "timestamp_dtype_core": str(core_ts_raw.dtype),
                 "channel_metrics": channel_metrics,
                 "summary_metrics": {
                     "channel_count": int(channel_count),
@@ -881,13 +956,18 @@ def _run_sim_radar_parity(
         )
 
         if idx == 0:
-            first_adc_shape = [int(x) for x in ref_bb.shape]
-            first_adc_dtype_ref = str(ref_bb.dtype)
-            first_adc_dtype_core = str(core_bb.dtype)
+            first_adc_shape = [int(x) for x in ref_bb_raw.shape]
+            first_adc_dtype_ref = str(ref_bb_raw.dtype)
+            first_adc_dtype_core = str(core_bb_raw.dtype)
+            first_noise_dtype_ref = str(ref_noise_raw.dtype)
+            first_noise_dtype_core = str(core_noise_raw.dtype)
+            first_timestamp_dtype_ref = str(ref_ts_raw.dtype)
+            first_timestamp_dtype_core = str(core_ts_raw.dtype)
             first_channel_metrics = list(channel_metrics)
 
         all_pass = bool(all_pass and scenario_pass)
         all_shape_match = bool(all_shape_match and shape_match)
+        all_dtype_match = bool(all_dtype_match and dtype_match)
         all_finite = bool(all_finite and finite_ok)
         max_range_diff_overall = max(int(max_range_diff_overall), int(max_range_diff))
         max_doppler_diff_overall = max(int(max_doppler_diff_overall), int(max_doppler_diff))
@@ -904,10 +984,16 @@ def _run_sim_radar_parity(
     return {
         "pass": bool(all_pass),
         "shape_match": bool(all_shape_match),
+        "dtype_match": bool(all_dtype_match),
+        "structural_match": bool(all_shape_match and all_dtype_match),
         "finite_ok": bool(all_finite),
         "adc_cube_shape": list(first_adc_shape),
         "adc_cube_dtype_ref": str(first_adc_dtype_ref),
         "adc_cube_dtype_core": str(first_adc_dtype_core),
+        "noise_cube_dtype_ref": str(first_noise_dtype_ref),
+        "noise_cube_dtype_core": str(first_noise_dtype_core),
+        "timestamp_dtype_ref": str(first_timestamp_dtype_ref),
+        "timestamp_dtype_core": str(first_timestamp_dtype_core),
         "scenario_count": int(len(scenario_rows)),
         "scenario_ids": [str(row["scenario_id"]) for row in scenario_rows],
         "scenarios": scenario_rows,

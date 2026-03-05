@@ -1,6 +1,6 @@
 {
   "report_name": "radarsimpy_layered_reference_parity_optional",
-  "generated_at_utc": "2026-03-05T14:45:10.581569+00:00",
+  "generated_at_utc": "2026-03-05T16:45:52.076918+00:00",
   "track": "trial",
   "require_runtime": true,
   "runtime_available": true,
@@ -24,6 +24,10 @@
           "case_id": "range_fft_canonical",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -48,6 +52,10 @@
           "case_id": "doppler_fft_canonical",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -72,6 +80,10 @@
           "case_id": "range_doppler_fft_canonical",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -96,6 +108,10 @@
           "case_id": "cfar_ca_1d_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -116,6 +132,10 @@
           "case_id": "cfar_ca_2d_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -138,6 +158,10 @@
           "case_id": "cfar_os_1d_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -158,6 +182,10 @@
           "case_id": "cfar_os_2d_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -180,6 +208,10 @@
           "case_id": "doa_bartlett_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -200,6 +232,10 @@
           "case_id": "doa_capon_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 4.3429444573916953e-07,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -220,6 +256,10 @@
           "case_id": "doa_music_basic",
           "pass": true,
           "comparator": "peak_index_and_spectrum_corr",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": false,
+          "dtype_mismatch_allowed": true,
           "max_abs_diff": 0.11410199583079361,
           "ref_shape_dtype": {
             "kind": "tuple",
@@ -282,6 +322,10 @@
           "case_id": "doa_root_music_basic",
           "pass": true,
           "comparator": "structural_finite",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 19.89042578914749,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -305,6 +349,10 @@
           "case_id": "doa_esprit_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -325,6 +373,10 @@
           "case_id": "doa_iaa_basic",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -345,6 +397,10 @@
           "case_id": "roc_pd_coherent",
           "pass": true,
           "comparator": "bounded_monotonic_corr",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.9600905734592001,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -372,6 +428,10 @@
           "case_id": "roc_snr_coherent",
           "pass": true,
           "comparator": "allclose",
+          "structural_match": true,
+          "shape_match": true,
+          "dtype_match": true,
+          "dtype_mismatch_allowed": false,
           "max_abs_diff": 0.0,
           "ref_shape_dtype": {
             "kind": "ndarray",
@@ -413,6 +473,8 @@
       "metrics": {
         "pass": true,
         "shape_match": true,
+        "dtype_match": true,
+        "structural_match": true,
         "finite_ok": true,
         "adc_cube_shape": [
           1,
@@ -421,6 +483,10 @@
         ],
         "adc_cube_dtype_ref": "complex128",
         "adc_cube_dtype_core": "complex128",
+        "noise_cube_dtype_ref": "complex128",
+        "noise_cube_dtype_core": "complex128",
+        "timestamp_dtype_ref": "float64",
+        "timestamp_dtype_core": "float64",
         "scenario_count": 2,
         "scenario_ids": [
           "trial_tdm_1tx1rx_seed7",
@@ -432,6 +498,8 @@
             "multiplexing_mode": "tdm",
             "pass": true,
             "shape_match": true,
+            "dtype_match": true,
+            "structural_match": true,
             "finite_ok": true,
             "adc_cube_shape": [
               1,
@@ -440,6 +508,10 @@
             ],
             "adc_cube_dtype_ref": "complex128",
             "adc_cube_dtype_core": "complex128",
+            "noise_cube_dtype_ref": "complex128",
+            "noise_cube_dtype_core": "complex128",
+            "timestamp_dtype_ref": "float64",
+            "timestamp_dtype_core": "float64",
             "channel_metrics": [
               {
                 "channel_index": 0,
@@ -474,6 +546,8 @@
             "multiplexing_mode": "custom",
             "pass": true,
             "shape_match": true,
+            "dtype_match": true,
+            "structural_match": true,
             "finite_ok": true,
             "adc_cube_shape": [
               1,
@@ -482,6 +556,10 @@
             ],
             "adc_cube_dtype_ref": "complex128",
             "adc_cube_dtype_core": "complex128",
+            "noise_cube_dtype_ref": "complex128",
+            "noise_cube_dtype_core": "complex128",
+            "timestamp_dtype_ref": "float64",
+            "timestamp_dtype_core": "float64",
             "channel_metrics": [
               {
                 "channel_index": 0,

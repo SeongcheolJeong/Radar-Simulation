@@ -1,12 +1,26 @@
 {
   "report_name": "radarsimpy_simulator_reference_parity_optional",
-  "generated_at_utc": "2026-03-05T14:45:09.789644+00:00",
+  "generated_at_utc": "2026-03-05T16:45:51.291091+00:00",
   "require_runtime": true,
   "runtime_available": true,
   "skipped": false,
   "skip_reason": null,
   "pass": true,
   "metrics": {
+    "adc_shape_ref": [
+      1,
+      16,
+      100
+    ],
+    "adc_shape_fallback": [
+      1,
+      16,
+      100
+    ],
+    "adc_dtype_ref": "complex128",
+    "adc_dtype_fallback": "complex128",
+    "shape_match": true,
+    "dtype_match": true,
     "rd_range_peak_ref": 93,
     "rd_range_peak_fallback": 93,
     "rd_range_peak_diff": 0,
@@ -24,7 +38,9 @@
   "thresholds": {
     "range_peak_diff_max": 2,
     "doppler_peak_diff_max": 2,
-    "rd_norm_corr_aligned_min": 0.6
+    "rd_norm_corr_aligned_min": 0.6,
+    "require_shape_match": true,
+    "require_dtype_match": true
   },
   "error": null
 }

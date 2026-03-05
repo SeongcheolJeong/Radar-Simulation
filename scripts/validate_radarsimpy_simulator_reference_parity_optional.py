@@ -180,6 +180,8 @@ def run() -> None:
             "range_peak_diff_max": 2,
             "doppler_peak_diff_max": 2,
             "rd_norm_corr_aligned_min": 0.60,
+            "require_shape_match": True,
+            "require_dtype_match": True,
         },
         "error": None,
     }
@@ -232,10 +234,15 @@ def run() -> None:
         dry_run=False,
     )
 
-    ref_bb = np.asarray(ref_out.get("baseband"), dtype=np.complex128)
-    fb_bb = np.asarray(fb_out.get("baseband"), dtype=np.complex128)
+    ref_bb_raw = np.asarray(ref_out.get("baseband"))
+    fb_bb_raw = np.asarray(fb_out.get("baseband"))
+    shape_match = bool(ref_bb_raw.shape == fb_bb_raw.shape)
+    dtype_match = bool(ref_bb_raw.dtype == fb_bb_raw.dtype)
 
-    assert ref_bb.shape == fb_bb.shape, (ref_bb.shape, fb_bb.shape)
+    ref_bb = np.asarray(ref_bb_raw, dtype=np.complex128)
+    fb_bb = np.asarray(fb_bb_raw, dtype=np.complex128)
+
+    assert shape_match, (ref_bb_raw.shape, fb_bb_raw.shape)
     assert ref_bb.ndim == 3, ref_bb.shape
     assert np.all(np.isfinite(np.real(ref_bb))) and np.all(np.isfinite(np.imag(ref_bb)))
     assert np.all(np.isfinite(np.real(fb_bb))) and np.all(np.isfinite(np.imag(fb_bb)))
@@ -254,6 +261,12 @@ def run() -> None:
 
     report["runtime_available"] = True
     report["metrics"] = {
+        "adc_shape_ref": [int(x) for x in ref_bb_raw.shape],
+        "adc_shape_fallback": [int(x) for x in fb_bb_raw.shape],
+        "adc_dtype_ref": str(ref_bb_raw.dtype),
+        "adc_dtype_fallback": str(fb_bb_raw.dtype),
+        "shape_match": bool(shape_match),
+        "dtype_match": bool(dtype_match),
         "rd_range_peak_ref": int(r_ref),
         "rd_range_peak_fallback": int(r_fb),
         "rd_range_peak_diff": int(range_diff),
@@ -269,11 +282,15 @@ def run() -> None:
     pass_range = bool(range_diff <= 2)
     pass_doppler = bool(doppler_diff <= 2)
     pass_corr = bool(math.isfinite(corr_aligned) and (corr_aligned >= 0.60))
-    report["pass"] = bool(pass_range and pass_doppler and pass_corr)
+    pass_shape = bool(shape_match)
+    pass_dtype = bool(dtype_match)
+    report["pass"] = bool(pass_shape and pass_dtype and pass_range and pass_doppler and pass_corr)
     _write_report(out_json, report)
     if not bool(report["pass"]):
         raise AssertionError(
             {
+                "shape_check": pass_shape,
+                "dtype_check": pass_dtype,
                 "range_check": pass_range,
                 "doppler_check": pass_doppler,
                 "corr_check": pass_corr,
