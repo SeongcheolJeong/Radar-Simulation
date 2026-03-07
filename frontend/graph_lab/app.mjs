@@ -869,6 +869,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     lastActionText: normalizeCompareSessionField(row.lastActionText, 320) || "last_action: seq=0 | idle",
     recentActionsText: normalizeCompareSessionField(row.recentActionsText, 320) || "recent_actions: none",
     auditStateText: normalizeCompareSessionField(row.auditStateText, 320) || "audit_state: idle | total=0 | retained=0/3 | trimmed=0",
+    auditCapacityText: normalizeCompareSessionField(row.auditCapacityText, 320) || "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no",
     auditSummaryText: normalizeCompareSessionField(row.auditSummaryText, 320) || "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty",
   };
 }
@@ -951,12 +952,24 @@ function buildArtifactInspectorMirrorControlState(statusBadgeRows) {
   };
 }
 
-function buildArtifactInspectorAuditControlState(recentActionsText) {
+function buildArtifactInspectorAuditControlState(recentActionsText, auditStateText) {
   const text = String(recentActionsText || "").trim();
+  const auditState = String(auditStateText || "").trim().toLowerCase();
   const clearDisabled = !text || text === "recent_actions: none";
+  let recommendation = "not_needed";
+  let reason = "idle";
+  if (!clearDisabled) {
+    if (auditState.includes("audit_state: trimmed")) {
+      recommendation = "clear_overflow";
+      reason = "trimmed";
+    } else {
+      recommendation = "optional";
+      reason = "history_present";
+    }
+  }
   return {
     clearDisabled,
-    text: `artifact_inspector_audit_controls: clear=${clearDisabled ? "disabled" : "enabled"}`,
+    text: `artifact_inspector_audit_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | reason=${reason}`,
   };
 }
 
@@ -2920,6 +2933,14 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.auditStateText]
   );
+  const artifactInspectorDecisionAuditCapacityText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.auditCapacityText,
+      "audit_capacity",
+      "artifact_inspector_audit_capacity"
+    ),
+    [artifactInspectorStatusSummary.auditCapacityText]
+  );
   const artifactInspectorDecisionAuditSummaryText = React.useMemo(
     () => buildArtifactInspectorDecisionLine(
       artifactInspectorStatusSummary.auditSummaryText,
@@ -2933,8 +2954,11 @@ export function App() {
     [artifactInspectorDecisionStatusBadgeRows]
   );
   const artifactInspectorDecisionAuditControlState = React.useMemo(
-    () => buildArtifactInspectorAuditControlState(artifactInspectorStatusSummary.recentActionsText),
-    [artifactInspectorStatusSummary.recentActionsText]
+    () => buildArtifactInspectorAuditControlState(
+      artifactInspectorStatusSummary.recentActionsText,
+      artifactInspectorStatusSummary.auditStateText
+    ),
+    [artifactInspectorStatusSummary.auditStateText, artifactInspectorStatusSummary.recentActionsText]
   );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
@@ -4131,6 +4155,7 @@ export function App() {
       `${artifactInspectorDecisionLastActionText}`,
       `${artifactInspectorDecisionRecentActionsText}`,
       `${artifactInspectorDecisionAuditStateText}`,
+      `${artifactInspectorDecisionAuditCapacityText}`,
       `${artifactInspectorDecisionAuditSummaryText}`,
       `${artifactInspectorDecisionAuditControlState.text}`,
       `${artifactInspectorDecisionControlState.text}`,
@@ -4180,6 +4205,7 @@ export function App() {
     artifactInspectorDecisionLastActionText,
     artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionAuditStateText,
+    artifactInspectorDecisionAuditCapacityText,
     artifactInspectorDecisionAuditSummaryText,
     artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
@@ -4302,6 +4328,7 @@ export function App() {
       artifactInspectorDecisionLastActionText,
       artifactInspectorDecisionRecentActionsText,
       artifactInspectorDecisionAuditStateText,
+      artifactInspectorDecisionAuditCapacityText,
       artifactInspectorDecisionAuditSummaryText,
       artifactInspectorDecisionAuditControlState.text,
       artifactInspectorDecisionControlState.text,
@@ -4369,6 +4396,7 @@ export function App() {
     artifactInspectorDecisionLastActionText,
     artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionAuditStateText,
+    artifactInspectorDecisionAuditCapacityText,
     artifactInspectorDecisionAuditSummaryText,
     artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
@@ -4817,6 +4845,7 @@ export function App() {
         artifactInspectorDecisionLastActionText,
         artifactInspectorDecisionRecentActionsText,
         artifactInspectorDecisionAuditStateText,
+        artifactInspectorDecisionAuditCapacityText,
         artifactInspectorDecisionAuditSummaryText,
         artifactInspectorDecisionAuditControlState,
         artifactInspectorDecisionControlState,

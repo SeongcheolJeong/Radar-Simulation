@@ -192,6 +192,15 @@ function buildArtifactInspectorAuditStateText(value) {
   return `audit_state: ${state} | total=${total} | retained=${retained}/${ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT} | trimmed=${trimmed}`;
 }
 
+function buildArtifactInspectorAuditCapacityText(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const retained = Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries.length : 0;
+  const total = Math.max(0, Number(prefs.actionTrailTotalCount || 0));
+  const trimmed = Math.max(0, total - retained);
+  const headroom = Math.max(0, ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT - retained);
+  return `audit_capacity: retained_limit=${ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT} | retained=${retained} | total=${total} | headroom=${headroom} | overflow=${trimmed > 0 ? "yes" : "no"}`;
+}
+
 function clearArtifactInspectorActionTrailState(value) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   return {
@@ -448,6 +457,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorAuditStateText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditCapacityText = React.useMemo(
+    () => buildArtifactInspectorAuditCapacityText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -461,9 +474,11 @@ export function ArtifactInspectorPanel({
       lastActionText: artifactInspectorLastActionText,
       recentActionsText: artifactInspectorRecentActionsText,
       auditStateText: artifactInspectorAuditStateText,
+      auditCapacityText: artifactInspectorAuditCapacityText,
       auditSummaryText: artifactInspectorAuditSummaryText,
     });
   }, [
+    artifactInspectorAuditCapacityText,
     artifactInspectorAuditStateText,
     artifactInspectorAuditSummaryText,
     artifactInspectorLayoutStateText,
@@ -605,6 +620,10 @@ export function ArtifactInspectorPanel({
           key: "audit_state",
           style: { color: "#8fb3c9" },
         }, artifactInspectorAuditStateText),
+        h("div", {
+          key: "audit_capacity",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditCapacityText),
         h("div", {
           key: "audit_summary",
           style: { color: "#8fb3c9" },
