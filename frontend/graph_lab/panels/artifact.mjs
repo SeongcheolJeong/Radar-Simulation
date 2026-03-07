@@ -59,6 +59,7 @@ function buildArtifactInspectorStatusBadges({
   probesDefault,
   liveCompareEvidenceExpanded,
   historyArtifactExpectationExpanded,
+  maintenanceState,
   auditState,
   auditContinuity,
   auditHealth,
@@ -84,6 +85,14 @@ function buildArtifactInspectorStatusBadges({
     {
       label: `reset:${layoutDefault ? "clean" : "required"}`,
       tone: layoutDefault ? "status-ok" : "status-warn",
+    },
+    {
+      label: `maintenance:${String(maintenanceState || "idle").trim() || "idle"}`,
+      tone: (
+        String(maintenanceState || "").trim() === "marked"
+          ? "status-warn"
+          : "status-neutral"
+      ),
     },
     {
       label: `audit:${String(auditState || "idle").trim() || "idle"}`,
@@ -381,6 +390,32 @@ function buildArtifactInspectorMaintenanceControlStateFromValue(value) {
   };
 }
 
+function parseArtifactInspectorMaintenanceFields(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const text = String(prefs.maintenanceActionText || "").trim();
+  const actionMatch = /\baction=([a-z_]+)/i.exec(text);
+  const sourceMatch = /\bsource=([a-z_]+)/i.exec(text);
+  const triggerMatch = /\btrigger=([a-z_]+)/i.exec(text);
+  return {
+    seq: Math.max(0, Number(prefs.maintenanceSeq || 0)),
+    action: String(actionMatch?.[1] || "none").trim().toLowerCase() || "none",
+    source: String(sourceMatch?.[1] || "none").trim().toLowerCase() || "none",
+    trigger: String(triggerMatch?.[1] || "idle").trim().toLowerCase() || "idle",
+  };
+}
+
+function extractArtifactInspectorMaintenanceState(value) {
+  return parseArtifactInspectorMaintenanceFields(value).seq > 0 ? "marked" : "idle";
+}
+
+function buildArtifactInspectorMaintenanceSummaryText(value) {
+  const fields = parseArtifactInspectorMaintenanceFields(value);
+  if (fields.seq <= 0) {
+    return "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none";
+  }
+  return `maintenance_summary: marked | marker=present | action=${fields.action} | source=${fields.source} | trigger=${fields.trigger} | next_action=clear_marker_if_acknowledged`;
+}
+
 function extractArtifactInspectorAuditOperatorBadge(value) {
   const text = String(buildArtifactInspectorAuditNextActionText(value) || "").trim();
   const match = /^audit_next_action:\s*([a-z_]+)/i.exec(text);
@@ -646,6 +681,7 @@ export function ArtifactInspectorPanel({
       .replace(/^audit_state:\s*/i, "")
       .trim()
       .toLowerCase();
+    const maintenanceState = extractArtifactInspectorMaintenanceState(artifactInspectorPrefs);
     const auditContinuity = extractArtifactInspectorAuditContinuityState(artifactInspectorPrefs);
     const auditHealth = extractArtifactInspectorAuditHealthState(artifactInspectorPrefs);
     const operatorAction = extractArtifactInspectorAuditOperatorBadge(artifactInspectorPrefs);
@@ -654,6 +690,7 @@ export function ArtifactInspectorPanel({
       probesDefault: artifactInspectorProbeState.probesDefault === true,
       liveCompareEvidenceExpanded,
       historyArtifactExpectationExpanded,
+      maintenanceState,
       auditState,
       auditContinuity,
       auditHealth,
@@ -677,6 +714,10 @@ export function ArtifactInspectorPanel({
   );
   const artifactInspectorMaintenanceActionText = React.useMemo(
     () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).maintenanceActionText || "maintenance_action: seq=0 | none | source=none | trigger=idle"),
+    [artifactInspectorPrefs]
+  );
+  const artifactInspectorMaintenanceSummaryText = React.useMemo(
+    () => buildArtifactInspectorMaintenanceSummaryText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
   const artifactInspectorMaintenanceControlState = React.useMemo(
@@ -742,6 +783,7 @@ export function ArtifactInspectorPanel({
       statusBadgesText: artifactInspectorStatusBadgesText,
       lastActionText: artifactInspectorLastActionText,
       maintenanceActionText: artifactInspectorMaintenanceActionText,
+      maintenanceSummaryText: artifactInspectorMaintenanceSummaryText,
       recentActionsText: artifactInspectorRecentActionsText,
       auditStateText: artifactInspectorAuditStateText,
       auditCapacityText: artifactInspectorAuditCapacityText,
@@ -766,6 +808,7 @@ export function ArtifactInspectorPanel({
     artifactInspectorLayoutStateText,
     artifactInspectorLastActionText,
     artifactInspectorMaintenanceActionText,
+    artifactInspectorMaintenanceSummaryText,
     artifactInspectorRecentActionsText,
     artifactInspectorProbeState.text,
     artifactInspectorStatusBadgesText,
@@ -981,6 +1024,10 @@ export function ArtifactInspectorPanel({
           key: "maintenance_action",
           style: { color: "#8fb3c9" },
         }, artifactInspectorMaintenanceActionText),
+        h("div", {
+          key: "maintenance_summary",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceSummaryText),
         h("div", {
           key: "maintenance_controls",
           style: { color: "#8fb3c9" },
