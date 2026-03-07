@@ -224,6 +224,7 @@ The same area now supports browser-to-browser transfer:
   - restores any observed artifact expectation snapshot that was exported with the same replayable pair id
   - the transfer hint now shows `schema` and `compatibility` for the imported bundle
   - an additional warning badge appears when the imported bundle uses an unknown future schema and Graph Lab falls back to best-effort parsing
+  - a compact line now mirrors the transfer chips and the import-preview one-line summary as `compare_history_transfer_compact`, so `transfer/schema/compatibility/selected_pair_retention` can be read without scanning the full preview box
   - committed legacy fixtures are exercised in browser E2E for both no-schema snake_case and no-schema camelCase imports
 
 Detailed schema and migration policy:
@@ -356,6 +357,8 @@ The `Runtime Compare` summary inside the brief now also carries:
 - `compare_history_import_preview`
   - a compact one-line import-preview summary near the top of the brief so staged import state is visible without scrolling down to the full preview section
   - now also carries `selected_pair_retention=<state>(visible/latest/retained)` so the selected imported replay pair's retention landing zone is visible even in the compact line
+- `compare_history_transfer_compact`
+  - a compact transfer-status line that mirrors the same `transfer/schema/compatibility` chip state shown in the UI and appends the current compact import-preview summary
 
 ## Current Scope
 

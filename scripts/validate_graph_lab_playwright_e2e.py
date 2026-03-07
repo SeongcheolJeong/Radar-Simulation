@@ -164,6 +164,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_retention_preview_checked": False,
             "compare_session_clear_all_checked": False,
             "compare_session_transfer_checked": False,
+            "compare_session_transfer_compact_checked": False,
             "compare_session_future_schema_warning_checked": False,
             "compare_session_persistence_checked": False,
             "pinned_pair_quick_actions_checked": False,
@@ -730,6 +731,12 @@ def run(args: argparse.Namespace) -> int:
                     or "compatibility=exact" not in history_transfer_text_after_import_preview
                 ):
                     raise AssertionError("compare history import preview did not include schema compatibility")
+                if (
+                    "compare_history_transfer_compact: transfer:import" not in history_transfer_text_after_import_preview
+                    or "schema:graph_lab_compare_history_export_v2" not in history_transfer_text_after_import_preview
+                    or "compat:exact" not in history_transfer_text_after_import_preview
+                ):
+                    raise AssertionError("compare history transfer compact summary did not mirror transfer chips")
                 if "apply_required=true" not in history_transfer_text_after_import_preview:
                     raise AssertionError("compare history import preview did not expose apply requirement")
                 if "retention_pairs(merged_latest/merged_extra/merged_dropped):" not in history_transfer_text_after_import_preview:
@@ -740,6 +747,7 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare history import preview did not expose selected replay-pair retention impact")
                 report["runtime_controls"]["compare_session_import_selected_pair_retention_checked"] = True
                 report["runtime_controls"]["compare_session_import_compact_retention_checked"] = True
+                report["runtime_controls"]["compare_session_transfer_compact_checked"] = True
                 options_after_preview = page.evaluate(
                     """() => {
                         const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
@@ -974,6 +982,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include runtime compare summary")
                 if "compare_history_import_preview:" not in brief_text:
                     raise AssertionError("decision brief did not include compact compare history import preview summary")
+                if "compare_history_transfer_compact:" not in brief_text:
+                    raise AssertionError("decision brief did not include compact compare history transfer summary")
                 if "selected_pair_retention=" not in brief_text:
                     raise AssertionError("decision brief did not include compact import-preview selected replay-pair retention summary")
                 if "retention_group_hint:" not in brief_text:

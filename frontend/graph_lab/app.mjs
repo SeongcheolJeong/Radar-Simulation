@@ -852,6 +852,14 @@ function buildCompareSessionTransferBadges(entry) {
   return badges;
 }
 
+function summarizeCompareSessionTransferBadgeLabels(badgeRows) {
+  const rows = Array.isArray(badgeRows) ? badgeRows : [];
+  const labels = rows
+    .map((row) => String(row?.label || "").trim())
+    .filter(Boolean);
+  return labels.length > 0 ? labels.join(" | ") : "transfer:idle";
+}
+
 function buildCompareSessionImportPreviewSummary(
   stagedEntry,
   existingHistoryEntries,
@@ -2748,6 +2756,13 @@ export function App() {
     () => String(stagedCompareSessionImportSummary?.previewText || "-"),
     [stagedCompareSessionImportSummary]
   );
+  const compareSessionTransferCompactSummaryText = React.useMemo(() => {
+    const badgeSummary = summarizeCompareSessionTransferBadgeLabels(compareSessionTransferBadgeRows);
+    const importCompactSummary = String(compareSessionImportPreviewCompactSummaryText || "compare_history_import_preview: none")
+      .replace(/^compare_history_import_preview:\s*/i, "")
+      .trim();
+    return `compare_history_transfer_compact: ${badgeSummary} | ${importCompactSummary || "none"}`;
+  }, [compareSessionImportPreviewCompactSummaryText, compareSessionTransferBadgeRows]);
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -3873,6 +3888,7 @@ export function App() {
       `${String(selectedReplayableCompareSessionRetentionText || "-").split("\n").join(" | ")}`,
       `${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `selected_history_pair_preview: ${selectedReplayableCompareSessionPreviewText.split("\n").slice(1).join(" | ")}`,
+      `${compareSessionTransferCompactSummaryText}`,
       `compare_history_transfer: ${String(compareSessionTransferStatusText || "-")}`,
       `${compareSessionImportPreviewCompactSummaryText}`,
       `current_track: ${runtimeSummary.trackLabel}`,
@@ -3919,6 +3935,7 @@ export function App() {
     compareRuntimeDiagnostics.badgeLine,
     compareRuntimeSummary.trackLabel,
     compareSessionImportPreviewCompactSummaryText,
+    compareSessionTransferCompactSummaryText,
     compareSessionTransferStatusText,
     graphRunSummary,
     latestCompareSessionText,
@@ -3974,6 +3991,7 @@ export function App() {
       `- ${compareSessionRetentionPolicySummaryText}`,
       `- ${compareSessionRetentionGroupHintText}`,
       `- ${compareSessionRetentionPreviewCompactSummaryText}`,
+      `- ${compareSessionTransferCompactSummaryText}`,
       `- ${compareSessionImportPreviewCompactSummaryText}`,
       `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `- ${pinnedCompareQuickActionSummaryText}`,
@@ -3993,6 +4011,7 @@ export function App() {
       compareSessionRetentionPolicySummaryText,
       compareSessionRetentionGroupHintText,
       compareSessionRetentionPreviewText,
+      compareSessionTransferCompactSummaryText,
       "",
       selectedReplayableCompareSessionRetentionText,
       "",
@@ -4084,6 +4103,7 @@ export function App() {
     compareSessionRetentionGroupHintText,
     compareSessionRetentionPreviewCompactSummaryText,
     compareSessionRetentionPreviewText,
+    compareSessionTransferCompactSummaryText,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
@@ -4500,6 +4520,7 @@ export function App() {
         compareSessionRetentionPolicySummaryText,
         compareSessionRetentionGroupHintText,
         compareSessionRetentionPreviewText,
+        compareSessionTransferCompactSummaryText,
         compareSessionTransferStatusText,
         compareSessionTransferBadgeRows,
         hasCompareSessionImportPreview: stagedCompareSessionImportSummary.ready === true,

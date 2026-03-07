@@ -1,6 +1,6 @@
 {
   "version": "graph_lab_playwright_e2e_report_v1",
-  "created_at_utc": "2026-03-07T15:19:45Z",
+  "created_at_utc": "2026-03-07T15:27:53Z",
   "require_playwright": true,
   "strict_visual": false,
   "update_baseline": false,
@@ -47,6 +47,7 @@
     "compare_session_retention_preview_checked": true,
     "compare_session_clear_all_checked": true,
     "compare_session_transfer_checked": true,
+    "compare_session_transfer_compact_checked": true,
     "compare_session_future_schema_warning_checked": true,
     "compare_session_persistence_checked": true,
     "pinned_pair_quick_actions_checked": true,
