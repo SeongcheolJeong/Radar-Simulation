@@ -178,6 +178,8 @@ export function resetContractWarnings() {
  * @property {string} runtimePoSbrMaterialTag
  * @property {string} runtimePoSbrPathIdPrefix
  * @property {string} runtimePoSbrComponentsJson
+ * @property {Array<any>} runtimeDiagnosticBadges
+ * @property {string} runtimeDiagnosticText
  * @property {string} runtimeStatusLine
  * @property {string} runMode
  * @property {boolean} autoPollAsyncRun
@@ -259,6 +261,8 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       runtimePoSbrMaterialTag: readString(scope, values, "runtimePoSbrMaterialTag", ""),
       runtimePoSbrPathIdPrefix: readString(scope, values, "runtimePoSbrPathIdPrefix", ""),
       runtimePoSbrComponentsJson: readString(scope, values, "runtimePoSbrComponentsJson", ""),
+      runtimeDiagnosticBadges: readArray(scope, values, "runtimeDiagnosticBadges", []),
+      runtimeDiagnosticText: readString(scope, values, "runtimeDiagnosticText", "-"),
       runtimeStatusLine: readString(scope, values, "runtimeStatusLine", "-"),
       runMode: readString(scope, values, "runMode", "sync"),
       autoPollAsyncRun: readBoolean(scope, values, "autoPollAsyncRun", true),

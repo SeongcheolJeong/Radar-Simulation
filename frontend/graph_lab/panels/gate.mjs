@@ -21,6 +21,7 @@ export function DecisionPane({
   trackCompareGuideText,
   decisionSummaryText,
   decisionOpsStatusText,
+  trackCompareRunnerStatusText,
   compareRunStatusText,
   lastRegressionSession,
   lastRegressionExport,
@@ -100,6 +101,7 @@ export function DecisionPane({
     ]),
     h("pre", { className: "result-box", key: "decision_summary_box" }, String(decisionSummaryText || "-")),
     h("div", { className: "hint", key: "decision_status_hint" }, `decision_ops: ${String(decisionOpsStatusText || "-")}`),
+    h("div", { className: "hint", key: "track_compare_status_hint" }, `track_compare_status: ${String(trackCompareRunnerStatusText || "-")}`),
     h("div", { className: "hint", key: "compare_status_hint" }, `compare_status: ${String(compareRunStatusText || "-")}`),
     h("div", { className: "hint", key: "session_status_hint" }, [
       `session_id=${String(lastRegressionSession?.session_id || "-")} | `,

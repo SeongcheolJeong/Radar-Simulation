@@ -27,6 +27,7 @@ import {
   NodeInspectorPanel,
   TopBar,
 } from "./panels.mjs";
+import { splitTokenList } from "./runtime_overrides.mjs";
 import { useGateOps } from "./hooks/use_gate_ops.mjs";
 import { useGraphRunOps } from "./hooks/use_graph_run_ops.mjs";
 
@@ -101,6 +102,167 @@ function summarizeRuntimeTrack(summary, fallbackConfig) {
     graphRunId,
     runtimeStatusLine,
     trackLabel,
+  };
+}
+
+function shortAdcSource(value) {
+  const text = String(value || "").trim();
+  if (!text) return "-";
+  if (text === "runtime_payload_adc_sctr") return "runtime";
+  if (text.startsWith("synth_")) return "synth";
+  return text;
+}
+
+function deriveTrackCompareRunnerStatus(statusText) {
+  const text = String(statusText || "").trim();
+  if (!text || text === "-") return "not_run";
+  if (text.includes("track_compare_runner=ready")) return "ready";
+  if (text.includes("track_compare_runner_blocked")) return "blocked";
+  if (text.includes("track_compare_runner_failed")) return "failed";
+  if (text.includes("phase=")) return "running";
+  return "manual_or_other";
+}
+
+function summarizeRuntimeDiagnostics(summary, fallbackConfig) {
+  const summaryObj = summary && typeof summary === "object" ? summary : {};
+  const fallback = fallbackConfig && typeof fallbackConfig === "object" ? fallbackConfig : {};
+  const meta = summaryObj?.radar_map_summary?.metadata && typeof summaryObj.radar_map_summary.metadata === "object"
+    ? summaryObj.radar_map_summary.metadata
+    : {};
+  const runtimeResolution = meta?.runtime_resolution && typeof meta.runtime_resolution === "object"
+    ? meta.runtime_resolution
+    : {};
+  const providerInfo = runtimeResolution?.provider_runtime_info && typeof runtimeResolution.provider_runtime_info === "object"
+    ? runtimeResolution.provider_runtime_info
+    : {};
+  const runtimeInfo = runtimeResolution?.runtime_info && typeof runtimeResolution.runtime_info === "object"
+    ? runtimeResolution.runtime_info
+    : {};
+  const moduleReport = runtimeInfo?.module_report && typeof runtimeInfo.module_report === "object"
+    ? runtimeInfo.module_report
+    : {};
+  const configuredModules = Array.isArray(fallback.requiredModules) ? fallback.requiredModules : [];
+  const moduleNames = Object.keys(moduleReport);
+  const effectiveModules = moduleNames.length > 0 ? moduleNames : configuredModules;
+  const moduleRows = effectiveModules.map((name) => {
+    const row = moduleReport?.[name] && typeof moduleReport[name] === "object" ? moduleReport[name] : {};
+    const available = typeof row.available === "boolean" ? Boolean(row.available) : null;
+    return {
+      name: String(name || "").trim(),
+      available,
+      version: String(row.module_version || row.version || "").trim(),
+      error: String(row.error || "").trim(),
+    };
+  });
+  const availableCount = moduleRows.filter((row) => row.available === true).length;
+  const missingCount = moduleRows.filter((row) => row.available === false).length;
+  const graphRunId = String(summaryObj?.graph_run_id || summaryObj?.run_id || "").trim();
+  const providerSpec = String(
+    runtimeResolution?.runtime_provider || runtimeInfo?.provider_spec || fallback.providerSpec || ""
+  ).trim();
+  const runtimeMode = String(runtimeResolution?.mode || fallback.runtimeMode || "").trim();
+  const backendType = String(meta?.backend_type || fallback.backendType || "").trim();
+  const simulationUsed = typeof providerInfo?.simulation_used === "boolean" ? Boolean(providerInfo.simulation_used) : null;
+  const simulationLabel = simulationUsed === true
+    ? "adc"
+    : simulationUsed === false
+      ? "path"
+      : String(fallback.simulationMode || fallback.simulationBackend || "-").trim() || "-";
+  const adcSource = String(runtimeResolution?.adc_source || "").trim();
+  const runtimeError = String(runtimeResolution?.runtime_error || providerInfo?.simulation_error || "").trim();
+  const licenseSource = String(
+    providerInfo?.license_source
+      || (providerInfo?.license_file ? "env" : "")
+      || fallback.licenseSource
+      || (fallback.licenseFile ? "runtime_input" : "")
+      || fallback.licenseStatus
+      || ""
+  ).trim();
+
+  let overallStatus = "idle";
+  if (runtimeError) {
+    overallStatus = "error";
+  } else if (missingCount > 0) {
+    overallStatus = "blocked";
+  } else if (graphRunId || adcSource || simulationUsed !== null || moduleNames.length > 0) {
+    overallStatus = "ready";
+  } else if (providerSpec || backendType || effectiveModules.length > 0) {
+    overallStatus = "planned";
+  }
+
+  const badges = [
+    {
+      label: `state:${overallStatus}`,
+      tone: overallStatus === "ready"
+        ? "status-ok"
+        : (overallStatus === "blocked" || overallStatus === "error")
+          ? "status-warn"
+          : "status-neutral",
+    },
+  ];
+  if (effectiveModules.length > 0) {
+    badges.push({
+      label: moduleNames.length > 0
+        ? `modules:${availableCount}/${effectiveModules.length}`
+        : `modules:planned:${effectiveModules.length}`,
+      tone: moduleNames.length > 0
+        ? (missingCount > 0 ? "status-warn" : "status-ok")
+        : "status-neutral",
+    });
+  }
+  if (simulationLabel && simulationLabel !== "-") {
+    badges.push({
+      label: `sim:${simulationLabel}`,
+      tone: simulationUsed === true ? "status-ok" : "status-neutral",
+    });
+  }
+  if (adcSource) {
+    badges.push({
+      label: `adc:${shortAdcSource(adcSource)}`,
+      tone: shortAdcSource(adcSource) === "runtime" ? "status-ok" : "status-neutral",
+    });
+  }
+  if (licenseSource) {
+    badges.push({
+      label: `license:${licenseSource}`,
+      tone: licenseSource === "none" ? "status-neutral" : "status-ok",
+    });
+  }
+
+  const moduleLines = moduleRows.length > 0
+    ? moduleRows.map((row) => {
+      if (row.available === true) {
+        return `- ${row.name}: ok${row.version ? ` @${row.version}` : ""}`;
+      }
+      if (row.available === false) {
+        return `- ${row.name}: missing${row.error ? ` | ${row.error}` : ""}`;
+      }
+      return `- ${row.name}: planned`;
+    })
+    : ["- none"];
+  const summaryText = [
+    `state: ${overallStatus}`,
+    `backend: ${backendType || "-"}`,
+    `provider: ${providerSpec || "-"}`,
+    `mode: ${runtimeMode || "-"}`,
+    `simulation_used: ${simulationUsed === null ? "-" : String(simulationUsed)}`,
+    `adc_source: ${adcSource || "-"}`,
+    `license_source: ${licenseSource || "-"}`,
+    "module_report:",
+    ...moduleLines,
+    `runtime_error: ${runtimeError || "-"}`,
+  ].join("\n");
+
+  return {
+    overallStatus,
+    providerSpec,
+    runtimeMode,
+    simulationUsed,
+    adcSource,
+    licenseSource,
+    badges,
+    badgeLine: badges.map((row) => String(row.label || "").trim()).filter(Boolean).join(" | ") || "-",
+    summaryText,
   };
 }
 
@@ -243,6 +405,7 @@ export function App() {
   const [lastRegressionSession, setLastRegressionSession] = React.useState(null);
   const [lastRegressionExport, setLastRegressionExport] = React.useState(null);
   const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
+  const [trackCompareRunnerStatusText, setTrackCompareRunnerStatusText] = React.useState("-");
   const [templates, setTemplates] = React.useState([]);
   const [statusText, setStatusText] = React.useState("idle");
   const [statusTone, setStatusTone] = React.useState("status-neutral");
@@ -432,6 +595,7 @@ export function App() {
       setCompareGraphRunSummary(null);
       setCompareRunStatusText("compare: not set");
       setCompareRunPinnedManual(false);
+      setTrackCompareRunnerStatusText("-");
       return false;
     }
 
@@ -454,6 +618,9 @@ export function App() {
       setCompareRunStatusText(
         `compare_mode=${mode} | run=${graphRunId} | status=${status} | completed_at=${completedAt}`
       );
+      if (mode === "manual") {
+        setTrackCompareRunnerStatusText("manual_compare_loaded");
+      }
       if (mode === "manual" && shouldSetStatus) {
         setStatus(`compare graph run loaded: ${graphRunId}`, "status-ok");
       }
@@ -479,6 +646,7 @@ export function App() {
     setCompareRunPinnedManual(false);
     setCompareAutoSkipForRunId(String(graphRunSummary?.graph_run_id || "").trim());
     setCompareRunStatusText("compare: cleared");
+    setTrackCompareRunnerStatusText("-");
     setStatus("compare graph run cleared", "status-ok");
   }, [graphRunSummary?.graph_run_id, setStatus]);
 
@@ -497,6 +665,7 @@ export function App() {
     setCompareRunStatusText(
       `compare_mode=pinned_current | run=${graphRunId} | waiting_for_next_run=true`
     );
+    setTrackCompareRunnerStatusText("manual_compare_pinned_current");
     setStatus(`current run pinned as compare: ${graphRunId}`, "status-ok");
   }, [graphRunSummary, setStatus]);
 
@@ -985,6 +1154,11 @@ export function App() {
     runtimeTxFfdFilesText,
   ]);
 
+  const configuredRequiredModules = React.useMemo(
+    () => splitTokenList(runtimeRequiredModulesText),
+    [runtimeRequiredModulesText]
+  );
+
   const compareRuntimeSummary = React.useMemo(() => summarizeRuntimeTrack(compareGraphRunSummary, {
     backendType: "-",
     simulationBackend: "-",
@@ -1011,6 +1185,36 @@ export function App() {
     runtimeRxFfdFilesText,
     runtimeTxFfdFilesText,
   ]);
+
+  const runtimeDiagnostics = React.useMemo(() => summarizeRuntimeDiagnostics(graphRunSummary, {
+    backendType: runtimeBackendType || "-",
+    providerSpec: runtimeProviderSpec || "",
+    requiredModules: configuredRequiredModules,
+    simulationMode: runtimeSimulationMode || "-",
+    licenseStatus: runtimeLicenseFile ? "requested" : "none",
+    licenseSource: runtimeLicenseFile ? "runtime_input" : "",
+    licenseFile: runtimeLicenseFile || "",
+  }), [
+    configuredRequiredModules,
+    graphRunSummary,
+    runtimeBackendType,
+    runtimeLicenseFile,
+    runtimeProviderSpec,
+    runtimeSimulationMode,
+  ]);
+
+  const compareRuntimeDiagnostics = React.useMemo(() => summarizeRuntimeDiagnostics(compareGraphRunSummary, {
+    backendType: "-",
+    providerSpec: "",
+    requiredModules: [],
+    simulationMode: "-",
+    licenseStatus: "none",
+  }), [compareGraphRunSummary]);
+
+  const trackCompareRunnerState = React.useMemo(
+    () => deriveTrackCompareRunnerStatus(trackCompareRunnerStatusText),
+    [trackCompareRunnerStatusText]
+  );
 
   const trackCompareGuideText = React.useMemo(() => [
     "1. Run the first track and confirm artifacts are produced.",
@@ -1178,6 +1382,9 @@ export function App() {
 
   const runLowVsCurrentTrackCompare = React.useCallback(async () => {
     const targetTrackLabel = String(configuredRuntimeSummary.trackLabel || "-");
+    setTrackCompareRunnerStatusText(
+      `track_compare_runner: baseline=low_fidelity | target=${targetTrackLabel} | phase=baseline`
+    );
     setDecisionOpsStatusText(
       `track_compare_runner: baseline=low_fidelity | target=${targetTrackLabel} | phase=baseline`
     );
@@ -1191,6 +1398,9 @@ export function App() {
     if (!lowResult?.ok || !lowResult?.summary) {
       const lowError = String(lowResult?.error || lowResult?.status || "unknown");
       const blocked = isRuntimeBlockedError(lowError);
+      setTrackCompareRunnerStatusText(
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=baseline | error=${lowError}`
+      );
       setDecisionOpsStatusText(
         `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=baseline | error=${lowError}`
       );
@@ -1211,6 +1421,9 @@ export function App() {
     setCompareRunStatusText(
       `compare_mode=runner_low_fidelity | run=${compareRunId || "-"} | status=${String(lowResult.status || lowResult.summary?.status || "completed")}`
     );
+    setTrackCompareRunnerStatusText(
+      `track_compare_runner: baseline_ready=${compareRunId || "-"} | target=${targetTrackLabel} | phase=current`
+    );
     setDecisionOpsStatusText(
       `track_compare_runner: baseline_ready=${compareRunId || "-"} | target=${targetTrackLabel} | phase=current`
     );
@@ -1222,6 +1435,9 @@ export function App() {
     if (!currentResult?.ok || !currentResult?.summary) {
       const currentError = String(currentResult?.error || currentResult?.status || "unknown");
       const blocked = isRuntimeBlockedError(currentError);
+      setTrackCompareRunnerStatusText(
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=current | compare=${compareRunId || "-"} | error=${currentError}`
+      );
       setDecisionOpsStatusText(
         `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=current | compare=${compareRunId || "-"} | error=${currentError}`
       );
@@ -1235,6 +1451,9 @@ export function App() {
     const currentRunId = String(
       currentResult.graphRunId || currentResult.summary?.graph_run_id || currentResult.summary?.run_id || ""
     ).trim();
+    setTrackCompareRunnerStatusText(
+      `track_compare_runner=ready | compare=${compareRunId || "-"} | current=${currentRunId || "-"} | target=${targetTrackLabel}`
+    );
     setDecisionOpsStatusText(
       `track_compare_runner=ready | compare=${compareRunId || "-"} | current=${currentRunId || "-"} | target=${targetTrackLabel}`
     );
@@ -1243,6 +1462,7 @@ export function App() {
     configuredRuntimeSummary.trackLabel,
     runGraphViaApi,
     setStatus,
+    setTrackCompareRunnerStatusText,
   ]);
 
   const exportDecisionRegressionSession = React.useCallback(async () => {
@@ -1279,6 +1499,7 @@ export function App() {
     ).trim() || "-";
     const compareRunId = String(compareGraphRunSummary?.graph_run_id || compareGraphRunId || "").trim() || "-";
     const recommendation = String(lastPolicyEval?.recommendation || "unknown");
+    const compareRunnerStatus = String(trackCompareRunnerState || "not_run");
     const gateKnown = typeof lastPolicyEval?.gate_failed === "boolean";
     const gateFailed = gateKnown ? Boolean(lastPolicyEval?.gate_failed) : null;
     const decision = gateKnown ? (gateFailed ? "HOLD" : "ADOPT") : "UNKNOWN";
@@ -1311,6 +1532,11 @@ export function App() {
       `baseline_id: ${String(baselineId || "-")}`,
       `current_run_id: ${currentRunId}`,
       `compare_run_id: ${compareRunId}`,
+      `compare_runner_status: ${compareRunnerStatus}`,
+      `current_track: ${runtimeSummary.trackLabel}`,
+      `compare_track: ${compareRuntimeSummary.trackLabel}`,
+      `current_runtime: ${runtimeDiagnostics.badgeLine}`,
+      `compare_runtime: ${compareRuntimeDiagnostics.badgeLine}`,
       `gate_failure_count: ${Number(failureRows.length || 0)}`,
       `path_count_delta(current-compare): ${signed(pathDelta)}`,
     ];
@@ -1339,8 +1565,13 @@ export function App() {
     baselineId,
     compareGraphRunId,
     compareGraphRunSummary,
+    compareRuntimeDiagnostics.badgeLine,
+    compareRuntimeSummary.trackLabel,
     graphRunSummary,
     lastPolicyEval,
+    runtimeDiagnostics.badgeLine,
+    runtimeSummary.trackLabel,
+    trackCompareRunnerState,
   ]);
 
   const exportDecisionBriefMd = React.useCallback(() => {
@@ -1362,6 +1593,22 @@ export function App() {
       "## Decision Snapshot",
       "```text",
       decisionSummaryText,
+      "```",
+      "",
+      "## Runtime Compare",
+      `- current_track: ${runtimeSummary.trackLabel}`,
+      `- compare_track: ${compareRuntimeSummary.trackLabel}`,
+      `- compare_runner_status: ${String(trackCompareRunnerStatusText || "-")}`,
+      `- compare_status: ${String(compareRunStatusText || "-")}`,
+      "",
+      "### Current Runtime Diagnostics",
+      "```text",
+      runtimeDiagnostics.summaryText,
+      "```",
+      "",
+      "### Compare Runtime Diagnostics",
+      "```text",
+      compareRuntimeDiagnostics.summaryText,
       "```",
       "",
       "## Current Artifacts",
@@ -1411,13 +1658,19 @@ export function App() {
     setStatus("decision brief exported", "status-ok");
   }, [
     compareGraphRunSummary,
+    compareRunStatusText,
+    compareRuntimeDiagnostics.summaryText,
+    compareRuntimeSummary.trackLabel,
     decisionSummaryText,
     graphId,
     graphRunSummary,
     lastPolicyEval,
     lastRegressionExport,
     lastRegressionSession,
+    runtimeDiagnostics.summaryText,
+    runtimeSummary.trackLabel,
     setStatus,
+    trackCompareRunnerStatusText,
   ]);
 
   const loadTemplateByIndex = React.useCallback((idx) => {
@@ -1551,6 +1804,8 @@ export function App() {
       runtimePoSbrMaterialTag,
       runtimePoSbrPathIdPrefix,
       runtimePoSbrComponentsJson,
+      runtimeDiagnosticBadges: runtimeDiagnostics.badges,
+      runtimeDiagnosticText: runtimeDiagnostics.summaryText,
       runtimeStatusLine: runtimeSummary.runtimeStatusLine,
       runMode,
       autoPollAsyncRun,
@@ -1665,6 +1920,8 @@ export function App() {
     runtimePoSbrMaterialTag,
     runtimePoSbrPathIdPrefix,
     runtimePoSbrComponentsJson,
+    runtimeDiagnostics.badges,
+    runtimeDiagnostics.summaryText,
     runtimeSummary.runtimeStatusLine,
     runMode,
     autoPollAsyncRun,
@@ -1767,6 +2024,7 @@ export function App() {
         trackCompareGuideText,
         decisionSummaryText,
         decisionOpsStatusText,
+        trackCompareRunnerStatusText,
         lastRegressionSession,
         lastRegressionExport,
         contractDebugText,

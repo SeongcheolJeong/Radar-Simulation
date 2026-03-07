@@ -113,6 +113,8 @@ export function RuntimeConfigSection({
   setRuntimePoSbrPathIdPrefix,
   runtimePoSbrComponentsJson,
   setRuntimePoSbrComponentsJson,
+  runtimeDiagnosticBadges,
+  runtimeDiagnosticText,
   runtimeStatusLine,
 }) {
   const applyMitsubaAdvancedSample = () => {
@@ -597,6 +599,24 @@ export function RuntimeConfigSection({
         style: { minHeight: "72px" },
       }),
     ]),
-    h("div", { className: "hint", key: "runtime_status_hint" }, `runtime_status: ${String(runtimeStatusLine || "-")}`),
+    h("div", { className: "field", key: "runtime_diagnostics" }, [
+      h("label", { className: "label", key: "lbl_runtime_diagnostics" }, "Runtime Diagnostics"),
+      h("div", { className: "chip-list", key: "runtime_diagnostics_chips" }, (
+        Array.isArray(runtimeDiagnosticBadges) && runtimeDiagnosticBadges.length > 0
+          ? runtimeDiagnosticBadges
+          : [{ label: "state:idle", tone: "status-neutral" }]
+      ).map((row, idx) =>
+        h("span", {
+          className: `chip ${String(row?.tone || "status-neutral")}`,
+          key: `runtime_diag_chip_${idx}`,
+        }, String(row?.label || "-"))
+      )),
+      h("pre", {
+        className: "result-box",
+        key: "runtime_diagnostics_box",
+        style: { minHeight: "86px" },
+      }, String(runtimeDiagnosticText || `runtime_status: ${String(runtimeStatusLine || "-")}`)),
+      h("div", { className: "hint", key: "runtime_status_hint" }, `runtime_status: ${String(runtimeStatusLine || "-")}`),
+    ]),
   ]);
 }

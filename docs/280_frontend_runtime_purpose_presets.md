@@ -58,6 +58,21 @@ The runtime panel now exposes provider-specific advanced sections when the selec
 
 The purpose preset buttons also load sample values for these sections so a user does not start from an invalid empty runtime payload.
 
+## Runtime Diagnostics
+
+The runtime panel now exposes a `Runtime Diagnostics` surface with:
+
+- availability badges such as `state:*`, `modules:*`, `sim:*`, `adc:*`, `license:*`
+- a compact multiline summary showing:
+  - backend/provider
+  - runtime mode
+  - module report
+  - license source
+  - simulation usage / ADC source
+  - runtime error when present
+
+This is fed from the actual `graph_run_summary` metadata when a run exists, and falls back to planned runtime configuration when the user has not run yet.
+
 ## Compare Workflow
 
 The Decision Pane now exposes a lightweight operator workflow for low-vs-high track comparison:
@@ -87,6 +102,8 @@ Fast path:
 2. Click `Run Low -> Current Compare`.
 3. If the low-fidelity runtime is installed, inspect the generated compare pair immediately.
 4. If the UI reports `track_compare_runner_blocked`, install or expose the `radarsimpy` runtime first.
+
+The Decision Pane also keeps a dedicated `track_compare_status` line so compare-runner state is preserved even after later `Policy Gate`, `Run Session`, or `Export Session` actions update the general decision status.
 
 ## Backend Behavior
 
@@ -128,6 +145,15 @@ The repo now auto-discovers a local RadarSimPy runtime for frontend/API workflow
   - repo-local `external/radarsimpy/src/radarsimpy/license_RadarSimPy_*.lic`
 
 This is what allows `Run Low -> Current Compare` to reach `ready` in the local workspace without manually exporting shell paths first.
+
+## Decision Brief
+
+`Export Brief` now includes a `Runtime Compare` section with:
+
+- current/compare track labels
+- stored compare-runner status
+- current runtime diagnostics block
+- compare runtime diagnostics block
 
 ## Current Scope
 
