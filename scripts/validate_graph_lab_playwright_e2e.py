@@ -734,6 +734,9 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare history import preview did not expose apply requirement")
                 if "retention_pairs(merged_latest/merged_extra/merged_dropped):" not in history_transfer_text_after_import_preview:
                     raise AssertionError("compare history import preview did not expose merged retention pair preview")
+                if "selected_replay_pair_retention_after_merge: state=latest_window" not in history_transfer_text_after_import_preview:
+                    raise AssertionError("compare history import preview did not expose selected replay-pair retention impact")
+                report["runtime_controls"]["compare_session_import_selected_pair_retention_checked"] = True
                 options_after_preview = page.evaluate(
                     """() => {
                         const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
@@ -958,6 +961,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include compact compare history import preview summary")
                 if "retention_pairs(latest/extra/dropped):" not in brief_text:
                     raise AssertionError("decision brief did not include compare history retention pair preview")
+                if "selected_replay_pair_retention_after_merge:" not in brief_text:
+                    raise AssertionError("decision brief did not include import-preview selected replay-pair retention impact")
                 if "selected_preset_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include selected preset pair summary")
                 if "## Selected Pair Forecast" not in brief_text or "baseline_forecast:" not in brief_text:

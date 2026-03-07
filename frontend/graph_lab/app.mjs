@@ -876,6 +876,7 @@ function buildCompareSessionImportPreviewSummary(
         "artifact_expectations(existing/imported/merged): 0/0/0",
         "selected_replay_pair(import): -",
         "selected_replay_pair_after_merge: unchanged",
+        "selected_replay_pair_retention_after_merge: unchanged",
         "import_pair_labels: -",
         "apply_note: choose Import History to stage a bundle before merge",
       ].join("\n"),
@@ -932,10 +933,27 @@ function buildCompareSessionImportPreviewSummary(
     "retention_pairs(merged_latest/merged_extra/merged_dropped)"
   );
   const selectedReplayPairId = normalizeCompareSessionField(imported.selectedReplayPairId, 192);
-  const mergedReplayOptions = buildCompareSessionReplayOptions(mergedState.history, mergedState.pairMetaById);
+  const mergedReplayOptions = buildCompareSessionReplayOptions(
+    mergedState.history,
+    mergedState.pairMetaById,
+    effectiveRetentionPolicy
+  );
   const selectedReplayPairAvailable = selectedReplayPairId
     ? mergedReplayOptions.some((row) => String(row?.id || "") === selectedReplayPairId)
     : false;
+  const selectedReplayPairSource = selectedReplayPairId
+    ? mergedHistory.find((row) => String(getCompareSessionReplayPair(row)?.pairId || "").trim() === selectedReplayPairId)
+    : null;
+  const selectedReplayPairRetentionSummary = selectedReplayPairId
+    ? analyzeCompareSessionSelectedPairRetention(
+      mergedHistory,
+      mergedPairMeta,
+      effectiveRetentionPolicy,
+      selectedReplayPairSource
+        ? applyCompareReplayPairMeta(getCompareSessionReplayPair(selectedReplayPairSource), mergedPairMeta)
+        : { id: selectedReplayPairId, pairId: selectedReplayPairId, pairLabel: selectedReplayPairId }
+    )
+    : null;
   const importedPairLabels = Array.from(new Set(importedHistory.map((row) => String(row.pairLabel || "").trim()).filter(Boolean)));
 
   return {
@@ -961,6 +979,9 @@ function buildCompareSessionImportPreviewSummary(
       `artifact_expectations(existing/imported/merged): ${Number(Object.keys(existingArtifactExpectation).length || 0)}/${Number(Object.keys(importedArtifactExpectation).length || 0)}/${Number(Object.keys(mergedArtifactExpectation).length || 0)}`,
       `selected_replay_pair(import): ${selectedReplayPairId || "-"}`,
       `selected_replay_pair_after_merge: ${selectedReplayPairId ? (selectedReplayPairAvailable ? "available" : "missing") : "unchanged"}`,
+      `selected_replay_pair_retention_after_merge: ${selectedReplayPairId
+        ? `state=${String(selectedReplayPairRetentionSummary?.state || "missing")} | rows(visible/latest/retained)=${Number(selectedReplayPairRetentionSummary?.visibleRows || 0)}/${Number(selectedReplayPairRetentionSummary?.latestRows || 0)}/${Number(selectedReplayPairRetentionSummary?.retainedRows || 0)}`
+        : "unchanged"}`,
       `import_pair_labels: ${importedPairLabels.length > 0 ? importedPairLabels.join(" | ") : "-"}`,
       importSchema.compatibility === "forward_compatible_best_effort"
         ? "warning: future schema will be parsed with best-effort compatibility"

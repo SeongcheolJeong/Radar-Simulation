@@ -211,6 +211,7 @@ The same area now supports browser-to-browser transfer:
   - shows `import_preview`, merge counts, selected replay-pair availability, and imported pair labels before any local state changes
   - preview also shows `retention_policy(current/imported/effective)`
   - preview now also shows `retention_pairs(merged_latest/merged_extra/merged_dropped)` for the post-merge retained set
+  - preview also shows `selected_replay_pair_retention_after_merge`, so the operator can see whether the imported selected pair would land in `latest_window`, `retained_extra`, `dropped`, or `missing`
   - requires `Apply Import Merge` to actually merge the previewed bundle into the current browser profile
   - `Clear Import Preview` discards the staged bundle without changing local history
   - restores replayable pairs that were deleted locally, as long as they exist in the imported bundle

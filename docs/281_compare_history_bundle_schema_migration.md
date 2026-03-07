@@ -87,6 +87,7 @@ Current UI signaling:
   - `Apply Import Merge` performs the actual merge
   - `Clear Import Preview` discards the staged import without changing persisted browser state
   - the staged preview now also renders `retention_pairs(merged_latest/merged_extra/merged_dropped)` so the operator can see which replay pairs would survive the effective retention policy
+  - the staged preview also renders `selected_replay_pair_retention_after_merge` so the imported selected replay pair's post-merge retention state is explicit before applying the merge
 
 ## Migration Policy
 
