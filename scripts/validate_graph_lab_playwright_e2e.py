@@ -141,6 +141,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_workflow_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
+            "compare_assessment_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -357,6 +358,13 @@ def run(args: argparse.Namespace) -> int:
                 if expect_compare_runner_ready and report["runtime_controls"]["track_compare_runner_result"] != "ready":
                     raise AssertionError("track compare runner should be ready when local RadarSimPy runtime assets are present")
 
+                artifact_field = field_locator(page, "Artifact Inspector")
+                artifact_field.wait_for(timeout=30_000)
+                artifact_text = artifact_field.inner_text()
+                if "compare_assessment:" not in artifact_text or "compare_flags:" not in artifact_text:
+                    raise AssertionError("artifact inspector did not render compare assessment")
+                report["runtime_controls"]["compare_assessment_checked"] = True
+
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()
                 page.wait_for_function(
@@ -385,6 +393,8 @@ def run(args: argparse.Namespace) -> int:
                 brief_text = brief_path.read_text(encoding="utf-8")
                 if "## Runtime Compare" not in brief_text or "compare_runner_status:" not in brief_text:
                     raise AssertionError("decision brief did not include runtime compare summary")
+                if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
+                    raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
 
                 # Normalize high-churn text before visual capture so strict snapshots

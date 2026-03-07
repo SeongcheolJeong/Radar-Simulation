@@ -105,6 +105,20 @@ Fast path:
 
 The Decision Pane also keeps a dedicated `track_compare_status` line so compare-runner state is preserved even after later `Policy Gate`, `Run Session`, or `Export Session` actions update the general decision status.
 
+The `Artifact Inspector` now also classifies the current-vs-compare pair into:
+
+- `aligned`
+- `review`
+- `hold`
+
+using concrete evidence from:
+
+- ADC/RD/RA shape equality
+- path-count delta
+- top RD/RA peak-bin drift
+- ADC source changes
+- required/optional artifact presence deltas
+
 ## Backend Behavior
 
 Path-based backends now share the same antenna-aware FMCW synth path:
@@ -154,6 +168,14 @@ This is what allows `Run Low -> Current Compare` to reach `ready` in the local w
 - stored compare-runner status
 - current runtime diagnostics block
 - compare runtime diagnostics block
+
+It also includes a `Compare Assessment` block with:
+
+- compare assessment status
+- compare flags
+- shape/path/peak delta evidence
+- ADC source delta
+- required artifact coverage and artifact presence delta
 
 ## Current Scope
 

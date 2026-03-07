@@ -27,6 +27,7 @@ import {
   NodeInspectorPanel,
   TopBar,
 } from "./panels.mjs";
+import { buildRunCompareSummary } from "./compare_summary.mjs";
 import { splitTokenList } from "./runtime_overrides.mjs";
 import { useGateOps } from "./hooks/use_gate_ops.mjs";
 import { useGraphRunOps } from "./hooks/use_graph_run_ops.mjs";
@@ -34,6 +35,11 @@ import { useGraphRunOps } from "./hooks/use_graph_run_ops.mjs";
 const h = React.createElement;
 const LAYOUT_MODE_SET = new Set(["triad", "build", "review", "focus"]);
 const DENSITY_MODE_SET = new Set(["comfortable", "compact"]);
+
+function formatSigned(value) {
+  const n = Number(value || 0);
+  return `${n >= 0 ? "+" : ""}${n}`;
+}
 
 function normalizeLayoutMode(value) {
   const mode = String(value || "").trim().toLowerCase();
@@ -1215,6 +1221,10 @@ export function App() {
     () => deriveTrackCompareRunnerStatus(trackCompareRunnerStatusText),
     [trackCompareRunnerStatusText]
   );
+  const runCompareSummary = React.useMemo(
+    () => buildRunCompareSummary(graphRunSummary, compareGraphRunSummary),
+    [compareGraphRunSummary, graphRunSummary]
+  );
 
   const trackCompareGuideText = React.useMemo(() => [
     "1. Run the first track and confirm artifacts are produced.",
@@ -1504,26 +1514,6 @@ export function App() {
     const gateFailed = gateKnown ? Boolean(lastPolicyEval?.gate_failed) : null;
     const decision = gateKnown ? (gateFailed ? "HOLD" : "ADOPT") : "UNKNOWN";
     const failureRows = Array.isArray(lastPolicyEval?.gate_failures) ? lastPolicyEval.gate_failures : [];
-    const currentPathCount = Number(graphRunSummary?.path_summary?.path_count_total || 0);
-    const comparePathCount = Number(compareGraphRunSummary?.path_summary?.path_count_total || 0);
-    const pathDelta = currentPathCount - comparePathCount;
-
-    const currentRdPeak = Array.isArray(graphRunSummary?.quicklook?.rd_top_peaks)
-      ? graphRunSummary.quicklook.rd_top_peaks[0] || null
-      : null;
-    const compareRdPeak = Array.isArray(compareGraphRunSummary?.quicklook?.rd_top_peaks)
-      ? compareGraphRunSummary.quicklook.rd_top_peaks[0] || null
-      : null;
-    const currentRaPeak = Array.isArray(graphRunSummary?.quicklook?.ra_top_peaks)
-      ? graphRunSummary.quicklook.ra_top_peaks[0] || null
-      : null;
-    const compareRaPeak = Array.isArray(compareGraphRunSummary?.quicklook?.ra_top_peaks)
-      ? compareGraphRunSummary.quicklook.ra_top_peaks[0] || null
-      : null;
-    const signed = (value) => {
-      const n = Number(value || 0);
-      return `${n >= 0 ? "+" : ""}${n}`;
-    };
 
     const lines = [
       `generated_at_utc: ${nowIso}`,
@@ -1537,18 +1527,20 @@ export function App() {
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
       `compare_runtime: ${compareRuntimeDiagnostics.badgeLine}`,
+      `compare_assessment: ${runCompareSummary.assessment}`,
+      `compare_flags: ${runCompareSummary.flagSummary}`,
       `gate_failure_count: ${Number(failureRows.length || 0)}`,
-      `path_count_delta(current-compare): ${signed(pathDelta)}`,
+      `path_count_delta(current-compare): ${runCompareSummary.available ? formatSigned(runCompareSummary.pathCountDelta) : "-"}`,
     ];
 
-    if (currentRdPeak && compareRdPeak) {
+    if (runCompareSummary.rdPeakDelta) {
       lines.push(
-        `rd_peak_delta(range/doppler): ${signed(Number(currentRdPeak.range_bin || 0) - Number(compareRdPeak.range_bin || 0))}/${signed(Number(currentRdPeak.doppler_bin || 0) - Number(compareRdPeak.doppler_bin || 0))}`
+        `rd_peak_delta(range/doppler): ${formatSigned(runCompareSummary.rdPeakDelta.rangeBinDelta)}/${formatSigned(runCompareSummary.rdPeakDelta.dopplerBinDelta)}`
       );
     }
-    if (currentRaPeak && compareRaPeak) {
+    if (runCompareSummary.raPeakDelta) {
       lines.push(
-        `ra_peak_delta(range/angle): ${signed(Number(currentRaPeak.range_bin || 0) - Number(compareRaPeak.range_bin || 0))}/${signed(Number(currentRaPeak.angle_bin || 0) - Number(compareRaPeak.angle_bin || 0))}`
+        `ra_peak_delta(range/angle): ${formatSigned(runCompareSummary.raPeakDelta.rangeBinDelta)}/${formatSigned(runCompareSummary.raPeakDelta.angleBinDelta)}`
       );
     }
     if (failureRows.length > 0) {
@@ -1565,6 +1557,7 @@ export function App() {
     baselineId,
     compareGraphRunId,
     compareGraphRunSummary,
+    runCompareSummary,
     compareRuntimeDiagnostics.badgeLine,
     compareRuntimeSummary.trackLabel,
     graphRunSummary,
@@ -1609,6 +1602,11 @@ export function App() {
       "### Compare Runtime Diagnostics",
       "```text",
       compareRuntimeDiagnostics.summaryText,
+      "```",
+      "",
+      "## Compare Assessment",
+      "```text",
+      ...runCompareSummary.detailLines,
       "```",
       "",
       "## Current Artifacts",
@@ -1659,6 +1657,7 @@ export function App() {
   }, [
     compareGraphRunSummary,
     compareRunStatusText,
+    runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
     decisionSummaryText,

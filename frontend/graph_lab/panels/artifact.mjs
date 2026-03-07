@@ -1,4 +1,5 @@
 import { React } from "../deps.mjs";
+import { buildRunCompareSummary } from "../compare_summary.mjs";
 import { normalizeRepoPath } from "../graph_helpers.mjs";
 
 const h = React.createElement;
@@ -79,59 +80,6 @@ function computeProbe(peaks, rowBin, colBin, shape) {
   };
 }
 
-function computeRunDiffOverlay(currentSummary, compareSummary) {
-  const current = currentSummary && typeof currentSummary === "object" ? currentSummary : null;
-  const baseline = compareSummary && typeof compareSummary === "object" ? compareSummary : null;
-  if (!current || !baseline) return null;
-
-  const currentAdcShape = normalizeShape(current?.adc_summary?.shape);
-  const currentRdShape = normalizeShape(current?.radar_map_summary?.rd_shape);
-  const currentRaShape = normalizeShape(current?.radar_map_summary?.ra_shape);
-  const baselineAdcShape = normalizeShape(baseline?.adc_summary?.shape);
-  const baselineRdShape = normalizeShape(baseline?.radar_map_summary?.rd_shape);
-  const baselineRaShape = normalizeShape(baseline?.radar_map_summary?.ra_shape);
-
-  const currentRdPeak = normalizePeakList(current?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin")[0] || null;
-  const baselineRdPeak = normalizePeakList(baseline?.quicklook?.rd_top_peaks, "doppler_bin", "range_bin")[0] || null;
-  const currentRaPeak = normalizePeakList(current?.quicklook?.ra_top_peaks, "angle_bin", "range_bin")[0] || null;
-  const baselineRaPeak = normalizePeakList(baseline?.quicklook?.ra_top_peaks, "angle_bin", "range_bin")[0] || null;
-
-  const currentPathCount = Number(current?.path_summary?.path_count_total || 0);
-  const baselinePathCount = Number(baseline?.path_summary?.path_count_total || 0);
-
-  const toSigned = (value) => {
-    const n = Number(value || 0);
-    return `${n >= 0 ? "+" : ""}${n}`;
-  };
-
-  return {
-    currentGraphRunId: String(current?.graph_run_id || "-"),
-    compareGraphRunId: String(baseline?.graph_run_id || "-"),
-    shapeEq: {
-      adc: safeShapeLabel(currentAdcShape) === safeShapeLabel(baselineAdcShape),
-      rd: safeShapeLabel(currentRdShape) === safeShapeLabel(baselineRdShape),
-      ra: safeShapeLabel(currentRaShape) === safeShapeLabel(baselineRaShape),
-    },
-    shapeText: {
-      adc: `${safeShapeLabel(currentAdcShape)} vs ${safeShapeLabel(baselineAdcShape)}`,
-      rd: `${safeShapeLabel(currentRdShape)} vs ${safeShapeLabel(baselineRdShape)}`,
-      ra: `${safeShapeLabel(currentRaShape)} vs ${safeShapeLabel(baselineRaShape)}`,
-    },
-    pathCountDelta: currentPathCount - baselinePathCount,
-    rdPeakDelta: currentRdPeak && baselineRdPeak ? {
-      rangeBinDelta: Number(currentRdPeak.col || 0) - Number(baselineRdPeak.col || 0),
-      dopplerBinDelta: Number(currentRdPeak.row || 0) - Number(baselineRdPeak.row || 0),
-      relDbDelta: Number(currentRdPeak.relDb || 0) - Number(baselineRdPeak.relDb || 0),
-    } : null,
-    raPeakDelta: currentRaPeak && baselineRaPeak ? {
-      rangeBinDelta: Number(currentRaPeak.col || 0) - Number(baselineRaPeak.col || 0),
-      angleBinDelta: Number(currentRaPeak.row || 0) - Number(baselineRaPeak.row || 0),
-      relDbDelta: Number(currentRaPeak.relDb || 0) - Number(baselineRaPeak.relDb || 0),
-    } : null,
-    toSigned,
-  };
-}
-
 export function ArtifactInspectorPanel({ graphRunSummary, compareGraphRunSummary, compareRunStatusText }) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
@@ -199,10 +147,15 @@ export function ArtifactInspectorPanel({ graphRunSummary, compareGraphRunSummary
     return computeProbe(raPeaks, angleBin, rangeBin, raShape);
   }, [raAngleBinText, raPeaks, raRangeBinText, raShape]);
 
-  const runDiff = React.useMemo(
-    () => computeRunDiffOverlay(graphRunSummary, compareGraphRunSummary),
+  const runCompare = React.useMemo(
+    () => buildRunCompareSummary(graphRunSummary, compareGraphRunSummary),
     [compareGraphRunSummary, graphRunSummary]
   );
+  const compareTone = runCompare.assessment === "hold"
+    ? "#ff9a9a"
+    : runCompare.assessment === "review"
+      ? "#f4c265"
+      : "#7ee3b8";
 
   const renderProbeSummary = (probe) => {
     const exact = probe.exact;
@@ -234,25 +187,34 @@ export function ArtifactInspectorPanel({ graphRunSummary, compareGraphRunSummary
       : null,
     h("div", { key: "diff_overlay", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
       h("div", { key: "diff_title", style: { marginBottom: "5px", color: "#8fb3c9" } }, "run-to-run diff overlay:"),
-      runDiff
+      runCompare.available
         ? h("div", { key: "diff_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, [
-            h("div", { key: "diff_hdr" }, `current=${runDiff.currentGraphRunId} | compare=${runDiff.compareGraphRunId}`),
-            h("div", { key: "diff_shape_adc" }, `shape.adc: ${runDiff.shapeText.adc} | eq=${runDiff.shapeEq.adc}`),
-            h("div", { key: "diff_shape_rd" }, `shape.rd: ${runDiff.shapeText.rd} | eq=${runDiff.shapeEq.rd}`),
-            h("div", { key: "diff_shape_ra" }, `shape.ra: ${runDiff.shapeText.ra} | eq=${runDiff.shapeEq.ra}`),
-            h("div", { key: "diff_paths" }, `path_count_delta: ${runDiff.toSigned(runDiff.pathCountDelta)}`),
+            h("div", { key: "diff_hdr" }, `current=${runCompare.currentGraphRunId} | compare=${runCompare.compareGraphRunId}`),
+            h("div", { key: "diff_assessment", style: { color: compareTone } }, `compare_assessment: ${runCompare.assessment}`),
+            h("div", { key: "diff_flags" }, `compare_flags: ${runCompare.flagSummary}`),
+            h("div", { key: "diff_source" }, `adc_source(current/compare): ${runCompare.adcSource.current}/${runCompare.adcSource.compare}`),
+            h(
+              "div",
+              { key: "diff_artifacts" },
+              `required_artifacts(current/compare/total): ${runCompare.requiredArtifactCounts.currentPresent}/${runCompare.requiredArtifactCounts.comparePresent}/${runCompare.requiredArtifactCounts.total}`
+            ),
+            h("div", { key: "diff_artifacts_delta" }, `artifact_presence_delta: ${runCompare.artifactPresenceDeltaText}`),
+            h("div", { key: "diff_shape_adc" }, `shape.adc: ${runCompare.shapeText.adc} | eq=${runCompare.shapeEq.adc}`),
+            h("div", { key: "diff_shape_rd" }, `shape.rd: ${runCompare.shapeText.rd} | eq=${runCompare.shapeEq.rd}`),
+            h("div", { key: "diff_shape_ra" }, `shape.ra: ${runCompare.shapeText.ra} | eq=${runCompare.shapeEq.ra}`),
+            h("div", { key: "diff_paths" }, `path_count_delta: ${formatSigned(runCompare.pathCountDelta)}`),
             h(
               "div",
               { key: "diff_rd" },
-              runDiff.rdPeakDelta
-                ? `rd_peak_delta(range/doppler/rel_db): ${runDiff.toSigned(runDiff.rdPeakDelta.rangeBinDelta)}/${runDiff.toSigned(runDiff.rdPeakDelta.dopplerBinDelta)}/${runDiff.rdPeakDelta.relDbDelta.toFixed(2)}`
+              runCompare.rdPeakDelta
+                ? `rd_peak_delta(range/doppler/rel_db): ${formatSigned(runCompare.rdPeakDelta.rangeBinDelta)}/${formatSigned(runCompare.rdPeakDelta.dopplerBinDelta)}/${runCompare.rdPeakDelta.relDbDelta.toFixed(2)}`
                 : "rd_peak_delta: unavailable"
             ),
             h(
               "div",
               { key: "diff_ra" },
-              runDiff.raPeakDelta
-                ? `ra_peak_delta(range/angle/rel_db): ${runDiff.toSigned(runDiff.raPeakDelta.rangeBinDelta)}/${runDiff.toSigned(runDiff.raPeakDelta.angleBinDelta)}/${runDiff.raPeakDelta.relDbDelta.toFixed(2)}`
+              runCompare.raPeakDelta
+                ? `ra_peak_delta(range/angle/rel_db): ${formatSigned(runCompare.raPeakDelta.rangeBinDelta)}/${formatSigned(runCompare.raPeakDelta.angleBinDelta)}/${runCompare.raPeakDelta.relDbDelta.toFixed(2)}`
                 : "ra_peak_delta: unavailable"
             ),
           ])
