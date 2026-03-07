@@ -65,6 +65,14 @@ Current compatibility labels exposed in the UI:
 - `forward_compatible_best_effort`
   - unknown future schema string was accepted on a best-effort basis because the required fields still parsed
 
+Current UI signaling:
+
+- `transfer:import`
+- `schema:<value>`
+- `compat:<value>`
+- `warning:future-schema`
+  - shown only when `compat=forward_compatible_best_effort`
+
 ## Migration Policy
 
 ### Writer policy

@@ -149,6 +149,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_artifact_expectation_checked": False,
             "compare_session_artifact_path_hash_checked": False,
             "compare_session_transfer_checked": False,
+            "compare_session_future_schema_warning_checked": False,
             "compare_session_persistence_checked": False,
             "pinned_pair_quick_actions_checked": False,
             "pinned_pair_preview_checked": False,
@@ -710,6 +711,30 @@ def run(args: argparse.Namespace) -> int:
                     or "compatibility=exact" not in history_transfer_text_after_import
                 ):
                     raise AssertionError("compare history import transfer hint did not include schema compatibility")
+                future_bundle = dict(exported_bundle)
+                future_bundle["schema_version"] = "graph_lab_compare_history_export_v99"
+                future_bundle_path = tmp_root / "compare_history_future_schema.json"
+                future_bundle_path.write_text(json.dumps(future_bundle, indent=2), encoding="utf-8")
+                with page.expect_file_chooser(timeout=20_000) as future_fc_info:
+                    history_field.get_by_role("button", name="Import History").click()
+                future_fc_info.value.set_files(str(future_bundle_path))
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("schema=graph_lab_compare_history_export_v99")
+                            && text.includes("compatibility=forward_compatible_best_effort")
+                        );
+                    }""",
+                    timeout=30_000,
+                )
+                history_transfer_text_after_future_import = history_field.inner_text()
+                if "warning:future-schema" not in history_transfer_text_after_future_import:
+                    raise AssertionError("compare history future-schema import did not expose warning badge")
+                report["runtime_controls"]["compare_session_future_schema_warning_checked"] = True
                 history_select.select_option("low_fidelity_radarsimpy_ffd::current_config")
                 page.wait_for_timeout(100)
                 report["runtime_controls"]["compare_session_management_checked"] = True

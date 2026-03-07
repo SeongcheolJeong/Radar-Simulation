@@ -51,6 +51,7 @@ export function DecisionPane({
   deleteSelectedCompareSessionPair,
   compareSessionImportFileInputRef,
   compareSessionTransferStatusText,
+  compareSessionTransferBadgeRows,
   triggerCompareSessionImportFilePick,
   handleCompareSessionImportFileChange,
   exportCompareSessionHistory,
@@ -205,6 +206,16 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_compare_session_history_replay_hint" }, String(latestReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_selected_hint" }, String(selectedReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_meta_hint" }, String(selectedReplayableCompareSessionMetaText || "-")),
+      h("div", { className: "chip-list", key: "decision_compare_session_history_transfer_chips" }, (
+        Array.isArray(compareSessionTransferBadgeRows) && compareSessionTransferBadgeRows.length > 0
+          ? compareSessionTransferBadgeRows
+          : [{ label: "transfer:idle", tone: "status-neutral" }]
+      ).map((row, idx) =>
+        h("span", {
+          className: `chip ${String(row?.tone || "status-neutral")}`,
+          key: `decision_compare_session_history_transfer_chip_${idx}`,
+        }, String(row?.label || "-"))
+      )),
       h("div", { className: "hint", key: "decision_compare_session_history_transfer_hint" }, String(compareSessionTransferStatusText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_preview_box" }, String(selectedReplayableCompareSessionPreviewText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_artifact_expectation_box" }, String(selectedReplayableCompareSessionArtifactExpectationText || "-")),

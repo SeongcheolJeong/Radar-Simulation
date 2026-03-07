@@ -465,6 +465,56 @@ function summarizeCompareSessionSchemaCompatibility(value) {
   };
 }
 
+function toneForCompareSessionSchemaCompatibility(value) {
+  const token = String(value || "").trim().toLowerCase();
+  if (token === "exact") return "status-ok";
+  if (token === "legacy_compatible") return "status-neutral";
+  if (token === "forward_compatible_best_effort") return "status-warn";
+  return "status-neutral";
+}
+
+function buildCompareSessionTransferBadges(entry) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  const direction = normalizeCompareSessionField(row.direction, 32) || "idle";
+  const schemaVersion = normalizeCompareSessionImportSchemaVersion(row.schemaVersion);
+  const compatibility = normalizeCompareSessionField(row.compatibility, 64) || "";
+  const failed = row.failed === true;
+  const badges = [];
+  badges.push({
+    label: `transfer:${direction}`,
+    tone: failed === true
+      ? "status-err"
+      : direction === "import" || direction === "export"
+        ? "status-ok"
+        : "status-neutral",
+  });
+  if (schemaVersion && schemaVersion !== COMPARE_SESSION_IMPORT_SCHEMA_LEGACY) {
+    badges.push({
+      label: `schema:${schemaVersion}`,
+      tone: "status-neutral",
+    });
+  }
+  if (compatibility) {
+    badges.push({
+      label: `compat:${compatibility}`,
+      tone: toneForCompareSessionSchemaCompatibility(compatibility),
+    });
+  }
+  if (compatibility === "forward_compatible_best_effort") {
+    badges.push({
+      label: "warning:future-schema",
+      tone: "status-warn",
+    });
+  }
+  if (failed === true) {
+    badges.push({
+      label: "warning:transfer-failed",
+      tone: "status-err",
+    });
+  }
+  return badges;
+}
+
 function serializeCompareSessionExportBundle(bundle) {
   const row = bundle && typeof bundle === "object" ? bundle : {};
   return JSON.stringify({
@@ -1097,6 +1147,9 @@ export function App() {
   const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
   const [trackCompareRunnerStatusText, setTrackCompareRunnerStatusText] = React.useState("-");
   const [compareSessionTransferStatusText, setCompareSessionTransferStatusText] = React.useState("-");
+  const [compareSessionTransferBadgeRows, setCompareSessionTransferBadgeRows] = React.useState(() => (
+    buildCompareSessionTransferBadges({ direction: "idle" })
+  ));
   const [compareSessionHistory, setCompareSessionHistory] = React.useState(
     () => initialCompareSessionPrefs.history
   );
@@ -2823,6 +2876,11 @@ export function App() {
     try {
       if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
         setCompareSessionTransferStatusText("compare history export prepared (download unavailable)");
+        setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
+          direction: "export",
+          schemaVersion: COMPARE_SESSION_EXPORT_SCHEMA_VERSION,
+          compatibility: "exact",
+        }));
         setStatus("compare history exported to memory buffer", "status-ok");
         return;
       }
@@ -2839,9 +2897,18 @@ export function App() {
       setCompareSessionTransferStatusText(
         `exported ${Number(compareSessionHistory.length || 0)} history row(s), ${Number(managedCompareReplayPairCount || 0)} managed pair(s), and ${Number(Object.keys(comparePairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) | schema=${COMPARE_SESSION_EXPORT_SCHEMA_VERSION}`
       );
+      setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
+        direction: "export",
+        schemaVersion: COMPARE_SESSION_EXPORT_SCHEMA_VERSION,
+        compatibility: "exact",
+      }));
       setStatus(`compare history exported: schema=${COMPARE_SESSION_EXPORT_SCHEMA_VERSION}`, "status-ok");
     } catch (err) {
       setCompareSessionTransferStatusText(`compare history export failed: ${String(err.message || err)}`);
+      setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
+        direction: "export",
+        failed: true,
+      }));
       setStatus(`compare history export failed: ${String(err.message || err)}`, "status-err");
     }
   }, [
@@ -2878,12 +2945,21 @@ export function App() {
       setCompareSessionTransferStatusText(
         `imported ${Number(imported.history.length || 0)} history row(s) and ${Number(Object.keys(imported.pairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) from ${String(sourceLabel || "text")} | schema=${importSchema.schemaVersion} | compatibility=${importSchema.compatibility}`
       );
+      setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
+        direction: "import",
+        schemaVersion: importSchema.schemaVersion,
+        compatibility: importSchema.compatibility,
+      }));
       setStatus(
         `compare history imported: ${String(sourceLabel || "text")} (schema=${importSchema.schemaVersion}, compatibility=${importSchema.compatibility})`,
         "status-ok"
       );
     } catch (err) {
       setCompareSessionTransferStatusText(`compare history import failed: ${String(err.message || err)}`);
+      setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
+        direction: "import",
+        failed: true,
+      }));
       setStatus(`compare history import failed: ${String(err.message || err)}`, "status-err");
     }
   }, [setStatus]);
@@ -3555,6 +3631,7 @@ export function App() {
         deleteSelectedCompareSessionPair,
         compareSessionImportFileInputRef,
         compareSessionTransferStatusText,
+        compareSessionTransferBadgeRows,
         triggerCompareSessionImportFilePick,
         handleCompareSessionImportFileChange,
         exportCompareSessionHistory,

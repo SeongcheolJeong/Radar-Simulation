@@ -190,6 +190,7 @@ The same area now supports browser-to-browser transfer:
   - restores replayable pairs that were deleted locally, as long as they exist in the imported bundle
   - restores any observed artifact expectation snapshot that was exported with the same replayable pair id
   - the transfer hint now shows `schema` and `compatibility` for the imported bundle
+  - an additional warning badge appears when the imported bundle uses an unknown future schema and Graph Lab falls back to best-effort parsing
 
 Detailed schema and migration policy:
 
