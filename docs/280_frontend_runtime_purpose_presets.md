@@ -331,6 +331,8 @@ The `Runtime Compare` summary inside the brief now also carries:
 
 - `latest_replayable_pair`
 - `selected_history_pair`
+- `compare_history_import_preview`
+  - a compact one-line import-preview summary near the top of the brief so staged import state is visible without scrolling down to the full preview section
 
 ## Current Scope
 

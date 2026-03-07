@@ -2376,6 +2376,16 @@ export function App() {
     () => String(stagedCompareSessionImportSummary?.summaryText || "import_preview: none"),
     [stagedCompareSessionImportSummary]
   );
+  const compareSessionImportPreviewCompactSummaryText = React.useMemo(() => {
+    const summary = String(stagedCompareSessionImportSummary?.summaryText || "import_preview: none").trim();
+    if (!summary || summary === "import_preview: none") {
+      return "compare_history_import_preview: none";
+    }
+    if (summary.startsWith("import_preview:")) {
+      return `compare_history_${summary}`;
+    }
+    return `compare_history_import_preview: ${summary}`;
+  }, [stagedCompareSessionImportSummary]);
   const compareSessionImportPreviewText = React.useMemo(
     () => String(stagedCompareSessionImportSummary?.previewText || "-"),
     [stagedCompareSessionImportSummary]
@@ -3423,7 +3433,7 @@ export function App() {
       `${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `selected_history_pair_preview: ${selectedReplayableCompareSessionPreviewText.split("\n").slice(1).join(" | ")}`,
       `compare_history_transfer: ${String(compareSessionTransferStatusText || "-")}`,
-      `${compareSessionImportPreviewSummaryText}`,
+      `${compareSessionImportPreviewCompactSummaryText}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -3465,7 +3475,7 @@ export function App() {
     runCompareSummary,
     compareRuntimeDiagnostics.badgeLine,
     compareRuntimeSummary.trackLabel,
-    compareSessionImportPreviewSummaryText,
+    compareSessionImportPreviewCompactSummaryText,
     compareSessionTransferStatusText,
     graphRunSummary,
     latestCompareSessionText,
@@ -3517,6 +3527,7 @@ export function App() {
       `- ${selectedReplayableCompareSessionMetaText}`,
       `- ${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `- ${compareSessionRetentionPolicySummaryText}`,
+      `- ${compareSessionImportPreviewCompactSummaryText}`,
       `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `- ${pinnedCompareQuickActionSummaryText}`,
       "",
@@ -3616,6 +3627,7 @@ export function App() {
     compareGraphRunSummary,
     compareRunStatusText,
     compareSessionHistoryText,
+    compareSessionImportPreviewCompactSummaryText,
     compareSessionImportPreviewText,
     compareSessionRetentionPolicySummaryText,
     runCompareSummary,

@@ -946,6 +946,8 @@ def run(args: argparse.Namespace) -> int:
                 brief_text = brief_path.read_text(encoding="utf-8")
                 if "## Runtime Compare" not in brief_text or "compare_runner_status:" not in brief_text:
                     raise AssertionError("decision brief did not include runtime compare summary")
+                if "compare_history_import_preview:" not in brief_text:
+                    raise AssertionError("decision brief did not include compact compare history import preview summary")
                 if "selected_preset_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include selected preset pair summary")
                 if "## Selected Pair Forecast" not in brief_text or "baseline_forecast:" not in brief_text:
