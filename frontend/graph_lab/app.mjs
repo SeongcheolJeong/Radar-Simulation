@@ -52,6 +52,12 @@ const PINNED_COMPARE_QUICK_ACTION_LIMIT = 3;
 const COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO = "fnv1a32_path_text";
 const COMPARE_SESSION_EXPORT_SCHEMA_VERSION = "graph_lab_compare_history_export_v2";
 const COMPARE_SESSION_IMPORT_SCHEMA_LEGACY = "legacy_pre_v2";
+const COMPARE_SESSION_RETENTION_POLICY_DEFAULT = "retain_8";
+const COMPARE_SESSION_RETENTION_POLICY_OPTIONS = [
+  { id: "retain_2", label: "Keep Latest 2" },
+  { id: "retain_4", label: "Keep Latest 4" },
+  { id: "retain_8", label: "Keep Latest 8" },
+];
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -70,6 +76,21 @@ function normalizeDensityMode(value) {
 
 function normalizeCompareSessionField(value, maxLength) {
   return String(value || "").trim().slice(0, Number(maxLength || 160));
+}
+
+function normalizeCompareSessionRetentionPolicy(value, fallback = COMPARE_SESSION_RETENTION_POLICY_DEFAULT) {
+  const token = String(value || "").trim().toLowerCase();
+  if (token === "retain_2" || token === "retain_4" || token === "retain_8") {
+    return token;
+  }
+  return String(fallback || "").trim().toLowerCase();
+}
+
+function getCompareSessionRetentionLimit(policy) {
+  const normalized = normalizeCompareSessionRetentionPolicy(policy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT);
+  if (normalized === "retain_2") return 2;
+  if (normalized === "retain_4") return 4;
+  return COMPARE_SESSION_HISTORY_LIMIT;
 }
 
 function normalizeCompareSessionHistoryEntry(entry, ordinal) {
@@ -439,6 +460,51 @@ function mergeCompareSessionHistoryEntries(existingEntries, importedEntries) {
     .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
 }
 
+function collectCompareSessionReplayPairIds(entries) {
+  return Array.from(new Set(
+    (Array.isArray(entries) ? entries : [])
+      .map((row) => String(getCompareSessionReplayPair(row)?.pairId || "").trim())
+      .filter(Boolean)
+  ));
+}
+
+function buildCompareSessionRetainedState(stateInput) {
+  const row = stateInput && typeof stateInput === "object" ? stateInput : {};
+  const retentionPolicy = normalizeCompareSessionRetentionPolicy(
+    row.retentionPolicy,
+    COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+  );
+  const limit = Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT);
+  const history = (Array.isArray(row.history) ? row.history : [])
+    .map((item, idx) => normalizeCompareSessionHistoryEntry(item, idx))
+    .slice(0, limit);
+  const activePairIds = new Set(collectCompareSessionReplayPairIds(history));
+  const pairMetaById = {};
+  Object.entries(normalizeCompareReplayPairMetaMap(row.pairMetaById)).forEach(([pairId, meta]) => {
+    if (activePairIds.has(pairId)) {
+      pairMetaById[pairId] = meta;
+    }
+  });
+  const pairArtifactExpectationById = {};
+  Object.entries(normalizeCompareArtifactExpectationMap(row.pairArtifactExpectationById)).forEach(([pairId, entry]) => {
+    if (activePairIds.has(pairId)) {
+      pairArtifactExpectationById[pairId] = entry;
+    }
+  });
+  const firstReplayPairId = collectCompareSessionReplayPairIds(history)[0] || "";
+  const selectedReplayPairIdRaw = normalizeCompareSessionField(row.selectedReplayPairId, 192);
+  const selectedReplayPairId = activePairIds.has(selectedReplayPairIdRaw)
+    ? selectedReplayPairIdRaw
+    : firstReplayPairId;
+  return {
+    retentionPolicy,
+    history,
+    pairMetaById,
+    pairArtifactExpectationById,
+    selectedReplayPairId,
+  };
+}
+
 function normalizeCompareSessionImportSchemaVersion(value) {
   const raw = normalizeCompareSessionField(value, 96);
   if (!raw) return COMPARE_SESSION_IMPORT_SCHEMA_LEGACY;
@@ -519,7 +585,8 @@ function buildCompareSessionImportPreviewSummary(
   stagedEntry,
   existingHistoryEntries,
   existingPairMetaById,
-  existingArtifactExpectationById
+  existingArtifactExpectationById,
+  currentRetentionPolicy
 ) {
   const staged = stagedEntry && typeof stagedEntry === "object" ? stagedEntry : null;
   if (!staged || !staged.imported || typeof staged.imported !== "object") {
@@ -530,6 +597,7 @@ function buildCompareSessionImportPreviewSummary(
         "import_preview_source: -",
         "schema_version: -",
         "schema_compatibility: -",
+        `retention_policy(current/imported/effective): ${normalizeCompareSessionRetentionPolicy(currentRetentionPolicy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT)}/-/-`,
         "history_merge(existing/imported/new/overlap/merged): 0/0/0/0/0",
         "pair_meta(existing/imported/merged): 0/0/0",
         "artifact_expectations(existing/imported/merged): 0/0/0",
@@ -544,6 +612,11 @@ function buildCompareSessionImportPreviewSummary(
   const sourceLabel = normalizeCompareSessionField(staged.sourceLabel, 192) || "compare_history.json";
   const imported = staged.imported;
   const importSchema = summarizeCompareSessionSchemaCompatibility(imported.schemaVersion);
+  const effectiveRetentionPolicy = normalizeCompareSessionRetentionPolicy(
+    imported.retentionPolicy || currentRetentionPolicy,
+    COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+  );
+  const importedRetentionPolicy = normalizeCompareSessionRetentionPolicy(imported.retentionPolicy, "");
   const existingHistory = (Array.isArray(existingHistoryEntries) ? existingHistoryEntries : [])
     .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx));
   const importedHistory = (Array.isArray(imported.history) ? imported.history : [])
@@ -567,9 +640,15 @@ function buildCompareSessionImportPreviewSummary(
     ...existingArtifactExpectation,
     ...importedArtifactExpectation,
   };
-
+  const mergedState = buildCompareSessionRetainedState({
+    history: mergedHistory,
+    pairMetaById: mergedPairMeta,
+    pairArtifactExpectationById: mergedArtifactExpectation,
+    selectedReplayPairId: normalizeCompareSessionField(imported.selectedReplayPairId, 192),
+    retentionPolicy: effectiveRetentionPolicy,
+  });
   const selectedReplayPairId = normalizeCompareSessionField(imported.selectedReplayPairId, 192);
-  const mergedReplayOptions = buildCompareSessionReplayOptions(mergedHistory, mergedPairMeta);
+  const mergedReplayOptions = buildCompareSessionReplayOptions(mergedState.history, mergedState.pairMetaById);
   const selectedReplayPairAvailable = selectedReplayPairId
     ? mergedReplayOptions.some((row) => String(row?.id || "") === selectedReplayPairId)
     : false;
@@ -583,13 +662,15 @@ function buildCompareSessionImportPreviewSummary(
       `schema=${importSchema.schemaVersion}`,
       `compatibility=${importSchema.compatibility}`,
       `rows=${Number(importedHistory.length || 0)}`,
+      `retention=${effectiveRetentionPolicy}`,
       "apply_required=true",
     ].join(" | "),
     previewText: [
       `import_preview_source: ${sourceLabel}`,
       `schema_version: ${importSchema.schemaVersion}`,
       `schema_compatibility: ${importSchema.compatibility}`,
-      `history_merge(existing/imported/new/overlap/merged): ${Number(existingHistory.length || 0)}/${Number(importedHistory.length || 0)}/${Number(newHistoryCount || 0)}/${Number(overlapHistoryCount || 0)}/${Number(mergedHistory.length || 0)}`,
+      `retention_policy(current/imported/effective): ${normalizeCompareSessionRetentionPolicy(currentRetentionPolicy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT)}/${importedRetentionPolicy || "unchanged"}/${effectiveRetentionPolicy}`,
+      `history_merge(existing/imported/new/overlap/merged): ${Number(existingHistory.length || 0)}/${Number(importedHistory.length || 0)}/${Number(newHistoryCount || 0)}/${Number(overlapHistoryCount || 0)}/${Number(mergedState.history.length || 0)}`,
       `pair_meta(existing/imported/merged): ${Number(Object.keys(existingPairMeta).length || 0)}/${Number(Object.keys(importedPairMeta).length || 0)}/${Number(Object.keys(mergedPairMeta).length || 0)}`,
       `artifact_expectations(existing/imported/merged): ${Number(Object.keys(existingArtifactExpectation).length || 0)}/${Number(Object.keys(importedArtifactExpectation).length || 0)}/${Number(Object.keys(mergedArtifactExpectation).length || 0)}`,
       `selected_replay_pair(import): ${selectedReplayPairId || "-"}`,
@@ -605,9 +686,14 @@ function buildCompareSessionImportPreviewSummary(
 
 function serializeCompareSessionExportBundle(bundle) {
   const row = bundle && typeof bundle === "object" ? bundle : {};
+  const retentionPolicy = normalizeCompareSessionRetentionPolicy(
+    row.retentionPolicy,
+    COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+  );
   return JSON.stringify({
     schema_version: COMPARE_SESSION_EXPORT_SCHEMA_VERSION,
     exported_at_utc: new Date().toISOString(),
+    retention_policy: retentionPolicy,
     history: (Array.isArray(row.history) ? row.history : [])
       .map((item, idx) => normalizeCompareSessionHistoryEntry(item, idx))
       .slice(0, COMPARE_SESSION_HISTORY_LIMIT),
@@ -624,6 +710,10 @@ function parseCompareSessionImportBundle(text) {
   }
   return {
     schemaVersion: normalizeCompareSessionImportSchemaVersion(parsed.schema_version || parsed.schemaVersion),
+    retentionPolicy: normalizeCompareSessionRetentionPolicy(
+      parsed.retention_policy || parsed.retentionPolicy,
+      ""
+    ),
     history: (Array.isArray(parsed.history) ? parsed.history : [])
       .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
       .slice(0, COMPARE_SESSION_HISTORY_LIMIT),
@@ -641,40 +731,56 @@ function parseCompareSessionImportBundle(text) {
 function loadCompareSessionPrefs() {
   try {
     if (typeof window === "undefined" || !window.localStorage) {
-      return { history: [], selectedReplayPairId: "", pairMetaById: {}, pairArtifactExpectationById: {} };
+      return buildCompareSessionRetainedState({
+        history: [],
+        selectedReplayPairId: "",
+        pairMetaById: {},
+        pairArtifactExpectationById: {},
+        retentionPolicy: COMPARE_SESSION_RETENTION_POLICY_DEFAULT,
+      });
     }
     const raw = String(window.localStorage.getItem(COMPARE_SESSION_STORAGE_KEY) || "").trim();
     if (!raw) {
-      return { history: [], selectedReplayPairId: "", pairMetaById: {}, pairArtifactExpectationById: {} };
+      return buildCompareSessionRetainedState({
+        history: [],
+        selectedReplayPairId: "",
+        pairMetaById: {},
+        pairArtifactExpectationById: {},
+        retentionPolicy: COMPARE_SESSION_RETENTION_POLICY_DEFAULT,
+      });
     }
     const parsed = JSON.parse(raw);
-    const history = (Array.isArray(parsed?.history) ? parsed.history : [])
-      .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
-      .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
-    return {
-      history,
-      selectedReplayPairId: normalizeCompareSessionField(parsed?.selectedReplayPairId, 192),
-      pairMetaById: normalizeCompareReplayPairMetaMap(parsed?.pairMetaById),
-      pairArtifactExpectationById: normalizeCompareArtifactExpectationMap(parsed?.pairArtifactExpectationById),
-    };
+    return buildCompareSessionRetainedState({
+      history: parsed?.history,
+      selectedReplayPairId: parsed?.selectedReplayPairId,
+      pairMetaById: parsed?.pairMetaById,
+      pairArtifactExpectationById: parsed?.pairArtifactExpectationById,
+      retentionPolicy: parsed?.retentionPolicy,
+    });
   } catch (_) {
-    return { history: [], selectedReplayPairId: "", pairMetaById: {}, pairArtifactExpectationById: {} };
+    return buildCompareSessionRetainedState({
+      history: [],
+      selectedReplayPairId: "",
+      pairMetaById: {},
+      pairArtifactExpectationById: {},
+      retentionPolicy: COMPARE_SESSION_RETENTION_POLICY_DEFAULT,
+    });
   }
 }
 
 function saveCompareSessionPrefs(prefs) {
   try {
     if (typeof window === "undefined" || !window.localStorage) return;
-    const payload = prefs && typeof prefs === "object" ? prefs : {};
-    const history = (Array.isArray(payload.history) ? payload.history : [])
-      .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
-      .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
-    const selectedReplayPairId = normalizeCompareSessionField(payload.selectedReplayPairId, 192);
-    const pairMetaById = normalizeCompareReplayPairMetaMap(payload.pairMetaById);
-    const pairArtifactExpectationById = normalizeCompareArtifactExpectationMap(payload.pairArtifactExpectationById);
+    const payload = buildCompareSessionRetainedState(prefs);
     window.localStorage.setItem(
       COMPARE_SESSION_STORAGE_KEY,
-      JSON.stringify({ history, selectedReplayPairId, pairMetaById, pairArtifactExpectationById })
+      JSON.stringify({
+        history: payload.history,
+        selectedReplayPairId: payload.selectedReplayPairId,
+        pairMetaById: payload.pairMetaById,
+        pairArtifactExpectationById: payload.pairArtifactExpectationById,
+        retentionPolicy: payload.retentionPolicy,
+      })
     );
   } catch (_) {
     // localStorage may be blocked; ignore and continue with in-memory state
@@ -1239,6 +1345,9 @@ export function App() {
     buildCompareSessionTransferBadges({ direction: "idle" })
   ));
   const [stagedCompareSessionImport, setStagedCompareSessionImport] = React.useState(null);
+  const [compareSessionRetentionPolicy, setCompareSessionRetentionPolicy] = React.useState(
+    () => initialCompareSessionPrefs.retentionPolicy || COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+  );
   const [compareSessionHistory, setCompareSessionHistory] = React.useState(
     () => initialCompareSessionPrefs.history
   );
@@ -1322,6 +1431,15 @@ export function App() {
     setStatusTone(String(tone || "status-neutral"));
   }, []);
 
+  const applyCompareSessionState = React.useCallback((stateInput) => {
+    const next = buildCompareSessionRetainedState(stateInput);
+    setCompareSessionRetentionPolicy(next.retentionPolicy);
+    setCompareSessionHistory(next.history);
+    setCompareReplayPairMetaById(next.pairMetaById);
+    setComparePairArtifactExpectationById(next.pairArtifactExpectationById);
+    setSelectedCompareReplayPairId(next.selectedReplayPairId);
+  }, []);
+
   const formatContractWarningSnapshot = React.useCallback((snapshot) => {
     const s = snapshot && typeof snapshot === "object" ? snapshot : {};
     const byScope = Array.isArray(s.by_scope) ? s.by_scope : [];
@@ -1351,8 +1469,12 @@ export function App() {
       timestampUtc: new Date().toISOString(),
       ...row,
     };
-    setCompareSessionHistory((prev) => [nextRow, ...(Array.isArray(prev) ? prev : [])].slice(0, COMPARE_SESSION_HISTORY_LIMIT));
-  }, []);
+    setCompareSessionHistory((prev) => (
+      [nextRow, ...(Array.isArray(prev) ? prev : [])]
+        .map((item, idx) => normalizeCompareSessionHistoryEntry(item, idx))
+        .slice(0, getCompareSessionRetentionLimit(compareSessionRetentionPolicy))
+    ));
+  }, [compareSessionRetentionPolicy]);
 
   const resetContractWarnings = React.useCallback(() => {
     resetContractWarningStore();
@@ -2230,17 +2352,23 @@ export function App() {
     () => summarizeCompareSessionHistory(compareSessionHistory, compareReplayPairMetaById),
     [compareReplayPairMetaById, compareSessionHistory]
   );
+  const compareSessionRetentionPolicySummaryText = React.useMemo(
+    () => `compare_history_retention_policy: ${compareSessionRetentionPolicy} | keep_latest=${getCompareSessionRetentionLimit(compareSessionRetentionPolicy)}`,
+    [compareSessionRetentionPolicy]
+  );
   const stagedCompareSessionImportSummary = React.useMemo(
     () => buildCompareSessionImportPreviewSummary(
       stagedCompareSessionImport,
       compareSessionHistory,
       compareReplayPairMetaById,
-      comparePairArtifactExpectationById
+      comparePairArtifactExpectationById,
+      compareSessionRetentionPolicy
     ),
     [
       comparePairArtifactExpectationById,
       compareReplayPairMetaById,
       compareSessionHistory,
+      compareSessionRetentionPolicy,
       stagedCompareSessionImport,
     ]
   );
@@ -2483,11 +2611,39 @@ export function App() {
       pairMetaById: compareReplayPairMetaById,
       pairArtifactExpectationById: comparePairArtifactExpectationById,
       selectedReplayPairId: selectedCompareReplayPairId,
+      retentionPolicy: compareSessionRetentionPolicy,
     });
   }, [
     comparePairArtifactExpectationById,
     compareReplayPairMetaById,
     compareSessionHistory,
+    compareSessionRetentionPolicy,
+    selectedCompareReplayPairId,
+  ]);
+
+  React.useEffect(() => {
+    const normalized = buildCompareSessionRetainedState({
+      history: compareSessionHistory,
+      pairMetaById: compareReplayPairMetaById,
+      pairArtifactExpectationById: comparePairArtifactExpectationById,
+      selectedReplayPairId: selectedCompareReplayPairId,
+      retentionPolicy: compareSessionRetentionPolicy,
+    });
+    const historyChanged = JSON.stringify(normalized.history) !== JSON.stringify(compareSessionHistory);
+    const metaChanged = JSON.stringify(normalized.pairMetaById) !== JSON.stringify(compareReplayPairMetaById || {});
+    const artifactChanged = JSON.stringify(normalized.pairArtifactExpectationById) !== JSON.stringify(comparePairArtifactExpectationById || {});
+    const selectedChanged = String(normalized.selectedReplayPairId || "") !== String(selectedCompareReplayPairId || "");
+    const retentionChanged = String(normalized.retentionPolicy || "") !== String(compareSessionRetentionPolicy || "");
+    if (!historyChanged && !metaChanged && !artifactChanged && !selectedChanged && !retentionChanged) {
+      return;
+    }
+    applyCompareSessionState(normalized);
+  }, [
+    applyCompareSessionState,
+    comparePairArtifactExpectationById,
+    compareReplayPairMetaById,
+    compareSessionHistory,
+    compareSessionRetentionPolicy,
     selectedCompareReplayPairId,
   ]);
 
@@ -2960,22 +3116,70 @@ export function App() {
       setStatus("selected compare session pair id is missing", "status-warn");
       return;
     }
-    setCompareSessionHistory((prev) => (Array.isArray(prev) ? prev : []).filter((row) => {
-      const replayPair = getCompareSessionReplayPair(row);
-      return String(replayPair?.pairId || "") !== pairId;
-    }));
-    setCompareReplayPairMetaById((prev) => {
-      const next = { ...(prev || {}) };
-      delete next[pairId];
-      return next;
-    });
-    setComparePairArtifactExpectationById((prev) => {
-      const next = { ...(prev || {}) };
-      delete next[pairId];
-      return next;
+    const nextMeta = { ...(compareReplayPairMetaById || {}) };
+    const nextArtifactExpectation = { ...(comparePairArtifactExpectationById || {}) };
+    delete nextMeta[pairId];
+    delete nextArtifactExpectation[pairId];
+    applyCompareSessionState({
+      history: (Array.isArray(compareSessionHistory) ? compareSessionHistory : []).filter((row) => {
+        const replayPair = getCompareSessionReplayPair(row);
+        return String(replayPair?.pairId || "") !== pairId;
+      }),
+      pairMetaById: nextMeta,
+      pairArtifactExpectationById: nextArtifactExpectation,
+      selectedReplayPairId: selectedCompareReplayPairId === pairId ? "" : selectedCompareReplayPairId,
+      retentionPolicy: compareSessionRetentionPolicy,
     });
     setStatus(`deleted history pair: ${String(selectedPair.pairLabel || "-")}`, "status-ok");
-  }, [selectedReplayableCompareSession, setStatus]);
+  }, [
+    applyCompareSessionState,
+    comparePairArtifactExpectationById,
+    compareReplayPairMetaById,
+    compareSessionHistory,
+    compareSessionRetentionPolicy,
+    selectedCompareReplayPairId,
+    selectedReplayableCompareSession,
+    setStatus,
+  ]);
+
+  const updateCompareSessionRetentionPolicy = React.useCallback((nextPolicyInput) => {
+    const nextPolicy = normalizeCompareSessionRetentionPolicy(
+      nextPolicyInput,
+      COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+    );
+    applyCompareSessionState({
+      history: compareSessionHistory,
+      pairMetaById: compareReplayPairMetaById,
+      pairArtifactExpectationById: comparePairArtifactExpectationById,
+      selectedReplayPairId: selectedCompareReplayPairId,
+      retentionPolicy: nextPolicy,
+    });
+    setStatus(
+      `compare history retention updated: ${nextPolicy} (keep_latest=${getCompareSessionRetentionLimit(nextPolicy)})`,
+      "status-ok"
+    );
+  }, [
+    applyCompareSessionState,
+    comparePairArtifactExpectationById,
+    compareReplayPairMetaById,
+    compareSessionHistory,
+    selectedCompareReplayPairId,
+    setStatus,
+  ]);
+
+  const clearAllCompareSessionHistory = React.useCallback(() => {
+    applyCompareSessionState({
+      history: [],
+      pairMetaById: {},
+      pairArtifactExpectationById: {},
+      selectedReplayPairId: "",
+      retentionPolicy: compareSessionRetentionPolicy,
+    });
+    setStagedCompareSessionImport(null);
+    setCompareSessionTransferStatusText("compare history cleared");
+    setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({ direction: "idle" }));
+    setStatus("compare history cleared", "status-ok");
+  }, [applyCompareSessionState, compareSessionRetentionPolicy, setStatus]);
 
   const exportCompareSessionHistory = React.useCallback(() => {
     const jsonText = serializeCompareSessionExportBundle({
@@ -2983,6 +3187,7 @@ export function App() {
       pairMetaById: compareReplayPairMetaById,
       pairArtifactExpectationById: comparePairArtifactExpectationById,
       selectedReplayPairId: selectedCompareReplayPairId,
+      retentionPolicy: compareSessionRetentionPolicy,
     });
     try {
       if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
@@ -3026,6 +3231,7 @@ export function App() {
     comparePairArtifactExpectationById,
     compareReplayPairMetaById,
     compareSessionHistory,
+    compareSessionRetentionPolicy,
     managedCompareReplayPairCount,
     selectedCompareReplayPairId,
     setStatus,
@@ -3078,18 +3284,23 @@ export function App() {
       const imported = staged.imported;
       const sourceLabel = normalizeCompareSessionField(staged.sourceLabel, 192) || "text";
       const importSchema = summarizeCompareSessionSchemaCompatibility(imported.schemaVersion);
-      setCompareSessionHistory((prev) => mergeCompareSessionHistoryEntries(prev, imported.history));
-      setCompareReplayPairMetaById((prev) => ({
-        ...(prev && typeof prev === "object" ? prev : {}),
-        ...(imported.pairMetaById || {}),
-      }));
-      setComparePairArtifactExpectationById((prev) => ({
-        ...(prev && typeof prev === "object" ? prev : {}),
-        ...(imported.pairArtifactExpectationById || {}),
-      }));
-      if (String(imported.selectedReplayPairId || "").trim()) {
-        setSelectedCompareReplayPairId(String(imported.selectedReplayPairId || "").trim());
-      }
+      const effectiveRetentionPolicy = normalizeCompareSessionRetentionPolicy(
+        imported.retentionPolicy || compareSessionRetentionPolicy,
+        COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+      );
+      applyCompareSessionState({
+        history: mergeCompareSessionHistoryEntries(compareSessionHistory, imported.history),
+        pairMetaById: {
+          ...(compareReplayPairMetaById && typeof compareReplayPairMetaById === "object" ? compareReplayPairMetaById : {}),
+          ...(imported.pairMetaById || {}),
+        },
+        pairArtifactExpectationById: {
+          ...(comparePairArtifactExpectationById && typeof comparePairArtifactExpectationById === "object" ? comparePairArtifactExpectationById : {}),
+          ...(imported.pairArtifactExpectationById || {}),
+        },
+        selectedReplayPairId: String(imported.selectedReplayPairId || "").trim() || selectedCompareReplayPairId,
+        retentionPolicy: effectiveRetentionPolicy,
+      });
       setStagedCompareSessionImport(null);
       setCompareSessionTransferStatusText(
         `imported ${Number(imported.history.length || 0)} history row(s) and ${Number(Object.keys(imported.pairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) from ${sourceLabel} | schema=${importSchema.schemaVersion} | compatibility=${importSchema.compatibility}`
@@ -3111,7 +3322,16 @@ export function App() {
       }));
       setStatus(`compare history import merge failed: ${String(err.message || err)}`, "status-err");
     }
-  }, [setStatus, stagedCompareSessionImport]);
+  }, [
+    applyCompareSessionState,
+    comparePairArtifactExpectationById,
+    compareReplayPairMetaById,
+    compareSessionHistory,
+    compareSessionRetentionPolicy,
+    selectedCompareReplayPairId,
+    setStatus,
+    stagedCompareSessionImport,
+  ]);
 
   const clearCompareSessionImportPreview = React.useCallback(() => {
     if (!stagedCompareSessionImport) {
@@ -3193,6 +3413,7 @@ export function App() {
       `selected_preset_pair_label: ${trackCompareSelectedPairSummaryText}`,
       `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
       `compare_session_count: ${Number(compareSessionHistory.length || 0)}`,
+      `${compareSessionRetentionPolicySummaryText}`,
       `managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `${pinnedCompareQuickActionSummaryText}`,
       `latest_compare_session: ${latestCompareSessionText}`,
@@ -3238,6 +3459,7 @@ export function App() {
     compareSessionHistory.length,
     compareGraphRunId,
     compareGraphRunSummary,
+    compareSessionRetentionPolicySummaryText,
     managedCompareReplayPairCount,
     pinnedCompareQuickActionSummaryText,
     runCompareSummary,
@@ -3294,6 +3516,7 @@ export function App() {
       `- ${selectedReplayableCompareSessionText}`,
       `- ${selectedReplayableCompareSessionMetaText}`,
       `- ${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
+      `- ${compareSessionRetentionPolicySummaryText}`,
       `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `- ${pinnedCompareQuickActionSummaryText}`,
       "",
@@ -3309,6 +3532,8 @@ export function App() {
       "",
       "## Compare Session History",
       "```text",
+      compareSessionRetentionPolicySummaryText,
+      "",
       compareSessionHistoryText,
       "```",
       "",
@@ -3392,6 +3617,7 @@ export function App() {
     compareRunStatusText,
     compareSessionHistoryText,
     compareSessionImportPreviewText,
+    compareSessionRetentionPolicySummaryText,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
@@ -3801,6 +4027,9 @@ export function App() {
         togglePinSelectedCompareSessionPair,
         deleteSelectedCompareSessionPair,
         compareSessionImportFileInputRef,
+        compareSessionRetentionPolicy,
+        compareSessionRetentionPolicyOptions: COMPARE_SESSION_RETENTION_POLICY_OPTIONS,
+        compareSessionRetentionPolicySummaryText,
         compareSessionTransferStatusText,
         compareSessionTransferBadgeRows,
         hasCompareSessionImportPreview: stagedCompareSessionImportSummary.ready === true,
@@ -3808,6 +4037,8 @@ export function App() {
         compareSessionImportPreviewText,
         triggerCompareSessionImportFilePick,
         handleCompareSessionImportFileChange,
+        updateCompareSessionRetentionPolicy,
+        clearAllCompareSessionHistory,
         applyCompareSessionImportPreview,
         clearCompareSessionImportPreview,
         exportCompareSessionHistory,

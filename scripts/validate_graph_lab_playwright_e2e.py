@@ -17,6 +17,7 @@ import sys
 import tempfile
 import threading
 import time
+import traceback
 import urllib.parse
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -157,6 +158,8 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_artifact_path_hash_checked": False,
             "compare_session_import_preview_checked": False,
             "compare_session_legacy_fixture_checked": False,
+            "compare_session_retention_policy_checked": False,
+            "compare_session_clear_all_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_future_schema_warning_checked": False,
             "compare_session_persistence_checked": False,
@@ -515,7 +518,8 @@ def run(args: argparse.Namespace) -> int:
                 )
                 report["runtime_controls"]["compare_session_replay_checked"] = True
 
-                history_select = history_field.locator("select").first
+                history_retention_select = history_field.locator("select").nth(0)
+                history_select = history_field.locator("select").nth(1)
                 option_count = history_select.locator("option").count()
                 if option_count < 1:
                     raise AssertionError("compare session history selector did not expose any replayable pairs")
@@ -671,6 +675,8 @@ def run(args: argparse.Namespace) -> int:
                 exported_bundle = json.loads(history_bundle_path.read_text(encoding="utf-8"))
                 if str(exported_bundle.get("schema_version") or "") != "graph_lab_compare_history_export_v2":
                     raise AssertionError("compare history export schema_version mismatch")
+                if str(exported_bundle.get("retention_policy") or "") != "retain_8":
+                    raise AssertionError("compare history export did not include retention policy")
                 exported_meta = exported_bundle.get("pair_meta_by_id") or {}
                 if "low_fidelity_radarsimpy_ffd::current_config" not in exported_meta:
                     raise AssertionError("compare history export did not include managed pair metadata")
@@ -948,6 +954,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include pinned quick action summary")
                 if "## Compare Session History" not in brief_text or "source=preset_pair" not in brief_text:
                     raise AssertionError("decision brief did not include compare session history summary")
+                if "compare_history_retention_policy:" not in brief_text:
+                    raise AssertionError("decision brief did not include compare history retention summary")
                 if "## Compare History Import Preview" not in brief_text or "import_preview_source:" not in brief_text:
                     raise AssertionError("decision brief did not include compare history import preview")
                 if "latest_replayable_pair:" not in brief_text:
@@ -1061,7 +1069,7 @@ def run(args: argparse.Namespace) -> int:
                 reloaded_history_field = field_locator(page, "Compare Session History")
                 reloaded_history_field.wait_for(timeout=30_000)
                 page.wait_for_timeout(300)
-                reloaded_history_select = reloaded_history_field.locator("select").first
+                reloaded_history_select = reloaded_history_field.locator("select").nth(1)
                 if reloaded_history_select.input_value() != persisted_pair_value:
                     raise AssertionError("compare session history selector did not persist after reload")
                 reloaded_history_text = reloaded_history_field.inner_text()
@@ -1094,6 +1102,52 @@ def run(args: argparse.Namespace) -> int:
                 if "shape.adc:" in reloaded_artifact_text or "artifact_expectation_source:" in reloaded_artifact_text:
                     raise AssertionError("artifact inspector detail sections unexpectedly reopened after reload")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
+
+                history_retention_select = reloaded_history_field.locator("select").nth(0)
+                reloaded_history_select = reloaded_history_field.locator("select").nth(1)
+                history_retention_select.select_option("retain_2")
+                retention_ok = False
+                retention_text = ""
+                retention_option_count = -1
+                for _ in range(40):
+                    retention_text = reloaded_history_field.inner_text()
+                    retention_option_count = reloaded_history_select.locator("option").count()
+                    if (
+                        "compare_history_retention_policy: retain_2 | keep_latest=2" in retention_text
+                        and retention_option_count <= 2
+                    ):
+                        retention_ok = True
+                        break
+                    page.wait_for_timeout(500)
+                if not retention_ok:
+                    raise AssertionError(
+                        "compare history retention policy did not prune as expected "
+                        f"(option_count={retention_option_count})\n{retention_text}"
+                    )
+                report["runtime_controls"]["compare_session_retention_policy_checked"] = True
+
+                reloaded_history_field.get_by_role("button", name="Clear All History").click()
+                clear_ok = False
+                cleared_history_text = ""
+                cleared_pinned_text = ""
+                for _ in range(40):
+                    cleared_history_text = reloaded_history_field.inner_text()
+                    cleared_pinned_text = reloaded_pinned_quick_field.inner_text()
+                    if (
+                        "compare history cleared" in cleared_history_text
+                        and "compare_history_retention_policy: retain_2 | keep_latest=2" in cleared_history_text
+                        and "no compare sessions recorded" in cleared_history_text
+                        and "pinned_quick_actions: -" in cleared_pinned_text
+                    ):
+                        clear_ok = True
+                        break
+                    page.wait_for_timeout(500)
+                if not clear_ok:
+                    raise AssertionError(
+                        "compare history clear-all did not reset state as expected\n"
+                        f"history:\n{cleared_history_text}\n\npinned:\n{cleared_pinned_text}"
+                    )
+                report["runtime_controls"]["compare_session_clear_all_checked"] = True
 
                 report["playwright_runtime_ready"] = True
                 report["e2e_pass"] = True
@@ -1143,8 +1197,11 @@ def run(args: argparse.Namespace) -> int:
 
         except Exception as exc:
             note = f"{type(exc).__name__}: {exc}"
+            tb_text = traceback.format_exc(limit=8)
             console_tail = debug["console_tail"][-8:]
             page_errors = debug["page_errors"][-8:]
+            if tb_text:
+                note = f"{note}\ntraceback:\n{tb_text.strip()}"
             if console_tail:
                 note = f"{note}\nconsole_tail:\n- " + "\n- ".join(console_tail)
             if page_errors:

@@ -50,6 +50,9 @@ export function DecisionPane({
   togglePinSelectedCompareSessionPair,
   deleteSelectedCompareSessionPair,
   compareSessionImportFileInputRef,
+  compareSessionRetentionPolicy,
+  compareSessionRetentionPolicyOptions,
+  compareSessionRetentionPolicySummaryText,
   compareSessionTransferStatusText,
   compareSessionTransferBadgeRows,
   hasCompareSessionImportPreview,
@@ -57,6 +60,8 @@ export function DecisionPane({
   compareSessionImportPreviewText,
   triggerCompareSessionImportFilePick,
   handleCompareSessionImportFileChange,
+  updateCompareSessionRetentionPolicy,
+  clearAllCompareSessionHistory,
   applyCompareSessionImportPreview,
   clearCompareSessionImportPreview,
   exportCompareSessionHistory,
@@ -211,6 +216,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_compare_session_history_replay_hint" }, String(latestReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_selected_hint" }, String(selectedReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_meta_hint" }, String(selectedReplayableCompareSessionMetaText || "-")),
+      h("div", { className: "hint", key: "decision_compare_session_history_retention_hint" }, String(compareSessionRetentionPolicySummaryText || "-")),
       h("div", { className: "chip-list", key: "decision_compare_session_history_transfer_chips" }, (
         Array.isArray(compareSessionTransferBadgeRows) && compareSessionTransferBadgeRows.length > 0
           ? compareSessionTransferBadgeRows
@@ -234,6 +240,16 @@ export function DecisionPane({
         style: { display: "none" },
         onChange: handleCompareSessionImportFileChange,
       }),
+      h("select", {
+        className: "select",
+        value: String(compareSessionRetentionPolicy || ""),
+        onChange: (e) => updateCompareSessionRetentionPolicy(String(e.target.value || "")),
+      }, (Array.isArray(compareSessionRetentionPolicyOptions) ? compareSessionRetentionPolicyOptions : []).map((row) =>
+        h("option", {
+          key: `decision_compare_history_retention_${String(row?.id || "")}`,
+          value: String(row?.id || ""),
+        }, String(row?.label || row?.id || "-"))
+      )),
       h("select", {
         className: "select",
         value: String(selectedCompareReplayPairId || ""),
@@ -295,6 +311,11 @@ export function DecisionPane({
           onClick: deleteSelectedCompareSessionPair,
           disabled: !canReplaySelectedCompareSession,
         }, "Delete Selected History Pair"),
+        h("button", {
+          className: "btn",
+          key: "decision_clear_all_compare_history",
+          onClick: clearAllCompareSessionHistory,
+        }, "Clear All History"),
       ]),
       h("div", { className: "btn-row", key: "decision_compare_session_history_transfer_row" }, [
         h("button", {

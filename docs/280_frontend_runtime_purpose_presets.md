@@ -182,12 +182,21 @@ Pinned pairs are also promoted into a top-level `Pinned Pair Quick Actions` bloc
 
 The same area now supports browser-to-browser transfer:
 
+- `History Retention`
+  - controls how many compare-session rows are kept in browser state
+  - current policies: `retain_2`, `retain_4`, `retain_8`
+  - pruning also drops replay-pair metadata and artifact expectation snapshots that no longer have a retained history row
+- `Clear All History`
+  - clears compare-session rows, replay-pair metadata, artifact expectation snapshots, and the current staged import preview
+  - keeps the currently selected retention policy unchanged
 - `Export History`
   - downloads a JSON bundle with the recent compare-session rows, selected replayable pair, pair metadata, and pair-scoped artifact expectation snapshots
+  - now also includes the active `retention_policy`
   - the transfer hint now also shows the exported bundle schema version
 - `Import History`
   - stages a previously exported JSON bundle as a dry-run import preview first
   - shows `import_preview`, merge counts, selected replay-pair availability, and imported pair labels before any local state changes
+  - preview also shows `retention_policy(current/imported/effective)`
   - requires `Apply Import Merge` to actually merge the previewed bundle into the current browser profile
   - `Clear Import Preview` discards the staged bundle without changing local history
   - restores replayable pairs that were deleted locally, as long as they exist in the imported bundle

@@ -22,6 +22,7 @@ Graph Lab currently writes a JSON object with these top-level fields:
 
 - `schema_version`
 - `exported_at_utc`
+- `retention_policy`
 - `history`
 - `pair_meta_by_id`
 - `pair_artifact_expectation_by_id`
@@ -31,6 +32,8 @@ Field meaning:
 
 - `history`
   - recent compare-session rows, normalized and capped to the in-app history limit
+- `retention_policy`
+  - active browser retention policy for compare-session history (`retain_2`, `retain_4`, `retain_8`)
 - `pair_meta_by_id`
   - replayable pair metadata such as custom label and `pinned`
 - `pair_artifact_expectation_by_id`
@@ -51,6 +54,7 @@ Accepted input patterns:
 Current normalization behavior:
 
 - missing `schema_version` is normalized to `legacy_pre_v2`
+- missing `retention_policy` leaves the current browser retention policy unchanged on import
 - unknown extra fields are ignored
 - malformed/non-object JSON is rejected
 - history rows are normalized and truncated to the in-app history limit
@@ -100,6 +104,8 @@ Bump `schema_version` only when one of these happens:
 
 Do not bump schema for purely additive optional fields when current import normalization can ignore missing values safely.
 
+`retention_policy` remains in `v2` for this reason: it is additive and legacy bundles continue to import correctly without it.
+
 ## Recommended Upgrade Path
 
 ### `v1/no-version` to `v2`
@@ -130,6 +136,7 @@ Any schema-related change should verify:
 - import round-trip still restores:
   - replayable pairs
   - selected replay pair
+  - retention policy when present
   - pair metadata
   - artifact expectation snapshots
 - browser reload persistence is unaffected
