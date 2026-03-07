@@ -50,10 +50,40 @@ export const RUNTIME_PURPOSE_PRESET_OPTIONS = [
   { id: RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_PO_SBR, label: "High Fidelity: PO-SBR" },
 ];
 
+export const RUNTIME_PURPOSE_QUICK_PAIR_OPTIONS = [
+  {
+    id: "low_to_current",
+    label: "Low -> Current",
+    baselinePresetId: RUNTIME_PURPOSE_PRESET_LOW_FIDELITY,
+    targetPresetId: RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG,
+  },
+  {
+    id: "low_to_sionna",
+    label: "Low -> Sionna",
+    baselinePresetId: RUNTIME_PURPOSE_PRESET_LOW_FIDELITY,
+    targetPresetId: RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_SIONNA,
+  },
+  {
+    id: "low_to_po_sbr",
+    label: "Low -> PO-SBR",
+    baselinePresetId: RUNTIME_PURPOSE_PRESET_LOW_FIDELITY,
+    targetPresetId: RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_PO_SBR,
+  },
+];
+
 export function getRuntimePurposePresetLabel(presetId) {
   const pid = String(presetId || "").trim();
   const row = RUNTIME_PURPOSE_PRESET_OPTIONS.find((item) => String(item.id || "") === pid);
   return String(row?.label || pid || RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG);
+}
+
+export function getRuntimePurposePairLabel(baselinePresetId, targetPresetId, currentConfigLabel) {
+  const baselineLabel = getRuntimePurposePresetLabel(baselinePresetId);
+  const targetId = String(targetPresetId || "").trim();
+  const targetLabel = targetId === RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG
+    ? String(currentConfigLabel || getRuntimePurposePresetLabel(targetId || RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG))
+    : getRuntimePurposePresetLabel(targetId);
+  return `${baselineLabel} -> ${targetLabel}`;
 }
 
 export function buildRuntimePurposePresetOverrides(presetId) {
@@ -125,4 +155,3 @@ export function applyRuntimePurposePreset(presetId, setters) {
   });
   return true;
 }
-

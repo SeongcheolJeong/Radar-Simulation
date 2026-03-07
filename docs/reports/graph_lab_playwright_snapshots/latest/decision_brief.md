@@ -1,17 +1,19 @@
 # Radar Decision Brief
 
-- generated_at_utc: 2026-03-07T09:40:16.753Z
+- generated_at_utc: 2026-03-07T09:47:19.181Z
 - graph_id: radar_minimal_v1
 
 ## Decision Snapshot
 ```text
-generated_at_utc: 2026-03-07T09:40:16.535Z
+generated_at_utc: 2026-03-07T09:47:18.852Z
 decision: ADOPT
 recommendation: adopt_candidate
 baseline_id: playwright_baseline
-current_run_id: grun_20260307_094015_5a245679
-compare_run_id: grun_20260307_094015_b8d742cd
+current_run_id: grun_20260307_094718_e9f109bd
+compare_run_id: grun_20260307_094717_ed8120be
 compare_runner_status: ready
+selected_preset_pair: low_fidelity_radarsimpy_ffd -> current_config
+selected_preset_pair_label: Low Fidelity: RadarSimPy + FFD -> backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
 current_track: backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
 compare_track: backend=radarsimpy_rt | sim=radarsimpy.sim_radar | mux=tdm | ant=isotropic | license=set
 current_runtime: state:ready | sim:auto | license:none
@@ -25,10 +27,12 @@ ra_peak_delta(range/angle): +0/+3
 ```
 
 ## Runtime Compare
+- selected_preset_pair: low_fidelity_radarsimpy_ffd -> current_config
+- selected_preset_pair_label: Low Fidelity: RadarSimPy + FFD -> backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
 - current_track: backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
 - compare_track: backend=radarsimpy_rt | sim=radarsimpy.sim_radar | mux=tdm | ant=isotropic | license=set
-- compare_runner_status: track_compare_runner=ready | mode=preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | target_preset=current_config | compare=grun_20260307_094015_b8d742cd | current=grun_20260307_094015_5a245679
-- compare_status: compare_mode=runner_preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | run=grun_20260307_094015_b8d742cd | status=completed
+- compare_runner_status: track_compare_runner=ready | mode=preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | target_preset=current_config | compare=grun_20260307_094717_ed8120be | current=grun_20260307_094718_e9f109bd
+- compare_status: compare_mode=runner_preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | run=grun_20260307_094717_ed8120be | status=completed
 
 ### Current Runtime Diagnostics
 ```text
@@ -76,22 +80,22 @@ optional_artifact_delta: none
 ```
 
 ## Current Artifacts
-- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_5a245679/graph_run_summary.json
-- radar_map_npz: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_5a245679/output/radar_map.npz
-- adc_cube_npz: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_5a245679/output/adc_cube.npz
-- path_list_json: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_5a245679/output/path_list.json
+- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094718_e9f109bd/graph_run_summary.json
+- radar_map_npz: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094718_e9f109bd/output/radar_map.npz
+- adc_cube_npz: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094718_e9f109bd/output/adc_cube.npz
+- path_list_json: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094718_e9f109bd/output/path_list.json
 
 ## Compare Artifacts
-- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_b8d742cd/graph_run_summary.json
-- radar_map_npz: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_b8d742cd/output/radar_map.npz
-- adc_cube_npz: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_b8d742cd/output/adc_cube.npz
-- path_list_json: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/graph_runs/grun_20260307_094015_b8d742cd/output/path_list.json
+- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094717_ed8120be/graph_run_summary.json
+- radar_map_npz: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094717_ed8120be/output/radar_map.npz
+- adc_cube_npz: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094717_ed8120be/output/adc_cube.npz
+- path_list_json: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/graph_runs/grun_20260307_094717_ed8120be/output/path_list.json
 
 ## Gate Evidence
 - none
 
 ## Regression Session
-- session_id: dssn_1772876416588
+- session_id: dssn_1772876838970
 - session_recommendation: hold_some_candidates
-- export_id: rexp_20260307_094016_b80db57d
-- export_package_json: /tmp/graph_lab_playwright_e2e_xhg3kdqc/store/regression_exports/rexp_20260307_094016_b80db57d/regression_package.json
+- export_id: rexp_20260307_094719_5344626b
+- export_package_json: /tmp/graph_lab_playwright_e2e_pz57rq6w/store/regression_exports/rexp_20260307_094719_5344626b/regression_package.json

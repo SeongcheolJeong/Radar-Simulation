@@ -84,6 +84,11 @@ The Decision Pane now exposes a lightweight operator workflow for low-vs-high tr
   - executes any selected `baseline_preset -> target_preset` pair
   - default is `low_fidelity_radarsimpy_ffd -> current_config`
   - when `target_preset` is not `current_config`, the frontend also applies that preset into the runtime panel so the visible controls match the executed target run
+- quick pair shortcuts
+  - `Low -> Current`
+  - `Low -> Sionna`
+  - `Low -> PO-SBR`
+  - these only change the selected preset pair; they do not run until `Run Preset Pair Compare` is clicked
 - `Run Low -> Current Compare`
   - executes a low-fidelity `radarsimpy_rt` baseline first
   - then runs the current frontend track and pins the low-fidelity result as compare input
@@ -117,6 +122,8 @@ Shortcut:
 4. If the UI reports `track_compare_runner_blocked`, install or expose the `radarsimpy` runtime first.
 
 The Decision Pane also keeps a dedicated `track_compare_status` line so compare-runner state is preserved even after later `Policy Gate`, `Run Session`, or `Export Session` actions update the general decision status.
+
+The preset-pair section also keeps a `selected_pair` summary so the operator can see which two tracks will run before pressing the compare button.
 
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
@@ -177,6 +184,7 @@ This is what allows `Run Low -> Current Compare` and the default `Run Preset Pai
 
 `Export Brief` now includes a `Runtime Compare` section with:
 
+- selected preset pair id/label
 - current/compare track labels
 - stored compare-runner status
 - current runtime diagnostics block

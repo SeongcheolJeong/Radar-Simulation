@@ -31,10 +31,12 @@ import { buildRunCompareSummary } from "./compare_summary.mjs";
 import {
   applyRuntimePurposePreset,
   buildRuntimePurposePresetOverrides,
+  getRuntimePurposePairLabel,
   getRuntimePurposePresetLabel,
   RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG,
   RUNTIME_PURPOSE_PRESET_LOW_FIDELITY,
   RUNTIME_PURPOSE_PRESET_OPTIONS,
+  RUNTIME_PURPOSE_QUICK_PAIR_OPTIONS,
 } from "./runtime_purpose_presets.mjs";
 import { splitTokenList } from "./runtime_overrides.mjs";
 import { useGateOps } from "./hooks/use_gate_ops.mjs";
@@ -1290,6 +1292,23 @@ export function App() {
     setRuntimeRequiredModulesText,
     setRuntimeSimulationMode,
   ]);
+  const applyTrackCompareQuickPair = React.useCallback((row) => {
+    const pair = row && typeof row === "object" ? row : {};
+    setTrackCompareBaselinePresetId(String(pair.baselinePresetId || RUNTIME_PURPOSE_PRESET_LOW_FIDELITY));
+    setTrackCompareTargetPresetId(String(pair.targetPresetId || RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG));
+  }, []);
+  const trackCompareSelectedPairSummaryText = React.useMemo(
+    () => getRuntimePurposePairLabel(
+      trackCompareBaselinePresetId,
+      trackCompareTargetPresetId,
+      configuredRuntimeSummary.trackLabel
+    ),
+    [
+      configuredRuntimeSummary.trackLabel,
+      trackCompareBaselinePresetId,
+      trackCompareTargetPresetId,
+    ]
+  );
 
   const {
     runGraphViaApi,
@@ -1605,6 +1624,8 @@ export function App() {
       `current_run_id: ${currentRunId}`,
       `compare_run_id: ${compareRunId}`,
       `compare_runner_status: ${compareRunnerStatus}`,
+      `selected_preset_pair: ${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+      `selected_preset_pair_label: ${trackCompareSelectedPairSummaryText}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -1646,6 +1667,9 @@ export function App() {
     lastPolicyEval,
     runtimeDiagnostics.badgeLine,
     runtimeSummary.trackLabel,
+    trackCompareBaselinePresetId,
+    trackCompareSelectedPairSummaryText,
+    trackCompareTargetPresetId,
     trackCompareRunnerState,
   ]);
 
@@ -1671,6 +1695,8 @@ export function App() {
       "```",
       "",
       "## Runtime Compare",
+      `- selected_preset_pair: ${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+      `- selected_preset_pair_label: ${trackCompareSelectedPairSummaryText}`,
       `- current_track: ${runtimeSummary.trackLabel}`,
       `- compare_track: ${compareRuntimeSummary.trackLabel}`,
       `- compare_runner_status: ${String(trackCompareRunnerStatusText || "-")}`,
@@ -1751,6 +1777,9 @@ export function App() {
     runtimeDiagnostics.summaryText,
     runtimeSummary.trackLabel,
     setStatus,
+    trackCompareBaselinePresetId,
+    trackCompareSelectedPairSummaryText,
+    trackCompareTargetPresetId,
     trackCompareRunnerStatusText,
   ]);
 
@@ -2102,6 +2131,9 @@ export function App() {
         trackCompareTargetPresetId,
         setTrackCompareTargetPresetId,
         trackComparePresetOptions: RUNTIME_PURPOSE_PRESET_OPTIONS,
+        trackCompareQuickPairOptions: RUNTIME_PURPOSE_QUICK_PAIR_OPTIONS,
+        applyTrackCompareQuickPair,
+        trackCompareSelectedPairSummaryText,
         runPresetPairTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,

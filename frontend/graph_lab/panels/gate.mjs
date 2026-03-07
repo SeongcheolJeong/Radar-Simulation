@@ -18,6 +18,9 @@ export function DecisionPane({
   trackCompareTargetPresetId,
   setTrackCompareTargetPresetId,
   trackComparePresetOptions,
+  trackCompareQuickPairOptions,
+  applyTrackCompareQuickPair,
+  trackCompareSelectedPairSummaryText,
   runPresetPairTrackCompare,
   exportGateReport,
   exportDecisionRegressionSession,
@@ -88,6 +91,14 @@ export function DecisionPane({
           )),
         ]),
       ]),
+      h("div", { className: "btn-row", key: "decision_preset_pair_quick_row" }, (Array.isArray(trackCompareQuickPairOptions) ? trackCompareQuickPairOptions : []).map((row) =>
+        h("button", {
+          className: "btn",
+          key: `decision_quick_pair_${String(row?.id || "")}`,
+          onClick: () => applyTrackCompareQuickPair(row),
+        }, String(row?.label || row?.id || "-"))
+      )),
+      h("div", { className: "hint", key: "decision_preset_pair_selected_hint" }, `selected_pair: ${String(trackCompareSelectedPairSummaryText || "-")}`),
       h("div", { className: "btn-row", key: "decision_preset_pair_row" }, [
         h("button", {
           className: "btn",
