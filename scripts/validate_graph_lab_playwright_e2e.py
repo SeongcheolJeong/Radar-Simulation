@@ -178,6 +178,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_folds_checked": False,
             "artifact_inspector_fold_persistence_checked": False,
             "artifact_inspector_reset_checked": False,
+            "artifact_inspector_layout_status_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -430,6 +431,12 @@ def run(args: argparse.Namespace) -> int:
                 if "compare_assessment:" not in artifact_text or "compare_flags:" not in artifact_text:
                     raise AssertionError("artifact inspector did not render compare assessment")
                 if (
+                    "layout_state: default" not in artifact_text
+                    or "probes=default" not in artifact_text
+                    or "reset_required=no" not in artifact_text
+                ):
+                    raise AssertionError("artifact inspector did not render default layout status")
+                if (
                     "selected history pair artifact expectation:" not in artifact_text
                     or "selected_history_artifact_expectation:" not in artifact_text
                     or "artifact_expectation_source:" not in artifact_text
@@ -443,6 +450,12 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector live compare evidence did not collapse")
                 if "compare_assessment:" not in collapsed_live_artifact_text:
                     raise AssertionError("artifact inspector live compare summary disappeared after collapse")
+                if (
+                    "layout_state: customized" not in collapsed_live_artifact_text
+                    or "live=collapsed" not in collapsed_live_artifact_text
+                    or "reset_required=yes" not in collapsed_live_artifact_text
+                ):
+                    raise AssertionError("artifact inspector collapse did not update layout status")
                 artifact_field.get_by_role("button", name="Show Live Compare Evidence").click()
                 page.wait_for_timeout(150)
                 restored_live_artifact_text = artifact_field.inner_text()
@@ -471,13 +484,16 @@ def run(args: argparse.Namespace) -> int:
                     or "Hide History Snapshot" not in reset_artifact_text
                     or "shape.adc:" not in reset_artifact_text
                     or "artifact_expectation_source:" not in reset_artifact_text
-                    or "layout_state: live=expanded | history=expanded" not in reset_artifact_text
+                    or "layout_state: default" not in reset_artifact_text
+                    or "probes=default" not in reset_artifact_text
+                    or "reset_required=no" not in reset_artifact_text
                 ):
                     raise AssertionError("artifact inspector reset layout did not restore expanded detail state")
                 report["runtime_controls"]["compare_assessment_checked"] = True
                 report["runtime_controls"]["artifact_inspector_expectation_checked"] = True
                 report["runtime_controls"]["artifact_inspector_folds_checked"] = True
                 report["runtime_controls"]["artifact_inspector_reset_checked"] = True
+                report["runtime_controls"]["artifact_inspector_layout_status_checked"] = True
 
                 history_field = field_locator(page, "Compare Session History")
                 history_field.wait_for(timeout=30_000)
@@ -940,7 +956,7 @@ def run(args: argparse.Namespace) -> int:
 
                 page.get_by_role("button", name="Run Session").click()
                 session_ready = False
-                for _ in range(180):
+                for _ in range(240):
                     decision_text = field_locator(page, "Decision Pane").inner_text()
                     if (
                         "regression_session_id=" in decision_text
@@ -1149,6 +1165,13 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector fold controls did not persist after reload")
                 if "shape.adc:" in reloaded_artifact_text or "artifact_expectation_source:" in reloaded_artifact_text:
                     raise AssertionError("artifact inspector detail sections unexpectedly reopened after reload")
+                if (
+                    "layout_state: customized" not in reloaded_artifact_text
+                    or "live=collapsed" not in reloaded_artifact_text
+                    or "history=collapsed" not in reloaded_artifact_text
+                    or "reset_required=yes" not in reloaded_artifact_text
+                ):
+                    raise AssertionError("artifact inspector persisted fold state did not update layout status")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")

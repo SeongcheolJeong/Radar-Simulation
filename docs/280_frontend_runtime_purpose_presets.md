@@ -283,6 +283,10 @@ It now also mirrors the currently selected history pair's artifact expectation s
   - collapses or restores the selected history pair snapshot while keeping the selected pair and summary line visible
 - `Reset Layout`
   - restores both fold sections to their default expanded state and clears the probe cursor/peak-lock controls back to their default values
+- `layout_state`
+  - reports whether the Artifact Inspector is in `default` or `customized` state
+  - includes current fold layout (`live`, `history`), probe-control status (`probes=default/customized`), and `reset_required=yes/no`
+  - updates immediately when either fold visibility or probe inputs drift from the default snapshot
 
 Those fold preferences now persist in browser `localStorage`, so a reload keeps the `Artifact Inspector` in the same collapsed/expanded state on the same machine/browser profile.
 

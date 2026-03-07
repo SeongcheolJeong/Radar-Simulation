@@ -53,6 +53,21 @@ function safeShapeLabel(shape) {
   return Array.isArray(shape) && shape.length > 0 ? shape.join("x") : "-";
 }
 
+function buildDefaultArtifactInspectorProbeState(rdPeaks, raPeaks) {
+  const primaryRd = Array.isArray(rdPeaks) && rdPeaks.length > 0 ? rdPeaks[0] : null;
+  const primaryRa = Array.isArray(raPeaks) && raPeaks.length > 0 ? raPeaks[0] : null;
+  return {
+    rdRangeBinText: String(primaryRd ? primaryRd.col : 0),
+    rdDopplerBinText: String(primaryRd ? primaryRd.row : 0),
+    raRangeBinText: String(primaryRa ? primaryRa.col : 0),
+    raAngleBinText: String(primaryRa ? primaryRa.row : 0),
+    rdPeakSelectText: primaryRd ? "0" : "-1",
+    raPeakSelectText: primaryRa ? "0" : "-1",
+    rdPeakLock: false,
+    raPeakLock: false,
+  };
+}
+
 function computeProbe(peaks, rowBin, colBin, shape) {
   const rows = Number(shape?.[0] || 0);
   const cols = Number(shape?.[1] || 0);
@@ -148,19 +163,21 @@ export function ArtifactInspectorPanel({
   const historyArtifactExpectationExpanded = normalizeArtifactInspectorPrefs(
     artifactInspectorPrefs
   ).historyArtifactExpectationExpanded;
+  const defaultProbeState = React.useMemo(
+    () => buildDefaultArtifactInspectorProbeState(rdPeaks, raPeaks),
+    [raPeaks, rdPeaks]
+  );
 
   const resetArtifactInspectorProbeControls = React.useCallback(() => {
-    const primaryRd = rdPeaks[0] || null;
-    const primaryRa = raPeaks[0] || null;
-    setRdRangeBinText(String(primaryRd ? primaryRd.col : 0));
-    setRdDopplerBinText(String(primaryRd ? primaryRd.row : 0));
-    setRaRangeBinText(String(primaryRa ? primaryRa.col : 0));
-    setRaAngleBinText(String(primaryRa ? primaryRa.row : 0));
-    setRdPeakSelectText(primaryRd ? "0" : "-1");
-    setRaPeakSelectText(primaryRa ? "0" : "-1");
-    setRdPeakLock(false);
-    setRaPeakLock(false);
-  }, [raPeaks, rdPeaks]);
+    setRdRangeBinText(defaultProbeState.rdRangeBinText);
+    setRdDopplerBinText(defaultProbeState.rdDopplerBinText);
+    setRaRangeBinText(defaultProbeState.raRangeBinText);
+    setRaAngleBinText(defaultProbeState.raAngleBinText);
+    setRdPeakSelectText(defaultProbeState.rdPeakSelectText);
+    setRaPeakSelectText(defaultProbeState.raPeakSelectText);
+    setRdPeakLock(defaultProbeState.rdPeakLock);
+    setRaPeakLock(defaultProbeState.raPeakLock);
+  }, [defaultProbeState]);
 
   React.useEffect(() => {
     resetArtifactInspectorProbeControls();
@@ -217,6 +234,33 @@ export function ArtifactInspectorPanel({
   const selectedHistoryArtifactExpectationSummaryLine = String(
     selectedReplayableCompareSessionArtifactExpectationSummaryText || "selected_history_artifact_expectation: -"
   );
+  const artifactInspectorLayoutStateText = React.useMemo(() => {
+    const foldsDefault = liveCompareEvidenceExpanded === true && historyArtifactExpectationExpanded === true;
+    const probesDefault = (
+      String(rdRangeBinText || "") === String(defaultProbeState.rdRangeBinText || "")
+      && String(rdDopplerBinText || "") === String(defaultProbeState.rdDopplerBinText || "")
+      && String(raRangeBinText || "") === String(defaultProbeState.raRangeBinText || "")
+      && String(raAngleBinText || "") === String(defaultProbeState.raAngleBinText || "")
+      && String(rdPeakSelectText || "") === String(defaultProbeState.rdPeakSelectText || "")
+      && String(raPeakSelectText || "") === String(defaultProbeState.raPeakSelectText || "")
+      && rdPeakLock === Boolean(defaultProbeState.rdPeakLock)
+      && raPeakLock === Boolean(defaultProbeState.raPeakLock)
+    );
+    const overallState = foldsDefault && probesDefault ? "default" : "customized";
+    return `layout_state: ${overallState} | live=${liveCompareEvidenceExpanded ? "expanded" : "collapsed"} | history=${historyArtifactExpectationExpanded ? "expanded" : "collapsed"} | probes=${probesDefault ? "default" : "customized"} | reset_required=${overallState === "default" ? "no" : "yes"}`;
+  }, [
+    defaultProbeState,
+    historyArtifactExpectationExpanded,
+    liveCompareEvidenceExpanded,
+    raAngleBinText,
+    raPeakLock,
+    raPeakSelectText,
+    raRangeBinText,
+    rdDopplerBinText,
+    rdPeakLock,
+    rdPeakSelectText,
+    rdRangeBinText,
+  ]);
   const toggleLiveCompareEvidenceExpanded = React.useCallback(() => {
     setArtifactInspectorPrefs((prev) => {
       const next = normalizeArtifactInspectorPrefs(prev);
@@ -275,7 +319,7 @@ export function ArtifactInspectorPanel({
       h("div", {
         key: "layout_state",
         style: { color: "#8fb3c9" },
-      }, `layout_state: live=${liveCompareEvidenceExpanded ? "expanded" : "collapsed"} | history=${historyArtifactExpectationExpanded ? "expanded" : "collapsed"}`),
+      }, artifactInspectorLayoutStateText),
       h("button", {
         key: "reset_artifact_inspector_layout",
         className: "btn",
