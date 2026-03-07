@@ -169,6 +169,15 @@ function buildArtifactInspectorRecentActionsText(entries) {
   return `recent_actions: ${rows.map((entry) => `[${entry}]`).join(" ")}`;
 }
 
+function extractArtifactInspectorActionSeq(entry) {
+  const text = String(entry || "").trim();
+  const match = /^seq=(\d+)\b/i.exec(text);
+  if (!match) return null;
+  const value = Number(match[1]);
+  if (!Number.isFinite(value) || value < 0) return null;
+  return Math.floor(value);
+}
+
 function buildArtifactInspectorAuditSummaryText(value) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   const retained = Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries.length : 0;
@@ -199,6 +208,20 @@ function buildArtifactInspectorAuditCapacityText(value) {
   const trimmed = Math.max(0, total - retained);
   const headroom = Math.max(0, ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT - retained);
   return `audit_capacity: retained_limit=${ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT} | retained=${retained} | total=${total} | headroom=${headroom} | overflow=${trimmed > 0 ? "yes" : "no"}`;
+}
+
+function buildArtifactInspectorAuditWindowText(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const seqs = (Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries : [])
+    .map((entry) => extractArtifactInspectorActionSeq(entry))
+    .filter((entry) => Number.isFinite(entry));
+  if (seqs.length <= 0) {
+    return "audit_window: retained_seqs=none | newest=0 | oldest=0 | lost_before=0 | coverage=empty";
+  }
+  const newest = Math.max(...seqs);
+  const oldest = Math.min(...seqs);
+  const lostBefore = Math.max(0, oldest - 1);
+  return `audit_window: retained_seqs=${oldest}..${newest} | newest=${newest} | oldest=${oldest} | lost_before=${lostBefore} | coverage=${lostBefore > 0 ? "tail_only" : "full"}`;
 }
 
 function clearArtifactInspectorActionTrailState(value) {
@@ -461,6 +484,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorAuditCapacityText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditWindowText = React.useMemo(
+    () => buildArtifactInspectorAuditWindowText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -475,11 +502,13 @@ export function ArtifactInspectorPanel({
       recentActionsText: artifactInspectorRecentActionsText,
       auditStateText: artifactInspectorAuditStateText,
       auditCapacityText: artifactInspectorAuditCapacityText,
+      auditWindowText: artifactInspectorAuditWindowText,
       auditSummaryText: artifactInspectorAuditSummaryText,
     });
   }, [
     artifactInspectorAuditCapacityText,
     artifactInspectorAuditStateText,
+    artifactInspectorAuditWindowText,
     artifactInspectorAuditSummaryText,
     artifactInspectorLayoutStateText,
     artifactInspectorLastActionText,
@@ -624,6 +653,10 @@ export function ArtifactInspectorPanel({
           key: "audit_capacity",
           style: { color: "#8fb3c9" },
         }, artifactInspectorAuditCapacityText),
+        h("div", {
+          key: "audit_window",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditWindowText),
         h("div", {
           key: "audit_summary",
           style: { color: "#8fb3c9" },

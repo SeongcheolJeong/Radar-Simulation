@@ -372,6 +372,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_recent_actions`
 - `artifact_inspector_audit_state`
 - `artifact_inspector_audit_capacity`
+- `artifact_inspector_audit_window`
 - `artifact_inspector_audit_summary`
 
 The `Decision Pane` now mirrors that live state as a chip row plus compact hint lines under `Inspector State Mirror`, and includes:
@@ -394,6 +395,7 @@ Those mirror controls are now also state-aware:
 - the mirror also exports `artifact_inspector_recent_actions:` so the newest three inspector actions remain visible as a short audit trail
 - the mirror also exports `artifact_inspector_audit_state:` so operators can see whether the ring buffer is idle, actively tracking, or already trimmed
 - the mirror also exports `artifact_inspector_audit_capacity:` so operators can see retained-limit usage, remaining headroom, and whether overflow is already happening
+- the mirror also exports `artifact_inspector_audit_window:` so operators can see which retained seq window is still present and how many earlier seqs were already lost
 - the mirror also exports `artifact_inspector_audit_summary:` with `total / retained / trimmed / next_seq / state` so operators can see full trail volume, the retained ring buffer size, and the next sequence number without parsing raw history
 - the mirror also exports `artifact_inspector_audit_controls:` with `recommended` and `reason` so brief/export readers can tell whether clearing is optional, unnecessary, or specifically recommended because the ring buffer trimmed older actions
 - the inspector status badges now also carry `audit:idle`, `audit:tracking`, or `audit:trimmed` so overflow is visible without reading the text summary
