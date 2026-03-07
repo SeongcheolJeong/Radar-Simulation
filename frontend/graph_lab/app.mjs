@@ -104,6 +104,57 @@ export function App() {
   const [runtimeRxFfdFilesText, setRuntimeRxFfdFilesText] = React.useState(
     String(params.get("runtime_rx_ffd_files") || "")
   );
+  const [runtimeMitsubaEgoOriginText, setRuntimeMitsubaEgoOriginText] = React.useState(
+    String(params.get("runtime_mitsuba_ego_origin") || "")
+  );
+  const [runtimeMitsubaChirpIntervalText, setRuntimeMitsubaChirpIntervalText] = React.useState(
+    String(params.get("runtime_mitsuba_chirp_interval") || "")
+  );
+  const [runtimeMitsubaMinRangeText, setRuntimeMitsubaMinRangeText] = React.useState(
+    String(params.get("runtime_mitsuba_min_range") || "")
+  );
+  const [runtimeMitsubaSpheresJson, setRuntimeMitsubaSpheresJson] = React.useState(
+    String(params.get("runtime_mitsuba_spheres_json") || "")
+  );
+  const [runtimePoSbrRepoRoot, setRuntimePoSbrRepoRoot] = React.useState(
+    String(params.get("runtime_po_sbr_repo_root") || "")
+  );
+  const [runtimePoSbrGeometryPath, setRuntimePoSbrGeometryPath] = React.useState(
+    String(params.get("runtime_po_sbr_geometry_path") || "")
+  );
+  const [runtimePoSbrChirpIntervalText, setRuntimePoSbrChirpIntervalText] = React.useState(
+    String(params.get("runtime_po_sbr_chirp_interval") || "")
+  );
+  const [runtimePoSbrBouncesText, setRuntimePoSbrBouncesText] = React.useState(
+    String(params.get("runtime_po_sbr_bounces") || "")
+  );
+  const [runtimePoSbrRaysPerLambdaText, setRuntimePoSbrRaysPerLambdaText] = React.useState(
+    String(params.get("runtime_po_sbr_rays_per_lambda") || "")
+  );
+  const [runtimePoSbrAlphaDegText, setRuntimePoSbrAlphaDegText] = React.useState(
+    String(params.get("runtime_po_sbr_alpha_deg") || "")
+  );
+  const [runtimePoSbrPhiDegText, setRuntimePoSbrPhiDegText] = React.useState(
+    String(params.get("runtime_po_sbr_phi_deg") || "")
+  );
+  const [runtimePoSbrThetaDegText, setRuntimePoSbrThetaDegText] = React.useState(
+    String(params.get("runtime_po_sbr_theta_deg") || "")
+  );
+  const [runtimePoSbrRadialVelocityText, setRuntimePoSbrRadialVelocityText] = React.useState(
+    String(params.get("runtime_po_sbr_radial_velocity") || "")
+  );
+  const [runtimePoSbrMinRangeText, setRuntimePoSbrMinRangeText] = React.useState(
+    String(params.get("runtime_po_sbr_min_range") || "")
+  );
+  const [runtimePoSbrMaterialTag, setRuntimePoSbrMaterialTag] = React.useState(
+    String(params.get("runtime_po_sbr_material_tag") || "")
+  );
+  const [runtimePoSbrPathIdPrefix, setRuntimePoSbrPathIdPrefix] = React.useState(
+    String(params.get("runtime_po_sbr_path_id_prefix") || "")
+  );
+  const [runtimePoSbrComponentsJson, setRuntimePoSbrComponentsJson] = React.useState(
+    String(params.get("runtime_po_sbr_components_json") || "")
+  );
   const [compareGraphRunId, setCompareGraphRunId] = React.useState(
     String(params.get("compare_run_id") || "")
   );
@@ -892,6 +943,23 @@ export function App() {
     runtimeLicenseFile,
     runtimeTxFfdFilesText,
     runtimeRxFfdFilesText,
+    runtimeMitsubaEgoOriginText,
+    runtimeMitsubaChirpIntervalText,
+    runtimeMitsubaMinRangeText,
+    runtimeMitsubaSpheresJson,
+    runtimePoSbrRepoRoot,
+    runtimePoSbrGeometryPath,
+    runtimePoSbrChirpIntervalText,
+    runtimePoSbrBouncesText,
+    runtimePoSbrRaysPerLambdaText,
+    runtimePoSbrAlphaDegText,
+    runtimePoSbrPhiDegText,
+    runtimePoSbrThetaDegText,
+    runtimePoSbrRadialVelocityText,
+    runtimePoSbrMinRangeText,
+    runtimePoSbrMaterialTag,
+    runtimePoSbrPathIdPrefix,
+    runtimePoSbrComponentsJson,
     nodes,
     edges,
     runMode,
@@ -1295,6 +1363,23 @@ export function App() {
       runtimeLicenseFile,
       runtimeTxFfdFilesText,
       runtimeRxFfdFilesText,
+      runtimeMitsubaEgoOriginText,
+      runtimeMitsubaChirpIntervalText,
+      runtimeMitsubaMinRangeText,
+      runtimeMitsubaSpheresJson,
+      runtimePoSbrRepoRoot,
+      runtimePoSbrGeometryPath,
+      runtimePoSbrChirpIntervalText,
+      runtimePoSbrBouncesText,
+      runtimePoSbrRaysPerLambdaText,
+      runtimePoSbrAlphaDegText,
+      runtimePoSbrPhiDegText,
+      runtimePoSbrThetaDegText,
+      runtimePoSbrRadialVelocityText,
+      runtimePoSbrMinRangeText,
+      runtimePoSbrMaterialTag,
+      runtimePoSbrPathIdPrefix,
+      runtimePoSbrComponentsJson,
       runtimeStatusLine: runtimeSummary.runtimeStatusLine,
       runMode,
       autoPollAsyncRun,
@@ -1326,6 +1411,23 @@ export function App() {
       setRuntimeLicenseFile,
       setRuntimeTxFfdFilesText,
       setRuntimeRxFfdFilesText,
+      setRuntimeMitsubaEgoOriginText,
+      setRuntimeMitsubaChirpIntervalText,
+      setRuntimeMitsubaMinRangeText,
+      setRuntimeMitsubaSpheresJson,
+      setRuntimePoSbrRepoRoot,
+      setRuntimePoSbrGeometryPath,
+      setRuntimePoSbrChirpIntervalText,
+      setRuntimePoSbrBouncesText,
+      setRuntimePoSbrRaysPerLambdaText,
+      setRuntimePoSbrAlphaDegText,
+      setRuntimePoSbrPhiDegText,
+      setRuntimePoSbrThetaDegText,
+      setRuntimePoSbrRadialVelocityText,
+      setRuntimePoSbrMinRangeText,
+      setRuntimePoSbrMaterialTag,
+      setRuntimePoSbrPathIdPrefix,
+      setRuntimePoSbrComponentsJson,
       setRunMode,
       setAutoPollAsyncRun,
       setPollIntervalMsText,
@@ -1375,6 +1477,23 @@ export function App() {
     runtimeLicenseFile,
     runtimeTxFfdFilesText,
     runtimeRxFfdFilesText,
+    runtimeMitsubaEgoOriginText,
+    runtimeMitsubaChirpIntervalText,
+    runtimeMitsubaMinRangeText,
+    runtimeMitsubaSpheresJson,
+    runtimePoSbrRepoRoot,
+    runtimePoSbrGeometryPath,
+    runtimePoSbrChirpIntervalText,
+    runtimePoSbrBouncesText,
+    runtimePoSbrRaysPerLambdaText,
+    runtimePoSbrAlphaDegText,
+    runtimePoSbrPhiDegText,
+    runtimePoSbrThetaDegText,
+    runtimePoSbrRadialVelocityText,
+    runtimePoSbrMinRangeText,
+    runtimePoSbrMaterialTag,
+    runtimePoSbrPathIdPrefix,
+    runtimePoSbrComponentsJson,
     runtimeSummary.runtimeStatusLine,
     runMode,
     autoPollAsyncRun,

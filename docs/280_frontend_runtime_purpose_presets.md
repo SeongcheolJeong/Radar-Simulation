@@ -20,14 +20,17 @@ The runtime panel now exposes three preset buttons:
 - `High Fidelity: Sionna-style RT`
   - backend: `sionna_rt`
   - runtime provider: `avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba`
-  - required modules: `mitsuba`
+  - required modules: `mitsuba,drjit`
   - simulation mode: `auto`
   - device hint: `gpu`
+  - advanced sample: fills `ego_origin_m`, `chirp_interval_s`, `min_range_m`, and a non-empty `spheres` JSON array
 - `High Fidelity: PO-SBR`
   - backend: `po_sbr_rt`
   - runtime provider: `avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr`
+  - required modules: `rtxpy,igl`
   - simulation mode: `auto`
   - device hint: `gpu`
+  - advanced sample: fills repo/geometry defaults plus `bounces`, `rays_per_lambda`, angle defaults, and optional `components` JSON
 
 ## FFD Inputs
 
@@ -37,6 +40,23 @@ The runtime panel now accepts:
 - `RX FFD Files (comma/newline)`
 
 These are emitted into `scene_overrides.backend.tx_ffd_files` and `scene_overrides.backend.rx_ffd_files`.
+
+## Advanced Controls
+
+The runtime panel now exposes provider-specific advanced sections when the selected backend/provider matches:
+
+- `Sionna-style RT Advanced`
+  - `Mitsuba Ego Origin`
+  - `Mitsuba Chirp Interval`
+  - `Mitsuba Min Range`
+  - `Mitsuba Spheres JSON`
+- `PO-SBR Advanced`
+  - `PO-SBR Repo Root`
+  - `PO-SBR Geometry Path`
+  - chirp/bounce/rays and angle controls
+  - `PO-SBR Components JSON`
+
+The purpose preset buttons also load sample values for these sections so a user does not start from an invalid empty runtime payload.
 
 ## Backend Behavior
 

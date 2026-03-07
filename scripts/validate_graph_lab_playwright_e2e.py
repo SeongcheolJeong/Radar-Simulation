@@ -124,6 +124,7 @@ def run(args: argparse.Namespace) -> int:
         "runtime_controls": {
             "purpose_presets_checked": [],
             "ffd_fields_present": False,
+            "advanced_controls_checked": [],
         },
         "artifacts": {},
         "status": "unknown",
@@ -240,6 +241,16 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("sionna preset did not set runtime device to gpu")
                 report["runtime_controls"]["purpose_presets_checked"].append("high_fidelity_sionna_rt")
 
+                mitsuba_ego_origin = field_locator(page, "Mitsuba Ego Origin").locator("input")
+                mitsuba_spheres = field_locator(page, "Mitsuba Spheres JSON").locator("textarea")
+                mitsuba_ego_origin.wait_for(timeout=30_000)
+                mitsuba_spheres.wait_for(timeout=30_000)
+                if mitsuba_ego_origin.input_value() != "0,0,0":
+                    raise AssertionError("sionna preset did not load Mitsuba ego origin sample")
+                if "center_m" not in mitsuba_spheres.input_value():
+                    raise AssertionError("sionna preset did not load Mitsuba spheres sample")
+                report["runtime_controls"]["advanced_controls_checked"].append("sionna_rt")
+
                 page.get_by_role("button", name="High Fidelity: PO-SBR").click()
                 page.wait_for_timeout(100)
                 if runtime_backend_select.input_value() != "po_sbr_rt":
@@ -249,6 +260,20 @@ def run(args: argparse.Namespace) -> int:
                 if runtime_device_select.input_value() != "gpu":
                     raise AssertionError("po-sbr preset did not set runtime device to gpu")
                 report["runtime_controls"]["purpose_presets_checked"].append("high_fidelity_po_sbr_rt")
+
+                po_sbr_repo_root = field_locator(page, "PO-SBR Repo Root").locator("input")
+                po_sbr_geometry_path = field_locator(page, "PO-SBR Geometry Path").locator("input")
+                po_sbr_components = field_locator(page, "PO-SBR Components JSON").locator("textarea")
+                po_sbr_repo_root.wait_for(timeout=30_000)
+                po_sbr_geometry_path.wait_for(timeout=30_000)
+                po_sbr_components.wait_for(timeout=30_000)
+                if po_sbr_repo_root.input_value() != "external/PO-SBR-Python":
+                    raise AssertionError("po-sbr preset did not load repo root sample")
+                if po_sbr_geometry_path.input_value() != "geometries/plate.obj":
+                    raise AssertionError("po-sbr preset did not load geometry path sample")
+                if "po_lane_left" not in po_sbr_components.input_value():
+                    raise AssertionError("po-sbr preset did not load components sample")
+                report["runtime_controls"]["advanced_controls_checked"].append("po_sbr_rt")
 
                 tx_ffd_area.fill("/tmp/tx0.ffd\n/tmp/tx1.ffd")
                 rx_ffd_area.fill("/tmp/rx0.ffd\n/tmp/rx1.ffd")

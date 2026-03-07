@@ -161,6 +161,23 @@ export function resetContractWarnings() {
  * @property {string} runtimeLicenseFile
  * @property {string} runtimeTxFfdFilesText
  * @property {string} runtimeRxFfdFilesText
+ * @property {string} runtimeMitsubaEgoOriginText
+ * @property {string} runtimeMitsubaChirpIntervalText
+ * @property {string} runtimeMitsubaMinRangeText
+ * @property {string} runtimeMitsubaSpheresJson
+ * @property {string} runtimePoSbrRepoRoot
+ * @property {string} runtimePoSbrGeometryPath
+ * @property {string} runtimePoSbrChirpIntervalText
+ * @property {string} runtimePoSbrBouncesText
+ * @property {string} runtimePoSbrRaysPerLambdaText
+ * @property {string} runtimePoSbrAlphaDegText
+ * @property {string} runtimePoSbrPhiDegText
+ * @property {string} runtimePoSbrThetaDegText
+ * @property {string} runtimePoSbrRadialVelocityText
+ * @property {string} runtimePoSbrMinRangeText
+ * @property {string} runtimePoSbrMaterialTag
+ * @property {string} runtimePoSbrPathIdPrefix
+ * @property {string} runtimePoSbrComponentsJson
  * @property {string} runtimeStatusLine
  * @property {string} runMode
  * @property {boolean} autoPollAsyncRun
@@ -225,6 +242,23 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       runtimeLicenseFile: readString(scope, values, "runtimeLicenseFile", ""),
       runtimeTxFfdFilesText: readString(scope, values, "runtimeTxFfdFilesText", ""),
       runtimeRxFfdFilesText: readString(scope, values, "runtimeRxFfdFilesText", ""),
+      runtimeMitsubaEgoOriginText: readString(scope, values, "runtimeMitsubaEgoOriginText", ""),
+      runtimeMitsubaChirpIntervalText: readString(scope, values, "runtimeMitsubaChirpIntervalText", ""),
+      runtimeMitsubaMinRangeText: readString(scope, values, "runtimeMitsubaMinRangeText", ""),
+      runtimeMitsubaSpheresJson: readString(scope, values, "runtimeMitsubaSpheresJson", ""),
+      runtimePoSbrRepoRoot: readString(scope, values, "runtimePoSbrRepoRoot", ""),
+      runtimePoSbrGeometryPath: readString(scope, values, "runtimePoSbrGeometryPath", ""),
+      runtimePoSbrChirpIntervalText: readString(scope, values, "runtimePoSbrChirpIntervalText", ""),
+      runtimePoSbrBouncesText: readString(scope, values, "runtimePoSbrBouncesText", ""),
+      runtimePoSbrRaysPerLambdaText: readString(scope, values, "runtimePoSbrRaysPerLambdaText", ""),
+      runtimePoSbrAlphaDegText: readString(scope, values, "runtimePoSbrAlphaDegText", ""),
+      runtimePoSbrPhiDegText: readString(scope, values, "runtimePoSbrPhiDegText", ""),
+      runtimePoSbrThetaDegText: readString(scope, values, "runtimePoSbrThetaDegText", ""),
+      runtimePoSbrRadialVelocityText: readString(scope, values, "runtimePoSbrRadialVelocityText", ""),
+      runtimePoSbrMinRangeText: readString(scope, values, "runtimePoSbrMinRangeText", ""),
+      runtimePoSbrMaterialTag: readString(scope, values, "runtimePoSbrMaterialTag", ""),
+      runtimePoSbrPathIdPrefix: readString(scope, values, "runtimePoSbrPathIdPrefix", ""),
+      runtimePoSbrComponentsJson: readString(scope, values, "runtimePoSbrComponentsJson", ""),
       runtimeStatusLine: readString(scope, values, "runtimeStatusLine", "-"),
       runMode: readString(scope, values, "runMode", "sync"),
       autoPollAsyncRun: readBoolean(scope, values, "autoPollAsyncRun", true),
@@ -256,6 +290,23 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       setRuntimeLicenseFile: readFunction(scope, setters, "setRuntimeLicenseFile"),
       setRuntimeTxFfdFilesText: readFunction(scope, setters, "setRuntimeTxFfdFilesText"),
       setRuntimeRxFfdFilesText: readFunction(scope, setters, "setRuntimeRxFfdFilesText"),
+      setRuntimeMitsubaEgoOriginText: readFunction(scope, setters, "setRuntimeMitsubaEgoOriginText"),
+      setRuntimeMitsubaChirpIntervalText: readFunction(scope, setters, "setRuntimeMitsubaChirpIntervalText"),
+      setRuntimeMitsubaMinRangeText: readFunction(scope, setters, "setRuntimeMitsubaMinRangeText"),
+      setRuntimeMitsubaSpheresJson: readFunction(scope, setters, "setRuntimeMitsubaSpheresJson"),
+      setRuntimePoSbrRepoRoot: readFunction(scope, setters, "setRuntimePoSbrRepoRoot"),
+      setRuntimePoSbrGeometryPath: readFunction(scope, setters, "setRuntimePoSbrGeometryPath"),
+      setRuntimePoSbrChirpIntervalText: readFunction(scope, setters, "setRuntimePoSbrChirpIntervalText"),
+      setRuntimePoSbrBouncesText: readFunction(scope, setters, "setRuntimePoSbrBouncesText"),
+      setRuntimePoSbrRaysPerLambdaText: readFunction(scope, setters, "setRuntimePoSbrRaysPerLambdaText"),
+      setRuntimePoSbrAlphaDegText: readFunction(scope, setters, "setRuntimePoSbrAlphaDegText"),
+      setRuntimePoSbrPhiDegText: readFunction(scope, setters, "setRuntimePoSbrPhiDegText"),
+      setRuntimePoSbrThetaDegText: readFunction(scope, setters, "setRuntimePoSbrThetaDegText"),
+      setRuntimePoSbrRadialVelocityText: readFunction(scope, setters, "setRuntimePoSbrRadialVelocityText"),
+      setRuntimePoSbrMinRangeText: readFunction(scope, setters, "setRuntimePoSbrMinRangeText"),
+      setRuntimePoSbrMaterialTag: readFunction(scope, setters, "setRuntimePoSbrMaterialTag"),
+      setRuntimePoSbrPathIdPrefix: readFunction(scope, setters, "setRuntimePoSbrPathIdPrefix"),
+      setRuntimePoSbrComponentsJson: readFunction(scope, setters, "setRuntimePoSbrComponentsJson"),
       setRunMode: readFunction(scope, setters, "setRunMode"),
       setAutoPollAsyncRun: readFunction(scope, setters, "setAutoPollAsyncRun"),
       setPollIntervalMsText: readFunction(scope, setters, "setPollIntervalMsText"),
@@ -317,6 +368,23 @@ export function normalizeGraphRunOpsOptions(raw) {
     runtimeLicenseFile: readString(scope, root, "runtimeLicenseFile", ""),
     runtimeTxFfdFilesText: readString(scope, root, "runtimeTxFfdFilesText", ""),
     runtimeRxFfdFilesText: readString(scope, root, "runtimeRxFfdFilesText", ""),
+    runtimeMitsubaEgoOriginText: readString(scope, root, "runtimeMitsubaEgoOriginText", ""),
+    runtimeMitsubaChirpIntervalText: readString(scope, root, "runtimeMitsubaChirpIntervalText", ""),
+    runtimeMitsubaMinRangeText: readString(scope, root, "runtimeMitsubaMinRangeText", ""),
+    runtimeMitsubaSpheresJson: readString(scope, root, "runtimeMitsubaSpheresJson", ""),
+    runtimePoSbrRepoRoot: readString(scope, root, "runtimePoSbrRepoRoot", ""),
+    runtimePoSbrGeometryPath: readString(scope, root, "runtimePoSbrGeometryPath", ""),
+    runtimePoSbrChirpIntervalText: readString(scope, root, "runtimePoSbrChirpIntervalText", ""),
+    runtimePoSbrBouncesText: readString(scope, root, "runtimePoSbrBouncesText", ""),
+    runtimePoSbrRaysPerLambdaText: readString(scope, root, "runtimePoSbrRaysPerLambdaText", ""),
+    runtimePoSbrAlphaDegText: readString(scope, root, "runtimePoSbrAlphaDegText", ""),
+    runtimePoSbrPhiDegText: readString(scope, root, "runtimePoSbrPhiDegText", ""),
+    runtimePoSbrThetaDegText: readString(scope, root, "runtimePoSbrThetaDegText", ""),
+    runtimePoSbrRadialVelocityText: readString(scope, root, "runtimePoSbrRadialVelocityText", ""),
+    runtimePoSbrMinRangeText: readString(scope, root, "runtimePoSbrMinRangeText", ""),
+    runtimePoSbrMaterialTag: readString(scope, root, "runtimePoSbrMaterialTag", ""),
+    runtimePoSbrPathIdPrefix: readString(scope, root, "runtimePoSbrPathIdPrefix", ""),
+    runtimePoSbrComponentsJson: readString(scope, root, "runtimePoSbrComponentsJson", ""),
     nodes: readArray(scope, root, "nodes", []),
     edges: readArray(scope, root, "edges", []),
     runMode: readString(scope, root, "runMode", "sync"),
