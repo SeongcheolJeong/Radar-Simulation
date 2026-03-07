@@ -60,6 +60,7 @@ function buildArtifactInspectorStatusBadges({
   liveCompareEvidenceExpanded,
   historyArtifactExpectationExpanded,
   auditState,
+  auditContinuity,
 }) {
   return [
     {
@@ -88,6 +89,16 @@ function buildArtifactInspectorStatusBadges({
         String(auditState || "").trim() === "trimmed"
           ? "status-warn"
           : String(auditState || "").trim() === "tracking"
+            ? "status-ok"
+            : "status-neutral"
+      ),
+    },
+    {
+      label: `continuity:${String(auditContinuity || "empty").trim() || "empty"}`,
+      tone: (
+        String(auditContinuity || "").trim() === "tail_only"
+          ? "status-warn"
+          : String(auditContinuity || "").trim() === "full"
             ? "status-ok"
             : "status-neutral"
       ),
@@ -239,6 +250,12 @@ function buildArtifactInspectorAuditContinuityText(value) {
     return `audit_continuity: partial | retained_span=${oldest}..${newest} | missing_prefix=1..${lostBefore} | continuity=tail_only`;
   }
   return `audit_continuity: full | retained_span=${oldest}..${newest} | missing_prefix=none | continuity=full`;
+}
+
+function extractArtifactInspectorAuditContinuityState(value) {
+  const text = String(buildArtifactInspectorAuditContinuityText(value) || "").trim();
+  const match = /\bcontinuity=([a-z_]+)/i.exec(text);
+  return String(match?.[1] || "empty").trim().toLowerCase() || "empty";
 }
 
 function clearArtifactInspectorActionTrailState(value) {
@@ -462,12 +479,14 @@ export function ArtifactInspectorPanel({
       .replace(/^audit_state:\s*/i, "")
       .trim()
       .toLowerCase();
+    const auditContinuity = extractArtifactInspectorAuditContinuityState(artifactInspectorPrefs);
     return buildArtifactInspectorStatusBadges({
       layoutDefault,
       probesDefault: artifactInspectorProbeState.probesDefault === true,
       liveCompareEvidenceExpanded,
       historyArtifactExpectationExpanded,
       auditState,
+      auditContinuity,
     });
   }, [
     artifactInspectorPrefs,

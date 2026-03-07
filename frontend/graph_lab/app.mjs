@@ -892,6 +892,11 @@ function toneForArtifactInspectorStatusBadge(label) {
     if (text.endsWith("tracking")) return "status-ok";
     return "status-neutral";
   }
+  if (text.startsWith("continuity:")) {
+    if (text.endsWith("tail_only")) return "status-warn";
+    if (text.endsWith("full")) return "status-ok";
+    return "status-neutral";
+  }
   return "status-neutral";
 }
 
