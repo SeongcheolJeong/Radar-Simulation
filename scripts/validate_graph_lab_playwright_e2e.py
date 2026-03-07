@@ -152,6 +152,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_persistence_checked": False,
             "pinned_pair_quick_actions_checked": False,
             "pinned_pair_preview_checked": False,
+            "pinned_pair_badges_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -546,6 +547,9 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_path_hashes:" not in pinned_quick_text
                 ):
                     raise AssertionError("pinned quick action field did not expose the selected pinned pair")
+                if "assessment:" not in pinned_quick_text or "fp:" not in pinned_quick_text or "source:" not in pinned_quick_text:
+                    raise AssertionError("pinned quick action field did not expose quick status badges")
+                report["runtime_controls"]["pinned_pair_badges_checked"] = True
                 pinned_quick_field.get_by_role("button", name=f"Show PIN Details: {selected_history_label}").click()
                 page.wait_for_timeout(200)
                 expanded_pinned_quick_text = pinned_quick_field.inner_text()
@@ -827,6 +831,8 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_path_hashes:" not in reloaded_pinned_quick_text
                 ):
                     raise AssertionError("pinned quick action field did not persist after reload")
+                if "assessment:" not in reloaded_pinned_quick_text or "fp:" not in reloaded_pinned_quick_text:
+                    raise AssertionError("pinned quick action badges did not persist after reload")
                 report["runtime_controls"]["compare_session_persistence_checked"] = True
 
                 report["playwright_runtime_ready"] = True

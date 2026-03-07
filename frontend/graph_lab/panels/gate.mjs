@@ -173,6 +173,19 @@ export function DecisionPane({
                 ? `Hide PIN Details: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`
                 : `Show PIN Details: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
             ]),
+            h("div", {
+              className: "chip-list",
+              key: `decision_pinned_pair_quick_action_badges_${String(row?.id || row?.pairId || "")}`,
+              style: { marginBottom: "6px" },
+            }, (Array.isArray(row?.quickActionBadges) && row.quickActionBadges.length > 0
+              ? row.quickActionBadges
+              : [{ label: "assessment:unknown", tone: "status-neutral" }]
+            ).map((badge, badgeIdx) =>
+              h("span", {
+                className: `chip ${String(badge?.tone || "status-neutral")}`,
+                key: `decision_pinned_pair_quick_action_badge_${String(row?.id || row?.pairId || "")}_${badgeIdx}`,
+              }, String(badge?.label || "-"))
+            )),
             h("div", { className: "hint", key: `decision_pinned_pair_quick_action_summary_${String(row?.id || row?.pairId || "")}` }, `artifact_expectation: ${String(row?.artifactExpectationSummaryText || "-")}`),
             h("div", { className: "hint", key: `decision_pinned_pair_quick_action_paths_${String(row?.id || row?.pairId || "")}` }, `artifact_path_hashes: ${String(row?.artifactPathFingerprintSummaryText || "-")}`),
             String(expandedPinnedCompareQuickActionId || "") === String(row?.id || row?.pairId || "")

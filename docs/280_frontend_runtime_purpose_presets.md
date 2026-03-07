@@ -175,6 +175,8 @@ Pinned pairs are also promoted into a top-level `Pinned Pair Quick Actions` bloc
   - summarizes how many pinned quick actions are currently promoted out of history
 - `artifact_expectation:` / `artifact_path_hashes:`
   - each promoted pinned pair now shows the stored artifact expectation summary and compact path-fingerprint summary directly in the quick-action block
+- quick badges
+  - each promoted pinned pair now also shows color-coded status chips for `assessment`, artifact path-fingerprint delta state (`fp:match` / `fp:delta` / `fp:unseen`), and expectation `source`
 - `Show PIN Details: <label>` / `Hide PIN Details: <label>`
   - expands the pinned card inline to show the preset-pair forecast (`baseline_forecast`, `target_forecast`, `planned_deltas`) and the full stored artifact expectation detail before running it
 

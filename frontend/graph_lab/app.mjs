@@ -226,6 +226,101 @@ function summarizeCompareArtifactPathFingerprintCompact(value) {
   ].join(" | ");
 }
 
+function summarizeCompareArtifactPathFingerprintStats(value) {
+  const rows = Object.values(normalizeCompareArtifactPathFingerprintMap(value));
+  return rows.reduce((acc, row) => {
+    const currentHash = String(row?.currentHash || "").trim().toLowerCase();
+    const compareHash = String(row?.compareHash || "").trim().toLowerCase();
+    if (!currentHash && !compareHash) return acc;
+    acc.total += 1;
+    if (currentHash && compareHash && currentHash === compareHash) {
+      acc.exact += 1;
+      return acc;
+    }
+    if (!currentHash || !compareHash) {
+      acc.missing += 1;
+    }
+    acc.delta += 1;
+    return acc;
+  }, {
+    total: 0,
+    exact: 0,
+    delta: 0,
+    missing: 0,
+  });
+}
+
+function normalizeCompareAssessmentToken(value) {
+  const token = String(value || "").trim().toLowerCase();
+  if (token === "aligned" || token === "review" || token === "hold") return token;
+  if (token === "planned" || token === "unavailable" || token === "unknown") return token;
+  return "";
+}
+
+function toneForCompareAssessmentToken(value) {
+  const token = normalizeCompareAssessmentToken(value);
+  if (token === "aligned") return "status-ok";
+  if (token === "review") return "status-warn";
+  if (token === "hold") return "status-err";
+  return "status-neutral";
+}
+
+function inferCompareArtifactExpectationAssessment(entry) {
+  const row = normalizeCompareArtifactExpectationEntry(entry);
+  const summaryMatch = String(row.summaryText || "").match(/(?:^|\|\s*)assessment=([a-z_]+)/i);
+  const detailMatch = String(row.detailText || "").match(/observed_assessment:\s*([a-z_]+)/i);
+  const token = normalizeCompareAssessmentToken(
+    summaryMatch?.[1]
+    || detailMatch?.[1]
+    || (row.source === "planned_default" ? "planned" : "")
+  );
+  return token || "unknown";
+}
+
+function shortCompareArtifactExpectationSourceLabel(value) {
+  const source = String(value || "").trim().toLowerCase();
+  if (source === "observed_ready_pair") return "observed";
+  if (source === "planned_default") return "planned";
+  return source || "-";
+}
+
+function toneForCompareArtifactExpectationSource(value) {
+  const source = String(value || "").trim().toLowerCase();
+  if (source === "observed_ready_pair") return "status-ok";
+  if (source === "planned_default" || !source) return "status-neutral";
+  return "status-warn";
+}
+
+function buildPinnedCompareQuickActionBadges(entry) {
+  const normalized = normalizeCompareArtifactExpectationEntry(entry);
+  const assessment = inferCompareArtifactExpectationAssessment(normalized);
+  const fingerprintStats = summarizeCompareArtifactPathFingerprintStats(
+    normalized.artifactPathFingerprintsByArtifact
+  );
+  return [
+    {
+      label: `assessment:${assessment}`,
+      tone: toneForCompareAssessmentToken(assessment),
+    },
+    {
+      label: fingerprintStats.total > 0
+        ? (
+          fingerprintStats.delta === 0
+            ? `fp:match:${fingerprintStats.exact}/${fingerprintStats.total}`
+            : `fp:delta:${fingerprintStats.delta}/${fingerprintStats.total}`
+        )
+        : "fp:unseen",
+      tone: fingerprintStats.total === 0
+        ? "status-neutral"
+        : (fingerprintStats.delta === 0 ? "status-ok" : "status-warn"),
+    },
+    {
+      label: `source:${shortCompareArtifactExpectationSourceLabel(normalized.source)}`,
+      tone: toneForCompareArtifactExpectationSource(normalized.source),
+    },
+  ];
+}
+
 function normalizeCompareArtifactExpectationEntry(entry) {
   const row = entry && typeof entry === "object" ? entry : {};
   return {
@@ -1986,44 +2081,47 @@ export function App() {
     () => compareReplayPairOptions
       .filter((row) => row?.pinned === true)
       .slice(0, PINNED_COMPARE_QUICK_ACTION_LIMIT)
-      .map((row) => ({
-        ...row,
-        shortLabel: compactCompareQuickActionLabel(row?.pairLabel || row?.label || row?.id || "-"),
-        artifactExpectationEntry: normalizeCompareArtifactExpectationEntry(
-          comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
-        ),
-        artifactExpectationSummaryText: (() => {
-          const entry = normalizeCompareArtifactExpectationEntry(
-            comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
-          );
-          return entry.summaryText || buildPlannedCompareArtifactExpectationEntry(row?.pairLabel).summaryText;
-        })(),
-        artifactPathFingerprintSummaryText: (() => {
-          const entry = normalizeCompareArtifactExpectationEntry(
-            comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
-          );
-          return summarizeCompareArtifactPathFingerprintCompact(entry.artifactPathFingerprintsByArtifact);
-        })(),
-        previewText: buildRuntimePairPreviewText({
-          baselinePresetId: row?.baselinePresetId,
-          targetPresetId: row?.targetPresetId,
-          pairLabel: row?.pairLabel,
-          currentConfigLabel: configuredRuntimeSummary.trackLabel,
-          currentOverrides: {
-            runtimeBackendType,
-            runtimeProviderSpec,
-            runtimeRequiredModulesText,
-            runtimeSimulationMode,
-            runtimeLicenseFile,
-          },
-        }),
-        artifactExpectationDetailText: (() => {
-          const entry = normalizeCompareArtifactExpectationEntry(
-            comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
-          );
-          return entry.detailText || buildPlannedCompareArtifactExpectationEntry(row?.pairLabel).detailText;
-        })(),
-      })),
+      .map((row) => {
+        const pairId = String(row?.id || row?.pairId || "").trim();
+        const storedEntry = normalizeCompareArtifactExpectationEntry(comparePairArtifactExpectationById[pairId]);
+        const fallbackEntry = buildPlannedCompareArtifactExpectationEntry(row?.pairLabel);
+        const effectiveEntry = normalizeCompareArtifactExpectationEntry({
+          ...fallbackEntry,
+          ...storedEntry,
+          artifactPathFingerprintsByArtifact: Object.keys(storedEntry.artifactPathFingerprintsByArtifact || {}).length > 0
+            ? storedEntry.artifactPathFingerprintsByArtifact
+            : fallbackEntry.artifactPathFingerprintsByArtifact,
+        });
+        const quickActionBadges = buildPinnedCompareQuickActionBadges(effectiveEntry);
+        return {
+          ...row,
+          shortLabel: compactCompareQuickActionLabel(row?.pairLabel || row?.label || row?.id || "-"),
+          artifactExpectationEntry: effectiveEntry,
+          artifactExpectationSummaryText: effectiveEntry.summaryText || fallbackEntry.summaryText,
+          artifactPathFingerprintSummaryText: summarizeCompareArtifactPathFingerprintCompact(
+            effectiveEntry.artifactPathFingerprintsByArtifact
+          ),
+          quickActionBadges,
+          quickActionBadgeSummaryText: quickActionBadges
+            .map((badge) => String(badge?.label || "").trim())
+            .filter(Boolean)
+            .join(" | ") || "-",
+          previewText: buildRuntimePairPreviewText({
+            baselinePresetId: row?.baselinePresetId,
+            targetPresetId: row?.targetPresetId,
+            pairLabel: row?.pairLabel,
+            currentConfigLabel: configuredRuntimeSummary.trackLabel,
+            currentOverrides: {
+              runtimeBackendType,
+              runtimeProviderSpec,
+              runtimeRequiredModulesText,
+              runtimeSimulationMode,
+              runtimeLicenseFile,
+            },
+          }),
+          artifactExpectationDetailText: effectiveEntry.detailText || fallbackEntry.detailText,
+        };
+      }),
     [
       comparePairArtifactExpectationById,
       compareReplayPairOptions,
@@ -2052,6 +2150,7 @@ export function App() {
       `pinned_quick_action_count: ${Number(pinnedCompareQuickActionOptions.length || 0)}`,
       ...pinnedCompareQuickActionOptions.flatMap((row, idx) => ([
         `- [${Number(idx) + 1}] ${String(row.pairLabel || "-")} | baseline=${String(row.baselinePresetId || "-")} | target=${String(row.targetPresetId || "-")}`,
+        `  badges: ${String(row.quickActionBadgeSummaryText || "-")}`,
         `  preview: ${String(row?.previewText || "").split("\n").slice(1).join(" | ") || "-"}`,
         `  artifact_expectation: ${String(row.artifactExpectationSummaryText || "-")}`,
         `  artifact_path_hashes: ${String(row.artifactPathFingerprintSummaryText || "-")}`,
