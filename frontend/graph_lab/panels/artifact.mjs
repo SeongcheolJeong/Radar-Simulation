@@ -382,11 +382,13 @@ function buildArtifactInspectorAuditControlStateFromTexts(recentActionsText, aud
 }
 
 function buildArtifactInspectorMaintenanceControlStateFromValue(value) {
-  const prefs = normalizeArtifactInspectorPrefs(value);
-  const clearDisabled = Number(prefs.maintenanceSeq || 0) <= 0;
+  const fields = parseArtifactInspectorMaintenanceFields(value);
+  const clearDisabled = fields.seq <= 0;
+  const recommendation = clearDisabled ? "not_needed" : "clear_marker";
+  const reason = clearDisabled ? "idle" : "marker_present";
   return {
     clearDisabled,
-    text: `maintenance_controls: clear=${clearDisabled ? "disabled" : "enabled"}`,
+    text: `maintenance_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | reason=${reason}`,
   };
 }
 
@@ -414,6 +416,14 @@ function buildArtifactInspectorMaintenanceSummaryText(value) {
     return "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none";
   }
   return `maintenance_summary: marked | marker=present | action=${fields.action} | source=${fields.source} | trigger=${fields.trigger} | next_action=clear_marker_if_acknowledged`;
+}
+
+function buildArtifactInspectorMaintenanceOperatorSummaryText(value) {
+  const fields = parseArtifactInspectorMaintenanceFields(value);
+  if (fields.seq <= 0) {
+    return "maintenance_operator_summary: idle -> none | because=no_marker";
+  }
+  return "maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present";
 }
 
 function extractArtifactInspectorAuditOperatorBadge(value) {
@@ -720,6 +730,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorMaintenanceSummaryText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorMaintenanceOperatorSummaryText = React.useMemo(
+    () => buildArtifactInspectorMaintenanceOperatorSummaryText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorMaintenanceControlState = React.useMemo(
     () => buildArtifactInspectorMaintenanceControlStateFromValue(artifactInspectorPrefs),
     [artifactInspectorPrefs]
@@ -784,6 +798,7 @@ export function ArtifactInspectorPanel({
       lastActionText: artifactInspectorLastActionText,
       maintenanceActionText: artifactInspectorMaintenanceActionText,
       maintenanceSummaryText: artifactInspectorMaintenanceSummaryText,
+      maintenanceOperatorSummaryText: artifactInspectorMaintenanceOperatorSummaryText,
       recentActionsText: artifactInspectorRecentActionsText,
       auditStateText: artifactInspectorAuditStateText,
       auditCapacityText: artifactInspectorAuditCapacityText,
@@ -809,6 +824,7 @@ export function ArtifactInspectorPanel({
     artifactInspectorLastActionText,
     artifactInspectorMaintenanceActionText,
     artifactInspectorMaintenanceSummaryText,
+    artifactInspectorMaintenanceOperatorSummaryText,
     artifactInspectorRecentActionsText,
     artifactInspectorProbeState.text,
     artifactInspectorStatusBadgesText,
@@ -1028,6 +1044,10 @@ export function ArtifactInspectorPanel({
           key: "maintenance_summary",
           style: { color: "#8fb3c9" },
         }, artifactInspectorMaintenanceSummaryText),
+        h("div", {
+          key: "maintenance_operator_summary",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceOperatorSummaryText),
         h("div", {
           key: "maintenance_controls",
           style: { color: "#8fb3c9" },
