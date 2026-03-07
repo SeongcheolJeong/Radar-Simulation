@@ -369,6 +369,8 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_layout_state`
 - `artifact_inspector_probe_state`
 
+The `Decision Pane` now mirrors that live state as a chip row plus compact hint lines under `Inspector State Mirror`, so the operator can confirm reset/collapse status without scrolling back to the `Artifact Inspector` panel.
+
 The `Runtime Compare` summary inside the brief now also carries:
 
 - `latest_replayable_pair`

@@ -110,6 +110,10 @@ export function DecisionPane({
   trackCompareGuideText,
   decisionSummaryText,
   decisionOpsStatusText,
+  artifactInspectorDecisionStatusBadgesText,
+  artifactInspectorDecisionStatusBadgeRows,
+  artifactInspectorDecisionLayoutStateText,
+  artifactInspectorDecisionProbeStateText,
   trackCompareRunnerStatusText,
   compareRunStatusText,
   lastRegressionSession,
@@ -147,6 +151,22 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_current_track_hint" }, `current_track: ${String(currentTrackLabel || "-")}`),
       h("div", { className: "hint", key: "decision_compare_track_hint" }, `compare_track: ${String(compareTrackLabel || "-")}`),
       h("pre", { className: "result-box", key: "decision_track_workflow_box" }, String(trackCompareGuideText || "-")),
+    ]),
+    h("div", { className: "field", key: "decision_artifact_state_mirror" }, [
+      h("label", { className: "label", key: "decision_artifact_state_mirror_label" }, "Inspector State Mirror"),
+      h("div", { className: "chip-list", key: "decision_artifact_inspector_live_state_chips" }, (
+        Array.isArray(artifactInspectorDecisionStatusBadgeRows) && artifactInspectorDecisionStatusBadgeRows.length > 0
+          ? artifactInspectorDecisionStatusBadgeRows
+          : [{ label: "layout:unknown", tone: "status-neutral" }]
+      ).map((row, idx) =>
+        h("span", {
+          className: `chip ${String(row?.tone || "status-neutral")}`,
+          key: `decision_artifact_inspector_live_state_chip_${idx}`,
+        }, String(row?.label || "-"))
+      )),
+      h("div", { className: "hint", key: "decision_artifact_inspector_live_state_badges_hint" }, String(artifactInspectorDecisionStatusBadgesText || "-")),
+      h("div", { className: "hint", key: "decision_artifact_inspector_live_state_layout_hint" }, String(artifactInspectorDecisionLayoutStateText || "-")),
+      h("div", { className: "hint", key: "decision_artifact_inspector_live_state_probe_hint" }, String(artifactInspectorDecisionProbeStateText || "-")),
     ]),
     h("div", { className: "field", key: "decision_preset_pair_compare" }, [
       h("label", { className: "label", key: "decision_preset_pair_label" }, "Preset Pair Compare"),

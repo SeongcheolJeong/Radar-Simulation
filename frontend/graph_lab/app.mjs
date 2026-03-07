@@ -869,6 +869,36 @@ function normalizeArtifactInspectorStatusSummary(value) {
   };
 }
 
+function toneForArtifactInspectorStatusBadge(label) {
+  const text = String(label || "").trim().toLowerCase();
+  if (text.startsWith("layout:")) {
+    return text.endsWith("default") ? "status-ok" : "status-warn";
+  }
+  if (text.startsWith("probe:")) {
+    return text.endsWith("default") ? "status-ok" : "status-warn";
+  }
+  if (text.startsWith("reset:")) {
+    return text.endsWith("clean") ? "status-ok" : "status-warn";
+  }
+  return "status-neutral";
+}
+
+function buildArtifactInspectorStatusBadgeRows(rawText) {
+  const text = String(rawText || "").trim();
+  const suffix = text.startsWith("status_badges:")
+    ? text.slice("status_badges:".length)
+    : text;
+  return suffix
+    .split("|")
+    .map((part) => String(part || "").trim())
+    .filter(Boolean)
+    .filter((part) => part !== "-")
+    .map((label) => ({
+      label,
+      tone: toneForArtifactInspectorStatusBadge(label),
+    }));
+}
+
 function buildArtifactInspectorDecisionLine(rawText, panelPrefix, decisionPrefix) {
   const text = String(rawText || "").trim();
   if (!text) return `${decisionPrefix}: -`;
@@ -2808,6 +2838,10 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.statusBadgesText]
   );
+  const artifactInspectorDecisionStatusBadgeRows = React.useMemo(
+    () => buildArtifactInspectorStatusBadgeRows(artifactInspectorStatusSummary.statusBadgesText),
+    [artifactInspectorStatusSummary.statusBadgesText]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -4606,6 +4640,10 @@ export function App() {
         trackCompareGuideText,
         decisionSummaryText,
         decisionOpsStatusText,
+        artifactInspectorDecisionStatusBadgesText,
+        artifactInspectorDecisionStatusBadgeRows,
+        artifactInspectorDecisionLayoutStateText,
+        artifactInspectorDecisionProbeStateText,
         trackCompareRunnerStatusText,
         lastRegressionSession,
         lastRegressionExport,

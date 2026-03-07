@@ -182,6 +182,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_badges_checked": False,
             "artifact_inspector_probe_state_checked": False,
             "artifact_inspector_badge_export_checked": False,
+            "decision_artifact_inspector_state_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -431,6 +432,19 @@ def run(args: argparse.Namespace) -> int:
                 artifact_field = field_locator(page, "Artifact Inspector")
                 artifact_field.wait_for(timeout=30_000)
                 artifact_text = artifact_field.inner_text()
+                decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
+                decision_artifact_state_field.wait_for(timeout=30_000)
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Inspector State Mirror")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean");
+                    }""",
+                    timeout=10_000,
+                )
+                decision_artifact_state_text = decision_artifact_state_field.inner_text()
                 if "compare_assessment:" not in artifact_text or "compare_flags:" not in artifact_text:
                     raise AssertionError("artifact inspector did not render compare assessment")
                 if (
@@ -455,9 +469,27 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_path_fingerprint_algo:" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render selected history pair artifact expectation")
+                if (
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean" not in decision_artifact_state_text
+                    or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
+                    or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
+                ):
+                    raise AssertionError("decision pane did not mirror default artifact inspector state")
                 artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
                 page.wait_for_timeout(150)
                 collapsed_live_artifact_text = artifact_field.inner_text()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Inspector State Mirror")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed")
+                            && text.includes("artifact_inspector_layout_state: customized");
+                    }""",
+                    timeout=10_000,
+                )
+                collapsed_live_decision_artifact_state_text = decision_artifact_state_field.inner_text()
                 if "shape.adc:" in collapsed_live_artifact_text or "rd_peak_delta(range/doppler/rel_db):" in collapsed_live_artifact_text:
                     raise AssertionError("artifact inspector live compare evidence did not collapse")
                 if "compare_assessment:" not in collapsed_live_artifact_text:
@@ -475,6 +507,11 @@ def run(args: argparse.Namespace) -> int:
                     or "reset:required" not in collapsed_live_artifact_text
                 ):
                     raise AssertionError("artifact inspector collapse did not update status badges")
+                if (
+                    "artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed" not in collapsed_live_decision_artifact_state_text
+                    or "artifact_inspector_layout_state: customized" not in collapsed_live_decision_artifact_state_text
+                ):
+                    raise AssertionError("decision pane did not mirror collapsed live evidence state")
                 artifact_field.get_by_role("button", name="Show Live Compare Evidence").click()
                 page.wait_for_timeout(150)
                 restored_live_artifact_text = artifact_field.inner_text()
@@ -498,6 +535,18 @@ def run(args: argparse.Namespace) -> int:
                 artifact_field.get_by_role("button", name="Reset Layout").click()
                 page.wait_for_timeout(150)
                 reset_artifact_text = artifact_field.inner_text()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Inspector State Mirror")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean")
+                            && text.includes("artifact_inspector_layout_state: default");
+                    }""",
+                    timeout=10_000,
+                )
+                reset_decision_artifact_state_text = decision_artifact_state_field.inner_text()
                 if (
                     "Hide Live Compare Evidence" not in reset_artifact_text
                     or "Hide History Snapshot" not in reset_artifact_text
@@ -509,6 +558,12 @@ def run(args: argparse.Namespace) -> int:
                     or "probe_state: default" not in reset_artifact_text
                 ):
                     raise AssertionError("artifact inspector reset layout did not restore expanded detail state")
+                if (
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean" not in reset_decision_artifact_state_text
+                    or "artifact_inspector_layout_state: default" not in reset_decision_artifact_state_text
+                    or "artifact_inspector_probe_state: default" not in reset_decision_artifact_state_text
+                ):
+                    raise AssertionError("decision pane did not mirror reset artifact inspector state")
                 report["runtime_controls"]["compare_assessment_checked"] = True
                 report["runtime_controls"]["artifact_inspector_expectation_checked"] = True
                 report["runtime_controls"]["artifact_inspector_folds_checked"] = True
@@ -516,6 +571,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_layout_status_checked"] = True
                 report["runtime_controls"]["artifact_inspector_badges_checked"] = True
                 report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
+                report["runtime_controls"]["decision_artifact_inspector_state_checked"] = True
 
                 history_field = field_locator(page, "Compare Session History")
                 history_field.wait_for(timeout=30_000)
@@ -1211,6 +1267,25 @@ def run(args: argparse.Namespace) -> int:
                     or "reset:required" not in reloaded_artifact_text
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not retain status badges")
+                reloaded_decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Inspector State Mirror")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed | history:collapsed | reset:required")
+                            && text.includes("artifact_inspector_layout_state: customized");
+                    }""",
+                    timeout=10_000,
+                )
+                reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
+                if (
+                    "artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed | history:collapsed | reset:required" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_layout_state: customized" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
+                ):
+                    raise AssertionError("decision pane did not persist mirrored artifact inspector state after reload")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")
