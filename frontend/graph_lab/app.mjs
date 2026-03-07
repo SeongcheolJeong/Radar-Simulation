@@ -987,6 +987,7 @@ export function App() {
   const [selectedCompareReplayPairId, setSelectedCompareReplayPairId] = React.useState(
     () => initialCompareSessionPrefs.selectedReplayPairId
   );
+  const [expandedPinnedCompareQuickActionId, setExpandedPinnedCompareQuickActionId] = React.useState("");
   const [selectedCompareReplayPairLabelDraft, setSelectedCompareReplayPairLabelDraft] = React.useState("");
   const [trackCompareBaselinePresetId, setTrackCompareBaselinePresetId] = React.useState(
     RUNTIME_PURPOSE_PRESET_LOW_FIDELITY
@@ -2003,8 +2004,36 @@ export function App() {
           );
           return summarizeCompareArtifactPathFingerprintCompact(entry.artifactPathFingerprintsByArtifact);
         })(),
+        previewText: buildRuntimePairPreviewText({
+          baselinePresetId: row?.baselinePresetId,
+          targetPresetId: row?.targetPresetId,
+          pairLabel: row?.pairLabel,
+          currentConfigLabel: configuredRuntimeSummary.trackLabel,
+          currentOverrides: {
+            runtimeBackendType,
+            runtimeProviderSpec,
+            runtimeRequiredModulesText,
+            runtimeSimulationMode,
+            runtimeLicenseFile,
+          },
+        }),
+        artifactExpectationDetailText: (() => {
+          const entry = normalizeCompareArtifactExpectationEntry(
+            comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
+          );
+          return entry.detailText || buildPlannedCompareArtifactExpectationEntry(row?.pairLabel).detailText;
+        })(),
       })),
-    [comparePairArtifactExpectationById, compareReplayPairOptions]
+    [
+      comparePairArtifactExpectationById,
+      compareReplayPairOptions,
+      configuredRuntimeSummary.trackLabel,
+      runtimeBackendType,
+      runtimeLicenseFile,
+      runtimeProviderSpec,
+      runtimeRequiredModulesText,
+      runtimeSimulationMode,
+    ]
   );
   const pinnedCompareQuickActionSummaryText = React.useMemo(() => {
     if (pinnedCompareQuickActionOptions.length === 0) {
@@ -2023,6 +2052,7 @@ export function App() {
       `pinned_quick_action_count: ${Number(pinnedCompareQuickActionOptions.length || 0)}`,
       ...pinnedCompareQuickActionOptions.flatMap((row, idx) => ([
         `- [${Number(idx) + 1}] ${String(row.pairLabel || "-")} | baseline=${String(row.baselinePresetId || "-")} | target=${String(row.targetPresetId || "-")}`,
+        `  preview: ${String(row?.previewText || "").split("\n").slice(1).join(" | ") || "-"}`,
         `  artifact_expectation: ${String(row.artifactExpectationSummaryText || "-")}`,
         `  artifact_path_hashes: ${String(row.artifactPathFingerprintSummaryText || "-")}`,
       ])),
@@ -2135,6 +2165,14 @@ export function App() {
     if (selectedId === firstId) return;
     setSelectedCompareReplayPairId(firstId);
   }, [compareReplayPairOptions, selectedCompareReplayPairId]);
+
+  React.useEffect(() => {
+    const expandedId = String(expandedPinnedCompareQuickActionId || "").trim();
+    if (!expandedId) return;
+    const stillExists = pinnedCompareQuickActionOptions.some((row) => String(row?.id || row?.pairId || "").trim() === expandedId);
+    if (stillExists) return;
+    setExpandedPinnedCompareQuickActionId("");
+  }, [expandedPinnedCompareQuickActionId, pinnedCompareQuickActionOptions]);
 
   React.useEffect(() => {
     const nextDraft = String(
@@ -2545,6 +2583,12 @@ export function App() {
     runCompareSessionReplayPair,
     setStatus,
   ]);
+
+  const togglePinnedCompareQuickActionExpanded = React.useCallback((pairId) => {
+    const selectedId = String(pairId || "").trim();
+    if (!selectedId) return;
+    setExpandedPinnedCompareQuickActionId((prev) => String(prev || "").trim() === selectedId ? "" : selectedId);
+  }, []);
 
   const saveSelectedCompareSessionPairLabel = React.useCallback(() => {
     const selectedPair = selectedReplayableCompareSession;
@@ -3354,8 +3398,10 @@ export function App() {
         pinnedCompareQuickActionOptions,
         pinnedCompareQuickActionSummaryText,
         pinnedCompareQuickActionDetailText,
+        expandedPinnedCompareQuickActionId,
         applyPinnedCompareQuickAction,
         runPinnedCompareQuickAction,
+        togglePinnedCompareQuickActionExpanded,
         compareSessionHistoryText,
         compareReplayPairOptions,
         selectedCompareReplayPairId,

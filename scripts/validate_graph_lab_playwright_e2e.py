@@ -151,6 +151,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_transfer_checked": False,
             "compare_session_persistence_checked": False,
             "pinned_pair_quick_actions_checked": False,
+            "pinned_pair_preview_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -545,6 +546,21 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_path_hashes:" not in pinned_quick_text
                 ):
                     raise AssertionError("pinned quick action field did not expose the selected pinned pair")
+                pinned_quick_field.get_by_role("button", name=f"Show PIN Details: {selected_history_label}").click()
+                page.wait_for_timeout(200)
+                expanded_pinned_quick_text = pinned_quick_field.inner_text()
+                if (
+                    "selected_pair:" not in expanded_pinned_quick_text
+                    or "artifact_expectation_source:" not in expanded_pinned_quick_text
+                    or "artifact_path_fingerprint_algo:" not in expanded_pinned_quick_text
+                ):
+                    raise AssertionError("expanded pinned quick action did not expose artifact expectation detail")
+                pinned_quick_field.get_by_role("button", name=f"Hide PIN Details: {selected_history_label}").click()
+                page.wait_for_timeout(200)
+                collapsed_pinned_quick_text = pinned_quick_field.inner_text()
+                if "selected_pair:" in collapsed_pinned_quick_text:
+                    raise AssertionError("collapsed pinned quick action still rendered expanded preview")
+                report["runtime_controls"]["pinned_pair_preview_checked"] = True
                 preset_pair_field.get_by_role("button", name="Low -> PO-SBR", exact=True).click()
                 page.wait_for_timeout(100)
                 if target_select.input_value() != "high_fidelity_po_sbr_rt":

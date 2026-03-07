@@ -25,8 +25,10 @@ export function DecisionPane({
   pinnedCompareQuickActionOptions,
   pinnedCompareQuickActionSummaryText,
   pinnedCompareQuickActionDetailText,
+  expandedPinnedCompareQuickActionId,
   applyPinnedCompareQuickAction,
   runPinnedCompareQuickAction,
+  togglePinnedCompareQuickActionExpanded,
   compareSessionHistoryText,
   compareReplayPairOptions,
   selectedCompareReplayPairId,
@@ -163,9 +165,22 @@ export function DecisionPane({
                 key: `decision_run_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
                 onClick: () => runPinnedCompareQuickAction(String(row?.id || row?.pairId || "")),
               }, `Run PIN: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
+              h("button", {
+                className: "btn",
+                key: `decision_toggle_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
+                onClick: () => togglePinnedCompareQuickActionExpanded(String(row?.id || row?.pairId || "")),
+              }, String(expandedPinnedCompareQuickActionId || "") === String(row?.id || row?.pairId || "")
+                ? `Hide PIN Details: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`
+                : `Show PIN Details: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
             ]),
             h("div", { className: "hint", key: `decision_pinned_pair_quick_action_summary_${String(row?.id || row?.pairId || "")}` }, `artifact_expectation: ${String(row?.artifactExpectationSummaryText || "-")}`),
             h("div", { className: "hint", key: `decision_pinned_pair_quick_action_paths_${String(row?.id || row?.pairId || "")}` }, `artifact_path_hashes: ${String(row?.artifactPathFingerprintSummaryText || "-")}`),
+            String(expandedPinnedCompareQuickActionId || "") === String(row?.id || row?.pairId || "")
+              ? h("div", { className: "field", key: `decision_pinned_pair_quick_action_detail_${String(row?.id || row?.pairId || "")}` }, [
+                h("pre", { className: "result-box", key: `decision_pinned_pair_quick_action_preview_${String(row?.id || row?.pairId || "")}` }, String(row?.previewText || "-")),
+                h("pre", { className: "result-box", key: `decision_pinned_pair_quick_action_artifact_${String(row?.id || row?.pairId || "")}` }, String(row?.artifactExpectationDetailText || "-")),
+              ])
+              : null,
           ])
         )
         : [
