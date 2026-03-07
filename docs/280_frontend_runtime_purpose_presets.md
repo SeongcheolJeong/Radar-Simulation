@@ -152,6 +152,9 @@ The history block also provides:
 - `selected_history_pair_retention`
   - shows whether the currently selected replayable pair is inside the latest retention window or only surviving as an extra preserved row
   - also shows the selected pair's pinned/saved management flags and `rows(visible/latest/retained)`
+- replayable pair selector badges
+  - the history dropdown options now also show `KEEP:latest` or `KEEP:extra`
+  - pinned pairs keep the existing `PIN | ...` prefix, so a preserved pinned row appears as `PIN | KEEP:latest | ...`
 - `Use Selected History Pair`
   - restores the chosen replayable pair from history into the selector controls
 - `Run Selected History Pair`

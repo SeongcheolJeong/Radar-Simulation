@@ -1464,7 +1464,7 @@ function compactCompareQuickActionLabel(value, maxLength = 28) {
   return `${text.slice(0, limit - 3)}...`;
 }
 
-function buildCompareSessionReplayOptions(entries, pairMetaById) {
+function buildCompareSessionReplayOptions(entries, pairMetaById, retentionPolicy) {
   const rows = Array.isArray(entries) ? entries : [];
   const seen = new Set();
   const options = [];
@@ -1474,6 +1474,12 @@ function buildCompareSessionReplayOptions(entries, pairMetaById) {
     const key = String(pair.pairId || "").trim();
     if (seen.has(key)) return;
     seen.add(key);
+    const retention = analyzeCompareSessionSelectedPairRetention(entries, pairMetaById, retentionPolicy, pair);
+    const retentionBadge = retention.state === "latest_window"
+      ? "KEEP:latest"
+      : retention.state === "retained_extra"
+        ? "KEEP:extra"
+        : `KEEP:${String(retention.state || "unknown")}`;
     options.push({
       id: key,
       baselinePresetId: pair.baselinePresetId,
@@ -1482,7 +1488,8 @@ function buildCompareSessionReplayOptions(entries, pairMetaById) {
       defaultPairLabel: pair.defaultPairLabel,
       customLabel: pair.customLabel,
       pinned: pair.pinned === true,
-      label: `${pair.pinned === true ? "PIN | " : ""}${pair.pairLabel} | ${String(row?.status || "-")} | ${String(row?.source || "-")}`,
+      retentionState: retention.state,
+      label: `${pair.pinned === true ? "PIN | " : ""}${retentionBadge} | ${pair.pairLabel} | ${String(row?.status || "-")} | ${String(row?.source || "-")}`,
       sortOrder: options.length,
     });
   });
@@ -2712,8 +2719,12 @@ export function App() {
     [compareReplayPairMetaById, compareSessionHistory]
   );
   const compareReplayPairOptions = React.useMemo(
-    () => buildCompareSessionReplayOptions(compareSessionHistory, compareReplayPairMetaById),
-    [compareReplayPairMetaById, compareSessionHistory]
+    () => buildCompareSessionReplayOptions(
+      compareSessionHistory,
+      compareReplayPairMetaById,
+      compareSessionRetentionPolicy
+    ),
+    [compareReplayPairMetaById, compareSessionHistory, compareSessionRetentionPolicy]
   );
   const pinnedCompareQuickActionOptions = React.useMemo(
     () => compareReplayPairOptions
