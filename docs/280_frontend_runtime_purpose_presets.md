@@ -375,6 +375,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_audit_window`
 - `artifact_inspector_audit_continuity`
 - `artifact_inspector_audit_health`
+- `artifact_inspector_audit_health_reason`
 - `artifact_inspector_audit_summary`
 
 The `Decision Pane` now mirrors that live state as a chip row plus compact hint lines under `Inspector State Mirror`, and includes:
@@ -400,6 +401,7 @@ Those mirror controls are now also state-aware:
 - the mirror also exports `artifact_inspector_audit_window:` so operators can see which retained seq window is still present and how many earlier seqs were already lost
 - the mirror also exports `artifact_inspector_audit_continuity:` so operators can tell whether the retained audit trail still represents a full history or only a partial tail window
 - the mirror also exports `artifact_inspector_audit_health:` as a compact operator summary (`idle`, `healthy`, `truncated`) so the retained trail trust level is visible before reading the detailed audit lines
+- the mirror also exports `artifact_inspector_audit_health_reason:` so operators can distinguish `no_history`, `full_history_retained`, and `trimmed_prefix_lost` without parsing the lower-level audit counters
 - the mirror also exports `artifact_inspector_audit_summary:` with `total / retained / trimmed / next_seq / state` so operators can see full trail volume, the retained ring buffer size, and the next sequence number without parsing raw history
 - the mirror also exports `artifact_inspector_audit_controls:` with `recommended` and `reason` so brief/export readers can tell whether clearing is optional, unnecessary, or specifically recommended because the ring buffer trimmed older actions
 - the inspector status badges now also carry `audit:idle`, `audit:tracking`, or `audit:trimmed`, plus `continuity:empty`, `continuity:full`, or `continuity:tail_only`, and `health:idle`, `health:healthy`, or `health:truncated`, so both overflow and retained-history trust are visible without reading the text summary
