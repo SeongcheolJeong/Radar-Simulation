@@ -866,7 +866,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     layoutStateText: normalizeCompareSessionField(row.layoutStateText, 320) || "layout_state: -",
     probeStateText: normalizeCompareSessionField(row.probeStateText, 320) || "probe_state: -",
     statusBadgesText: normalizeCompareSessionField(row.statusBadgesText, 320) || "status_badges: -",
-    lastActionText: normalizeCompareSessionField(row.lastActionText, 320) || "last_action: idle",
+    lastActionText: normalizeCompareSessionField(row.lastActionText, 320) || "last_action: seq=0 | idle",
   };
 }
 
@@ -2914,7 +2914,7 @@ export function App() {
       {
         liveCompareEvidenceExpanded: false,
         historyArtifactExpectationExpanded: false,
-        lastActionText: "last_action: decision:collapse_evidence",
+        lastActionLabel: "decision:collapse_evidence",
       },
       "artifact inspector evidence collapsed from decision pane",
       "status-warn"
@@ -2925,7 +2925,7 @@ export function App() {
       {
         liveCompareEvidenceExpanded: true,
         historyArtifactExpectationExpanded: true,
-        lastActionText: "last_action: decision:expand_evidence",
+        lastActionLabel: "decision:expand_evidence",
       },
       "artifact inspector evidence expanded from decision pane",
       "status-ok"
@@ -2937,7 +2937,7 @@ export function App() {
         liveCompareEvidenceExpanded: true,
         historyArtifactExpectationExpanded: true,
         resetProbeControls: true,
-        lastActionText: "last_action: decision:reset_layout",
+        lastActionLabel: "decision:reset_layout",
       },
       "artifact inspector layout reset from decision pane",
       "status-ok"

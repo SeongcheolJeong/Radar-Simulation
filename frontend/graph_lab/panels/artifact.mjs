@@ -128,10 +128,22 @@ function computeProbe(peaks, rowBin, colBin, shape) {
 
 function normalizeArtifactInspectorPrefs(value) {
   const row = value && typeof value === "object" ? value : {};
+  const lastActionSeq = Number(row.lastActionSeq);
   return {
     liveCompareEvidenceExpanded: row.liveCompareEvidenceExpanded !== false,
     historyArtifactExpectationExpanded: row.historyArtifactExpectationExpanded !== false,
-    lastActionText: String(row.lastActionText || "last_action: idle").trim() || "last_action: idle",
+    lastActionSeq: Number.isFinite(lastActionSeq) && lastActionSeq >= 0 ? Math.floor(lastActionSeq) : 0,
+    lastActionText: String(row.lastActionText || "last_action: seq=0 | idle").trim() || "last_action: seq=0 | idle",
+  };
+}
+
+function buildArtifactInspectorLastActionUpdate(value, label) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const nextSeq = Math.max(0, Number(prefs.lastActionSeq || 0)) + 1;
+  const normalizedLabel = String(label || "unknown").trim() || "unknown";
+  return {
+    lastActionSeq: nextSeq,
+    lastActionText: `last_action: seq=${nextSeq} | ${normalizedLabel}`,
   };
 }
 
@@ -345,7 +357,7 @@ export function ArtifactInspectorPanel({
     return `status_badges: ${labels.length > 0 ? labels.join(" | ") : "-"}`;
   }, [artifactInspectorStatusBadges]);
   const artifactInspectorLastActionText = React.useMemo(
-    () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).lastActionText || "last_action: idle"),
+    () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).lastActionText || "last_action: seq=0 | idle"),
     [artifactInspectorPrefs]
   );
   React.useEffect(() => {
@@ -366,10 +378,14 @@ export function ArtifactInspectorPanel({
   const toggleLiveCompareEvidenceExpanded = React.useCallback(() => {
     setArtifactInspectorPrefs((prev) => {
       const next = normalizeArtifactInspectorPrefs(prev);
+      const actionUpdate = buildArtifactInspectorLastActionUpdate(
+        next,
+        `inspector:live_compare=${next.liveCompareEvidenceExpanded ? "collapsed" : "expanded"}`
+      );
       const updated = {
         ...next,
         liveCompareEvidenceExpanded: !next.liveCompareEvidenceExpanded,
-        lastActionText: `last_action: inspector:live_compare=${next.liveCompareEvidenceExpanded ? "collapsed" : "expanded"}`,
+        ...actionUpdate,
       };
       saveArtifactInspectorPrefs(updated);
       return updated;
@@ -378,10 +394,14 @@ export function ArtifactInspectorPanel({
   const toggleHistoryArtifactExpectationExpanded = React.useCallback(() => {
     setArtifactInspectorPrefs((prev) => {
       const next = normalizeArtifactInspectorPrefs(prev);
+      const actionUpdate = buildArtifactInspectorLastActionUpdate(
+        next,
+        `inspector:history_snapshot=${next.historyArtifactExpectationExpanded ? "collapsed" : "expanded"}`
+      );
       const updated = {
         ...next,
         historyArtifactExpectationExpanded: !next.historyArtifactExpectationExpanded,
-        lastActionText: `last_action: inspector:history_snapshot=${next.historyArtifactExpectationExpanded ? "collapsed" : "expanded"}`,
+        ...actionUpdate,
       };
       saveArtifactInspectorPrefs(updated);
       return updated;
@@ -389,9 +409,10 @@ export function ArtifactInspectorPanel({
   }, []);
   const resetArtifactInspectorLayout = React.useCallback(() => {
     const defaults = normalizeArtifactInspectorPrefs({});
+    const actionUpdate = buildArtifactInspectorLastActionUpdate(defaults, "inspector:reset_layout");
     const updated = {
       ...defaults,
-      lastActionText: "last_action: inspector:reset_layout",
+      ...actionUpdate,
     };
     setArtifactInspectorPrefs(updated);
     saveArtifactInspectorPrefs(updated);
@@ -404,9 +425,12 @@ export function ArtifactInspectorPanel({
     if (lastAppliedControlNonceRef.current === nonce) return;
     lastAppliedControlNonceRef.current = nonce;
     setArtifactInspectorPrefs((prev) => {
-      const updated = applyArtifactInspectorPrefsCommand(prev, command);
-      if (String(command?.lastActionText || "").trim()) {
-        updated.lastActionText = String(command.lastActionText).trim();
+      const next = applyArtifactInspectorPrefsCommand(prev, command);
+      const updated = {
+        ...next,
+      };
+      if (String(command?.lastActionLabel || "").trim()) {
+        Object.assign(updated, buildArtifactInspectorLastActionUpdate(next, String(command.lastActionLabel).trim()));
       }
       saveArtifactInspectorPrefs(updated);
       return updated;
