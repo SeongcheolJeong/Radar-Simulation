@@ -62,6 +62,7 @@ function buildArtifactInspectorStatusBadges({
   auditState,
   auditContinuity,
   auditHealth,
+  operatorAction,
 }) {
   return [
     {
@@ -110,6 +111,16 @@ function buildArtifactInspectorStatusBadges({
         String(auditHealth || "").trim() === "truncated"
           ? "status-warn"
           : String(auditHealth || "").trim() === "healthy"
+            ? "status-ok"
+            : "status-neutral"
+      ),
+    },
+    {
+      label: `operator:${String(operatorAction || "idle").trim() || "idle"}`,
+      tone: (
+        String(operatorAction || "").trim() === "clear"
+          ? "status-warn"
+          : String(operatorAction || "").trim() === "track"
             ? "status-ok"
             : "status-neutral"
       ),
@@ -329,6 +340,15 @@ function buildArtifactInspectorAuditOperatorSummaryText(value) {
   const reason = String(reasonMatch?.[1] || "unknown").trim().toLowerCase() || "unknown";
   const nextAction = String(nextMatch?.[1] || "none").trim().toLowerCase() || "none";
   return `audit_operator_summary: ${health} -> ${nextAction} | because=${reason}`;
+}
+
+function extractArtifactInspectorAuditOperatorBadge(value) {
+  const text = String(buildArtifactInspectorAuditNextActionText(value) || "").trim();
+  const match = /^audit_next_action:\s*([a-z_]+)/i.exec(text);
+  const nextAction = String(match?.[1] || "none").trim().toLowerCase() || "none";
+  if (nextAction === "keep_tracking") return "track";
+  if (nextAction === "clear_if_full_history_needed") return "clear";
+  return "idle";
 }
 
 function clearArtifactInspectorActionTrailState(value) {
@@ -554,6 +574,7 @@ export function ArtifactInspectorPanel({
       .toLowerCase();
     const auditContinuity = extractArtifactInspectorAuditContinuityState(artifactInspectorPrefs);
     const auditHealth = extractArtifactInspectorAuditHealthState(artifactInspectorPrefs);
+    const operatorAction = extractArtifactInspectorAuditOperatorBadge(artifactInspectorPrefs);
     return buildArtifactInspectorStatusBadges({
       layoutDefault,
       probesDefault: artifactInspectorProbeState.probesDefault === true,
@@ -562,6 +583,7 @@ export function ArtifactInspectorPanel({
       auditState,
       auditContinuity,
       auditHealth,
+      operatorAction,
     });
   }, [
     artifactInspectorPrefs,

@@ -906,6 +906,11 @@ function toneForArtifactInspectorStatusBadge(label) {
     if (text.endsWith("healthy")) return "status-ok";
     return "status-neutral";
   }
+  if (text.startsWith("operator:")) {
+    if (text.endsWith("clear")) return "status-warn";
+    if (text.endsWith("track")) return "status-ok";
+    return "status-neutral";
+  }
   return "status-neutral";
 }
 

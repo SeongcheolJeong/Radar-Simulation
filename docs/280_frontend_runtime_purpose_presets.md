@@ -408,7 +408,7 @@ Those mirror controls are now also state-aware:
 - the mirror also exports `artifact_inspector_audit_operator_summary:` as a single compact line joining health, immediate action, and root cause so brief readers can scan one decision sentence before dropping to the detailed audit fields
 - the mirror also exports `artifact_inspector_audit_summary:` with `total / retained / trimmed / next_seq / state` so operators can see full trail volume, the retained ring buffer size, and the next sequence number without parsing raw history
 - the mirror also exports `artifact_inspector_audit_controls:` with `recommended` and `reason` so brief/export readers can tell whether clearing is optional, unnecessary, or specifically recommended because the ring buffer trimmed older actions
-- the inspector status badges now also carry `audit:idle`, `audit:tracking`, or `audit:trimmed`, plus `continuity:empty`, `continuity:full`, or `continuity:tail_only`, and `health:idle`, `health:healthy`, or `health:truncated`, so both overflow and retained-history trust are visible without reading the text summary
+- the inspector status badges now also carry `audit:idle`, `audit:tracking`, or `audit:trimmed`, plus `continuity:empty`, `continuity:full`, or `continuity:tail_only`, `health:idle`, `health:healthy`, or `health:truncated`, and `operator:idle`, `operator:track`, or `operator:clear`, so overflow, retained-history trust, and the immediate operator posture are visible without reading the text summary
 
 The `Runtime Compare` summary inside the brief now also carries:
 
