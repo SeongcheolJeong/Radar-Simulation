@@ -342,6 +342,33 @@ function buildArtifactInspectorAuditOperatorSummaryText(value) {
   return `audit_operator_summary: ${health} -> ${nextAction} | because=${reason}`;
 }
 
+function buildArtifactInspectorAuditControlStateFromTexts(recentActionsText, auditStateText) {
+  const text = String(recentActionsText || "").trim();
+  const auditState = String(auditStateText || "").trim().toLowerCase();
+  const clearDisabled = !text || text === "recent_actions: none";
+  let applyRecommendedDisabled = true;
+  let recommendedAction = "none";
+  let recommendation = "not_needed";
+  let reason = "idle";
+  if (!clearDisabled) {
+    if (auditState.includes("audit_state: trimmed")) {
+      recommendation = "clear_overflow";
+      reason = "trimmed";
+      applyRecommendedDisabled = false;
+      recommendedAction = "clear_action_trail";
+    } else {
+      recommendation = "optional";
+      reason = "history_present";
+    }
+  }
+  return {
+    clearDisabled,
+    applyRecommendedDisabled,
+    recommendedAction,
+    text: `audit_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | apply=${applyRecommendedDisabled ? "disabled" : "enabled"} | reason=${reason}`,
+  };
+}
+
 function extractArtifactInspectorAuditOperatorBadge(value) {
   const text = String(buildArtifactInspectorAuditNextActionText(value) || "").trim();
   const match = /^audit_next_action:\s*([a-z_]+)/i.exec(text);
@@ -641,6 +668,13 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorAuditOperatorSummaryText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditControlState = React.useMemo(
+    () => buildArtifactInspectorAuditControlStateFromTexts(
+      artifactInspectorRecentActionsText,
+      artifactInspectorAuditStateText
+    ),
+    [artifactInspectorAuditStateText, artifactInspectorRecentActionsText]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -730,6 +764,18 @@ export function ArtifactInspectorPanel({
       return updated;
     });
   }, []);
+  const applyRecommendedArtifactInspectorAuditAction = React.useCallback(() => {
+    if (artifactInspectorAuditControlState.applyRecommendedDisabled) return;
+    if (String(artifactInspectorAuditControlState.recommendedAction || "").trim() !== "clear_action_trail") return;
+    setArtifactInspectorPrefs((prev) => {
+      const updated = clearArtifactInspectorActionTrailState(prev);
+      saveArtifactInspectorPrefs(updated);
+      return updated;
+    });
+  }, [
+    artifactInspectorAuditControlState.applyRecommendedDisabled,
+    artifactInspectorAuditControlState.recommendedAction,
+  ]);
   React.useEffect(() => {
     const command = controlRequest && typeof controlRequest === "object" ? controlRequest : null;
     const nonce = Number(command?.nonce);
@@ -845,6 +891,10 @@ export function ArtifactInspectorPanel({
           style: { color: "#8fb3c9" },
         }, artifactInspectorAuditSummaryText),
         h("div", {
+          key: "audit_controls",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditControlState.text),
+        h("div", {
           key: "last_action",
           style: { color: "#8fb3c9" },
         }, artifactInspectorLastActionText),
@@ -858,6 +908,12 @@ export function ArtifactInspectorPanel({
           className: "btn",
           onClick: resetArtifactInspectorLayout,
         }, "Reset Layout"),
+        h("button", {
+          key: "apply_recommended_artifact_inspector_audit_action",
+          className: "btn",
+          onClick: applyRecommendedArtifactInspectorAuditAction,
+          disabled: artifactInspectorAuditControlState.applyRecommendedDisabled === true,
+        }, "Apply Recommended Audit Action"),
         h("button", {
           key: "clear_artifact_inspector_action_trail",
           className: "btn",

@@ -190,6 +190,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_audit_next_action_checked": False,
             "artifact_inspector_audit_operator_summary_checked": False,
             "artifact_inspector_clear_action_trail_checked": False,
+            "artifact_inspector_local_recommended_action_checked": False,
             "artifact_inspector_badge_export_checked": False,
             "decision_artifact_inspector_state_checked": False,
             "decision_artifact_inspector_controls_checked": False,
@@ -444,6 +445,7 @@ def run(args: argparse.Namespace) -> int:
                 artifact_field = field_locator(page, "Artifact Inspector")
                 artifact_field.wait_for(timeout=30_000)
                 artifact_text = artifact_field.inner_text()
+                artifact_apply_recommended_button = artifact_field.get_by_role("button", name="Apply Recommended Audit Action")
                 decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
                 decision_artifact_state_field.wait_for(timeout=30_000)
                 decision_collapse_button = decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
@@ -479,6 +481,7 @@ def run(args: argparse.Namespace) -> int:
                     or "audit_next_action: none | trigger=idle" not in artifact_text
                     or "audit_operator_summary: idle -> none | because=no_history" not in artifact_text
                     or "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" not in artifact_text
+                    or "audit_controls: clear=disabled | recommended=not_needed | apply=disabled | reason=idle" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render default layout status")
                 if (
@@ -500,6 +503,8 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_path_fingerprint_algo:" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render selected history pair artifact expectation")
+                if not artifact_apply_recommended_button.is_disabled():
+                    raise AssertionError("artifact inspector recommended-audit button should be disabled in default state")
                 if (
                     "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty | health:idle | operator:idle" not in decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
@@ -607,6 +612,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane reset button should be disabled again after expanding evidence")
                 if not decision_apply_recommended_button.is_disabled():
                     raise AssertionError("decision pane recommended-audit button should remain disabled while audit action is only optional")
+                if not artifact_apply_recommended_button.is_disabled():
+                    raise AssertionError("artifact inspector recommended-audit button should remain disabled while audit action is only optional")
                 if decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should remain enabled while audit entries exist")
                 artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
@@ -743,6 +750,7 @@ def run(args: argparse.Namespace) -> int:
                     or "audit_next_action: clear_if_full_history_needed | trigger=tail_only_retained" not in reset_artifact_text
                     or "audit_operator_summary: truncated -> clear_if_full_history_needed | because=trimmed_prefix_lost" not in reset_artifact_text
                     or "audit_summary:" not in reset_artifact_text
+                    or "audit_controls: clear=enabled | recommended=clear_overflow | apply=enabled | reason=trimmed" not in reset_artifact_text
                     or "state=active" not in reset_artifact_text
                     or "retained=3" not in reset_artifact_text
                     or "trimmed=" not in reset_artifact_text
@@ -781,9 +789,11 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane did not mirror reset artifact inspector state")
                 if decision_apply_recommended_button.is_disabled():
                     raise AssertionError("decision pane recommended-audit button should be enabled after overflow is detected")
+                if artifact_apply_recommended_button.is_disabled():
+                    raise AssertionError("artifact inspector recommended-audit button should be enabled after overflow is detected")
                 if decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should be enabled after reset leaves audit history")
-                decision_apply_recommended_button.click()
+                artifact_apply_recommended_button.click()
                 cleared_audit_ready = False
                 cleared_audit_artifact_text = ""
                 for _ in range(40):
@@ -814,7 +824,9 @@ def run(args: argparse.Namespace) -> int:
                         break
                     page.wait_for_timeout(250)
                 if not cleared_audit_ready:
-                    raise AssertionError("decision pane recommended audit action did not reset artifact inspector audit trail")
+                    raise AssertionError("artifact inspector recommended audit action did not reset audit trail")
+                if not artifact_apply_recommended_button.is_disabled():
+                    raise AssertionError("artifact inspector recommended-audit button should be disabled after local action is applied")
                 if not decision_apply_recommended_button.is_disabled():
                     raise AssertionError("decision pane recommended-audit button should be disabled after recommended action is applied")
                 if not decision_clear_audit_button.is_disabled():
@@ -835,6 +847,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_audit_next_action_checked"] = True
                 report["runtime_controls"]["artifact_inspector_audit_operator_summary_checked"] = True
                 report["runtime_controls"]["artifact_inspector_clear_action_trail_checked"] = True
+                report["runtime_controls"]["artifact_inspector_local_recommended_action_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_state_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_controls_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_recommended_action_checked"] = True
@@ -1544,11 +1557,13 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not retain status badges")
                 reloaded_decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
+                reloaded_artifact_field = field_locator(page, "Artifact Inspector")
                 reloaded_decision_collapse_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
                 reloaded_decision_expand_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Expand Inspector Evidence")
                 reloaded_decision_reset_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout")
                 reloaded_decision_apply_recommended_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Apply Recommended Audit Action")
                 reloaded_decision_clear_audit_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Clear Action Trail")
+                reloaded_artifact_apply_recommended_button = reloaded_artifact_field.get_by_role("button", name="Apply Recommended Audit Action")
                 reloaded_mirror_ready = False
                 for _ in range(40):
                     reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
@@ -1589,6 +1604,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane reset button should remain disabled after reload")
                 if not reloaded_decision_apply_recommended_button.is_disabled():
                     raise AssertionError("decision pane recommended-audit button should remain disabled after reload")
+                if not reloaded_artifact_apply_recommended_button.is_disabled():
+                    raise AssertionError("artifact inspector recommended-audit button should remain disabled after reload")
                 if not reloaded_decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should remain disabled after reload")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
