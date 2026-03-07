@@ -19,6 +19,16 @@ def _save_adc_npz(path: Path, adc_sctr: np.ndarray) -> None:
     )
 
 
+def _assert_runtime_info(summary: dict) -> None:
+    runtime = summary["runtime_info"]["radarsimpy"]
+    available = runtime.get("available")
+    assert isinstance(available, bool)
+    if available:
+        assert str(runtime.get("version", "")).strip() != ""
+    else:
+        assert str(runtime.get("reason", "")).strip() != ""
+
+
 def run() -> None:
     with tempfile.TemporaryDirectory(prefix="validate_radarsimpy_periodic_lock_") as td:
         root = Path(td)
@@ -162,7 +172,7 @@ def run() -> None:
         assert summary_mixed["pass_count"] == 1
         assert summary_mixed["fail_count"] == 1
         assert summary_mixed["normalization_mode"] == "none"
-        assert summary_mixed["runtime_info"]["radarsimpy"]["available"] is False
+        _assert_runtime_info(summary_mixed)
 
         # Case 3: same mixed manifest should pass when complex gain normalization is enabled.
         summary_norm_json = root / "summary_norm.json"
@@ -191,7 +201,7 @@ def run() -> None:
         assert summary_norm["pass_count"] == 2
         assert summary_norm["fail_count"] == 0
         assert summary_norm["normalization_mode"] == "complex_l2"
-        assert summary_norm["runtime_info"]["radarsimpy"]["available"] is False
+        _assert_runtime_info(summary_norm)
 
     print("validate_run_radarsimpy_periodic_parity_lock: pass")
 
