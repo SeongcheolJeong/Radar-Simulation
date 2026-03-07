@@ -297,6 +297,49 @@ function buildRuntimeDiagnosticsFallbackFromOverrides(overrides) {
   };
 }
 
+function formatCompareSessionHistoryEntry(entry, ordinal) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  const indexPrefix = Number.isFinite(Number(ordinal)) && Number(ordinal) > 0 ? `[${Number(ordinal)}] ` : "";
+  const parts = [
+    `${indexPrefix}${String(row.timestampUtc || "-")}`,
+    `source=${String(row.source || "-")}`,
+    `status=${String(row.status || "-")}`,
+  ];
+  const pairLabel = String(row.pairLabel || "").trim();
+  if (pairLabel) {
+    parts.push(`pair=${pairLabel}`);
+  }
+  const phase = String(row.phase || "").trim();
+  if (phase) {
+    parts.push(`phase=${phase}`);
+  }
+  const compareRunId = String(row.compareRunId || "").trim();
+  if (compareRunId) {
+    parts.push(`compare=${compareRunId}`);
+  }
+  const currentRunId = String(row.currentRunId || "").trim();
+  if (currentRunId) {
+    parts.push(`current=${currentRunId}`);
+  }
+  const assessment = String(row.assessment || "").trim();
+  if (assessment) {
+    parts.push(`assessment=${assessment}`);
+  }
+  const note = String(row.note || "").trim();
+  if (note) {
+    parts.push(`note=${note}`);
+  }
+  return parts.join(" | ");
+}
+
+function summarizeCompareSessionHistory(entries) {
+  const rows = Array.isArray(entries) ? entries : [];
+  if (rows.length === 0) {
+    return "no compare sessions recorded";
+  }
+  return rows.slice(0, 6).map((row, idx) => formatCompareSessionHistoryEntry(row, idx + 1)).join("\n");
+}
+
 function isRuntimeBlockedError(message) {
   const text = String(message || "").trim().toLowerCase();
   return text.includes("required runtime modules unavailable") || text.includes("runtime provider failed");
@@ -426,6 +469,7 @@ export function App() {
   const [lastRegressionExport, setLastRegressionExport] = React.useState(null);
   const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
   const [trackCompareRunnerStatusText, setTrackCompareRunnerStatusText] = React.useState("-");
+  const [compareSessionHistory, setCompareSessionHistory] = React.useState([]);
   const [trackCompareBaselinePresetId, setTrackCompareBaselinePresetId] = React.useState(
     RUNTIME_PURPOSE_PRESET_LOW_FIDELITY
   );
@@ -516,6 +560,16 @@ export function App() {
     const snapshot = getContractWarningSnapshot();
     setContractDebugText(formatContractWarningSnapshot(snapshot));
   }, [formatContractWarningSnapshot]);
+
+  const appendCompareSession = React.useCallback((entryInput) => {
+    const row = entryInput && typeof entryInput === "object" ? entryInput : {};
+    const nextRow = {
+      id: `cmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      timestampUtc: new Date().toISOString(),
+      ...row,
+    };
+    setCompareSessionHistory((prev) => [nextRow, ...(Array.isArray(prev) ? prev : [])].slice(0, 8));
+  }, []);
 
   const resetContractWarnings = React.useCallback(() => {
     resetContractWarningStore();
@@ -646,6 +700,13 @@ export function App() {
       );
       if (mode === "manual") {
         setTrackCompareRunnerStatusText("manual_compare_loaded");
+        appendCompareSession({
+          source: "manual_load",
+          status: "loaded",
+          pairLabel: `${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+          compareRunId: graphRunId,
+          note: `graph_status=${status}`,
+        });
       }
       if (mode === "manual" && shouldSetStatus) {
         setStatus(`compare graph run loaded: ${graphRunId}`, "status-ok");
@@ -662,9 +723,24 @@ export function App() {
       if (mode === "manual" && shouldSetStatus) {
         setStatus(`compare graph run load failed: ${String(err.message || err)}`, "status-err");
       }
+      if (mode === "manual") {
+        appendCompareSession({
+          source: "manual_load",
+          status: "failed",
+          pairLabel: `${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+          compareRunId: graphRunId,
+          note: String(err.message || err),
+        });
+      }
       return false;
     }
-  }, [apiBase, setStatus]);
+  }, [
+    apiBase,
+    appendCompareSession,
+    setStatus,
+    trackCompareBaselinePresetId,
+    trackCompareTargetPresetId,
+  ]);
 
   const clearCompareGraphRun = React.useCallback(() => {
     setCompareGraphRunId("");
@@ -692,8 +768,20 @@ export function App() {
       `compare_mode=pinned_current | run=${graphRunId} | waiting_for_next_run=true`
     );
     setTrackCompareRunnerStatusText("manual_compare_pinned_current");
+    appendCompareSession({
+      source: "pin_current",
+      status: "pinned",
+      pairLabel: `${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+      compareRunId: graphRunId,
+    });
     setStatus(`current run pinned as compare: ${graphRunId}`, "status-ok");
-  }, [graphRunSummary, setStatus]);
+  }, [
+    appendCompareSession,
+    graphRunSummary,
+    setStatus,
+    trackCompareBaselinePresetId,
+    trackCompareTargetPresetId,
+  ]);
 
   const setCompareGraphRunIdDraft = React.useCallback((nextText) => {
     const text = String(nextText || "");
@@ -1358,6 +1446,14 @@ export function App() {
     trackCompareSelectedPairSummaryText,
     trackCompareTargetPresetId,
   ]);
+  const compareSessionHistoryText = React.useMemo(
+    () => summarizeCompareSessionHistory(compareSessionHistory),
+    [compareSessionHistory]
+  );
+  const latestCompareSessionText = React.useMemo(
+    () => compareSessionHistory.length > 0 ? formatCompareSessionHistoryEntry(compareSessionHistory[0]) : "-",
+    [compareSessionHistory]
+  );
 
   const {
     runGraphViaApi,
@@ -1549,6 +1645,13 @@ export function App() {
       setDecisionOpsStatusText(
         `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: mode=preset_pair | phase=baseline | baseline_preset=${baselinePresetId} | error=${lowError}`
       );
+      appendCompareSession({
+        source: "preset_pair",
+        status: blocked ? "blocked" : "failed",
+        pairLabel: `${baselinePresetLabel} -> ${targetPresetLabel}`,
+        phase: "baseline",
+        note: lowError,
+      });
       setStatus(
         blocked ? `track compare blocked at baseline preset: ${baselinePresetLabel}` : `track compare failed at baseline preset: ${baselinePresetLabel}`,
         blocked ? "status-warn" : "status-err"
@@ -1591,6 +1694,14 @@ export function App() {
       setDecisionOpsStatusText(
         `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: mode=preset_pair | phase=current | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | compare=${compareRunId || "-"} | error=${currentError}`
       );
+      appendCompareSession({
+        source: "preset_pair",
+        status: blocked ? "blocked" : "failed",
+        pairLabel: `${baselinePresetLabel} -> ${targetPresetLabel}`,
+        phase: "current",
+        compareRunId,
+        note: currentError,
+      });
       setStatus(
         blocked ? `track compare blocked at target preset: ${targetPresetLabel}` : `track compare failed at target preset: ${targetPresetLabel}`,
         blocked ? "status-warn" : "status-err"
@@ -1601,6 +1712,16 @@ export function App() {
     const currentRunId = String(
       currentResult.graphRunId || currentResult.summary?.graph_run_id || currentResult.summary?.run_id || ""
     ).trim();
+    const compareAssessment = buildRunCompareSummary(currentResult.summary, lowResult.summary);
+    appendCompareSession({
+      source: "preset_pair",
+      status: "ready",
+      pairLabel: `${baselinePresetLabel} -> ${targetPresetLabel}`,
+      phase: "current",
+      compareRunId,
+      currentRunId,
+      assessment: String(compareAssessment.assessment || "-"),
+    });
     setTrackCompareRunnerStatusText(
       `track_compare_runner=ready | mode=preset_pair | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | compare=${compareRunId || "-"} | current=${currentRunId || "-"}`
     );
@@ -1610,6 +1731,7 @@ export function App() {
     setStatus(`track compare ready: ${baselinePresetLabel} -> ${targetPresetLabel}`, "status-ok");
   }, [
     configuredRuntimeSummary.trackLabel,
+    appendCompareSession,
     applyRuntimePurposePresetToUi,
     runGraphViaApi,
     setStatus,
@@ -1676,6 +1798,8 @@ export function App() {
       `selected_preset_pair: ${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
       `selected_preset_pair_label: ${trackCompareSelectedPairSummaryText}`,
       `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
+      `compare_session_count: ${Number(compareSessionHistory.length || 0)}`,
+      `latest_compare_session: ${latestCompareSessionText}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -1708,12 +1832,14 @@ export function App() {
     return lines.join("\n");
   }, [
     baselineId,
+    compareSessionHistory.length,
     compareGraphRunId,
     compareGraphRunSummary,
     runCompareSummary,
     compareRuntimeDiagnostics.badgeLine,
     compareRuntimeSummary.trackLabel,
     graphRunSummary,
+    latestCompareSessionText,
     lastPolicyEval,
     runtimeDiagnostics.badgeLine,
     runtimeSummary.trackLabel,
@@ -1756,6 +1882,11 @@ export function App() {
       "## Selected Pair Forecast",
       "```text",
       trackCompareSelectedPairForecastText,
+      "```",
+      "",
+      "## Compare Session History",
+      "```text",
+      compareSessionHistoryText,
       "```",
       "",
       "### Current Runtime Diagnostics",
@@ -1821,6 +1952,7 @@ export function App() {
   }, [
     compareGraphRunSummary,
     compareRunStatusText,
+    compareSessionHistoryText,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
@@ -2192,6 +2324,7 @@ export function App() {
         applyTrackCompareQuickPair,
         trackCompareSelectedPairSummaryText,
         trackCompareSelectedPairForecastText,
+        compareSessionHistoryText,
         runPresetPairTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,

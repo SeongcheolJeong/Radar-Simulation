@@ -22,6 +22,7 @@ export function DecisionPane({
   applyTrackCompareQuickPair,
   trackCompareSelectedPairSummaryText,
   trackCompareSelectedPairForecastText,
+  compareSessionHistoryText,
   runPresetPairTrackCompare,
   exportGateReport,
   exportDecisionRegressionSession,
@@ -114,6 +115,10 @@ export function DecisionPane({
         }, "Run Low -> Current Compare"),
       ]),
       h("div", { className: "hint", key: "decision_preset_pair_mode_hint" }, "target_preset=current_config keeps the current runtime inputs and only builds the baseline automatically."),
+    ]),
+    h("div", { className: "field", key: "decision_compare_session_history" }, [
+      h("label", { className: "label", key: "decision_compare_session_history_label" }, "Compare Session History"),
+      h("pre", { className: "result-box", key: "decision_compare_session_history_box" }, String(compareSessionHistoryText || "-")),
     ]),
     h("div", { className: "btn-row", key: "decision_gate_row" }, [
       h("button", {

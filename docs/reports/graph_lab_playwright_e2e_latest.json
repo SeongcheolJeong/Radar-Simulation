@@ -1,6 +1,6 @@
 {
   "version": "graph_lab_playwright_e2e_report_v1",
-  "created_at_utc": "2026-03-07T09:54:25Z",
+  "created_at_utc": "2026-03-07T10:05:58Z",
   "require_playwright": true,
   "strict_visual": false,
   "update_baseline": false,
@@ -32,6 +32,7 @@
     "compare_workflow_checked": true,
     "quick_pair_shortcuts_checked": true,
     "pair_forecast_checked": true,
+    "compare_session_history_checked": true,
     "preset_pair_runner_checked": true,
     "track_compare_runner_checked": true,
     "track_compare_runner_result": "ready",

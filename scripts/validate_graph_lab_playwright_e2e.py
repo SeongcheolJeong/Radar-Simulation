@@ -141,6 +141,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_workflow_checked": False,
             "quick_pair_shortcuts_checked": False,
             "pair_forecast_checked": False,
+            "compare_session_history_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -395,6 +396,18 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector did not render compare assessment")
                 report["runtime_controls"]["compare_assessment_checked"] = True
 
+                history_field = field_locator(page, "Compare Session History")
+                history_field.wait_for(timeout=30_000)
+                history_text = history_field.inner_text()
+                if "source=pin_current" not in history_text:
+                    raise AssertionError("compare session history did not capture manual pin event")
+                if "source=preset_pair" not in history_text:
+                    raise AssertionError("compare session history did not capture preset pair event")
+                expected_history_status = str(report["runtime_controls"]["track_compare_runner_result"] or "").strip()
+                if expected_history_status and f"status={expected_history_status}" not in history_text:
+                    raise AssertionError("compare session history did not capture preset pair result status")
+                report["runtime_controls"]["compare_session_history_checked"] = True
+
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()
                 page.wait_for_function(
@@ -427,6 +440,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include selected preset pair summary")
                 if "## Selected Pair Forecast" not in brief_text or "baseline_forecast:" not in brief_text:
                     raise AssertionError("decision brief did not include selected pair forecast summary")
+                if "## Compare Session History" not in brief_text or "source=preset_pair" not in brief_text:
+                    raise AssertionError("decision brief did not include compare session history summary")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True

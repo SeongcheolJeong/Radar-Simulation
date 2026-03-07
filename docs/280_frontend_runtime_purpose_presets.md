@@ -132,6 +132,13 @@ It now also shows a `selected pair forecast` block with:
 
 These are planned runtime diagnostics derived from the selected preset ids and current runtime panel state, so the operator can see whether a pair is likely to be `planned`, `ready`, or blocked by missing modules before running it.
 
+The Decision Pane also keeps a `Compare Session History` block that records the latest manual compare actions and preset-pair runs, including:
+
+- `source=manual_load`, `source=pin_current`, or `source=preset_pair`
+- result status such as `loaded`, `pinned`, `ready`, `blocked`, or `failed`
+- compare/current graph run ids when available
+- compare assessment for completed preset-pair runs
+
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
 - `aligned`
@@ -206,6 +213,8 @@ It also includes a `Compare Assessment` block with:
 - required artifact coverage and artifact presence delta
 
 `Export Brief` also includes a `Selected Pair Forecast` section so the chosen compare recipe and its planned runtime expectations are preserved outside the UI.
+
+It now also exports a `Compare Session History` section so the operator can hand off recent compare actions and their outcomes without relying on the browser state.
 
 ## Current Scope
 
