@@ -147,6 +147,12 @@ The history block also provides:
 - `Run Latest History Pair`
   - immediately reruns that stored preset pair
   - if the stored target is `current_config`, the replay uses the current runtime panel state at replay time
+- `selected_history_pair`
+  - tracks the replayable pair currently chosen in the history dropdown
+- `Use Selected History Pair`
+  - restores the chosen replayable pair from history into the selector controls
+- `Run Selected History Pair`
+  - reruns the chosen replayable pair from history instead of always using the newest one
 
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
@@ -224,6 +230,11 @@ It also includes a `Compare Assessment` block with:
 `Export Brief` also includes a `Selected Pair Forecast` section so the chosen compare recipe and its planned runtime expectations are preserved outside the UI.
 
 It now also exports a `Compare Session History` section so the operator can hand off recent compare actions and their outcomes without relying on the browser state.
+
+The `Runtime Compare` summary inside the brief now also carries:
+
+- `latest_replayable_pair`
+- `selected_history_pair`
 
 ## Current Scope
 

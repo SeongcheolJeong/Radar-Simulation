@@ -143,6 +143,7 @@ def run(args: argparse.Namespace) -> int:
             "pair_forecast_checked": False,
             "compare_session_history_checked": False,
             "compare_session_replay_checked": False,
+            "compare_session_selector_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -207,7 +208,10 @@ def run(args: argparse.Namespace) -> int:
             )
 
             def field_locator(page: Any, label_text: str) -> Any:
-                return page.locator("div.field").filter(has_text=label_text).first
+                escaped = json.dumps(str(label_text))
+                return page.locator(
+                    f"xpath=//label[contains(@class,'label')][contains(normalize-space(), {escaped})]/parent::div[contains(@class,'field')]"
+                ).first
 
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
@@ -400,12 +404,16 @@ def run(args: argparse.Namespace) -> int:
                 history_field = field_locator(page, "Compare Session History")
                 history_field.wait_for(timeout=30_000)
                 history_text = history_field.inner_text()
+                history_hints = history_field.locator(".hint")
+                selected_history_hint = history_hints.nth(1)
                 if "source=pin_current" not in history_text:
                     raise AssertionError("compare session history did not capture manual pin event")
                 if "source=preset_pair" not in history_text:
                     raise AssertionError("compare session history did not capture preset pair event")
                 if "latest_replayable_pair:" not in history_text:
                     raise AssertionError("compare session history did not render latest replayable pair hint")
+                if "selected_history_pair:" not in history_text:
+                    raise AssertionError("compare session history did not render selected history pair hint")
                 expected_history_status = str(report["runtime_controls"]["track_compare_runner_result"] or "").strip()
                 if expected_history_status and f"status={expected_history_status}" not in history_text:
                     raise AssertionError("compare session history did not capture preset pair result status")
@@ -433,6 +441,43 @@ def run(args: argparse.Namespace) -> int:
                     timeout=90_000,
                 )
                 report["runtime_controls"]["compare_session_replay_checked"] = True
+
+                history_select = history_field.locator("select").first
+                option_count = history_select.locator("option").count()
+                if option_count < 1:
+                    raise AssertionError("compare session history selector did not expose any replayable pairs")
+                selected_option_value = history_select.locator("option").nth(0).get_attribute("value") or ""
+                selected_target_value = selected_option_value.split("::", 1)[1] if "::" in selected_option_value else ""
+                if not selected_option_value or not selected_target_value:
+                    raise AssertionError("compare session history selector did not provide a valid replayable pair value")
+                history_select.select_option(selected_option_value)
+                page.wait_for_timeout(100)
+                history_field.get_by_role("button", name="Use Selected History Pair").click()
+                page.wait_for_function(
+                    """(expectedTarget) => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Preset Pair Compare")
+                        );
+                        const selects = field ? Array.from(field.querySelectorAll("select")) : [];
+                        return selects.length >= 2 && String(selects[1].value || "") === String(expectedTarget || "");
+                    }""",
+                    arg=selected_target_value,
+                    timeout=10_000,
+                )
+                pre_selected_replay_history_text = history_field.inner_text()
+                history_field.get_by_role("button", name="Run Selected History Pair").click()
+                page.wait_for_function(
+                    """(prevText) => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("source=preset_pair") && text !== String(prevText || "");
+                    }""",
+                    arg=pre_selected_replay_history_text,
+                    timeout=90_000,
+                )
+                report["runtime_controls"]["compare_session_selector_checked"] = True
 
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()
@@ -470,6 +515,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include compare session history summary")
                 if "latest_replayable_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include latest replayable pair summary")
+                if "selected_history_pair:" not in brief_text:
+                    raise AssertionError("decision brief did not include selected history pair summary")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
