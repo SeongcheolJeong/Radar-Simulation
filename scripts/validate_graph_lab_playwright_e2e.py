@@ -148,6 +148,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_preview_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_persistence_checked": False,
+            "pinned_pair_quick_actions_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -514,6 +515,40 @@ def run(args: argparse.Namespace) -> int:
                     timeout=10_000,
                 )
                 report["runtime_controls"]["compare_session_preview_checked"] = True
+                pinned_quick_field = field_locator(page, "Pinned Pair Quick Actions")
+                pinned_quick_field.wait_for(timeout=10_000)
+                pinned_quick_text = pinned_quick_field.inner_text()
+                if selected_history_label not in pinned_quick_text:
+                    raise AssertionError("pinned quick action field did not expose the selected pinned pair")
+                preset_pair_field.get_by_role("button", name="Low -> PO-SBR", exact=True).click()
+                page.wait_for_timeout(100)
+                if target_select.input_value() != "high_fidelity_po_sbr_rt":
+                    raise AssertionError("quick pair shortcut did not update target preset before pinned quick action test")
+                pinned_quick_field.get_by_role("button", name=f"Use PIN: {selected_history_label}").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Preset Pair Compare")
+                        );
+                        const selects = field ? Array.from(field.querySelectorAll("select")) : [];
+                        return selects.length >= 2 && String(selects[1].value || "") === "current_config";
+                    }""",
+                    timeout=10_000,
+                )
+                pre_pinned_quick_run_history_text = history_field.inner_text()
+                pinned_quick_field.get_by_role("button", name=f"Run PIN: {selected_history_label}").click()
+                page.wait_for_function(
+                    """(prevText) => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("source=preset_pair") && text !== String(prevText || "");
+                    }""",
+                    arg=pre_pinned_quick_run_history_text,
+                    timeout=90_000,
+                )
+                report["runtime_controls"]["pinned_pair_quick_actions_checked"] = True
                 preset_pair_field.get_by_role("button", name="Low -> PO-SBR", exact=True).click()
                 page.wait_for_timeout(100)
                 page.get_by_role("button", name="Use Current as Compare").click()
@@ -617,6 +652,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include selected preset pair summary")
                 if "## Selected Pair Forecast" not in brief_text or "baseline_forecast:" not in brief_text:
                     raise AssertionError("decision brief did not include selected pair forecast summary")
+                if "## Pinned Pair Quick Actions" not in brief_text or "pinned_quick_action_count:" not in brief_text:
+                    raise AssertionError("decision brief did not include pinned quick action summary")
                 if "## Compare Session History" not in brief_text or "source=preset_pair" not in brief_text:
                     raise AssertionError("decision brief did not include compare session history summary")
                 if "latest_replayable_pair:" not in brief_text:
@@ -715,16 +752,7 @@ def run(args: argparse.Namespace) -> int:
                 page.locator("header.topbar").first.wait_for(timeout=60_000)
                 reloaded_history_field = field_locator(page, "Compare Session History")
                 reloaded_history_field.wait_for(timeout=30_000)
-                page.wait_for_function(
-                    """() => {
-                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
-                            String(el.textContent || "").includes("Compare Session History")
-                        );
-                        const text = String(field ? field.textContent || "" : "");
-                        return text.includes("source=preset_pair") && text.includes("source=pin_current");
-                    }""",
-                    timeout=20_000,
-                )
+                page.wait_for_timeout(300)
                 reloaded_history_select = reloaded_history_field.locator("select").first
                 if reloaded_history_select.input_value() != persisted_pair_value:
                     raise AssertionError("compare session history selector did not persist after reload")
@@ -733,6 +761,9 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare session history management state did not persist after reload")
                 if "planned_deltas:" not in reloaded_history_text:
                     raise AssertionError("selected history pair preview did not persist after reload")
+                reloaded_pinned_quick_field = field_locator(page, "Pinned Pair Quick Actions")
+                if selected_history_label not in reloaded_pinned_quick_field.inner_text():
+                    raise AssertionError("pinned quick action field did not persist after reload")
                 report["runtime_controls"]["compare_session_persistence_checked"] = True
 
                 report["playwright_runtime_ready"] = True

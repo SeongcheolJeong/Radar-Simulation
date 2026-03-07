@@ -22,6 +22,11 @@ export function DecisionPane({
   applyTrackCompareQuickPair,
   trackCompareSelectedPairSummaryText,
   trackCompareSelectedPairForecastText,
+  pinnedCompareQuickActionOptions,
+  pinnedCompareQuickActionSummaryText,
+  pinnedCompareQuickActionDetailText,
+  applyPinnedCompareQuickAction,
+  runPinnedCompareQuickAction,
   compareSessionHistoryText,
   compareReplayPairOptions,
   selectedCompareReplayPairId,
@@ -138,6 +143,29 @@ export function DecisionPane({
         }, "Run Low -> Current Compare"),
       ]),
       h("div", { className: "hint", key: "decision_preset_pair_mode_hint" }, "target_preset=current_config keeps the current runtime inputs and only builds the baseline automatically."),
+    ]),
+    h("div", { className: "field", key: "decision_pinned_pair_quick_actions" }, [
+      h("label", { className: "label", key: "decision_pinned_pair_quick_actions_label" }, "Pinned Pair Quick Actions"),
+      h("div", { className: "hint", key: "decision_pinned_pair_quick_actions_hint" }, String(pinnedCompareQuickActionSummaryText || "-")),
+      h("pre", { className: "result-box", key: "decision_pinned_pair_quick_actions_box" }, String(pinnedCompareQuickActionDetailText || "-")),
+      ...(Array.isArray(pinnedCompareQuickActionOptions) && pinnedCompareQuickActionOptions.length > 0
+        ? pinnedCompareQuickActionOptions.map((row) =>
+          h("div", { className: "btn-row", key: `decision_pinned_pair_quick_action_row_${String(row?.id || row?.pairId || "")}` }, [
+            h("button", {
+              className: "btn",
+              key: `decision_apply_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
+              onClick: () => applyPinnedCompareQuickAction(String(row?.id || row?.pairId || "")),
+            }, `Use PIN: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
+            h("button", {
+              className: "btn",
+              key: `decision_run_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
+              onClick: () => runPinnedCompareQuickAction(String(row?.id || row?.pairId || "")),
+            }, `Run PIN: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
+          ])
+        )
+        : [
+          h("div", { className: "hint", key: "decision_pinned_pair_quick_actions_empty_hint" }, "Pin a selected history pair below to promote it here."),
+        ]),
     ]),
     h("div", { className: "field", key: "decision_compare_session_history" }, [
       h("label", { className: "label", key: "decision_compare_session_history_label" }, "Compare Session History"),

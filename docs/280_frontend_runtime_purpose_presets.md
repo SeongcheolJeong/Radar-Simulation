@@ -165,6 +165,15 @@ It also supports lightweight pair management directly in the Decision Pane:
 - `Delete Selected History Pair`
   - removes the selected pair and its matching history entries from the local compare-session store
 
+Pinned pairs are also promoted into a top-level `Pinned Pair Quick Actions` block:
+
+- `Use PIN: <label>`
+  - restores that pinned replayable pair into the preset-pair compare selectors without opening the history dropdown
+- `Run PIN: <label>`
+  - reruns that pinned replayable pair directly from the top-level quick action area
+- `pinned_quick_action_count`
+  - summarizes how many pinned quick actions are currently promoted out of history
+
 The same area now supports browser-to-browser transfer:
 
 - `Export History`

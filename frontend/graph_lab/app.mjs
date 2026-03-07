@@ -48,6 +48,7 @@ const DENSITY_MODE_SET = new Set(["comfortable", "compact"]);
 const COMPARE_SESSION_STORAGE_KEY = "graph_lab_compare_session_history_v1";
 const COMPARE_SESSION_HISTORY_LIMIT = 8;
 const COMPARE_REPLAY_PAIR_OPTION_LIMIT = 6;
+const PINNED_COMPARE_QUICK_ACTION_LIMIT = 3;
 const COMPARE_SESSION_EXPORT_SCHEMA_VERSION = "graph_lab_compare_history_export_v1";
 
 function formatSigned(value) {
@@ -592,6 +593,14 @@ function summarizeCompareSessionHistory(entries, pairMetaById) {
     .slice(0, 6)
     .map((row, idx) => formatCompareSessionHistoryEntry(row, idx + 1, pairMetaById))
     .join("\n");
+}
+
+function compactCompareQuickActionLabel(value, maxLength = 28) {
+  const text = String(value || "").trim();
+  const limit = Math.max(12, Number(maxLength || 28));
+  if (!text) return "-";
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit - 3)}...`;
 }
 
 function buildCompareSessionReplayOptions(entries, pairMetaById) {
@@ -1760,6 +1769,36 @@ export function App() {
     () => buildCompareSessionReplayOptions(compareSessionHistory, compareReplayPairMetaById),
     [compareReplayPairMetaById, compareSessionHistory]
   );
+  const pinnedCompareQuickActionOptions = React.useMemo(
+    () => compareReplayPairOptions
+      .filter((row) => row?.pinned === true)
+      .slice(0, PINNED_COMPARE_QUICK_ACTION_LIMIT)
+      .map((row) => ({
+        ...row,
+        shortLabel: compactCompareQuickActionLabel(row?.pairLabel || row?.label || row?.id || "-"),
+      })),
+    [compareReplayPairOptions]
+  );
+  const pinnedCompareQuickActionSummaryText = React.useMemo(() => {
+    if (pinnedCompareQuickActionOptions.length === 0) {
+      return "pinned_quick_actions: -";
+    }
+    return `pinned_quick_actions: ${pinnedCompareQuickActionOptions.map((row) => row.pairLabel).join(" | ")}`;
+  }, [pinnedCompareQuickActionOptions]);
+  const pinnedCompareQuickActionDetailText = React.useMemo(() => {
+    if (pinnedCompareQuickActionOptions.length === 0) {
+      return [
+        "pinned_quick_action_count: 0",
+        "Pin a selected history pair below to promote it here.",
+      ].join("\n");
+    }
+    return [
+      `pinned_quick_action_count: ${Number(pinnedCompareQuickActionOptions.length || 0)}`,
+      ...pinnedCompareQuickActionOptions.map((row, idx) => (
+        `- [${Number(idx) + 1}] ${String(row.pairLabel || "-")} | baseline=${String(row.baselinePresetId || "-")} | target=${String(row.targetPresetId || "-")}`
+      )),
+    ].join("\n");
+  }, [pinnedCompareQuickActionOptions]);
   const latestReplayableCompareSessionText = React.useMemo(() => {
     if (!latestReplayableCompareSession) {
       return "latest_replayable_pair: -";
@@ -2199,6 +2238,36 @@ export function App() {
     return runCompareSessionReplayPair(selectedReplayableCompareSession);
   }, [runCompareSessionReplayPair, selectedReplayableCompareSession]);
 
+  const applyPinnedCompareQuickAction = React.useCallback((pairId) => {
+    const selectedId = String(pairId || "").trim();
+    const row = pinnedCompareQuickActionOptions.find((item) => String(item?.id || item?.pairId || "").trim() === selectedId) || null;
+    if (!row) {
+      setStatus("selected pinned quick action is unavailable", "status-warn");
+      return false;
+    }
+    setSelectedCompareReplayPairId(String(row.id || row.pairId || ""));
+    return applyCompareSessionReplayPair(row);
+  }, [
+    applyCompareSessionReplayPair,
+    pinnedCompareQuickActionOptions,
+    setStatus,
+  ]);
+
+  const runPinnedCompareQuickAction = React.useCallback(async (pairId) => {
+    const selectedId = String(pairId || "").trim();
+    const row = pinnedCompareQuickActionOptions.find((item) => String(item?.id || item?.pairId || "").trim() === selectedId) || null;
+    if (!row) {
+      setStatus("selected pinned quick action is unavailable", "status-warn");
+      return;
+    }
+    setSelectedCompareReplayPairId(String(row.id || row.pairId || ""));
+    return runCompareSessionReplayPair(row);
+  }, [
+    pinnedCompareQuickActionOptions,
+    runCompareSessionReplayPair,
+    setStatus,
+  ]);
+
   const saveSelectedCompareSessionPairLabel = React.useCallback(() => {
     const selectedPair = selectedReplayableCompareSession;
     if (!selectedPair) {
@@ -2425,6 +2494,7 @@ export function App() {
       `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
       `compare_session_count: ${Number(compareSessionHistory.length || 0)}`,
       `managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
+      `${pinnedCompareQuickActionSummaryText}`,
       `latest_compare_session: ${latestCompareSessionText}`,
       `${latestReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionText}`,
@@ -2466,6 +2536,7 @@ export function App() {
     compareGraphRunId,
     compareGraphRunSummary,
     managedCompareReplayPairCount,
+    pinnedCompareQuickActionSummaryText,
     runCompareSummary,
     compareRuntimeDiagnostics.badgeLine,
     compareRuntimeSummary.trackLabel,
@@ -2517,10 +2588,16 @@ export function App() {
       `- ${selectedReplayableCompareSessionText}`,
       `- ${selectedReplayableCompareSessionMetaText}`,
       `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
+      `- ${pinnedCompareQuickActionSummaryText}`,
       "",
       "## Selected Pair Forecast",
       "```text",
       trackCompareSelectedPairForecastText,
+      "```",
+      "",
+      "## Pinned Pair Quick Actions",
+      "```text",
+      pinnedCompareQuickActionDetailText,
       "```",
       "",
       "## Compare Session History",
@@ -2615,6 +2692,8 @@ export function App() {
     setStatus,
     latestReplayableCompareSessionText,
     trackCompareBaselinePresetId,
+    pinnedCompareQuickActionDetailText,
+    pinnedCompareQuickActionSummaryText,
     trackCompareSelectedPairForecastText,
     trackCompareSelectedPairSummaryText,
     trackCompareTargetPresetId,
@@ -2973,6 +3052,11 @@ export function App() {
         applyTrackCompareQuickPair,
         trackCompareSelectedPairSummaryText,
         trackCompareSelectedPairForecastText,
+        pinnedCompareQuickActionOptions,
+        pinnedCompareQuickActionSummaryText,
+        pinnedCompareQuickActionDetailText,
+        applyPinnedCompareQuickAction,
+        runPinnedCompareQuickAction,
         compareSessionHistoryText,
         compareReplayPairOptions,
         selectedCompareReplayPairId,
