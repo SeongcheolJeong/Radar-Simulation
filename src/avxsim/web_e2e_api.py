@@ -61,6 +61,20 @@ def _now_iso() -> str:
     return _dt.datetime.now(tz=_dt.timezone.utc).replace(microsecond=0).isoformat()
 
 
+def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    try:
+        tmp_path.write_text(json.dumps(payload, indent=2, default=_json_default), encoding="utf-8")
+        tmp_path.replace(path)
+    finally:
+        try:
+            if tmp_path.exists():
+                tmp_path.unlink()
+        except Exception:
+            pass
+
+
 def _json_default(value: Any) -> Any:
     if isinstance(value, (np.integer,)):
         return int(value)
@@ -2443,33 +2457,53 @@ class WebE2EOrchestrator:
         return self._load_record_path(self._record_path(run_id))
 
     def _load_record_path(self, path: Path) -> dict[str, Any]:
-        if not path.exists() or not path.is_file():
-            raise FileNotFoundError(f"run record not found: {path}")
-        return json.loads(path.read_text(encoding="utf-8"))
+        last_exc: Optional[BaseException] = None
+        for attempt in range(5):
+            if not path.exists() or not path.is_file():
+                last_exc = FileNotFoundError(f"run record not found: {path}")
+            else:
+                try:
+                    return json.loads(path.read_text(encoding="utf-8"))
+                except json.JSONDecodeError as exc:
+                    last_exc = exc
+            if attempt < 4:
+                time.sleep(0.02)
+        if isinstance(last_exc, FileNotFoundError):
+            raise last_exc
+        raise RuntimeError(f"run record decode failed after retries: {path}") from last_exc
 
     def _load_graph_record(self, graph_run_id: str) -> dict[str, Any]:
         return self._load_graph_record_path(self._graph_record_path(graph_run_id))
 
     def _load_graph_record_path(self, path: Path) -> dict[str, Any]:
-        if not path.exists() or not path.is_file():
-            raise FileNotFoundError(f"graph run record not found: {path}")
-        return json.loads(path.read_text(encoding="utf-8"))
+        last_exc: Optional[BaseException] = None
+        for attempt in range(5):
+            if not path.exists() or not path.is_file():
+                last_exc = FileNotFoundError(f"graph run record not found: {path}")
+            else:
+                try:
+                    return json.loads(path.read_text(encoding="utf-8"))
+                except json.JSONDecodeError as exc:
+                    last_exc = exc
+            if attempt < 4:
+                time.sleep(0.02)
+        if isinstance(last_exc, FileNotFoundError):
+            raise last_exc
+        raise RuntimeError(f"graph run record decode failed after retries: {path}") from last_exc
 
     def _save_record(self, record: Mapping[str, Any]) -> None:
         run_id = str(record.get("run_id", "")).strip()
         if run_id == "":
             raise ValueError("run_id missing in record")
         path = self._record_path(run_id)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(record, indent=2, default=_json_default), encoding="utf-8")
+        _write_json_atomic(path, record)
 
     def _save_graph_record(self, record: Mapping[str, Any]) -> None:
         graph_run_id = str(record.get("graph_run_id", "")).strip()
         if graph_run_id == "":
             raise ValueError("graph_run_id missing in record")
         path = self._graph_record_path(graph_run_id)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(record, indent=2, default=_json_default), encoding="utf-8")
+        _write_json_atomic(path, record)
 
     def _mutate_record(self, run_id: str, mutate_fn: Any) -> dict[str, Any]:
         with self._lock:
