@@ -125,6 +125,7 @@ def run(args: argparse.Namespace) -> int:
             "purpose_presets_checked": [],
             "ffd_fields_present": False,
             "advanced_controls_checked": [],
+            "compare_workflow_checked": False,
         },
         "artifacts": {},
         "status": "unknown",
@@ -291,6 +292,24 @@ def run(args: argparse.Namespace) -> int:
 
                 page.get_by_role("button", name="Run Graph (API)").click()
                 page.get_by_text("graph run completed", exact=False).first.wait_for(timeout=30_000)
+
+                page.get_by_text("Track Compare Workflow", exact=True).wait_for(timeout=30_000)
+                current_track_hint = page.get_by_text("current_track:", exact=False).first
+                compare_track_hint = page.get_by_text("compare_track:", exact=False).first
+                if "backend=" not in current_track_hint.inner_text():
+                    raise AssertionError("track compare workflow did not render current track label")
+                if "backend=" not in compare_track_hint.inner_text():
+                    raise AssertionError("track compare workflow did not render compare track label")
+
+                page.get_by_role("button", name="Use Current as Compare").click()
+                page.wait_for_function(
+                    """() => {
+                        const text = (document.body && document.body.innerText) || "";
+                        return text.includes("compare_mode=pinned_current");
+                    }""",
+                    timeout=20_000,
+                )
+                report["runtime_controls"]["compare_workflow_checked"] = True
 
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()

@@ -58,6 +58,25 @@ The runtime panel now exposes provider-specific advanced sections when the selec
 
 The purpose preset buttons also load sample values for these sections so a user does not start from an invalid empty runtime payload.
 
+## Compare Workflow
+
+The Decision Pane now exposes a lightweight operator workflow for low-vs-high track comparison:
+
+- `Use Current as Compare`
+  - locks the current run as the compare reference
+  - keeps that reference pinned while the operator switches runtime presets and runs again
+- `Track Compare Workflow`
+  - shows current/compare track labels
+  - keeps the recommended sequence visible inside the UI
+
+Practical flow:
+
+1. Run the first track.
+2. Click `Use Current as Compare`.
+3. Switch to the other runtime preset.
+4. Run again.
+5. Inspect `Artifact Inspector` diff and use `Policy Gate` / `Run Session`.
+
 ## Backend Behavior
 
 Path-based backends now share the same antenna-aware FMCW synth path:

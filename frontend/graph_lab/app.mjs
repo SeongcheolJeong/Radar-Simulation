@@ -44,6 +44,66 @@ function normalizeDensityMode(value) {
   return DENSITY_MODE_SET.has(mode) ? mode : "comfortable";
 }
 
+function summarizeRuntimeTrack(summary, fallbackConfig) {
+  const summaryObj = summary && typeof summary === "object" ? summary : {};
+  const fallback = fallbackConfig && typeof fallbackConfig === "object" ? fallbackConfig : {};
+  const meta = summaryObj?.radar_map_summary?.metadata && typeof summaryObj.radar_map_summary.metadata === "object"
+    ? summaryObj.radar_map_summary.metadata
+    : {};
+  const runtimeResolution = meta?.runtime_resolution && typeof meta.runtime_resolution === "object"
+    ? meta.runtime_resolution
+    : {};
+  const antennaSummary = meta?.antenna_summary && typeof meta.antenna_summary === "object"
+    ? meta.antenna_summary
+    : {};
+  const providerInfo = runtimeResolution?.provider_runtime_info && typeof runtimeResolution.provider_runtime_info === "object"
+    ? runtimeResolution.provider_runtime_info
+    : {};
+
+  const backendTypeObserved = String(meta?.backend_type || fallback.backendType || "").trim();
+  const runtimeModeObserved = String(runtimeResolution?.mode || fallback.runtimeMode || "").trim();
+  const simulationBackendObserved = String(
+    providerInfo?.simulation_backend || providerInfo?.generator || fallback.simulationBackend || ""
+  ).trim();
+  const multiplexingObserved = String(
+    providerInfo?.multiplexing_mode || fallback.multiplexingMode || ""
+  ).trim();
+  const licenseObserved = String(
+    providerInfo?.license_file || providerInfo?.license_file_hint || fallback.licenseObserved || ""
+  ).trim();
+  const antennaModeObserved = String(antennaSummary?.antenna_mode || fallback.antennaMode || "").trim();
+  const licenseStatus = licenseObserved ? "set" : String(fallback.licenseStatus || "none").trim();
+  const graphRunId = String(summaryObj?.graph_run_id || summaryObj?.run_id || "").trim();
+  const runtimeStatusLine = [
+    `backend=${backendTypeObserved || "-"}`,
+    `mode=${runtimeModeObserved || "-"}`,
+    `sim=${simulationBackendObserved || "-"}`,
+    `mux=${multiplexingObserved || "-"}`,
+    `ant=${antennaModeObserved || "-"}`,
+    `license=${licenseStatus || "-"}`,
+  ].join(" | ");
+  const trackLabel = [
+    `backend=${backendTypeObserved || "-"}`,
+    `sim=${simulationBackendObserved || runtimeModeObserved || "-"}`,
+    `mux=${multiplexingObserved || "-"}`,
+    `ant=${antennaModeObserved || "-"}`,
+    `license=${licenseStatus || "-"}`,
+  ].join(" | ");
+
+  return {
+    backendTypeObserved,
+    runtimeModeObserved,
+    simulationBackendObserved,
+    multiplexingObserved,
+    antennaModeObserved,
+    licenseObserved,
+    licenseStatus,
+    graphRunId,
+    runtimeStatusLine,
+    trackLabel,
+  };
+}
+
 export function App() {
   const params = new URLSearchParams(window.location.search);
   const [layoutMode, setLayoutMode] = React.useState(
@@ -406,6 +466,24 @@ export function App() {
     setStatus("compare graph run cleared", "status-ok");
   }, [graphRunSummary?.graph_run_id, setStatus]);
 
+  const pinCurrentGraphRunAsCompare = React.useCallback(() => {
+    const graphRunId = String(
+      graphRunSummary?.graph_run_id || graphRunSummary?.run_id || ""
+    ).trim();
+    if (!graphRunId || !graphRunSummary) {
+      setStatus("run graph first to pin current as compare", "status-warn");
+      return;
+    }
+    setCompareGraphRunId(graphRunId);
+    setCompareGraphRunSummary(graphRunSummary);
+    setCompareRunPinnedManual(true);
+    setCompareAutoSkipForRunId("");
+    setCompareRunStatusText(
+      `compare_mode=pinned_current | run=${graphRunId} | waiting_for_next_run=true`
+    );
+    setStatus(`current run pinned as compare: ${graphRunId}`, "status-ok");
+  }, [graphRunSummary, setStatus]);
+
   const setCompareGraphRunIdDraft = React.useCallback((nextText) => {
     const text = String(nextText || "");
     setCompareGraphRunId(text);
@@ -695,8 +773,9 @@ export function App() {
 
     const compareLockedByUser = Boolean(compareRunPinnedManual);
     if (compareLockedByUser && String(compareGraphRunId).trim() === currentGraphRunId) {
-      setCompareRunStatusText("compare: same as current run (disabled)");
-      setCompareGraphRunSummary(null);
+      if (!compareGraphRunSummary) {
+        setCompareRunStatusText("compare: same as current run (disabled)");
+      }
       return;
     }
     if (compareLockedByUser) return;
@@ -871,53 +950,40 @@ export function App() {
   }, [apiBase, edges, graphId, nodes, profile, setStatus]);
 
   const runtimeSummary = React.useMemo(() => {
-    const meta = graphRunSummary?.radar_map_summary?.metadata || {};
-    const runtimeResolution = meta?.runtime_resolution && typeof meta.runtime_resolution === "object"
-      ? meta.runtime_resolution
-      : {};
-    const antennaSummary = meta?.antenna_summary && typeof meta.antenna_summary === "object"
-      ? meta.antenna_summary
-      : {};
-    const providerInfo = runtimeResolution?.provider_runtime_info && typeof runtimeResolution.provider_runtime_info === "object"
-      ? runtimeResolution.provider_runtime_info
-      : {};
-    const backendTypeObserved = String(meta?.backend_type || "").trim();
-    const runtimeModeObserved = String(runtimeResolution?.mode || "").trim();
-    const simulationBackendObserved = String(
-      providerInfo?.simulation_backend || providerInfo?.generator || ""
-    ).trim();
-    const multiplexingObserved = String(providerInfo?.multiplexing_mode || "").trim();
-    const licenseObserved = String(
-      providerInfo?.license_file || providerInfo?.license_file_hint || ""
-    ).trim();
-    const antennaModeObserved = String(antennaSummary?.antenna_mode || "").trim();
     const ffdRequested = String(runtimeTxFfdFilesText || "").trim() !== ""
       || String(runtimeRxFfdFilesText || "").trim() !== "";
-    const runtimeStatusLine = [
-      `backend=${backendTypeObserved || runtimeBackendType || "-"}`,
-      `mode=${runtimeModeObserved || "-"}`,
-      `sim=${simulationBackendObserved || "-"}`,
-      `mux=${multiplexingObserved || runtimeMultiplexingMode || "-"}`,
-      `ant=${antennaModeObserved || (ffdRequested ? "ffd_requested" : "isotropic")}`,
-      `license=${licenseObserved ? "set" : (runtimeLicenseFile ? "requested" : "none")}`,
-    ].join(" | ");
-    return {
-      backendTypeObserved,
-      runtimeModeObserved,
-      simulationBackendObserved,
-      multiplexingObserved,
-      antennaModeObserved,
-      licenseObserved,
-      runtimeStatusLine,
-    };
+    return summarizeRuntimeTrack(graphRunSummary, {
+      backendType: runtimeBackendType || "-",
+      simulationBackend: runtimeSimulationMode || "-",
+      multiplexingMode: runtimeMultiplexingMode || "-",
+      antennaMode: ffdRequested ? "ffd_requested" : "isotropic",
+      licenseStatus: runtimeLicenseFile ? "requested" : "none",
+    });
   }, [
     graphRunSummary,
     runtimeBackendType,
+    runtimeSimulationMode,
     runtimeLicenseFile,
     runtimeMultiplexingMode,
     runtimeRxFfdFilesText,
     runtimeTxFfdFilesText,
   ]);
+
+  const compareRuntimeSummary = React.useMemo(() => summarizeRuntimeTrack(compareGraphRunSummary, {
+    backendType: "-",
+    simulationBackend: "-",
+    multiplexingMode: "-",
+    antennaMode: "-",
+    licenseStatus: "none",
+  }), [compareGraphRunSummary]);
+
+  const trackCompareGuideText = React.useMemo(() => [
+    "1. Run the first track and confirm artifacts are produced.",
+    "2. Click Use Current as Compare to lock that run as the reference.",
+    "3. Switch runtime preset or advanced controls for the alternate track.",
+    "4. Run Graph (API) again and inspect Artifact Inspector diff.",
+    "5. Use Policy Gate / Run Session when the current-vs-compare pair is final.",
+  ].join("\n"), []);
 
   const {
     runGraphViaApi,
@@ -1582,6 +1648,7 @@ export function App() {
         compareGraphRunSummary,
         loadCompareGraphRunById,
         clearCompareGraphRun,
+        pinCurrentGraphRunAsCompare,
         baselineId,
         pinBaselineFromGraphRun,
         runPolicyGateForGraphRun,
@@ -1589,6 +1656,9 @@ export function App() {
         exportGateReport,
         exportDecisionRegressionSession,
         exportDecisionBriefMd,
+        currentTrackLabel: runtimeSummary.trackLabel,
+        compareTrackLabel: compareRuntimeSummary.trackLabel,
+        trackCompareGuideText,
         decisionSummaryText,
         decisionOpsStatusText,
         lastRegressionSession,

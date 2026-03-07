@@ -8,12 +8,16 @@ export function DecisionPane({
   setCompareGraphRunId,
   loadCompareGraphRunById,
   clearCompareGraphRun,
+  pinCurrentGraphRunAsCompare,
   pinBaselineFromGraphRun,
   runPolicyGateForGraphRun,
   runDecisionRegressionSession,
   exportGateReport,
   exportDecisionRegressionSession,
   exportDecisionBriefMd,
+  currentTrackLabel,
+  compareTrackLabel,
+  trackCompareGuideText,
   decisionSummaryText,
   decisionOpsStatusText,
   compareRunStatusText,
@@ -37,9 +41,20 @@ export function DecisionPane({
       }, "Load Compare"),
       h("button", {
         className: "btn",
+        key: "decision_pin_current_compare",
+        onClick: pinCurrentGraphRunAsCompare,
+      }, "Use Current as Compare"),
+      h("button", {
+        className: "btn",
         key: "decision_clear_compare",
         onClick: clearCompareGraphRun,
       }, "Clear Compare"),
+    ]),
+    h("div", { className: "field", key: "decision_track_workflow" }, [
+      h("label", { className: "label", key: "lbl_decision_track_workflow" }, "Track Compare Workflow"),
+      h("div", { className: "hint", key: "decision_current_track_hint" }, `current_track: ${String(currentTrackLabel || "-")}`),
+      h("div", { className: "hint", key: "decision_compare_track_hint" }, `compare_track: ${String(compareTrackLabel || "-")}`),
+      h("pre", { className: "result-box", key: "decision_track_workflow_box" }, String(trackCompareGuideText || "-")),
     ]),
     h("div", { className: "btn-row", key: "decision_gate_row" }, [
       h("button", {
