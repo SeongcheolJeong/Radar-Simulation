@@ -1001,6 +1001,15 @@ function buildArtifactInspectorAuditControlState(recentActionsText, auditStateTe
   };
 }
 
+function buildArtifactInspectorMaintenanceControlState(maintenanceActionText) {
+  const text = String(maintenanceActionText || "").trim();
+  const clearDisabled = !text || text === "maintenance_action: seq=0 | none | source=none | trigger=idle";
+  return {
+    clearDisabled,
+    text: `artifact_inspector_maintenance_controls: clear=${clearDisabled ? "disabled" : "enabled"}`,
+  };
+}
+
 function buildCompareSessionImportPreviewSummary(
   stagedEntry,
   existingHistoryEntries,
@@ -3044,6 +3053,12 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.auditStateText, artifactInspectorStatusSummary.recentActionsText]
   );
+  const artifactInspectorDecisionMaintenanceControlState = React.useMemo(
+    () => buildArtifactInspectorMaintenanceControlState(
+      artifactInspectorStatusSummary.maintenanceActionText
+    ),
+    [artifactInspectorStatusSummary.maintenanceActionText]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -3105,6 +3120,15 @@ export function App() {
         maintenanceTrigger: "manual",
       },
       "artifact inspector action trail cleared from decision pane",
+      "status-ok"
+    );
+  }, [issueArtifactInspectorControlRequest]);
+  const clearArtifactInspectorMaintenanceActionFromDecisionPane = React.useCallback(() => {
+    issueArtifactInspectorControlRequest(
+      {
+        clearMaintenanceAction: true,
+      },
+      "artifact inspector maintenance marker cleared from decision pane",
       "status-ok"
     );
   }, [issueArtifactInspectorControlRequest]);
@@ -4256,6 +4280,7 @@ export function App() {
       `${artifactInspectorDecisionProbeStateText}`,
       `${artifactInspectorDecisionLastActionText}`,
       `${artifactInspectorDecisionMaintenanceActionText}`,
+      `${artifactInspectorDecisionMaintenanceControlState.text}`,
       `${artifactInspectorDecisionRecentActionsText}`,
       `${artifactInspectorDecisionAuditStateText}`,
       `${artifactInspectorDecisionAuditCapacityText}`,
@@ -4313,6 +4338,7 @@ export function App() {
       artifactInspectorDecisionProbeStateText,
       artifactInspectorDecisionLastActionText,
       artifactInspectorDecisionMaintenanceActionText,
+      artifactInspectorDecisionMaintenanceControlState.text,
       artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
@@ -4440,10 +4466,11 @@ export function App() {
       "```text",
       artifactInspectorDecisionStatusBadgesText,
       artifactInspectorDecisionLayoutStateText,
-      artifactInspectorDecisionProbeStateText,
-      artifactInspectorDecisionLastActionText,
-      artifactInspectorDecisionMaintenanceActionText,
-      artifactInspectorDecisionRecentActionsText,
+    artifactInspectorDecisionProbeStateText,
+    artifactInspectorDecisionLastActionText,
+    artifactInspectorDecisionMaintenanceActionText,
+    artifactInspectorDecisionMaintenanceControlState.text,
+    artifactInspectorDecisionRecentActionsText,
       artifactInspectorDecisionAuditStateText,
       artifactInspectorDecisionAuditCapacityText,
       artifactInspectorDecisionAuditWindowText,
@@ -4518,6 +4545,7 @@ export function App() {
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
     artifactInspectorDecisionMaintenanceActionText,
+    artifactInspectorDecisionMaintenanceControlState.text,
     artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
@@ -4974,6 +5002,7 @@ export function App() {
         artifactInspectorDecisionProbeStateText,
         artifactInspectorDecisionLastActionText,
         artifactInspectorDecisionMaintenanceActionText,
+        artifactInspectorDecisionMaintenanceControlState,
         artifactInspectorDecisionRecentActionsText,
         artifactInspectorDecisionAuditStateText,
         artifactInspectorDecisionAuditCapacityText,
@@ -4988,6 +5017,7 @@ export function App() {
         artifactInspectorDecisionControlState,
         applyRecommendedArtifactInspectorAuditActionFromDecisionPane,
         clearArtifactInspectorActionTrailFromDecisionPane,
+        clearArtifactInspectorMaintenanceActionFromDecisionPane,
         collapseArtifactInspectorEvidenceFromDecisionPane,
         expandArtifactInspectorEvidenceFromDecisionPane,
         resetArtifactInspectorLayoutFromDecisionPane,

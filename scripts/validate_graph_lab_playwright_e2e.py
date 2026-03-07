@@ -183,6 +183,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_probe_state_checked": False,
             "artifact_inspector_last_action_checked": False,
             "artifact_inspector_maintenance_action_checked": False,
+            "artifact_inspector_maintenance_clear_checked": False,
             "artifact_inspector_recent_actions_checked": False,
             "artifact_inspector_audit_overflow_checked": False,
             "artifact_inspector_audit_window_checked": False,
@@ -447,6 +448,7 @@ def run(args: argparse.Namespace) -> int:
                 artifact_field.wait_for(timeout=30_000)
                 artifact_text = artifact_field.inner_text()
                 artifact_apply_recommended_button = artifact_field.get_by_role("button", name="Apply Recommended Audit Action")
+                artifact_clear_maintenance_button = artifact_field.get_by_role("button", name="Clear Maintenance Marker")
                 decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
                 decision_artifact_state_field.wait_for(timeout=30_000)
                 decision_collapse_button = decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
@@ -454,6 +456,7 @@ def run(args: argparse.Namespace) -> int:
                 decision_reset_button = decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout")
                 decision_apply_recommended_button = decision_artifact_state_field.get_by_role("button", name="Apply Recommended Audit Action")
                 decision_clear_audit_button = decision_artifact_state_field.get_by_role("button", name="Clear Action Trail")
+                decision_clear_maintenance_button = decision_artifact_state_field.get_by_role("button", name="Clear Maintenance Marker")
                 default_mirror_ready = False
                 for _ in range(40):
                     decision_artifact_state_text = decision_artifact_state_field.inner_text()
@@ -473,6 +476,7 @@ def run(args: argparse.Namespace) -> int:
                     or "probe_state: default" not in artifact_text
                     or "last_action: seq=0 | idle" not in artifact_text
                     or "maintenance_action: seq=0 | none | source=none | trigger=idle" not in artifact_text
+                    or "maintenance_controls: clear=disabled" not in artifact_text
                     or "recent_actions: none" not in artifact_text
                     or "audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in artifact_text
                     or "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in artifact_text
@@ -507,12 +511,15 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector did not render selected history pair artifact expectation")
                 if not artifact_apply_recommended_button.is_disabled():
                     raise AssertionError("artifact inspector recommended-audit button should be disabled in default state")
+                if not artifact_clear_maintenance_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-maintenance button should be disabled in default state")
                 if (
                     "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty | health:idle | operator:idle" not in decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" not in decision_artifact_state_text
+                    or "artifact_inspector_maintenance_controls: clear=disabled" not in decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in decision_artifact_state_text
                     or "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in decision_artifact_state_text
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in decision_artifact_state_text
@@ -535,6 +542,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane reset button should be disabled in default state")
                 if not decision_apply_recommended_button.is_disabled():
                     raise AssertionError("decision pane recommended-audit button should be disabled in default state")
+                if not decision_clear_maintenance_button.is_disabled():
+                    raise AssertionError("decision pane clear-maintenance button should be disabled in default state")
                 if not decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should be disabled in default state")
                 decision_collapse_button.click()
@@ -785,6 +794,7 @@ def run(args: argparse.Namespace) -> int:
                     or "trimmed=" not in reset_decision_artifact_state_text
                     or "trimmed=0" in reset_decision_artifact_state_text
                     or "audit:trimmed" not in reset_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_controls: clear=disabled" not in reset_decision_artifact_state_text
                     or "artifact_inspector_audit_controls: clear=enabled | recommended=clear_overflow | apply=enabled | reason=trimmed" not in reset_decision_artifact_state_text
                     or "decision:reset_layout" not in reset_decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reset_decision_artifact_state_text
@@ -794,6 +804,10 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane recommended-audit button should be enabled after overflow is detected")
                 if artifact_apply_recommended_button.is_disabled():
                     raise AssertionError("artifact inspector recommended-audit button should be enabled after overflow is detected")
+                if not artifact_clear_maintenance_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-maintenance button should still be disabled before any maintenance action is recorded")
+                if not decision_clear_maintenance_button.is_disabled():
+                    raise AssertionError("decision pane clear-maintenance button should still be disabled before any maintenance action is recorded")
                 if decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should be enabled after reset leaves audit history")
                 artifact_apply_recommended_button.click()
@@ -805,6 +819,7 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "last_action: seq=0 | idle" in cleared_audit_artifact_text
                         and "maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" in cleared_audit_artifact_text
+                        and "maintenance_controls: clear=enabled" in cleared_audit_artifact_text
                         and "recent_actions: none" in cleared_audit_artifact_text
                         and "audit_state: idle | total=0 | retained=0/3 | trimmed=0" in cleared_audit_artifact_text
                         and "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" in cleared_audit_artifact_text
@@ -813,6 +828,7 @@ def run(args: argparse.Namespace) -> int:
                         and "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" in cleared_audit_artifact_text
                         and "artifact_inspector_last_action: seq=0 | idle" in cleared_audit_mirror_text
                         and "artifact_inspector_maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" in cleared_audit_mirror_text
+                        and "artifact_inspector_maintenance_controls: clear=enabled" in cleared_audit_mirror_text
                         and "artifact_inspector_recent_actions: none" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" in cleared_audit_mirror_text
@@ -832,8 +848,12 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector recommended audit action did not reset audit trail")
                 if not artifact_apply_recommended_button.is_disabled():
                     raise AssertionError("artifact inspector recommended-audit button should be disabled after local action is applied")
+                if artifact_clear_maintenance_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-maintenance button should be enabled after maintenance action is recorded")
                 if not decision_apply_recommended_button.is_disabled():
                     raise AssertionError("decision pane recommended-audit button should be disabled after recommended action is applied")
+                if decision_clear_maintenance_button.is_disabled():
+                    raise AssertionError("decision pane clear-maintenance button should be enabled after maintenance action is recorded")
                 if not decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should be disabled after clearing audit trail")
                 report["runtime_controls"]["compare_assessment_checked"] = True
@@ -1571,7 +1591,9 @@ def run(args: argparse.Namespace) -> int:
                 reloaded_decision_reset_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout")
                 reloaded_decision_apply_recommended_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Apply Recommended Audit Action")
                 reloaded_decision_clear_audit_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Clear Action Trail")
+                reloaded_decision_clear_maintenance_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Clear Maintenance Marker")
                 reloaded_artifact_apply_recommended_button = reloaded_artifact_field.get_by_role("button", name="Apply Recommended Audit Action")
+                reloaded_artifact_clear_maintenance_button = reloaded_artifact_field.get_by_role("button", name="Clear Maintenance Marker")
                 reloaded_mirror_ready = False
                 for _ in range(40):
                     reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
@@ -1591,6 +1613,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_controls: clear=enabled" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in reloaded_decision_artifact_state_text
@@ -1615,8 +1638,37 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane recommended-audit button should remain disabled after reload")
                 if not reloaded_artifact_apply_recommended_button.is_disabled():
                     raise AssertionError("artifact inspector recommended-audit button should remain disabled after reload")
+                if reloaded_artifact_clear_maintenance_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-maintenance button should remain enabled after reload while maintenance marker exists")
+                if reloaded_decision_clear_maintenance_button.is_disabled():
+                    raise AssertionError("decision pane clear-maintenance button should remain enabled after reload while maintenance marker exists")
                 if not reloaded_decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should remain disabled after reload")
+                reloaded_decision_clear_maintenance_button.click()
+                maintenance_cleared_ready = False
+                for _ in range(40):
+                    maintenance_cleared_artifact_text = reloaded_artifact_field.inner_text()
+                    maintenance_cleared_mirror_text = reloaded_decision_artifact_state_field.inner_text()
+                    if (
+                        "maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_artifact_text
+                        and "maintenance_controls: clear=disabled" in maintenance_cleared_artifact_text
+                        and "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_mirror_text
+                        and "artifact_inspector_maintenance_controls: clear=disabled" in maintenance_cleared_mirror_text
+                    ):
+                        maintenance_cleared_ready = True
+                        break
+                    page.wait_for_timeout(250)
+                if not maintenance_cleared_ready:
+                    raise AssertionError("clear maintenance marker did not reset maintenance state after reload")
+                if not reloaded_artifact_apply_recommended_button.is_disabled():
+                    raise AssertionError("artifact inspector recommended-audit button should stay disabled after maintenance marker clear")
+                if not reloaded_decision_apply_recommended_button.is_disabled():
+                    raise AssertionError("decision pane recommended-audit button should stay disabled after maintenance marker clear")
+                if not reloaded_artifact_clear_maintenance_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-maintenance button should be disabled after clearing maintenance marker")
+                if not reloaded_decision_clear_maintenance_button.is_disabled():
+                    raise AssertionError("decision pane clear-maintenance button should be disabled after clearing maintenance marker")
+                report["runtime_controls"]["artifact_inspector_maintenance_clear_checked"] = True
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")

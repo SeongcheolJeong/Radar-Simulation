@@ -372,6 +372,15 @@ function buildArtifactInspectorAuditControlStateFromTexts(recentActionsText, aud
   };
 }
 
+function buildArtifactInspectorMaintenanceControlStateFromValue(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const clearDisabled = Number(prefs.maintenanceSeq || 0) <= 0;
+  return {
+    clearDisabled,
+    text: `maintenance_controls: clear=${clearDisabled ? "disabled" : "enabled"}`,
+  };
+}
+
 function extractArtifactInspectorAuditOperatorBadge(value) {
   const text = String(buildArtifactInspectorAuditNextActionText(value) || "").trim();
   const match = /^audit_next_action:\s*([a-z_]+)/i.exec(text);
@@ -389,6 +398,15 @@ function clearArtifactInspectorActionTrailState(value) {
     actionTrailTotalCount: 0,
     lastActionText: "last_action: seq=0 | idle",
     recentActionEntries: [],
+  };
+}
+
+function clearArtifactInspectorMaintenanceActionState(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  return {
+    ...prefs,
+    maintenanceSeq: 0,
+    maintenanceActionText: "maintenance_action: seq=0 | none | source=none | trigger=idle",
   };
 }
 
@@ -661,6 +679,10 @@ export function ArtifactInspectorPanel({
     () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).maintenanceActionText || "maintenance_action: seq=0 | none | source=none | trigger=idle"),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorMaintenanceControlState = React.useMemo(
+    () => buildArtifactInspectorMaintenanceControlStateFromValue(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorRecentActionsText = React.useMemo(
     () => buildArtifactInspectorRecentActionsText(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries),
     [artifactInspectorPrefs]
@@ -803,6 +825,13 @@ export function ArtifactInspectorPanel({
       return updated;
     });
   }, []);
+  const clearArtifactInspectorMaintenanceAction = React.useCallback(() => {
+    setArtifactInspectorPrefs((prev) => {
+      const updated = clearArtifactInspectorMaintenanceActionState(prev);
+      saveArtifactInspectorPrefs(updated);
+      return updated;
+    });
+  }, []);
   const applyRecommendedArtifactInspectorAuditAction = React.useCallback(() => {
     if (artifactInspectorAuditControlState.applyRecommendedDisabled) return;
     if (String(artifactInspectorAuditControlState.recommendedAction || "").trim() !== "clear_action_trail") return;
@@ -836,6 +865,9 @@ export function ArtifactInspectorPanel({
           source: String(command.maintenanceSource || "decision_pane").trim() || "decision_pane",
           trigger: String(command.maintenanceTrigger || "manual").trim() || "manual",
         });
+      }
+      if (command.clearMaintenanceAction === true) {
+        updated = clearArtifactInspectorMaintenanceActionState(updated);
       }
       if (String(command?.lastActionLabel || "").trim()) {
         Object.assign(updated, buildArtifactInspectorLastActionUpdate(next, String(command.lastActionLabel).trim()));
@@ -950,6 +982,10 @@ export function ArtifactInspectorPanel({
           style: { color: "#8fb3c9" },
         }, artifactInspectorMaintenanceActionText),
         h("div", {
+          key: "maintenance_controls",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceControlState.text),
+        h("div", {
           key: "recent_actions",
           style: { color: "#8fb3c9" },
         }, artifactInspectorRecentActionsText),
@@ -971,6 +1007,12 @@ export function ArtifactInspectorPanel({
           onClick: clearArtifactInspectorActionTrail,
           disabled: !artifactInspectorHasRecentActions,
         }, "Clear Action Trail"),
+        h("button", {
+          key: "clear_artifact_inspector_maintenance_action",
+          className: "btn",
+          onClick: clearArtifactInspectorMaintenanceAction,
+          disabled: artifactInspectorMaintenanceControlState.clearDisabled === true,
+        }, "Clear Maintenance Marker"),
       ]),
       h("div", { className: "chip-list", key: "artifact_inspector_status_chips" }, (
         Array.isArray(artifactInspectorStatusBadges) && artifactInspectorStatusBadges.length > 0

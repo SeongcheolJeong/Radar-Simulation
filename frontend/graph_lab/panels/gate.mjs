@@ -116,6 +116,7 @@ export function DecisionPane({
   artifactInspectorDecisionProbeStateText,
   artifactInspectorDecisionLastActionText,
   artifactInspectorDecisionMaintenanceActionText,
+  artifactInspectorDecisionMaintenanceControlState,
   artifactInspectorDecisionRecentActionsText,
   artifactInspectorDecisionAuditStateText,
   artifactInspectorDecisionAuditCapacityText,
@@ -130,6 +131,7 @@ export function DecisionPane({
   artifactInspectorDecisionControlState,
   applyRecommendedArtifactInspectorAuditActionFromDecisionPane,
   clearArtifactInspectorActionTrailFromDecisionPane,
+  clearArtifactInspectorMaintenanceActionFromDecisionPane,
   collapseArtifactInspectorEvidenceFromDecisionPane,
   expandArtifactInspectorEvidenceFromDecisionPane,
   resetArtifactInspectorLayoutFromDecisionPane,
@@ -204,6 +206,12 @@ export function DecisionPane({
           onClick: clearArtifactInspectorActionTrailFromDecisionPane,
           disabled: artifactInspectorDecisionAuditControlState?.clearDisabled === true,
         }, "Clear Action Trail"),
+        h("button", {
+          className: "btn",
+          key: "decision_clear_artifact_inspector_maintenance_action",
+          onClick: clearArtifactInspectorMaintenanceActionFromDecisionPane,
+          disabled: artifactInspectorDecisionMaintenanceControlState?.clearDisabled === true,
+        }, "Clear Maintenance Marker"),
       ]),
       h("div", { className: "chip-list", key: "decision_artifact_inspector_live_state_chips" }, (
         Array.isArray(artifactInspectorDecisionStatusBadgeRows) && artifactInspectorDecisionStatusBadgeRows.length > 0
@@ -220,6 +228,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_probe_hint" }, String(artifactInspectorDecisionProbeStateText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_action_hint" }, String(artifactInspectorDecisionLastActionText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_maintenance_hint" }, String(artifactInspectorDecisionMaintenanceActionText || "-")),
+      h("div", { className: "hint", key: "decision_artifact_inspector_live_state_maintenance_controls_hint" }, String(artifactInspectorDecisionMaintenanceControlState?.text || "artifact_inspector_maintenance_controls: -")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_recent_actions_hint" }, String(artifactInspectorDecisionRecentActionsText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_audit_state_hint" }, String(artifactInspectorDecisionAuditStateText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_audit_capacity_hint" }, String(artifactInspectorDecisionAuditCapacityText || "-")),

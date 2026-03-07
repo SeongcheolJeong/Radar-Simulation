@@ -370,6 +370,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_probe_state`
 - `artifact_inspector_last_action`
 - `artifact_inspector_maintenance_action`
+- `artifact_inspector_maintenance_controls`
 - `artifact_inspector_recent_actions`
 - `artifact_inspector_audit_state`
 - `artifact_inspector_audit_capacity`
@@ -387,6 +388,7 @@ The `Decision Pane` now mirrors that live state as a chip row plus compact hint 
 - `Expand Inspector Evidence`
 - `Reset Inspector Layout`
 - `Clear Action Trail`
+- `Clear Maintenance Marker`
 
 so the operator can collapse, restore, or fully reset the `Artifact Inspector` layout without scrolling back to that panel.
 
@@ -396,9 +398,11 @@ Those mirror controls are now also state-aware:
 - `Collapse Inspector Evidence` is disabled when both evidence sections are already collapsed
 - `Reset Inspector Layout` is disabled when the inspector is already in canonical default layout
 - `Clear Action Trail` is disabled when there is no stored inspector action history
+- `Clear Maintenance Marker` is disabled until a persisted maintenance provenance marker exists
 - the mirror exports an `artifact_inspector_controls:` hint line so the same actionability state survives in the decision brief
 - the mirror also exports `artifact_inspector_last_action:` as `seq=N | <source>` so the last collapse/expand/reset source and ordering stay visible after reload and in the decision brief
 - the mirror also exports `artifact_inspector_maintenance_action:` so audit-trail clears remain attributable even after `last_action` and `recent_actions` are reset back to idle/none
+- the mirror also exports `artifact_inspector_maintenance_controls:` so operators and brief readers can see whether the provenance marker itself can be cleared without touching layout state or the audit ring buffer
 - the mirror also exports `artifact_inspector_recent_actions:` so the newest three inspector actions remain visible as a short audit trail
 - the mirror also exports `artifact_inspector_audit_state:` so operators can see whether the ring buffer is idle, actively tracking, or already trimmed
 - the mirror also exports `artifact_inspector_audit_capacity:` so operators can see retained-limit usage, remaining headroom, and whether overflow is already happening
@@ -411,7 +415,9 @@ Those mirror controls are now also state-aware:
 - the mirror also exports `artifact_inspector_audit_summary:` with `total / retained / trimmed / next_seq / state` so operators can see full trail volume, the retained ring buffer size, and the next sequence number without parsing raw history
 - the mirror also exports `artifact_inspector_audit_controls:` with `recommended`, `apply`, and `reason` so brief/export readers can tell whether clearing is optional, unnecessary, or specifically recommended because the ring buffer trimmed older actions, and whether the one-click recommended-action control should currently be enabled
 - the mirror now also exposes `Apply Recommended Audit Action`, which stays disabled for `not_needed` and `optional`, and only enables when the retained audit trail is truncated and the recommended operator response is to clear the overflowed ring buffer
+- the mirror now also exposes `Clear Maintenance Marker`, which clears only the persisted provenance marker for the last maintenance action and leaves layout state plus the current audit trail state untouched
 - the `Artifact Inspector` panel itself now mirrors the same `Apply Recommended Audit Action` behavior locally and renders `audit_controls:` inline, so operators can clear truncated audit overflow without moving back to the `Decision Pane`
+- the `Artifact Inspector` panel also renders `maintenance_controls:` inline and exposes the same `Clear Maintenance Marker` action locally, so the stored provenance marker can be acknowledged and cleared without altering the audit trail contents
 - the inspector status badges now also carry `audit:idle`, `audit:tracking`, or `audit:trimmed`, plus `continuity:empty`, `continuity:full`, or `continuity:tail_only`, `health:idle`, `health:healthy`, or `health:truncated`, and `operator:idle`, `operator:track`, or `operator:clear`, so overflow, retained-history trust, and the immediate operator posture are visible without reading the text summary
 
 The `Runtime Compare` summary inside the brief now also carries:
