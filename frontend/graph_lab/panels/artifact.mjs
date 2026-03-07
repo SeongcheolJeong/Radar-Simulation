@@ -59,6 +59,7 @@ function buildArtifactInspectorStatusBadges({
   probesDefault,
   liveCompareEvidenceExpanded,
   historyArtifactExpectationExpanded,
+  auditState,
 }) {
   return [
     {
@@ -80,6 +81,16 @@ function buildArtifactInspectorStatusBadges({
     {
       label: `reset:${layoutDefault ? "clean" : "required"}`,
       tone: layoutDefault ? "status-ok" : "status-warn",
+    },
+    {
+      label: `audit:${String(auditState || "idle").trim() || "idle"}`,
+      tone: (
+        String(auditState || "").trim() === "trimmed"
+          ? "status-warn"
+          : String(auditState || "").trim() === "tracking"
+            ? "status-ok"
+            : "status-neutral"
+      ),
     },
   ];
 }
@@ -165,6 +176,20 @@ function buildArtifactInspectorAuditSummaryText(value) {
   const trimmed = Math.max(0, total - retained);
   const nextSeq = Math.max(0, Number(prefs.lastActionSeq || 0)) + 1;
   return `audit_summary: total=${total} | retained=${retained} | trimmed=${trimmed} | next_seq=${nextSeq} | state=${total > 0 ? "active" : "empty"}`;
+}
+
+function buildArtifactInspectorAuditStateText(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const retained = Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries.length : 0;
+  const total = Math.max(0, Number(prefs.actionTrailTotalCount || 0));
+  const trimmed = Math.max(0, total - retained);
+  let state = "idle";
+  if (trimmed > 0) {
+    state = "trimmed";
+  } else if (total > 0) {
+    state = "tracking";
+  }
+  return `audit_state: ${state} | total=${total} | retained=${retained}/${ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT} | trimmed=${trimmed}`;
 }
 
 function clearArtifactInspectorActionTrailState(value) {
@@ -383,13 +408,20 @@ export function ArtifactInspectorPanel({
       && historyArtifactExpectationExpanded === true
       && artifactInspectorProbeState.probesDefault === true
     );
+    const auditStateText = buildArtifactInspectorAuditStateText(artifactInspectorPrefs);
+    const auditState = String(auditStateText.split("|")[0] || "")
+      .replace(/^audit_state:\s*/i, "")
+      .trim()
+      .toLowerCase();
     return buildArtifactInspectorStatusBadges({
       layoutDefault,
       probesDefault: artifactInspectorProbeState.probesDefault === true,
       liveCompareEvidenceExpanded,
       historyArtifactExpectationExpanded,
+      auditState,
     });
   }, [
+    artifactInspectorPrefs,
     artifactInspectorProbeState.probesDefault,
     historyArtifactExpectationExpanded,
     liveCompareEvidenceExpanded,
@@ -412,6 +444,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorAuditSummaryText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditStateText = React.useMemo(
+    () => buildArtifactInspectorAuditStateText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -424,9 +460,11 @@ export function ArtifactInspectorPanel({
       statusBadgesText: artifactInspectorStatusBadgesText,
       lastActionText: artifactInspectorLastActionText,
       recentActionsText: artifactInspectorRecentActionsText,
+      auditStateText: artifactInspectorAuditStateText,
       auditSummaryText: artifactInspectorAuditSummaryText,
     });
   }, [
+    artifactInspectorAuditStateText,
     artifactInspectorAuditSummaryText,
     artifactInspectorLayoutStateText,
     artifactInspectorLastActionText,
@@ -563,6 +601,10 @@ export function ArtifactInspectorPanel({
           key: "probe_state",
           style: { color: "#8fb3c9" },
         }, artifactInspectorProbeState.text),
+        h("div", {
+          key: "audit_state",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditStateText),
         h("div", {
           key: "audit_summary",
           style: { color: "#8fb3c9" },

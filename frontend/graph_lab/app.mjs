@@ -868,6 +868,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     statusBadgesText: normalizeCompareSessionField(row.statusBadgesText, 320) || "status_badges: -",
     lastActionText: normalizeCompareSessionField(row.lastActionText, 320) || "last_action: seq=0 | idle",
     recentActionsText: normalizeCompareSessionField(row.recentActionsText, 320) || "recent_actions: none",
+    auditStateText: normalizeCompareSessionField(row.auditStateText, 320) || "audit_state: idle | total=0 | retained=0/3 | trimmed=0",
     auditSummaryText: normalizeCompareSessionField(row.auditSummaryText, 320) || "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty",
   };
 }
@@ -882,6 +883,11 @@ function toneForArtifactInspectorStatusBadge(label) {
   }
   if (text.startsWith("reset:")) {
     return text.endsWith("clean") ? "status-ok" : "status-warn";
+  }
+  if (text.startsWith("audit:")) {
+    if (text.endsWith("trimmed")) return "status-warn";
+    if (text.endsWith("tracking")) return "status-ok";
+    return "status-neutral";
   }
   return "status-neutral";
 }
@@ -2906,6 +2912,14 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.recentActionsText]
   );
+  const artifactInspectorDecisionAuditStateText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.auditStateText,
+      "audit_state",
+      "artifact_inspector_audit_state"
+    ),
+    [artifactInspectorStatusSummary.auditStateText]
+  );
   const artifactInspectorDecisionAuditSummaryText = React.useMemo(
     () => buildArtifactInspectorDecisionLine(
       artifactInspectorStatusSummary.auditSummaryText,
@@ -4116,6 +4130,7 @@ export function App() {
       `${artifactInspectorDecisionProbeStateText}`,
       `${artifactInspectorDecisionLastActionText}`,
       `${artifactInspectorDecisionRecentActionsText}`,
+      `${artifactInspectorDecisionAuditStateText}`,
       `${artifactInspectorDecisionAuditSummaryText}`,
       `${artifactInspectorDecisionAuditControlState.text}`,
       `${artifactInspectorDecisionControlState.text}`,
@@ -4164,6 +4179,7 @@ export function App() {
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
     artifactInspectorDecisionRecentActionsText,
+    artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditSummaryText,
     artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
@@ -4285,6 +4301,7 @@ export function App() {
       artifactInspectorDecisionProbeStateText,
       artifactInspectorDecisionLastActionText,
       artifactInspectorDecisionRecentActionsText,
+      artifactInspectorDecisionAuditStateText,
       artifactInspectorDecisionAuditSummaryText,
       artifactInspectorDecisionAuditControlState.text,
       artifactInspectorDecisionControlState.text,
@@ -4351,6 +4368,7 @@ export function App() {
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
     artifactInspectorDecisionRecentActionsText,
+    artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditSummaryText,
     artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
@@ -4798,6 +4816,7 @@ export function App() {
         artifactInspectorDecisionProbeStateText,
         artifactInspectorDecisionLastActionText,
         artifactInspectorDecisionRecentActionsText,
+        artifactInspectorDecisionAuditStateText,
         artifactInspectorDecisionAuditSummaryText,
         artifactInspectorDecisionAuditControlState,
         artifactInspectorDecisionControlState,

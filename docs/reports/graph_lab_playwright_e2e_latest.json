@@ -1,6 +1,6 @@
 {
   "version": "graph_lab_playwright_e2e_report_v1",
-  "created_at_utc": "2026-03-07T17:33:35Z",
+  "created_at_utc": "2026-03-07T17:42:43Z",
   "require_playwright": true,
   "strict_visual": false,
   "update_baseline": false,
@@ -66,6 +66,7 @@
     "artifact_inspector_probe_state_checked": true,
     "artifact_inspector_last_action_checked": true,
     "artifact_inspector_recent_actions_checked": true,
+    "artifact_inspector_audit_overflow_checked": true,
     "artifact_inspector_clear_action_trail_checked": true,
     "artifact_inspector_badge_export_checked": true,
     "decision_artifact_inspector_state_checked": true,
