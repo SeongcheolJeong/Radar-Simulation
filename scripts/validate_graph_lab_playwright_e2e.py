@@ -475,6 +475,52 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                 ):
                     raise AssertionError("decision pane did not mirror default artifact inspector state")
+                decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence").click()
+                collapsed_from_decision_ready = False
+                collapsed_from_decision_artifact_text = ""
+                for _ in range(40):
+                    collapsed_from_decision_artifact_text = artifact_field.inner_text()
+                    collapsed_from_decision_mirror_text = decision_artifact_state_field.inner_text()
+                    if (
+                        "shape.adc:" not in collapsed_from_decision_artifact_text
+                        and "artifact_expectation_source:" not in collapsed_from_decision_artifact_text
+                        and "artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed | history:collapsed | reset:required" in collapsed_from_decision_mirror_text
+                    ):
+                        collapsed_from_decision_ready = True
+                        break
+                    page.wait_for_timeout(250)
+                if not collapsed_from_decision_ready:
+                    raise AssertionError("decision pane collapse did not update artifact inspector state in time")
+                if (
+                    "layout_state: customized" not in collapsed_from_decision_artifact_text
+                    or "live=collapsed" not in collapsed_from_decision_artifact_text
+                    or "history=collapsed" not in collapsed_from_decision_artifact_text
+                    or "reset_required=yes" not in collapsed_from_decision_artifact_text
+                ):
+                    raise AssertionError("decision pane collapse did not update artifact inspector layout state")
+                decision_artifact_state_field.get_by_role("button", name="Expand Inspector Evidence").click()
+                expanded_from_decision_ready = False
+                expanded_from_decision_artifact_text = ""
+                for _ in range(40):
+                    expanded_from_decision_artifact_text = artifact_field.inner_text()
+                    expanded_from_decision_mirror_text = decision_artifact_state_field.inner_text()
+                    if (
+                        "shape.adc:" in expanded_from_decision_artifact_text
+                        and "artifact_expectation_source:" in expanded_from_decision_artifact_text
+                        and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean" in expanded_from_decision_mirror_text
+                    ):
+                        expanded_from_decision_ready = True
+                        break
+                    page.wait_for_timeout(250)
+                if not expanded_from_decision_ready:
+                    raise AssertionError("decision pane expand did not restore artifact inspector state in time")
+                if (
+                    "layout_state: default" not in expanded_from_decision_artifact_text
+                    or "live=expanded" not in expanded_from_decision_artifact_text
+                    or "history=expanded" not in expanded_from_decision_artifact_text
+                    or "reset_required=no" not in expanded_from_decision_artifact_text
+                ):
+                    raise AssertionError("decision pane expand did not restore artifact inspector layout state")
                 artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
                 collapsed_live_ready = False
                 collapsed_live_artifact_text = ""
@@ -588,6 +634,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_badges_checked"] = True
                 report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_state_checked"] = True
+                report["runtime_controls"]["decision_artifact_inspector_fold_controls_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_reset_checked"] = True
 
                 history_field = field_locator(page, "Compare Session History")

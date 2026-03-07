@@ -114,6 +114,8 @@ export function DecisionPane({
   artifactInspectorDecisionStatusBadgeRows,
   artifactInspectorDecisionLayoutStateText,
   artifactInspectorDecisionProbeStateText,
+  collapseArtifactInspectorEvidenceFromDecisionPane,
+  expandArtifactInspectorEvidenceFromDecisionPane,
   resetArtifactInspectorLayoutFromDecisionPane,
   trackCompareRunnerStatusText,
   compareRunStatusText,
@@ -156,6 +158,16 @@ export function DecisionPane({
     h("div", { className: "field", key: "decision_artifact_state_mirror" }, [
       h("label", { className: "label", key: "decision_artifact_state_mirror_label" }, "Inspector State Mirror"),
       h("div", { className: "btn-row", key: "decision_artifact_state_mirror_actions" }, [
+        h("button", {
+          className: "btn",
+          key: "decision_collapse_artifact_inspector_evidence",
+          onClick: collapseArtifactInspectorEvidenceFromDecisionPane,
+        }, "Collapse Inspector Evidence"),
+        h("button", {
+          className: "btn",
+          key: "decision_expand_artifact_inspector_evidence",
+          onClick: expandArtifactInspectorEvidenceFromDecisionPane,
+        }, "Expand Inspector Evidence"),
         h("button", {
           className: "btn",
           key: "decision_reset_artifact_inspector_layout",

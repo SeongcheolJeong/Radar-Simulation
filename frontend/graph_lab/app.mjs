@@ -1777,7 +1777,8 @@ export function App() {
   const [artifactInspectorStatusSummary, setArtifactInspectorStatusSummary] = React.useState(() => (
     normalizeArtifactInspectorStatusSummary({})
   ));
-  const [artifactInspectorResetRequestNonce, setArtifactInspectorResetRequestNonce] = React.useState(0);
+  const [artifactInspectorControlRequest, setArtifactInspectorControlRequest] = React.useState(null);
+  const artifactInspectorControlNonceRef = React.useRef(0);
   const [contractOverlayEnabled, setContractOverlayEnabled] = React.useState(
     String(params.get("contract_overlay") || "0") === "1"
   );
@@ -2852,10 +2853,46 @@ export function App() {
   const handleArtifactInspectorStatusChange = React.useCallback((statusInput) => {
     setArtifactInspectorStatusSummary(normalizeArtifactInspectorStatusSummary(statusInput));
   }, []);
-  const resetArtifactInspectorLayoutFromDecisionPane = React.useCallback(() => {
-    setArtifactInspectorResetRequestNonce((prev) => Number(prev || 0) + 1);
-    setStatus("artifact inspector layout reset from decision pane", "status-ok");
+  const issueArtifactInspectorControlRequest = React.useCallback((commandInput, statusText, tone = "status-ok") => {
+    artifactInspectorControlNonceRef.current += 1;
+    const command = commandInput && typeof commandInput === "object" ? commandInput : {};
+    setArtifactInspectorControlRequest({
+      nonce: artifactInspectorControlNonceRef.current,
+      ...command,
+    });
+    setStatus(statusText, tone);
   }, [setStatus]);
+  const collapseArtifactInspectorEvidenceFromDecisionPane = React.useCallback(() => {
+    issueArtifactInspectorControlRequest(
+      {
+        liveCompareEvidenceExpanded: false,
+        historyArtifactExpectationExpanded: false,
+      },
+      "artifact inspector evidence collapsed from decision pane",
+      "status-warn"
+    );
+  }, [issueArtifactInspectorControlRequest]);
+  const expandArtifactInspectorEvidenceFromDecisionPane = React.useCallback(() => {
+    issueArtifactInspectorControlRequest(
+      {
+        liveCompareEvidenceExpanded: true,
+        historyArtifactExpectationExpanded: true,
+      },
+      "artifact inspector evidence expanded from decision pane",
+      "status-ok"
+    );
+  }, [issueArtifactInspectorControlRequest]);
+  const resetArtifactInspectorLayoutFromDecisionPane = React.useCallback(() => {
+    issueArtifactInspectorControlRequest(
+      {
+        liveCompareEvidenceExpanded: true,
+        historyArtifactExpectationExpanded: true,
+        resetProbeControls: true,
+      },
+      "artifact inspector layout reset from decision pane",
+      "status-ok"
+    );
+  }, [issueArtifactInspectorControlRequest]);
   const latestReplayableCompareSession = React.useMemo(
     () => compareSessionHistory
       .map((row) => applyCompareReplayPairMeta(getCompareSessionReplayPair(row), compareReplayPairMetaById))
@@ -4649,13 +4686,15 @@ export function App() {
         artifactInspectorDecisionStatusBadgeRows,
         artifactInspectorDecisionLayoutStateText,
         artifactInspectorDecisionProbeStateText,
+        collapseArtifactInspectorEvidenceFromDecisionPane,
+        expandArtifactInspectorEvidenceFromDecisionPane,
         resetArtifactInspectorLayoutFromDecisionPane,
         trackCompareRunnerStatusText,
         lastRegressionSession,
         lastRegressionExport,
         contractDebugText,
         onArtifactInspectorStatusChange: handleArtifactInspectorStatusChange,
-        artifactInspectorResetRequestNonce,
+        artifactInspectorControlRequest,
       }),
     ]),
     h(ContractWarningOverlay, {

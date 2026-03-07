@@ -134,6 +134,19 @@ function normalizeArtifactInspectorPrefs(value) {
   };
 }
 
+function applyArtifactInspectorPrefsCommand(value, command) {
+  const current = normalizeArtifactInspectorPrefs(value);
+  const row = command && typeof command === "object" ? command : {};
+  const next = { ...current };
+  if (typeof row.liveCompareEvidenceExpanded === "boolean") {
+    next.liveCompareEvidenceExpanded = row.liveCompareEvidenceExpanded;
+  }
+  if (typeof row.historyArtifactExpectationExpanded === "boolean") {
+    next.historyArtifactExpectationExpanded = row.historyArtifactExpectationExpanded;
+  }
+  return normalizeArtifactInspectorPrefs(next);
+}
+
 function loadArtifactInspectorPrefs() {
   try {
     if (typeof window === "undefined" || !window.localStorage) {
@@ -166,7 +179,7 @@ export function ArtifactInspectorPanel({
   selectedReplayableCompareSessionText,
   selectedReplayableCompareSessionArtifactExpectationSummaryText,
   selectedReplayableCompareSessionArtifactExpectationText,
-  resetRequestNonce,
+  controlRequest,
   onArtifactInspectorStatusChange,
 }) {
   const hasGraphRunSummary = Boolean(graphRunSummary);
@@ -189,6 +202,7 @@ export function ArtifactInspectorPanel({
   const [rdPeakLock, setRdPeakLock] = React.useState(false);
   const [raPeakLock, setRaPeakLock] = React.useState(false);
   const [artifactInspectorPrefs, setArtifactInspectorPrefs] = React.useState(() => loadArtifactInspectorPrefs());
+  const lastAppliedControlNonceRef = React.useRef(null);
   const liveCompareEvidenceExpanded = normalizeArtifactInspectorPrefs(
     artifactInspectorPrefs
   ).liveCompareEvidenceExpanded;
@@ -371,9 +385,20 @@ export function ArtifactInspectorPanel({
     resetArtifactInspectorProbeControls();
   }, [resetArtifactInspectorProbeControls]);
   React.useEffect(() => {
-    if (!Number.isFinite(Number(resetRequestNonce))) return;
-    resetArtifactInspectorLayout();
-  }, [resetArtifactInspectorLayout, resetRequestNonce]);
+    const command = controlRequest && typeof controlRequest === "object" ? controlRequest : null;
+    const nonce = Number(command?.nonce);
+    if (!command || !Number.isFinite(nonce) || nonce <= 0) return;
+    if (lastAppliedControlNonceRef.current === nonce) return;
+    lastAppliedControlNonceRef.current = nonce;
+    setArtifactInspectorPrefs((prev) => {
+      const updated = applyArtifactInspectorPrefsCommand(prev, command);
+      saveArtifactInspectorPrefs(updated);
+      return updated;
+    });
+    if (command.resetProbeControls === true) {
+      resetArtifactInspectorProbeControls();
+    }
+  }, [controlRequest, resetArtifactInspectorProbeControls]);
 
   const renderProbeSummary = (probe) => {
     const exact = probe.exact;
