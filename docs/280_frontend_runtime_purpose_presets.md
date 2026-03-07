@@ -149,6 +149,9 @@ The history block also provides:
   - if the stored target is `current_config`, the replay uses the current runtime panel state at replay time
 - `selected_history_pair`
   - tracks the replayable pair currently chosen in the history dropdown
+- `selected_history_pair_retention`
+  - shows whether the currently selected replayable pair is inside the latest retention window or only surviving as an extra preserved row
+  - also shows the selected pair's pinned/saved management flags and `rows(visible/latest/retained)`
 - `Use Selected History Pair`
   - restores the chosen replayable pair from history into the selector controls
 - `Run Selected History Pair`
@@ -339,6 +342,7 @@ The `Runtime Compare` summary inside the brief now also carries:
 
 - `latest_replayable_pair`
 - `selected_history_pair`
+- `selected_history_pair_retention`
 - `compare_history_import_preview`
   - a compact one-line import-preview summary near the top of the brief so staged import state is visible without scrolling down to the full preview section
 

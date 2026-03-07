@@ -41,6 +41,7 @@ export function DecisionPane({
   runLatestCompareSessionPair,
   selectedReplayableCompareSessionText,
   selectedReplayableCompareSessionMetaText,
+  selectedReplayableCompareSessionRetentionText,
   selectedReplayableCompareSessionArtifactExpectationText,
   selectedReplayableCompareSessionPreviewText,
   canReplaySelectedCompareSession,
@@ -217,6 +218,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_compare_session_history_replay_hint" }, String(latestReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_selected_hint" }, String(selectedReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_meta_hint" }, String(selectedReplayableCompareSessionMetaText || "-")),
+      h("pre", { className: "result-box", key: "decision_compare_session_history_selected_retention_box" }, String(selectedReplayableCompareSessionRetentionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_retention_hint" }, String(compareSessionRetentionPolicySummaryText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_retention_preview_box" }, String(compareSessionRetentionPreviewText || "-")),
       h("div", { className: "chip-list", key: "decision_compare_session_history_transfer_chips" }, (

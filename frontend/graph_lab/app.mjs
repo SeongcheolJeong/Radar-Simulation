@@ -638,6 +638,79 @@ function buildCompareSessionRetentionPreviewText(entries, pairMetaById, retentio
   ].join("\n");
 }
 
+function analyzeCompareSessionSelectedPairRetention(entries, pairMetaById, retentionPolicy, replayPair) {
+  const pair = replayPair && typeof replayPair === "object" ? replayPair : null;
+  const pairId = normalizeCompareSessionField(
+    pair?.id
+    || pair?.pairId
+    || makeCompareReplayPairId(pair?.baselinePresetId, pair?.targetPresetId),
+    192
+  );
+  const pairLabel = normalizeCompareSessionField(pair?.pairLabel || pair?.label, 160) || "-";
+  if (!pairId) {
+    return {
+      pairId: "",
+      pairLabel: "-",
+      state: "none",
+      pinned: false,
+      saved: false,
+      visibleRows: 0,
+      latestRows: 0,
+      retainedRows: 0,
+      keepLatest: Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT),
+      retentionPolicy: normalizeCompareSessionRetentionPolicy(
+        retentionPolicy,
+        COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+      ),
+    };
+  }
+  const normalizedEntries = sortCompareSessionHistoryEntries(entries).slice(0, COMPARE_SESSION_HISTORY_LIMIT);
+  const keepLatest = Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT);
+  const latestEntries = normalizedEntries.slice(0, keepLatest);
+  const retainedHistory = buildCompareSessionRetainedHistory(normalizedEntries, pairMetaById, retentionPolicy);
+  const byPairId = (rows) => (Array.isArray(rows) ? rows : []).filter(
+    (row) => String(getCompareSessionReplayPair(row)?.pairId || "").trim() === pairId
+  );
+  const meta = normalizeCompareReplayPairMetaEntry(pairMetaById?.[pairId] || pair || {});
+  const visibleRows = byPairId(normalizedEntries).length;
+  const latestRows = byPairId(latestEntries).length;
+  const retainedRows = byPairId(retainedHistory).length;
+  const state = retainedRows > 0
+    ? (latestRows > 0 ? "latest_window" : "retained_extra")
+    : visibleRows > 0
+      ? "dropped"
+      : "missing";
+  return {
+    pairId,
+    pairLabel,
+    state,
+    pinned: meta.pinned === true,
+    saved: Boolean(String(meta.customLabel || "").trim()),
+    visibleRows,
+    latestRows,
+    retainedRows,
+    keepLatest,
+    retentionPolicy: normalizeCompareSessionRetentionPolicy(
+      retentionPolicy,
+      COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+    ),
+  };
+}
+
+function buildCompareSessionSelectedPairRetentionText(entries, pairMetaById, retentionPolicy, replayPair) {
+  const summary = analyzeCompareSessionSelectedPairRetention(entries, pairMetaById, retentionPolicy, replayPair);
+  if (!summary.pairId) {
+    return [
+      "selected_history_pair_retention: -",
+      `retention_window: keep_latest=${Number(summary.keepLatest || 0)} | policy=${String(summary.retentionPolicy || "-")}`,
+    ].join("\n");
+  }
+  return [
+    `selected_history_pair_retention: state=${String(summary.state || "-")} | managed=pinned=${summary.pinned === true},saved=${summary.saved === true} | rows(visible/latest/retained)=${Number(summary.visibleRows || 0)}/${Number(summary.latestRows || 0)}/${Number(summary.retainedRows || 0)}`,
+    `retention_window: keep_latest=${Number(summary.keepLatest || 0)} | policy=${String(summary.retentionPolicy || "-")} | pair=${String(summary.pairLabel || "-")}`,
+  ].join("\n");
+}
+
 function mergeCompareSessionHistoryEntries(existingEntries, importedEntries) {
   const existing = Array.isArray(existingEntries) ? existingEntries : [];
   const incoming = Array.isArray(importedEntries) ? importedEntries : [];
@@ -2812,6 +2885,20 @@ export function App() {
       `custom_label=${String(selectedReplayableCompareSession.customLabel || "-")}`,
     ].join(" | ");
   }, [selectedReplayableCompareSession]);
+  const selectedReplayableCompareSessionRetentionText = React.useMemo(
+    () => buildCompareSessionSelectedPairRetentionText(
+      compareSessionHistory,
+      compareReplayPairMetaById,
+      compareSessionRetentionPolicy,
+      selectedReplayableCompareSession
+    ),
+    [
+      compareReplayPairMetaById,
+      compareSessionHistory,
+      compareSessionRetentionPolicy,
+      selectedReplayableCompareSession,
+    ]
+  );
   const managedCompareReplayPairCount = React.useMemo(
     () => Object.values(compareReplayPairMetaById || {}).filter((row) => {
       const meta = normalizeCompareReplayPairMetaEntry(row);
@@ -3667,6 +3754,7 @@ export function App() {
       `${latestReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionMetaText}`,
+      `${String(selectedReplayableCompareSessionRetentionText || "-").split("\n").join(" | ")}`,
       `${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `selected_history_pair_preview: ${selectedReplayableCompareSessionPreviewText.split("\n").slice(1).join(" | ")}`,
       `compare_history_transfer: ${String(compareSessionTransferStatusText || "-")}`,
@@ -3723,6 +3811,7 @@ export function App() {
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
     selectedReplayableCompareSessionMetaText,
+    selectedReplayableCompareSessionRetentionText,
     selectedReplayableCompareSessionArtifactExpectationSummaryText,
     selectedReplayableCompareSessionPreviewText,
     trackCompareBaselinePresetId,
@@ -3763,6 +3852,7 @@ export function App() {
       `- ${latestReplayableCompareSessionText}`,
       `- ${selectedReplayableCompareSessionText}`,
       `- ${selectedReplayableCompareSessionMetaText}`,
+      `- ${String(selectedReplayableCompareSessionRetentionText || "-").split("\n").join(" | ")}`,
       `- ${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `- ${compareSessionRetentionPolicySummaryText}`,
       `- ${compareSessionRetentionPreviewCompactSummaryText}`,
@@ -3784,6 +3874,8 @@ export function App() {
       "```text",
       compareSessionRetentionPolicySummaryText,
       compareSessionRetentionPreviewText,
+      "",
+      selectedReplayableCompareSessionRetentionText,
       "",
       compareSessionHistoryText,
       "```",
@@ -3885,6 +3977,7 @@ export function App() {
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
     selectedReplayableCompareSessionMetaText,
+    selectedReplayableCompareSessionRetentionText,
     selectedReplayableCompareSessionArtifactExpectationSummaryText,
     selectedReplayableCompareSessionArtifactExpectationText,
     selectedReplayableCompareSessionPreviewText,
@@ -4271,6 +4364,7 @@ export function App() {
         runLatestCompareSessionPair,
         selectedReplayableCompareSessionText,
         selectedReplayableCompareSessionMetaText,
+        selectedReplayableCompareSessionRetentionText,
         selectedReplayableCompareSessionArtifactExpectationSummaryText,
         selectedReplayableCompareSessionArtifactExpectationText,
         selectedReplayableCompareSessionPreviewText,

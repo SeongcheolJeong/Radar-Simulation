@@ -974,6 +974,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include latest replayable pair summary")
                 if "selected_history_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include selected history pair summary")
+                if "selected_history_pair_retention:" not in brief_text:
+                    raise AssertionError("decision brief did not include selected history pair retention summary")
                 if "selected_history_pair_meta:" not in brief_text or "managed_history_pair_count:" not in brief_text:
                     raise AssertionError("decision brief did not include selected history pair management summary")
                 if "## Selected History Pair Preview" not in brief_text or "planned_deltas:" not in brief_text:
@@ -1279,8 +1281,25 @@ def run(args: argparse.Namespace) -> int:
                         "compare history preserve-saved retention policy did not preserve the custom-labeled pair as expected "
                         f"(option_count={retention_option_count}, option_values={retained_option_values})\n{retention_text}"
                     )
+                reloaded_history_select.select_option("low_fidelity_radarsimpy_ffd::high_fidelity_sionna_rt")
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("selected_history_pair: Low Sionna Saved")
+                            && text.includes("selected_history_pair_retention: state=retained_extra")
+                            && text.includes("managed=pinned=false,saved=true")
+                            && text.includes("rows(visible/latest/retained)=1/0/1")
+                        );
+                    }""",
+                    timeout=15_000,
+                )
                 report["runtime_controls"]["compare_session_retention_preview_checked"] = True
                 report["runtime_controls"]["compare_session_retention_preserve_saved_checked"] = True
+                report["runtime_controls"]["compare_session_selected_pair_retention_checked"] = True
 
                 history_retention_select.select_option("retain_2_preserve_pinned")
                 retention_ok = False
@@ -1311,6 +1330,20 @@ def run(args: argparse.Namespace) -> int:
                         "compare history preserve-pinned retention policy did not preserve the pinned pair as expected "
                         f"(option_count={retention_option_count}, option_values={retained_option_values})\n{retention_text}"
                     )
+                reloaded_history_select.select_option("low_fidelity_radarsimpy_ffd::current_config")
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("selected_history_pair_retention: state=latest_window")
+                            && text.includes("managed=pinned=true,saved=true")
+                        );
+                    }""",
+                    timeout=15_000,
+                )
                 report["runtime_controls"]["compare_session_retention_policy_checked"] = True
                 report["runtime_controls"]["compare_session_retention_preserve_pinned_checked"] = True
 
