@@ -155,6 +155,7 @@ The history block also provides:
 - replayable pair selector badges
   - the history dropdown options now also show `KEEP:latest` or `KEEP:extra`
   - pinned pairs keep the existing `PIN | ...` prefix, so a preserved pinned row appears as `PIN | KEEP:latest | ...`
+  - the selector itself is now grouped into `Latest Window` and `Extra Preserved` sections, so the retained-set structure is visible before selecting a pair
 - `Use Selected History Pair`
   - restores the chosen replayable pair from history into the selector controls
 - `Run Selected History Pair`

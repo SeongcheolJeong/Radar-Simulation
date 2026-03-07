@@ -1264,6 +1264,7 @@ def run(args: argparse.Namespace) -> int:
                 retention_option_count = -1
                 retained_option_values = []
                 retained_option_labels = []
+                retained_group_labels = []
                 for _ in range(40):
                     retention_text = reloaded_history_field.inner_text()
                     retention_option_count = reloaded_history_select.locator("option").count()
@@ -1272,6 +1273,9 @@ def run(args: argparse.Namespace) -> int:
                     )
                     retained_option_labels = reloaded_history_select.locator("option").evaluate_all(
                         "(nodes) => nodes.map((row) => String(row.textContent || ''))"
+                    )
+                    retained_group_labels = reloaded_history_select.locator("optgroup").evaluate_all(
+                        "(nodes) => nodes.map((row) => String(row.label || ''))"
                     )
                     if (
                         "compare_history_retention_policy: retain_2_preserve_saved | keep_latest=2 | preserve_scope=saved | preserve_pinned=true | preserve_saved=true" in retention_text
@@ -1282,6 +1286,8 @@ def run(args: argparse.Namespace) -> int:
                         and "low_fidelity_radarsimpy_ffd::high_fidelity_sionna_rt" in retained_option_values
                         and any("PIN | KEEP:latest | Low Current Saved" in label for label in retained_option_labels)
                         and any("KEEP:extra | Low Sionna Saved" in label for label in retained_option_labels)
+                        and "Latest Window" in retained_group_labels
+                        and "Extra Preserved" in retained_group_labels
                         and retention_option_count >= 2
                     ):
                         retention_ok = True
@@ -1312,6 +1318,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["compare_session_retention_preserve_saved_checked"] = True
                 report["runtime_controls"]["compare_session_selected_pair_retention_checked"] = True
                 report["runtime_controls"]["compare_session_replay_option_retention_badges_checked"] = True
+                report["runtime_controls"]["compare_session_replay_option_groups_checked"] = True
 
                 history_retention_select.select_option("retain_2_preserve_pinned")
                 retention_ok = False
@@ -1319,6 +1326,7 @@ def run(args: argparse.Namespace) -> int:
                 retention_option_count = -1
                 retained_option_values = []
                 retained_option_labels = []
+                retained_group_labels = []
                 for _ in range(40):
                     retention_text = reloaded_history_field.inner_text()
                     retention_option_count = reloaded_history_select.locator("option").count()
@@ -1327,6 +1335,9 @@ def run(args: argparse.Namespace) -> int:
                     )
                     retained_option_labels = reloaded_history_select.locator("option").evaluate_all(
                         "(nodes) => nodes.map((row) => String(row.textContent || ''))"
+                    )
+                    retained_group_labels = reloaded_history_select.locator("optgroup").evaluate_all(
+                        "(nodes) => nodes.map((row) => String(row.label || ''))"
                     )
                     if (
                         "compare_history_retention_policy: retain_2_preserve_pinned | keep_latest=2 | preserve_scope=pinned | preserve_pinned=true | preserve_saved=false" in retention_text
@@ -1337,6 +1348,8 @@ def run(args: argparse.Namespace) -> int:
                         and "low_fidelity_radarsimpy_ffd::current_config" in retained_option_values
                         and "low_fidelity_radarsimpy_ffd::high_fidelity_sionna_rt" not in retained_option_values
                         and any("PIN | KEEP:latest | Low Current Saved" in label for label in retained_option_labels)
+                        and "Latest Window" in retained_group_labels
+                        and "Extra Preserved" not in retained_group_labels
                         and retention_option_count <= 2
                     ):
                         retention_ok = True

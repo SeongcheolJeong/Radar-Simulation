@@ -2,6 +2,38 @@ import { React } from "../deps.mjs";
 
 const h = React.createElement;
 
+function buildReplayPairOptionGroups(options) {
+  const rows = Array.isArray(options) ? options : [];
+  const groups = {
+    latest_window: [],
+    retained_extra: [],
+    other: [],
+  };
+  rows.forEach((row) => {
+    const state = String(row?.retentionState || "").trim();
+    if (state === "latest_window") {
+      groups.latest_window.push(row);
+      return;
+    }
+    if (state === "retained_extra") {
+      groups.retained_extra.push(row);
+      return;
+    }
+    groups.other.push(row);
+  });
+  return [
+    groups.latest_window.length > 0
+      ? { id: "latest_window", label: "Latest Window", options: groups.latest_window }
+      : null,
+    groups.retained_extra.length > 0
+      ? { id: "retained_extra", label: "Extra Preserved", options: groups.retained_extra }
+      : null,
+    groups.other.length > 0
+      ? { id: "other", label: "Other", options: groups.other }
+      : null,
+  ].filter(Boolean);
+}
+
 export function DecisionPane({
   baselineId,
   compareGraphRunId,
@@ -81,6 +113,7 @@ export function DecisionPane({
   lastRegressionSession,
   lastRegressionExport,
 }) {
+  const replayPairOptionGroups = buildReplayPairOptionGroups(compareReplayPairOptions);
   return h("div", { className: "field", key: "decision_surface" }, [
     h("label", { className: "label", key: "lbl_decision_surface" }, "Decision Pane"),
     h("div", { className: "hint", key: "decision_scope_hint" }, `baseline_id: ${String(baselineId || "-")}`),
@@ -259,10 +292,20 @@ export function DecisionPane({
         value: String(selectedCompareReplayPairId || ""),
         onChange: (e) => setSelectedCompareReplayPairId(String(e.target.value || "")),
       }, (Array.isArray(compareReplayPairOptions) && compareReplayPairOptions.length > 0
-        ? compareReplayPairOptions
-        : [{ id: "", label: "No replayable pairs yet" }]
-      ).map((row) =>
-        h("option", { key: `decision_compare_history_pair_${String(row?.id || "")}`, value: String(row?.id || "") }, String(row?.label || row?.id || "-"))
+        ? replayPairOptionGroups.map((group) =>
+          h("optgroup", {
+            key: `decision_compare_history_pair_group_${String(group?.id || "")}`,
+            label: String(group?.label || group?.id || "-"),
+          }, (Array.isArray(group?.options) ? group.options : []).map((row) =>
+            h("option", {
+              key: `decision_compare_history_pair_${String(row?.id || "")}`,
+              value: String(row?.id || ""),
+            }, String(row?.label || row?.id || "-"))
+          ))
+        )
+        : [
+          h("option", { key: "decision_compare_history_pair_empty", value: "" }, "No replayable pairs yet"),
+        ]
       )),
       h("input", {
         className: "input",
