@@ -149,7 +149,7 @@ export function ArtifactInspectorPanel({
     artifactInspectorPrefs
   ).historyArtifactExpectationExpanded;
 
-  React.useEffect(() => {
+  const resetArtifactInspectorProbeControls = React.useCallback(() => {
     const primaryRd = rdPeaks[0] || null;
     const primaryRa = raPeaks[0] || null;
     setRdRangeBinText(String(primaryRd ? primaryRd.col : 0));
@@ -160,7 +160,11 @@ export function ArtifactInspectorPanel({
     setRaPeakSelectText(primaryRa ? "0" : "-1");
     setRdPeakLock(false);
     setRaPeakLock(false);
-  }, [graphRunSummary, rdPeaks, raPeaks]);
+  }, [raPeaks, rdPeaks]);
+
+  React.useEffect(() => {
+    resetArtifactInspectorProbeControls();
+  }, [graphRunSummary, resetArtifactInspectorProbeControls]);
 
   React.useEffect(() => {
     if (!rdPeakLock) return;
@@ -235,6 +239,12 @@ export function ArtifactInspectorPanel({
       return updated;
     });
   }, []);
+  const resetArtifactInspectorLayout = React.useCallback(() => {
+    const defaults = normalizeArtifactInspectorPrefs({});
+    setArtifactInspectorPrefs(defaults);
+    saveArtifactInspectorPrefs(defaults);
+    resetArtifactInspectorProbeControls();
+  }, [resetArtifactInspectorProbeControls]);
 
   const renderProbeSummary = (probe) => {
     const exact = probe.exact;
@@ -252,6 +262,26 @@ export function ArtifactInspectorPanel({
   };
 
   return h("div", { className: "result-box", key: "aibox" }, [
+    h("div", {
+      key: "layout_controls",
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "8px",
+        marginBottom: "8px",
+      },
+    }, [
+      h("div", {
+        key: "layout_state",
+        style: { color: "#8fb3c9" },
+      }, `layout_state: live=${liveCompareEvidenceExpanded ? "expanded" : "collapsed"} | history=${historyArtifactExpectationExpanded ? "expanded" : "collapsed"}`),
+      h("button", {
+        key: "reset_artifact_inspector_layout",
+        className: "btn",
+        onClick: resetArtifactInspectorLayout,
+      }, "Reset Layout"),
+    ]),
     hasGraphRunSummary
       ? h("div", { key: "kpi", style: { marginBottom: "8px" } }, [
           `paths=${Number(graphRunSummary?.path_summary?.path_count_total || 0)} | `,

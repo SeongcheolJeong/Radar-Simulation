@@ -245,6 +245,8 @@ It now also mirrors the currently selected history pair's artifact expectation s
   - collapses or restores the current-vs-compare evidence block while keeping the assessment summary visible
 - `Hide/Show History Snapshot`
   - collapses or restores the selected history pair snapshot while keeping the selected pair and summary line visible
+- `Reset Layout`
+  - restores both fold sections to their default expanded state and clears the probe cursor/peak-lock controls back to their default values
 
 Those fold preferences now persist in browser `localStorage`, so a reload keeps the `Artifact Inspector` in the same collapsed/expanded state on the same machine/browser profile.
 
