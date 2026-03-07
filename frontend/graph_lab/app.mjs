@@ -871,6 +871,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     auditStateText: normalizeCompareSessionField(row.auditStateText, 320) || "audit_state: idle | total=0 | retained=0/3 | trimmed=0",
     auditCapacityText: normalizeCompareSessionField(row.auditCapacityText, 320) || "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no",
     auditWindowText: normalizeCompareSessionField(row.auditWindowText, 320) || "audit_window: retained_seqs=none | newest=0 | oldest=0 | lost_before=0 | coverage=empty",
+    auditContinuityText: normalizeCompareSessionField(row.auditContinuityText, 320) || "audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty",
     auditSummaryText: normalizeCompareSessionField(row.auditSummaryText, 320) || "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty",
   };
 }
@@ -2950,6 +2951,14 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.auditWindowText]
   );
+  const artifactInspectorDecisionAuditContinuityText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.auditContinuityText,
+      "audit_continuity",
+      "artifact_inspector_audit_continuity"
+    ),
+    [artifactInspectorStatusSummary.auditContinuityText]
+  );
   const artifactInspectorDecisionAuditSummaryText = React.useMemo(
     () => buildArtifactInspectorDecisionLine(
       artifactInspectorStatusSummary.auditSummaryText,
@@ -4166,6 +4175,7 @@ export function App() {
       `${artifactInspectorDecisionAuditStateText}`,
       `${artifactInspectorDecisionAuditCapacityText}`,
       `${artifactInspectorDecisionAuditWindowText}`,
+      `${artifactInspectorDecisionAuditContinuityText}`,
       `${artifactInspectorDecisionAuditSummaryText}`,
       `${artifactInspectorDecisionAuditControlState.text}`,
       `${artifactInspectorDecisionControlState.text}`,
@@ -4217,6 +4227,7 @@ export function App() {
     artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
     artifactInspectorDecisionAuditWindowText,
+    artifactInspectorDecisionAuditContinuityText,
     artifactInspectorDecisionAuditSummaryText,
     artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
@@ -4341,6 +4352,7 @@ export function App() {
       artifactInspectorDecisionAuditStateText,
       artifactInspectorDecisionAuditCapacityText,
       artifactInspectorDecisionAuditWindowText,
+      artifactInspectorDecisionAuditContinuityText,
       artifactInspectorDecisionAuditSummaryText,
       artifactInspectorDecisionAuditControlState.text,
       artifactInspectorDecisionControlState.text,
@@ -4410,6 +4422,7 @@ export function App() {
     artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
     artifactInspectorDecisionAuditWindowText,
+    artifactInspectorDecisionAuditContinuityText,
     artifactInspectorDecisionAuditSummaryText,
     artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
@@ -4860,6 +4873,7 @@ export function App() {
         artifactInspectorDecisionAuditStateText,
         artifactInspectorDecisionAuditCapacityText,
         artifactInspectorDecisionAuditWindowText,
+        artifactInspectorDecisionAuditContinuityText,
         artifactInspectorDecisionAuditSummaryText,
         artifactInspectorDecisionAuditControlState,
         artifactInspectorDecisionControlState,

@@ -224,6 +224,23 @@ function buildArtifactInspectorAuditWindowText(value) {
   return `audit_window: retained_seqs=${oldest}..${newest} | newest=${newest} | oldest=${oldest} | lost_before=${lostBefore} | coverage=${lostBefore > 0 ? "tail_only" : "full"}`;
 }
 
+function buildArtifactInspectorAuditContinuityText(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const seqs = (Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries : [])
+    .map((entry) => extractArtifactInspectorActionSeq(entry))
+    .filter((entry) => Number.isFinite(entry));
+  if (seqs.length <= 0) {
+    return "audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty";
+  }
+  const newest = Math.max(...seqs);
+  const oldest = Math.min(...seqs);
+  const lostBefore = Math.max(0, oldest - 1);
+  if (lostBefore > 0) {
+    return `audit_continuity: partial | retained_span=${oldest}..${newest} | missing_prefix=1..${lostBefore} | continuity=tail_only`;
+  }
+  return `audit_continuity: full | retained_span=${oldest}..${newest} | missing_prefix=none | continuity=full`;
+}
+
 function clearArtifactInspectorActionTrailState(value) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   return {
@@ -488,6 +505,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorAuditWindowText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditContinuityText = React.useMemo(
+    () => buildArtifactInspectorAuditContinuityText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -503,10 +524,12 @@ export function ArtifactInspectorPanel({
       auditStateText: artifactInspectorAuditStateText,
       auditCapacityText: artifactInspectorAuditCapacityText,
       auditWindowText: artifactInspectorAuditWindowText,
+      auditContinuityText: artifactInspectorAuditContinuityText,
       auditSummaryText: artifactInspectorAuditSummaryText,
     });
   }, [
     artifactInspectorAuditCapacityText,
+    artifactInspectorAuditContinuityText,
     artifactInspectorAuditStateText,
     artifactInspectorAuditWindowText,
     artifactInspectorAuditSummaryText,
@@ -657,6 +680,10 @@ export function ArtifactInspectorPanel({
           key: "audit_window",
           style: { color: "#8fb3c9" },
         }, artifactInspectorAuditWindowText),
+        h("div", {
+          key: "audit_continuity",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditContinuityText),
         h("div", {
           key: "audit_summary",
           style: { color: "#8fb3c9" },
