@@ -369,7 +369,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_layout_state`
 - `artifact_inspector_probe_state`
 
-The `Decision Pane` now mirrors that live state as a chip row plus compact hint lines under `Inspector State Mirror`, so the operator can confirm reset/collapse status without scrolling back to the `Artifact Inspector` panel.
+The `Decision Pane` now mirrors that live state as a chip row plus compact hint lines under `Inspector State Mirror`, and includes `Reset Inspector Layout` so the operator can restore the `Artifact Inspector` layout without scrolling back to that panel.
 
 The `Runtime Compare` summary inside the brief now also carries:
 

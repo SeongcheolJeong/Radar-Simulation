@@ -114,6 +114,7 @@ export function DecisionPane({
   artifactInspectorDecisionStatusBadgeRows,
   artifactInspectorDecisionLayoutStateText,
   artifactInspectorDecisionProbeStateText,
+  resetArtifactInspectorLayoutFromDecisionPane,
   trackCompareRunnerStatusText,
   compareRunStatusText,
   lastRegressionSession,
@@ -154,6 +155,13 @@ export function DecisionPane({
     ]),
     h("div", { className: "field", key: "decision_artifact_state_mirror" }, [
       h("label", { className: "label", key: "decision_artifact_state_mirror_label" }, "Inspector State Mirror"),
+      h("div", { className: "btn-row", key: "decision_artifact_state_mirror_actions" }, [
+        h("button", {
+          className: "btn",
+          key: "decision_reset_artifact_inspector_layout",
+          onClick: resetArtifactInspectorLayoutFromDecisionPane,
+        }, "Reset Inspector Layout"),
+      ]),
       h("div", { className: "chip-list", key: "decision_artifact_inspector_live_state_chips" }, (
         Array.isArray(artifactInspectorDecisionStatusBadgeRows) && artifactInspectorDecisionStatusBadgeRows.length > 0
           ? artifactInspectorDecisionStatusBadgeRows

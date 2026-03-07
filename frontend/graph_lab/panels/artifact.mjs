@@ -166,6 +166,7 @@ export function ArtifactInspectorPanel({
   selectedReplayableCompareSessionText,
   selectedReplayableCompareSessionArtifactExpectationSummaryText,
   selectedReplayableCompareSessionArtifactExpectationText,
+  resetRequestNonce,
   onArtifactInspectorStatusChange,
 }) {
   const hasGraphRunSummary = Boolean(graphRunSummary);
@@ -369,6 +370,10 @@ export function ArtifactInspectorPanel({
     saveArtifactInspectorPrefs(defaults);
     resetArtifactInspectorProbeControls();
   }, [resetArtifactInspectorProbeControls]);
+  React.useEffect(() => {
+    if (!Number.isFinite(Number(resetRequestNonce))) return;
+    resetArtifactInspectorLayout();
+  }, [resetArtifactInspectorLayout, resetRequestNonce]);
 
   const renderProbeSummary = (probe) => {
     const exact = probe.exact;

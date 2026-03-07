@@ -1777,6 +1777,7 @@ export function App() {
   const [artifactInspectorStatusSummary, setArtifactInspectorStatusSummary] = React.useState(() => (
     normalizeArtifactInspectorStatusSummary({})
   ));
+  const [artifactInspectorResetRequestNonce, setArtifactInspectorResetRequestNonce] = React.useState(0);
   const [contractOverlayEnabled, setContractOverlayEnabled] = React.useState(
     String(params.get("contract_overlay") || "0") === "1"
   );
@@ -2851,6 +2852,10 @@ export function App() {
   const handleArtifactInspectorStatusChange = React.useCallback((statusInput) => {
     setArtifactInspectorStatusSummary(normalizeArtifactInspectorStatusSummary(statusInput));
   }, []);
+  const resetArtifactInspectorLayoutFromDecisionPane = React.useCallback(() => {
+    setArtifactInspectorResetRequestNonce((prev) => Number(prev || 0) + 1);
+    setStatus("artifact inspector layout reset from decision pane", "status-ok");
+  }, [setStatus]);
   const latestReplayableCompareSession = React.useMemo(
     () => compareSessionHistory
       .map((row) => applyCompareReplayPairMeta(getCompareSessionReplayPair(row), compareReplayPairMetaById))
@@ -4644,11 +4649,13 @@ export function App() {
         artifactInspectorDecisionStatusBadgeRows,
         artifactInspectorDecisionLayoutStateText,
         artifactInspectorDecisionProbeStateText,
+        resetArtifactInspectorLayoutFromDecisionPane,
         trackCompareRunnerStatusText,
         lastRegressionSession,
         lastRegressionExport,
         contractDebugText,
         onArtifactInspectorStatusChange: handleArtifactInspectorStatusChange,
+        artifactInspectorResetRequestNonce,
       }),
     ]),
     h(ContractWarningOverlay, {
