@@ -4,6 +4,7 @@ import { normalizeRepoPath } from "../graph_helpers.mjs";
 
 const h = React.createElement;
 const ARTIFACT_INSPECTOR_PREFS_STORAGE_KEY = "graph_lab_artifact_inspector_prefs_v1";
+const ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT = 3;
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -129,21 +130,35 @@ function computeProbe(peaks, rowBin, colBin, shape) {
 function normalizeArtifactInspectorPrefs(value) {
   const row = value && typeof value === "object" ? value : {};
   const lastActionSeq = Number(row.lastActionSeq);
+  const recentActionEntries = Array.isArray(row.recentActionEntries)
+    ? row.recentActionEntries.map((entry) => String(entry || "").trim()).filter(Boolean).slice(0, ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT)
+    : [];
   return {
     liveCompareEvidenceExpanded: row.liveCompareEvidenceExpanded !== false,
     historyArtifactExpectationExpanded: row.historyArtifactExpectationExpanded !== false,
     lastActionSeq: Number.isFinite(lastActionSeq) && lastActionSeq >= 0 ? Math.floor(lastActionSeq) : 0,
     lastActionText: String(row.lastActionText || "last_action: seq=0 | idle").trim() || "last_action: seq=0 | idle",
+    recentActionEntries,
   };
+}
+
+function buildArtifactInspectorRecentActionsText(entries) {
+  const rows = Array.isArray(entries) ? entries.map((entry) => String(entry || "").trim()).filter(Boolean) : [];
+  if (rows.length <= 0) {
+    return "recent_actions: none";
+  }
+  return `recent_actions: ${rows.map((entry) => `[${entry}]`).join(" ")}`;
 }
 
 function buildArtifactInspectorLastActionUpdate(value, label) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   const nextSeq = Math.max(0, Number(prefs.lastActionSeq || 0)) + 1;
   const normalizedLabel = String(label || "unknown").trim() || "unknown";
+  const actionEntry = `seq=${nextSeq} | ${normalizedLabel}`;
   return {
     lastActionSeq: nextSeq,
-    lastActionText: `last_action: seq=${nextSeq} | ${normalizedLabel}`,
+    lastActionText: `last_action: ${actionEntry}`,
+    recentActionEntries: [actionEntry, ...prefs.recentActionEntries].slice(0, ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT),
   };
 }
 
@@ -360,6 +375,10 @@ export function ArtifactInspectorPanel({
     () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).lastActionText || "last_action: seq=0 | idle"),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorRecentActionsText = React.useMemo(
+    () => buildArtifactInspectorRecentActionsText(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries),
+    [artifactInspectorPrefs]
+  );
   React.useEffect(() => {
     if (typeof onArtifactInspectorStatusChange !== "function") return;
     onArtifactInspectorStatusChange({
@@ -367,10 +386,12 @@ export function ArtifactInspectorPanel({
       probeStateText: artifactInspectorProbeState.text,
       statusBadgesText: artifactInspectorStatusBadgesText,
       lastActionText: artifactInspectorLastActionText,
+      recentActionsText: artifactInspectorRecentActionsText,
     });
   }, [
     artifactInspectorLayoutStateText,
     artifactInspectorLastActionText,
+    artifactInspectorRecentActionsText,
     artifactInspectorProbeState.text,
     artifactInspectorStatusBadgesText,
     onArtifactInspectorStatusChange,
@@ -497,6 +518,10 @@ export function ArtifactInspectorPanel({
           key: "last_action",
           style: { color: "#8fb3c9" },
         }, artifactInspectorLastActionText),
+        h("div", {
+          key: "recent_actions",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorRecentActionsText),
       ]),
         h("button", {
           key: "reset_artifact_inspector_layout",

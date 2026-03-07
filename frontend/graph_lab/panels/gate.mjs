@@ -115,6 +115,7 @@ export function DecisionPane({
   artifactInspectorDecisionLayoutStateText,
   artifactInspectorDecisionProbeStateText,
   artifactInspectorDecisionLastActionText,
+  artifactInspectorDecisionRecentActionsText,
   artifactInspectorDecisionControlState,
   collapseArtifactInspectorEvidenceFromDecisionPane,
   expandArtifactInspectorEvidenceFromDecisionPane,
@@ -193,6 +194,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_layout_hint" }, String(artifactInspectorDecisionLayoutStateText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_probe_hint" }, String(artifactInspectorDecisionProbeStateText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_action_hint" }, String(artifactInspectorDecisionLastActionText || "-")),
+      h("div", { className: "hint", key: "decision_artifact_inspector_live_state_recent_actions_hint" }, String(artifactInspectorDecisionRecentActionsText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_controls_hint" }, String(artifactInspectorDecisionControlState?.text || "artifact_inspector_controls: -")),
     ]),
     h("div", { className: "field", key: "decision_preset_pair_compare" }, [

@@ -867,6 +867,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     probeStateText: normalizeCompareSessionField(row.probeStateText, 320) || "probe_state: -",
     statusBadgesText: normalizeCompareSessionField(row.statusBadgesText, 320) || "status_badges: -",
     lastActionText: normalizeCompareSessionField(row.lastActionText, 320) || "last_action: seq=0 | idle",
+    recentActionsText: normalizeCompareSessionField(row.recentActionsText, 320) || "recent_actions: none",
   };
 }
 
@@ -2887,6 +2888,14 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.lastActionText]
   );
+  const artifactInspectorDecisionRecentActionsText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.recentActionsText,
+      "recent_actions",
+      "artifact_inspector_recent_actions"
+    ),
+    [artifactInspectorStatusSummary.recentActionsText]
+  );
   const artifactInspectorDecisionControlState = React.useMemo(
     () => buildArtifactInspectorMirrorControlState(artifactInspectorDecisionStatusBadgeRows),
     [artifactInspectorDecisionStatusBadgeRows]
@@ -4075,6 +4084,7 @@ export function App() {
       `${artifactInspectorDecisionLayoutStateText}`,
       `${artifactInspectorDecisionProbeStateText}`,
       `${artifactInspectorDecisionLastActionText}`,
+      `${artifactInspectorDecisionRecentActionsText}`,
       `${artifactInspectorDecisionControlState.text}`,
       `gate_failure_count: ${Number(failureRows.length || 0)}`,
       `path_count_delta(current-compare): ${runCompareSummary.available ? formatSigned(runCompareSummary.pathCountDelta) : "-"}`,
@@ -4120,6 +4130,7 @@ export function App() {
     artifactInspectorDecisionLayoutStateText,
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
+    artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionControlState.text,
     graphRunSummary,
     latestCompareSessionText,
@@ -4238,6 +4249,7 @@ export function App() {
       artifactInspectorDecisionLayoutStateText,
       artifactInspectorDecisionProbeStateText,
       artifactInspectorDecisionLastActionText,
+      artifactInspectorDecisionRecentActionsText,
       artifactInspectorDecisionControlState.text,
       "```",
       "",
@@ -4301,6 +4313,7 @@ export function App() {
     artifactInspectorDecisionLayoutStateText,
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
+    artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionControlState.text,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
@@ -4745,6 +4758,7 @@ export function App() {
         artifactInspectorDecisionLayoutStateText,
         artifactInspectorDecisionProbeStateText,
         artifactInspectorDecisionLastActionText,
+        artifactInspectorDecisionRecentActionsText,
         artifactInspectorDecisionControlState,
         collapseArtifactInspectorEvidenceFromDecisionPane,
         expandArtifactInspectorEvidenceFromDecisionPane,
