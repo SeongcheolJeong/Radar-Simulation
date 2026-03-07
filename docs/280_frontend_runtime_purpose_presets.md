@@ -369,6 +369,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_layout_state`
 - `artifact_inspector_probe_state`
 - `artifact_inspector_last_action`
+- `artifact_inspector_maintenance_action`
 - `artifact_inspector_recent_actions`
 - `artifact_inspector_audit_state`
 - `artifact_inspector_audit_capacity`
@@ -397,6 +398,7 @@ Those mirror controls are now also state-aware:
 - `Clear Action Trail` is disabled when there is no stored inspector action history
 - the mirror exports an `artifact_inspector_controls:` hint line so the same actionability state survives in the decision brief
 - the mirror also exports `artifact_inspector_last_action:` as `seq=N | <source>` so the last collapse/expand/reset source and ordering stay visible after reload and in the decision brief
+- the mirror also exports `artifact_inspector_maintenance_action:` so audit-trail clears remain attributable even after `last_action` and `recent_actions` are reset back to idle/none
 - the mirror also exports `artifact_inspector_recent_actions:` so the newest three inspector actions remain visible as a short audit trail
 - the mirror also exports `artifact_inspector_audit_state:` so operators can see whether the ring buffer is idle, actively tracking, or already trimmed
 - the mirror also exports `artifact_inspector_audit_capacity:` so operators can see retained-limit usage, remaining headroom, and whether overflow is already happening

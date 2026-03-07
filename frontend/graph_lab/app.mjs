@@ -867,6 +867,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     probeStateText: normalizeCompareSessionField(row.probeStateText, 320) || "probe_state: -",
     statusBadgesText: normalizeCompareSessionField(row.statusBadgesText, 320) || "status_badges: -",
     lastActionText: normalizeCompareSessionField(row.lastActionText, 320) || "last_action: seq=0 | idle",
+    maintenanceActionText: normalizeCompareSessionField(row.maintenanceActionText, 320) || "maintenance_action: seq=0 | none | source=none | trigger=idle",
     recentActionsText: normalizeCompareSessionField(row.recentActionsText, 320) || "recent_actions: none",
     auditStateText: normalizeCompareSessionField(row.auditStateText, 320) || "audit_state: idle | total=0 | retained=0/3 | trimmed=0",
     auditCapacityText: normalizeCompareSessionField(row.auditCapacityText, 320) || "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no",
@@ -2944,6 +2945,14 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.lastActionText]
   );
+  const artifactInspectorDecisionMaintenanceActionText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.maintenanceActionText,
+      "maintenance_action",
+      "artifact_inspector_maintenance_action"
+    ),
+    [artifactInspectorStatusSummary.maintenanceActionText]
+  );
   const artifactInspectorDecisionRecentActionsText = React.useMemo(
     () => buildArtifactInspectorDecisionLine(
       artifactInspectorStatusSummary.recentActionsText,
@@ -3091,6 +3100,9 @@ export function App() {
     issueArtifactInspectorControlRequest(
       {
         clearActionTrail: true,
+        maintenanceAction: "clear_action_trail",
+        maintenanceSource: "decision_pane",
+        maintenanceTrigger: "manual",
       },
       "artifact inspector action trail cleared from decision pane",
       "status-ok"
@@ -3103,6 +3115,9 @@ export function App() {
     issueArtifactInspectorControlRequest(
       {
         clearActionTrail: true,
+        maintenanceAction: "clear_action_trail",
+        maintenanceSource: "decision_pane",
+        maintenanceTrigger: "recommended",
       },
       "artifact inspector recommended audit action applied from decision pane",
       "status-ok"
@@ -4240,6 +4255,7 @@ export function App() {
       `${artifactInspectorDecisionLayoutStateText}`,
       `${artifactInspectorDecisionProbeStateText}`,
       `${artifactInspectorDecisionLastActionText}`,
+      `${artifactInspectorDecisionMaintenanceActionText}`,
       `${artifactInspectorDecisionRecentActionsText}`,
       `${artifactInspectorDecisionAuditStateText}`,
       `${artifactInspectorDecisionAuditCapacityText}`,
@@ -4292,11 +4308,12 @@ export function App() {
     compareSessionImportPreviewCompactSummaryText,
     compareSessionTransferCompactSummaryText,
     compareSessionTransferStatusText,
-    artifactInspectorDecisionStatusBadgesText,
-    artifactInspectorDecisionLayoutStateText,
-    artifactInspectorDecisionProbeStateText,
-    artifactInspectorDecisionLastActionText,
-    artifactInspectorDecisionRecentActionsText,
+      artifactInspectorDecisionStatusBadgesText,
+      artifactInspectorDecisionLayoutStateText,
+      artifactInspectorDecisionProbeStateText,
+      artifactInspectorDecisionLastActionText,
+      artifactInspectorDecisionMaintenanceActionText,
+      artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
     artifactInspectorDecisionAuditWindowText,
@@ -4425,6 +4442,7 @@ export function App() {
       artifactInspectorDecisionLayoutStateText,
       artifactInspectorDecisionProbeStateText,
       artifactInspectorDecisionLastActionText,
+      artifactInspectorDecisionMaintenanceActionText,
       artifactInspectorDecisionRecentActionsText,
       artifactInspectorDecisionAuditStateText,
       artifactInspectorDecisionAuditCapacityText,
@@ -4499,6 +4517,7 @@ export function App() {
     artifactInspectorDecisionLayoutStateText,
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
+    artifactInspectorDecisionMaintenanceActionText,
     artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
@@ -4954,6 +4973,7 @@ export function App() {
         artifactInspectorDecisionLayoutStateText,
         artifactInspectorDecisionProbeStateText,
         artifactInspectorDecisionLastActionText,
+        artifactInspectorDecisionMaintenanceActionText,
         artifactInspectorDecisionRecentActionsText,
         artifactInspectorDecisionAuditStateText,
         artifactInspectorDecisionAuditCapacityText,

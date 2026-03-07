@@ -182,6 +182,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_badges_checked": False,
             "artifact_inspector_probe_state_checked": False,
             "artifact_inspector_last_action_checked": False,
+            "artifact_inspector_maintenance_action_checked": False,
             "artifact_inspector_recent_actions_checked": False,
             "artifact_inspector_audit_overflow_checked": False,
             "artifact_inspector_audit_window_checked": False,
@@ -471,6 +472,7 @@ def run(args: argparse.Namespace) -> int:
                     or "reset_required=no" not in artifact_text
                     or "probe_state: default" not in artifact_text
                     or "last_action: seq=0 | idle" not in artifact_text
+                    or "maintenance_action: seq=0 | none | source=none | trigger=idle" not in artifact_text
                     or "recent_actions: none" not in artifact_text
                     or "audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in artifact_text
                     or "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in artifact_text
@@ -510,6 +512,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
+                    or "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" not in decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in decision_artifact_state_text
                     or "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in decision_artifact_state_text
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in decision_artifact_state_text
@@ -801,6 +804,7 @@ def run(args: argparse.Namespace) -> int:
                     cleared_audit_mirror_text = decision_artifact_state_field.inner_text()
                     if (
                         "last_action: seq=0 | idle" in cleared_audit_artifact_text
+                        and "maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" in cleared_audit_artifact_text
                         and "recent_actions: none" in cleared_audit_artifact_text
                         and "audit_state: idle | total=0 | retained=0/3 | trimmed=0" in cleared_audit_artifact_text
                         and "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" in cleared_audit_artifact_text
@@ -808,6 +812,7 @@ def run(args: argparse.Namespace) -> int:
                         and "audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty" in cleared_audit_artifact_text
                         and "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" in cleared_audit_artifact_text
                         and "artifact_inspector_last_action: seq=0 | idle" in cleared_audit_mirror_text
+                        and "artifact_inspector_maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" in cleared_audit_mirror_text
                         and "artifact_inspector_recent_actions: none" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" in cleared_audit_mirror_text
@@ -839,6 +844,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_badges_checked"] = True
                 report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
                 report["runtime_controls"]["artifact_inspector_last_action_checked"] = True
+                report["runtime_controls"]["artifact_inspector_maintenance_action_checked"] = True
                 report["runtime_controls"]["artifact_inspector_recent_actions_checked"] = True
                 report["runtime_controls"]["artifact_inspector_audit_overflow_checked"] = True
                 report["runtime_controls"]["artifact_inspector_audit_window_checked"] = True
@@ -1401,6 +1407,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_layout_state:" not in brief_text
                     or "artifact_inspector_probe_state:" not in brief_text
                     or "artifact_inspector_last_action:" not in brief_text
+                    or "artifact_inspector_maintenance_action:" not in brief_text
                     or "artifact_inspector_recent_actions:" not in brief_text
                     or "artifact_inspector_audit_state:" not in brief_text
                     or "artifact_inspector_audit_capacity:" not in brief_text
@@ -1540,6 +1547,7 @@ def run(args: argparse.Namespace) -> int:
                     or "reset_required=no" not in reloaded_artifact_text
                     or "probe_state: default" not in reloaded_artifact_text
                     or "last_action: seq=0 | idle" not in reloaded_artifact_text
+                    or "maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" not in reloaded_artifact_text
                     or "recent_actions: none" not in reloaded_artifact_text
                     or "audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in reloaded_artifact_text
                     or "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in reloaded_artifact_text
@@ -1582,6 +1590,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_layout_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in reloaded_decision_artifact_state_text

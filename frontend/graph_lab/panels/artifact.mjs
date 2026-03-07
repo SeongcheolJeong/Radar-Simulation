@@ -174,6 +174,7 @@ function computeProbe(peaks, rowBin, colBin, shape) {
 function normalizeArtifactInspectorPrefs(value) {
   const row = value && typeof value === "object" ? value : {};
   const lastActionSeq = Number(row.lastActionSeq);
+  const maintenanceSeq = Number(row.maintenanceSeq);
   const rawActionTrailTotalCount = Number(row.actionTrailTotalCount);
   const recentActionEntries = Array.isArray(row.recentActionEntries)
     ? row.recentActionEntries.map((entry) => String(entry || "").trim()).filter(Boolean).slice(0, ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT)
@@ -186,10 +187,12 @@ function normalizeArtifactInspectorPrefs(value) {
     liveCompareEvidenceExpanded: row.liveCompareEvidenceExpanded !== false,
     historyArtifactExpectationExpanded: row.historyArtifactExpectationExpanded !== false,
     lastActionSeq: Number.isFinite(lastActionSeq) && lastActionSeq >= 0 ? Math.floor(lastActionSeq) : 0,
+    maintenanceSeq: Number.isFinite(maintenanceSeq) && maintenanceSeq >= 0 ? Math.floor(maintenanceSeq) : 0,
     actionTrailTotalCount: Number.isFinite(rawActionTrailTotalCount) && rawActionTrailTotalCount >= 0
       ? Math.floor(rawActionTrailTotalCount)
       : fallbackActionTrailTotalCount,
     lastActionText: String(row.lastActionText || "last_action: seq=0 | idle").trim() || "last_action: seq=0 | idle",
+    maintenanceActionText: String(row.maintenanceActionText || "maintenance_action: seq=0 | none | source=none | trigger=idle").trim() || "maintenance_action: seq=0 | none | source=none | trigger=idle",
     recentActionEntries,
   };
 }
@@ -386,6 +389,32 @@ function clearArtifactInspectorActionTrailState(value) {
     actionTrailTotalCount: 0,
     lastActionText: "last_action: seq=0 | idle",
     recentActionEntries: [],
+  };
+}
+
+function buildArtifactInspectorMaintenanceActionUpdate(value, actionInput) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const row = actionInput && typeof actionInput === "object" ? actionInput : {};
+  const nextSeq = Math.max(0, Number(prefs.maintenanceSeq || 0)) + 1;
+  const action = String(row.action || "unknown").trim() || "unknown";
+  const source = String(row.source || "unknown").trim() || "unknown";
+  const trigger = String(row.trigger || "unknown").trim() || "unknown";
+  return {
+    maintenanceSeq: nextSeq,
+    maintenanceActionText: `maintenance_action: seq=${nextSeq} | action=${action} | source=${source} | trigger=${trigger}`,
+  };
+}
+
+function applyArtifactInspectorClearAction(value, actionInput) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const cleared = clearArtifactInspectorActionTrailState(prefs);
+  const row = actionInput && typeof actionInput === "object" ? actionInput : null;
+  if (!row) {
+    return cleared;
+  }
+  return {
+    ...cleared,
+    ...buildArtifactInspectorMaintenanceActionUpdate(prefs, row),
   };
 }
 
@@ -628,6 +657,10 @@ export function ArtifactInspectorPanel({
     () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).lastActionText || "last_action: seq=0 | idle"),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorMaintenanceActionText = React.useMemo(
+    () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).maintenanceActionText || "maintenance_action: seq=0 | none | source=none | trigger=idle"),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorRecentActionsText = React.useMemo(
     () => buildArtifactInspectorRecentActionsText(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries),
     [artifactInspectorPrefs]
@@ -686,6 +719,7 @@ export function ArtifactInspectorPanel({
       probeStateText: artifactInspectorProbeState.text,
       statusBadgesText: artifactInspectorStatusBadgesText,
       lastActionText: artifactInspectorLastActionText,
+      maintenanceActionText: artifactInspectorMaintenanceActionText,
       recentActionsText: artifactInspectorRecentActionsText,
       auditStateText: artifactInspectorAuditStateText,
       auditCapacityText: artifactInspectorAuditCapacityText,
@@ -709,6 +743,7 @@ export function ArtifactInspectorPanel({
     artifactInspectorAuditSummaryText,
     artifactInspectorLayoutStateText,
     artifactInspectorLastActionText,
+    artifactInspectorMaintenanceActionText,
     artifactInspectorRecentActionsText,
     artifactInspectorProbeState.text,
     artifactInspectorStatusBadgesText,
@@ -759,7 +794,11 @@ export function ArtifactInspectorPanel({
   }, [resetArtifactInspectorProbeControls]);
   const clearArtifactInspectorActionTrail = React.useCallback(() => {
     setArtifactInspectorPrefs((prev) => {
-      const updated = clearArtifactInspectorActionTrailState(prev);
+      const updated = applyArtifactInspectorClearAction(prev, {
+        action: "clear_action_trail",
+        source: "artifact_panel",
+        trigger: "manual",
+      });
       saveArtifactInspectorPrefs(updated);
       return updated;
     });
@@ -768,7 +807,11 @@ export function ArtifactInspectorPanel({
     if (artifactInspectorAuditControlState.applyRecommendedDisabled) return;
     if (String(artifactInspectorAuditControlState.recommendedAction || "").trim() !== "clear_action_trail") return;
     setArtifactInspectorPrefs((prev) => {
-      const updated = clearArtifactInspectorActionTrailState(prev);
+      const updated = applyArtifactInspectorClearAction(prev, {
+        action: "clear_action_trail",
+        source: "artifact_panel",
+        trigger: "recommended",
+      });
       saveArtifactInspectorPrefs(updated);
       return updated;
     });
@@ -788,7 +831,11 @@ export function ArtifactInspectorPanel({
         ...next,
       };
       if (command.clearActionTrail === true) {
-        updated = clearArtifactInspectorActionTrailState(updated);
+        updated = applyArtifactInspectorClearAction(updated, {
+          action: String(command.maintenanceAction || "clear_action_trail").trim() || "clear_action_trail",
+          source: String(command.maintenanceSource || "decision_pane").trim() || "decision_pane",
+          trigger: String(command.maintenanceTrigger || "manual").trim() || "manual",
+        });
       }
       if (String(command?.lastActionLabel || "").trim()) {
         Object.assign(updated, buildArtifactInspectorLastActionUpdate(next, String(command.lastActionLabel).trim()));
@@ -898,6 +945,10 @@ export function ArtifactInspectorPanel({
           key: "last_action",
           style: { color: "#8fb3c9" },
         }, artifactInspectorLastActionText),
+        h("div", {
+          key: "maintenance_action",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceActionText),
         h("div", {
           key: "recent_actions",
           style: { color: "#8fb3c9" },
