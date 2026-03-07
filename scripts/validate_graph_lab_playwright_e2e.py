@@ -126,6 +126,8 @@ def run(args: argparse.Namespace) -> int:
             "ffd_fields_present": False,
             "advanced_controls_checked": [],
             "compare_workflow_checked": False,
+            "track_compare_runner_checked": False,
+            "track_compare_runner_result": "",
         },
         "artifacts": {},
         "status": "unknown",
@@ -336,6 +338,27 @@ def run(args: argparse.Namespace) -> int:
                 download = dl_info.value
                 brief_path = latest_dir / "decision_brief.md"
                 download.save_as(str(brief_path))
+
+                page.get_by_role("button", name="Run Low -> Current Compare").click()
+                page.wait_for_function(
+                    """() => {
+                        const text = (document.body && document.body.innerText) || "";
+                        return (
+                            text.includes("track_compare_runner=ready")
+                            || text.includes("track_compare_runner_blocked")
+                            || text.includes("track_compare_runner_failed")
+                        );
+                    }""",
+                    timeout=90_000,
+                )
+                report["runtime_controls"]["track_compare_runner_checked"] = True
+                body_text = page.locator("body").inner_text()
+                if "track_compare_runner=ready" in body_text:
+                    report["runtime_controls"]["track_compare_runner_result"] = "ready"
+                elif "track_compare_runner_blocked" in body_text:
+                    report["runtime_controls"]["track_compare_runner_result"] = "blocked"
+                else:
+                    raise AssertionError("track compare runner ended in failed state")
 
                 # Normalize high-churn text before visual capture so strict snapshots
                 # track structural UI regressions instead of run-id/timestamp drift.

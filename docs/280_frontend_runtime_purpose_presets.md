@@ -65,6 +65,10 @@ The Decision Pane now exposes a lightweight operator workflow for low-vs-high tr
 - `Use Current as Compare`
   - locks the current run as the compare reference
   - keeps that reference pinned while the operator switches runtime presets and runs again
+- `Run Low -> Current Compare`
+  - executes a low-fidelity `radarsimpy_rt` baseline first
+  - then runs the current frontend track and pins the low-fidelity result as compare input
+  - reports `blocked` when the low-fidelity runtime is unavailable, instead of leaving the UI in an ambiguous state
 - `Track Compare Workflow`
   - shows current/compare track labels
   - keeps the recommended sequence visible inside the UI
@@ -76,6 +80,13 @@ Practical flow:
 3. Switch to the other runtime preset.
 4. Run again.
 5. Inspect `Artifact Inspector` diff and use `Policy Gate` / `Run Session`.
+
+Fast path:
+
+1. Configure the target high-fidelity track.
+2. Click `Run Low -> Current Compare`.
+3. If the low-fidelity runtime is installed, inspect the generated compare pair immediately.
+4. If the UI reports `track_compare_runner_blocked`, install or expose the `radarsimpy` runtime first.
 
 ## Backend Behavior
 

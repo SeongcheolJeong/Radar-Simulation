@@ -104,6 +104,22 @@ function summarizeRuntimeTrack(summary, fallbackConfig) {
   };
 }
 
+function buildLowFidelityRuntimeOverrides() {
+  return {
+    runtimeBackendType: "radarsimpy_rt",
+    runtimeProviderSpec: "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths",
+    runtimeRequiredModulesText: "radarsimpy",
+    runtimeFailurePolicy: "error",
+    runtimeSimulationMode: "radarsimpy_adc",
+    runtimeDevice: "cpu",
+  };
+}
+
+function isRuntimeBlockedError(message) {
+  const text = String(message || "").trim().toLowerCase();
+  return text.includes("required runtime modules unavailable") || text.includes("runtime provider failed");
+}
+
 export function App() {
   const params = new URLSearchParams(window.location.search);
   const [layoutMode, setLayoutMode] = React.useState(
@@ -977,12 +993,32 @@ export function App() {
     licenseStatus: "none",
   }), [compareGraphRunSummary]);
 
+  const configuredRuntimeSummary = React.useMemo(() => {
+    const ffdRequested = String(runtimeTxFfdFilesText || "").trim() !== ""
+      || String(runtimeRxFfdFilesText || "").trim() !== "";
+    return summarizeRuntimeTrack(null, {
+      backendType: runtimeBackendType || "-",
+      simulationBackend: runtimeSimulationMode || "-",
+      multiplexingMode: runtimeMultiplexingMode || "-",
+      antennaMode: ffdRequested ? "ffd_requested" : "isotropic",
+      licenseStatus: runtimeLicenseFile ? "requested" : "none",
+    });
+  }, [
+    runtimeBackendType,
+    runtimeSimulationMode,
+    runtimeMultiplexingMode,
+    runtimeLicenseFile,
+    runtimeRxFfdFilesText,
+    runtimeTxFfdFilesText,
+  ]);
+
   const trackCompareGuideText = React.useMemo(() => [
     "1. Run the first track and confirm artifacts are produced.",
     "2. Click Use Current as Compare to lock that run as the reference.",
     "3. Switch runtime preset or advanced controls for the alternate track.",
     "4. Run Graph (API) again and inspect Artifact Inspector diff.",
     "5. Use Policy Gate / Run Session when the current-vs-compare pair is final.",
+    "6. Or click Run Low -> Current Compare to build the pair automatically.",
   ].join("\n"), []);
 
   const {
@@ -1137,6 +1173,75 @@ export function App() {
     compareGraphRunId,
     compareGraphRunSummary,
     graphRunSummary,
+    setStatus,
+  ]);
+
+  const runLowVsCurrentTrackCompare = React.useCallback(async () => {
+    const targetTrackLabel = String(configuredRuntimeSummary.trackLabel || "-");
+    setDecisionOpsStatusText(
+      `track_compare_runner: baseline=low_fidelity | target=${targetTrackLabel} | phase=baseline`
+    );
+    setStatus("running low-vs-current compare...", "status-warn");
+
+    const lowResult = await runGraphViaApi({
+      runModeOverride: "sync",
+      tag: "graph_lab_track_compare_low",
+      runtimeOverrides: buildLowFidelityRuntimeOverrides(),
+    });
+    if (!lowResult?.ok || !lowResult?.summary) {
+      const lowError = String(lowResult?.error || lowResult?.status || "unknown");
+      const blocked = isRuntimeBlockedError(lowError);
+      setDecisionOpsStatusText(
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=baseline | error=${lowError}`
+      );
+      setStatus(
+        blocked ? "track compare blocked at low-fidelity baseline" : "track compare failed at low-fidelity baseline",
+        blocked ? "status-warn" : "status-err"
+      );
+      return;
+    }
+
+    const compareRunId = String(
+      lowResult.graphRunId || lowResult.summary?.graph_run_id || lowResult.summary?.run_id || ""
+    ).trim();
+    setCompareGraphRunId(compareRunId);
+    setCompareGraphRunSummary(lowResult.summary);
+    setCompareRunPinnedManual(true);
+    setCompareAutoSkipForRunId("");
+    setCompareRunStatusText(
+      `compare_mode=runner_low_fidelity | run=${compareRunId || "-"} | status=${String(lowResult.status || lowResult.summary?.status || "completed")}`
+    );
+    setDecisionOpsStatusText(
+      `track_compare_runner: baseline_ready=${compareRunId || "-"} | target=${targetTrackLabel} | phase=current`
+    );
+
+    const currentResult = await runGraphViaApi({
+      runModeOverride: "sync",
+      tag: "graph_lab_track_compare_current",
+    });
+    if (!currentResult?.ok || !currentResult?.summary) {
+      const currentError = String(currentResult?.error || currentResult?.status || "unknown");
+      const blocked = isRuntimeBlockedError(currentError);
+      setDecisionOpsStatusText(
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=current | compare=${compareRunId || "-"} | error=${currentError}`
+      );
+      setStatus(
+        blocked ? "track compare blocked at current track" : "track compare failed at current track",
+        blocked ? "status-warn" : "status-err"
+      );
+      return;
+    }
+
+    const currentRunId = String(
+      currentResult.graphRunId || currentResult.summary?.graph_run_id || currentResult.summary?.run_id || ""
+    ).trim();
+    setDecisionOpsStatusText(
+      `track_compare_runner=ready | compare=${compareRunId || "-"} | current=${currentRunId || "-"} | target=${targetTrackLabel}`
+    );
+    setStatus(`track compare ready: ${compareRunId || "-"} -> ${currentRunId || "-"}`, "status-ok");
+  }, [
+    configuredRuntimeSummary.trackLabel,
+    runGraphViaApi,
     setStatus,
   ]);
 
@@ -1653,10 +1758,11 @@ export function App() {
         pinBaselineFromGraphRun,
         runPolicyGateForGraphRun,
         runDecisionRegressionSession,
+        runLowVsCurrentTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,
         exportDecisionBriefMd,
-        currentTrackLabel: runtimeSummary.trackLabel,
+        currentTrackLabel: configuredRuntimeSummary.trackLabel,
         compareTrackLabel: compareRuntimeSummary.trackLabel,
         trackCompareGuideText,
         decisionSummaryText,

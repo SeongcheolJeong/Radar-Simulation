@@ -35,6 +35,14 @@ function applyRuntimeBackendToGraph(graph, backendType, runtimeProviderSpec) {
   };
 }
 
+function normalizeRunGraphRequestOptions(raw) {
+  const value = raw && typeof raw === "object" ? raw : null;
+  if (!value) return {};
+  if (typeof value.preventDefault === "function") return {};
+  if (Object.prototype.hasOwnProperty.call(value, "nativeEvent")) return {};
+  return value;
+}
+
 export function useGraphRunOps(opts) {
   const safeOpts = normalizeGraphRunOpsOptions(opts);
   const {
@@ -254,13 +262,17 @@ export function useGraphRunOps(opts) {
         const status = String(row?.status || "").trim().toLowerCase();
         setPollStateText(`poll #${i + 1} status=${status || "-"}`);
         if (status === "completed") {
-          await loadGraphRunSummaryById(
+          const result = await loadGraphRunSummaryById(
             graphRunId,
             row,
             beforeContractSnapshot,
             "graph_run_poll_completed"
           );
-          return { ok: true, status: "completed" };
+          return {
+            ok: Boolean(result?.ok),
+            status: "completed",
+            summary: result?.summary || null,
+          };
         }
         if (status === "failed" || status === "canceled") {
           const contract = renderGraphRunRecord(
@@ -282,7 +294,12 @@ export function useGraphRunOps(opts) {
             status === "canceled" ? `graph run canceled: ${graphRunId}` : `graph run failed: ${graphRunId}`,
             status === "canceled" ? "status-warn" : "status-err"
           );
-          return { ok: false, status };
+          return {
+            ok: false,
+            status,
+            summary: null,
+            error: String(row?.error || status || ""),
+          };
         }
         await new Promise((resolve) => window.setTimeout(resolve, intervalMs));
       }
@@ -304,42 +321,54 @@ export function useGraphRunOps(opts) {
     setStatus,
   ]);
 
-  const runGraphViaApi = React.useCallback(async () => {
-    const graphRaw = toGraphPayload({ graphId, profile, nodes, edges });
-    const graph = applyRuntimeBackendToGraph(graphRaw, runtimeBackendType, runtimeProviderSpec);
-    const sceneOverrides = buildSceneOverrides({
-      runtimeBackendType,
-      runtimeProviderSpec,
-      runtimeRequiredModulesText,
-      runtimeFailurePolicy,
-      runtimeSimulationMode,
-      runtimeMultiplexingMode,
-      runtimeBpmPhaseCodeText,
-      runtimeMultiplexingPlanJson,
-      runtimeDevice,
-      runtimeLicenseTier,
-      runtimeLicenseFile,
-      runtimeTxFfdFilesText,
-      runtimeRxFfdFilesText,
-      runtimeMitsubaEgoOriginText,
-      runtimeMitsubaChirpIntervalText,
-      runtimeMitsubaMinRangeText,
-      runtimeMitsubaSpheresJson,
-      runtimePoSbrRepoRoot,
-      runtimePoSbrGeometryPath,
-      runtimePoSbrChirpIntervalText,
-      runtimePoSbrBouncesText,
-      runtimePoSbrRaysPerLambdaText,
-      runtimePoSbrAlphaDegText,
-      runtimePoSbrPhiDegText,
-      runtimePoSbrThetaDegText,
-      runtimePoSbrRadialVelocityText,
-      runtimePoSbrMinRangeText,
-      runtimePoSbrMaterialTag,
-      runtimePoSbrPathIdPrefix,
-      runtimePoSbrComponentsJson,
-    });
-    const runAsync = String(runMode || "sync") === "async";
+  const runGraphViaApi = React.useCallback(async (rawOptions) => {
+    const requestOptions = normalizeRunGraphRequestOptions(rawOptions);
+    const runtimeOverrides = requestOptions.runtimeOverrides && typeof requestOptions.runtimeOverrides === "object"
+      ? requestOptions.runtimeOverrides
+      : {};
+    const resolvedProfile = String(requestOptions.profile || profile);
+    const resolvedGraphId = String(requestOptions.graphId || graphId);
+    const resolvedSceneJsonPath = String(requestOptions.sceneJsonPath || sceneJsonPath);
+    const resolvedRuntimeOpts = {
+      runtimeBackendType: String(runtimeOverrides.runtimeBackendType || runtimeBackendType),
+      runtimeProviderSpec: String(runtimeOverrides.runtimeProviderSpec || runtimeProviderSpec),
+      runtimeRequiredModulesText: String(runtimeOverrides.runtimeRequiredModulesText || runtimeRequiredModulesText),
+      runtimeFailurePolicy: String(runtimeOverrides.runtimeFailurePolicy || runtimeFailurePolicy),
+      runtimeSimulationMode: String(runtimeOverrides.runtimeSimulationMode || runtimeSimulationMode),
+      runtimeMultiplexingMode: String(runtimeOverrides.runtimeMultiplexingMode || runtimeMultiplexingMode),
+      runtimeBpmPhaseCodeText: String(runtimeOverrides.runtimeBpmPhaseCodeText || runtimeBpmPhaseCodeText),
+      runtimeMultiplexingPlanJson: String(runtimeOverrides.runtimeMultiplexingPlanJson || runtimeMultiplexingPlanJson),
+      runtimeDevice: String(runtimeOverrides.runtimeDevice || runtimeDevice),
+      runtimeLicenseTier: String(runtimeOverrides.runtimeLicenseTier || runtimeLicenseTier),
+      runtimeLicenseFile: String(runtimeOverrides.runtimeLicenseFile || runtimeLicenseFile),
+      runtimeTxFfdFilesText: String(runtimeOverrides.runtimeTxFfdFilesText || runtimeTxFfdFilesText),
+      runtimeRxFfdFilesText: String(runtimeOverrides.runtimeRxFfdFilesText || runtimeRxFfdFilesText),
+      runtimeMitsubaEgoOriginText: String(runtimeOverrides.runtimeMitsubaEgoOriginText || runtimeMitsubaEgoOriginText),
+      runtimeMitsubaChirpIntervalText: String(runtimeOverrides.runtimeMitsubaChirpIntervalText || runtimeMitsubaChirpIntervalText),
+      runtimeMitsubaMinRangeText: String(runtimeOverrides.runtimeMitsubaMinRangeText || runtimeMitsubaMinRangeText),
+      runtimeMitsubaSpheresJson: String(runtimeOverrides.runtimeMitsubaSpheresJson || runtimeMitsubaSpheresJson),
+      runtimePoSbrRepoRoot: String(runtimeOverrides.runtimePoSbrRepoRoot || runtimePoSbrRepoRoot),
+      runtimePoSbrGeometryPath: String(runtimeOverrides.runtimePoSbrGeometryPath || runtimePoSbrGeometryPath),
+      runtimePoSbrChirpIntervalText: String(runtimeOverrides.runtimePoSbrChirpIntervalText || runtimePoSbrChirpIntervalText),
+      runtimePoSbrBouncesText: String(runtimeOverrides.runtimePoSbrBouncesText || runtimePoSbrBouncesText),
+      runtimePoSbrRaysPerLambdaText: String(runtimeOverrides.runtimePoSbrRaysPerLambdaText || runtimePoSbrRaysPerLambdaText),
+      runtimePoSbrAlphaDegText: String(runtimeOverrides.runtimePoSbrAlphaDegText || runtimePoSbrAlphaDegText),
+      runtimePoSbrPhiDegText: String(runtimeOverrides.runtimePoSbrPhiDegText || runtimePoSbrPhiDegText),
+      runtimePoSbrThetaDegText: String(runtimeOverrides.runtimePoSbrThetaDegText || runtimePoSbrThetaDegText),
+      runtimePoSbrRadialVelocityText: String(runtimeOverrides.runtimePoSbrRadialVelocityText || runtimePoSbrRadialVelocityText),
+      runtimePoSbrMinRangeText: String(runtimeOverrides.runtimePoSbrMinRangeText || runtimePoSbrMinRangeText),
+      runtimePoSbrMaterialTag: String(runtimeOverrides.runtimePoSbrMaterialTag || runtimePoSbrMaterialTag),
+      runtimePoSbrPathIdPrefix: String(runtimeOverrides.runtimePoSbrPathIdPrefix || runtimePoSbrPathIdPrefix),
+      runtimePoSbrComponentsJson: String(runtimeOverrides.runtimePoSbrComponentsJson || runtimePoSbrComponentsJson),
+    };
+    const graphRaw = toGraphPayload({ graphId: resolvedGraphId, profile: resolvedProfile, nodes, edges });
+    const graph = applyRuntimeBackendToGraph(
+      graphRaw,
+      resolvedRuntimeOpts.runtimeBackendType,
+      resolvedRuntimeOpts.runtimeProviderSpec
+    );
+    const sceneOverrides = buildSceneOverrides(resolvedRuntimeOpts);
+    const runAsync = String(requestOptions.runModeOverride || runMode || "sync") === "async";
     const beforeContractSnapshot = getContractWarningSnapshot();
     let submittedGraphRunId = "";
     setStatus(
@@ -349,10 +378,10 @@ export function useGraphRunOps(opts) {
     try {
       const requestPayload = {
         graph,
-        scene_json_path: sceneJsonPath,
-        profile,
+        scene_json_path: resolvedSceneJsonPath,
+        profile: resolvedProfile,
         run_hybrid_estimation: false,
-        tag: "graph_lab",
+        tag: String(requestOptions.tag || "graph_lab"),
       };
       if (sceneOverrides) {
         requestPayload.scene_overrides = sceneOverrides;
@@ -383,11 +412,17 @@ export function useGraphRunOps(opts) {
         setGateResultText("-");
         setLastPolicyEval(null);
         if (autoPollAsyncRun) {
-          await pollGraphRunUntilTerminal(graphRunId, beforeContractSnapshot);
+          const pollResult = await pollGraphRunUntilTerminal(graphRunId, beforeContractSnapshot);
+          return {
+            ok: Boolean(pollResult?.ok),
+            graphRunId,
+            status: String(pollResult?.status || rowStatus || "completed"),
+            summary: pollResult?.summary || null,
+          };
         } else {
           setStatus(`graph run queued: ${graphRunId}`, "status-warn");
         }
-        return;
+        return { ok: true, graphRunId, status: rowStatus || "queued", summary: null };
       }
       if (rowStatus && rowStatus !== "completed") {
         const contract = renderGraphRunRecord(row, graphRunId, [], beforeContractSnapshot);
@@ -399,14 +434,26 @@ export function useGraphRunOps(opts) {
         setLastPolicyEval(null);
         const tone = rowStatus === "canceled" ? "status-warn" : "status-err";
         setStatus(`graph run ${rowStatus}: ${graphRunId}`, tone);
-        return;
+        return {
+          ok: false,
+          graphRunId,
+          status: rowStatus,
+          summary: null,
+          error: String(row?.error || rowStatus || ""),
+        };
       }
-      await loadGraphRunSummaryById(
+      const finalResult = await loadGraphRunSummaryById(
         graphRunId,
         row,
         beforeContractSnapshot,
         "graph_run_sync_completed"
       );
+      return {
+        ok: Boolean(finalResult?.ok),
+        graphRunId,
+        status: String(finalResult?.summary?.status || rowStatus || "completed"),
+        summary: finalResult?.summary || null,
+      };
     } catch (err) {
       const contract = collectContractDiagnostics(beforeContractSnapshot);
       setGraphRunText([
@@ -424,6 +471,12 @@ export function useGraphRunOps(opts) {
       setGateResultText("-");
       setLastPolicyEval(null);
       setStatus(`graph run failed: ${String(err.message || err)}`, "status-err");
+      return {
+        ok: false,
+        graphRunId: submittedGraphRunId,
+        error: String(err.message || err),
+        summary: null,
+      };
     }
   }, [
     apiBase,

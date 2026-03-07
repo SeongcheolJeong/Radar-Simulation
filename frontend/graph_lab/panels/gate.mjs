@@ -12,6 +12,7 @@ export function DecisionPane({
   pinBaselineFromGraphRun,
   runPolicyGateForGraphRun,
   runDecisionRegressionSession,
+  runLowVsCurrentTrackCompare,
   exportGateReport,
   exportDecisionRegressionSession,
   exportDecisionBriefMd,
@@ -67,6 +68,11 @@ export function DecisionPane({
         key: "decision_policy_gate",
         onClick: runPolicyGateForGraphRun,
       }, "Policy Gate"),
+      h("button", {
+        className: "btn",
+        key: "decision_run_track_compare",
+        onClick: runLowVsCurrentTrackCompare,
+      }, "Run Low -> Current Compare"),
     ]),
     h("div", { className: "btn-row", key: "decision_session_row" }, [
       h("button", {
