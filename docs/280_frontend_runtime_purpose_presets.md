@@ -235,6 +235,10 @@ It now also mirrors the currently selected history pair's artifact expectation s
 - `artifact_expectation_source`
 - `artifact_path_fingerprint_algo`
 - artifact path fingerprint rows for the stored current/compare artifact paths
+- `Hide/Show Live Compare Evidence`
+  - collapses or restores the current-vs-compare evidence block while keeping the assessment summary visible
+- `Hide/Show History Snapshot`
+  - collapses or restores the selected history pair snapshot while keeping the selected pair and summary line visible
 
 ## Backend Behavior
 

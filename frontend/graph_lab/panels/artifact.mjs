@@ -110,6 +110,8 @@ export function ArtifactInspectorPanel({
   const [raPeakSelectText, setRaPeakSelectText] = React.useState("-1");
   const [rdPeakLock, setRdPeakLock] = React.useState(false);
   const [raPeakLock, setRaPeakLock] = React.useState(false);
+  const [liveCompareEvidenceExpanded, setLiveCompareEvidenceExpanded] = React.useState(true);
+  const [historyArtifactExpectationExpanded, setHistoryArtifactExpectationExpanded] = React.useState(true);
 
   React.useEffect(() => {
     const primaryRd = rdPeaks[0] || null;
@@ -169,6 +171,12 @@ export function ArtifactInspectorPanel({
     : runCompare.assessment === "review"
       ? "#f4c265"
       : "#7ee3b8";
+  const liveCompareSummaryText = runCompare.available
+    ? `compare_assessment: ${runCompare.assessment} | compare_flags: ${runCompare.flagSummary}`
+    : String(compareRunStatusText || "compare run not loaded");
+  const selectedHistoryArtifactExpectationSummaryLine = String(
+    selectedReplayableCompareSessionArtifactExpectationSummaryText || "selected_history_artifact_expectation: -"
+  );
 
   const renderProbeSummary = (probe) => {
     const exact = probe.exact;
@@ -199,47 +207,66 @@ export function ArtifactInspectorPanel({
         ])
       : null,
     h("div", { key: "diff_overlay", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
-      h("div", { key: "diff_title", style: { marginBottom: "5px", color: "#8fb3c9" } }, "run-to-run diff overlay:"),
-      runCompare.available
-        ? h("div", { key: "diff_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, [
-            h("div", { key: "diff_hdr" }, `current=${runCompare.currentGraphRunId} | compare=${runCompare.compareGraphRunId}`),
-            h("div", { key: "diff_assessment", style: { color: compareTone } }, `compare_assessment: ${runCompare.assessment}`),
-            h("div", { key: "diff_flags" }, `compare_flags: ${runCompare.flagSummary}`),
-            h("div", { key: "diff_source" }, `adc_source(current/compare): ${runCompare.adcSource.current}/${runCompare.adcSource.compare}`),
-            h(
-              "div",
-              { key: "diff_artifacts" },
-              `required_artifacts(current/compare/total): ${runCompare.requiredArtifactCounts.currentPresent}/${runCompare.requiredArtifactCounts.comparePresent}/${runCompare.requiredArtifactCounts.total}`
-            ),
-            h("div", { key: "diff_artifacts_delta" }, `artifact_presence_delta: ${runCompare.artifactPresenceDeltaText}`),
-            h("div", { key: "diff_shape_adc" }, `shape.adc: ${runCompare.shapeText.adc} | eq=${runCompare.shapeEq.adc}`),
-            h("div", { key: "diff_shape_rd" }, `shape.rd: ${runCompare.shapeText.rd} | eq=${runCompare.shapeEq.rd}`),
-            h("div", { key: "diff_shape_ra" }, `shape.ra: ${runCompare.shapeText.ra} | eq=${runCompare.shapeEq.ra}`),
-            h("div", { key: "diff_paths" }, `path_count_delta: ${formatSigned(runCompare.pathCountDelta)}`),
-            h(
-              "div",
-              { key: "diff_rd" },
-              runCompare.rdPeakDelta
-                ? `rd_peak_delta(range/doppler/rel_db): ${formatSigned(runCompare.rdPeakDelta.rangeBinDelta)}/${formatSigned(runCompare.rdPeakDelta.dopplerBinDelta)}/${runCompare.rdPeakDelta.relDbDelta.toFixed(2)}`
-                : "rd_peak_delta: unavailable"
-            ),
-            h(
-              "div",
-              { key: "diff_ra" },
-              runCompare.raPeakDelta
-                ? `ra_peak_delta(range/angle/rel_db): ${formatSigned(runCompare.raPeakDelta.rangeBinDelta)}/${formatSigned(runCompare.raPeakDelta.angleBinDelta)}/${runCompare.raPeakDelta.relDbDelta.toFixed(2)}`
-                : "ra_peak_delta: unavailable"
-            ),
-          ])
-        : h("div", { key: "diff_empty", style: { color: "#86a1b4" } }, String(compareRunStatusText || "compare run not loaded")),
+      h("div", { key: "diff_header", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "5px" } }, [
+        h("div", { key: "diff_title", style: { color: "#8fb3c9" } }, "run-to-run diff overlay:"),
+        h("button", {
+          key: "toggle_live_compare_evidence",
+          className: "btn",
+          onClick: () => setLiveCompareEvidenceExpanded((prev) => !prev),
+        }, liveCompareEvidenceExpanded ? "Hide Live Compare Evidence" : "Show Live Compare Evidence"),
+      ]),
+      h("div", { key: "diff_summary", style: { marginBottom: liveCompareEvidenceExpanded ? "5px" : "0", color: compareTone } }, liveCompareSummaryText),
+      liveCompareEvidenceExpanded
+        ? (runCompare.available
+          ? h("div", { key: "diff_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, [
+              h("div", { key: "diff_hdr" }, `current=${runCompare.currentGraphRunId} | compare=${runCompare.compareGraphRunId}`),
+              h("div", { key: "diff_assessment", style: { color: compareTone } }, `compare_assessment: ${runCompare.assessment}`),
+              h("div", { key: "diff_flags" }, `compare_flags: ${runCompare.flagSummary}`),
+              h("div", { key: "diff_source" }, `adc_source(current/compare): ${runCompare.adcSource.current}/${runCompare.adcSource.compare}`),
+              h(
+                "div",
+                { key: "diff_artifacts" },
+                `required_artifacts(current/compare/total): ${runCompare.requiredArtifactCounts.currentPresent}/${runCompare.requiredArtifactCounts.comparePresent}/${runCompare.requiredArtifactCounts.total}`
+              ),
+              h("div", { key: "diff_artifacts_delta" }, `artifact_presence_delta: ${runCompare.artifactPresenceDeltaText}`),
+              h("div", { key: "diff_shape_adc" }, `shape.adc: ${runCompare.shapeText.adc} | eq=${runCompare.shapeEq.adc}`),
+              h("div", { key: "diff_shape_rd" }, `shape.rd: ${runCompare.shapeText.rd} | eq=${runCompare.shapeEq.rd}`),
+              h("div", { key: "diff_shape_ra" }, `shape.ra: ${runCompare.shapeText.ra} | eq=${runCompare.shapeEq.ra}`),
+              h("div", { key: "diff_paths" }, `path_count_delta: ${formatSigned(runCompare.pathCountDelta)}`),
+              h(
+                "div",
+                { key: "diff_rd" },
+                runCompare.rdPeakDelta
+                  ? `rd_peak_delta(range/doppler/rel_db): ${formatSigned(runCompare.rdPeakDelta.rangeBinDelta)}/${formatSigned(runCompare.rdPeakDelta.dopplerBinDelta)}/${runCompare.rdPeakDelta.relDbDelta.toFixed(2)}`
+                  : "rd_peak_delta: unavailable"
+              ),
+              h(
+                "div",
+                { key: "diff_ra" },
+                runCompare.raPeakDelta
+                  ? `ra_peak_delta(range/angle/rel_db): ${formatSigned(runCompare.raPeakDelta.rangeBinDelta)}/${formatSigned(runCompare.raPeakDelta.angleBinDelta)}/${runCompare.raPeakDelta.relDbDelta.toFixed(2)}`
+                  : "ra_peak_delta: unavailable"
+              ),
+            ])
+          : h("div", { key: "diff_empty", style: { color: "#86a1b4" } }, String(compareRunStatusText || "compare run not loaded")))
+        : null,
     ]),
     h("div", { key: "history_artifact_expectation_overlay", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
-      h("div", { key: "history_artifact_expectation_title", style: { marginBottom: "5px", color: "#8fb3c9" } }, "selected history pair artifact expectation:"),
+      h("div", { key: "history_artifact_expectation_header", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "5px" } }, [
+        h("div", { key: "history_artifact_expectation_title", style: { color: "#8fb3c9" } }, "selected history pair artifact expectation:"),
+        h("button", {
+          key: "toggle_history_artifact_expectation",
+          className: "btn",
+          onClick: () => setHistoryArtifactExpectationExpanded((prev) => !prev),
+        }, historyArtifactExpectationExpanded ? "Hide History Snapshot" : "Show History Snapshot"),
+      ]),
       h("div", { key: "history_artifact_expectation_pair", style: { marginBottom: "3px", color: "#b9d5e7" } }, String(selectedReplayableCompareSessionText || "selected_history_pair: -")),
-      h("div", { key: "history_artifact_expectation_summary", style: { marginBottom: "5px", color: "#9fc1d4" } }, String(selectedReplayableCompareSessionArtifactExpectationSummaryText || "selected_history_artifact_expectation: -")),
-      h("div", { key: "history_artifact_expectation_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, selectedHistoryArtifactExpectationLines.map((line, idx) =>
-        h("div", { key: `history_artifact_expectation_line_${idx}`, style: { color: "#cfe2ef" } }, line)
-      )),
+      h("div", { key: "history_artifact_expectation_summary", style: { marginBottom: historyArtifactExpectationExpanded ? "5px" : "0", color: "#9fc1d4" } }, selectedHistoryArtifactExpectationSummaryLine),
+      historyArtifactExpectationExpanded
+        ? h("div", { key: "history_artifact_expectation_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, selectedHistoryArtifactExpectationLines.map((line, idx) =>
+            h("div", { key: `history_artifact_expectation_line_${idx}`, style: { color: "#cfe2ef" } }, line)
+          ))
+        : null,
     ]),
     h("div", { key: "probe", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
       h("div", { key: "probe_title", style: { marginBottom: "6px", color: "#8fb3c9" } }, "cursor probe + peak lock:"),

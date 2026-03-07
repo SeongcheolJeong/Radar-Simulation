@@ -1,6 +1,6 @@
 {
   "version": "graph_lab_playwright_e2e_report_v1",
-  "created_at_utc": "2026-03-07T12:09:43Z",
+  "created_at_utc": "2026-03-07T12:16:41Z",
   "require_playwright": true,
   "strict_visual": false,
   "update_baseline": false,
@@ -48,6 +48,7 @@
     "track_compare_runner_result": "ready",
     "compare_assessment_checked": true,
     "artifact_inspector_expectation_checked": true,
+    "artifact_inspector_folds_checked": true,
     "decision_brief_runtime_compare_checked": true
   },
   "artifacts": {

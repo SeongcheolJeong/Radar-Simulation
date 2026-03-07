@@ -158,6 +158,7 @@ def run(args: argparse.Namespace) -> int:
             "track_compare_runner_result": "",
             "compare_assessment_checked": False,
             "artifact_inspector_expectation_checked": False,
+            "artifact_inspector_folds_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -416,8 +417,33 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_path_fingerprint_algo:" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render selected history pair artifact expectation")
+                artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
+                page.wait_for_timeout(150)
+                collapsed_live_artifact_text = artifact_field.inner_text()
+                if "shape.adc:" in collapsed_live_artifact_text or "rd_peak_delta(range/doppler/rel_db):" in collapsed_live_artifact_text:
+                    raise AssertionError("artifact inspector live compare evidence did not collapse")
+                if "compare_assessment:" not in collapsed_live_artifact_text:
+                    raise AssertionError("artifact inspector live compare summary disappeared after collapse")
+                artifact_field.get_by_role("button", name="Show Live Compare Evidence").click()
+                page.wait_for_timeout(150)
+                restored_live_artifact_text = artifact_field.inner_text()
+                if "shape.adc:" not in restored_live_artifact_text:
+                    raise AssertionError("artifact inspector live compare evidence did not restore after expand")
+                artifact_field.get_by_role("button", name="Hide History Snapshot").click()
+                page.wait_for_timeout(150)
+                collapsed_history_artifact_text = artifact_field.inner_text()
+                if "artifact_expectation_source:" in collapsed_history_artifact_text or "artifact_path_fingerprint_algo:" in collapsed_history_artifact_text:
+                    raise AssertionError("artifact inspector history snapshot did not collapse")
+                if "selected_history_artifact_expectation:" not in collapsed_history_artifact_text:
+                    raise AssertionError("artifact inspector history snapshot summary disappeared after collapse")
+                artifact_field.get_by_role("button", name="Show History Snapshot").click()
+                page.wait_for_timeout(150)
+                restored_history_artifact_text = artifact_field.inner_text()
+                if "artifact_expectation_source:" not in restored_history_artifact_text:
+                    raise AssertionError("artifact inspector history snapshot did not restore after expand")
                 report["runtime_controls"]["compare_assessment_checked"] = True
                 report["runtime_controls"]["artifact_inspector_expectation_checked"] = True
+                report["runtime_controls"]["artifact_inspector_folds_checked"] = True
 
                 history_field = field_locator(page, "Compare Session History")
                 history_field.wait_for(timeout=30_000)
