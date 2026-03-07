@@ -173,6 +173,8 @@ Pinned pairs are also promoted into a top-level `Pinned Pair Quick Actions` bloc
   - reruns that pinned replayable pair directly from the top-level quick action area
 - `pinned_quick_action_count`
   - summarizes how many pinned quick actions are currently promoted out of history
+- `artifact_expectation:` / `artifact_path_hashes:`
+  - each promoted pinned pair now shows the stored artifact expectation summary and compact path-fingerprint summary directly in the quick-action block
 
 The same area now supports browser-to-browser transfer:
 
@@ -205,6 +207,9 @@ It now also renders a `Selected History Pair Artifact Expectation` block:
 - `required_artifacts(current/compare/total)`
 - `artifact_presence_delta`
 - `optional_artifact_delta`
+- `artifact_path_fingerprint_algo`
+- `artifact_path_fingerprints`
+  - captures a stable fingerprint of the observed artifact path text for `path_list_json`, `adc_cube_npz`, `radar_map_npz`, `graph_run_summary_json`, and optional LGIT output when present
 
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 

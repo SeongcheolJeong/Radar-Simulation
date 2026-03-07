@@ -49,6 +49,7 @@ const COMPARE_SESSION_STORAGE_KEY = "graph_lab_compare_session_history_v1";
 const COMPARE_SESSION_HISTORY_LIMIT = 8;
 const COMPARE_REPLAY_PAIR_OPTION_LIMIT = 6;
 const PINNED_COMPARE_QUICK_ACTION_LIMIT = 3;
+const COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO = "fnv1a32_path_text";
 const COMPARE_SESSION_EXPORT_SCHEMA_VERSION = "graph_lab_compare_history_export_v2";
 
 function formatSigned(value) {
@@ -116,6 +117,115 @@ function normalizeCompareReplayPairMetaMap(metaMap) {
   return normalized;
 }
 
+function computeComparePathFingerprintHex(text) {
+  const src = String(text || "");
+  let hash = 0x811c9dc5;
+  for (let idx = 0; idx < src.length; idx += 1) {
+    hash ^= src.charCodeAt(idx);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function summarizeArtifactPathLabel(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const segments = text.split(/[\\/]+/).filter(Boolean);
+  const base = String(segments[segments.length - 1] || "").trim();
+  return normalizeCompareSessionField(base || text, 96);
+}
+
+function normalizeCompareArtifactPathFingerprintEntry(entry) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  const currentPath = normalizeCompareSessionField(row.currentPath || row.current_path, 512);
+  const comparePath = normalizeCompareSessionField(row.comparePath || row.compare_path, 512);
+  return {
+    currentPath,
+    currentLabel: normalizeCompareSessionField(
+      row.currentLabel || row.current_label || summarizeArtifactPathLabel(currentPath),
+      96
+    ),
+    currentHash: normalizeCompareSessionField(row.currentHash || row.current_hash, 64).toLowerCase(),
+    comparePath,
+    compareLabel: normalizeCompareSessionField(
+      row.compareLabel || row.compare_label || summarizeArtifactPathLabel(comparePath),
+      96
+    ),
+    compareHash: normalizeCompareSessionField(row.compareHash || row.compare_hash, 64).toLowerCase(),
+  };
+}
+
+function normalizeCompareArtifactPathFingerprintMap(value) {
+  const raw = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const normalized = {};
+  Object.entries(raw).forEach(([rawName, rawEntry]) => {
+    const name = normalizeCompareSessionField(rawName, 96);
+    if (!name) return;
+    const entry = normalizeCompareArtifactPathFingerprintEntry(rawEntry);
+    if (!entry.currentPath && !entry.comparePath && !entry.currentHash && !entry.compareHash) return;
+    normalized[name] = entry;
+  });
+  return normalized;
+}
+
+function buildCompareArtifactPathFingerprintMap(currentSummary, compareSummary) {
+  const artifactNames = [
+    "path_list_json",
+    "adc_cube_npz",
+    "radar_map_npz",
+    "graph_run_summary_json",
+    "lgit_customized_output_npz",
+  ];
+  return artifactNames.reduce((acc, name) => {
+    const currentPath = normalizeCompareSessionField(currentSummary?.outputs?.[name], 512);
+    const comparePath = normalizeCompareSessionField(compareSummary?.outputs?.[name], 512);
+    if (!currentPath && !comparePath) return acc;
+    acc[name] = normalizeCompareArtifactPathFingerprintEntry({
+      currentPath,
+      currentLabel: summarizeArtifactPathLabel(currentPath),
+      currentHash: currentPath ? computeComparePathFingerprintHex(currentPath) : "",
+      comparePath,
+      compareLabel: summarizeArtifactPathLabel(comparePath),
+      compareHash: comparePath ? computeComparePathFingerprintHex(comparePath) : "",
+    });
+    return acc;
+  }, {});
+}
+
+function countCompareArtifactPathFingerprintRows(value) {
+  return Object.values(normalizeCompareArtifactPathFingerprintMap(value)).filter((row) => {
+    return Boolean(row.currentHash || row.compareHash);
+  }).length;
+}
+
+function buildCompareArtifactPathFingerprintDetailLines(value) {
+  const rows = Object.entries(normalizeCompareArtifactPathFingerprintMap(value));
+  if (rows.length === 0) {
+    return [
+      `artifact_path_fingerprint_algo: ${COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO}`,
+      "artifact_path_fingerprints: unavailable",
+    ];
+  }
+  return [
+    `artifact_path_fingerprint_algo: ${COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO}`,
+    "artifact_path_fingerprints:",
+    ...rows.map(([name, row]) => (
+      `- ${String(name || "-")}: current=${String(row.currentLabel || "-")}#${String(row.currentHash || "-")} compare=${String(row.compareLabel || "-")}#${String(row.compareHash || "-")}`
+    )),
+  ];
+}
+
+function summarizeCompareArtifactPathFingerprintCompact(value) {
+  const rows = Object.entries(normalizeCompareArtifactPathFingerprintMap(value)).slice(0, 2);
+  if (rows.length === 0) {
+    return "path_hashes=0";
+  }
+  return [
+    `path_hashes=${countCompareArtifactPathFingerprintRows(value)}`,
+    ...rows.map(([name, row]) => `${name}:${String(row.currentHash || "-")}/${String(row.compareHash || "-")}`),
+  ].join(" | ");
+}
+
 function normalizeCompareArtifactExpectationEntry(entry) {
   const row = entry && typeof entry === "object" ? entry : {};
   return {
@@ -123,6 +233,13 @@ function normalizeCompareArtifactExpectationEntry(entry) {
     observedAtUtc: normalizeCompareSessionField(row.observedAtUtc || row.observed_at_utc, 64),
     summaryText: normalizeCompareSessionField(row.summaryText || row.summary_text, 640),
     detailText: normalizeCompareSessionField(row.detailText || row.detail_text, 4000),
+    artifactPathFingerprintAlgo: normalizeCompareSessionField(
+      row.artifactPathFingerprintAlgo || row.artifact_path_fingerprint_algo || COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO,
+      64
+    ),
+    artifactPathFingerprintsByArtifact: normalizeCompareArtifactPathFingerprintMap(
+      row.artifactPathFingerprintsByArtifact || row.artifact_path_fingerprints_by_artifact
+    ),
   };
 }
 
@@ -143,13 +260,16 @@ function buildPlannedCompareArtifactExpectationEntry(pairLabel) {
   const label = normalizeCompareSessionField(pairLabel, 160) || "-";
   return normalizeCompareArtifactExpectationEntry({
     source: "planned_default",
-    summaryText: "source=planned_default | required=4/4/4 | optional=lgit_customized_output_npz | artifact_delta=none expected",
+    summaryText: "source=planned_default | required=4/4/4 | optional=lgit_customized_output_npz | artifact_delta=none expected | path_hashes=0",
+    artifactPathFingerprintAlgo: COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO,
     detailText: [
       "artifact_expectation_source: planned_default",
       `pair_label: ${label}`,
       "required_artifacts: path_list_json, adc_cube_npz, radar_map_npz, graph_run_summary_json",
       "optional_artifacts: lgit_customized_output_npz",
       "artifact_presence_delta: none expected",
+      `artifact_path_fingerprint_algo: ${COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO}`,
+      "artifact_path_fingerprints: unavailable until pair is observed or imported",
       "note: run the preset pair once to capture an observed artifact expectation snapshot",
     ].join("\n"),
   });
@@ -158,6 +278,8 @@ function buildPlannedCompareArtifactExpectationEntry(pairLabel) {
 function buildObservedCompareArtifactExpectationEntry(pairLabel, currentSummary, compareSummary) {
   const compare = buildRunCompareSummary(currentSummary, compareSummary);
   if (!compare.available) return null;
+  const artifactPathFingerprintsByArtifact = buildCompareArtifactPathFingerprintMap(currentSummary, compareSummary);
+  const pathFingerprintCount = countCompareArtifactPathFingerprintRows(artifactPathFingerprintsByArtifact);
   const requiredMissingCurrent = compare.artifactRows
     .filter((row) => row.required && !row.currentPresent)
     .map((row) => row.name)
@@ -174,7 +296,10 @@ function buildObservedCompareArtifactExpectationEntry(pairLabel, currentSummary,
       `assessment=${String(compare.assessment || "-")}`,
       `required=${Number(compare.requiredArtifactCounts?.currentPresent || 0)}/${Number(compare.requiredArtifactCounts?.comparePresent || 0)}/${Number(compare.requiredArtifactCounts?.total || 0)}`,
       `artifact_delta=${String(compare.artifactPresenceDeltaText || "none")}`,
+      `path_hashes=${pathFingerprintCount}`,
     ].join(" | "),
+    artifactPathFingerprintAlgo: COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO,
+    artifactPathFingerprintsByArtifact,
     detailText: [
       "artifact_expectation_source: observed_ready_pair",
       `pair_label: ${normalizeCompareSessionField(pairLabel, 160) || "-"}`,
@@ -185,6 +310,7 @@ function buildObservedCompareArtifactExpectationEntry(pairLabel, currentSummary,
       `optional_artifact_delta: ${String(compare.optionalPresenceDeltaText || "none")}`,
       `current_required_missing: ${requiredMissingCurrent}`,
       `compare_required_missing: ${requiredMissingCompare}`,
+      ...buildCompareArtifactPathFingerprintDetailLines(artifactPathFingerprintsByArtifact),
       "artifact_rows:",
       ...compare.artifactRows.map((row) => (
         `- ${String(row.name || "-")}: required=${row.required === true} current=${row.currentPresent === true} compare=${row.comparePresent === true}`
@@ -1862,8 +1988,23 @@ export function App() {
       .map((row) => ({
         ...row,
         shortLabel: compactCompareQuickActionLabel(row?.pairLabel || row?.label || row?.id || "-"),
+        artifactExpectationEntry: normalizeCompareArtifactExpectationEntry(
+          comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
+        ),
+        artifactExpectationSummaryText: (() => {
+          const entry = normalizeCompareArtifactExpectationEntry(
+            comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
+          );
+          return entry.summaryText || buildPlannedCompareArtifactExpectationEntry(row?.pairLabel).summaryText;
+        })(),
+        artifactPathFingerprintSummaryText: (() => {
+          const entry = normalizeCompareArtifactExpectationEntry(
+            comparePairArtifactExpectationById[String(row?.id || row?.pairId || "").trim()]
+          );
+          return summarizeCompareArtifactPathFingerprintCompact(entry.artifactPathFingerprintsByArtifact);
+        })(),
       })),
-    [compareReplayPairOptions]
+    [comparePairArtifactExpectationById, compareReplayPairOptions]
   );
   const pinnedCompareQuickActionSummaryText = React.useMemo(() => {
     if (pinnedCompareQuickActionOptions.length === 0) {
@@ -1880,9 +2021,11 @@ export function App() {
     }
     return [
       `pinned_quick_action_count: ${Number(pinnedCompareQuickActionOptions.length || 0)}`,
-      ...pinnedCompareQuickActionOptions.map((row, idx) => (
-        `- [${Number(idx) + 1}] ${String(row.pairLabel || "-")} | baseline=${String(row.baselinePresetId || "-")} | target=${String(row.targetPresetId || "-")}`
-      )),
+      ...pinnedCompareQuickActionOptions.flatMap((row, idx) => ([
+        `- [${Number(idx) + 1}] ${String(row.pairLabel || "-")} | baseline=${String(row.baselinePresetId || "-")} | target=${String(row.targetPresetId || "-")}`,
+        `  artifact_expectation: ${String(row.artifactExpectationSummaryText || "-")}`,
+        `  artifact_path_hashes: ${String(row.artifactPathFingerprintSummaryText || "-")}`,
+      ])),
     ].join("\n");
   }, [pinnedCompareQuickActionOptions]);
   const latestReplayableCompareSessionText = React.useMemo(() => {

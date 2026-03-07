@@ -151,17 +151,21 @@ export function DecisionPane({
       h("pre", { className: "result-box", key: "decision_pinned_pair_quick_actions_box" }, String(pinnedCompareQuickActionDetailText || "-")),
       ...(Array.isArray(pinnedCompareQuickActionOptions) && pinnedCompareQuickActionOptions.length > 0
         ? pinnedCompareQuickActionOptions.map((row) =>
-          h("div", { className: "btn-row", key: `decision_pinned_pair_quick_action_row_${String(row?.id || row?.pairId || "")}` }, [
-            h("button", {
-              className: "btn",
-              key: `decision_apply_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
-              onClick: () => applyPinnedCompareQuickAction(String(row?.id || row?.pairId || "")),
-            }, `Use PIN: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
-            h("button", {
-              className: "btn",
-              key: `decision_run_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
-              onClick: () => runPinnedCompareQuickAction(String(row?.id || row?.pairId || "")),
-            }, `Run PIN: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
+          h("div", { className: "field", key: `decision_pinned_pair_quick_action_row_${String(row?.id || row?.pairId || "")}` }, [
+            h("div", { className: "btn-row", key: `decision_pinned_pair_quick_action_buttons_${String(row?.id || row?.pairId || "")}` }, [
+              h("button", {
+                className: "btn",
+                key: `decision_apply_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
+                onClick: () => applyPinnedCompareQuickAction(String(row?.id || row?.pairId || "")),
+              }, `Use PIN: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
+              h("button", {
+                className: "btn",
+                key: `decision_run_pinned_pair_quick_action_${String(row?.id || row?.pairId || "")}`,
+                onClick: () => runPinnedCompareQuickAction(String(row?.id || row?.pairId || "")),
+              }, `Run PIN: ${String(row?.shortLabel || row?.pairLabel || row?.id || "-")}`),
+            ]),
+            h("div", { className: "hint", key: `decision_pinned_pair_quick_action_summary_${String(row?.id || row?.pairId || "")}` }, `artifact_expectation: ${String(row?.artifactExpectationSummaryText || "-")}`),
+            h("div", { className: "hint", key: `decision_pinned_pair_quick_action_paths_${String(row?.id || row?.pairId || "")}` }, `artifact_path_hashes: ${String(row?.artifactPathFingerprintSummaryText || "-")}`),
           ])
         )
         : [

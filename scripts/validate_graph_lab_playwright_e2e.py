@@ -147,6 +147,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_management_checked": False,
             "compare_session_preview_checked": False,
             "compare_session_artifact_expectation_checked": False,
+            "compare_session_artifact_path_hash_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_persistence_checked": False,
             "pinned_pair_quick_actions_checked": False,
@@ -516,14 +517,24 @@ def run(args: argparse.Namespace) -> int:
                     timeout=10_000,
                 )
                 history_text_after_pin = history_field.inner_text()
-                if "artifact_expectation_source:" not in history_text_after_pin or "required_artifacts(current/compare/total):" not in history_text_after_pin:
+                if (
+                    "artifact_expectation_source:" not in history_text_after_pin
+                    or "required_artifacts(current/compare/total):" not in history_text_after_pin
+                    or "artifact_path_fingerprint_algo:" not in history_text_after_pin
+                    or "path_list_json:" not in history_text_after_pin
+                ):
                     raise AssertionError("selected history pair artifact expectation did not render after pin")
                 report["runtime_controls"]["compare_session_preview_checked"] = True
                 report["runtime_controls"]["compare_session_artifact_expectation_checked"] = True
+                report["runtime_controls"]["compare_session_artifact_path_hash_checked"] = True
                 pinned_quick_field = field_locator(page, "Pinned Pair Quick Actions")
                 pinned_quick_field.wait_for(timeout=10_000)
                 pinned_quick_text = pinned_quick_field.inner_text()
-                if selected_history_label not in pinned_quick_text:
+                if (
+                    selected_history_label not in pinned_quick_text
+                    or "artifact_expectation:" not in pinned_quick_text
+                    or "artifact_path_hashes:" not in pinned_quick_text
+                ):
                     raise AssertionError("pinned quick action field did not expose the selected pinned pair")
                 preset_pair_field.get_by_role("button", name="Low -> PO-SBR", exact=True).click()
                 page.wait_for_timeout(100)
@@ -580,7 +591,13 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare history export did not include managed pair metadata")
                 exported_artifact_expectations = exported_bundle.get("pair_artifact_expectation_by_id") or {}
                 low_current_expectation = exported_artifact_expectations.get("low_fidelity_radarsimpy_ffd::current_config") or {}
-                if "required_artifacts(current/compare/total):" not in str(low_current_expectation.get("detailText") or low_current_expectation.get("detail_text") or ""):
+                low_current_detail = str(low_current_expectation.get("detailText") or low_current_expectation.get("detail_text") or "")
+                low_current_path_map = low_current_expectation.get("artifactPathFingerprintsByArtifact") or low_current_expectation.get("artifact_path_fingerprints_by_artifact") or {}
+                if (
+                    "required_artifacts(current/compare/total):" not in low_current_detail
+                    or "artifact_path_fingerprint_algo:" not in low_current_detail
+                    or "path_list_json" not in low_current_path_map
+                ):
                     raise AssertionError("compare history export did not include artifact expectation snapshot")
                 history_select.select_option("low_fidelity_radarsimpy_ffd::high_fidelity_po_sbr_rt")
                 page.wait_for_timeout(100)
@@ -675,6 +692,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include selected history pair preview")
                 if "## Selected History Pair Artifact Expectation" not in brief_text or "artifact_expectation_source:" not in brief_text:
                     raise AssertionError("decision brief did not include selected history pair artifact expectation")
+                if "artifact_path_fingerprint_algo:" not in brief_text or "path_list_json:" not in brief_text:
+                    raise AssertionError("decision brief did not include artifact path fingerprint summary")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
@@ -774,8 +793,14 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("selected history pair preview did not persist after reload")
                 if "artifact_expectation_source:" not in reloaded_history_text:
                     raise AssertionError("selected history pair artifact expectation did not persist after reload")
+                if "artifact_path_fingerprint_algo:" not in reloaded_history_text:
+                    raise AssertionError("artifact path fingerprint summary did not persist after reload")
                 reloaded_pinned_quick_field = field_locator(page, "Pinned Pair Quick Actions")
-                if selected_history_label not in reloaded_pinned_quick_field.inner_text():
+                reloaded_pinned_quick_text = reloaded_pinned_quick_field.inner_text()
+                if (
+                    selected_history_label not in reloaded_pinned_quick_text
+                    or "artifact_path_hashes:" not in reloaded_pinned_quick_text
+                ):
                     raise AssertionError("pinned quick action field did not persist after reload")
                 report["runtime_controls"]["compare_session_persistence_checked"] = True
 
