@@ -208,6 +208,7 @@ function normalizeArtifactInspectorPrefs(value) {
     lastActionSeq: Number.isFinite(lastActionSeq) && lastActionSeq >= 0 ? Math.floor(lastActionSeq) : 0,
     maintenanceSeq: Number.isFinite(maintenanceSeq) && maintenanceSeq >= 0 ? Math.floor(maintenanceSeq) : 0,
     maintenanceClearSeq: Number.isFinite(maintenanceClearSeq) && maintenanceClearSeq >= 0 ? Math.floor(maintenanceClearSeq) : 0,
+    maintenanceLastClearAtUtc: String(row.maintenanceLastClearAtUtc || "").trim(),
     actionTrailTotalCount: Number.isFinite(rawActionTrailTotalCount) && rawActionTrailTotalCount >= 0
       ? Math.floor(rawActionTrailTotalCount)
       : fallbackActionTrailTotalCount,
@@ -464,6 +465,15 @@ function buildArtifactInspectorMaintenanceLastClearSummaryText(value) {
   return `maintenance_last_clear_summary: recorded | record=present | source=${fields.source} | trigger=${fields.trigger} | cleared_action=${fields.clearedAction} | next_action=clear_record_if_acknowledged`;
 }
 
+function buildArtifactInspectorMaintenanceLastClearAtUtcText(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const timestamp = String(prefs.maintenanceLastClearAtUtc || "").trim();
+  if (!timestamp) {
+    return "maintenance_last_clear_at_utc: none | state=idle";
+  }
+  return `maintenance_last_clear_at_utc: ${timestamp} | state=recorded`;
+}
+
 function buildArtifactInspectorMaintenanceLastClearOperatorSummaryText(value) {
   const fields = parseArtifactInspectorMaintenanceLastClearFields(value);
   if (fields.seq <= 0) {
@@ -482,6 +492,7 @@ function buildArtifactInspectorMaintenanceLastClearUpdate(value, actionInput) {
   const clearedAction = currentFields.seq > 0 ? currentFields.action : "none";
   return {
     maintenanceClearSeq: nextSeq,
+    maintenanceLastClearAtUtc: new Date().toISOString(),
     maintenanceLastClearText: `maintenance_last_clear: seq=${nextSeq} | source=${source} | trigger=${trigger} | cleared_action=${clearedAction}`,
   };
 }
@@ -538,6 +549,7 @@ function clearArtifactInspectorMaintenanceLastClearState(value) {
   return {
     ...prefs,
     maintenanceClearSeq: 0,
+    maintenanceLastClearAtUtc: "",
     maintenanceLastClearText: "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none",
   };
 }
@@ -835,6 +847,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorMaintenanceLastClearSummaryText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorMaintenanceLastClearAtUtcText = React.useMemo(
+    () => buildArtifactInspectorMaintenanceLastClearAtUtcText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorMaintenanceLastClearOperatorSummaryText = React.useMemo(
     () => buildArtifactInspectorMaintenanceLastClearOperatorSummaryText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
@@ -906,6 +922,7 @@ export function ArtifactInspectorPanel({
       maintenanceSummaryText: artifactInspectorMaintenanceSummaryText,
       maintenanceOperatorSummaryText: artifactInspectorMaintenanceOperatorSummaryText,
       maintenanceLastClearSummaryText: artifactInspectorMaintenanceLastClearSummaryText,
+      maintenanceLastClearAtUtcText: artifactInspectorMaintenanceLastClearAtUtcText,
       maintenanceLastClearOperatorSummaryText: artifactInspectorMaintenanceLastClearOperatorSummaryText,
       recentActionsText: artifactInspectorRecentActionsText,
       auditStateText: artifactInspectorAuditStateText,
@@ -932,6 +949,7 @@ export function ArtifactInspectorPanel({
     artifactInspectorLastActionText,
     artifactInspectorMaintenanceActionText,
     artifactInspectorMaintenanceLastClearText,
+    artifactInspectorMaintenanceLastClearAtUtcText,
     artifactInspectorMaintenanceLastClearOperatorSummaryText,
     artifactInspectorMaintenanceLastClearSummaryText,
     artifactInspectorMaintenanceSummaryText,
@@ -1187,6 +1205,10 @@ export function ArtifactInspectorPanel({
           key: "maintenance_last_clear_summary",
           style: { color: "#8fb3c9" },
         }, artifactInspectorMaintenanceLastClearSummaryText),
+        h("div", {
+          key: "maintenance_last_clear_at_utc",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceLastClearAtUtcText),
         h("div", {
           key: "maintenance_last_clear_operator_summary",
           style: { color: "#8fb3c9" },

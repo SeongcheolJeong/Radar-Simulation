@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -185,6 +186,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_maintenance_action_checked": False,
             "artifact_inspector_maintenance_last_clear_checked": False,
             "artifact_inspector_maintenance_last_clear_summary_checked": False,
+            "artifact_inspector_maintenance_last_clear_at_utc_checked": False,
             "artifact_inspector_maintenance_clear_checked": False,
             "artifact_inspector_maintenance_last_clear_clear_checked": False,
             "artifact_inspector_maintenance_summary_checked": False,
@@ -484,6 +486,7 @@ def run(args: argparse.Namespace) -> int:
                     or "last_action: seq=0 | idle" not in artifact_text
                     or "maintenance_action: seq=0 | none | source=none | trigger=idle" not in artifact_text
                     or "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in artifact_text
+                    or "maintenance_last_clear_at_utc: none | state=idle" not in artifact_text
                     or "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" not in artifact_text
                     or "maintenance_operator_summary: idle -> none | because=no_marker" not in artifact_text
                     or "maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" not in artifact_text
@@ -537,6 +540,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_at_utc: none | state=idle" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_operator_summary: idle -> none | because=no_marker" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" not in decision_artifact_state_text
@@ -1463,6 +1467,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_last_action:" not in brief_text
                     or "artifact_inspector_maintenance_action:" not in brief_text
                     or "artifact_inspector_maintenance_last_clear:" not in brief_text
+                    or "artifact_inspector_maintenance_last_clear_at_utc:" not in brief_text
                     or "artifact_inspector_maintenance_summary:" not in brief_text
                     or "artifact_inspector_maintenance_operator_summary:" not in brief_text
                     or "artifact_inspector_maintenance_last_clear_summary:" not in brief_text
@@ -1609,6 +1614,7 @@ def run(args: argparse.Namespace) -> int:
                     or "last_action: seq=0 | idle" not in reloaded_artifact_text
                     or "maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" not in reloaded_artifact_text
                     or "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in reloaded_artifact_text
+                    or "maintenance_last_clear_at_utc: none | state=idle" not in reloaded_artifact_text
                     or "maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" not in reloaded_artifact_text
                     or "maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" not in reloaded_artifact_text
                     or "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" not in reloaded_artifact_text
@@ -1664,6 +1670,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_at_utc: none | state=idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_controls: clear=enabled | recommended=clear_marker | reason=marker_present" not in reloaded_decision_artifact_state_text
@@ -1709,10 +1716,19 @@ def run(args: argparse.Namespace) -> int:
                 for _ in range(40):
                     maintenance_cleared_artifact_text = reloaded_artifact_field.inner_text()
                     maintenance_cleared_mirror_text = reloaded_decision_artifact_state_field.inner_text()
+                    artifact_last_clear_time_ok = re.search(
+                        r"maintenance_last_clear_at_utc: 20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9:.+-]+Z \| state=recorded",
+                        maintenance_cleared_artifact_text,
+                    ) is not None
+                    mirror_last_clear_time_ok = re.search(
+                        r"artifact_inspector_maintenance_last_clear_at_utc: 20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9:.+-]+Z \| state=recorded",
+                        maintenance_cleared_mirror_text,
+                    ) is not None
                     if (
                         "maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_artifact_text
                         and "maintenance_last_clear: seq=1 | source=decision_pane | trigger=manual | cleared_action=clear_action_trail" in maintenance_cleared_artifact_text
                         and "maintenance_clear:recorded" in maintenance_cleared_artifact_text
+                        and artifact_last_clear_time_ok
                         and "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_artifact_text
                         and "maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_artifact_text
                         and "maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_artifact_text
@@ -1722,6 +1738,7 @@ def run(args: argparse.Namespace) -> int:
                         and "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear: seq=1 | source=decision_pane | trigger=manual | cleared_action=clear_action_trail" in maintenance_cleared_mirror_text
                         and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:recorded | audit:idle | continuity:empty | health:idle | operator:idle" in maintenance_cleared_mirror_text
+                        and mirror_last_clear_time_ok
                         and "artifact_inspector_maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_mirror_text
@@ -1748,6 +1765,7 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane clear-last-clear button should be enabled after a last-clear record is created")
                 report["runtime_controls"]["artifact_inspector_maintenance_clear_checked"] = True
                 report["runtime_controls"]["artifact_inspector_maintenance_last_clear_summary_checked"] = True
+                report["runtime_controls"]["artifact_inspector_maintenance_last_clear_at_utc_checked"] = True
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 reloaded_artifact_clear_last_clear_button.click()
@@ -1757,11 +1775,13 @@ def run(args: argparse.Namespace) -> int:
                     last_clear_cleared_mirror_text = reloaded_decision_artifact_state_field.inner_text()
                     if (
                         "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in last_clear_cleared_artifact_text
+                        and "maintenance_last_clear_at_utc: none | state=idle" in last_clear_cleared_artifact_text
                         and "maintenance_clear:idle" in last_clear_cleared_artifact_text
                         and "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" in last_clear_cleared_artifact_text
                         and "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" in last_clear_cleared_artifact_text
                         and "maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" in last_clear_cleared_artifact_text
                         and "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in last_clear_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear_at_utc: none | state=idle" in last_clear_cleared_mirror_text
                         and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:idle | audit:idle | continuity:empty | health:idle | operator:idle" in last_clear_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" in last_clear_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" in last_clear_cleared_mirror_text

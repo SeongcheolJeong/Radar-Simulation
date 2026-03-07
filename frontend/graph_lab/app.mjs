@@ -872,6 +872,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     maintenanceSummaryText: normalizeCompareSessionField(row.maintenanceSummaryText, 320) || "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none",
     maintenanceOperatorSummaryText: normalizeCompareSessionField(row.maintenanceOperatorSummaryText, 320) || "maintenance_operator_summary: idle -> none | because=no_marker",
     maintenanceLastClearSummaryText: normalizeCompareSessionField(row.maintenanceLastClearSummaryText, 320) || "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none",
+    maintenanceLastClearAtUtcText: normalizeCompareSessionField(row.maintenanceLastClearAtUtcText, 320) || "maintenance_last_clear_at_utc: none | state=idle",
     maintenanceLastClearOperatorSummaryText: normalizeCompareSessionField(row.maintenanceLastClearOperatorSummaryText, 320) || "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record",
     recentActionsText: normalizeCompareSessionField(row.recentActionsText, 320) || "recent_actions: none",
     auditStateText: normalizeCompareSessionField(row.auditStateText, 320) || "audit_state: idle | total=0 | retained=0/3 | trimmed=0",
@@ -3020,6 +3021,14 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.maintenanceLastClearSummaryText]
   );
+  const artifactInspectorDecisionMaintenanceLastClearAtUtcText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.maintenanceLastClearAtUtcText,
+      "maintenance_last_clear_at_utc",
+      "artifact_inspector_maintenance_last_clear_at_utc"
+    ),
+    [artifactInspectorStatusSummary.maintenanceLastClearAtUtcText]
+  );
   const artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText = React.useMemo(
     () => buildArtifactInspectorDecisionLine(
       artifactInspectorStatusSummary.maintenanceLastClearOperatorSummaryText,
@@ -4368,6 +4377,7 @@ export function App() {
       `${artifactInspectorDecisionMaintenanceOperatorSummaryText}`,
       `${artifactInspectorDecisionMaintenanceControlState.text}`,
       `${artifactInspectorDecisionMaintenanceLastClearSummaryText}`,
+      `${artifactInspectorDecisionMaintenanceLastClearAtUtcText}`,
       `${artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText}`,
       `${artifactInspectorDecisionMaintenanceLastClearControlState.text}`,
       `${artifactInspectorDecisionRecentActionsText}`,
@@ -4432,6 +4442,7 @@ export function App() {
       artifactInspectorDecisionMaintenanceOperatorSummaryText,
       artifactInspectorDecisionMaintenanceControlState.text,
       artifactInspectorDecisionMaintenanceLastClearSummaryText,
+      artifactInspectorDecisionMaintenanceLastClearAtUtcText,
       artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
       artifactInspectorDecisionMaintenanceLastClearControlState.text,
       artifactInspectorDecisionRecentActionsText,
@@ -4569,6 +4580,7 @@ export function App() {
       artifactInspectorDecisionMaintenanceOperatorSummaryText,
       artifactInspectorDecisionMaintenanceControlState.text,
       artifactInspectorDecisionMaintenanceLastClearSummaryText,
+      artifactInspectorDecisionMaintenanceLastClearAtUtcText,
       artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
       artifactInspectorDecisionMaintenanceLastClearControlState.text,
       artifactInspectorDecisionRecentActionsText,
@@ -4651,6 +4663,7 @@ export function App() {
     artifactInspectorDecisionMaintenanceOperatorSummaryText,
     artifactInspectorDecisionMaintenanceControlState.text,
     artifactInspectorDecisionMaintenanceLastClearSummaryText,
+    artifactInspectorDecisionMaintenanceLastClearAtUtcText,
     artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
     artifactInspectorDecisionMaintenanceLastClearControlState.text,
     artifactInspectorDecisionRecentActionsText,
@@ -5114,6 +5127,7 @@ export function App() {
         artifactInspectorDecisionMaintenanceOperatorSummaryText,
         artifactInspectorDecisionMaintenanceControlState,
         artifactInspectorDecisionMaintenanceLastClearSummaryText,
+        artifactInspectorDecisionMaintenanceLastClearAtUtcText,
         artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
         artifactInspectorDecisionMaintenanceLastClearControlState,
         artifactInspectorDecisionRecentActionsText,
