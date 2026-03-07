@@ -868,7 +868,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
     statusBadgesText: normalizeCompareSessionField(row.statusBadgesText, 320) || "status_badges: -",
     lastActionText: normalizeCompareSessionField(row.lastActionText, 320) || "last_action: seq=0 | idle",
     recentActionsText: normalizeCompareSessionField(row.recentActionsText, 320) || "recent_actions: none",
-    auditSummaryText: normalizeCompareSessionField(row.auditSummaryText, 320) || "audit_summary: count=0 | next_seq=1 | state=empty",
+    auditSummaryText: normalizeCompareSessionField(row.auditSummaryText, 320) || "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty",
   };
 }
 

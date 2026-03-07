@@ -130,13 +130,21 @@ function computeProbe(peaks, rowBin, colBin, shape) {
 function normalizeArtifactInspectorPrefs(value) {
   const row = value && typeof value === "object" ? value : {};
   const lastActionSeq = Number(row.lastActionSeq);
+  const rawActionTrailTotalCount = Number(row.actionTrailTotalCount);
   const recentActionEntries = Array.isArray(row.recentActionEntries)
     ? row.recentActionEntries.map((entry) => String(entry || "").trim()).filter(Boolean).slice(0, ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT)
     : [];
+  const fallbackActionTrailTotalCount = Math.max(
+    recentActionEntries.length,
+    Number.isFinite(lastActionSeq) && lastActionSeq >= 0 ? Math.floor(lastActionSeq) : 0
+  );
   return {
     liveCompareEvidenceExpanded: row.liveCompareEvidenceExpanded !== false,
     historyArtifactExpectationExpanded: row.historyArtifactExpectationExpanded !== false,
     lastActionSeq: Number.isFinite(lastActionSeq) && lastActionSeq >= 0 ? Math.floor(lastActionSeq) : 0,
+    actionTrailTotalCount: Number.isFinite(rawActionTrailTotalCount) && rawActionTrailTotalCount >= 0
+      ? Math.floor(rawActionTrailTotalCount)
+      : fallbackActionTrailTotalCount,
     lastActionText: String(row.lastActionText || "last_action: seq=0 | idle").trim() || "last_action: seq=0 | idle",
     recentActionEntries,
   };
@@ -152,9 +160,11 @@ function buildArtifactInspectorRecentActionsText(entries) {
 
 function buildArtifactInspectorAuditSummaryText(value) {
   const prefs = normalizeArtifactInspectorPrefs(value);
-  const count = Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries.length : 0;
+  const retained = Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries.length : 0;
+  const total = Math.max(0, Number(prefs.actionTrailTotalCount || 0));
+  const trimmed = Math.max(0, total - retained);
   const nextSeq = Math.max(0, Number(prefs.lastActionSeq || 0)) + 1;
-  return `audit_summary: count=${count} | next_seq=${nextSeq} | state=${count > 0 ? "active" : "empty"}`;
+  return `audit_summary: total=${total} | retained=${retained} | trimmed=${trimmed} | next_seq=${nextSeq} | state=${total > 0 ? "active" : "empty"}`;
 }
 
 function clearArtifactInspectorActionTrailState(value) {
@@ -162,6 +172,7 @@ function clearArtifactInspectorActionTrailState(value) {
   return {
     ...prefs,
     lastActionSeq: 0,
+    actionTrailTotalCount: 0,
     lastActionText: "last_action: seq=0 | idle",
     recentActionEntries: [],
   };
@@ -174,6 +185,7 @@ function buildArtifactInspectorLastActionUpdate(value, label) {
   const actionEntry = `seq=${nextSeq} | ${normalizedLabel}`;
   return {
     lastActionSeq: nextSeq,
+    actionTrailTotalCount: Math.max(0, Number(prefs.actionTrailTotalCount || 0)) + 1,
     lastActionText: `last_action: ${actionEntry}`,
     recentActionEntries: [actionEntry, ...prefs.recentActionEntries].slice(0, ARTIFACT_INSPECTOR_RECENT_ACTION_LIMIT),
   };
