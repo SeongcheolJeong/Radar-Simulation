@@ -51,6 +51,7 @@ const COMPARE_REPLAY_PAIR_OPTION_LIMIT = 6;
 const PINNED_COMPARE_QUICK_ACTION_LIMIT = 3;
 const COMPARE_ARTIFACT_PATH_FINGERPRINT_ALGO = "fnv1a32_path_text";
 const COMPARE_SESSION_EXPORT_SCHEMA_VERSION = "graph_lab_compare_history_export_v2";
+const COMPARE_SESSION_IMPORT_SCHEMA_LEGACY = "legacy_pre_v2";
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -438,6 +439,32 @@ function mergeCompareSessionHistoryEntries(existingEntries, importedEntries) {
     .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
 }
 
+function normalizeCompareSessionImportSchemaVersion(value) {
+  const raw = normalizeCompareSessionField(value, 96);
+  if (!raw) return COMPARE_SESSION_IMPORT_SCHEMA_LEGACY;
+  return raw;
+}
+
+function summarizeCompareSessionSchemaCompatibility(value) {
+  const schemaVersion = normalizeCompareSessionImportSchemaVersion(value);
+  if (schemaVersion === COMPARE_SESSION_EXPORT_SCHEMA_VERSION) {
+    return {
+      schemaVersion,
+      compatibility: "exact",
+    };
+  }
+  if (schemaVersion === COMPARE_SESSION_IMPORT_SCHEMA_LEGACY) {
+    return {
+      schemaVersion,
+      compatibility: "legacy_compatible",
+    };
+  }
+  return {
+    schemaVersion,
+    compatibility: "forward_compatible_best_effort",
+  };
+}
+
 function serializeCompareSessionExportBundle(bundle) {
   const row = bundle && typeof bundle === "object" ? bundle : {};
   return JSON.stringify({
@@ -458,7 +485,7 @@ function parseCompareSessionImportBundle(text) {
     throw new Error("compare history import must be a JSON object");
   }
   return {
-    schemaVersion: normalizeCompareSessionField(parsed.schema_version || parsed.schemaVersion, 96),
+    schemaVersion: normalizeCompareSessionImportSchemaVersion(parsed.schema_version || parsed.schemaVersion),
     history: (Array.isArray(parsed.history) ? parsed.history : [])
       .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
       .slice(0, COMPARE_SESSION_HISTORY_LIMIT),
@@ -2810,9 +2837,9 @@ export function App() {
       document.body.removeChild(anchor);
       window.URL.revokeObjectURL(url);
       setCompareSessionTransferStatusText(
-        `exported ${Number(compareSessionHistory.length || 0)} history row(s), ${Number(managedCompareReplayPairCount || 0)} managed pair(s), and ${Number(Object.keys(comparePairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s)`
+        `exported ${Number(compareSessionHistory.length || 0)} history row(s), ${Number(managedCompareReplayPairCount || 0)} managed pair(s), and ${Number(Object.keys(comparePairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) | schema=${COMPARE_SESSION_EXPORT_SCHEMA_VERSION}`
       );
-      setStatus("compare history exported", "status-ok");
+      setStatus(`compare history exported: schema=${COMPARE_SESSION_EXPORT_SCHEMA_VERSION}`, "status-ok");
     } catch (err) {
       setCompareSessionTransferStatusText(`compare history export failed: ${String(err.message || err)}`);
       setStatus(`compare history export failed: ${String(err.message || err)}`, "status-err");
@@ -2835,6 +2862,7 @@ export function App() {
   const importCompareSessionHistoryText = React.useCallback((rawText, sourceLabel) => {
     try {
       const imported = parseCompareSessionImportBundle(rawText);
+      const importSchema = summarizeCompareSessionSchemaCompatibility(imported.schemaVersion);
       setCompareSessionHistory((prev) => mergeCompareSessionHistoryEntries(prev, imported.history));
       setCompareReplayPairMetaById((prev) => ({
         ...(prev && typeof prev === "object" ? prev : {}),
@@ -2848,9 +2876,12 @@ export function App() {
         setSelectedCompareReplayPairId(String(imported.selectedReplayPairId || "").trim());
       }
       setCompareSessionTransferStatusText(
-        `imported ${Number(imported.history.length || 0)} history row(s) and ${Number(Object.keys(imported.pairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) from ${String(sourceLabel || "text")}`
+        `imported ${Number(imported.history.length || 0)} history row(s) and ${Number(Object.keys(imported.pairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) from ${String(sourceLabel || "text")} | schema=${importSchema.schemaVersion} | compatibility=${importSchema.compatibility}`
       );
-      setStatus(`compare history imported: ${String(sourceLabel || "text")}`, "status-ok");
+      setStatus(
+        `compare history imported: ${String(sourceLabel || "text")} (schema=${importSchema.schemaVersion}, compatibility=${importSchema.compatibility})`,
+        "status-ok"
+      );
     } catch (err) {
       setCompareSessionTransferStatusText(`compare history import failed: ${String(err.message || err)}`);
       setStatus(`compare history import failed: ${String(err.message || err)}`, "status-err");

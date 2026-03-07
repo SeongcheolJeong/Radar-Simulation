@@ -184,10 +184,16 @@ The same area now supports browser-to-browser transfer:
 
 - `Export History`
   - downloads a JSON bundle with the recent compare-session rows, selected replayable pair, pair metadata, and pair-scoped artifact expectation snapshots
+  - the transfer hint now also shows the exported bundle schema version
 - `Import History`
   - merges a previously exported JSON bundle back into the current browser profile
   - restores replayable pairs that were deleted locally, as long as they exist in the imported bundle
   - restores any observed artifact expectation snapshot that was exported with the same replayable pair id
+  - the transfer hint now shows `schema` and `compatibility` for the imported bundle
+
+Detailed schema and migration policy:
+
+- [281_compare_history_bundle_schema_migration.md](/home/seongcheoljeong/workspace/myproject/docs/281_compare_history_bundle_schema_migration.md)
 
 The Decision Summary and exported brief now include:
 

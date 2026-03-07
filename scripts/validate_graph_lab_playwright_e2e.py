@@ -639,6 +639,9 @@ def run(args: argparse.Namespace) -> int:
                 history_download = history_dl_info.value
                 history_bundle_path = tmp_root / "compare_history_export.json"
                 history_download.save_as(str(history_bundle_path))
+                history_transfer_text_after_export = history_field.inner_text()
+                if "schema=graph_lab_compare_history_export_v2" not in history_transfer_text_after_export:
+                    raise AssertionError("compare history export transfer hint did not include schema version")
                 exported_bundle = json.loads(history_bundle_path.read_text(encoding="utf-8"))
                 if str(exported_bundle.get("schema_version") or "") != "graph_lab_compare_history_export_v2":
                     raise AssertionError("compare history export schema_version mismatch")
@@ -685,6 +688,12 @@ def run(args: argparse.Namespace) -> int:
                     }""",
                     timeout=30_000,
                 )
+                history_transfer_text_after_import = history_field.inner_text()
+                if (
+                    "schema=graph_lab_compare_history_export_v2" not in history_transfer_text_after_import
+                    or "compatibility=exact" not in history_transfer_text_after_import
+                ):
+                    raise AssertionError("compare history import transfer hint did not include schema compatibility")
                 history_select.select_option("low_fidelity_radarsimpy_ffd::current_config")
                 page.wait_for_timeout(100)
                 report["runtime_controls"]["compare_session_management_checked"] = True
