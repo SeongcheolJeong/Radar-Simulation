@@ -322,13 +322,25 @@ export function ArtifactInspectorPanel({
     historyArtifactExpectationExpanded,
     liveCompareEvidenceExpanded,
   ]);
+  const artifactInspectorStatusBadgesText = React.useMemo(() => {
+    const labels = (Array.isArray(artifactInspectorStatusBadges) ? artifactInspectorStatusBadges : [])
+      .map((row) => String(row?.label || "").trim())
+      .filter(Boolean);
+    return `status_badges: ${labels.length > 0 ? labels.join(" | ") : "-"}`;
+  }, [artifactInspectorStatusBadges]);
   React.useEffect(() => {
     if (typeof onArtifactInspectorStatusChange !== "function") return;
     onArtifactInspectorStatusChange({
       layoutStateText: artifactInspectorLayoutStateText,
       probeStateText: artifactInspectorProbeState.text,
+      statusBadgesText: artifactInspectorStatusBadgesText,
     });
-  }, [artifactInspectorLayoutStateText, artifactInspectorProbeState.text, onArtifactInspectorStatusChange]);
+  }, [
+    artifactInspectorLayoutStateText,
+    artifactInspectorProbeState.text,
+    artifactInspectorStatusBadgesText,
+    onArtifactInspectorStatusChange,
+  ]);
   const toggleLiveCompareEvidenceExpanded = React.useCallback(() => {
     setArtifactInspectorPrefs((prev) => {
       const next = normalizeArtifactInspectorPrefs(prev);

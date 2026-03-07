@@ -865,6 +865,7 @@ function normalizeArtifactInspectorStatusSummary(value) {
   return {
     layoutStateText: normalizeCompareSessionField(row.layoutStateText, 320) || "layout_state: -",
     probeStateText: normalizeCompareSessionField(row.probeStateText, 320) || "probe_state: -",
+    statusBadgesText: normalizeCompareSessionField(row.statusBadgesText, 320) || "status_badges: -",
   };
 }
 
@@ -2799,6 +2800,14 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.probeStateText]
   );
+  const artifactInspectorDecisionStatusBadgesText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.statusBadgesText,
+      "status_badges",
+      "artifact_inspector_status_badges"
+    ),
+    [artifactInspectorStatusSummary.statusBadgesText]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -3936,6 +3945,7 @@ export function App() {
       `compare_runtime: ${compareRuntimeDiagnostics.badgeLine}`,
       `compare_assessment: ${runCompareSummary.assessment}`,
       `compare_flags: ${runCompareSummary.flagSummary}`,
+      `${artifactInspectorDecisionStatusBadgesText}`,
       `${artifactInspectorDecisionLayoutStateText}`,
       `${artifactInspectorDecisionProbeStateText}`,
       `gate_failure_count: ${Number(failureRows.length || 0)}`,
@@ -3978,6 +3988,7 @@ export function App() {
     compareSessionImportPreviewCompactSummaryText,
     compareSessionTransferCompactSummaryText,
     compareSessionTransferStatusText,
+    artifactInspectorDecisionStatusBadgesText,
     artifactInspectorDecisionLayoutStateText,
     artifactInspectorDecisionProbeStateText,
     graphRunSummary,
@@ -4093,6 +4104,7 @@ export function App() {
       "",
       "## Artifact Inspector State",
       "```text",
+      artifactInspectorDecisionStatusBadgesText,
       artifactInspectorDecisionLayoutStateText,
       artifactInspectorDecisionProbeStateText,
       "```",
@@ -4153,6 +4165,7 @@ export function App() {
     compareSessionRetentionPreviewCompactSummaryText,
     compareSessionRetentionPreviewText,
     compareSessionTransferCompactSummaryText,
+    artifactInspectorDecisionStatusBadgesText,
     artifactInspectorDecisionLayoutStateText,
     artifactInspectorDecisionProbeStateText,
     runCompareSummary,

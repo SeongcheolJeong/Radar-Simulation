@@ -181,6 +181,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_layout_status_checked": False,
             "artifact_inspector_badges_checked": False,
             "artifact_inspector_probe_state_checked": False,
+            "artifact_inspector_badge_export_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -1059,10 +1060,12 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 if (
                     "## Artifact Inspector State" not in brief_text
+                    or "artifact_inspector_status_badges:" not in brief_text
                     or "artifact_inspector_layout_state:" not in brief_text
                     or "artifact_inspector_probe_state:" not in brief_text
                 ):
                     raise AssertionError("decision brief did not include artifact inspector state summary")
+                report["runtime_controls"]["artifact_inspector_badge_export_checked"] = True
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
 
                 # Normalize high-churn text before visual capture so strict snapshots

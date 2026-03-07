@@ -365,6 +365,7 @@ It now also exports a `Compare Session History` section so the operator can hand
 
 The exported brief now also includes an `Artifact Inspector State` section with:
 
+- `artifact_inspector_status_badges`
 - `artifact_inspector_layout_state`
 - `artifact_inspector_probe_state`
 
