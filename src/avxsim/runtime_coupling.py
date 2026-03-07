@@ -2,6 +2,8 @@ import importlib
 from types import ModuleType
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 
+from . import radarsimpy_api as rs_api
+
 
 def detect_runtime_modules(module_names: Sequence[str]) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
@@ -10,7 +12,10 @@ def detect_runtime_modules(module_names: Sequence[str]) -> Dict[str, Dict[str, A
         if name == "":
             continue
         try:
-            module = importlib.import_module(name)
+            if name == "radarsimpy":
+                module = rs_api.load_radarsimpy_module()
+            else:
+                module = importlib.import_module(name)
             out[name] = {
                 "available": True,
                 "module_name": name,

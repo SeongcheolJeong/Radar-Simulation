@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import ctypes
 import importlib
 import os
-from types import ModuleType
 from pathlib import Path
+import sys
+from types import ModuleType
 from typing import Any, Dict, List, Tuple
 
 from .radarsimpy_core_processing import (
@@ -28,6 +30,9 @@ from .radarsimpy_core_tools import core_roc_pd, core_roc_snr
 API_INDEX_URL = "https://radarsimx.github.io/radarsimpy/api/index.html"
 API_INDEX_VERSION = "15.0.1"
 RADARSIMPY_LICENSE_FILE_ENV = "RADARSIMPY_LICENSE_FILE"
+RADARSIMPY_PACKAGE_ROOT_ENV = "RADARSIMPY_PACKAGE_ROOT"
+RADARSIMPY_LIBCOMPAT_DIR_ENV = "RADARSIMPY_LIBCOMPAT_DIR"
+RADARSIMPY_AUTO_DISCOVER_ENV = "RADARSIMPY_AUTO_DISCOVER"
 
 RADARSIMPY_ROOT_API: Tuple[str, ...] = (
     "Transmitter",
@@ -62,6 +67,161 @@ RADARSIMPY_SUPPORTED_API: Tuple[str, ...] = (
     *RADARSIMPY_TOOLS_API,
 )
 _RADARSIMPY_LICENSE_CONFIGURED_PATH: str | None = None
+_RADARSIMPY_BOOTSTRAP_ROOT = Path(__file__).resolve().parents[2]
+_RADARSIMPY_PRELOADED_LIBS: set[str] = set()
+
+
+def _radarsimpy_auto_discover_enabled() -> bool:
+    raw = str(os.environ.get(RADARSIMPY_AUTO_DISCOVER_ENV, "1")).strip().lower()
+    return raw not in {"0", "false", "no", "off"}
+
+
+def _iter_candidate_package_roots() -> List[Path]:
+    out: List[Path] = []
+    seen: set[str] = set()
+
+    def _append(path: Path) -> None:
+        resolved = path.expanduser().resolve()
+        key = str(resolved)
+        if key in seen:
+            return
+        if not (resolved / "radarsimpy" / "__init__.py").is_file():
+            return
+        seen.add(key)
+        out.append(resolved)
+
+    env_root = str(os.environ.get(RADARSIMPY_PACKAGE_ROOT_ENV, "")).strip()
+    if env_root != "":
+        _append(Path(env_root))
+
+    if not _radarsimpy_auto_discover_enabled():
+        return out
+
+    defaults = (
+        _RADARSIMPY_BOOTSTRAP_ROOT / "external" / "radarsimpy_trial" / "Ubuntu24_x86_64_CPU" / "Ubuntu24_x86_64_CPU",
+        _RADARSIMPY_BOOTSTRAP_ROOT / "external" / "radarsimpy_order_pull_latest" / "extracted" / "Ubuntu24_x86_64_CPU" / "Ubuntu24_x86_64_CPU",
+        _RADARSIMPY_BOOTSTRAP_ROOT / "external" / "radarsimpy" / "src",
+    )
+    for candidate in defaults:
+        _append(candidate)
+    return out
+
+
+def _iter_candidate_libcompat_dirs(package_root: Path | None) -> List[Path]:
+    out: List[Path] = []
+    seen: set[str] = set()
+
+    def _append(path: Path) -> None:
+        resolved = path.expanduser().resolve()
+        key = str(resolved)
+        if key in seen:
+            return
+        if not resolved.is_dir():
+            return
+        seen.add(key)
+        out.append(resolved)
+
+    env_dir = str(os.environ.get(RADARSIMPY_LIBCOMPAT_DIR_ENV, "")).strip()
+    if env_dir != "":
+        _append(Path(env_dir))
+
+    if package_root is not None:
+        package_root = package_root.expanduser().resolve()
+        trial_root = package_root.parents[1] if len(package_root.parents) >= 2 else None
+        if trial_root is not None:
+            _append(trial_root / "libcompat" / "usr" / "lib" / "x86_64-linux-gnu")
+
+    if not _radarsimpy_auto_discover_enabled():
+        return out
+
+    _append(
+        _RADARSIMPY_BOOTSTRAP_ROOT
+        / "external"
+        / "radarsimpy_trial"
+        / "libcompat"
+        / "usr"
+        / "lib"
+        / "x86_64-linux-gnu"
+    )
+    return out
+
+
+def _preload_radarsimpy_libcompat(package_root: Path | None) -> None:
+    rtld_global = int(getattr(ctypes, "RTLD_GLOBAL", 0))
+    for lib_dir in _iter_candidate_libcompat_dirs(package_root):
+        candidates: List[Path] = []
+        preferred = lib_dir / "libmbedcrypto.so.7"
+        if preferred.exists():
+            candidates.append(preferred)
+        for path in sorted(lib_dir.glob("libmbedcrypto.so*")):
+            if path not in candidates:
+                candidates.append(path)
+        loaded_any = False
+        for path in candidates:
+            resolved = path.resolve()
+            key = str(resolved)
+            if key in _RADARSIMPY_PRELOADED_LIBS:
+                loaded_any = True
+                continue
+            try:
+                ctypes.CDLL(key, mode=rtld_global)
+            except OSError:
+                continue
+            _RADARSIMPY_PRELOADED_LIBS.add(key)
+            loaded_any = True
+        if loaded_any:
+            break
+
+
+def _iter_candidate_license_files(package_root: Path | None) -> List[Path]:
+    out: List[Path] = []
+    seen: set[str] = set()
+
+    def _append(path: Path) -> None:
+        resolved = path.expanduser().resolve()
+        key = str(resolved)
+        if key in seen:
+            return
+        if not resolved.is_file():
+            return
+        seen.add(key)
+        out.append(resolved)
+
+    if package_root is not None:
+        pkg_dir = package_root.expanduser().resolve() / "radarsimpy"
+        _append(pkg_dir / "license_RadarSimPy_env.lic")
+        for path in sorted(pkg_dir.glob("license_RadarSimPy_*.lic")):
+            _append(path)
+
+    if not _radarsimpy_auto_discover_enabled():
+        return out
+
+    repo_pkg_dir = _RADARSIMPY_BOOTSTRAP_ROOT / "external" / "radarsimpy" / "src" / "radarsimpy"
+    for path in sorted(repo_pkg_dir.glob("license_RadarSimPy_*.lic")):
+        _append(path)
+    return out
+
+
+def _configure_radarsimpy_license_env(package_root: Path | None) -> None:
+    license_file = str(os.environ.get(RADARSIMPY_LICENSE_FILE_ENV, "")).strip()
+    if license_file != "":
+        return
+    for candidate in _iter_candidate_license_files(package_root):
+        os.environ[RADARSIMPY_LICENSE_FILE_ENV] = str(candidate)
+        return
+
+
+def _bootstrap_local_radarsimpy_runtime() -> Path | None:
+    package_root: Path | None = None
+    for candidate in _iter_candidate_package_roots():
+        package_root = candidate
+        candidate_text = str(candidate)
+        if candidate_text not in sys.path:
+            sys.path.insert(0, candidate_text)
+        break
+    _preload_radarsimpy_libcompat(package_root)
+    _configure_radarsimpy_license_env(package_root)
+    return package_root
 
 
 def _configure_radarsimpy_license(module: ModuleType) -> None:
@@ -93,6 +253,7 @@ def _configure_radarsimpy_license(module: ModuleType) -> None:
 
 def _import_radarsimpy_module() -> ModuleType:
     try:
+        _bootstrap_local_radarsimpy_runtime()
         module = importlib.import_module("radarsimpy")
         _configure_radarsimpy_license(module)
         return module

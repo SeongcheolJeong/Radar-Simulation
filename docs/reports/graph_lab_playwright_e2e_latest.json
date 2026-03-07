@@ -1,6 +1,6 @@
 {
   "version": "graph_lab_playwright_e2e_report_v1",
-  "created_at_utc": "2026-03-07T08:46:21Z",
+  "created_at_utc": "2026-03-07T08:56:59Z",
   "require_playwright": true,
   "strict_visual": false,
   "update_baseline": false,
@@ -29,7 +29,7 @@
     ],
     "compare_workflow_checked": true,
     "track_compare_runner_checked": true,
-    "track_compare_runner_result": "blocked"
+    "track_compare_runner_result": "ready"
   },
   "artifacts": {
     "snapshot_latest_dir": "/home/seongcheoljeong/workspace/myproject/docs/reports/graph_lab_playwright_snapshots/latest",

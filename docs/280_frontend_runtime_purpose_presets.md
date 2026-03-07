@@ -111,6 +111,24 @@ Current rule:
 
 This keeps the low-fidelity RadarSimPy flow usable while still letting the operator inject measured antenna patterns.
 
+## Local Runtime Bootstrap
+
+The repo now auto-discovers a local RadarSimPy runtime for frontend/API workflows when available:
+
+- package roots:
+  - `RADARSIMPY_PACKAGE_ROOT`
+  - bundled trial package under `external/radarsimpy_trial/...`
+  - repo source tree under `external/radarsimpy/src`
+- libcompat:
+  - `RADARSIMPY_LIBCOMPAT_DIR`
+  - bundled `external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu`
+- license:
+  - existing `RADARSIMPY_LICENSE_FILE`
+  - staged/import-time license under the runtime package
+  - repo-local `external/radarsimpy/src/radarsimpy/license_RadarSimPy_*.lic`
+
+This is what allows `Run Low -> Current Compare` to reach `ready` in the local workspace without manually exporting shell paths first.
+
 ## Current Scope
 
 This repo does not currently contain a direct `OptiX` or `HybridDynamicRT` runtime backend.
