@@ -1,9 +1,9 @@
 {
-  "scene_json": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json",
+  "scene_json": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json",
   "outputs": {
-    "path_list_json": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/output/path_list.json",
-    "adc_cube_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/output/adc_cube.npz",
-    "radar_map_npz": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/output/radar_map.npz"
+    "path_list_json": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/output/path_list.json",
+    "adc_cube_npz": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/output/adc_cube.npz",
+    "radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/output/radar_map.npz"
   },
   "path_summary": {
     "n_chirps": 16,
@@ -85,7 +85,7 @@
       4
     ],
     "dtype": "complex64",
-    "abs_mean": 0.0008791275904513896,
+    "abs_mean": 0.0008791275322437286,
     "abs_max": 0.00223923590965569,
     "metadata": {
       "fc_hz": 77000000000.0,
@@ -157,82 +157,82 @@
     ],
     "rd_top_peaks": [
       {
-        "doppler_bin": 32,
+        "doppler_bin": 0,
         "range_bin": 164,
-        "power": 11.058491188103487,
+        "power": 11.058491188103485,
         "rel_db": 0.0
       },
       {
-        "doppler_bin": 0,
+        "doppler_bin": 32,
         "range_bin": 164,
-        "power": 11.058491188103487,
+        "power": 11.058491188103485,
         "rel_db": 0.0
       },
       {
         "doppler_bin": 31,
         "range_bin": 164,
-        "power": 10.299620858540772,
-        "rel_db": -0.3087463811487625
+        "power": 10.299620858540774,
+        "rel_db": -0.30874638114876096
       },
       {
         "doppler_bin": 63,
         "range_bin": 164,
-        "power": 10.299620858540772,
-        "rel_db": -0.3087463811487625
-      },
-      {
-        "doppler_bin": 1,
-        "range_bin": 164,
-        "power": 10.299620849195554,
-        "rel_db": -0.3087463850892731
+        "power": 10.299620858540774,
+        "rel_db": -0.30874638114876096
       },
       {
         "doppler_bin": 33,
         "range_bin": 164,
         "power": 10.299620849195554,
-        "rel_db": -0.3087463850892731
+        "rel_db": -0.308746385089272
+      },
+      {
+        "doppler_bin": 1,
+        "range_bin": 164,
+        "power": 10.299620849195554,
+        "rel_db": -0.308746385089272
       }
     ],
     "ra_top_peaks": [
       {
         "angle_bin": 19,
         "range_bin": 164,
-        "power": 1.4470286515966444,
+        "power": 1.447028651596644,
         "rel_db": 0.0
       },
       {
         "angle_bin": 18,
         "range_bin": 164,
         "power": 1.3938851865335924,
-        "rel_db": -0.16250127698221792
+        "rel_db": -0.16250127698221645
       },
       {
         "angle_bin": 20,
         "range_bin": 164,
         "power": 1.3246213850529587,
-        "rel_db": -0.3838536822641423
+        "rel_db": -0.3838536822641412
       },
       {
         "angle_bin": 17,
         "range_bin": 164,
-        "power": 1.1513311686588106,
-        "rel_db": -0.9927686838970428
+        "power": 1.1513311686588112,
+        "rel_db": -0.9927686838970391
       },
       {
         "angle_bin": 21,
         "range_bin": 164,
-        "power": 1.0919696602696378,
-        "rel_db": -1.2226655844242087
+        "power": 1.0919696602696385,
+        "rel_db": -1.2226655844242047
       },
       {
         "angle_bin": 22,
         "range_bin": 164,
         "power": 0.8285770041215622,
-        "rel_db": -2.4214425440861365
+        "rel_db": -2.4214425440861356
       }
     ],
     "metadata": {
-      "scene_id": "frontend_quickstart_2026_02_22",
+      "scene_id": "frontend_quickstart_2026_03_06",
       "backend_type": "analytic_targets",
       "frame_count": 16,
       "tx_schedule": [
@@ -267,13 +267,46 @@
         "doppler_window": "hann",
         "angle_window": "hann",
         "range_bin_limit": 256
+      },
+      "compensation_summary": {
+        "enabled": false,
+        "input_path_count": 48,
+        "output_path_count": 48,
+        "added_diffuse_path_count": 0,
+        "added_clutter_path_count": 0,
+        "seed": null,
+        "reason": "not_configured"
+      },
+      "path_contract_summary": {
+        "chirp_count": 16,
+        "path_count": 48
+      },
+      "lgit_customized_output_npz": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/output/lgit_customized_output.npz",
+      "lgit_customized_output_summary": {
+        "output_npz": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/output/lgit_customized_output.npz",
+        "version": "lgit_customized_output_v1",
+        "adc_virtual_shape": [
+          1024,
+          16,
+          8
+        ],
+        "range_doppler_power_shape": [
+          16,
+          512,
+          8
+        ],
+        "tx_pair_doppler_power_shape": [
+          2,
+          16,
+          512
+        ]
       }
     }
   },
   "visuals": {
-    "rd_map_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/rd_map.png",
-    "ra_map_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/ra_map.png",
-    "adc_tx0_rx0_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/adc_tx0_rx0.png",
-    "path_scatter_chirp0_png": "/Users/seongcheoljeong/Documents/Codex_test/data/demo/frontend_quickstart_v1/visuals/path_scatter_chirp0.png"
+    "rd_map_png": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/visuals/rd_map.png",
+    "ra_map_png": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/visuals/ra_map.png",
+    "adc_tx0_rx0_png": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/visuals/adc_tx0_rx0.png",
+    "path_scatter_chirp0_png": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/visuals/path_scatter_chirp0.png"
   }
 }
