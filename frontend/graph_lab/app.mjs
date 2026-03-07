@@ -3368,6 +3368,7 @@ export function App() {
         runLatestCompareSessionPair,
         selectedReplayableCompareSessionText,
         selectedReplayableCompareSessionMetaText,
+        selectedReplayableCompareSessionArtifactExpectationSummaryText,
         selectedReplayableCompareSessionArtifactExpectationText,
         selectedReplayableCompareSessionPreviewText,
         canReplaySelectedCompareSession: Boolean(selectedReplayableCompareSession),

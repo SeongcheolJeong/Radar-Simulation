@@ -80,7 +80,14 @@ function computeProbe(peaks, rowBin, colBin, shape) {
   };
 }
 
-export function ArtifactInspectorPanel({ graphRunSummary, compareGraphRunSummary, compareRunStatusText }) {
+export function ArtifactInspectorPanel({
+  graphRunSummary,
+  compareGraphRunSummary,
+  compareRunStatusText,
+  selectedReplayableCompareSessionText,
+  selectedReplayableCompareSessionArtifactExpectationSummaryText,
+  selectedReplayableCompareSessionArtifactExpectationText,
+}) {
   if (!graphRunSummary) {
     return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
   }
@@ -151,6 +158,12 @@ export function ArtifactInspectorPanel({ graphRunSummary, compareGraphRunSummary
     () => buildRunCompareSummary(graphRunSummary, compareGraphRunSummary),
     [compareGraphRunSummary, graphRunSummary]
   );
+  const selectedHistoryArtifactExpectationLines = React.useMemo(() => {
+    return String(selectedReplayableCompareSessionArtifactExpectationText || "-")
+      .split("\n")
+      .map((line) => String(line || "").trim())
+      .filter(Boolean);
+  }, [selectedReplayableCompareSessionArtifactExpectationText]);
   const compareTone = runCompare.assessment === "hold"
     ? "#ff9a9a"
     : runCompare.assessment === "review"
@@ -219,6 +232,14 @@ export function ArtifactInspectorPanel({ graphRunSummary, compareGraphRunSummary
             ),
           ])
         : h("div", { key: "diff_empty", style: { color: "#86a1b4" } }, String(compareRunStatusText || "compare run not loaded")),
+    ]),
+    h("div", { key: "history_artifact_expectation_overlay", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
+      h("div", { key: "history_artifact_expectation_title", style: { marginBottom: "5px", color: "#8fb3c9" } }, "selected history pair artifact expectation:"),
+      h("div", { key: "history_artifact_expectation_pair", style: { marginBottom: "3px", color: "#b9d5e7" } }, String(selectedReplayableCompareSessionText || "selected_history_pair: -")),
+      h("div", { key: "history_artifact_expectation_summary", style: { marginBottom: "5px", color: "#9fc1d4" } }, String(selectedReplayableCompareSessionArtifactExpectationSummaryText || "selected_history_artifact_expectation: -")),
+      h("div", { key: "history_artifact_expectation_body", style: { display: "flex", flexDirection: "column", gap: "3px" } }, selectedHistoryArtifactExpectationLines.map((line, idx) =>
+        h("div", { key: `history_artifact_expectation_line_${idx}`, style: { color: "#cfe2ef" } }, line)
+      )),
     ]),
     h("div", { key: "probe", style: { marginBottom: "8px", padding: "8px", border: "1px solid #284a5d", borderRadius: "6px", background: "rgba(9, 22, 30, 0.62)" } }, [
       h("div", { key: "probe_title", style: { marginBottom: "6px", color: "#8fb3c9" } }, "cursor probe + peak lock:"),

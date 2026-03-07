@@ -155,6 +155,7 @@ def run(args: argparse.Namespace) -> int:
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
             "compare_assessment_checked": False,
+            "artifact_inspector_expectation_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -406,7 +407,15 @@ def run(args: argparse.Namespace) -> int:
                 artifact_text = artifact_field.inner_text()
                 if "compare_assessment:" not in artifact_text or "compare_flags:" not in artifact_text:
                     raise AssertionError("artifact inspector did not render compare assessment")
+                if (
+                    "selected history pair artifact expectation:" not in artifact_text
+                    or "selected_history_artifact_expectation:" not in artifact_text
+                    or "artifact_expectation_source:" not in artifact_text
+                    or "artifact_path_fingerprint_algo:" not in artifact_text
+                ):
+                    raise AssertionError("artifact inspector did not render selected history pair artifact expectation")
                 report["runtime_controls"]["compare_assessment_checked"] = True
+                report["runtime_controls"]["artifact_inspector_expectation_checked"] = True
 
                 history_field = field_locator(page, "Compare Session History")
                 history_field.wait_for(timeout=30_000)

@@ -225,6 +225,13 @@ using concrete evidence from:
 - ADC source changes
 - required/optional artifact presence deltas
 
+It now also mirrors the currently selected history pair's artifact expectation snapshot directly inside the `Artifact Inspector`, including:
+
+- `selected_history_artifact_expectation`
+- `artifact_expectation_source`
+- `artifact_path_fingerprint_algo`
+- artifact path fingerprint rows for the stored current/compare artifact paths
+
 ## Backend Behavior
 
 Path-based backends now share the same antenna-aware FMCW synth path:
