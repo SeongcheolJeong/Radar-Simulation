@@ -183,6 +183,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_probe_state_checked": False,
             "artifact_inspector_last_action_checked": False,
             "artifact_inspector_maintenance_action_checked": False,
+            "artifact_inspector_maintenance_last_clear_checked": False,
             "artifact_inspector_maintenance_clear_checked": False,
             "artifact_inspector_maintenance_summary_checked": False,
             "artifact_inspector_maintenance_operator_summary_checked": False,
@@ -478,6 +479,7 @@ def run(args: argparse.Namespace) -> int:
                     or "probe_state: default" not in artifact_text
                     or "last_action: seq=0 | idle" not in artifact_text
                     or "maintenance_action: seq=0 | none | source=none | trigger=idle" not in artifact_text
+                    or "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in artifact_text
                     or "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" not in artifact_text
                     or "maintenance_operator_summary: idle -> none | because=no_marker" not in artifact_text
                     or "maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" not in artifact_text
@@ -524,6 +526,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" not in decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_operator_summary: idle -> none | because=no_marker" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" not in decision_artifact_state_text
@@ -826,6 +829,7 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "last_action: seq=0 | idle" in cleared_audit_artifact_text
                         and "maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" in cleared_audit_artifact_text
+                        and "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in cleared_audit_artifact_text
                         and "maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" in cleared_audit_artifact_text
                         and "maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" in cleared_audit_artifact_text
                         and "maintenance_controls: clear=enabled | recommended=clear_marker | reason=marker_present" in cleared_audit_artifact_text
@@ -837,6 +841,7 @@ def run(args: argparse.Namespace) -> int:
                         and "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" in cleared_audit_artifact_text
                         and "artifact_inspector_last_action: seq=0 | idle" in cleared_audit_mirror_text
                         and "artifact_inspector_maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" in cleared_audit_mirror_text
+                        and "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in cleared_audit_mirror_text
                         and "artifact_inspector_maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" in cleared_audit_mirror_text
                         and "artifact_inspector_maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" in cleared_audit_mirror_text
                         and "artifact_inspector_maintenance_controls: clear=enabled | recommended=clear_marker | reason=marker_present" in cleared_audit_mirror_text
@@ -876,6 +881,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
                 report["runtime_controls"]["artifact_inspector_last_action_checked"] = True
                 report["runtime_controls"]["artifact_inspector_maintenance_action_checked"] = True
+                report["runtime_controls"]["artifact_inspector_maintenance_last_clear_checked"] = True
                 report["runtime_controls"]["artifact_inspector_maintenance_summary_checked"] = True
                 report["runtime_controls"]["artifact_inspector_maintenance_operator_summary_checked"] = True
                 report["runtime_controls"]["artifact_inspector_recent_actions_checked"] = True
@@ -1441,6 +1447,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state:" not in brief_text
                     or "artifact_inspector_last_action:" not in brief_text
                     or "artifact_inspector_maintenance_action:" not in brief_text
+                    or "artifact_inspector_maintenance_last_clear:" not in brief_text
                     or "artifact_inspector_maintenance_summary:" not in brief_text
                     or "artifact_inspector_maintenance_operator_summary:" not in brief_text
                     or "artifact_inspector_recent_actions:" not in brief_text
@@ -1583,6 +1590,7 @@ def run(args: argparse.Namespace) -> int:
                     or "probe_state: default" not in reloaded_artifact_text
                     or "last_action: seq=0 | idle" not in reloaded_artifact_text
                     or "maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" not in reloaded_artifact_text
+                    or "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in reloaded_artifact_text
                     or "maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" not in reloaded_artifact_text
                     or "maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" not in reloaded_artifact_text
                     or "recent_actions: none" not in reloaded_artifact_text
@@ -1631,6 +1639,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_action: seq=1 | action=clear_action_trail | source=artifact_panel | trigger=recommended" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_controls: clear=enabled | recommended=clear_marker | reason=marker_present" not in reloaded_decision_artifact_state_text
@@ -1671,10 +1680,12 @@ def run(args: argparse.Namespace) -> int:
                     maintenance_cleared_mirror_text = reloaded_decision_artifact_state_field.inner_text()
                     if (
                         "maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_artifact_text
+                        and "maintenance_last_clear: seq=1 | source=decision_pane | trigger=manual | cleared_action=clear_action_trail" in maintenance_cleared_artifact_text
                         and "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_artifact_text
                         and "maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_artifact_text
                         and "maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_artifact_text
                         and "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear: seq=1 | source=decision_pane | trigger=manual | cleared_action=clear_action_trail" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_mirror_text

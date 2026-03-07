@@ -370,6 +370,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_probe_state`
 - `artifact_inspector_last_action`
 - `artifact_inspector_maintenance_action`
+- `artifact_inspector_maintenance_last_clear`
 - `artifact_inspector_maintenance_summary`
 - `artifact_inspector_maintenance_operator_summary`
 - `artifact_inspector_maintenance_controls`
@@ -404,6 +405,7 @@ Those mirror controls are now also state-aware:
 - the mirror exports an `artifact_inspector_controls:` hint line so the same actionability state survives in the decision brief
 - the mirror also exports `artifact_inspector_last_action:` as `seq=N | <source>` so the last collapse/expand/reset source and ordering stay visible after reload and in the decision brief
 - the mirror also exports `artifact_inspector_maintenance_action:` so audit-trail clears remain attributable even after `last_action` and `recent_actions` are reset back to idle/none
+- the mirror also exports `artifact_inspector_maintenance_last_clear:` so clearing the marker back to idle does not erase who acknowledged it and which provenance action was cleared
 - the mirror also exports `artifact_inspector_maintenance_summary:` so operators can scan whether a provenance marker is idle or still marked, and what the expected follow-up is, without parsing the raw action line
 - the mirror also exports `artifact_inspector_maintenance_operator_summary:` as a compact operator sentence (`idle -> none`, `marked -> clear_marker_if_acknowledged`) so brief readers can tell whether the provenance marker needs acknowledgement before reading the detailed maintenance fields
 - the mirror also exports `artifact_inspector_maintenance_controls:` so operators and brief readers can see whether the provenance marker itself can be cleared without touching layout state or the audit ring buffer
