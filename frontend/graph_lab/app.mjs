@@ -340,6 +340,20 @@ function summarizeCompareSessionHistory(entries) {
   return rows.slice(0, 6).map((row, idx) => formatCompareSessionHistoryEntry(row, idx + 1)).join("\n");
 }
 
+function getCompareSessionReplayPair(entry) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  const baselinePresetId = String(row.baselinePresetId || "").trim();
+  const targetPresetId = String(row.targetPresetId || "").trim();
+  if (!baselinePresetId || !targetPresetId) {
+    return null;
+  }
+  return {
+    baselinePresetId,
+    targetPresetId,
+    pairLabel: String(row.pairLabel || `${baselinePresetId} -> ${targetPresetId}`).trim(),
+  };
+}
+
 function isRuntimeBlockedError(message) {
   const text = String(message || "").trim().toLowerCase();
   return text.includes("required runtime modules unavailable") || text.includes("runtime provider failed");
@@ -704,6 +718,8 @@ export function App() {
           source: "manual_load",
           status: "loaded",
           pairLabel: `${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+          baselinePresetId: trackCompareBaselinePresetId,
+          targetPresetId: trackCompareTargetPresetId,
           compareRunId: graphRunId,
           note: `graph_status=${status}`,
         });
@@ -728,6 +744,8 @@ export function App() {
           source: "manual_load",
           status: "failed",
           pairLabel: `${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+          baselinePresetId: trackCompareBaselinePresetId,
+          targetPresetId: trackCompareTargetPresetId,
           compareRunId: graphRunId,
           note: String(err.message || err),
         });
@@ -772,6 +790,8 @@ export function App() {
       source: "pin_current",
       status: "pinned",
       pairLabel: `${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
+      baselinePresetId: trackCompareBaselinePresetId,
+      targetPresetId: trackCompareTargetPresetId,
       compareRunId: graphRunId,
     });
     setStatus(`current run pinned as compare: ${graphRunId}`, "status-ok");
@@ -1454,6 +1474,16 @@ export function App() {
     () => compareSessionHistory.length > 0 ? formatCompareSessionHistoryEntry(compareSessionHistory[0]) : "-",
     [compareSessionHistory]
   );
+  const latestReplayableCompareSession = React.useMemo(
+    () => compareSessionHistory.map((row) => getCompareSessionReplayPair(row)).find(Boolean) || null,
+    [compareSessionHistory]
+  );
+  const latestReplayableCompareSessionText = React.useMemo(() => {
+    if (!latestReplayableCompareSession) {
+      return "latest_replayable_pair: -";
+    }
+    return `latest_replayable_pair: ${String(latestReplayableCompareSession.pairLabel || "-")}`;
+  }, [latestReplayableCompareSession]);
 
   const {
     runGraphViaApi,
@@ -1649,6 +1679,8 @@ export function App() {
         source: "preset_pair",
         status: blocked ? "blocked" : "failed",
         pairLabel: `${baselinePresetLabel} -> ${targetPresetLabel}`,
+        baselinePresetId,
+        targetPresetId,
         phase: "baseline",
         note: lowError,
       });
@@ -1698,6 +1730,8 @@ export function App() {
         source: "preset_pair",
         status: blocked ? "blocked" : "failed",
         pairLabel: `${baselinePresetLabel} -> ${targetPresetLabel}`,
+        baselinePresetId,
+        targetPresetId,
         phase: "current",
         compareRunId,
         note: currentError,
@@ -1717,6 +1751,8 @@ export function App() {
       source: "preset_pair",
       status: "ready",
       pairLabel: `${baselinePresetLabel} -> ${targetPresetLabel}`,
+      baselinePresetId,
+      targetPresetId,
       phase: "current",
       compareRunId,
       currentRunId,
@@ -1746,6 +1782,33 @@ export function App() {
       targetPresetId: RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG,
     });
   }, [runPresetPairTrackCompare]);
+
+  const applyLatestCompareSessionPair = React.useCallback(() => {
+    if (!latestReplayableCompareSession) {
+      setStatus("no replayable compare session recorded yet", "status-warn");
+      return;
+    }
+    setTrackCompareBaselinePresetId(String(latestReplayableCompareSession.baselinePresetId || RUNTIME_PURPOSE_PRESET_LOW_FIDELITY));
+    setTrackCompareTargetPresetId(String(latestReplayableCompareSession.targetPresetId || RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG));
+    setStatus(`applied latest compare session pair: ${String(latestReplayableCompareSession.pairLabel || "-")}`, "status-ok");
+  }, [latestReplayableCompareSession, setStatus]);
+
+  const runLatestCompareSessionPair = React.useCallback(async () => {
+    if (!latestReplayableCompareSession) {
+      setStatus("no replayable compare session recorded yet", "status-warn");
+      return;
+    }
+    setTrackCompareBaselinePresetId(String(latestReplayableCompareSession.baselinePresetId || RUNTIME_PURPOSE_PRESET_LOW_FIDELITY));
+    setTrackCompareTargetPresetId(String(latestReplayableCompareSession.targetPresetId || RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG));
+    return runPresetPairTrackCompare({
+      baselinePresetId: latestReplayableCompareSession.baselinePresetId,
+      targetPresetId: latestReplayableCompareSession.targetPresetId,
+    });
+  }, [
+    latestReplayableCompareSession,
+    runPresetPairTrackCompare,
+    setStatus,
+  ]);
 
   const exportDecisionRegressionSession = React.useCallback(async () => {
     const sessionId = String(lastRegressionSession?.session_id || "").trim();
@@ -1800,6 +1863,7 @@ export function App() {
       `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
       `compare_session_count: ${Number(compareSessionHistory.length || 0)}`,
       `latest_compare_session: ${latestCompareSessionText}`,
+      `${latestReplayableCompareSessionText}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -1840,6 +1904,7 @@ export function App() {
     compareRuntimeSummary.trackLabel,
     graphRunSummary,
     latestCompareSessionText,
+    latestReplayableCompareSessionText,
     lastPolicyEval,
     runtimeDiagnostics.badgeLine,
     runtimeSummary.trackLabel,
@@ -1878,6 +1943,7 @@ export function App() {
       `- compare_track: ${compareRuntimeSummary.trackLabel}`,
       `- compare_runner_status: ${String(trackCompareRunnerStatusText || "-")}`,
       `- compare_status: ${String(compareRunStatusText || "-")}`,
+      `- ${latestReplayableCompareSessionText}`,
       "",
       "## Selected Pair Forecast",
       "```text",
@@ -1965,6 +2031,7 @@ export function App() {
     runtimeDiagnostics.summaryText,
     runtimeSummary.trackLabel,
     setStatus,
+    latestReplayableCompareSessionText,
     trackCompareBaselinePresetId,
     trackCompareSelectedPairForecastText,
     trackCompareSelectedPairSummaryText,
@@ -2325,6 +2392,10 @@ export function App() {
         trackCompareSelectedPairSummaryText,
         trackCompareSelectedPairForecastText,
         compareSessionHistoryText,
+        latestReplayableCompareSessionText,
+        canReplayLatestCompareSession: Boolean(latestReplayableCompareSession),
+        applyLatestCompareSessionPair,
+        runLatestCompareSessionPair,
         runPresetPairTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,

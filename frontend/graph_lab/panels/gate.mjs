@@ -23,6 +23,10 @@ export function DecisionPane({
   trackCompareSelectedPairSummaryText,
   trackCompareSelectedPairForecastText,
   compareSessionHistoryText,
+  latestReplayableCompareSessionText,
+  canReplayLatestCompareSession,
+  applyLatestCompareSessionPair,
+  runLatestCompareSessionPair,
   runPresetPairTrackCompare,
   exportGateReport,
   exportDecisionRegressionSession,
@@ -118,6 +122,21 @@ export function DecisionPane({
     ]),
     h("div", { className: "field", key: "decision_compare_session_history" }, [
       h("label", { className: "label", key: "decision_compare_session_history_label" }, "Compare Session History"),
+      h("div", { className: "hint", key: "decision_compare_session_history_replay_hint" }, String(latestReplayableCompareSessionText || "-")),
+      h("div", { className: "btn-row", key: "decision_compare_session_history_actions" }, [
+        h("button", {
+          className: "btn",
+          key: "decision_apply_latest_history_pair",
+          onClick: applyLatestCompareSessionPair,
+          disabled: !canReplayLatestCompareSession,
+        }, "Use Latest History Pair"),
+        h("button", {
+          className: "btn",
+          key: "decision_run_latest_history_pair",
+          onClick: runLatestCompareSessionPair,
+          disabled: !canReplayLatestCompareSession,
+        }, "Run Latest History Pair"),
+      ]),
       h("pre", { className: "result-box", key: "decision_compare_session_history_box" }, String(compareSessionHistoryText || "-")),
     ]),
     h("div", { className: "btn-row", key: "decision_gate_row" }, [

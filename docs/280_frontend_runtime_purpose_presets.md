@@ -138,6 +138,15 @@ The Decision Pane also keeps a `Compare Session History` block that records the 
 - result status such as `loaded`, `pinned`, `ready`, `blocked`, or `failed`
 - compare/current graph run ids when available
 - compare assessment for completed preset-pair runs
+- `latest_replayable_pair` so the operator can reuse the newest stored preset pair quickly
+
+The history block also provides:
+
+- `Use Latest History Pair`
+  - restores the newest replayable `baseline_preset -> target_preset` into the selector controls
+- `Run Latest History Pair`
+  - immediately reruns that stored preset pair
+  - if the stored target is `current_config`, the replay uses the current runtime panel state at replay time
 
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 

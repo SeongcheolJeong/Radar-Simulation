@@ -142,6 +142,7 @@ def run(args: argparse.Namespace) -> int:
             "quick_pair_shortcuts_checked": False,
             "pair_forecast_checked": False,
             "compare_session_history_checked": False,
+            "compare_session_replay_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -403,10 +404,35 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare session history did not capture manual pin event")
                 if "source=preset_pair" not in history_text:
                     raise AssertionError("compare session history did not capture preset pair event")
+                if "latest_replayable_pair:" not in history_text:
+                    raise AssertionError("compare session history did not render latest replayable pair hint")
                 expected_history_status = str(report["runtime_controls"]["track_compare_runner_result"] or "").strip()
                 if expected_history_status and f"status={expected_history_status}" not in history_text:
                     raise AssertionError("compare session history did not capture preset pair result status")
                 report["runtime_controls"]["compare_session_history_checked"] = True
+
+                preset_pair_field.get_by_role("button", name="Low -> PO-SBR", exact=True).click()
+                page.wait_for_timeout(100)
+                if target_select.input_value() != "high_fidelity_po_sbr_rt":
+                    raise AssertionError("quick pair shortcut did not update target preset before replay test")
+                history_field.get_by_role("button", name="Use Latest History Pair").click()
+                page.wait_for_timeout(100)
+                if target_select.input_value() != "current_config":
+                    raise AssertionError("latest history pair did not restore target preset to current_config")
+                pre_replay_history_text = history_field.inner_text()
+                history_field.get_by_role("button", name="Run Latest History Pair").click()
+                page.wait_for_function(
+                    """(prevText) => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("source=preset_pair") && text !== String(prevText || "");
+                    }""",
+                    arg=pre_replay_history_text,
+                    timeout=90_000,
+                )
+                report["runtime_controls"]["compare_session_replay_checked"] = True
 
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()
@@ -442,6 +468,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include selected pair forecast summary")
                 if "## Compare Session History" not in brief_text or "source=preset_pair" not in brief_text:
                     raise AssertionError("decision brief did not include compare session history summary")
+                if "latest_replayable_pair:" not in brief_text:
+                    raise AssertionError("decision brief did not include latest replayable pair summary")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
