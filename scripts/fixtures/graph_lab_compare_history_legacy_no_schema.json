@@ -1,0 +1,53 @@
+{
+  "exported_at_utc": "2026-03-07T13:10:00Z",
+  "history": [
+    {
+      "id": "cmp_fixture_legacy_no_schema_po_current",
+      "timestampUtc": "2026-03-07T13:09:45Z",
+      "source": "fixture_legacy_no_schema",
+      "status": "ready",
+      "pairLabel": "Legacy Fixture | PO-SBR -> Current",
+      "baselinePresetId": "high_fidelity_po_sbr_rt",
+      "targetPresetId": "current_config",
+      "phase": "import_fixture",
+      "compareRunId": "grun_fixture_legacy_po_compare",
+      "currentRunId": "grun_fixture_legacy_po_current",
+      "assessment": "review",
+      "note": "legacy fixture without schema_version using snake_case top-level fields"
+    }
+  ],
+  "pair_meta_by_id": {
+    "high_fidelity_po_sbr_rt::current_config": {
+      "customLabel": "Legacy Fixture | PO-SBR -> Current",
+      "pinned": true
+    }
+  },
+  "pair_artifact_expectation_by_id": {
+    "high_fidelity_po_sbr_rt::current_config": {
+      "source": "imported_legacy_fixture",
+      "observed_at_utc": "2026-03-07T13:09:50Z",
+      "summary_text": "source=imported_legacy_fixture | assessment=review | required=4/4/4 | artifact_delta=none | path_hashes=2",
+      "detail_text": "artifact_expectation_source: imported_legacy_fixture\npair_label: Legacy Fixture | PO-SBR -> Current\nobserved_at_utc: 2026-03-07T13:09:50Z\nobserved_assessment: review\nrequired_artifacts(current/compare/total): 4/4/4\nartifact_presence_delta: none\noptional_artifact_delta: none\nartifact_path_fingerprint_algo: fnv1a32_path_text\nartifact_path_fingerprints:\n- path_list_json: current=path_list_fixture_current.json#aa11aa11 compare=path_list_fixture_compare.json#bb22bb22\n- radar_map_npz: current=radar_map_fixture_current.npz#cc33cc33 compare=radar_map_fixture_compare.npz#dd44dd44",
+      "artifact_path_fingerprint_algo": "fnv1a32_path_text",
+      "artifact_path_fingerprints_by_artifact": {
+        "path_list_json": {
+          "current_path": "fixtures/path_list_fixture_current.json",
+          "current_label": "path_list_fixture_current.json",
+          "current_hash": "aa11aa11",
+          "compare_path": "fixtures/path_list_fixture_compare.json",
+          "compare_label": "path_list_fixture_compare.json",
+          "compare_hash": "bb22bb22"
+        },
+        "radar_map_npz": {
+          "current_path": "fixtures/radar_map_fixture_current.npz",
+          "current_label": "radar_map_fixture_current.npz",
+          "current_hash": "cc33cc33",
+          "compare_path": "fixtures/radar_map_fixture_compare.npz",
+          "compare_label": "radar_map_fixture_compare.npz",
+          "compare_hash": "dd44dd44"
+        }
+      }
+    }
+  },
+  "selected_replay_pair_id": "high_fidelity_po_sbr_rt::current_config"
+}

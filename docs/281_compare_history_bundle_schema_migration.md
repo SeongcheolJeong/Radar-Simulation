@@ -138,6 +138,9 @@ Any schema-related change should verify:
 Current automated coverage:
 
 - [validate_graph_lab_playwright_e2e.py](/home/seongcheoljeong/workspace/myproject/scripts/validate_graph_lab_playwright_e2e.py)
+- fixture bundles:
+  - [graph_lab_compare_history_legacy_no_schema.json](/home/seongcheoljeong/workspace/myproject/scripts/fixtures/graph_lab_compare_history_legacy_no_schema.json)
+  - [graph_lab_compare_history_legacy_camelcase.json](/home/seongcheoljeong/workspace/myproject/scripts/fixtures/graph_lab_compare_history_legacy_camelcase.json)
 
 ## Practical Rule
 

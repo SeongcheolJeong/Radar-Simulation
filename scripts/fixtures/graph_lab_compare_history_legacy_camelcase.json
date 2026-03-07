@@ -1,0 +1,45 @@
+{
+  "exportedAtUtc": "2026-03-07T13:11:00Z",
+  "history": [
+    {
+      "id": "cmp_fixture_legacy_camel_sionna_current",
+      "timestampUtc": "2026-03-07T13:10:45Z",
+      "source": "fixture_legacy_camelcase",
+      "status": "ready",
+      "pairLabel": "Legacy Fixture | Sionna -> Current",
+      "baselinePresetId": "high_fidelity_sionna_rt",
+      "targetPresetId": "current_config",
+      "phase": "import_fixture",
+      "compareRunId": "grun_fixture_legacy_sionna_compare",
+      "currentRunId": "grun_fixture_legacy_sionna_current",
+      "assessment": "aligned",
+      "note": "legacy fixture without schemaVersion using camelCase fields"
+    }
+  ],
+  "pairMetaById": {
+    "high_fidelity_sionna_rt::current_config": {
+      "customLabel": "Legacy Fixture | Sionna -> Current",
+      "pinned": false
+    }
+  },
+  "pairArtifactExpectationById": {
+    "high_fidelity_sionna_rt::current_config": {
+      "source": "imported_legacy_fixture_camel",
+      "observedAtUtc": "2026-03-07T13:10:50Z",
+      "summaryText": "source=imported_legacy_fixture_camel | assessment=aligned | required=4/4/4 | artifact_delta=none | path_hashes=1",
+      "detailText": "artifact_expectation_source: imported_legacy_fixture_camel\npair_label: Legacy Fixture | Sionna -> Current\nobserved_at_utc: 2026-03-07T13:10:50Z\nobserved_assessment: aligned\nrequired_artifacts(current/compare/total): 4/4/4\nartifact_presence_delta: none\noptional_artifact_delta: none\nartifact_path_fingerprint_algo: fnv1a32_path_text\nartifact_path_fingerprints:\n- adc_cube_npz: current=adc_cube_fixture_current.npz#ee55ee55 compare=adc_cube_fixture_compare.npz#ff66ff66",
+      "artifactPathFingerprintAlgo": "fnv1a32_path_text",
+      "artifactPathFingerprintsByArtifact": {
+        "adc_cube_npz": {
+          "currentPath": "fixtures/adc_cube_fixture_current.npz",
+          "currentLabel": "adc_cube_fixture_current.npz",
+          "currentHash": "ee55ee55",
+          "comparePath": "fixtures/adc_cube_fixture_compare.npz",
+          "compareLabel": "adc_cube_fixture_compare.npz",
+          "compareHash": "ff66ff66"
+        }
+      }
+    }
+  },
+  "selectedReplayPairId": "high_fidelity_sionna_rt::current_config"
+}

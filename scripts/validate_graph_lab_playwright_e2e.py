@@ -101,6 +101,9 @@ def _copy_tree(src: Path, dst: Path) -> None:
 
 def run(args: argparse.Namespace) -> int:
     repo_root = Path(__file__).resolve().parents[1]
+    fixture_root = repo_root / "scripts" / "fixtures"
+    legacy_no_schema_fixture = fixture_root / "graph_lab_compare_history_legacy_no_schema.json"
+    legacy_camelcase_fixture = fixture_root / "graph_lab_compare_history_legacy_camelcase.json"
     expect_compare_runner_ready = bool(
         (
             repo_root
@@ -118,6 +121,10 @@ def run(args: argparse.Namespace) -> int:
     latest_dir = snapshot_root / "latest"
     latest_dir.mkdir(parents=True, exist_ok=True)
     baseline_dir.mkdir(parents=True, exist_ok=True)
+    if not legacy_no_schema_fixture.is_file():
+        raise FileNotFoundError(f"missing legacy no-schema fixture: {legacy_no_schema_fixture}")
+    if not legacy_camelcase_fixture.is_file():
+        raise FileNotFoundError(f"missing legacy camelCase fixture: {legacy_camelcase_fixture}")
 
     report: Dict[str, Any] = {
         "version": "graph_lab_playwright_e2e_report_v1",
@@ -149,6 +156,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_artifact_expectation_checked": False,
             "compare_session_artifact_path_hash_checked": False,
             "compare_session_import_preview_checked": False,
+            "compare_session_legacy_fixture_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_future_schema_warning_checked": False,
             "compare_session_persistence_checked": False,
@@ -776,7 +784,116 @@ def run(args: argparse.Namespace) -> int:
                     }""",
                     timeout=20_000,
                 )
+                with page.expect_file_chooser(timeout=20_000) as legacy_no_schema_fc_info:
+                    history_field.get_by_role("button", name="Import History").click()
+                legacy_no_schema_fc_info.value.set_files(str(legacy_no_schema_fixture))
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("schema=legacy_pre_v2")
+                            && text.includes("compatibility=legacy_compatible")
+                            && text.includes("Legacy Fixture | PO-SBR -> Current")
+                        );
+                    }""",
+                    timeout=30_000,
+                )
+                legacy_no_schema_preview_text = history_field.inner_text()
+                if (
+                    "schema=legacy_pre_v2" not in legacy_no_schema_preview_text
+                    or "compatibility=legacy_compatible" not in legacy_no_schema_preview_text
+                    or "Legacy Fixture | PO-SBR -> Current" not in legacy_no_schema_preview_text
+                ):
+                    raise AssertionError("legacy no-schema fixture preview did not expose legacy compatibility")
+                history_field.get_by_role("button", name="Apply Import Merge").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("fixture_legacy_no_schema")
+                            && text.includes("Legacy Fixture | PO-SBR -> Current")
+                            && text.includes("compatibility=legacy_compatible")
+                        );
+                    }""",
+                    timeout=30_000,
+                )
+                history_select.select_option("high_fidelity_po_sbr_rt::current_config")
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("selected_history_pair: Legacy Fixture | PO-SBR -> Current")
+                            && text.includes("custom_label=Legacy Fixture | PO-SBR -> Current")
+                            && text.includes("artifact_expectation_source: imported_legacy_fixture")
+                        );
+                    }""",
+                    timeout=20_000,
+                )
+                with page.expect_file_chooser(timeout=20_000) as legacy_camel_fc_info:
+                    history_field.get_by_role("button", name="Import History").click()
+                legacy_camel_fc_info.value.set_files(str(legacy_camelcase_fixture))
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("schema=legacy_pre_v2")
+                            && text.includes("compatibility=legacy_compatible")
+                            && text.includes("Legacy Fixture | Sionna -> Current")
+                        );
+                    }""",
+                    timeout=30_000,
+                )
+                legacy_camel_preview_text = history_field.inner_text()
+                if (
+                    "schema=legacy_pre_v2" not in legacy_camel_preview_text
+                    or "compatibility=legacy_compatible" not in legacy_camel_preview_text
+                    or "Legacy Fixture | Sionna -> Current" not in legacy_camel_preview_text
+                ):
+                    raise AssertionError("legacy camelCase fixture preview did not expose legacy compatibility")
+                history_field.get_by_role("button", name="Apply Import Merge").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("fixture_legacy_camelcase")
+                            && text.includes("Legacy Fixture | Sionna -> Current")
+                            && text.includes("compatibility=legacy_compatible")
+                        );
+                    }""",
+                    timeout=30_000,
+                )
+                history_select.select_option("high_fidelity_sionna_rt::current_config")
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("selected_history_pair: Legacy Fixture | Sionna -> Current")
+                            && text.includes("custom_label=Legacy Fixture | Sionna -> Current")
+                            && text.includes("artifact_expectation_source: imported_legacy_fixture_camel")
+                        );
+                    }""",
+                    timeout=20_000,
+                )
                 report["runtime_controls"]["compare_session_import_preview_checked"] = True
+                report["runtime_controls"]["compare_session_legacy_fixture_checked"] = True
                 report["runtime_controls"]["compare_session_future_schema_warning_checked"] = True
                 history_select.select_option("low_fidelity_radarsimpy_ffd::current_config")
                 page.wait_for_timeout(100)
