@@ -121,6 +121,10 @@ def run(args: argparse.Namespace) -> int:
             "changed": [],
             "matched": [],
         },
+        "runtime_controls": {
+            "purpose_presets_checked": [],
+            "ffd_fields_present": False,
+        },
         "artifacts": {},
         "status": "unknown",
         "note": "",
@@ -178,6 +182,9 @@ def run(args: argparse.Namespace) -> int:
                 f"&baseline_id=playwright_baseline"
             )
 
+            def field_locator(page: Any, label_text: str) -> Any:
+                return page.locator("div.field").filter(has_text=label_text).first
+
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 context = browser.new_context(
@@ -192,6 +199,70 @@ def run(args: argparse.Namespace) -> int:
                 page.locator("header.topbar").first.wait_for(timeout=60_000)
                 page.locator("section.panel.panel-left").first.wait_for(timeout=60_000)
                 page.get_by_role("button", name="Run Graph (API)").first.wait_for(timeout=60_000)
+
+                # Runtime purpose preset controls must be visible and mutate the runtime fields.
+                page.get_by_text("Purpose Presets", exact=True).wait_for(timeout=30_000)
+                tx_ffd_area = field_locator(page, "TX FFD Files").locator("textarea")
+                rx_ffd_area = field_locator(page, "RX FFD Files").locator("textarea")
+                tx_ffd_area.wait_for(timeout=30_000)
+                rx_ffd_area.wait_for(timeout=30_000)
+                report["runtime_controls"]["ffd_fields_present"] = True
+
+                runtime_backend_select = field_locator(page, "Runtime Backend").locator("select")
+                runtime_provider_input = field_locator(page, "Runtime Provider").locator("input")
+                runtime_modules_area = field_locator(page, "Runtime Required Modules").locator("textarea")
+                simulation_mode_select = field_locator(page, "Simulation Mode").locator("select")
+                runtime_device_select = field_locator(page, "Runtime Device").locator("select")
+
+                page.get_by_role("button", name="Low Fidelity: RadarSimPy + FFD").click()
+                page.wait_for_timeout(100)
+                if runtime_backend_select.input_value() != "radarsimpy_rt":
+                    raise AssertionError("low-fidelity preset did not set runtime backend to radarsimpy_rt")
+                if "generate_radarsimpy_like_paths" not in runtime_provider_input.input_value():
+                    raise AssertionError("low-fidelity preset did not set RadarSimPy runtime provider")
+                if "radarsimpy" not in runtime_modules_area.input_value():
+                    raise AssertionError("low-fidelity preset did not set required module to radarsimpy")
+                if simulation_mode_select.input_value() != "radarsimpy_adc":
+                    raise AssertionError("low-fidelity preset did not set simulation mode to radarsimpy_adc")
+                if runtime_device_select.input_value() != "cpu":
+                    raise AssertionError("low-fidelity preset did not set runtime device to cpu")
+                report["runtime_controls"]["purpose_presets_checked"].append("low_fidelity_radarsimpy_ffd")
+
+                page.get_by_role("button", name="High Fidelity: Sionna-style RT").click()
+                page.wait_for_timeout(100)
+                if runtime_backend_select.input_value() != "sionna_rt":
+                    raise AssertionError("sionna preset did not set runtime backend to sionna_rt")
+                if "generate_sionna_like_paths_from_mitsuba" not in runtime_provider_input.input_value():
+                    raise AssertionError("sionna preset did not set Mitsuba runtime provider")
+                if "mitsuba" not in runtime_modules_area.input_value():
+                    raise AssertionError("sionna preset did not set required module to mitsuba")
+                if runtime_device_select.input_value() != "gpu":
+                    raise AssertionError("sionna preset did not set runtime device to gpu")
+                report["runtime_controls"]["purpose_presets_checked"].append("high_fidelity_sionna_rt")
+
+                page.get_by_role("button", name="High Fidelity: PO-SBR").click()
+                page.wait_for_timeout(100)
+                if runtime_backend_select.input_value() != "po_sbr_rt":
+                    raise AssertionError("po-sbr preset did not set runtime backend to po_sbr_rt")
+                if "generate_po_sbr_like_paths_from_posbr" not in runtime_provider_input.input_value():
+                    raise AssertionError("po-sbr preset did not set PO-SBR runtime provider")
+                if runtime_device_select.input_value() != "gpu":
+                    raise AssertionError("po-sbr preset did not set runtime device to gpu")
+                report["runtime_controls"]["purpose_presets_checked"].append("high_fidelity_po_sbr_rt")
+
+                tx_ffd_area.fill("/tmp/tx0.ffd\n/tmp/tx1.ffd")
+                rx_ffd_area.fill("/tmp/rx0.ffd\n/tmp/rx1.ffd")
+                if "/tmp/tx0.ffd" not in tx_ffd_area.input_value():
+                    raise AssertionError("tx ffd textarea did not retain value")
+                if "/tmp/rx0.ffd" not in rx_ffd_area.input_value():
+                    raise AssertionError("rx ffd textarea did not retain value")
+
+                # Restore a runnable graph-lab baseline after UI checks.
+                runtime_backend_select.select_option("analytic_targets")
+                runtime_provider_input.fill("")
+                runtime_modules_area.fill("")
+                tx_ffd_area.fill("")
+                rx_ffd_area.fill("")
 
                 page.get_by_role("button", name="Run Graph (API)").click()
                 page.get_by_text("graph run completed", exact=False).first.wait_for(timeout=30_000)

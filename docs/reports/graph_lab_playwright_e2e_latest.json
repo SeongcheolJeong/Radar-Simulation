@@ -1,7 +1,7 @@
 {
   "version": "graph_lab_playwright_e2e_report_v1",
-  "created_at_utc": "2026-03-05T10:55:47Z",
-  "require_playwright": false,
+  "created_at_utc": "2026-03-07T07:54:31Z",
+  "require_playwright": true,
   "strict_visual": false,
   "update_baseline": false,
   "playwright_available": true,
@@ -16,6 +16,14 @@
     "matched": [
       "topbar.png"
     ]
+  },
+  "runtime_controls": {
+    "purpose_presets_checked": [
+      "low_fidelity_radarsimpy_ffd",
+      "high_fidelity_sionna_rt",
+      "high_fidelity_po_sbr_rt"
+    ],
+    "ffd_fields_present": true
   },
   "artifacts": {
     "snapshot_latest_dir": "/home/seongcheoljeong/workspace/myproject/docs/reports/graph_lab_playwright_snapshots/latest",
