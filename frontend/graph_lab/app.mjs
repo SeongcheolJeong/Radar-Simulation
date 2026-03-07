@@ -48,6 +48,7 @@ const DENSITY_MODE_SET = new Set(["comfortable", "compact"]);
 const COMPARE_SESSION_STORAGE_KEY = "graph_lab_compare_session_history_v1";
 const COMPARE_SESSION_HISTORY_LIMIT = 8;
 const COMPARE_REPLAY_PAIR_OPTION_LIMIT = 6;
+const COMPARE_SESSION_EXPORT_SCHEMA_VERSION = "graph_lab_compare_history_export_v1";
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -112,6 +113,61 @@ function normalizeCompareReplayPairMetaMap(metaMap) {
     normalized[pairId] = meta;
   });
   return normalized;
+}
+
+function parseCompareSessionTimestampMs(entry) {
+  const raw = String(entry?.timestampUtc || "").trim();
+  const ts = Date.parse(raw);
+  return Number.isFinite(ts) ? ts : 0;
+}
+
+function mergeCompareSessionHistoryEntries(existingEntries, importedEntries) {
+  const existing = Array.isArray(existingEntries) ? existingEntries : [];
+  const incoming = Array.isArray(importedEntries) ? importedEntries : [];
+  const byId = new Map();
+  [...existing, ...incoming].forEach((row, idx) => {
+    const normalized = normalizeCompareSessionHistoryEntry(row, idx);
+    const key = String(normalized.id || `cmp_merge_${idx}`).trim();
+    if (!key) return;
+    const prior = byId.get(key);
+    if (!prior || parseCompareSessionTimestampMs(normalized) >= parseCompareSessionTimestampMs(prior)) {
+      byId.set(key, normalized);
+    }
+  });
+  return Array.from(byId.values())
+    .sort((left, right) => parseCompareSessionTimestampMs(right) - parseCompareSessionTimestampMs(left))
+    .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
+}
+
+function serializeCompareSessionExportBundle(bundle) {
+  const row = bundle && typeof bundle === "object" ? bundle : {};
+  return JSON.stringify({
+    schema_version: COMPARE_SESSION_EXPORT_SCHEMA_VERSION,
+    exported_at_utc: new Date().toISOString(),
+    history: (Array.isArray(row.history) ? row.history : [])
+      .map((item, idx) => normalizeCompareSessionHistoryEntry(item, idx))
+      .slice(0, COMPARE_SESSION_HISTORY_LIMIT),
+    pair_meta_by_id: normalizeCompareReplayPairMetaMap(row.pairMetaById),
+    selected_replay_pair_id: normalizeCompareSessionField(row.selectedReplayPairId, 192),
+  }, null, 2);
+}
+
+function parseCompareSessionImportBundle(text) {
+  const parsed = JSON.parse(String(text || ""));
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("compare history import must be a JSON object");
+  }
+  return {
+    schemaVersion: normalizeCompareSessionField(parsed.schema_version || parsed.schemaVersion, 96),
+    history: (Array.isArray(parsed.history) ? parsed.history : [])
+      .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
+      .slice(0, COMPARE_SESSION_HISTORY_LIMIT),
+    pairMetaById: normalizeCompareReplayPairMetaMap(parsed.pair_meta_by_id || parsed.pairMetaById),
+    selectedReplayPairId: normalizeCompareSessionField(
+      parsed.selected_replay_pair_id || parsed.selectedReplayPairId,
+      192
+    ),
+  };
 }
 
 function loadCompareSessionPrefs() {
@@ -695,10 +751,12 @@ export function App() {
     String(params.get("compare_run_id") || "").trim() !== ""
   );
   const [compareAutoSkipForRunId, setCompareAutoSkipForRunId] = React.useState("");
+  const compareSessionImportFileInputRef = React.useRef(null);
   const [lastRegressionSession, setLastRegressionSession] = React.useState(null);
   const [lastRegressionExport, setLastRegressionExport] = React.useState(null);
   const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
   const [trackCompareRunnerStatusText, setTrackCompareRunnerStatusText] = React.useState("-");
+  const [compareSessionTransferStatusText, setCompareSessionTransferStatusText] = React.useState("-");
   const [compareSessionHistory, setCompareSessionHistory] = React.useState(
     () => initialCompareSessionPrefs.history
   );
@@ -2233,6 +2291,87 @@ export function App() {
     setStatus(`deleted history pair: ${String(selectedPair.pairLabel || "-")}`, "status-ok");
   }, [selectedReplayableCompareSession, setStatus]);
 
+  const exportCompareSessionHistory = React.useCallback(() => {
+    const jsonText = serializeCompareSessionExportBundle({
+      history: compareSessionHistory,
+      pairMetaById: compareReplayPairMetaById,
+      selectedReplayPairId: selectedCompareReplayPairId,
+    });
+    try {
+      if (typeof window === "undefined" || typeof document === "undefined" || !window.URL) {
+        setCompareSessionTransferStatusText("compare history export prepared (download unavailable)");
+        setStatus("compare history exported to memory buffer", "status-ok");
+        return;
+      }
+      const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `graph_lab_compare_history_${ts}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      setCompareSessionTransferStatusText(
+        `exported ${Number(compareSessionHistory.length || 0)} history row(s) and ${Number(managedCompareReplayPairCount || 0)} managed pair(s)`
+      );
+      setStatus("compare history exported", "status-ok");
+    } catch (err) {
+      setCompareSessionTransferStatusText(`compare history export failed: ${String(err.message || err)}`);
+      setStatus(`compare history export failed: ${String(err.message || err)}`, "status-err");
+    }
+  }, [
+    compareReplayPairMetaById,
+    compareSessionHistory,
+    managedCompareReplayPairCount,
+    selectedCompareReplayPairId,
+    setStatus,
+  ]);
+
+  const triggerCompareSessionImportFilePick = React.useCallback(() => {
+    const input = compareSessionImportFileInputRef.current;
+    if (!input || typeof input.click !== "function") return;
+    input.click();
+  }, []);
+
+  const importCompareSessionHistoryText = React.useCallback((rawText, sourceLabel) => {
+    try {
+      const imported = parseCompareSessionImportBundle(rawText);
+      setCompareSessionHistory((prev) => mergeCompareSessionHistoryEntries(prev, imported.history));
+      setCompareReplayPairMetaById((prev) => ({
+        ...(prev && typeof prev === "object" ? prev : {}),
+        ...(imported.pairMetaById || {}),
+      }));
+      if (String(imported.selectedReplayPairId || "").trim()) {
+        setSelectedCompareReplayPairId(String(imported.selectedReplayPairId || "").trim());
+      }
+      setCompareSessionTransferStatusText(
+        `imported ${Number(imported.history.length || 0)} history row(s) from ${String(sourceLabel || "text")}`
+      );
+      setStatus(`compare history imported: ${String(sourceLabel || "text")}`, "status-ok");
+    } catch (err) {
+      setCompareSessionTransferStatusText(`compare history import failed: ${String(err.message || err)}`);
+      setStatus(`compare history import failed: ${String(err.message || err)}`, "status-err");
+    }
+  }, [setStatus]);
+
+  const handleCompareSessionImportFileChange = React.useCallback((evt) => {
+    const file = evt?.target?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      importCompareSessionHistoryText(String(reader.result || ""), String(file.name || "compare_history.json"));
+    };
+    reader.onerror = () => {
+      const label = String(file.name || "-");
+      setCompareSessionTransferStatusText(`failed to read compare history file: ${label}`);
+      setStatus(`compare history import read failed: ${label}`, "status-err");
+    };
+    reader.readAsText(file);
+    if (evt?.target) evt.target.value = "";
+  }, [importCompareSessionHistoryText, setStatus]);
+
   const exportDecisionRegressionSession = React.useCallback(async () => {
     const sessionId = String(lastRegressionSession?.session_id || "").trim();
     if (!sessionId) {
@@ -2853,6 +2992,11 @@ export function App() {
         saveSelectedCompareSessionPairLabel,
         togglePinSelectedCompareSessionPair,
         deleteSelectedCompareSessionPair,
+        compareSessionImportFileInputRef,
+        compareSessionTransferStatusText,
+        triggerCompareSessionImportFilePick,
+        handleCompareSessionImportFileChange,
+        exportCompareSessionHistory,
         runPresetPairTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,

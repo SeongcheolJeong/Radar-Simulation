@@ -165,6 +165,14 @@ It also supports lightweight pair management directly in the Decision Pane:
 - `Delete Selected History Pair`
   - removes the selected pair and its matching history entries from the local compare-session store
 
+The same area now supports browser-to-browser transfer:
+
+- `Export History`
+  - downloads a JSON bundle with the recent compare-session rows, selected replayable pair, and pair metadata
+- `Import History`
+  - merges a previously exported JSON bundle back into the current browser profile
+  - restores replayable pairs that were deleted locally, as long as they exist in the imported bundle
+
 The Decision Summary and exported brief now include:
 
 - `selected_history_pair_meta`

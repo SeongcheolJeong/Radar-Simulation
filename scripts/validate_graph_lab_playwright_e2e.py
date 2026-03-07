@@ -146,6 +146,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_selector_checked": False,
             "compare_session_management_checked": False,
             "compare_session_preview_checked": False,
+            "compare_session_transfer_checked": False,
             "compare_session_persistence_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
@@ -526,6 +527,17 @@ def run(args: argparse.Namespace) -> int:
                     }""",
                     timeout=20_000,
                 )
+                with page.expect_download(timeout=20_000) as history_dl_info:
+                    history_field.get_by_role("button", name="Export History").click()
+                history_download = history_dl_info.value
+                history_bundle_path = tmp_root / "compare_history_export.json"
+                history_download.save_as(str(history_bundle_path))
+                exported_bundle = json.loads(history_bundle_path.read_text(encoding="utf-8"))
+                if str(exported_bundle.get("schema_version") or "") != "graph_lab_compare_history_export_v1":
+                    raise AssertionError("compare history export schema_version mismatch")
+                exported_meta = exported_bundle.get("pair_meta_by_id") or {}
+                if "low_fidelity_radarsimpy_ffd::current_config" not in exported_meta:
+                    raise AssertionError("compare history export did not include managed pair metadata")
                 history_select.select_option("low_fidelity_radarsimpy_ffd::high_fidelity_po_sbr_rt")
                 page.wait_for_timeout(100)
                 history_field.get_by_role("button", name="Delete Selected History Pair").click()
@@ -540,9 +552,26 @@ def run(args: argparse.Namespace) -> int:
                     }""",
                     timeout=10_000,
                 )
+                with page.expect_file_chooser(timeout=20_000) as history_fc_info:
+                    history_field.get_by_role("button", name="Import History").click()
+                history_fc_info.value.set_files(str(history_bundle_path))
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return (
+                            text.includes("high_fidelity_po_sbr_rt")
+                            && text.includes("imported")
+                        );
+                    }""",
+                    timeout=30_000,
+                )
                 history_select.select_option("low_fidelity_radarsimpy_ffd::current_config")
                 page.wait_for_timeout(100)
                 report["runtime_controls"]["compare_session_management_checked"] = True
+                report["runtime_controls"]["compare_session_transfer_checked"] = True
 
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()
@@ -634,6 +663,9 @@ def run(args: argparse.Namespace) -> int:
                         );
                         if (decisionField) {
                             for (const input of decisionField.querySelectorAll("input")) {
+                                if (String(input.type || "").toLowerCase() === "file") {
+                                    continue;
+                                }
                                 input.value = "<normalized-id>";
                                 input.setAttribute("value", "<normalized-id>");
                             }
