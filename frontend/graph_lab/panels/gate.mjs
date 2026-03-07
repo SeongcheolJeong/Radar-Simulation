@@ -127,6 +127,7 @@ export function DecisionPane({
   artifactInspectorDecisionAuditSummaryText,
   artifactInspectorDecisionAuditControlState,
   artifactInspectorDecisionControlState,
+  applyRecommendedArtifactInspectorAuditActionFromDecisionPane,
   clearArtifactInspectorActionTrailFromDecisionPane,
   collapseArtifactInspectorEvidenceFromDecisionPane,
   expandArtifactInspectorEvidenceFromDecisionPane,
@@ -190,6 +191,12 @@ export function DecisionPane({
           onClick: resetArtifactInspectorLayoutFromDecisionPane,
           disabled: artifactInspectorDecisionControlState?.resetDisabled === true,
         }, "Reset Inspector Layout"),
+        h("button", {
+          className: "btn",
+          key: "decision_apply_recommended_artifact_inspector_audit_action",
+          onClick: applyRecommendedArtifactInspectorAuditActionFromDecisionPane,
+          disabled: artifactInspectorDecisionAuditControlState?.applyRecommendedDisabled === true,
+        }, "Apply Recommended Audit Action"),
         h("button", {
           className: "btn",
           key: "decision_clear_artifact_inspector_action_trail",

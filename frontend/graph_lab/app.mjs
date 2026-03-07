@@ -977,12 +977,16 @@ function buildArtifactInspectorAuditControlState(recentActionsText, auditStateTe
   const text = String(recentActionsText || "").trim();
   const auditState = String(auditStateText || "").trim().toLowerCase();
   const clearDisabled = !text || text === "recent_actions: none";
+  let applyRecommendedDisabled = true;
+  let recommendedAction = "none";
   let recommendation = "not_needed";
   let reason = "idle";
   if (!clearDisabled) {
     if (auditState.includes("audit_state: trimmed")) {
       recommendation = "clear_overflow";
       reason = "trimmed";
+      applyRecommendedDisabled = false;
+      recommendedAction = "clear_action_trail";
     } else {
       recommendation = "optional";
       reason = "history_present";
@@ -990,7 +994,9 @@ function buildArtifactInspectorAuditControlState(recentActionsText, auditStateTe
   }
   return {
     clearDisabled,
-    text: `artifact_inspector_audit_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | reason=${reason}`,
+    applyRecommendedDisabled,
+    recommendedAction,
+    text: `artifact_inspector_audit_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | apply=${applyRecommendedDisabled ? "disabled" : "enabled"} | reason=${reason}`,
   };
 }
 
@@ -3090,6 +3096,18 @@ export function App() {
       "status-ok"
     );
   }, [issueArtifactInspectorControlRequest]);
+  const applyRecommendedArtifactInspectorAuditActionFromDecisionPane = React.useCallback(() => {
+    if (artifactInspectorDecisionAuditControlState.applyRecommendedDisabled) return;
+    const recommendedAction = String(artifactInspectorDecisionAuditControlState.recommendedAction || "").trim();
+    if (recommendedAction !== "clear_action_trail") return;
+    issueArtifactInspectorControlRequest(
+      {
+        clearActionTrail: true,
+      },
+      "artifact inspector recommended audit action applied from decision pane",
+      "status-ok"
+    );
+  }, [artifactInspectorDecisionAuditControlState.applyRecommendedDisabled, artifactInspectorDecisionAuditControlState.recommendedAction, issueArtifactInspectorControlRequest]);
   const latestReplayableCompareSession = React.useMemo(
     () => compareSessionHistory
       .map((row) => applyCompareReplayPairMeta(getCompareSessionReplayPair(row), compareReplayPairMetaById))
@@ -4948,6 +4966,7 @@ export function App() {
         artifactInspectorDecisionAuditSummaryText,
         artifactInspectorDecisionAuditControlState,
         artifactInspectorDecisionControlState,
+        applyRecommendedArtifactInspectorAuditActionFromDecisionPane,
         clearArtifactInspectorActionTrailFromDecisionPane,
         collapseArtifactInspectorEvidenceFromDecisionPane,
         expandArtifactInspectorEvidenceFromDecisionPane,
