@@ -131,6 +131,7 @@ function normalizeArtifactInspectorPrefs(value) {
   return {
     liveCompareEvidenceExpanded: row.liveCompareEvidenceExpanded !== false,
     historyArtifactExpectationExpanded: row.historyArtifactExpectationExpanded !== false,
+    lastActionText: String(row.lastActionText || "last_action: idle").trim() || "last_action: idle",
   };
 }
 
@@ -343,15 +344,21 @@ export function ArtifactInspectorPanel({
       .filter(Boolean);
     return `status_badges: ${labels.length > 0 ? labels.join(" | ") : "-"}`;
   }, [artifactInspectorStatusBadges]);
+  const artifactInspectorLastActionText = React.useMemo(
+    () => String(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).lastActionText || "last_action: idle"),
+    [artifactInspectorPrefs]
+  );
   React.useEffect(() => {
     if (typeof onArtifactInspectorStatusChange !== "function") return;
     onArtifactInspectorStatusChange({
       layoutStateText: artifactInspectorLayoutStateText,
       probeStateText: artifactInspectorProbeState.text,
       statusBadgesText: artifactInspectorStatusBadgesText,
+      lastActionText: artifactInspectorLastActionText,
     });
   }, [
     artifactInspectorLayoutStateText,
+    artifactInspectorLastActionText,
     artifactInspectorProbeState.text,
     artifactInspectorStatusBadgesText,
     onArtifactInspectorStatusChange,
@@ -362,6 +369,7 @@ export function ArtifactInspectorPanel({
       const updated = {
         ...next,
         liveCompareEvidenceExpanded: !next.liveCompareEvidenceExpanded,
+        lastActionText: `last_action: inspector:live_compare=${next.liveCompareEvidenceExpanded ? "collapsed" : "expanded"}`,
       };
       saveArtifactInspectorPrefs(updated);
       return updated;
@@ -373,6 +381,7 @@ export function ArtifactInspectorPanel({
       const updated = {
         ...next,
         historyArtifactExpectationExpanded: !next.historyArtifactExpectationExpanded,
+        lastActionText: `last_action: inspector:history_snapshot=${next.historyArtifactExpectationExpanded ? "collapsed" : "expanded"}`,
       };
       saveArtifactInspectorPrefs(updated);
       return updated;
@@ -380,8 +389,12 @@ export function ArtifactInspectorPanel({
   }, []);
   const resetArtifactInspectorLayout = React.useCallback(() => {
     const defaults = normalizeArtifactInspectorPrefs({});
-    setArtifactInspectorPrefs(defaults);
-    saveArtifactInspectorPrefs(defaults);
+    const updated = {
+      ...defaults,
+      lastActionText: "last_action: inspector:reset_layout",
+    };
+    setArtifactInspectorPrefs(updated);
+    saveArtifactInspectorPrefs(updated);
     resetArtifactInspectorProbeControls();
   }, [resetArtifactInspectorProbeControls]);
   React.useEffect(() => {
@@ -392,6 +405,9 @@ export function ArtifactInspectorPanel({
     lastAppliedControlNonceRef.current = nonce;
     setArtifactInspectorPrefs((prev) => {
       const updated = applyArtifactInspectorPrefsCommand(prev, command);
+      if (String(command?.lastActionText || "").trim()) {
+        updated.lastActionText = String(command.lastActionText).trim();
+      }
       saveArtifactInspectorPrefs(updated);
       return updated;
     });
@@ -449,11 +465,15 @@ export function ArtifactInspectorPanel({
             key: "layout_state",
             style: { color: "#8fb3c9" },
           }, artifactInspectorLayoutStateText),
-          h("div", {
-            key: "probe_state",
-            style: { color: "#8fb3c9" },
-          }, artifactInspectorProbeState.text),
-        ]),
+        h("div", {
+          key: "probe_state",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorProbeState.text),
+        h("div", {
+          key: "last_action",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorLastActionText),
+      ]),
         h("button", {
           key: "reset_artifact_inspector_layout",
           className: "btn",

@@ -368,6 +368,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_status_badges`
 - `artifact_inspector_layout_state`
 - `artifact_inspector_probe_state`
+- `artifact_inspector_last_action`
 
 The `Decision Pane` now mirrors that live state as a chip row plus compact hint lines under `Inspector State Mirror`, and includes:
 
@@ -383,6 +384,7 @@ Those mirror controls are now also state-aware:
 - `Collapse Inspector Evidence` is disabled when both evidence sections are already collapsed
 - `Reset Inspector Layout` is disabled when the inspector is already in canonical default layout
 - the mirror exports an `artifact_inspector_controls:` hint line so the same actionability state survives in the decision brief
+- the mirror also exports `artifact_inspector_last_action:` so the last collapse/expand/reset source is visible after reload and in the decision brief
 
 The `Runtime Compare` summary inside the brief now also carries:
 
