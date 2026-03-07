@@ -183,6 +183,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_probe_state_checked": False,
             "artifact_inspector_badge_export_checked": False,
             "decision_artifact_inspector_state_checked": False,
+            "decision_artifact_inspector_controls_checked": False,
             "decision_artifact_inspector_reset_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
@@ -435,6 +436,9 @@ def run(args: argparse.Namespace) -> int:
                 artifact_text = artifact_field.inner_text()
                 decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
                 decision_artifact_state_field.wait_for(timeout=30_000)
+                decision_collapse_button = decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
+                decision_expand_button = decision_artifact_state_field.get_by_role("button", name="Expand Inspector Evidence")
+                decision_reset_button = decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout")
                 default_mirror_ready = False
                 for _ in range(40):
                     decision_artifact_state_text = decision_artifact_state_field.inner_text()
@@ -473,9 +477,16 @@ def run(args: argparse.Namespace) -> int:
                     "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean" not in decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
+                    or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in decision_artifact_state_text
                 ):
                     raise AssertionError("decision pane did not mirror default artifact inspector state")
-                decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence").click()
+                if decision_collapse_button.is_disabled():
+                    raise AssertionError("decision pane collapse button should be enabled in default state")
+                if not decision_expand_button.is_disabled():
+                    raise AssertionError("decision pane expand button should be disabled in default state")
+                if not decision_reset_button.is_disabled():
+                    raise AssertionError("decision pane reset button should be disabled in default state")
+                decision_collapse_button.click()
                 collapsed_from_decision_ready = False
                 collapsed_from_decision_artifact_text = ""
                 for _ in range(40):
@@ -498,7 +509,13 @@ def run(args: argparse.Namespace) -> int:
                     or "reset_required=yes" not in collapsed_from_decision_artifact_text
                 ):
                     raise AssertionError("decision pane collapse did not update artifact inspector layout state")
-                decision_artifact_state_field.get_by_role("button", name="Expand Inspector Evidence").click()
+                if not decision_collapse_button.is_disabled():
+                    raise AssertionError("decision pane collapse button should be disabled after collapsing all evidence")
+                if decision_expand_button.is_disabled():
+                    raise AssertionError("decision pane expand button should be enabled after collapsing all evidence")
+                if decision_reset_button.is_disabled():
+                    raise AssertionError("decision pane reset button should be enabled after collapsing all evidence")
+                decision_expand_button.click()
                 expanded_from_decision_ready = False
                 expanded_from_decision_artifact_text = ""
                 for _ in range(40):
@@ -521,6 +538,12 @@ def run(args: argparse.Namespace) -> int:
                     or "reset_required=no" not in expanded_from_decision_artifact_text
                 ):
                     raise AssertionError("decision pane expand did not restore artifact inspector layout state")
+                if decision_collapse_button.is_disabled():
+                    raise AssertionError("decision pane collapse button should be enabled again after expanding evidence")
+                if not decision_expand_button.is_disabled():
+                    raise AssertionError("decision pane expand button should be disabled again after expanding evidence")
+                if not decision_reset_button.is_disabled():
+                    raise AssertionError("decision pane reset button should be disabled again after expanding evidence")
                 artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
                 collapsed_live_ready = False
                 collapsed_live_artifact_text = ""
@@ -593,7 +616,7 @@ def run(args: argparse.Namespace) -> int:
                 artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
                 artifact_field.get_by_role("button", name="Hide History Snapshot").click()
                 page.wait_for_timeout(150)
-                decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout").click()
+                decision_reset_button.click()
                 page.wait_for_timeout(150)
                 reset_artifact_text = artifact_field.inner_text()
                 reset_mirror_ready = False
@@ -624,6 +647,7 @@ def run(args: argparse.Namespace) -> int:
                     "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean" not in reset_decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in reset_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reset_decision_artifact_state_text
+                    or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reset_decision_artifact_state_text
                 ):
                     raise AssertionError("decision pane did not mirror reset artifact inspector state")
                 report["runtime_controls"]["compare_assessment_checked"] = True
@@ -634,6 +658,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_badges_checked"] = True
                 report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_state_checked"] = True
+                report["runtime_controls"]["decision_artifact_inspector_controls_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_fold_controls_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_reset_checked"] = True
 
@@ -1183,6 +1208,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_status_badges:" not in brief_text
                     or "artifact_inspector_layout_state:" not in brief_text
                     or "artifact_inspector_probe_state:" not in brief_text
+                    or "artifact_inspector_controls:" not in brief_text
                 ):
                     raise AssertionError("decision brief did not include artifact inspector state summary")
                 report["runtime_controls"]["artifact_inspector_badge_export_checked"] = True
@@ -1320,6 +1346,9 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not retain status badges")
                 reloaded_decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
+                reloaded_decision_collapse_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
+                reloaded_decision_expand_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Expand Inspector Evidence")
+                reloaded_decision_reset_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout")
                 reloaded_mirror_ready = False
                 for _ in range(40):
                     reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
@@ -1337,8 +1366,15 @@ def run(args: argparse.Namespace) -> int:
                     "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reloaded_decision_artifact_state_text
                 ):
                     raise AssertionError("decision pane did not persist mirrored artifact inspector state after reload")
+                if reloaded_decision_collapse_button.is_disabled():
+                    raise AssertionError("decision pane collapse button should remain enabled after reload")
+                if not reloaded_decision_expand_button.is_disabled():
+                    raise AssertionError("decision pane expand button should remain disabled after reload")
+                if not reloaded_decision_reset_button.is_disabled():
+                    raise AssertionError("decision pane reset button should remain disabled after reload")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")

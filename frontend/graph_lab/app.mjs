@@ -908,6 +908,40 @@ function buildArtifactInspectorDecisionLine(rawText, panelPrefix, decisionPrefix
   return `${decisionPrefix}: ${text}`;
 }
 
+function buildArtifactInspectorMirrorControlState(statusBadgeRows) {
+  const rows = Array.isArray(statusBadgeRows) ? statusBadgeRows : [];
+  const labels = new Set(
+    rows
+      .map((row) => String(row?.label || "").trim().toLowerCase())
+      .filter(Boolean)
+  );
+  const liveExpanded = labels.has("live:expanded");
+  const liveCollapsed = labels.has("live:collapsed");
+  const historyExpanded = labels.has("history:expanded");
+  const historyCollapsed = labels.has("history:collapsed");
+  const layoutDefault = labels.has("layout:default");
+  const layoutCustomized = labels.has("layout:customized");
+  const collapseDisabled = liveCollapsed && historyCollapsed;
+  const expandDisabled = liveExpanded && historyExpanded;
+  const resetDisabled = layoutDefault && !layoutCustomized;
+  let nextAction = "next_action: inspect_state";
+  if (collapseDisabled && !expandDisabled) {
+    nextAction = "next_action: expand_or_reset";
+  } else if (!collapseDisabled && expandDisabled && resetDisabled) {
+    nextAction = "next_action: collapse_if_you_need_focus";
+  } else if (!collapseDisabled && !expandDisabled) {
+    nextAction = "next_action: collapse_or_expand_partial_state";
+  } else if (!resetDisabled) {
+    nextAction = "next_action: reset_if_you_need_canonical_layout";
+  }
+  return {
+    collapseDisabled,
+    expandDisabled,
+    resetDisabled,
+    text: `artifact_inspector_controls: collapse=${collapseDisabled ? "disabled" : "enabled"} | expand=${expandDisabled ? "disabled" : "enabled"} | reset=${resetDisabled ? "disabled" : "enabled"} | ${nextAction}`,
+  };
+}
+
 function buildCompareSessionImportPreviewSummary(
   stagedEntry,
   existingHistoryEntries,
@@ -2844,6 +2878,10 @@ export function App() {
     () => buildArtifactInspectorStatusBadgeRows(artifactInspectorStatusSummary.statusBadgesText),
     [artifactInspectorStatusSummary.statusBadgesText]
   );
+  const artifactInspectorDecisionControlState = React.useMemo(
+    () => buildArtifactInspectorMirrorControlState(artifactInspectorDecisionStatusBadgeRows),
+    [artifactInspectorDecisionStatusBadgeRows]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -4024,6 +4062,7 @@ export function App() {
       `${artifactInspectorDecisionStatusBadgesText}`,
       `${artifactInspectorDecisionLayoutStateText}`,
       `${artifactInspectorDecisionProbeStateText}`,
+      `${artifactInspectorDecisionControlState.text}`,
       `gate_failure_count: ${Number(failureRows.length || 0)}`,
       `path_count_delta(current-compare): ${runCompareSummary.available ? formatSigned(runCompareSummary.pathCountDelta) : "-"}`,
     ];
@@ -4067,6 +4106,7 @@ export function App() {
     artifactInspectorDecisionStatusBadgesText,
     artifactInspectorDecisionLayoutStateText,
     artifactInspectorDecisionProbeStateText,
+    artifactInspectorDecisionControlState.text,
     graphRunSummary,
     latestCompareSessionText,
     latestReplayableCompareSessionText,
@@ -4183,6 +4223,7 @@ export function App() {
       artifactInspectorDecisionStatusBadgesText,
       artifactInspectorDecisionLayoutStateText,
       artifactInspectorDecisionProbeStateText,
+      artifactInspectorDecisionControlState.text,
       "```",
       "",
       "## Current Artifacts",
@@ -4244,6 +4285,7 @@ export function App() {
     artifactInspectorDecisionStatusBadgesText,
     artifactInspectorDecisionLayoutStateText,
     artifactInspectorDecisionProbeStateText,
+    artifactInspectorDecisionControlState.text,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
@@ -4686,6 +4728,7 @@ export function App() {
         artifactInspectorDecisionStatusBadgeRows,
         artifactInspectorDecisionLayoutStateText,
         artifactInspectorDecisionProbeStateText,
+        artifactInspectorDecisionControlState,
         collapseArtifactInspectorEvidenceFromDecisionPane,
         expandArtifactInspectorEvidenceFromDecisionPane,
         resetArtifactInspectorLayoutFromDecisionPane,

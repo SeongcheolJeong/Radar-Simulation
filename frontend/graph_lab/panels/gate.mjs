@@ -114,6 +114,7 @@ export function DecisionPane({
   artifactInspectorDecisionStatusBadgeRows,
   artifactInspectorDecisionLayoutStateText,
   artifactInspectorDecisionProbeStateText,
+  artifactInspectorDecisionControlState,
   collapseArtifactInspectorEvidenceFromDecisionPane,
   expandArtifactInspectorEvidenceFromDecisionPane,
   resetArtifactInspectorLayoutFromDecisionPane,
@@ -162,16 +163,19 @@ export function DecisionPane({
           className: "btn",
           key: "decision_collapse_artifact_inspector_evidence",
           onClick: collapseArtifactInspectorEvidenceFromDecisionPane,
+          disabled: artifactInspectorDecisionControlState?.collapseDisabled === true,
         }, "Collapse Inspector Evidence"),
         h("button", {
           className: "btn",
           key: "decision_expand_artifact_inspector_evidence",
           onClick: expandArtifactInspectorEvidenceFromDecisionPane,
+          disabled: artifactInspectorDecisionControlState?.expandDisabled === true,
         }, "Expand Inspector Evidence"),
         h("button", {
           className: "btn",
           key: "decision_reset_artifact_inspector_layout",
           onClick: resetArtifactInspectorLayoutFromDecisionPane,
+          disabled: artifactInspectorDecisionControlState?.resetDisabled === true,
         }, "Reset Inspector Layout"),
       ]),
       h("div", { className: "chip-list", key: "decision_artifact_inspector_live_state_chips" }, (
@@ -187,6 +191,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_badges_hint" }, String(artifactInspectorDecisionStatusBadgesText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_layout_hint" }, String(artifactInspectorDecisionLayoutStateText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_probe_hint" }, String(artifactInspectorDecisionProbeStateText || "-")),
+      h("div", { className: "hint", key: "decision_artifact_inspector_live_state_controls_hint" }, String(artifactInspectorDecisionControlState?.text || "artifact_inspector_controls: -")),
     ]),
     h("div", { className: "field", key: "decision_preset_pair_compare" }, [
       h("label", { className: "label", key: "decision_preset_pair_label" }, "Preset Pair Compare"),

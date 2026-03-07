@@ -377,6 +377,13 @@ The `Decision Pane` now mirrors that live state as a chip row plus compact hint 
 
 so the operator can collapse, restore, or fully reset the `Artifact Inspector` layout without scrolling back to that panel.
 
+Those mirror controls are now also state-aware:
+
+- `Expand Inspector Evidence` is disabled when the inspector is already fully expanded
+- `Collapse Inspector Evidence` is disabled when both evidence sections are already collapsed
+- `Reset Inspector Layout` is disabled when the inspector is already in canonical default layout
+- the mirror exports an `artifact_inspector_controls:` hint line so the same actionability state survives in the decision brief
+
 The `Runtime Compare` summary inside the brief now also carries:
 
 - `latest_replayable_pair`
