@@ -37,7 +37,9 @@ Field meaning:
   - supported values:
     - `retain_2`, `retain_4`, `retain_8`
     - `retain_2_preserve_pinned`, `retain_4_preserve_pinned`, `retain_8_preserve_pinned`
+    - `retain_2_preserve_saved`, `retain_4_preserve_saved`, `retain_8_preserve_saved`
   - `*_preserve_pinned` keeps the latest `N` rows and then preserves one retained row per pinned replay pair when possible within the app history cap
+  - `*_preserve_saved` extends that preservation set to replay pairs that are pinned or have a saved custom label
 - `pair_meta_by_id`
   - replayable pair metadata such as custom label and `pinned`
 - `pair_artifact_expectation_by_id`

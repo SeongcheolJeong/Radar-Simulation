@@ -56,10 +56,13 @@ const COMPARE_SESSION_RETENTION_POLICY_DEFAULT = "retain_8";
 const COMPARE_SESSION_RETENTION_POLICY_OPTIONS = [
   { id: "retain_2", label: "Keep Latest 2" },
   { id: "retain_2_preserve_pinned", label: "Keep Latest 2 + Preserve Pinned" },
+  { id: "retain_2_preserve_saved", label: "Keep Latest 2 + Preserve Saved" },
   { id: "retain_4", label: "Keep Latest 4" },
   { id: "retain_4_preserve_pinned", label: "Keep Latest 4 + Preserve Pinned" },
+  { id: "retain_4_preserve_saved", label: "Keep Latest 4 + Preserve Saved" },
   { id: "retain_8", label: "Keep Latest 8" },
   { id: "retain_8_preserve_pinned", label: "Keep Latest 8 + Preserve Pinned" },
+  { id: "retain_8_preserve_saved", label: "Keep Latest 8 + Preserve Saved" },
 ];
 
 function formatSigned(value) {
@@ -86,10 +89,13 @@ function normalizeCompareSessionRetentionPolicy(value, fallback = COMPARE_SESSIO
   if (
     token === "retain_2"
     || token === "retain_2_preserve_pinned"
+    || token === "retain_2_preserve_saved"
     || token === "retain_4"
     || token === "retain_4_preserve_pinned"
+    || token === "retain_4_preserve_saved"
     || token === "retain_8"
     || token === "retain_8_preserve_pinned"
+    || token === "retain_8_preserve_saved"
   ) {
     return token;
   }
@@ -103,9 +109,20 @@ function getCompareSessionRetentionLimit(policy) {
   return COMPARE_SESSION_HISTORY_LIMIT;
 }
 
-function shouldCompareSessionRetentionPreservePinned(policy) {
+function getCompareSessionRetentionPreserveMode(policy) {
   const normalized = normalizeCompareSessionRetentionPolicy(policy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT);
-  return normalized.endsWith("_preserve_pinned");
+  if (normalized.endsWith("_preserve_saved")) return "saved";
+  if (normalized.endsWith("_preserve_pinned")) return "pinned";
+  return "none";
+}
+
+function shouldCompareSessionRetentionPreservePinned(policy) {
+  const mode = getCompareSessionRetentionPreserveMode(policy);
+  return mode === "pinned" || mode === "saved";
+}
+
+function shouldCompareSessionRetentionPreserveSaved(policy) {
+  return getCompareSessionRetentionPreserveMode(policy) === "saved";
 }
 
 function summarizeCompareSessionRetentionPolicy(policy, outcome) {
@@ -114,11 +131,16 @@ function summarizeCompareSessionRetentionPolicy(policy, outcome) {
   return [
     `compare_history_retention_policy: ${normalized}`,
     `keep_latest=${getCompareSessionRetentionLimit(normalized)}`,
+    `preserve_scope=${String(summary.preserveScope || getCompareSessionRetentionPreserveMode(normalized))}`,
     `preserve_pinned=${shouldCompareSessionRetentionPreservePinned(normalized)}`,
+    `preserve_saved=${shouldCompareSessionRetentionPreserveSaved(normalized)}`,
     `retained_rows=${Number(summary.retainedRows || 0)}/${Number(summary.availableRows || 0)}`,
     `managed_pinned_pairs=${Number(summary.pinnedPairsManaged || 0)}`,
     `retained_pinned_pairs=${Number(summary.pinnedPairsRetained || 0)}`,
     `extra_pinned_rows=${Number(summary.extraPinnedRowsRetained || 0)}`,
+    `managed_saved_pairs=${Number(summary.savedPairsManaged || 0)}`,
+    `retained_saved_pairs=${Number(summary.savedPairsRetained || 0)}`,
+    `extra_saved_rows=${Number(summary.extraSavedRowsRetained || 0)}`,
   ].join(" | ");
 }
 
@@ -481,40 +503,45 @@ function buildCompareSessionRetainedHistory(entries, pairMetaById, retentionPoli
   const normalizedEntries = sortCompareSessionHistoryEntries(entries).slice(0, COMPARE_SESSION_HISTORY_LIMIT);
   const limit = Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT);
   const latestEntries = normalizedEntries.slice(0, limit);
-  if (!shouldCompareSessionRetentionPreservePinned(retentionPolicy)) {
+  const preserveMode = getCompareSessionRetentionPreserveMode(retentionPolicy);
+  if (preserveMode === "none") {
     return latestEntries;
   }
   const normalizedMeta = normalizeCompareReplayPairMetaMap(pairMetaById);
-  const pinnedPairIds = new Set(
+  const preservedPairIds = new Set(
     Object.entries(normalizedMeta)
-      .filter(([, meta]) => meta?.pinned === true)
+      .filter(([, meta]) => (
+        preserveMode === "saved"
+          ? (meta?.pinned === true || Boolean(String(meta?.customLabel || "").trim()))
+          : meta?.pinned === true
+      ))
       .map(([pairId]) => String(pairId || "").trim())
       .filter(Boolean)
   );
-  if (pinnedPairIds.size === 0) {
+  if (preservedPairIds.size === 0) {
     return latestEntries;
   }
   const retainedEntryIds = new Set(latestEntries.map((row) => String(row?.id || "").trim()).filter(Boolean));
-  const retainedPinnedPairIds = new Set(
+  const retainedPreservedPairIds = new Set(
     latestEntries
       .map((row) => String(getCompareSessionReplayPair(row)?.pairId || "").trim())
-      .filter((pairId) => pinnedPairIds.has(pairId))
+      .filter((pairId) => preservedPairIds.has(pairId))
   );
-  const extraPinnedEntries = [];
+  const extraPreservedEntries = [];
   normalizedEntries.slice(limit).forEach((row) => {
-    if (latestEntries.length + extraPinnedEntries.length >= COMPARE_SESSION_HISTORY_LIMIT) {
+    if (latestEntries.length + extraPreservedEntries.length >= COMPARE_SESSION_HISTORY_LIMIT) {
       return;
     }
     const pairId = String(getCompareSessionReplayPair(row)?.pairId || "").trim();
     const rowId = String(row?.id || "").trim();
-    if (!pairId || !rowId || !pinnedPairIds.has(pairId) || retainedEntryIds.has(rowId) || retainedPinnedPairIds.has(pairId)) {
+    if (!pairId || !rowId || !preservedPairIds.has(pairId) || retainedEntryIds.has(rowId) || retainedPreservedPairIds.has(pairId)) {
       return;
     }
     retainedEntryIds.add(rowId);
-    retainedPinnedPairIds.add(pairId);
-    extraPinnedEntries.push(row);
+    retainedPreservedPairIds.add(pairId);
+    extraPreservedEntries.push(row);
   });
-  return [...latestEntries, ...extraPinnedEntries];
+  return [...latestEntries, ...extraPreservedEntries];
 }
 
 function analyzeCompareSessionRetentionOutcome(entries, pairMetaById, retentionPolicy) {
@@ -533,6 +560,12 @@ function analyzeCompareSessionRetentionOutcome(entries, pairMetaById, retentionP
       .map(([pairId]) => String(pairId || "").trim())
       .filter(Boolean)
   );
+  const managedSavedPairIds = new Set(
+    Object.entries(normalizedMeta)
+      .filter(([, meta]) => meta?.pinned === true || Boolean(String(meta?.customLabel || "").trim()))
+      .map(([pairId]) => String(pairId || "").trim())
+      .filter(Boolean)
+  );
   const retainedPairIds = new Set(
     retainedHistory
       .map((row) => String(getCompareSessionReplayPair(row)?.pairId || "").trim())
@@ -542,10 +575,18 @@ function analyzeCompareSessionRetentionOutcome(entries, pairMetaById, retentionP
     availableRows: normalizedEntries.length,
     retainedRows: retainedHistory.length,
     keepLatest: getCompareSessionRetentionLimit(retentionPolicy),
+    preserveScope: getCompareSessionRetentionPreserveMode(retentionPolicy),
     preservePinned: shouldCompareSessionRetentionPreservePinned(retentionPolicy),
+    preserveSaved: shouldCompareSessionRetentionPreserveSaved(retentionPolicy),
     pinnedPairsManaged: managedPinnedPairIds.size,
     pinnedPairsRetained: Array.from(managedPinnedPairIds).filter((pairId) => retainedPairIds.has(pairId)).length,
     extraPinnedRowsRetained: retainedHistory.filter((row) => !latestIds.has(String(row?.id || "").trim())).length,
+    savedPairsManaged: managedSavedPairIds.size,
+    savedPairsRetained: Array.from(managedSavedPairIds).filter((pairId) => retainedPairIds.has(pairId)).length,
+    extraSavedRowsRetained: retainedHistory
+      .filter((row) => !latestIds.has(String(row?.id || "").trim()))
+      .filter((row) => managedSavedPairIds.has(String(getCompareSessionReplayPair(row)?.pairId || "").trim()))
+      .length,
   };
 }
 
@@ -3292,7 +3333,7 @@ export function App() {
       retentionPolicy: nextPolicy,
     });
     setStatus(
-      `compare history retention updated: ${nextPolicy} (keep_latest=${getCompareSessionRetentionLimit(nextPolicy)}, preserve_pinned=${shouldCompareSessionRetentionPreservePinned(nextPolicy)})`,
+      `compare history retention updated: ${nextPolicy} (keep_latest=${getCompareSessionRetentionLimit(nextPolicy)}, preserve_scope=${getCompareSessionRetentionPreserveMode(nextPolicy)}, preserve_pinned=${shouldCompareSessionRetentionPreservePinned(nextPolicy)}, preserve_saved=${shouldCompareSessionRetentionPreserveSaved(nextPolicy)})`,
       "status-ok"
     );
   }, [

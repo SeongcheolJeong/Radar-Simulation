@@ -187,9 +187,11 @@ The same area now supports browser-to-browser transfer:
   - current policies:
     - `retain_2`, `retain_4`, `retain_8`
     - `retain_2_preserve_pinned`, `retain_4_preserve_pinned`, `retain_8_preserve_pinned`
+    - `retain_2_preserve_saved`, `retain_4_preserve_saved`, `retain_8_preserve_saved`
   - `*_preserve_pinned` keeps the latest `N` rows and then keeps one newest retained row for each pinned replay pair, up to the in-app history cap
+  - `*_preserve_saved` does the same for any replay pair that is either pinned or has a saved custom label
   - pruning still drops replay-pair metadata and artifact expectation snapshots that no longer have a retained history row
-  - the summary line now shows `keep_latest`, `preserve_pinned`, retained-row counts, managed pinned pair count, and extra pinned rows kept beyond the latest-`N` window
+  - the summary line now shows `keep_latest`, `preserve_scope`, `preserve_pinned`, `preserve_saved`, retained-row counts, managed/retained pinned-vs-saved pair counts, and extra retained rows beyond the latest-`N` window
 - `Clear All History`
   - clears compare-session rows, replay-pair metadata, artifact expectation snapshots, and the current staged import preview
   - keeps the currently selected retention policy unchanged
