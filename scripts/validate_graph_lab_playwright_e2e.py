@@ -148,6 +148,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_preview_checked": False,
             "compare_session_artifact_expectation_checked": False,
             "compare_session_artifact_path_hash_checked": False,
+            "compare_session_import_preview_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_future_schema_warning_checked": False,
             "compare_session_persistence_checked": False,
@@ -699,18 +700,46 @@ def run(args: argparse.Namespace) -> int:
                         );
                         const text = String(field ? field.textContent || "" : "");
                         return (
-                            text.includes("high_fidelity_po_sbr_rt")
-                            && text.includes("imported")
+                            text.includes("import preview ready")
+                            && text.includes("schema=graph_lab_compare_history_export_v2")
+                            && text.includes("compatibility=exact")
                         );
                     }""",
                     timeout=30_000,
                 )
-                history_transfer_text_after_import = history_field.inner_text()
+                history_transfer_text_after_import_preview = history_field.inner_text()
                 if (
-                    "schema=graph_lab_compare_history_export_v2" not in history_transfer_text_after_import
-                    or "compatibility=exact" not in history_transfer_text_after_import
+                    "schema=graph_lab_compare_history_export_v2" not in history_transfer_text_after_import_preview
+                    or "compatibility=exact" not in history_transfer_text_after_import_preview
                 ):
-                    raise AssertionError("compare history import transfer hint did not include schema compatibility")
+                    raise AssertionError("compare history import preview did not include schema compatibility")
+                if "apply_required=true" not in history_transfer_text_after_import_preview:
+                    raise AssertionError("compare history import preview did not expose apply requirement")
+                options_after_preview = page.evaluate(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const select = field ? field.querySelector("select") : null;
+                        return select ? Array.from(select.querySelectorAll("option")).map((row) => String(row.value || "")) : [];
+                    }"""
+                )
+                if "low_fidelity_radarsimpy_ffd::high_fidelity_po_sbr_rt" in options_after_preview:
+                    raise AssertionError("compare history import preview merged data before Apply Import Merge")
+                history_field.get_by_role("button", name="Apply Import Merge").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("imported ") && text.includes("high_fidelity_po_sbr_rt") && text.includes("compatibility=exact");
+                    }""",
+                    timeout=30_000,
+                )
+                history_transfer_text_after_import = history_field.inner_text()
+                if "import_preview: none" not in history_transfer_text_after_import:
+                    raise AssertionError("compare history import preview did not clear after apply")
                 future_bundle = dict(exported_bundle)
                 future_bundle["schema_version"] = "graph_lab_compare_history_export_v99"
                 future_bundle_path = tmp_root / "compare_history_future_schema.json"
@@ -725,7 +754,9 @@ def run(args: argparse.Namespace) -> int:
                         );
                         const text = String(field ? field.textContent || "" : "");
                         return (
-                            text.includes("schema=graph_lab_compare_history_export_v99")
+                            text.includes("import preview ready")
+                            && text.includes("warning:future-schema")
+                            && text.includes("schema=graph_lab_compare_history_export_v99")
                             && text.includes("compatibility=forward_compatible_best_effort")
                         );
                     }""",
@@ -734,6 +765,18 @@ def run(args: argparse.Namespace) -> int:
                 history_transfer_text_after_future_import = history_field.inner_text()
                 if "warning:future-schema" not in history_transfer_text_after_future_import:
                     raise AssertionError("compare history future-schema import did not expose warning badge")
+                history_field.get_by_role("button", name="Clear Import Preview").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("compare history import preview cleared") && text.includes("import_preview: none");
+                    }""",
+                    timeout=20_000,
+                )
+                report["runtime_controls"]["compare_session_import_preview_checked"] = True
                 report["runtime_controls"]["compare_session_future_schema_warning_checked"] = True
                 history_select.select_option("low_fidelity_radarsimpy_ffd::current_config")
                 page.wait_for_timeout(100)
@@ -788,6 +831,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include pinned quick action summary")
                 if "## Compare Session History" not in brief_text or "source=preset_pair" not in brief_text:
                     raise AssertionError("decision brief did not include compare session history summary")
+                if "## Compare History Import Preview" not in brief_text or "import_preview_source:" not in brief_text:
+                    raise AssertionError("decision brief did not include compare history import preview")
                 if "latest_replayable_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include latest replayable pair summary")
                 if "selected_history_pair:" not in brief_text:

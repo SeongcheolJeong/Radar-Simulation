@@ -52,8 +52,13 @@ export function DecisionPane({
   compareSessionImportFileInputRef,
   compareSessionTransferStatusText,
   compareSessionTransferBadgeRows,
+  hasCompareSessionImportPreview,
+  compareSessionImportPreviewSummaryText,
+  compareSessionImportPreviewText,
   triggerCompareSessionImportFilePick,
   handleCompareSessionImportFileChange,
+  applyCompareSessionImportPreview,
+  clearCompareSessionImportPreview,
   exportCompareSessionHistory,
   runPresetPairTrackCompare,
   exportGateReport,
@@ -217,6 +222,8 @@ export function DecisionPane({
         }, String(row?.label || "-"))
       )),
       h("div", { className: "hint", key: "decision_compare_session_history_transfer_hint" }, String(compareSessionTransferStatusText || "-")),
+      h("div", { className: "hint", key: "decision_compare_session_history_import_preview_hint" }, String(compareSessionImportPreviewSummaryText || "-")),
+      h("pre", { className: "result-box", key: "decision_compare_session_history_import_preview_box" }, String(compareSessionImportPreviewText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_preview_box" }, String(selectedReplayableCompareSessionPreviewText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_artifact_expectation_box" }, String(selectedReplayableCompareSessionArtifactExpectationText || "-")),
       h("input", {
@@ -300,6 +307,20 @@ export function DecisionPane({
           key: "decision_import_compare_history",
           onClick: triggerCompareSessionImportFilePick,
         }, "Import History"),
+      ]),
+      h("div", { className: "btn-row", key: "decision_compare_session_history_transfer_apply_row" }, [
+        h("button", {
+          className: "btn",
+          key: "decision_apply_compare_history_import_preview",
+          onClick: applyCompareSessionImportPreview,
+          disabled: !hasCompareSessionImportPreview,
+        }, "Apply Import Merge"),
+        h("button", {
+          className: "btn",
+          key: "decision_clear_compare_history_import_preview",
+          onClick: clearCompareSessionImportPreview,
+          disabled: !hasCompareSessionImportPreview,
+        }, "Clear Import Preview"),
       ]),
       h("pre", { className: "result-box", key: "decision_compare_session_history_box" }, String(compareSessionHistoryText || "-")),
     ]),

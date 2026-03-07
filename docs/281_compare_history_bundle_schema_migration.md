@@ -72,6 +72,10 @@ Current UI signaling:
 - `compat:<value>`
 - `warning:future-schema`
   - shown only when `compat=forward_compatible_best_effort`
+- dry-run preview before merge
+  - `Import History` stages the bundle and renders an `import_preview` summary before local history is changed
+  - `Apply Import Merge` performs the actual merge
+  - `Clear Import Preview` discards the staged import without changing persisted browser state
 
 ## Migration Policy
 

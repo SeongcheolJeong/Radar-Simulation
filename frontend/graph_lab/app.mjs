@@ -515,6 +515,94 @@ function buildCompareSessionTransferBadges(entry) {
   return badges;
 }
 
+function buildCompareSessionImportPreviewSummary(
+  stagedEntry,
+  existingHistoryEntries,
+  existingPairMetaById,
+  existingArtifactExpectationById
+) {
+  const staged = stagedEntry && typeof stagedEntry === "object" ? stagedEntry : null;
+  if (!staged || !staged.imported || typeof staged.imported !== "object") {
+    return {
+      ready: false,
+      summaryText: "import_preview: none",
+      previewText: [
+        "import_preview_source: -",
+        "schema_version: -",
+        "schema_compatibility: -",
+        "history_merge(existing/imported/new/overlap/merged): 0/0/0/0/0",
+        "pair_meta(existing/imported/merged): 0/0/0",
+        "artifact_expectations(existing/imported/merged): 0/0/0",
+        "selected_replay_pair(import): -",
+        "selected_replay_pair_after_merge: unchanged",
+        "import_pair_labels: -",
+        "apply_note: choose Import History to stage a bundle before merge",
+      ].join("\n"),
+    };
+  }
+
+  const sourceLabel = normalizeCompareSessionField(staged.sourceLabel, 192) || "compare_history.json";
+  const imported = staged.imported;
+  const importSchema = summarizeCompareSessionSchemaCompatibility(imported.schemaVersion);
+  const existingHistory = (Array.isArray(existingHistoryEntries) ? existingHistoryEntries : [])
+    .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx));
+  const importedHistory = (Array.isArray(imported.history) ? imported.history : [])
+    .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx));
+  const existingHistoryIds = new Set(existingHistory.map((row) => String(row.id || "").trim()).filter(Boolean));
+  const importedHistoryIds = Array.from(new Set(importedHistory.map((row) => String(row.id || "").trim()).filter(Boolean)));
+  const newHistoryCount = importedHistoryIds.filter((id) => !existingHistoryIds.has(id)).length;
+  const overlapHistoryCount = importedHistoryIds.filter((id) => existingHistoryIds.has(id)).length;
+  const mergedHistory = mergeCompareSessionHistoryEntries(existingHistory, importedHistory);
+
+  const existingPairMeta = normalizeCompareReplayPairMetaMap(existingPairMetaById);
+  const importedPairMeta = normalizeCompareReplayPairMetaMap(imported.pairMetaById);
+  const mergedPairMeta = {
+    ...existingPairMeta,
+    ...importedPairMeta,
+  };
+
+  const existingArtifactExpectation = normalizeCompareArtifactExpectationMap(existingArtifactExpectationById);
+  const importedArtifactExpectation = normalizeCompareArtifactExpectationMap(imported.pairArtifactExpectationById);
+  const mergedArtifactExpectation = {
+    ...existingArtifactExpectation,
+    ...importedArtifactExpectation,
+  };
+
+  const selectedReplayPairId = normalizeCompareSessionField(imported.selectedReplayPairId, 192);
+  const mergedReplayOptions = buildCompareSessionReplayOptions(mergedHistory, mergedPairMeta);
+  const selectedReplayPairAvailable = selectedReplayPairId
+    ? mergedReplayOptions.some((row) => String(row?.id || "") === selectedReplayPairId)
+    : false;
+  const importedPairLabels = Array.from(new Set(importedHistory.map((row) => String(row.pairLabel || "").trim()).filter(Boolean)));
+
+  return {
+    ready: true,
+    summaryText: [
+      `import_preview: ready`,
+      `source=${sourceLabel}`,
+      `schema=${importSchema.schemaVersion}`,
+      `compatibility=${importSchema.compatibility}`,
+      `rows=${Number(importedHistory.length || 0)}`,
+      "apply_required=true",
+    ].join(" | "),
+    previewText: [
+      `import_preview_source: ${sourceLabel}`,
+      `schema_version: ${importSchema.schemaVersion}`,
+      `schema_compatibility: ${importSchema.compatibility}`,
+      `history_merge(existing/imported/new/overlap/merged): ${Number(existingHistory.length || 0)}/${Number(importedHistory.length || 0)}/${Number(newHistoryCount || 0)}/${Number(overlapHistoryCount || 0)}/${Number(mergedHistory.length || 0)}`,
+      `pair_meta(existing/imported/merged): ${Number(Object.keys(existingPairMeta).length || 0)}/${Number(Object.keys(importedPairMeta).length || 0)}/${Number(Object.keys(mergedPairMeta).length || 0)}`,
+      `artifact_expectations(existing/imported/merged): ${Number(Object.keys(existingArtifactExpectation).length || 0)}/${Number(Object.keys(importedArtifactExpectation).length || 0)}/${Number(Object.keys(mergedArtifactExpectation).length || 0)}`,
+      `selected_replay_pair(import): ${selectedReplayPairId || "-"}`,
+      `selected_replay_pair_after_merge: ${selectedReplayPairId ? (selectedReplayPairAvailable ? "available" : "missing") : "unchanged"}`,
+      `import_pair_labels: ${importedPairLabels.length > 0 ? importedPairLabels.join(" | ") : "-"}`,
+      importSchema.compatibility === "forward_compatible_best_effort"
+        ? "warning: future schema will be parsed with best-effort compatibility"
+        : "warning: none",
+      "apply_note: preview only; click Apply Import Merge to persist",
+    ].join("\n"),
+  };
+}
+
 function serializeCompareSessionExportBundle(bundle) {
   const row = bundle && typeof bundle === "object" ? bundle : {};
   return JSON.stringify({
@@ -1150,6 +1238,7 @@ export function App() {
   const [compareSessionTransferBadgeRows, setCompareSessionTransferBadgeRows] = React.useState(() => (
     buildCompareSessionTransferBadges({ direction: "idle" })
   ));
+  const [stagedCompareSessionImport, setStagedCompareSessionImport] = React.useState(null);
   const [compareSessionHistory, setCompareSessionHistory] = React.useState(
     () => initialCompareSessionPrefs.history
   );
@@ -2141,6 +2230,28 @@ export function App() {
     () => summarizeCompareSessionHistory(compareSessionHistory, compareReplayPairMetaById),
     [compareReplayPairMetaById, compareSessionHistory]
   );
+  const stagedCompareSessionImportSummary = React.useMemo(
+    () => buildCompareSessionImportPreviewSummary(
+      stagedCompareSessionImport,
+      compareSessionHistory,
+      compareReplayPairMetaById,
+      comparePairArtifactExpectationById
+    ),
+    [
+      comparePairArtifactExpectationById,
+      compareReplayPairMetaById,
+      compareSessionHistory,
+      stagedCompareSessionImport,
+    ]
+  );
+  const compareSessionImportPreviewSummaryText = React.useMemo(
+    () => String(stagedCompareSessionImportSummary?.summaryText || "import_preview: none"),
+    [stagedCompareSessionImportSummary]
+  );
+  const compareSessionImportPreviewText = React.useMemo(
+    () => String(stagedCompareSessionImportSummary?.previewText || "-"),
+    [stagedCompareSessionImportSummary]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -2926,9 +3037,46 @@ export function App() {
     input.click();
   }, []);
 
-  const importCompareSessionHistoryText = React.useCallback((rawText, sourceLabel) => {
+  const previewCompareSessionHistoryText = React.useCallback((rawText, sourceLabel) => {
     try {
       const imported = parseCompareSessionImportBundle(rawText);
+      const importSchema = summarizeCompareSessionSchemaCompatibility(imported.schemaVersion);
+      setStagedCompareSessionImport({
+        sourceLabel: normalizeCompareSessionField(sourceLabel, 192) || "compare_history.json",
+        imported,
+      });
+      setCompareSessionTransferStatusText(
+        `compare history import preview ready: ${String(sourceLabel || "text")} | rows=${Number(imported.history.length || 0)} | schema=${importSchema.schemaVersion} | compatibility=${importSchema.compatibility} | apply merge to persist`
+      );
+      setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
+        direction: "import",
+        schemaVersion: importSchema.schemaVersion,
+        compatibility: importSchema.compatibility,
+      }));
+      setStatus(
+        `compare history import preview ready: ${String(sourceLabel || "text")} (schema=${importSchema.schemaVersion}, compatibility=${importSchema.compatibility})`,
+        "status-warn"
+      );
+    } catch (err) {
+      setStagedCompareSessionImport(null);
+      setCompareSessionTransferStatusText(`compare history import failed: ${String(err.message || err)}`);
+      setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
+        direction: "import",
+        failed: true,
+      }));
+      setStatus(`compare history import failed: ${String(err.message || err)}`, "status-err");
+    }
+  }, [setStatus]);
+
+  const applyCompareSessionImportPreview = React.useCallback(() => {
+    const staged = stagedCompareSessionImport;
+    if (!staged || !staged.imported || typeof staged.imported !== "object") {
+      setStatus("stage compare history import first", "status-warn");
+      return;
+    }
+    try {
+      const imported = staged.imported;
+      const sourceLabel = normalizeCompareSessionField(staged.sourceLabel, 192) || "text";
       const importSchema = summarizeCompareSessionSchemaCompatibility(imported.schemaVersion);
       setCompareSessionHistory((prev) => mergeCompareSessionHistoryEntries(prev, imported.history));
       setCompareReplayPairMetaById((prev) => ({
@@ -2942,8 +3090,9 @@ export function App() {
       if (String(imported.selectedReplayPairId || "").trim()) {
         setSelectedCompareReplayPairId(String(imported.selectedReplayPairId || "").trim());
       }
+      setStagedCompareSessionImport(null);
       setCompareSessionTransferStatusText(
-        `imported ${Number(imported.history.length || 0)} history row(s) and ${Number(Object.keys(imported.pairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) from ${String(sourceLabel || "text")} | schema=${importSchema.schemaVersion} | compatibility=${importSchema.compatibility}`
+        `imported ${Number(imported.history.length || 0)} history row(s) and ${Number(Object.keys(imported.pairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) from ${sourceLabel} | schema=${importSchema.schemaVersion} | compatibility=${importSchema.compatibility}`
       );
       setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
         direction: "import",
@@ -2951,34 +3100,46 @@ export function App() {
         compatibility: importSchema.compatibility,
       }));
       setStatus(
-        `compare history imported: ${String(sourceLabel || "text")} (schema=${importSchema.schemaVersion}, compatibility=${importSchema.compatibility})`,
+        `compare history imported: ${sourceLabel} (schema=${importSchema.schemaVersion}, compatibility=${importSchema.compatibility})`,
         "status-ok"
       );
     } catch (err) {
-      setCompareSessionTransferStatusText(`compare history import failed: ${String(err.message || err)}`);
+      setCompareSessionTransferStatusText(`compare history import merge failed: ${String(err.message || err)}`);
       setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({
         direction: "import",
         failed: true,
       }));
-      setStatus(`compare history import failed: ${String(err.message || err)}`, "status-err");
+      setStatus(`compare history import merge failed: ${String(err.message || err)}`, "status-err");
     }
-  }, [setStatus]);
+  }, [setStatus, stagedCompareSessionImport]);
+
+  const clearCompareSessionImportPreview = React.useCallback(() => {
+    if (!stagedCompareSessionImport) {
+      setStatus("no staged compare history import preview", "status-warn");
+      return;
+    }
+    setStagedCompareSessionImport(null);
+    setCompareSessionTransferStatusText("compare history import preview cleared");
+    setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({ direction: "idle" }));
+    setStatus("compare history import preview cleared", "status-ok");
+  }, [setStatus, stagedCompareSessionImport]);
 
   const handleCompareSessionImportFileChange = React.useCallback((evt) => {
     const file = evt?.target?.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      importCompareSessionHistoryText(String(reader.result || ""), String(file.name || "compare_history.json"));
+      previewCompareSessionHistoryText(String(reader.result || ""), String(file.name || "compare_history.json"));
     };
     reader.onerror = () => {
       const label = String(file.name || "-");
+      setStagedCompareSessionImport(null);
       setCompareSessionTransferStatusText(`failed to read compare history file: ${label}`);
       setStatus(`compare history import read failed: ${label}`, "status-err");
     };
     reader.readAsText(file);
     if (evt?.target) evt.target.value = "";
-  }, [importCompareSessionHistoryText, setStatus]);
+  }, [previewCompareSessionHistoryText, setStatus]);
 
   const exportDecisionRegressionSession = React.useCallback(async () => {
     const sessionId = String(lastRegressionSession?.session_id || "").trim();
@@ -3040,6 +3201,8 @@ export function App() {
       `${selectedReplayableCompareSessionMetaText}`,
       `${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `selected_history_pair_preview: ${selectedReplayableCompareSessionPreviewText.split("\n").slice(1).join(" | ")}`,
+      `compare_history_transfer: ${String(compareSessionTransferStatusText || "-")}`,
+      `${compareSessionImportPreviewSummaryText}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -3080,6 +3243,8 @@ export function App() {
     runCompareSummary,
     compareRuntimeDiagnostics.badgeLine,
     compareRuntimeSummary.trackLabel,
+    compareSessionImportPreviewSummaryText,
+    compareSessionTransferStatusText,
     graphRunSummary,
     latestCompareSessionText,
     latestReplayableCompareSessionText,
@@ -3145,6 +3310,11 @@ export function App() {
       "## Compare Session History",
       "```text",
       compareSessionHistoryText,
+      "```",
+      "",
+      "## Compare History Import Preview",
+      "```text",
+      compareSessionImportPreviewText,
       "```",
       "",
       "## Selected History Pair Preview",
@@ -3221,6 +3391,7 @@ export function App() {
     compareGraphRunSummary,
     compareRunStatusText,
     compareSessionHistoryText,
+    compareSessionImportPreviewText,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
@@ -3632,8 +3803,13 @@ export function App() {
         compareSessionImportFileInputRef,
         compareSessionTransferStatusText,
         compareSessionTransferBadgeRows,
+        hasCompareSessionImportPreview: stagedCompareSessionImportSummary.ready === true,
+        compareSessionImportPreviewSummaryText,
+        compareSessionImportPreviewText,
         triggerCompareSessionImportFilePick,
         handleCompareSessionImportFileChange,
+        applyCompareSessionImportPreview,
+        clearCompareSessionImportPreview,
         exportCompareSessionHistory,
         runPresetPairTrackCompare,
         exportGateReport,
