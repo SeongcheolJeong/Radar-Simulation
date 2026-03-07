@@ -370,6 +370,7 @@ The exported brief now also includes an `Artifact Inspector State` section with:
 - `artifact_inspector_probe_state`
 - `artifact_inspector_last_action`
 - `artifact_inspector_recent_actions`
+- `artifact_inspector_audit_summary`
 
 The `Decision Pane` now mirrors that live state as a chip row plus compact hint lines under `Inspector State Mirror`, and includes:
 
@@ -389,6 +390,7 @@ Those mirror controls are now also state-aware:
 - the mirror exports an `artifact_inspector_controls:` hint line so the same actionability state survives in the decision brief
 - the mirror also exports `artifact_inspector_last_action:` as `seq=N | <source>` so the last collapse/expand/reset source and ordering stay visible after reload and in the decision brief
 - the mirror also exports `artifact_inspector_recent_actions:` so the newest three inspector actions remain visible as a short audit trail
+- the mirror also exports `artifact_inspector_audit_summary:` with `count / next_seq / state` so operators can see trail size and the next sequence number without parsing the raw history
 - the mirror also exports `artifact_inspector_audit_controls:` so brief/export readers can tell whether the action trail is currently clearable
 
 The `Runtime Compare` summary inside the brief now also carries:

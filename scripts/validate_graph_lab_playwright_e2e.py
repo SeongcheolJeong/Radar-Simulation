@@ -462,6 +462,7 @@ def run(args: argparse.Namespace) -> int:
                     or "probe_state: default" not in artifact_text
                     or "last_action: seq=0 | idle" not in artifact_text
                     or "recent_actions: none" not in artifact_text
+                    or "audit_summary: count=0 | next_seq=1 | state=empty" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render default layout status")
                 if (
@@ -485,6 +486,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in decision_artifact_state_text
+                    or "artifact_inspector_audit_summary: count=0 | next_seq=1 | state=empty" not in decision_artifact_state_text
                     or "artifact_inspector_audit_controls: clear=disabled" not in decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in decision_artifact_state_text
                 ):
@@ -523,6 +525,8 @@ def run(args: argparse.Namespace) -> int:
                     or "last_action:" not in collapsed_from_decision_artifact_text
                     or "decision:collapse_evidence" not in collapsed_from_decision_artifact_text
                     or "recent_actions:" not in collapsed_from_decision_artifact_text
+                    or "audit_summary:" not in collapsed_from_decision_artifact_text
+                    or "state=active" not in collapsed_from_decision_artifact_text
                     or "decision:collapse_evidence" not in collapsed_from_decision_artifact_text
                 ):
                     raise AssertionError("decision pane collapse did not update artifact inspector layout state")
@@ -560,6 +564,8 @@ def run(args: argparse.Namespace) -> int:
                     or "last_action:" not in expanded_from_decision_artifact_text
                     or "decision:expand_evidence" not in expanded_from_decision_artifact_text
                     or "recent_actions:" not in expanded_from_decision_artifact_text
+                    or "audit_summary:" not in expanded_from_decision_artifact_text
+                    or "state=active" not in expanded_from_decision_artifact_text
                     or "decision:collapse_evidence" not in expanded_from_decision_artifact_text
                 ):
                     raise AssertionError("decision pane expand did not restore artifact inspector layout state")
@@ -693,6 +699,8 @@ def run(args: argparse.Namespace) -> int:
                     or "last_action:" not in reset_artifact_text
                     or "decision:reset_layout" not in reset_artifact_text
                     or "recent_actions:" not in reset_artifact_text
+                    or "audit_summary:" not in reset_artifact_text
+                    or "state=active" not in reset_artifact_text
                     or "decision:reset_layout" not in reset_artifact_text
                 ):
                     raise AssertionError("artifact inspector reset layout did not restore expanded detail state")
@@ -702,6 +710,8 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in reset_decision_artifact_state_text
                     or "artifact_inspector_last_action:" not in reset_decision_artifact_state_text
                     or "artifact_inspector_recent_actions:" not in reset_decision_artifact_state_text
+                    or "artifact_inspector_audit_summary:" not in reset_decision_artifact_state_text
+                    or "state=active" not in reset_decision_artifact_state_text
                     or "artifact_inspector_audit_controls: clear=enabled" not in reset_decision_artifact_state_text
                     or "decision:reset_layout" not in reset_decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reset_decision_artifact_state_text
@@ -718,8 +728,10 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "last_action: seq=0 | idle" in cleared_audit_artifact_text
                         and "recent_actions: none" in cleared_audit_artifact_text
+                        and "audit_summary: count=0 | next_seq=1 | state=empty" in cleared_audit_artifact_text
                         and "artifact_inspector_last_action: seq=0 | idle" in cleared_audit_mirror_text
                         and "artifact_inspector_recent_actions: none" in cleared_audit_mirror_text
+                        and "artifact_inspector_audit_summary: count=0 | next_seq=1 | state=empty" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_controls: clear=disabled" in cleared_audit_mirror_text
                     ):
                         cleared_audit_ready = True
@@ -1292,6 +1304,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state:" not in brief_text
                     or "artifact_inspector_last_action:" not in brief_text
                     or "artifact_inspector_recent_actions:" not in brief_text
+                    or "artifact_inspector_audit_summary:" not in brief_text
                     or "artifact_inspector_audit_controls:" not in brief_text
                     or "artifact_inspector_controls:" not in brief_text
                 ):
@@ -1422,6 +1435,7 @@ def run(args: argparse.Namespace) -> int:
                     or "probe_state: default" not in reloaded_artifact_text
                     or "last_action: seq=0 | idle" not in reloaded_artifact_text
                     or "recent_actions: none" not in reloaded_artifact_text
+                    or "audit_summary: count=0 | next_seq=1 | state=empty" not in reloaded_artifact_text
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not update layout status")
                 if (
@@ -1456,6 +1470,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_audit_summary: count=0 | next_seq=1 | state=empty" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_controls: clear=disabled" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reloaded_decision_artifact_state_text
                 ):

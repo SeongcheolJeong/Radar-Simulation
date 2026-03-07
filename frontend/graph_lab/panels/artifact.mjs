@@ -150,6 +150,13 @@ function buildArtifactInspectorRecentActionsText(entries) {
   return `recent_actions: ${rows.map((entry) => `[${entry}]`).join(" ")}`;
 }
 
+function buildArtifactInspectorAuditSummaryText(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const count = Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries.length : 0;
+  const nextSeq = Math.max(0, Number(prefs.lastActionSeq || 0)) + 1;
+  return `audit_summary: count=${count} | next_seq=${nextSeq} | state=${count > 0 ? "active" : "empty"}`;
+}
+
 function clearArtifactInspectorActionTrailState(value) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   return {
@@ -389,6 +396,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorRecentActionsText(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditSummaryText = React.useMemo(
+    () => buildArtifactInspectorAuditSummaryText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -401,8 +412,10 @@ export function ArtifactInspectorPanel({
       statusBadgesText: artifactInspectorStatusBadgesText,
       lastActionText: artifactInspectorLastActionText,
       recentActionsText: artifactInspectorRecentActionsText,
+      auditSummaryText: artifactInspectorAuditSummaryText,
     });
   }, [
+    artifactInspectorAuditSummaryText,
     artifactInspectorLayoutStateText,
     artifactInspectorLastActionText,
     artifactInspectorRecentActionsText,
@@ -538,6 +551,10 @@ export function ArtifactInspectorPanel({
           key: "probe_state",
           style: { color: "#8fb3c9" },
         }, artifactInspectorProbeState.text),
+        h("div", {
+          key: "audit_summary",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditSummaryText),
         h("div", {
           key: "last_action",
           style: { color: "#8fb3c9" },
