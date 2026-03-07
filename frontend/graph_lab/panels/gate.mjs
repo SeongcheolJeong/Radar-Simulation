@@ -39,6 +39,7 @@ export function DecisionPane({
   runLatestCompareSessionPair,
   selectedReplayableCompareSessionText,
   selectedReplayableCompareSessionMetaText,
+  selectedReplayableCompareSessionArtifactExpectationText,
   selectedReplayableCompareSessionPreviewText,
   canReplaySelectedCompareSession,
   applySelectedCompareSessionPair,
@@ -174,6 +175,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_compare_session_history_meta_hint" }, String(selectedReplayableCompareSessionMetaText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_transfer_hint" }, String(compareSessionTransferStatusText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_preview_box" }, String(selectedReplayableCompareSessionPreviewText || "-")),
+      h("pre", { className: "result-box", key: "decision_compare_session_history_artifact_expectation_box" }, String(selectedReplayableCompareSessionArtifactExpectationText || "-")),
       h("input", {
         key: "decision_compare_session_history_import_file",
         ref: compareSessionImportFileInputRef,

@@ -146,6 +146,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_selector_checked": False,
             "compare_session_management_checked": False,
             "compare_session_preview_checked": False,
+            "compare_session_artifact_expectation_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_persistence_checked": False,
             "pinned_pair_quick_actions_checked": False,
@@ -514,7 +515,11 @@ def run(args: argparse.Namespace) -> int:
                     }""",
                     timeout=10_000,
                 )
+                history_text_after_pin = history_field.inner_text()
+                if "artifact_expectation_source:" not in history_text_after_pin or "required_artifacts(current/compare/total):" not in history_text_after_pin:
+                    raise AssertionError("selected history pair artifact expectation did not render after pin")
                 report["runtime_controls"]["compare_session_preview_checked"] = True
+                report["runtime_controls"]["compare_session_artifact_expectation_checked"] = True
                 pinned_quick_field = field_locator(page, "Pinned Pair Quick Actions")
                 pinned_quick_field.wait_for(timeout=10_000)
                 pinned_quick_text = pinned_quick_field.inner_text()
@@ -568,11 +573,15 @@ def run(args: argparse.Namespace) -> int:
                 history_bundle_path = tmp_root / "compare_history_export.json"
                 history_download.save_as(str(history_bundle_path))
                 exported_bundle = json.loads(history_bundle_path.read_text(encoding="utf-8"))
-                if str(exported_bundle.get("schema_version") or "") != "graph_lab_compare_history_export_v1":
+                if str(exported_bundle.get("schema_version") or "") != "graph_lab_compare_history_export_v2":
                     raise AssertionError("compare history export schema_version mismatch")
                 exported_meta = exported_bundle.get("pair_meta_by_id") or {}
                 if "low_fidelity_radarsimpy_ffd::current_config" not in exported_meta:
                     raise AssertionError("compare history export did not include managed pair metadata")
+                exported_artifact_expectations = exported_bundle.get("pair_artifact_expectation_by_id") or {}
+                low_current_expectation = exported_artifact_expectations.get("low_fidelity_radarsimpy_ffd::current_config") or {}
+                if "required_artifacts(current/compare/total):" not in str(low_current_expectation.get("detailText") or low_current_expectation.get("detail_text") or ""):
+                    raise AssertionError("compare history export did not include artifact expectation snapshot")
                 history_select.select_option("low_fidelity_radarsimpy_ffd::high_fidelity_po_sbr_rt")
                 page.wait_for_timeout(100)
                 history_field.get_by_role("button", name="Delete Selected History Pair").click()
@@ -664,6 +673,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include selected history pair management summary")
                 if "## Selected History Pair Preview" not in brief_text or "planned_deltas:" not in brief_text:
                     raise AssertionError("decision brief did not include selected history pair preview")
+                if "## Selected History Pair Artifact Expectation" not in brief_text or "artifact_expectation_source:" not in brief_text:
+                    raise AssertionError("decision brief did not include selected history pair artifact expectation")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
@@ -761,6 +772,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare session history management state did not persist after reload")
                 if "planned_deltas:" not in reloaded_history_text:
                     raise AssertionError("selected history pair preview did not persist after reload")
+                if "artifact_expectation_source:" not in reloaded_history_text:
+                    raise AssertionError("selected history pair artifact expectation did not persist after reload")
                 reloaded_pinned_quick_field = field_locator(page, "Pinned Pair Quick Actions")
                 if selected_history_label not in reloaded_pinned_quick_field.inner_text():
                     raise AssertionError("pinned quick action field did not persist after reload")

@@ -49,7 +49,7 @@ const COMPARE_SESSION_STORAGE_KEY = "graph_lab_compare_session_history_v1";
 const COMPARE_SESSION_HISTORY_LIMIT = 8;
 const COMPARE_REPLAY_PAIR_OPTION_LIMIT = 6;
 const PINNED_COMPARE_QUICK_ACTION_LIMIT = 3;
-const COMPARE_SESSION_EXPORT_SCHEMA_VERSION = "graph_lab_compare_history_export_v1";
+const COMPARE_SESSION_EXPORT_SCHEMA_VERSION = "graph_lab_compare_history_export_v2";
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -116,6 +116,83 @@ function normalizeCompareReplayPairMetaMap(metaMap) {
   return normalized;
 }
 
+function normalizeCompareArtifactExpectationEntry(entry) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  return {
+    source: normalizeCompareSessionField(row.source, 64),
+    observedAtUtc: normalizeCompareSessionField(row.observedAtUtc || row.observed_at_utc, 64),
+    summaryText: normalizeCompareSessionField(row.summaryText || row.summary_text, 640),
+    detailText: normalizeCompareSessionField(row.detailText || row.detail_text, 4000),
+  };
+}
+
+function normalizeCompareArtifactExpectationMap(expectationMap) {
+  const raw = expectationMap && typeof expectationMap === "object" && !Array.isArray(expectationMap) ? expectationMap : {};
+  const normalized = {};
+  Object.entries(raw).forEach(([rawId, rawEntry]) => {
+    const pairId = normalizeCompareSessionField(rawId, 192);
+    if (!pairId) return;
+    const entry = normalizeCompareArtifactExpectationEntry(rawEntry);
+    if (!entry.summaryText && !entry.detailText) return;
+    normalized[pairId] = entry;
+  });
+  return normalized;
+}
+
+function buildPlannedCompareArtifactExpectationEntry(pairLabel) {
+  const label = normalizeCompareSessionField(pairLabel, 160) || "-";
+  return normalizeCompareArtifactExpectationEntry({
+    source: "planned_default",
+    summaryText: "source=planned_default | required=4/4/4 | optional=lgit_customized_output_npz | artifact_delta=none expected",
+    detailText: [
+      "artifact_expectation_source: planned_default",
+      `pair_label: ${label}`,
+      "required_artifacts: path_list_json, adc_cube_npz, radar_map_npz, graph_run_summary_json",
+      "optional_artifacts: lgit_customized_output_npz",
+      "artifact_presence_delta: none expected",
+      "note: run the preset pair once to capture an observed artifact expectation snapshot",
+    ].join("\n"),
+  });
+}
+
+function buildObservedCompareArtifactExpectationEntry(pairLabel, currentSummary, compareSummary) {
+  const compare = buildRunCompareSummary(currentSummary, compareSummary);
+  if (!compare.available) return null;
+  const requiredMissingCurrent = compare.artifactRows
+    .filter((row) => row.required && !row.currentPresent)
+    .map((row) => row.name)
+    .join(",") || "none";
+  const requiredMissingCompare = compare.artifactRows
+    .filter((row) => row.required && !row.comparePresent)
+    .map((row) => row.name)
+    .join(",") || "none";
+  return normalizeCompareArtifactExpectationEntry({
+    source: "observed_ready_pair",
+    observedAtUtc: new Date().toISOString(),
+    summaryText: [
+      "source=observed_ready_pair",
+      `assessment=${String(compare.assessment || "-")}`,
+      `required=${Number(compare.requiredArtifactCounts?.currentPresent || 0)}/${Number(compare.requiredArtifactCounts?.comparePresent || 0)}/${Number(compare.requiredArtifactCounts?.total || 0)}`,
+      `artifact_delta=${String(compare.artifactPresenceDeltaText || "none")}`,
+    ].join(" | "),
+    detailText: [
+      "artifact_expectation_source: observed_ready_pair",
+      `pair_label: ${normalizeCompareSessionField(pairLabel, 160) || "-"}`,
+      `observed_at_utc: ${new Date().toISOString()}`,
+      `observed_assessment: ${String(compare.assessment || "-")}`,
+      `required_artifacts(current/compare/total): ${Number(compare.requiredArtifactCounts?.currentPresent || 0)}/${Number(compare.requiredArtifactCounts?.comparePresent || 0)}/${Number(compare.requiredArtifactCounts?.total || 0)}`,
+      `artifact_presence_delta: ${String(compare.artifactPresenceDeltaText || "none")}`,
+      `optional_artifact_delta: ${String(compare.optionalPresenceDeltaText || "none")}`,
+      `current_required_missing: ${requiredMissingCurrent}`,
+      `compare_required_missing: ${requiredMissingCompare}`,
+      "artifact_rows:",
+      ...compare.artifactRows.map((row) => (
+        `- ${String(row.name || "-")}: required=${row.required === true} current=${row.currentPresent === true} compare=${row.comparePresent === true}`
+      )),
+    ].join("\n"),
+  });
+}
+
 function parseCompareSessionTimestampMs(entry) {
   const raw = String(entry?.timestampUtc || "").trim();
   const ts = Date.parse(raw);
@@ -149,6 +226,7 @@ function serializeCompareSessionExportBundle(bundle) {
       .map((item, idx) => normalizeCompareSessionHistoryEntry(item, idx))
       .slice(0, COMPARE_SESSION_HISTORY_LIMIT),
     pair_meta_by_id: normalizeCompareReplayPairMetaMap(row.pairMetaById),
+    pair_artifact_expectation_by_id: normalizeCompareArtifactExpectationMap(row.pairArtifactExpectationById),
     selected_replay_pair_id: normalizeCompareSessionField(row.selectedReplayPairId, 192),
   }, null, 2);
 }
@@ -164,6 +242,9 @@ function parseCompareSessionImportBundle(text) {
       .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
       .slice(0, COMPARE_SESSION_HISTORY_LIMIT),
     pairMetaById: normalizeCompareReplayPairMetaMap(parsed.pair_meta_by_id || parsed.pairMetaById),
+    pairArtifactExpectationById: normalizeCompareArtifactExpectationMap(
+      parsed.pair_artifact_expectation_by_id || parsed.pairArtifactExpectationById
+    ),
     selectedReplayPairId: normalizeCompareSessionField(
       parsed.selected_replay_pair_id || parsed.selectedReplayPairId,
       192
@@ -174,11 +255,11 @@ function parseCompareSessionImportBundle(text) {
 function loadCompareSessionPrefs() {
   try {
     if (typeof window === "undefined" || !window.localStorage) {
-      return { history: [], selectedReplayPairId: "", pairMetaById: {} };
+      return { history: [], selectedReplayPairId: "", pairMetaById: {}, pairArtifactExpectationById: {} };
     }
     const raw = String(window.localStorage.getItem(COMPARE_SESSION_STORAGE_KEY) || "").trim();
     if (!raw) {
-      return { history: [], selectedReplayPairId: "", pairMetaById: {} };
+      return { history: [], selectedReplayPairId: "", pairMetaById: {}, pairArtifactExpectationById: {} };
     }
     const parsed = JSON.parse(raw);
     const history = (Array.isArray(parsed?.history) ? parsed.history : [])
@@ -188,9 +269,10 @@ function loadCompareSessionPrefs() {
       history,
       selectedReplayPairId: normalizeCompareSessionField(parsed?.selectedReplayPairId, 192),
       pairMetaById: normalizeCompareReplayPairMetaMap(parsed?.pairMetaById),
+      pairArtifactExpectationById: normalizeCompareArtifactExpectationMap(parsed?.pairArtifactExpectationById),
     };
   } catch (_) {
-    return { history: [], selectedReplayPairId: "", pairMetaById: {} };
+    return { history: [], selectedReplayPairId: "", pairMetaById: {}, pairArtifactExpectationById: {} };
   }
 }
 
@@ -203,9 +285,10 @@ function saveCompareSessionPrefs(prefs) {
       .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
     const selectedReplayPairId = normalizeCompareSessionField(payload.selectedReplayPairId, 192);
     const pairMetaById = normalizeCompareReplayPairMetaMap(payload.pairMetaById);
+    const pairArtifactExpectationById = normalizeCompareArtifactExpectationMap(payload.pairArtifactExpectationById);
     window.localStorage.setItem(
       COMPARE_SESSION_STORAGE_KEY,
-      JSON.stringify({ history, selectedReplayPairId, pairMetaById })
+      JSON.stringify({ history, selectedReplayPairId, pairMetaById, pairArtifactExpectationById })
     );
   } catch (_) {
     // localStorage may be blocked; ignore and continue with in-memory state
@@ -771,6 +854,9 @@ export function App() {
   );
   const [compareReplayPairMetaById, setCompareReplayPairMetaById] = React.useState(
     () => initialCompareSessionPrefs.pairMetaById || {}
+  );
+  const [comparePairArtifactExpectationById, setComparePairArtifactExpectationById] = React.useState(
+    () => initialCompareSessionPrefs.pairArtifactExpectationById || {}
   );
   const [selectedCompareReplayPairId, setSelectedCompareReplayPairId] = React.useState(
     () => initialCompareSessionPrefs.selectedReplayPairId
@@ -1850,6 +1936,36 @@ export function App() {
     runtimeSimulationMode,
     selectedReplayableCompareSession,
   ]);
+  const selectedReplayableCompareSessionArtifactExpectationEntry = React.useMemo(() => {
+    if (!selectedReplayableCompareSession) {
+      return buildPlannedCompareArtifactExpectationEntry("-");
+    }
+    const pairId = String(
+      selectedReplayableCompareSession.id
+      || selectedReplayableCompareSession.pairId
+      || makeCompareReplayPairId(
+        selectedReplayableCompareSession.baselinePresetId,
+        selectedReplayableCompareSession.targetPresetId
+      )
+    ).trim();
+    const stored = normalizeCompareArtifactExpectationEntry(comparePairArtifactExpectationById[pairId]);
+    if (stored.summaryText || stored.detailText) {
+      return stored;
+    }
+    return buildPlannedCompareArtifactExpectationEntry(selectedReplayableCompareSession.pairLabel);
+  }, [comparePairArtifactExpectationById, selectedReplayableCompareSession]);
+  const selectedReplayableCompareSessionArtifactExpectationSummaryText = React.useMemo(
+    () => `selected_history_artifact_expectation: ${String(selectedReplayableCompareSessionArtifactExpectationEntry.summaryText || "-")}`,
+    [selectedReplayableCompareSessionArtifactExpectationEntry]
+  );
+  const selectedReplayableCompareSessionArtifactExpectationText = React.useMemo(
+    () => String(
+      selectedReplayableCompareSessionArtifactExpectationEntry.detailText
+      || buildPlannedCompareArtifactExpectationEntry(selectedReplayableCompareSession?.pairLabel).detailText
+      || "-"
+    ),
+    [selectedReplayableCompareSession?.pairLabel, selectedReplayableCompareSessionArtifactExpectationEntry]
+  );
   const selectedReplayableCompareSessionMetaText = React.useMemo(() => {
     if (!selectedReplayableCompareSession) {
       return "selected_history_pair_meta: -";
@@ -1894,9 +2010,15 @@ export function App() {
     saveCompareSessionPrefs({
       history: compareSessionHistory,
       pairMetaById: compareReplayPairMetaById,
+      pairArtifactExpectationById: comparePairArtifactExpectationById,
       selectedReplayPairId: selectedCompareReplayPairId,
     });
-  }, [compareReplayPairMetaById, compareSessionHistory, selectedCompareReplayPairId]);
+  }, [
+    comparePairArtifactExpectationById,
+    compareReplayPairMetaById,
+    compareSessionHistory,
+    selectedCompareReplayPairId,
+  ]);
 
   const {
     runGraphViaApi,
@@ -2160,6 +2282,18 @@ export function App() {
       currentResult.graphRunId || currentResult.summary?.graph_run_id || currentResult.summary?.run_id || ""
     ).trim();
     const compareAssessment = buildRunCompareSummary(currentResult.summary, lowResult.summary);
+    const pairId = makeCompareReplayPairId(baselinePresetId, targetPresetId);
+    const observedArtifactExpectation = buildObservedCompareArtifactExpectationEntry(
+      `${baselinePresetLabel} -> ${targetPresetLabel}`,
+      currentResult.summary,
+      lowResult.summary
+    );
+    if (pairId && observedArtifactExpectation) {
+      setComparePairArtifactExpectationById((prev) => ({
+        ...(prev && typeof prev === "object" ? prev : {}),
+        [pairId]: observedArtifactExpectation,
+      }));
+    }
     appendCompareSession({
       source: "preset_pair",
       status: "ready",
@@ -2183,6 +2317,7 @@ export function App() {
     appendCompareSession,
     applyRuntimePurposePresetToUi,
     runGraphViaApi,
+    setComparePairArtifactExpectationById,
     setStatus,
     trackCompareBaselinePresetId,
     trackCompareTargetPresetId,
@@ -2357,6 +2492,11 @@ export function App() {
       delete next[pairId];
       return next;
     });
+    setComparePairArtifactExpectationById((prev) => {
+      const next = { ...(prev || {}) };
+      delete next[pairId];
+      return next;
+    });
     setStatus(`deleted history pair: ${String(selectedPair.pairLabel || "-")}`, "status-ok");
   }, [selectedReplayableCompareSession, setStatus]);
 
@@ -2364,6 +2504,7 @@ export function App() {
     const jsonText = serializeCompareSessionExportBundle({
       history: compareSessionHistory,
       pairMetaById: compareReplayPairMetaById,
+      pairArtifactExpectationById: comparePairArtifactExpectationById,
       selectedReplayPairId: selectedCompareReplayPairId,
     });
     try {
@@ -2383,7 +2524,7 @@ export function App() {
       document.body.removeChild(anchor);
       window.URL.revokeObjectURL(url);
       setCompareSessionTransferStatusText(
-        `exported ${Number(compareSessionHistory.length || 0)} history row(s) and ${Number(managedCompareReplayPairCount || 0)} managed pair(s)`
+        `exported ${Number(compareSessionHistory.length || 0)} history row(s), ${Number(managedCompareReplayPairCount || 0)} managed pair(s), and ${Number(Object.keys(comparePairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s)`
       );
       setStatus("compare history exported", "status-ok");
     } catch (err) {
@@ -2391,6 +2532,7 @@ export function App() {
       setStatus(`compare history export failed: ${String(err.message || err)}`, "status-err");
     }
   }, [
+    comparePairArtifactExpectationById,
     compareReplayPairMetaById,
     compareSessionHistory,
     managedCompareReplayPairCount,
@@ -2412,11 +2554,15 @@ export function App() {
         ...(prev && typeof prev === "object" ? prev : {}),
         ...(imported.pairMetaById || {}),
       }));
+      setComparePairArtifactExpectationById((prev) => ({
+        ...(prev && typeof prev === "object" ? prev : {}),
+        ...(imported.pairArtifactExpectationById || {}),
+      }));
       if (String(imported.selectedReplayPairId || "").trim()) {
         setSelectedCompareReplayPairId(String(imported.selectedReplayPairId || "").trim());
       }
       setCompareSessionTransferStatusText(
-        `imported ${Number(imported.history.length || 0)} history row(s) from ${String(sourceLabel || "text")}`
+        `imported ${Number(imported.history.length || 0)} history row(s) and ${Number(Object.keys(imported.pairArtifactExpectationById || {}).length || 0)} artifact expectation snapshot(s) from ${String(sourceLabel || "text")}`
       );
       setStatus(`compare history imported: ${String(sourceLabel || "text")}`, "status-ok");
     } catch (err) {
@@ -2499,6 +2645,7 @@ export function App() {
       `${latestReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionMetaText}`,
+      `${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `selected_history_pair_preview: ${selectedReplayableCompareSessionPreviewText.split("\n").slice(1).join(" | ")}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
@@ -2548,6 +2695,7 @@ export function App() {
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
     selectedReplayableCompareSessionMetaText,
+    selectedReplayableCompareSessionArtifactExpectationSummaryText,
     selectedReplayableCompareSessionPreviewText,
     trackCompareBaselinePresetId,
     trackCompareSelectedPairForecastText,
@@ -2587,6 +2735,7 @@ export function App() {
       `- ${latestReplayableCompareSessionText}`,
       `- ${selectedReplayableCompareSessionText}`,
       `- ${selectedReplayableCompareSessionMetaText}`,
+      `- ${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `- ${pinnedCompareQuickActionSummaryText}`,
       "",
@@ -2608,6 +2757,11 @@ export function App() {
       "## Selected History Pair Preview",
       "```text",
       selectedReplayableCompareSessionPreviewText,
+      "```",
+      "",
+      "## Selected History Pair Artifact Expectation",
+      "```text",
+      selectedReplayableCompareSessionArtifactExpectationText,
       "```",
       "",
       "### Current Runtime Diagnostics",
@@ -2687,6 +2841,8 @@ export function App() {
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
     selectedReplayableCompareSessionMetaText,
+    selectedReplayableCompareSessionArtifactExpectationSummaryText,
+    selectedReplayableCompareSessionArtifactExpectationText,
     selectedReplayableCompareSessionPreviewText,
     managedCompareReplayPairCount,
     setStatus,
@@ -3069,6 +3225,7 @@ export function App() {
         runLatestCompareSessionPair,
         selectedReplayableCompareSessionText,
         selectedReplayableCompareSessionMetaText,
+        selectedReplayableCompareSessionArtifactExpectationText,
         selectedReplayableCompareSessionPreviewText,
         canReplaySelectedCompareSession: Boolean(selectedReplayableCompareSession),
         applySelectedCompareSessionPair,

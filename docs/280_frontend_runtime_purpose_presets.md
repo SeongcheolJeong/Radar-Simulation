@@ -177,10 +177,11 @@ Pinned pairs are also promoted into a top-level `Pinned Pair Quick Actions` bloc
 The same area now supports browser-to-browser transfer:
 
 - `Export History`
-  - downloads a JSON bundle with the recent compare-session rows, selected replayable pair, and pair metadata
+  - downloads a JSON bundle with the recent compare-session rows, selected replayable pair, pair metadata, and pair-scoped artifact expectation snapshots
 - `Import History`
   - merges a previously exported JSON bundle back into the current browser profile
   - restores replayable pairs that were deleted locally, as long as they exist in the imported bundle
+  - restores any observed artifact expectation snapshot that was exported with the same replayable pair id
 
 The Decision Summary and exported brief now include:
 
@@ -194,6 +195,16 @@ The history area also renders a `Selected History Pair Preview` block before exe
 - `planned_deltas`
 
 so the operator can inspect the expected backend/provider/module/license changes for the selected replayable pair before clicking `Run Selected History Pair`.
+
+It now also renders a `Selected History Pair Artifact Expectation` block:
+
+- `artifact_expectation_source: planned_default`
+  - shown before a pair has been observed live
+- `artifact_expectation_source: observed_ready_pair`
+  - shown after a successful preset-pair run or after importing a bundle that already captured the snapshot
+- `required_artifacts(current/compare/total)`
+- `artifact_presence_delta`
+- `optional_artifact_delta`
 
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
