@@ -45,6 +45,8 @@ import { useGraphRunOps } from "./hooks/use_graph_run_ops.mjs";
 const h = React.createElement;
 const LAYOUT_MODE_SET = new Set(["triad", "build", "review", "focus"]);
 const DENSITY_MODE_SET = new Set(["comfortable", "compact"]);
+const COMPARE_SESSION_STORAGE_KEY = "graph_lab_compare_session_history_v1";
+const COMPARE_SESSION_HISTORY_LIMIT = 8;
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -59,6 +61,67 @@ function normalizeLayoutMode(value) {
 function normalizeDensityMode(value) {
   const mode = String(value || "").trim().toLowerCase();
   return DENSITY_MODE_SET.has(mode) ? mode : "comfortable";
+}
+
+function normalizeCompareSessionField(value, maxLength) {
+  return String(value || "").trim().slice(0, Number(maxLength || 160));
+}
+
+function normalizeCompareSessionHistoryEntry(entry, ordinal) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  return {
+    id: normalizeCompareSessionField(row.id, 96) || `cmp_saved_${Number(ordinal) + 1}`,
+    timestampUtc: normalizeCompareSessionField(row.timestampUtc, 64),
+    source: normalizeCompareSessionField(row.source, 48),
+    status: normalizeCompareSessionField(row.status, 48),
+    pairLabel: normalizeCompareSessionField(row.pairLabel, 160),
+    baselinePresetId: normalizeCompareSessionField(row.baselinePresetId, 96),
+    targetPresetId: normalizeCompareSessionField(row.targetPresetId, 96),
+    phase: normalizeCompareSessionField(row.phase, 48),
+    compareRunId: normalizeCompareSessionField(row.compareRunId, 128),
+    currentRunId: normalizeCompareSessionField(row.currentRunId, 128),
+    assessment: normalizeCompareSessionField(row.assessment, 48),
+    note: normalizeCompareSessionField(row.note, 320),
+  };
+}
+
+function loadCompareSessionPrefs() {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return { history: [], selectedReplayPairId: "" };
+    }
+    const raw = String(window.localStorage.getItem(COMPARE_SESSION_STORAGE_KEY) || "").trim();
+    if (!raw) {
+      return { history: [], selectedReplayPairId: "" };
+    }
+    const parsed = JSON.parse(raw);
+    const history = (Array.isArray(parsed?.history) ? parsed.history : [])
+      .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
+      .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
+    return {
+      history,
+      selectedReplayPairId: normalizeCompareSessionField(parsed?.selectedReplayPairId, 192),
+    };
+  } catch (_) {
+    return { history: [], selectedReplayPairId: "" };
+  }
+}
+
+function saveCompareSessionPrefs(prefs) {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    const payload = prefs && typeof prefs === "object" ? prefs : {};
+    const history = (Array.isArray(payload.history) ? payload.history : [])
+      .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
+      .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
+    const selectedReplayPairId = normalizeCompareSessionField(payload.selectedReplayPairId, 192);
+    window.localStorage.setItem(
+      COMPARE_SESSION_STORAGE_KEY,
+      JSON.stringify({ history, selectedReplayPairId })
+    );
+  } catch (_) {
+    // localStorage may be blocked; ignore and continue with in-memory state
+  }
 }
 
 function summarizeRuntimeTrack(summary, fallbackConfig) {
@@ -382,6 +445,7 @@ function isRuntimeBlockedError(message) {
 
 export function App() {
   const params = new URLSearchParams(window.location.search);
+  const initialCompareSessionPrefs = React.useMemo(() => loadCompareSessionPrefs(), []);
   const [layoutMode, setLayoutMode] = React.useState(
     normalizeLayoutMode(params.get("view") || "triad")
   );
@@ -504,8 +568,12 @@ export function App() {
   const [lastRegressionExport, setLastRegressionExport] = React.useState(null);
   const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
   const [trackCompareRunnerStatusText, setTrackCompareRunnerStatusText] = React.useState("-");
-  const [compareSessionHistory, setCompareSessionHistory] = React.useState([]);
-  const [selectedCompareReplayPairId, setSelectedCompareReplayPairId] = React.useState("");
+  const [compareSessionHistory, setCompareSessionHistory] = React.useState(
+    () => initialCompareSessionPrefs.history
+  );
+  const [selectedCompareReplayPairId, setSelectedCompareReplayPairId] = React.useState(
+    () => initialCompareSessionPrefs.selectedReplayPairId
+  );
   const [trackCompareBaselinePresetId, setTrackCompareBaselinePresetId] = React.useState(
     RUNTIME_PURPOSE_PRESET_LOW_FIDELITY
   );
@@ -1533,6 +1601,13 @@ export function App() {
     if (selectedId === firstId) return;
     setSelectedCompareReplayPairId(firstId);
   }, [compareReplayPairOptions, selectedCompareReplayPairId]);
+
+  React.useEffect(() => {
+    saveCompareSessionPrefs({
+      history: compareSessionHistory,
+      selectedReplayPairId: selectedCompareReplayPairId,
+    });
+  }, [compareSessionHistory, selectedCompareReplayPairId]);
 
   const {
     runGraphViaApi,

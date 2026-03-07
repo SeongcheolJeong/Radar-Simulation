@@ -144,6 +144,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_history_checked": False,
             "compare_session_replay_checked": False,
             "compare_session_selector_checked": False,
+            "compare_session_persistence_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -494,10 +495,22 @@ def run(args: argparse.Namespace) -> int:
                 )
 
                 page.get_by_role("button", name="Run Session").click()
-                page.get_by_text("regression session", exact=False).first.wait_for(timeout=20_000)
+                page.wait_for_function(
+                    """() => {
+                        const text = (document.body && document.body.innerText) || "";
+                        return text.includes("regression_session_id=") || text.includes("regression session completed");
+                    }""",
+                    timeout=30_000,
+                )
 
                 page.get_by_role("button", name="Export Session").click()
-                page.get_by_text("regression export", exact=False).first.wait_for(timeout=20_000)
+                page.wait_for_function(
+                    """() => {
+                        const text = (document.body && document.body.innerText) || "";
+                        return text.includes("regression_export_id=") || text.includes("regression export completed");
+                    }""",
+                    timeout=30_000,
+                )
 
                 with page.expect_download(timeout=20_000) as dl_info:
                     page.get_by_role("button", name="Export Brief").click()
@@ -596,6 +609,26 @@ def run(args: argparse.Namespace) -> int:
                         caret="hide",
                         scale="css",
                     )
+
+                persisted_pair_value = history_select.input_value()
+                page.reload(wait_until="domcontentloaded", timeout=60_000)
+                page.locator("header.topbar").first.wait_for(timeout=60_000)
+                reloaded_history_field = field_locator(page, "Compare Session History")
+                reloaded_history_field.wait_for(timeout=30_000)
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("source=preset_pair") && text.includes("source=pin_current");
+                    }""",
+                    timeout=20_000,
+                )
+                reloaded_history_select = reloaded_history_field.locator("select").first
+                if reloaded_history_select.input_value() != persisted_pair_value:
+                    raise AssertionError("compare session history selector did not persist after reload")
+                report["runtime_controls"]["compare_session_persistence_checked"] = True
 
                 report["playwright_runtime_ready"] = True
                 report["e2e_pass"] = True

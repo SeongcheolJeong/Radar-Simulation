@@ -154,6 +154,8 @@ The history block also provides:
 - `Run Selected History Pair`
   - reruns the chosen replayable pair from history instead of always using the newest one
 
+The compare-session history and the selected replayable pair now persist in browser `localStorage`, so a page refresh keeps the recent compare workflow intact on the same machine/browser profile.
+
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
 - `aligned`
