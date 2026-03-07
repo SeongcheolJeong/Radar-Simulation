@@ -449,7 +449,7 @@ def run(args: argparse.Namespace) -> int:
                 default_mirror_ready = False
                 for _ in range(40):
                     decision_artifact_state_text = decision_artifact_state_field.inner_text()
-                    if "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty" in decision_artifact_state_text:
+                    if "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty | health:idle" in decision_artifact_state_text:
                         default_mirror_ready = True
                         break
                     page.wait_for_timeout(250)
@@ -481,6 +481,7 @@ def run(args: argparse.Namespace) -> int:
                     or "reset:clean" not in artifact_text
                     or "audit:idle" not in artifact_text
                     or "continuity:empty" not in artifact_text
+                    or "health:idle" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render default status badges")
                 if (
@@ -491,7 +492,7 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     raise AssertionError("artifact inspector did not render selected history pair artifact expectation")
                 if (
-                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty" not in decision_artifact_state_text
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty | health:idle" not in decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
@@ -523,7 +524,7 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "shape.adc:" not in collapsed_from_decision_artifact_text
                         and "artifact_expectation_source:" not in collapsed_from_decision_artifact_text
-                        and "artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed | history:collapsed | reset:required | audit:tracking | continuity:full" in collapsed_from_decision_mirror_text
+                        and "artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed | history:collapsed | reset:required | audit:tracking | continuity:full | health:healthy" in collapsed_from_decision_mirror_text
                         and "artifact_inspector_last_action:" in collapsed_from_decision_mirror_text
                         and "decision:collapse_evidence" in collapsed_from_decision_mirror_text
                     ):
@@ -562,7 +563,7 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "shape.adc:" in expanded_from_decision_artifact_text
                         and "artifact_expectation_source:" in expanded_from_decision_artifact_text
-                        and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:tracking | continuity:full" in expanded_from_decision_mirror_text
+                        and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:tracking | continuity:full | health:healthy" in expanded_from_decision_mirror_text
                         and "artifact_inspector_last_action:" in expanded_from_decision_mirror_text
                         and "decision:expand_evidence" in expanded_from_decision_mirror_text
                     ):
@@ -691,7 +692,7 @@ def run(args: argparse.Namespace) -> int:
                 for _ in range(40):
                     reset_decision_artifact_state_text = decision_artifact_state_field.inner_text()
                     if (
-                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:trimmed | continuity:tail_only" in reset_decision_artifact_state_text
+                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:trimmed | continuity:tail_only | health:truncated" in reset_decision_artifact_state_text
                         and "artifact_inspector_layout_state: default" in reset_decision_artifact_state_text
                         and "artifact_inspector_last_action:" in reset_decision_artifact_state_text
                         and "decision:reset_layout" in reset_decision_artifact_state_text
@@ -732,7 +733,7 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     raise AssertionError("artifact inspector reset layout did not restore expanded detail state")
                 if (
-                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:trimmed | continuity:tail_only" not in reset_decision_artifact_state_text
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:trimmed | continuity:tail_only | health:truncated" not in reset_decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in reset_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reset_decision_artifact_state_text
                     or "artifact_inspector_last_action:" not in reset_decision_artifact_state_text
@@ -1515,7 +1516,7 @@ def run(args: argparse.Namespace) -> int:
                 for _ in range(40):
                     reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
                     if (
-                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty" in reloaded_decision_artifact_state_text
+                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty | health:idle" in reloaded_decision_artifact_state_text
                         and "artifact_inspector_layout_state: default" in reloaded_decision_artifact_state_text
                     ):
                         reloaded_mirror_ready = True
@@ -1525,7 +1526,7 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane did not persist mirrored artifact inspector state after reload")
                 reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
                 if (
-                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty" not in reloaded_decision_artifact_state_text
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | audit:idle | continuity:empty | health:idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text

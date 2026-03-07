@@ -898,6 +898,11 @@ function toneForArtifactInspectorStatusBadge(label) {
     if (text.endsWith("full")) return "status-ok";
     return "status-neutral";
   }
+  if (text.startsWith("health:")) {
+    if (text.endsWith("truncated")) return "status-warn";
+    if (text.endsWith("healthy")) return "status-ok";
+    return "status-neutral";
+  }
   return "status-neutral";
 }
 

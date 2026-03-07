@@ -61,6 +61,7 @@ function buildArtifactInspectorStatusBadges({
   historyArtifactExpectationExpanded,
   auditState,
   auditContinuity,
+  auditHealth,
 }) {
   return [
     {
@@ -99,6 +100,16 @@ function buildArtifactInspectorStatusBadges({
         String(auditContinuity || "").trim() === "tail_only"
           ? "status-warn"
           : String(auditContinuity || "").trim() === "full"
+            ? "status-ok"
+            : "status-neutral"
+      ),
+    },
+    {
+      label: `health:${String(auditHealth || "idle").trim() || "idle"}`,
+      tone: (
+        String(auditHealth || "").trim() === "truncated"
+          ? "status-warn"
+          : String(auditHealth || "").trim() === "healthy"
             ? "status-ok"
             : "status-neutral"
       ),
@@ -271,6 +282,12 @@ function buildArtifactInspectorAuditHealthText(value) {
     return "audit_health: truncated | trust=tail_only | recommendation=clear_if_full_history_needed";
   }
   return "audit_health: healthy | trust=full_history | recommendation=keep_tracking";
+}
+
+function extractArtifactInspectorAuditHealthState(value) {
+  const text = String(buildArtifactInspectorAuditHealthText(value) || "").trim();
+  const match = /^audit_health:\s*([a-z_]+)/i.exec(text);
+  return String(match?.[1] || "idle").trim().toLowerCase() || "idle";
 }
 
 function clearArtifactInspectorActionTrailState(value) {
@@ -495,6 +512,7 @@ export function ArtifactInspectorPanel({
       .trim()
       .toLowerCase();
     const auditContinuity = extractArtifactInspectorAuditContinuityState(artifactInspectorPrefs);
+    const auditHealth = extractArtifactInspectorAuditHealthState(artifactInspectorPrefs);
     return buildArtifactInspectorStatusBadges({
       layoutDefault,
       probesDefault: artifactInspectorProbeState.probesDefault === true,
@@ -502,6 +520,7 @@ export function ArtifactInspectorPanel({
       historyArtifactExpectationExpanded,
       auditState,
       auditContinuity,
+      auditHealth,
     });
   }, [
     artifactInspectorPrefs,
