@@ -376,6 +376,7 @@ The `Decision Pane` now mirrors that live state as a chip row plus compact hint 
 - `Collapse Inspector Evidence`
 - `Expand Inspector Evidence`
 - `Reset Inspector Layout`
+- `Clear Action Trail`
 
 so the operator can collapse, restore, or fully reset the `Artifact Inspector` layout without scrolling back to that panel.
 
@@ -384,9 +385,11 @@ Those mirror controls are now also state-aware:
 - `Expand Inspector Evidence` is disabled when the inspector is already fully expanded
 - `Collapse Inspector Evidence` is disabled when both evidence sections are already collapsed
 - `Reset Inspector Layout` is disabled when the inspector is already in canonical default layout
+- `Clear Action Trail` is disabled when there is no stored inspector action history
 - the mirror exports an `artifact_inspector_controls:` hint line so the same actionability state survives in the decision brief
 - the mirror also exports `artifact_inspector_last_action:` as `seq=N | <source>` so the last collapse/expand/reset source and ordering stay visible after reload and in the decision brief
 - the mirror also exports `artifact_inspector_recent_actions:` so the newest three inspector actions remain visible as a short audit trail
+- the mirror also exports `artifact_inspector_audit_controls:` so brief/export readers can tell whether the action trail is currently clearable
 
 The `Runtime Compare` summary inside the brief now also carries:
 

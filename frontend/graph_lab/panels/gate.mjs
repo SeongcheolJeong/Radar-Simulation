@@ -116,7 +116,9 @@ export function DecisionPane({
   artifactInspectorDecisionProbeStateText,
   artifactInspectorDecisionLastActionText,
   artifactInspectorDecisionRecentActionsText,
+  artifactInspectorDecisionAuditControlState,
   artifactInspectorDecisionControlState,
+  clearArtifactInspectorActionTrailFromDecisionPane,
   collapseArtifactInspectorEvidenceFromDecisionPane,
   expandArtifactInspectorEvidenceFromDecisionPane,
   resetArtifactInspectorLayoutFromDecisionPane,
@@ -179,6 +181,12 @@ export function DecisionPane({
           onClick: resetArtifactInspectorLayoutFromDecisionPane,
           disabled: artifactInspectorDecisionControlState?.resetDisabled === true,
         }, "Reset Inspector Layout"),
+        h("button", {
+          className: "btn",
+          key: "decision_clear_artifact_inspector_action_trail",
+          onClick: clearArtifactInspectorActionTrailFromDecisionPane,
+          disabled: artifactInspectorDecisionAuditControlState?.clearDisabled === true,
+        }, "Clear Action Trail"),
       ]),
       h("div", { className: "chip-list", key: "decision_artifact_inspector_live_state_chips" }, (
         Array.isArray(artifactInspectorDecisionStatusBadgeRows) && artifactInspectorDecisionStatusBadgeRows.length > 0
@@ -195,6 +203,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_probe_hint" }, String(artifactInspectorDecisionProbeStateText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_action_hint" }, String(artifactInspectorDecisionLastActionText || "-")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_recent_actions_hint" }, String(artifactInspectorDecisionRecentActionsText || "-")),
+      h("div", { className: "hint", key: "decision_artifact_inspector_live_state_audit_controls_hint" }, String(artifactInspectorDecisionAuditControlState?.text || "artifact_inspector_audit_controls: -")),
       h("div", { className: "hint", key: "decision_artifact_inspector_live_state_controls_hint" }, String(artifactInspectorDecisionControlState?.text || "artifact_inspector_controls: -")),
     ]),
     h("div", { className: "field", key: "decision_preset_pair_compare" }, [

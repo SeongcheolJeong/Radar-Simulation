@@ -183,6 +183,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_probe_state_checked": False,
             "artifact_inspector_last_action_checked": False,
             "artifact_inspector_recent_actions_checked": False,
+            "artifact_inspector_clear_action_trail_checked": False,
             "artifact_inspector_badge_export_checked": False,
             "decision_artifact_inspector_state_checked": False,
             "decision_artifact_inspector_controls_checked": False,
@@ -441,6 +442,7 @@ def run(args: argparse.Namespace) -> int:
                 decision_collapse_button = decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
                 decision_expand_button = decision_artifact_state_field.get_by_role("button", name="Expand Inspector Evidence")
                 decision_reset_button = decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout")
+                decision_clear_audit_button = decision_artifact_state_field.get_by_role("button", name="Clear Action Trail")
                 default_mirror_ready = False
                 for _ in range(40):
                     decision_artifact_state_text = decision_artifact_state_field.inner_text()
@@ -483,6 +485,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in decision_artifact_state_text
+                    or "artifact_inspector_audit_controls: clear=disabled" not in decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in decision_artifact_state_text
                 ):
                     raise AssertionError("decision pane did not mirror default artifact inspector state")
@@ -492,6 +495,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane expand button should be disabled in default state")
                 if not decision_reset_button.is_disabled():
                     raise AssertionError("decision pane reset button should be disabled in default state")
+                if not decision_clear_audit_button.is_disabled():
+                    raise AssertionError("decision pane clear-audit button should be disabled in default state")
                 decision_collapse_button.click()
                 collapsed_from_decision_ready = False
                 collapsed_from_decision_artifact_text = ""
@@ -527,6 +532,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane expand button should be enabled after collapsing all evidence")
                 if decision_reset_button.is_disabled():
                     raise AssertionError("decision pane reset button should be enabled after collapsing all evidence")
+                if decision_clear_audit_button.is_disabled():
+                    raise AssertionError("decision pane clear-audit button should be enabled after audit entries exist")
                 decision_expand_button.click()
                 expanded_from_decision_ready = False
                 expanded_from_decision_artifact_text = ""
@@ -562,6 +569,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane expand button should be disabled again after expanding evidence")
                 if not decision_reset_button.is_disabled():
                     raise AssertionError("decision pane reset button should be disabled again after expanding evidence")
+                if decision_clear_audit_button.is_disabled():
+                    raise AssertionError("decision pane clear-audit button should remain enabled while audit entries exist")
                 artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
                 collapsed_live_ready = False
                 collapsed_live_artifact_text = ""
@@ -693,10 +702,33 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state: default" not in reset_decision_artifact_state_text
                     or "artifact_inspector_last_action:" not in reset_decision_artifact_state_text
                     or "artifact_inspector_recent_actions:" not in reset_decision_artifact_state_text
+                    or "artifact_inspector_audit_controls: clear=enabled" not in reset_decision_artifact_state_text
                     or "decision:reset_layout" not in reset_decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reset_decision_artifact_state_text
                 ):
                     raise AssertionError("decision pane did not mirror reset artifact inspector state")
+                if decision_clear_audit_button.is_disabled():
+                    raise AssertionError("decision pane clear-audit button should be enabled after reset leaves audit history")
+                decision_clear_audit_button.click()
+                cleared_audit_ready = False
+                cleared_audit_artifact_text = ""
+                for _ in range(40):
+                    cleared_audit_artifact_text = artifact_field.inner_text()
+                    cleared_audit_mirror_text = decision_artifact_state_field.inner_text()
+                    if (
+                        "last_action: seq=0 | idle" in cleared_audit_artifact_text
+                        and "recent_actions: none" in cleared_audit_artifact_text
+                        and "artifact_inspector_last_action: seq=0 | idle" in cleared_audit_mirror_text
+                        and "artifact_inspector_recent_actions: none" in cleared_audit_mirror_text
+                        and "artifact_inspector_audit_controls: clear=disabled" in cleared_audit_mirror_text
+                    ):
+                        cleared_audit_ready = True
+                        break
+                    page.wait_for_timeout(250)
+                if not cleared_audit_ready:
+                    raise AssertionError("decision pane clear-audit did not reset artifact inspector audit trail")
+                if not decision_clear_audit_button.is_disabled():
+                    raise AssertionError("decision pane clear-audit button should be disabled after clearing audit trail")
                 report["runtime_controls"]["compare_assessment_checked"] = True
                 report["runtime_controls"]["artifact_inspector_expectation_checked"] = True
                 report["runtime_controls"]["artifact_inspector_folds_checked"] = True
@@ -706,6 +738,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
                 report["runtime_controls"]["artifact_inspector_last_action_checked"] = True
                 report["runtime_controls"]["artifact_inspector_recent_actions_checked"] = True
+                report["runtime_controls"]["artifact_inspector_clear_action_trail_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_state_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_controls_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_fold_controls_checked"] = True
@@ -1259,6 +1292,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_probe_state:" not in brief_text
                     or "artifact_inspector_last_action:" not in brief_text
                     or "artifact_inspector_recent_actions:" not in brief_text
+                    or "artifact_inspector_audit_controls:" not in brief_text
                     or "artifact_inspector_controls:" not in brief_text
                 ):
                     raise AssertionError("decision brief did not include artifact inspector state summary")
@@ -1386,9 +1420,8 @@ def run(args: argparse.Namespace) -> int:
                     or "history=expanded" not in reloaded_artifact_text
                     or "reset_required=no" not in reloaded_artifact_text
                     or "probe_state: default" not in reloaded_artifact_text
-                    or "last_action:" not in reloaded_artifact_text
-                    or "recent_actions:" not in reloaded_artifact_text
-                    or "decision:reset_layout" not in reloaded_artifact_text
+                    or "last_action: seq=0 | idle" not in reloaded_artifact_text
+                    or "recent_actions: none" not in reloaded_artifact_text
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not update layout status")
                 if (
@@ -1403,6 +1436,7 @@ def run(args: argparse.Namespace) -> int:
                 reloaded_decision_collapse_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
                 reloaded_decision_expand_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Expand Inspector Evidence")
                 reloaded_decision_reset_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Reset Inspector Layout")
+                reloaded_decision_clear_audit_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Clear Action Trail")
                 reloaded_mirror_ready = False
                 for _ in range(40):
                     reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
@@ -1420,9 +1454,9 @@ def run(args: argparse.Namespace) -> int:
                     "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
-                    or "artifact_inspector_last_action:" not in reloaded_decision_artifact_state_text
-                    or "artifact_inspector_recent_actions:" not in reloaded_decision_artifact_state_text
-                    or "decision:reset_layout" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_recent_actions: none" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_audit_controls: clear=disabled" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reloaded_decision_artifact_state_text
                 ):
                     raise AssertionError("decision pane did not persist mirrored artifact inspector state after reload")
@@ -1432,6 +1466,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane expand button should remain disabled after reload")
                 if not reloaded_decision_reset_button.is_disabled():
                     raise AssertionError("decision pane reset button should remain disabled after reload")
+                if not reloaded_decision_clear_audit_button.is_disabled():
+                    raise AssertionError("decision pane clear-audit button should remain disabled after reload")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")

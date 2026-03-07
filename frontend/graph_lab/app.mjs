@@ -944,6 +944,15 @@ function buildArtifactInspectorMirrorControlState(statusBadgeRows) {
   };
 }
 
+function buildArtifactInspectorAuditControlState(recentActionsText) {
+  const text = String(recentActionsText || "").trim();
+  const clearDisabled = !text || text === "recent_actions: none";
+  return {
+    clearDisabled,
+    text: `artifact_inspector_audit_controls: clear=${clearDisabled ? "disabled" : "enabled"}`,
+  };
+}
+
 function buildCompareSessionImportPreviewSummary(
   stagedEntry,
   existingHistoryEntries,
@@ -2900,6 +2909,10 @@ export function App() {
     () => buildArtifactInspectorMirrorControlState(artifactInspectorDecisionStatusBadgeRows),
     [artifactInspectorDecisionStatusBadgeRows]
   );
+  const artifactInspectorDecisionAuditControlState = React.useMemo(
+    () => buildArtifactInspectorAuditControlState(artifactInspectorStatusSummary.recentActionsText),
+    [artifactInspectorStatusSummary.recentActionsText]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -2949,6 +2962,15 @@ export function App() {
         lastActionLabel: "decision:reset_layout",
       },
       "artifact inspector layout reset from decision pane",
+      "status-ok"
+    );
+  }, [issueArtifactInspectorControlRequest]);
+  const clearArtifactInspectorActionTrailFromDecisionPane = React.useCallback(() => {
+    issueArtifactInspectorControlRequest(
+      {
+        clearActionTrail: true,
+      },
+      "artifact inspector action trail cleared from decision pane",
       "status-ok"
     );
   }, [issueArtifactInspectorControlRequest]);
@@ -4085,6 +4107,7 @@ export function App() {
       `${artifactInspectorDecisionProbeStateText}`,
       `${artifactInspectorDecisionLastActionText}`,
       `${artifactInspectorDecisionRecentActionsText}`,
+      `${artifactInspectorDecisionAuditControlState.text}`,
       `${artifactInspectorDecisionControlState.text}`,
       `gate_failure_count: ${Number(failureRows.length || 0)}`,
       `path_count_delta(current-compare): ${runCompareSummary.available ? formatSigned(runCompareSummary.pathCountDelta) : "-"}`,
@@ -4131,6 +4154,7 @@ export function App() {
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
     artifactInspectorDecisionRecentActionsText,
+    artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
     graphRunSummary,
     latestCompareSessionText,
@@ -4250,6 +4274,7 @@ export function App() {
       artifactInspectorDecisionProbeStateText,
       artifactInspectorDecisionLastActionText,
       artifactInspectorDecisionRecentActionsText,
+      artifactInspectorDecisionAuditControlState.text,
       artifactInspectorDecisionControlState.text,
       "```",
       "",
@@ -4314,6 +4339,7 @@ export function App() {
     artifactInspectorDecisionProbeStateText,
     artifactInspectorDecisionLastActionText,
     artifactInspectorDecisionRecentActionsText,
+    artifactInspectorDecisionAuditControlState.text,
     artifactInspectorDecisionControlState.text,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
@@ -4759,7 +4785,9 @@ export function App() {
         artifactInspectorDecisionProbeStateText,
         artifactInspectorDecisionLastActionText,
         artifactInspectorDecisionRecentActionsText,
+        artifactInspectorDecisionAuditControlState,
         artifactInspectorDecisionControlState,
+        clearArtifactInspectorActionTrailFromDecisionPane,
         collapseArtifactInspectorEvidenceFromDecisionPane,
         expandArtifactInspectorEvidenceFromDecisionPane,
         resetArtifactInspectorLayoutFromDecisionPane,

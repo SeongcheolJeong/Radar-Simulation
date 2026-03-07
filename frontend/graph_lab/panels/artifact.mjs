@@ -150,6 +150,16 @@ function buildArtifactInspectorRecentActionsText(entries) {
   return `recent_actions: ${rows.map((entry) => `[${entry}]`).join(" ")}`;
 }
 
+function clearArtifactInspectorActionTrailState(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  return {
+    ...prefs,
+    lastActionSeq: 0,
+    lastActionText: "last_action: seq=0 | idle",
+    recentActionEntries: [],
+  };
+}
+
 function buildArtifactInspectorLastActionUpdate(value, label) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   const nextSeq = Math.max(0, Number(prefs.lastActionSeq || 0)) + 1;
@@ -379,6 +389,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorRecentActionsText(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorHasRecentActions = React.useMemo(
+    () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
+    [artifactInspectorPrefs]
+  );
   React.useEffect(() => {
     if (typeof onArtifactInspectorStatusChange !== "function") return;
     onArtifactInspectorStatusChange({
@@ -439,6 +453,13 @@ export function ArtifactInspectorPanel({
     saveArtifactInspectorPrefs(updated);
     resetArtifactInspectorProbeControls();
   }, [resetArtifactInspectorProbeControls]);
+  const clearArtifactInspectorActionTrail = React.useCallback(() => {
+    setArtifactInspectorPrefs((prev) => {
+      const updated = clearArtifactInspectorActionTrailState(prev);
+      saveArtifactInspectorPrefs(updated);
+      return updated;
+    });
+  }, []);
   React.useEffect(() => {
     const command = controlRequest && typeof controlRequest === "object" ? controlRequest : null;
     const nonce = Number(command?.nonce);
@@ -447,9 +468,12 @@ export function ArtifactInspectorPanel({
     lastAppliedControlNonceRef.current = nonce;
     setArtifactInspectorPrefs((prev) => {
       const next = applyArtifactInspectorPrefsCommand(prev, command);
-      const updated = {
+      let updated = {
         ...next,
       };
+      if (command.clearActionTrail === true) {
+        updated = clearArtifactInspectorActionTrailState(updated);
+      }
       if (String(command?.lastActionLabel || "").trim()) {
         Object.assign(updated, buildArtifactInspectorLastActionUpdate(next, String(command.lastActionLabel).trim()));
       }
@@ -528,6 +552,12 @@ export function ArtifactInspectorPanel({
           className: "btn",
           onClick: resetArtifactInspectorLayout,
         }, "Reset Layout"),
+        h("button", {
+          key: "clear_artifact_inspector_action_trail",
+          className: "btn",
+          onClick: clearArtifactInspectorActionTrail,
+          disabled: !artifactInspectorHasRecentActions,
+        }, "Clear Action Trail"),
       ]),
       h("div", { className: "chip-list", key: "artifact_inspector_status_chips" }, (
         Array.isArray(artifactInspectorStatusBadges) && artifactInspectorStatusBadges.length > 0
