@@ -305,6 +305,21 @@ function buildArtifactInspectorAuditHealthReasonText(value) {
   return "audit_health_reason: full_history_retained | source=complete_window";
 }
 
+function buildArtifactInspectorAuditNextActionText(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const retained = Array.isArray(prefs.recentActionEntries) ? prefs.recentActionEntries.length : 0;
+  const total = Math.max(0, Number(prefs.actionTrailTotalCount || 0));
+  const trimmed = Math.max(0, total - retained);
+  const continuity = extractArtifactInspectorAuditContinuityState(value);
+  if (total <= 0) {
+    return "audit_next_action: none | trigger=idle";
+  }
+  if (trimmed > 0 || continuity === "tail_only") {
+    return "audit_next_action: clear_if_full_history_needed | trigger=tail_only_retained";
+  }
+  return "audit_next_action: keep_tracking | trigger=full_history_retained";
+}
+
 function clearArtifactInspectorActionTrailState(value) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   return {
@@ -585,6 +600,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorAuditHealthReasonText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditNextActionText = React.useMemo(
+    () => buildArtifactInspectorAuditNextActionText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -603,12 +622,14 @@ export function ArtifactInspectorPanel({
       auditContinuityText: artifactInspectorAuditContinuityText,
       auditHealthText: artifactInspectorAuditHealthText,
       auditHealthReasonText: artifactInspectorAuditHealthReasonText,
+      auditNextActionText: artifactInspectorAuditNextActionText,
       auditSummaryText: artifactInspectorAuditSummaryText,
     });
   }, [
     artifactInspectorAuditCapacityText,
     artifactInspectorAuditHealthText,
     artifactInspectorAuditHealthReasonText,
+    artifactInspectorAuditNextActionText,
     artifactInspectorAuditContinuityText,
     artifactInspectorAuditStateText,
     artifactInspectorAuditWindowText,
@@ -772,6 +793,10 @@ export function ArtifactInspectorPanel({
           key: "audit_health_reason",
           style: { color: "#8fb3c9" },
         }, artifactInspectorAuditHealthReasonText),
+        h("div", {
+          key: "audit_next_action",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditNextActionText),
         h("div", {
           key: "audit_summary",
           style: { color: "#8fb3c9" },

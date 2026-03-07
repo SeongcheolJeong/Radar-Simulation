@@ -1,16 +1,16 @@
 # Radar Decision Brief
 
-- generated_at_utc: 2026-03-07T18:36:36.367Z
+- generated_at_utc: 2026-03-07T18:43:30.167Z
 - graph_id: radar_minimal_v1
 
 ## Decision Snapshot
 ```text
-generated_at_utc: 2026-03-07T18:36:25.461Z
+generated_at_utc: 2026-03-07T18:43:19.667Z
 decision: UNKNOWN
 recommendation: unknown
 baseline_id: playwright_baseline
-current_run_id: grun_20260307_183624_ef4494d9
-compare_run_id: grun_20260307_183623_2399726d
+current_run_id: grun_20260307_184319_b8b0bd68
+compare_run_id: grun_20260307_184317_a58313aa
 compare_runner_status: ready
 selected_preset_pair: low_fidelity_radarsimpy_ffd -> high_fidelity_po_sbr_rt
 selected_preset_pair_label: Low Fidelity: RadarSimPy + FFD -> High Fidelity: PO-SBR
@@ -21,7 +21,7 @@ retention_group_hint: none
 retention_pairs(latest/extra/dropped): Low Fidelity Saved | low_fidelity_radarsimpy_ffd -> high_fidelity_po_sbr_rt | Legacy Fixture | Sionna -> Current | Legacy Fixture | PO-SBR -> Current / - / -
 managed_history_pair_count: 3
 pinned_quick_actions: Low Fidelity Saved | Legacy Fixture | PO-SBR -> Current
-latest_compare_session: 2026-03-07T18:36:25.457Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_183623_2399726d | current=grun_20260307_183624_ef4494d9 | assessment=review
+latest_compare_session: 2026-03-07T18:43:19.666Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_184317_a58313aa | current=grun_20260307_184319_b8b0bd68 | assessment=review
 latest_replayable_pair: Low Fidelity Saved | pinned=true
 selected_history_pair: Low Fidelity Saved
 selected_history_pair_meta: pinned=true | custom_label=Low Fidelity Saved
@@ -48,6 +48,7 @@ artifact_inspector_audit_window: retained_seqs=none | newest=0 | oldest=0 | lost
 artifact_inspector_audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty
 artifact_inspector_audit_health: idle | trust=empty | recommendation=not_needed
 artifact_inspector_audit_health_reason: no_history | source=idle
+artifact_inspector_audit_next_action: none | trigger=idle
 artifact_inspector_audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty
 artifact_inspector_audit_controls: clear=disabled | recommended=not_needed | reason=idle
 artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled | next_action: collapse_if_you_need_focus
@@ -62,8 +63,8 @@ ra_peak_delta(range/angle): +0/+3
 - selected_preset_pair_label: Low Fidelity: RadarSimPy + FFD -> High Fidelity: PO-SBR
 - current_track: backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
 - compare_track: backend=radarsimpy_rt | sim=radarsimpy.sim_radar | mux=tdm | ant=isotropic | license=set
-- compare_runner_status: track_compare_runner=ready | mode=preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | target_preset=current_config | compare=grun_20260307_183623_2399726d | current=grun_20260307_183624_ef4494d9
-- compare_status: compare_mode=runner_preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | run=grun_20260307_183623_2399726d | status=completed
+- compare_runner_status: track_compare_runner=ready | mode=preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | target_preset=current_config | compare=grun_20260307_184317_a58313aa | current=grun_20260307_184319_b8b0bd68
+- compare_status: compare_mode=runner_preset_pair | baseline_preset=low_fidelity_radarsimpy_ffd | run=grun_20260307_184317_a58313aa | status=completed
 - latest_replayable_pair: Low Fidelity Saved | pinned=true
 - selected_history_pair: Low Fidelity Saved
 - selected_history_pair_meta: pinned=true | custom_label=Low Fidelity Saved
@@ -96,7 +97,7 @@ pinned_quick_action_count: 2
   badges: assessment:review | fp:delta:5/5 | source:observed
   preview: baseline_forecast: state:planned | modules:planned:1 | sim:radarsimpy_adc | license:none | target_forecast: state:planned | sim:auto | license:none | planned_deltas: | - backend: radarsimpy_rt -> analytic_targets | - provider: avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths -> - | - simulation_mode: radarsimpy_adc -> auto | - required_modules: radarsimpy -> - | - target_mode: current_config -> backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
   artifact_expectation: source=observed_ready_pair | assessment=review | required=4/4/4 | artifact_delta=none | path_hashes=5
-  artifact_path_hashes: path_hashes=5 | path_list_json:f21a3a8a/83af34b2 | adc_cube_npz:d66a384e/39f23596
+  artifact_path_hashes: path_hashes=5 | path_list_json:e83ae292/beb36bad | adc_cube_npz:64793d76/5b69d23d
 - [2] Legacy Fixture | PO-SBR -> Current | baseline=high_fidelity_po_sbr_rt | target=current_config
   badges: assessment:review | fp:delta:2/2 | source:imported_legacy_fixture
   preview: baseline_forecast: state:planned | modules:planned:2 | sim:auto | license:none | target_forecast: state:planned | sim:auto | license:none | planned_deltas: | - backend: po_sbr_rt -> analytic_targets | - provider: avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr -> - | - required_modules: rtxpy,igl -> - | - target_mode: current_config -> backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
@@ -115,12 +116,12 @@ compare_history_transfer_compact: transfer:import | compat:legacy_compatible | n
 selected_history_pair_retention: state=latest_window | managed=pinned=true,saved=true | rows(visible/latest/retained)=5/5/5
 retention_window: keep_latest=8 | policy=retain_8 | pair=Low Fidelity Saved
 
-[1] 2026-03-07T18:36:25.457Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_183623_2399726d | current=grun_20260307_183624_ef4494d9 | assessment=review
-[2] 2026-03-07T18:36:24.772Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_183622_e006791c | current=grun_20260307_183623_e934b2e1 | assessment=review
-[3] 2026-03-07T18:36:24.319Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_183622_8316d1a5 | current=grun_20260307_183622_e08a76d7 | assessment=review
-[4] 2026-03-07T18:36:23.700Z | source=pin_current | status=pinned | pair=low_fidelity_radarsimpy_ffd -> high_fidelity_po_sbr_rt | compare=grun_20260307_183622_e006791c
-[5] 2026-03-07T18:36:19.644Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_183618_dac87062 | current=grun_20260307_183619_96a0c328 | assessment=review
-[6] 2026-03-07T18:36:18.068Z | source=pin_current | status=pinned | pair=Low Fidelity Saved | pin=yes | compare=grun_20260307_183616_d397f76e
+[1] 2026-03-07T18:43:19.666Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_184317_a58313aa | current=grun_20260307_184319_b8b0bd68 | assessment=review
+[2] 2026-03-07T18:43:19.122Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_184316_a3eece2b | current=grun_20260307_184317_f8231622 | assessment=review
+[3] 2026-03-07T18:43:18.719Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_184316_66e93013 | current=grun_20260307_184316_aa550eb1 | assessment=review
+[4] 2026-03-07T18:43:17.466Z | source=pin_current | status=pinned | pair=low_fidelity_radarsimpy_ffd -> high_fidelity_po_sbr_rt | compare=grun_20260307_184316_66e93013
+[5] 2026-03-07T18:43:14.210Z | source=preset_pair | status=ready | pair=Low Fidelity Saved | pin=yes | phase=current | compare=grun_20260307_184313_bd8254b9 | current=grun_20260307_184313_4fe5fb8c | assessment=review
+[6] 2026-03-07T18:43:12.719Z | source=pin_current | status=pinned | pair=Low Fidelity Saved | pin=yes | compare=grun_20260307_184311_78dab1a3
 ```
 
 ## Compare History Import Preview
@@ -158,7 +159,7 @@ planned_deltas:
 ```text
 artifact_expectation_source: observed_ready_pair
 pair_label: Low Fidelity: RadarSimPy + FFD -> backend=analytic_targets | sim=auto | mux=tdm | ant=isotropic | license=none
-observed_at_utc: 2026-03-07T18:36:25.457Z
+observed_at_utc: 2026-03-07T18:43:19.666Z
 observed_assessment: review
 required_artifacts(current/compare/total): 4/4/4
 artifact_presence_delta: none
@@ -167,11 +168,11 @@ current_required_missing: none
 compare_required_missing: none
 artifact_path_fingerprint_algo: fnv1a32_path_text
 artifact_path_fingerprints:
-- path_list_json: current=path_list.json#f21a3a8a compare=path_list.json#83af34b2
-- adc_cube_npz: current=adc_cube.npz#d66a384e compare=adc_cube.npz#39f23596
-- radar_map_npz: current=radar_map.npz#09dcc34d compare=radar_map.npz#790e7eb5
-- graph_run_summary_json: current=graph_run_summary.json#ebf3c833 compare=graph_run_summary.json#4ab8055b
-- lgit_customized_output_npz: current=lgit_customized_output.npz#a331666c compare=lgit_customized_output.npz#ee956b74
+- path_list_json: current=path_list.json#e83ae292 compare=path_list.json#beb36bad
+- adc_cube_npz: current=adc_cube.npz#64793d76 compare=adc_cube.npz#5b69d23d
+- radar_map_npz: current=radar_map.npz#73a02295 compare=radar_map.npz#4a54f918
+- graph_run_summary_json: current=graph_run_summary.json#c0c0a8fb compare=graph_run_summary.json#44470e62
+- lgit_customized_output_npz: current=lgit_customized_output.npz#40062894 compare=lgit_customized_output.npz#318ef977
 artifact_rows:
 - path_list_json: required=true current=true compare=true
 - adc_cube_npz: required=true current=true compare=true
@@ -238,28 +239,29 @@ artifact_inspector_audit_window: retained_seqs=none | newest=0 | oldest=0 | lost
 artifact_inspector_audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty
 artifact_inspector_audit_health: idle | trust=empty | recommendation=not_needed
 artifact_inspector_audit_health_reason: no_history | source=idle
+artifact_inspector_audit_next_action: none | trigger=idle
 artifact_inspector_audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty
 artifact_inspector_audit_controls: clear=disabled | recommended=not_needed | reason=idle
 artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled | next_action: collapse_if_you_need_focus
 ```
 
 ## Current Artifacts
-- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183624_ef4494d9/graph_run_summary.json
-- radar_map_npz: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183624_ef4494d9/output/radar_map.npz
-- adc_cube_npz: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183624_ef4494d9/output/adc_cube.npz
-- path_list_json: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183624_ef4494d9/output/path_list.json
+- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184319_b8b0bd68/graph_run_summary.json
+- radar_map_npz: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184319_b8b0bd68/output/radar_map.npz
+- adc_cube_npz: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184319_b8b0bd68/output/adc_cube.npz
+- path_list_json: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184319_b8b0bd68/output/path_list.json
 
 ## Compare Artifacts
-- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183623_2399726d/graph_run_summary.json
-- radar_map_npz: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183623_2399726d/output/radar_map.npz
-- adc_cube_npz: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183623_2399726d/output/adc_cube.npz
-- path_list_json: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/graph_runs/grun_20260307_183623_2399726d/output/path_list.json
+- graph_run_summary_json: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184317_a58313aa/graph_run_summary.json
+- radar_map_npz: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184317_a58313aa/output/radar_map.npz
+- adc_cube_npz: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184317_a58313aa/output/adc_cube.npz
+- path_list_json: /tmp/graph_lab_playwright_e2e_tju5b66w/store/graph_runs/grun_20260307_184317_a58313aa/output/path_list.json
 
 ## Gate Evidence
 - none
 
 ## Regression Session
-- session_id: dssn_1772908595267
+- session_id: dssn_1772909009084
 - session_recommendation: hold_some_candidates
-- export_id: rexp_20260307_183635_90edefcb
-- export_package_json: /tmp/graph_lab_playwright_e2e_18jqx0n6/store/regression_exports/rexp_20260307_183635_90edefcb/regression_package.json
+- export_id: rexp_20260307_184329_a1779793
+- export_package_json: /tmp/graph_lab_playwright_e2e_tju5b66w/store/regression_exports/rexp_20260307_184329_a1779793/regression_package.json
