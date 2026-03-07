@@ -21,6 +21,7 @@ export function DecisionPane({
   trackCompareQuickPairOptions,
   applyTrackCompareQuickPair,
   trackCompareSelectedPairSummaryText,
+  trackCompareSelectedPairForecastText,
   runPresetPairTrackCompare,
   exportGateReport,
   exportDecisionRegressionSession,
@@ -99,6 +100,7 @@ export function DecisionPane({
         }, String(row?.label || row?.id || "-"))
       )),
       h("div", { className: "hint", key: "decision_preset_pair_selected_hint" }, `selected_pair: ${String(trackCompareSelectedPairSummaryText || "-")}`),
+      h("pre", { className: "result-box", key: "decision_preset_pair_forecast_box" }, String(trackCompareSelectedPairForecastText || "-")),
       h("div", { className: "btn-row", key: "decision_preset_pair_row" }, [
         h("button", {
           className: "btn",

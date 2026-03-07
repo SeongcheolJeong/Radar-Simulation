@@ -282,6 +282,21 @@ function summarizeRuntimeDiagnostics(summary, fallbackConfig) {
   };
 }
 
+function buildRuntimeDiagnosticsFallbackFromOverrides(overrides) {
+  const row = overrides && typeof overrides === "object" ? overrides : {};
+  const requiredModules = splitTokenList(row.runtimeRequiredModulesText || "");
+  const licenseFile = String(row.runtimeLicenseFile || "").trim();
+  return {
+    backendType: String(row.runtimeBackendType || "").trim() || "-",
+    providerSpec: String(row.runtimeProviderSpec || "").trim(),
+    requiredModules,
+    simulationMode: String(row.runtimeSimulationMode || "").trim() || "-",
+    licenseStatus: licenseFile ? "requested" : "none",
+    licenseSource: licenseFile ? "runtime_input" : "none",
+    licenseFile,
+  };
+}
+
 function isRuntimeBlockedError(message) {
   const text = String(message || "").trim().toLowerCase();
   return text.includes("required runtime modules unavailable") || text.includes("runtime provider failed");
@@ -1309,6 +1324,40 @@ export function App() {
       trackCompareTargetPresetId,
     ]
   );
+  const trackCompareSelectedPairForecastText = React.useMemo(() => {
+    const baselineOverrides = buildRuntimePurposePresetOverrides(trackCompareBaselinePresetId) || {};
+    const targetOverrides = trackCompareTargetPresetId === RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG
+      ? {
+          runtimeBackendType,
+          runtimeProviderSpec,
+          runtimeRequiredModulesText,
+          runtimeSimulationMode,
+          runtimeLicenseFile,
+        }
+      : (buildRuntimePurposePresetOverrides(trackCompareTargetPresetId) || {});
+    const baselineForecast = summarizeRuntimeDiagnostics(
+      null,
+      buildRuntimeDiagnosticsFallbackFromOverrides(baselineOverrides)
+    );
+    const targetForecast = summarizeRuntimeDiagnostics(
+      null,
+      buildRuntimeDiagnosticsFallbackFromOverrides(targetOverrides)
+    );
+    return [
+      `selected_pair: ${trackCompareSelectedPairSummaryText}`,
+      `baseline_forecast: ${baselineForecast.badgeLine}`,
+      `target_forecast: ${targetForecast.badgeLine}`,
+    ].join("\n");
+  }, [
+    runtimeBackendType,
+    runtimeLicenseFile,
+    runtimeProviderSpec,
+    runtimeRequiredModulesText,
+    runtimeSimulationMode,
+    trackCompareBaselinePresetId,
+    trackCompareSelectedPairSummaryText,
+    trackCompareTargetPresetId,
+  ]);
 
   const {
     runGraphViaApi,
@@ -1626,6 +1675,7 @@ export function App() {
       `compare_runner_status: ${compareRunnerStatus}`,
       `selected_preset_pair: ${trackCompareBaselinePresetId} -> ${trackCompareTargetPresetId}`,
       `selected_preset_pair_label: ${trackCompareSelectedPairSummaryText}`,
+      `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -1668,6 +1718,7 @@ export function App() {
     runtimeDiagnostics.badgeLine,
     runtimeSummary.trackLabel,
     trackCompareBaselinePresetId,
+    trackCompareSelectedPairForecastText,
     trackCompareSelectedPairSummaryText,
     trackCompareTargetPresetId,
     trackCompareRunnerState,
@@ -1701,6 +1752,11 @@ export function App() {
       `- compare_track: ${compareRuntimeSummary.trackLabel}`,
       `- compare_runner_status: ${String(trackCompareRunnerStatusText || "-")}`,
       `- compare_status: ${String(compareRunStatusText || "-")}`,
+      "",
+      "## Selected Pair Forecast",
+      "```text",
+      trackCompareSelectedPairForecastText,
+      "```",
       "",
       "### Current Runtime Diagnostics",
       "```text",
@@ -1778,6 +1834,7 @@ export function App() {
     runtimeSummary.trackLabel,
     setStatus,
     trackCompareBaselinePresetId,
+    trackCompareSelectedPairForecastText,
     trackCompareSelectedPairSummaryText,
     trackCompareTargetPresetId,
     trackCompareRunnerStatusText,
@@ -2134,6 +2191,7 @@ export function App() {
         trackCompareQuickPairOptions: RUNTIME_PURPOSE_QUICK_PAIR_OPTIONS,
         applyTrackCompareQuickPair,
         trackCompareSelectedPairSummaryText,
+        trackCompareSelectedPairForecastText,
         runPresetPairTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,

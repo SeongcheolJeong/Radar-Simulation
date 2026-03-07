@@ -125,6 +125,13 @@ The Decision Pane also keeps a dedicated `track_compare_status` line so compare-
 
 The preset-pair section also keeps a `selected_pair` summary so the operator can see which two tracks will run before pressing the compare button.
 
+It now also shows a `selected pair forecast` block with:
+
+- `baseline_forecast`
+- `target_forecast`
+
+These are planned runtime diagnostics derived from the selected preset ids and current runtime panel state, so the operator can see whether a pair is likely to be `planned`, `ready`, or blocked by missing modules before running it.
+
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
 - `aligned`
@@ -197,6 +204,8 @@ It also includes a `Compare Assessment` block with:
 - shape/path/peak delta evidence
 - ADC source delta
 - required artifact coverage and artifact presence delta
+
+`Export Brief` also includes a `Selected Pair Forecast` section so the chosen compare recipe and its planned runtime expectations are preserved outside the UI.
 
 ## Current Scope
 

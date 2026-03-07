@@ -140,6 +140,7 @@ def run(args: argparse.Namespace) -> int:
             "runtime_diagnostics_checked": False,
             "compare_workflow_checked": False,
             "quick_pair_shortcuts_checked": False,
+            "pair_forecast_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
@@ -352,11 +353,14 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("quick pair shortcut did not update target preset to high_fidelity_po_sbr_rt")
                 if "selected_pair:" not in preset_pair_field.inner_text():
                     raise AssertionError("preset pair section did not render selected_pair summary")
+                if "baseline_forecast:" not in preset_pair_field.inner_text() or "target_forecast:" not in preset_pair_field.inner_text():
+                    raise AssertionError("preset pair section did not render baseline/target forecast")
                 preset_pair_field.get_by_role("button", name="Low -> Current", exact=True).click()
                 page.wait_for_timeout(100)
                 if target_select.input_value() != "current_config":
                     raise AssertionError("quick pair shortcut did not reset target preset to current_config")
                 report["runtime_controls"]["quick_pair_shortcuts_checked"] = True
+                report["runtime_controls"]["pair_forecast_checked"] = True
                 baseline_select.select_option("low_fidelity_radarsimpy_ffd")
                 target_select.select_option("current_config")
                 report["runtime_controls"]["preset_pair_runner_checked"] = True
@@ -421,6 +425,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include runtime compare summary")
                 if "selected_preset_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include selected preset pair summary")
+                if "## Selected Pair Forecast" not in brief_text or "baseline_forecast:" not in brief_text:
+                    raise AssertionError("decision brief did not include selected pair forecast summary")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
