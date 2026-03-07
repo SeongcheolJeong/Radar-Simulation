@@ -170,6 +170,14 @@ The Decision Summary and exported brief now include:
 - `selected_history_pair_meta`
 - `managed_history_pair_count`
 
+The history area also renders a `Selected History Pair Preview` block before execution. It shows:
+
+- `baseline_forecast`
+- `target_forecast`
+- `planned_deltas`
+
+so the operator can inspect the expected backend/provider/module/license changes for the selected replayable pair before clicking `Run Selected History Pair`.
+
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
 - `aligned`

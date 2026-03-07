@@ -391,6 +391,68 @@ function buildRuntimeDiagnosticsFallbackFromOverrides(overrides) {
   };
 }
 
+function buildCurrentRuntimeOverrides(config) {
+  const row = config && typeof config === "object" ? config : {};
+  return {
+    runtimeBackendType: String(row.runtimeBackendType || "").trim(),
+    runtimeProviderSpec: String(row.runtimeProviderSpec || "").trim(),
+    runtimeRequiredModulesText: String(row.runtimeRequiredModulesText || "").trim(),
+    runtimeSimulationMode: String(row.runtimeSimulationMode || "").trim(),
+    runtimeLicenseFile: String(row.runtimeLicenseFile || "").trim(),
+  };
+}
+
+function formatRuntimePreviewValue(value) {
+  const text = String(value || "").trim();
+  return text || "-";
+}
+
+function buildRuntimePairPreviewText(options) {
+  const opts = options && typeof options === "object" ? options : {};
+  const baselinePresetId = String(opts.baselinePresetId || "").trim();
+  const targetPresetId = String(opts.targetPresetId || "").trim();
+  const currentConfigLabel = String(opts.currentConfigLabel || "").trim();
+  const pairLabel = String(
+    opts.pairLabel || getRuntimePurposePairLabel(baselinePresetId, targetPresetId, currentConfigLabel)
+  ).trim();
+  const currentOverrides = buildCurrentRuntimeOverrides(opts.currentOverrides);
+  const baselineOverrides = buildRuntimePurposePresetOverrides(baselinePresetId) || {};
+  const targetOverrides = targetPresetId === RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG
+    ? currentOverrides
+    : (buildRuntimePurposePresetOverrides(targetPresetId) || {});
+  const baselineFallback = buildRuntimeDiagnosticsFallbackFromOverrides(baselineOverrides);
+  const targetFallback = buildRuntimeDiagnosticsFallbackFromOverrides(targetOverrides);
+  const baselineForecast = summarizeRuntimeDiagnostics(null, baselineFallback);
+  const targetForecast = summarizeRuntimeDiagnostics(null, targetFallback);
+  const deltaLines = [];
+  const pushDelta = (label, leftValue, rightValue) => {
+    const left = formatRuntimePreviewValue(leftValue);
+    const right = formatRuntimePreviewValue(rightValue);
+    if (left === right) return;
+    deltaLines.push(`- ${label}: ${left} -> ${right}`);
+  };
+  pushDelta("backend", baselineFallback.backendType, targetFallback.backendType);
+  pushDelta("provider", baselineFallback.providerSpec, targetFallback.providerSpec);
+  pushDelta("simulation_mode", baselineFallback.simulationMode, targetFallback.simulationMode);
+  pushDelta(
+    "required_modules",
+    (Array.isArray(baselineFallback.requiredModules) ? baselineFallback.requiredModules : []).join(","),
+    (Array.isArray(targetFallback.requiredModules) ? targetFallback.requiredModules : []).join(",")
+  );
+  pushDelta("license_status", baselineFallback.licenseStatus, targetFallback.licenseStatus);
+  pushDelta("license_source", baselineFallback.licenseSource, targetFallback.licenseSource);
+  if (targetPresetId === RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG) {
+    deltaLines.push(`- target_mode: current_config -> ${formatRuntimePreviewValue(currentConfigLabel)}`);
+  }
+  return [
+    `selected_pair: ${pairLabel || "-"}`,
+    `baseline_forecast: ${baselineForecast.badgeLine}`,
+    `target_forecast: ${targetForecast.badgeLine}`,
+    "planned_deltas:",
+    ...(deltaLines.length > 0 ? deltaLines : ["- none"]),
+  ].join("\n");
+}
+
 function getCompareSessionReplayPair(entry) {
   const row = entry && typeof entry === "object" ? entry : {};
   const baselinePresetId = String(row.baselinePresetId || "").trim();
@@ -1596,30 +1658,21 @@ export function App() {
     ]
   );
   const trackCompareSelectedPairForecastText = React.useMemo(() => {
-    const baselineOverrides = buildRuntimePurposePresetOverrides(trackCompareBaselinePresetId) || {};
-    const targetOverrides = trackCompareTargetPresetId === RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG
-      ? {
-          runtimeBackendType,
-          runtimeProviderSpec,
-          runtimeRequiredModulesText,
-          runtimeSimulationMode,
-          runtimeLicenseFile,
-        }
-      : (buildRuntimePurposePresetOverrides(trackCompareTargetPresetId) || {});
-    const baselineForecast = summarizeRuntimeDiagnostics(
-      null,
-      buildRuntimeDiagnosticsFallbackFromOverrides(baselineOverrides)
-    );
-    const targetForecast = summarizeRuntimeDiagnostics(
-      null,
-      buildRuntimeDiagnosticsFallbackFromOverrides(targetOverrides)
-    );
-    return [
-      `selected_pair: ${trackCompareSelectedPairSummaryText}`,
-      `baseline_forecast: ${baselineForecast.badgeLine}`,
-      `target_forecast: ${targetForecast.badgeLine}`,
-    ].join("\n");
+    return buildRuntimePairPreviewText({
+      baselinePresetId: trackCompareBaselinePresetId,
+      targetPresetId: trackCompareTargetPresetId,
+      pairLabel: trackCompareSelectedPairSummaryText,
+      currentConfigLabel: configuredRuntimeSummary.trackLabel,
+      currentOverrides: {
+        runtimeBackendType,
+        runtimeProviderSpec,
+        runtimeRequiredModulesText,
+        runtimeSimulationMode,
+        runtimeLicenseFile,
+      },
+    });
   }, [
+    configuredRuntimeSummary.trackLabel,
     runtimeBackendType,
     runtimeLicenseFile,
     runtimeProviderSpec,
@@ -1668,6 +1721,38 @@ export function App() {
     }
     return `selected_history_pair: ${String(selectedReplayableCompareSession.pairLabel || "-")}`;
   }, [selectedReplayableCompareSession]);
+  const selectedReplayableCompareSessionPreviewText = React.useMemo(() => {
+    if (!selectedReplayableCompareSession) {
+      return [
+        "selected_pair: -",
+        "baseline_forecast: -",
+        "target_forecast: -",
+        "planned_deltas:",
+        "- none",
+      ].join("\n");
+    }
+    return buildRuntimePairPreviewText({
+      baselinePresetId: selectedReplayableCompareSession.baselinePresetId,
+      targetPresetId: selectedReplayableCompareSession.targetPresetId,
+      pairLabel: selectedReplayableCompareSession.pairLabel,
+      currentConfigLabel: configuredRuntimeSummary.trackLabel,
+      currentOverrides: {
+        runtimeBackendType,
+        runtimeProviderSpec,
+        runtimeRequiredModulesText,
+        runtimeSimulationMode,
+        runtimeLicenseFile,
+      },
+    });
+  }, [
+    configuredRuntimeSummary.trackLabel,
+    runtimeBackendType,
+    runtimeLicenseFile,
+    runtimeProviderSpec,
+    runtimeRequiredModulesText,
+    runtimeSimulationMode,
+    selectedReplayableCompareSession,
+  ]);
   const selectedReplayableCompareSessionMetaText = React.useMemo(() => {
     if (!selectedReplayableCompareSession) {
       return "selected_history_pair_meta: -";
@@ -2205,6 +2290,7 @@ export function App() {
       `${latestReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionMetaText}`,
+      `selected_history_pair_preview: ${selectedReplayableCompareSessionPreviewText.split("\n").slice(1).join(" | ")}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -2252,6 +2338,7 @@ export function App() {
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
     selectedReplayableCompareSessionMetaText,
+    selectedReplayableCompareSessionPreviewText,
     trackCompareBaselinePresetId,
     trackCompareSelectedPairForecastText,
     trackCompareSelectedPairSummaryText,
@@ -2300,6 +2387,11 @@ export function App() {
       "## Compare Session History",
       "```text",
       compareSessionHistoryText,
+      "```",
+      "",
+      "## Selected History Pair Preview",
+      "```text",
+      selectedReplayableCompareSessionPreviewText,
       "```",
       "",
       "### Current Runtime Diagnostics",
@@ -2379,6 +2471,7 @@ export function App() {
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
     selectedReplayableCompareSessionMetaText,
+    selectedReplayableCompareSessionPreviewText,
     managedCompareReplayPairCount,
     setStatus,
     latestReplayableCompareSessionText,
@@ -2753,6 +2846,7 @@ export function App() {
         runLatestCompareSessionPair,
         selectedReplayableCompareSessionText,
         selectedReplayableCompareSessionMetaText,
+        selectedReplayableCompareSessionPreviewText,
         canReplaySelectedCompareSession: Boolean(selectedReplayableCompareSession),
         applySelectedCompareSessionPair,
         runSelectedCompareSessionPair,

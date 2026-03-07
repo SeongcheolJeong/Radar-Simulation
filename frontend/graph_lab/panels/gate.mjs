@@ -34,6 +34,7 @@ export function DecisionPane({
   runLatestCompareSessionPair,
   selectedReplayableCompareSessionText,
   selectedReplayableCompareSessionMetaText,
+  selectedReplayableCompareSessionPreviewText,
   canReplaySelectedCompareSession,
   applySelectedCompareSessionPair,
   runSelectedCompareSessionPair,
@@ -138,6 +139,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_compare_session_history_replay_hint" }, String(latestReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_selected_hint" }, String(selectedReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_meta_hint" }, String(selectedReplayableCompareSessionMetaText || "-")),
+      h("pre", { className: "result-box", key: "decision_compare_session_history_preview_box" }, String(selectedReplayableCompareSessionPreviewText || "-")),
       h("select", {
         className: "select",
         value: String(selectedCompareReplayPairId || ""),
