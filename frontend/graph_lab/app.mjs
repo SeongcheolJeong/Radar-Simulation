@@ -98,6 +98,12 @@ export function App() {
   const [runtimeLicenseFile, setRuntimeLicenseFile] = React.useState(
     String(params.get("runtime_license_file") || "")
   );
+  const [runtimeTxFfdFilesText, setRuntimeTxFfdFilesText] = React.useState(
+    String(params.get("runtime_tx_ffd_files") || "")
+  );
+  const [runtimeRxFfdFilesText, setRuntimeRxFfdFilesText] = React.useState(
+    String(params.get("runtime_rx_ffd_files") || "")
+  );
   const [compareGraphRunId, setCompareGraphRunId] = React.useState(
     String(params.get("compare_run_id") || "")
   );
@@ -818,6 +824,9 @@ export function App() {
     const runtimeResolution = meta?.runtime_resolution && typeof meta.runtime_resolution === "object"
       ? meta.runtime_resolution
       : {};
+    const antennaSummary = meta?.antenna_summary && typeof meta.antenna_summary === "object"
+      ? meta.antenna_summary
+      : {};
     const providerInfo = runtimeResolution?.provider_runtime_info && typeof runtimeResolution.provider_runtime_info === "object"
       ? runtimeResolution.provider_runtime_info
       : {};
@@ -830,11 +839,15 @@ export function App() {
     const licenseObserved = String(
       providerInfo?.license_file || providerInfo?.license_file_hint || ""
     ).trim();
+    const antennaModeObserved = String(antennaSummary?.antenna_mode || "").trim();
+    const ffdRequested = String(runtimeTxFfdFilesText || "").trim() !== ""
+      || String(runtimeRxFfdFilesText || "").trim() !== "";
     const runtimeStatusLine = [
       `backend=${backendTypeObserved || runtimeBackendType || "-"}`,
       `mode=${runtimeModeObserved || "-"}`,
       `sim=${simulationBackendObserved || "-"}`,
       `mux=${multiplexingObserved || runtimeMultiplexingMode || "-"}`,
+      `ant=${antennaModeObserved || (ffdRequested ? "ffd_requested" : "isotropic")}`,
       `license=${licenseObserved ? "set" : (runtimeLicenseFile ? "requested" : "none")}`,
     ].join(" | ");
     return {
@@ -842,10 +855,18 @@ export function App() {
       runtimeModeObserved,
       simulationBackendObserved,
       multiplexingObserved,
+      antennaModeObserved,
       licenseObserved,
       runtimeStatusLine,
     };
-  }, [graphRunSummary, runtimeBackendType, runtimeLicenseFile, runtimeMultiplexingMode]);
+  }, [
+    graphRunSummary,
+    runtimeBackendType,
+    runtimeLicenseFile,
+    runtimeMultiplexingMode,
+    runtimeRxFfdFilesText,
+    runtimeTxFfdFilesText,
+  ]);
 
   const {
     runGraphViaApi,
@@ -869,6 +890,8 @@ export function App() {
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,
+    runtimeTxFfdFilesText,
+    runtimeRxFfdFilesText,
     nodes,
     edges,
     runMode,
@@ -1270,6 +1293,8 @@ export function App() {
       runtimeDevice,
       runtimeLicenseTier,
       runtimeLicenseFile,
+      runtimeTxFfdFilesText,
+      runtimeRxFfdFilesText,
       runtimeStatusLine: runtimeSummary.runtimeStatusLine,
       runMode,
       autoPollAsyncRun,
@@ -1299,6 +1324,8 @@ export function App() {
       setRuntimeDevice,
       setRuntimeLicenseTier,
       setRuntimeLicenseFile,
+      setRuntimeTxFfdFilesText,
+      setRuntimeRxFfdFilesText,
       setRunMode,
       setAutoPollAsyncRun,
       setPollIntervalMsText,
@@ -1346,6 +1373,8 @@ export function App() {
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,
+    runtimeTxFfdFilesText,
+    runtimeRxFfdFilesText,
     runtimeSummary.runtimeStatusLine,
     runMode,
     autoPollAsyncRun,

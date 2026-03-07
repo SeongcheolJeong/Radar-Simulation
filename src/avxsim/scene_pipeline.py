@@ -13,6 +13,7 @@ from .adapters import (
     load_sionna_paths_json,
 )
 from .adc_pack_builder import estimate_rd_ra_from_adc
+from .antenna import FfdAntennaModel
 from .constants import C0
 from .io import save_adc_npz, save_paths_by_chirp_json
 from .lgit_output_adapter import save_lgit_customized_output_npz
@@ -117,6 +118,8 @@ def run_object_scene_to_radar_map(
     }
     if "runtime_resolution" in result:
         meta["runtime_resolution"] = result["runtime_resolution"]
+    if "antenna_summary" in result and isinstance(result["antenna_summary"], Mapping):
+        meta["antenna_summary"] = dict(result["antenna_summary"])
     if "compensation_summary" in result and isinstance(result["compensation_summary"], Mapping):
         meta["compensation_summary"] = dict(result["compensation_summary"])
     meta["path_contract_summary"] = dict(path_contract_summary)
@@ -375,12 +378,12 @@ def _run_backend_analytic_targets(
         chirp_interval_s=float(chirp_interval_s),
     )
 
-    adc = synth_fmcw_tdm(
+    adc, antenna_summary = _synth_backend_adc(
+        backend=backend,
         paths_by_chirp=paths_by_chirp,
-        tx_pos_m=tx_pos,
-        rx_pos_m=rx_pos,
-        radar=radar_cfg,
-        noise_sigma=float(backend.get("noise_sigma", 0.0)),
+        tx_pos=tx_pos,
+        rx_pos=rx_pos,
+        radar_cfg=radar_cfg,
     )
 
     out_root = Path(output_dir)
@@ -398,6 +401,7 @@ def _run_backend_analytic_targets(
         "adc_cube_npz": str(adc_npz),
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
+        "antenna_summary": antenna_summary,
         "compensation_summary": compensation_summary,
     }
 
@@ -460,12 +464,12 @@ def _run_backend_mesh_material_stub(
         chirp_interval_s=float(chirp_interval_s),
     )
 
-    adc = synth_fmcw_tdm(
+    adc, antenna_summary = _synth_backend_adc(
+        backend=backend,
         paths_by_chirp=paths_by_chirp,
-        tx_pos_m=tx_pos,
-        rx_pos_m=rx_pos,
-        radar=radar_cfg,
-        noise_sigma=float(backend.get("noise_sigma", 0.0)),
+        tx_pos=tx_pos,
+        rx_pos=rx_pos,
+        radar_cfg=radar_cfg,
     )
 
     out_root = Path(output_dir)
@@ -483,6 +487,7 @@ def _run_backend_mesh_material_stub(
         "adc_cube_npz": str(adc_npz),
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
+        "antenna_summary": antenna_summary,
         "compensation_summary": compensation_summary,
     }
 
@@ -538,12 +543,12 @@ def _run_backend_sionna_rt(
         chirp_interval_s=float(chirp_interval_s),
     )
 
-    adc = synth_fmcw_tdm(
+    adc, antenna_summary = _synth_backend_adc(
+        backend=backend,
         paths_by_chirp=paths_by_chirp,
-        tx_pos_m=tx_pos,
-        rx_pos_m=rx_pos,
-        radar=radar_cfg,
-        noise_sigma=float(backend.get("noise_sigma", 0.0)),
+        tx_pos=tx_pos,
+        rx_pos=rx_pos,
+        radar_cfg=radar_cfg,
     )
 
     out_root = Path(output_dir)
@@ -562,6 +567,7 @@ def _run_backend_sionna_rt(
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
         "runtime_resolution": runtime_resolution,
+        "antenna_summary": antenna_summary,
         "compensation_summary": compensation_summary,
     }
 
@@ -618,12 +624,12 @@ def _run_backend_po_sbr_rt(
         chirp_interval_s=float(chirp_interval_s),
     )
 
-    adc = synth_fmcw_tdm(
+    adc, antenna_summary = _synth_backend_adc(
+        backend=backend,
         paths_by_chirp=paths_by_chirp,
-        tx_pos_m=tx_pos,
-        rx_pos_m=rx_pos,
-        radar=radar_cfg,
-        noise_sigma=float(backend.get("noise_sigma", 0.0)),
+        tx_pos=tx_pos,
+        rx_pos=rx_pos,
+        radar_cfg=radar_cfg,
     )
 
     out_root = Path(output_dir)
@@ -642,6 +648,7 @@ def _run_backend_po_sbr_rt(
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
         "runtime_resolution": runtime_resolution,
+        "antenna_summary": antenna_summary,
         "compensation_summary": compensation_summary,
     }
 
@@ -705,9 +712,15 @@ def _run_backend_radarsimpy_rt(
         n_tx=int(tx_pos.shape[0]),
         n_rx=int(rx_pos.shape[0]),
     )
+    synth_options, antenna_summary = _resolve_backend_synth_options(
+        backend=backend,
+        n_tx=int(tx_pos.shape[0]),
+        n_rx=int(rx_pos.shape[0]),
+    )
     compensation_enabled = bool(compensation_summary.get("enabled", False))
+    synth_requires_path = bool(antenna_summary.get("synth_requires_path", False))
     adc_source = "synth_fmcw_tdm"
-    if (adc_payload is not None) and (not compensation_enabled):
+    if (adc_payload is not None) and (not compensation_enabled) and (not synth_requires_path):
         adc = np.asarray(adc_payload)
         adc_source = "runtime_payload_adc_sctr"
     else:
@@ -717,11 +730,21 @@ def _run_backend_radarsimpy_rt(
             rx_pos_m=rx_pos,
             radar=radar_cfg,
             noise_sigma=float(backend.get("noise_sigma", 0.0)),
+            **synth_options,
         )
         if adc_payload is not None:
             compensation_summary = dict(compensation_summary)
             compensation_summary["adc_payload_ignored"] = True
-            compensation_summary["adc_payload_ignored_reason"] = "radar_compensation_enabled"
+            if compensation_enabled and synth_requires_path:
+                compensation_summary["adc_payload_ignored_reason"] = (
+                    "radar_compensation_enabled_and_antenna_path_synth_required"
+                )
+            elif compensation_enabled:
+                compensation_summary["adc_payload_ignored_reason"] = "radar_compensation_enabled"
+            elif synth_requires_path:
+                compensation_summary["adc_payload_ignored_reason"] = "antenna_path_synth_required"
+            else:
+                compensation_summary["adc_payload_ignored_reason"] = "path_synth_selected"
 
     runtime_resolution_out = dict(runtime_resolution)
     runtime_resolution_out["adc_source"] = str(adc_source)
@@ -746,6 +769,7 @@ def _run_backend_radarsimpy_rt(
         "hybrid_estimation_npz": None,
         "frame_count": int(n_chirps),
         "runtime_resolution": runtime_resolution_out,
+        "antenna_summary": antenna_summary,
         "compensation_summary": compensation_summary,
     }
 
@@ -770,6 +794,74 @@ def _resolve_optional_adc_sctr_from_payload(
     if (not np.all(np.isfinite(np.real(arr_c)))) or (not np.all(np.isfinite(np.imag(arr_c)))):
         raise ValueError("backend payload adc_sctr contains non-finite values")
     return arr_c
+
+
+def _resolve_backend_synth_options(
+    backend: Mapping[str, Any],
+    *,
+    n_tx: int,
+    n_rx: int,
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    tx_ffd_files = _resolve_optional_path_list(backend.get("tx_ffd_files"))
+    rx_ffd_files = _resolve_optional_path_list(backend.get("rx_ffd_files"))
+    if (tx_ffd_files is None) != (rx_ffd_files is None):
+        raise ValueError("backend.tx_ffd_files and backend.rx_ffd_files must be provided together")
+
+    use_jones_polarization = bool(backend.get("use_jones_polarization", False))
+    global_jones_matrix = _resolve_optional_jones(backend.get("global_jones_matrix"))
+    synth_options: Dict[str, Any] = {
+        "use_jones_polarization": bool(use_jones_polarization),
+        "global_jones_matrix": global_jones_matrix,
+    }
+    antenna_mode = "isotropic"
+    if tx_ffd_files is not None:
+        synth_options["antenna_model"] = FfdAntennaModel.from_files(
+            tx_ffd_files=tx_ffd_files,
+            rx_ffd_files=rx_ffd_files,
+            n_tx=int(n_tx),
+            n_rx=int(n_rx),
+            field_format=str(backend.get("ffd_field_format", "auto")),
+        )
+        antenna_mode = "ffd_jones" if use_jones_polarization else "ffd"
+    elif use_jones_polarization or (global_jones_matrix is not None):
+        antenna_mode = "jones"
+
+    antenna_summary = {
+        "antenna_mode": antenna_mode,
+        "ffd_enabled": bool(tx_ffd_files is not None),
+        "use_jones_polarization": bool(use_jones_polarization),
+        "global_jones_enabled": bool(global_jones_matrix is not None),
+        "tx_ffd_file_count": int(len(tx_ffd_files) if tx_ffd_files is not None else 0),
+        "rx_ffd_file_count": int(len(rx_ffd_files) if rx_ffd_files is not None else 0),
+        "synth_requires_path": bool(
+            (tx_ffd_files is not None) or use_jones_polarization or (global_jones_matrix is not None)
+        ),
+    }
+    return synth_options, antenna_summary
+
+
+def _synth_backend_adc(
+    *,
+    backend: Mapping[str, Any],
+    paths_by_chirp: Sequence[Sequence[RadarPath]],
+    tx_pos: np.ndarray,
+    rx_pos: np.ndarray,
+    radar_cfg: RadarConfig,
+) -> Tuple[np.ndarray, Dict[str, Any]]:
+    synth_options, antenna_summary = _resolve_backend_synth_options(
+        backend=backend,
+        n_tx=int(tx_pos.shape[0]),
+        n_rx=int(rx_pos.shape[0]),
+    )
+    adc = synth_fmcw_tdm(
+        paths_by_chirp=paths_by_chirp,
+        tx_pos_m=tx_pos,
+        rx_pos_m=rx_pos,
+        radar=radar_cfg,
+        noise_sigma=float(backend.get("noise_sigma", 0.0)),
+        **synth_options,
+    )
+    return adc, antenna_summary
 
 
 def _resolve_optional_static_paths_payload(

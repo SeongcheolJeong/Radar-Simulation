@@ -74,9 +74,24 @@ class _FakeRadarSimPyWithSim:
         }
 
 
-def _load_runtime_resolution(radar_map_npz: Path) -> dict:
+def _write_const_ffd(path: Path, gain: complex) -> None:
+    lines = ["# theta phi et_re et_im ep_re ep_im"]
+    for th in [0.0, 90.0, 180.0]:
+        for ph in [0.0, 90.0, 180.0, 270.0]:
+            lines.append(f"{th:.1f} {ph:.1f} {np.real(gain):.8f} {np.imag(gain):.8f} 0.0 0.0")
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def _load_radar_map_metadata(radar_map_npz: Path) -> dict:
     payload = np.load(str(radar_map_npz), allow_pickle=False)
     metadata = json.loads(str(payload["metadata_json"]))
+    if not isinstance(metadata, dict):
+        raise AssertionError("radar_map metadata missing")
+    return metadata
+
+
+def _load_runtime_resolution(radar_map_npz: Path) -> dict:
+    metadata = _load_radar_map_metadata(radar_map_npz)
     info = metadata.get("runtime_resolution")
     if not isinstance(info, dict):
         raise AssertionError("runtime_resolution metadata missing")
@@ -228,6 +243,132 @@ def run() -> None:
         assert sim_runtime_resolution["mode"] == "runtime_provider"
         assert sim_runtime_resolution["adc_source"] == "runtime_payload_adc_sctr"
         assert sim_runtime_resolution["adc_payload_present"] is True
+
+        baseline_scene_json = root / "scene_radarsimpy_runtime_provider_ffd_baseline.json"
+        baseline_scene_json.write_text(
+            json.dumps(
+                {
+                    "scene_id": "radarsimpy_runtime_provider_ffd_baseline_case",
+                    "backend": {
+                        "type": "radarsimpy_rt",
+                        "n_chirps": 1,
+                        "tx_pos_m": [[0.0, 0.0, 0.0]],
+                        "rx_pos_m": [[0.0, 0.00185, 0.0]],
+                        "runtime_provider": (
+                            "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths"
+                        ),
+                        "runtime_required_modules": [],
+                        "runtime_failure_policy": "error",
+                        "runtime_input": {
+                            "simulation_mode": "analytic_paths",
+                            "target_range_m": 25.0,
+                            "target_az_deg": 0.0,
+                            "target_el_deg": 0.0,
+                            "target_radial_velocity_mps": 0.0,
+                            "material_tag": "stubbed_radarsimpy_ffd",
+                            "path_id_prefix": "stubbed_radarsimpy_ffd",
+                        },
+                        "noise_sigma": 0.0,
+                    },
+                    "radar": {
+                        "fc_hz": 77e9,
+                        "slope_hz_per_s": 20e12,
+                        "fs_hz": 20e6,
+                        "samples_per_chirp": 32,
+                    },
+                    "map_config": {"nfft_range": 32, "range_bin_limit": 16},
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        ffd_dir = root / "ffd"
+        ffd_dir.mkdir(parents=True, exist_ok=True)
+        tx_ffd = ffd_dir / "tx0.ffd"
+        rx_ffd = ffd_dir / "rx0.ffd"
+        _write_const_ffd(tx_ffd, gain=2.0 + 0.0j)
+        _write_const_ffd(rx_ffd, gain=1.5 + 0.0j)
+
+        ffd_scene_json = root / "scene_radarsimpy_runtime_provider_ffd.json"
+        ffd_scene_json.write_text(
+            json.dumps(
+                {
+                    "scene_id": "radarsimpy_runtime_provider_ffd_case",
+                    "backend": {
+                        "type": "radarsimpy_rt",
+                        "n_chirps": 1,
+                        "tx_pos_m": [[0.0, 0.0, 0.0]],
+                        "rx_pos_m": [[0.0, 0.00185, 0.0]],
+                        "runtime_provider": (
+                            "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths"
+                        ),
+                        "runtime_required_modules": [],
+                        "runtime_failure_policy": "error",
+                        "tx_ffd_files": [str(tx_ffd)],
+                        "rx_ffd_files": [str(rx_ffd)],
+                        "ffd_field_format": "real_imag",
+                        "runtime_input": {
+                            "simulation_mode": "radarsimpy_adc",
+                            "fallback_to_analytic_on_error": False,
+                            "target_range_m": 25.0,
+                            "target_az_deg": 0.0,
+                            "target_el_deg": 0.0,
+                            "target_radial_velocity_mps": 0.0,
+                            "material_tag": "stubbed_radarsimpy_ffd",
+                            "path_id_prefix": "stubbed_radarsimpy_ffd",
+                        },
+                        "noise_sigma": 0.0,
+                    },
+                    "radar": {
+                        "fc_hz": 77e9,
+                        "slope_hz_per_s": 20e12,
+                        "fs_hz": 20e6,
+                        "samples_per_chirp": 32,
+                    },
+                    "map_config": {"nfft_range": 32, "range_bin_limit": 16},
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        old_import_provider = provider._import_radarsimpy_module
+        old_import_api = rs_api._import_radarsimpy_module
+        try:
+            provider._import_radarsimpy_module = lambda: _FakeRadarSimPyWithSim
+            rs_api._import_radarsimpy_module = lambda: _FakeRadarSimPyWithSim
+            baseline_out_dir = root / "outputs_ffd_baseline"
+            baseline_result = run_object_scene_to_radar_map_json(
+                scene_json_path=str(baseline_scene_json),
+                output_dir=str(baseline_out_dir),
+                run_hybrid_estimation=False,
+            )
+            ffd_out_dir = root / "outputs_ffd"
+            ffd_result = run_object_scene_to_radar_map_json(
+                scene_json_path=str(ffd_scene_json),
+                output_dir=str(ffd_out_dir),
+                run_hybrid_estimation=False,
+            )
+        finally:
+            provider._import_radarsimpy_module = old_import_provider
+            rs_api._import_radarsimpy_module = old_import_api
+
+        baseline_adc = np.asarray(np.load(str(baseline_result["adc_cube_npz"]), allow_pickle=False)["adc"])
+        ffd_adc = np.asarray(np.load(str(ffd_result["adc_cube_npz"]), allow_pickle=False)["adc"])
+        assert baseline_adc.shape == (32, 1, 1, 1), baseline_adc.shape
+        assert ffd_adc.shape == (32, 1, 1, 1), ffd_adc.shape
+        gain_ratio = float(np.mean(np.abs(ffd_adc[:, 0, 0, 0])) / np.mean(np.abs(baseline_adc[:, 0, 0, 0])))
+        assert abs(gain_ratio - 3.0) < 1.0e-3, gain_ratio
+
+        ffd_runtime_resolution = _load_runtime_resolution(Path(ffd_result["radar_map_npz"]))
+        assert ffd_runtime_resolution["mode"] == "runtime_provider"
+        assert ffd_runtime_resolution["adc_source"] == "synth_fmcw_tdm"
+        assert ffd_runtime_resolution["adc_payload_present"] is True
+        ffd_metadata = _load_radar_map_metadata(Path(ffd_result["radar_map_npz"]))
+        antenna_summary = ffd_metadata.get("antenna_summary")
+        assert isinstance(antenna_summary, dict)
+        assert antenna_summary.get("antenna_mode") == "ffd"
+        assert antenna_summary.get("ffd_enabled") is True
 
     print("validate_scene_runtime_radarsimpy_provider_integration_stubbed: pass")
 

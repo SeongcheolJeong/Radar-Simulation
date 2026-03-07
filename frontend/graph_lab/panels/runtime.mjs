@@ -25,8 +25,45 @@ export function RuntimeConfigSection({
   setRuntimeLicenseTier,
   runtimeLicenseFile,
   setRuntimeLicenseFile,
+  runtimeTxFfdFilesText,
+  setRuntimeTxFfdFilesText,
+  runtimeRxFfdFilesText,
+  setRuntimeRxFfdFilesText,
   runtimeStatusLine,
 }) {
+  const applyLowFidelityPreset = () => {
+    setRuntimeBackendType("radarsimpy_rt");
+    setRuntimeProviderSpec(
+      "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths"
+    );
+    setRuntimeRequiredModulesText("radarsimpy");
+    setRuntimeFailurePolicy("error");
+    setRuntimeSimulationMode("radarsimpy_adc");
+    setRuntimeDevice("cpu");
+  };
+
+  const applyHighFidelitySionnaPreset = () => {
+    setRuntimeBackendType("sionna_rt");
+    setRuntimeProviderSpec(
+      "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba"
+    );
+    setRuntimeRequiredModulesText("mitsuba");
+    setRuntimeFailurePolicy("error");
+    setRuntimeSimulationMode("auto");
+    setRuntimeDevice("gpu");
+  };
+
+  const applyHighFidelityPoSbrPreset = () => {
+    setRuntimeBackendType("po_sbr_rt");
+    setRuntimeProviderSpec(
+      "avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr"
+    );
+    setRuntimeRequiredModulesText("");
+    setRuntimeFailurePolicy("error");
+    setRuntimeSimulationMode("auto");
+    setRuntimeDevice("gpu");
+  };
+
   const applyTdmPreset = () => {
     setRuntimeMultiplexingMode("tdm");
     setRuntimeBpmPhaseCodeText("");
@@ -48,6 +85,34 @@ export function RuntimeConfigSection({
   };
 
   return h(React.Fragment, null, [
+    h("div", { className: "field", key: "runtime_purpose_presets" }, [
+      h("label", { className: "label", key: "lbl_runtime_purpose_presets" }, "Purpose Presets"),
+      h("div", { className: "btn-row", key: "runtime_purpose_preset_row" }, [
+        h("button", {
+          type: "button",
+          className: "btn",
+          key: "purpose_low_fidelity",
+          onClick: applyLowFidelityPreset,
+        }, "Low Fidelity: RadarSimPy + FFD"),
+        h("button", {
+          type: "button",
+          className: "btn",
+          key: "purpose_high_fidelity_sionna",
+          onClick: applyHighFidelitySionnaPreset,
+        }, "High Fidelity: Sionna-style RT"),
+        h("button", {
+          type: "button",
+          className: "btn",
+          key: "purpose_high_fidelity_po_sbr",
+          onClick: applyHighFidelityPoSbrPreset,
+        }, "High Fidelity: PO-SBR"),
+      ]),
+      h(
+        "div",
+        { className: "hint", key: "runtime_purpose_hint" },
+        "Low fidelity uses RadarSimPy runtime; when FFD files are set, the repo synth applies antenna patterns on the returned paths. High fidelity maps to the Sionna-style or PO-SBR ray-tracing providers available in this repo."
+      ),
+    ]),
     h("div", { className: "field", key: "runtime_backend" }, [
       h("label", { className: "label", key: "lbl_runtime_backend" }, "Runtime Backend"),
       h("select", {
@@ -149,6 +214,31 @@ export function RuntimeConfigSection({
         onChange: (e) => setRuntimeLicenseFile(e.target.value),
         placeholder: "/abs/path/license_RadarSimPy_*.lic",
       }),
+    ]),
+    h("div", { className: "field", key: "runtime_tx_ffd_files" }, [
+      h("label", { className: "label", key: "lbl_runtime_tx_ffd_files" }, "TX FFD Files (comma/newline)"),
+      h("textarea", {
+        className: "textarea",
+        value: runtimeTxFfdFilesText,
+        onChange: (e) => setRuntimeTxFfdFilesText(e.target.value),
+        placeholder: "/abs/path/tx0.ffd\n/abs/path/tx1.ffd",
+        style: { minHeight: "62px" },
+      }),
+    ]),
+    h("div", { className: "field", key: "runtime_rx_ffd_files" }, [
+      h("label", { className: "label", key: "lbl_runtime_rx_ffd_files" }, "RX FFD Files (comma/newline)"),
+      h("textarea", {
+        className: "textarea",
+        value: runtimeRxFfdFilesText,
+        onChange: (e) => setRuntimeRxFfdFilesText(e.target.value),
+        placeholder: "/abs/path/rx0.ffd\n/abs/path/rx1.ffd",
+        style: { minHeight: "62px" },
+      }),
+      h(
+        "div",
+        { className: "hint", key: "runtime_ffd_hint" },
+        "Provide both TX and RX lists together. FFD input is applied by the common FMCW synth path for RadarSimPy, Sionna-style RT, and PO-SBR backends."
+      ),
     ]),
     h("div", { className: "field", key: "runtime_mux_presets" }, [
       h("label", { className: "label", key: "lbl_runtime_mux_presets" }, "Multiplexing Presets"),

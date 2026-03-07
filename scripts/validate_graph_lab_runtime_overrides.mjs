@@ -55,6 +55,16 @@ const base = {
   assert.equal(out.backend.runtime_input.tx_multiplexing_plan.mode, "custom");
 }
 
+{
+  const out = buildSceneOverrides({
+    ...base,
+    runtimeTxFfdFilesText: "/tmp/tx0.ffd,\n/tmp/tx1.ffd",
+    runtimeRxFfdFilesText: "/tmp/rx0.ffd\n/tmp/rx1.ffd",
+  });
+  assert.deepEqual(out.backend.tx_ffd_files, ["/tmp/tx0.ffd", "/tmp/tx1.ffd"]);
+  assert.deepEqual(out.backend.rx_ffd_files, ["/tmp/rx0.ffd", "/tmp/rx1.ffd"]);
+}
+
 expectThrow(
   () => buildSceneOverrides({ ...base, runtimeMultiplexingMode: "invalid_mode" }),
   "runtime multiplexing mode must be one of"
@@ -71,6 +81,9 @@ expectThrow(
   }),
   "pulse_amp"
 );
+expectThrow(
+  () => buildSceneOverrides({ ...base, runtimeTxFfdFilesText: "/tmp/tx0.ffd" }),
+  "runtime tx/rx FFD files must be provided together"
+);
 
 console.log("validate_graph_lab_runtime_overrides: pass");
-

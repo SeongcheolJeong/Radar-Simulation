@@ -53,6 +53,8 @@ export function useGraphRunOps(opts) {
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,
+    runtimeTxFfdFilesText,
+    runtimeRxFfdFilesText,
     nodes,
     edges,
     runMode,
@@ -300,6 +302,8 @@ export function useGraphRunOps(opts) {
       runtimeDevice,
       runtimeLicenseTier,
       runtimeLicenseFile,
+      runtimeTxFfdFilesText,
+      runtimeRxFfdFilesText,
     });
     const runAsync = String(runMode || "sync") === "async";
     const beforeContractSnapshot = getContractWarningSnapshot();
@@ -411,6 +415,8 @@ export function useGraphRunOps(opts) {
     runtimeDevice,
     runtimeLicenseTier,
     runtimeLicenseFile,
+    runtimeTxFfdFilesText,
+    runtimeRxFfdFilesText,
     sceneJsonPath,
     setGateResultText,
     setGraphRunSummary,

@@ -98,11 +98,16 @@ export function buildSceneOverrides(options) {
   const runtimeLicenseTier = String(opts.runtimeLicenseTier || "").trim().toLowerCase();
   const runtimeLicenseFile = String(opts.runtimeLicenseFile || "").trim();
   const runtimeRequiredModules = splitTokenList(opts.runtimeRequiredModulesText || "");
+  const runtimeTxFfdFiles = splitTokenList(opts.runtimeTxFfdFilesText || "");
+  const runtimeRxFfdFiles = splitTokenList(opts.runtimeRxFfdFilesText || "");
 
   if (runtimeMultiplexingMode && !MULTIPLEXING_MODE_SET.has(runtimeMultiplexingMode)) {
     throw new Error(
       `runtime multiplexing mode must be one of: tdm, bpm, custom (got "${runtimeMultiplexingMode}")`
     );
+  }
+  if ((runtimeTxFfdFiles.length > 0) !== (runtimeRxFfdFiles.length > 0)) {
+    throw new Error("runtime tx/rx FFD files must be provided together");
   }
   if (runtimeMultiplexingPlan) {
     validateMultiplexingPlanObject(runtimeMultiplexingPlan);
@@ -112,6 +117,8 @@ export function buildSceneOverrides(options) {
   if (runtimeProviderSpec) backend.runtime_provider = runtimeProviderSpec;
   if (runtimeRequiredModules.length > 0) backend.runtime_required_modules = runtimeRequiredModules;
   if (runtimeFailurePolicy) backend.runtime_failure_policy = runtimeFailurePolicy;
+  if (runtimeTxFfdFiles.length > 0) backend.tx_ffd_files = runtimeTxFfdFiles;
+  if (runtimeRxFfdFiles.length > 0) backend.rx_ffd_files = runtimeRxFfdFiles;
 
   const runtimeInput = {};
   if (runtimeSimulationMode) runtimeInput.simulation_mode = runtimeSimulationMode;
@@ -131,4 +138,3 @@ export function buildSceneOverrides(options) {
 
   return { backend };
 }
-

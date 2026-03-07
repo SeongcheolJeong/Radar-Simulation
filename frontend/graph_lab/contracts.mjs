@@ -159,6 +159,8 @@ export function resetContractWarnings() {
  * @property {string} runtimeDevice
  * @property {string} runtimeLicenseTier
  * @property {string} runtimeLicenseFile
+ * @property {string} runtimeTxFfdFilesText
+ * @property {string} runtimeRxFfdFilesText
  * @property {string} runtimeStatusLine
  * @property {string} runMode
  * @property {boolean} autoPollAsyncRun
@@ -221,6 +223,8 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       runtimeDevice: readString(scope, values, "runtimeDevice", "cpu"),
       runtimeLicenseTier: readString(scope, values, "runtimeLicenseTier", "trial"),
       runtimeLicenseFile: readString(scope, values, "runtimeLicenseFile", ""),
+      runtimeTxFfdFilesText: readString(scope, values, "runtimeTxFfdFilesText", ""),
+      runtimeRxFfdFilesText: readString(scope, values, "runtimeRxFfdFilesText", ""),
       runtimeStatusLine: readString(scope, values, "runtimeStatusLine", "-"),
       runMode: readString(scope, values, "runMode", "sync"),
       autoPollAsyncRun: readBoolean(scope, values, "autoPollAsyncRun", true),
@@ -250,6 +254,8 @@ export function normalizeGraphInputsPanelModel(rawModel) {
       setRuntimeDevice: readFunction(scope, setters, "setRuntimeDevice"),
       setRuntimeLicenseTier: readFunction(scope, setters, "setRuntimeLicenseTier"),
       setRuntimeLicenseFile: readFunction(scope, setters, "setRuntimeLicenseFile"),
+      setRuntimeTxFfdFilesText: readFunction(scope, setters, "setRuntimeTxFfdFilesText"),
+      setRuntimeRxFfdFilesText: readFunction(scope, setters, "setRuntimeRxFfdFilesText"),
       setRunMode: readFunction(scope, setters, "setRunMode"),
       setAutoPollAsyncRun: readFunction(scope, setters, "setAutoPollAsyncRun"),
       setPollIntervalMsText: readFunction(scope, setters, "setPollIntervalMsText"),
@@ -309,6 +315,8 @@ export function normalizeGraphRunOpsOptions(raw) {
     runtimeDevice: readString(scope, root, "runtimeDevice", "cpu"),
     runtimeLicenseTier: readString(scope, root, "runtimeLicenseTier", "trial"),
     runtimeLicenseFile: readString(scope, root, "runtimeLicenseFile", ""),
+    runtimeTxFfdFilesText: readString(scope, root, "runtimeTxFfdFilesText", ""),
+    runtimeRxFfdFilesText: readString(scope, root, "runtimeRxFfdFilesText", ""),
     nodes: readArray(scope, root, "nodes", []),
     edges: readArray(scope, root, "edges", []),
     runMode: readString(scope, root, "runMode", "sync"),
