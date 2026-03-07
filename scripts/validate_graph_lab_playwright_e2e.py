@@ -179,6 +179,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_fold_persistence_checked": False,
             "artifact_inspector_reset_checked": False,
             "artifact_inspector_layout_status_checked": False,
+            "artifact_inspector_badges_checked": False,
             "artifact_inspector_probe_state_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
@@ -439,6 +440,14 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     raise AssertionError("artifact inspector did not render default layout status")
                 if (
+                    "layout:default" not in artifact_text
+                    or "probe:default" not in artifact_text
+                    or "live:expanded" not in artifact_text
+                    or "history:expanded" not in artifact_text
+                    or "reset:clean" not in artifact_text
+                ):
+                    raise AssertionError("artifact inspector did not render default status badges")
+                if (
                     "selected history pair artifact expectation:" not in artifact_text
                     or "selected_history_artifact_expectation:" not in artifact_text
                     or "artifact_expectation_source:" not in artifact_text
@@ -458,6 +467,13 @@ def run(args: argparse.Namespace) -> int:
                     or "reset_required=yes" not in collapsed_live_artifact_text
                 ):
                     raise AssertionError("artifact inspector collapse did not update layout status")
+                if (
+                    "layout:customized" not in collapsed_live_artifact_text
+                    or "probe:default" not in collapsed_live_artifact_text
+                    or "live:collapsed" not in collapsed_live_artifact_text
+                    or "reset:required" not in collapsed_live_artifact_text
+                ):
+                    raise AssertionError("artifact inspector collapse did not update status badges")
                 artifact_field.get_by_role("button", name="Show Live Compare Evidence").click()
                 page.wait_for_timeout(150)
                 restored_live_artifact_text = artifact_field.inner_text()
@@ -497,6 +513,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_folds_checked"] = True
                 report["runtime_controls"]["artifact_inspector_reset_checked"] = True
                 report["runtime_controls"]["artifact_inspector_layout_status_checked"] = True
+                report["runtime_controls"]["artifact_inspector_badges_checked"] = True
                 report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
 
                 history_field = field_locator(page, "Compare Session History")
@@ -1183,6 +1200,14 @@ def run(args: argparse.Namespace) -> int:
                     or "probe_state: default" not in reloaded_artifact_text
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not update layout status")
+                if (
+                    "layout:customized" not in reloaded_artifact_text
+                    or "probe:default" not in reloaded_artifact_text
+                    or "live:collapsed" not in reloaded_artifact_text
+                    or "history:collapsed" not in reloaded_artifact_text
+                    or "reset:required" not in reloaded_artifact_text
+                ):
+                    raise AssertionError("artifact inspector persisted fold state did not retain status badges")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")

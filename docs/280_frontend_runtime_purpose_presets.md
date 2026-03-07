@@ -290,6 +290,13 @@ It now also mirrors the currently selected history pair's artifact expectation s
 - `probe_state`
   - summarizes the current RD/RA cursor positions and peak-lock state as `default` or `customized`
   - changes immediately when the operator edits probe bins or toggles a peak lock, and returns to `default` on `Reset Layout`
+- status chips
+  - `layout:default/customized`
+  - `probe:default/customized`
+  - `live:expanded/collapsed`
+  - `history:expanded/collapsed`
+  - `reset:clean/required`
+  - gives the operator a compact visual summary without reading the full state text lines
 
 Those fold preferences now persist in browser `localStorage`, so a reload keeps the `Artifact Inspector` in the same collapsed/expanded state on the same machine/browser profile.
 

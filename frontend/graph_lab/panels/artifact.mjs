@@ -53,6 +53,36 @@ function safeShapeLabel(shape) {
   return Array.isArray(shape) && shape.length > 0 ? shape.join("x") : "-";
 }
 
+function buildArtifactInspectorStatusBadges({
+  layoutDefault,
+  probesDefault,
+  liveCompareEvidenceExpanded,
+  historyArtifactExpectationExpanded,
+}) {
+  return [
+    {
+      label: `layout:${layoutDefault ? "default" : "customized"}`,
+      tone: layoutDefault ? "status-ok" : "status-warn",
+    },
+    {
+      label: `probe:${probesDefault ? "default" : "customized"}`,
+      tone: probesDefault ? "status-ok" : "status-warn",
+    },
+    {
+      label: `live:${liveCompareEvidenceExpanded ? "expanded" : "collapsed"}`,
+      tone: "status-neutral",
+    },
+    {
+      label: `history:${historyArtifactExpectationExpanded ? "expanded" : "collapsed"}`,
+      tone: "status-neutral",
+    },
+    {
+      label: `reset:${layoutDefault ? "clean" : "required"}`,
+      tone: layoutDefault ? "status-ok" : "status-warn",
+    },
+  ];
+}
+
 function buildDefaultArtifactInspectorProbeState(rdPeaks, raPeaks) {
   const primaryRd = Array.isArray(rdPeaks) && rdPeaks.length > 0 ? rdPeaks[0] : null;
   const primaryRa = Array.isArray(raPeaks) && raPeaks.length > 0 ? raPeaks[0] : null;
@@ -275,6 +305,23 @@ export function ArtifactInspectorPanel({
     historyArtifactExpectationExpanded,
     liveCompareEvidenceExpanded,
   ]);
+  const artifactInspectorStatusBadges = React.useMemo(() => {
+    const layoutDefault = (
+      liveCompareEvidenceExpanded === true
+      && historyArtifactExpectationExpanded === true
+      && artifactInspectorProbeState.probesDefault === true
+    );
+    return buildArtifactInspectorStatusBadges({
+      layoutDefault,
+      probesDefault: artifactInspectorProbeState.probesDefault === true,
+      liveCompareEvidenceExpanded,
+      historyArtifactExpectationExpanded,
+    });
+  }, [
+    artifactInspectorProbeState.probesDefault,
+    historyArtifactExpectationExpanded,
+    liveCompareEvidenceExpanded,
+  ]);
   React.useEffect(() => {
     if (typeof onArtifactInspectorStatusChange !== "function") return;
     onArtifactInspectorStatusChange({
@@ -331,25 +378,56 @@ export function ArtifactInspectorPanel({
       key: "layout_controls",
       style: {
         display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "8px",
+        flexDirection: "column",
+        gap: "6px",
         marginBottom: "8px",
       },
     }, [
       h("div", {
-        key: "layout_state",
-        style: { color: "#8fb3c9" },
-      }, artifactInspectorLayoutStateText),
-      h("div", {
-        key: "probe_state",
-        style: { color: "#8fb3c9" },
-      }, artifactInspectorProbeState.text),
-      h("button", {
-        key: "reset_artifact_inspector_layout",
-        className: "btn",
-        onClick: resetArtifactInspectorLayout,
-      }, "Reset Layout"),
+        key: "layout_controls_header",
+        style: {
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: "8px",
+          flexWrap: "wrap",
+        },
+      }, [
+        h("div", {
+          key: "layout_status_stack",
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+            minWidth: "280px",
+            flex: "1 1 360px",
+          },
+        }, [
+          h("div", {
+            key: "layout_state",
+            style: { color: "#8fb3c9" },
+          }, artifactInspectorLayoutStateText),
+          h("div", {
+            key: "probe_state",
+            style: { color: "#8fb3c9" },
+          }, artifactInspectorProbeState.text),
+        ]),
+        h("button", {
+          key: "reset_artifact_inspector_layout",
+          className: "btn",
+          onClick: resetArtifactInspectorLayout,
+        }, "Reset Layout"),
+      ]),
+      h("div", { className: "chip-list", key: "artifact_inspector_status_chips" }, (
+        Array.isArray(artifactInspectorStatusBadges) && artifactInspectorStatusBadges.length > 0
+          ? artifactInspectorStatusBadges
+          : [{ label: "layout:unknown", tone: "status-neutral" }]
+      ).map((row, idx) =>
+        h("span", {
+          className: `chip ${String(row?.tone || "status-neutral")}`,
+          key: `artifact_inspector_status_chip_${idx}`,
+        }, String(row?.label || "-"))
+      )),
     ]),
     hasGraphRunSummary
       ? h("div", { key: "kpi", style: { marginBottom: "8px" } }, [
