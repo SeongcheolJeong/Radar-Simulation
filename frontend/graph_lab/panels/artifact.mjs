@@ -136,6 +136,7 @@ export function ArtifactInspectorPanel({
   selectedReplayableCompareSessionText,
   selectedReplayableCompareSessionArtifactExpectationSummaryText,
   selectedReplayableCompareSessionArtifactExpectationText,
+  onArtifactInspectorStatusChange,
 }) {
   const hasGraphRunSummary = Boolean(graphRunSummary);
   const runtimeContract = graphRunSummary?.runtime_contract_diagnostics || null;
@@ -234,8 +235,7 @@ export function ArtifactInspectorPanel({
   const selectedHistoryArtifactExpectationSummaryLine = String(
     selectedReplayableCompareSessionArtifactExpectationSummaryText || "selected_history_artifact_expectation: -"
   );
-  const artifactInspectorLayoutStateText = React.useMemo(() => {
-    const foldsDefault = liveCompareEvidenceExpanded === true && historyArtifactExpectationExpanded === true;
+  const artifactInspectorProbeState = React.useMemo(() => {
     const probesDefault = (
       String(rdRangeBinText || "") === String(defaultProbeState.rdRangeBinText || "")
       && String(rdDopplerBinText || "") === String(defaultProbeState.rdDopplerBinText || "")
@@ -246,21 +246,42 @@ export function ArtifactInspectorPanel({
       && rdPeakLock === Boolean(defaultProbeState.rdPeakLock)
       && raPeakLock === Boolean(defaultProbeState.raPeakLock)
     );
-    const overallState = foldsDefault && probesDefault ? "default" : "customized";
-    return `layout_state: ${overallState} | live=${liveCompareEvidenceExpanded ? "expanded" : "collapsed"} | history=${historyArtifactExpectationExpanded ? "expanded" : "collapsed"} | probes=${probesDefault ? "default" : "customized"} | reset_required=${overallState === "default" ? "no" : "yes"}`;
+    return {
+      probesDefault,
+      text: `probe_state: ${probesDefault ? "default" : "customized"} | rd_cursor=${Number(rdProbe.row || 0)}/${Number(rdProbe.col || 0)} | rd_lock=${rdPeakLock ? "on" : "off"} | ra_cursor=${Number(raProbe.row || 0)}/${Number(raProbe.col || 0)} | ra_lock=${raPeakLock ? "on" : "off"}`,
+    };
   }, [
     defaultProbeState,
-    historyArtifactExpectationExpanded,
-    liveCompareEvidenceExpanded,
     raAngleBinText,
     raPeakLock,
     raPeakSelectText,
+    raProbe.col,
+    raProbe.row,
     raRangeBinText,
     rdDopplerBinText,
     rdPeakLock,
     rdPeakSelectText,
+    rdProbe.col,
+    rdProbe.row,
     rdRangeBinText,
   ]);
+  const artifactInspectorLayoutStateText = React.useMemo(() => {
+    const foldsDefault = liveCompareEvidenceExpanded === true && historyArtifactExpectationExpanded === true;
+    const probesDefault = artifactInspectorProbeState.probesDefault === true;
+    const overallState = foldsDefault && probesDefault ? "default" : "customized";
+    return `layout_state: ${overallState} | live=${liveCompareEvidenceExpanded ? "expanded" : "collapsed"} | history=${historyArtifactExpectationExpanded ? "expanded" : "collapsed"} | probes=${probesDefault ? "default" : "customized"} | reset_required=${overallState === "default" ? "no" : "yes"}`;
+  }, [
+    artifactInspectorProbeState.probesDefault,
+    historyArtifactExpectationExpanded,
+    liveCompareEvidenceExpanded,
+  ]);
+  React.useEffect(() => {
+    if (typeof onArtifactInspectorStatusChange !== "function") return;
+    onArtifactInspectorStatusChange({
+      layoutStateText: artifactInspectorLayoutStateText,
+      probeStateText: artifactInspectorProbeState.text,
+    });
+  }, [artifactInspectorLayoutStateText, artifactInspectorProbeState.text, onArtifactInspectorStatusChange]);
   const toggleLiveCompareEvidenceExpanded = React.useCallback(() => {
     setArtifactInspectorPrefs((prev) => {
       const next = normalizeArtifactInspectorPrefs(prev);
@@ -320,6 +341,10 @@ export function ArtifactInspectorPanel({
         key: "layout_state",
         style: { color: "#8fb3c9" },
       }, artifactInspectorLayoutStateText),
+      h("div", {
+        key: "probe_state",
+        style: { color: "#8fb3c9" },
+      }, artifactInspectorProbeState.text),
       h("button", {
         key: "reset_artifact_inspector_layout",
         className: "btn",

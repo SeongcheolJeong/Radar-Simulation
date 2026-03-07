@@ -179,6 +179,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_fold_persistence_checked": False,
             "artifact_inspector_reset_checked": False,
             "artifact_inspector_layout_status_checked": False,
+            "artifact_inspector_probe_state_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -434,6 +435,7 @@ def run(args: argparse.Namespace) -> int:
                     "layout_state: default" not in artifact_text
                     or "probes=default" not in artifact_text
                     or "reset_required=no" not in artifact_text
+                    or "probe_state: default" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render default layout status")
                 if (
@@ -487,6 +489,7 @@ def run(args: argparse.Namespace) -> int:
                     or "layout_state: default" not in reset_artifact_text
                     or "probes=default" not in reset_artifact_text
                     or "reset_required=no" not in reset_artifact_text
+                    or "probe_state: default" not in reset_artifact_text
                 ):
                     raise AssertionError("artifact inspector reset layout did not restore expanded detail state")
                 report["runtime_controls"]["compare_assessment_checked"] = True
@@ -494,6 +497,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_folds_checked"] = True
                 report["runtime_controls"]["artifact_inspector_reset_checked"] = True
                 report["runtime_controls"]["artifact_inspector_layout_status_checked"] = True
+                report["runtime_controls"]["artifact_inspector_probe_state_checked"] = True
 
                 history_field = field_locator(page, "Compare Session History")
                 history_field.wait_for(timeout=30_000)
@@ -1036,6 +1040,12 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include artifact path fingerprint summary")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
+                if (
+                    "## Artifact Inspector State" not in brief_text
+                    or "artifact_inspector_layout_state:" not in brief_text
+                    or "artifact_inspector_probe_state:" not in brief_text
+                ):
+                    raise AssertionError("decision brief did not include artifact inspector state summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
 
                 # Normalize high-churn text before visual capture so strict snapshots
@@ -1170,6 +1180,7 @@ def run(args: argparse.Namespace) -> int:
                     or "live=collapsed" not in reloaded_artifact_text
                     or "history=collapsed" not in reloaded_artifact_text
                     or "reset_required=yes" not in reloaded_artifact_text
+                    or "probe_state: default" not in reloaded_artifact_text
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not update layout status")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True

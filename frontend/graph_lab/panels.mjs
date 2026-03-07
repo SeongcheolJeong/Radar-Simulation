@@ -13708,6 +13708,7 @@ export function NodeInspectorPanel({
   lastRegressionSession,
   lastRegressionExport,
   contractDebugText,
+  onArtifactInspectorStatusChange,
 }) {
   return h("section", { className: "panel panel-right", key: "right" }, [
     h("div", { className: "panel-hd", key: "rhd" }, "Node Inspector"),
@@ -13847,6 +13848,7 @@ export function NodeInspectorPanel({
           selectedReplayableCompareSessionText,
           selectedReplayableCompareSessionArtifactExpectationSummaryText,
           selectedReplayableCompareSessionArtifactExpectationText,
+          onArtifactInspectorStatusChange,
         }),
       ]),
     ]),

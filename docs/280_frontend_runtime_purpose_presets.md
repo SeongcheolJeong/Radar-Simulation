@@ -287,6 +287,9 @@ It now also mirrors the currently selected history pair's artifact expectation s
   - reports whether the Artifact Inspector is in `default` or `customized` state
   - includes current fold layout (`live`, `history`), probe-control status (`probes=default/customized`), and `reset_required=yes/no`
   - updates immediately when either fold visibility or probe inputs drift from the default snapshot
+- `probe_state`
+  - summarizes the current RD/RA cursor positions and peak-lock state as `default` or `customized`
+  - changes immediately when the operator edits probe bins or toggles a peak lock, and returns to `default` on `Reset Layout`
 
 Those fold preferences now persist in browser `localStorage`, so a reload keeps the `Artifact Inspector` in the same collapsed/expanded state on the same machine/browser profile.
 
@@ -352,6 +355,11 @@ It also includes a `Compare Assessment` block with:
 `Export Brief` also includes a `Selected Pair Forecast` section so the chosen compare recipe and its planned runtime expectations are preserved outside the UI.
 
 It now also exports a `Compare Session History` section so the operator can hand off recent compare actions and their outcomes without relying on the browser state.
+
+The exported brief now also includes an `Artifact Inspector State` section with:
+
+- `artifact_inspector_layout_state`
+- `artifact_inspector_probe_state`
 
 The `Runtime Compare` summary inside the brief now also carries:
 

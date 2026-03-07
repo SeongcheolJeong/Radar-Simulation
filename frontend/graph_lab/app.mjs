@@ -860,6 +860,23 @@ function summarizeCompareSessionTransferBadgeLabels(badgeRows) {
   return labels.length > 0 ? labels.join(" | ") : "transfer:idle";
 }
 
+function normalizeArtifactInspectorStatusSummary(value) {
+  const row = value && typeof value === "object" ? value : {};
+  return {
+    layoutStateText: normalizeCompareSessionField(row.layoutStateText, 320) || "layout_state: -",
+    probeStateText: normalizeCompareSessionField(row.probeStateText, 320) || "probe_state: -",
+  };
+}
+
+function buildArtifactInspectorDecisionLine(rawText, panelPrefix, decisionPrefix) {
+  const text = String(rawText || "").trim();
+  if (!text) return `${decisionPrefix}: -`;
+  if (text.startsWith(`${panelPrefix}:`)) {
+    return `${decisionPrefix}:${text.slice(panelPrefix.length + 1)}`;
+  }
+  return `${decisionPrefix}: ${text}`;
+}
+
 function buildCompareSessionImportPreviewSummary(
   stagedEntry,
   existingHistoryEntries,
@@ -1726,6 +1743,9 @@ export function App() {
   const [gateResultText, setGateResultText] = React.useState("-");
   const [lastPolicyEval, setLastPolicyEval] = React.useState(null);
   const [contractDebugText, setContractDebugText] = React.useState("-");
+  const [artifactInspectorStatusSummary, setArtifactInspectorStatusSummary] = React.useState(() => (
+    normalizeArtifactInspectorStatusSummary({})
+  ));
   const [contractOverlayEnabled, setContractOverlayEnabled] = React.useState(
     String(params.get("contract_overlay") || "0") === "1"
   );
@@ -2763,12 +2783,31 @@ export function App() {
       .trim();
     return `compare_history_transfer_compact: ${badgeSummary} | ${importCompactSummary || "none"}`;
   }, [compareSessionImportPreviewCompactSummaryText, compareSessionTransferBadgeRows]);
+  const artifactInspectorDecisionLayoutStateText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.layoutStateText,
+      "layout_state",
+      "artifact_inspector_layout_state"
+    ),
+    [artifactInspectorStatusSummary.layoutStateText]
+  );
+  const artifactInspectorDecisionProbeStateText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.probeStateText,
+      "probe_state",
+      "artifact_inspector_probe_state"
+    ),
+    [artifactInspectorStatusSummary.probeStateText]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
       : "-",
     [compareReplayPairMetaById, compareSessionHistory]
   );
+  const handleArtifactInspectorStatusChange = React.useCallback((statusInput) => {
+    setArtifactInspectorStatusSummary(normalizeArtifactInspectorStatusSummary(statusInput));
+  }, []);
   const latestReplayableCompareSession = React.useMemo(
     () => compareSessionHistory
       .map((row) => applyCompareReplayPairMeta(getCompareSessionReplayPair(row), compareReplayPairMetaById))
@@ -3897,6 +3936,8 @@ export function App() {
       `compare_runtime: ${compareRuntimeDiagnostics.badgeLine}`,
       `compare_assessment: ${runCompareSummary.assessment}`,
       `compare_flags: ${runCompareSummary.flagSummary}`,
+      `${artifactInspectorDecisionLayoutStateText}`,
+      `${artifactInspectorDecisionProbeStateText}`,
       `gate_failure_count: ${Number(failureRows.length || 0)}`,
       `path_count_delta(current-compare): ${runCompareSummary.available ? formatSigned(runCompareSummary.pathCountDelta) : "-"}`,
     ];
@@ -3937,6 +3978,8 @@ export function App() {
     compareSessionImportPreviewCompactSummaryText,
     compareSessionTransferCompactSummaryText,
     compareSessionTransferStatusText,
+    artifactInspectorDecisionLayoutStateText,
+    artifactInspectorDecisionProbeStateText,
     graphRunSummary,
     latestCompareSessionText,
     latestReplayableCompareSessionText,
@@ -4048,6 +4091,12 @@ export function App() {
       ...runCompareSummary.detailLines,
       "```",
       "",
+      "## Artifact Inspector State",
+      "```text",
+      artifactInspectorDecisionLayoutStateText,
+      artifactInspectorDecisionProbeStateText,
+      "```",
+      "",
       "## Current Artifacts",
       `- graph_run_summary_json: ${String(currentOutputs.graph_run_summary_json || "-")}`,
       `- radar_map_npz: ${String(currentOutputs.radar_map_npz || "-")}`,
@@ -4104,6 +4153,8 @@ export function App() {
     compareSessionRetentionPreviewCompactSummaryText,
     compareSessionRetentionPreviewText,
     compareSessionTransferCompactSummaryText,
+    artifactInspectorDecisionLayoutStateText,
+    artifactInspectorDecisionProbeStateText,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
@@ -4546,6 +4597,7 @@ export function App() {
         lastRegressionSession,
         lastRegressionExport,
         contractDebugText,
+        onArtifactInspectorStatusChange: handleArtifactInspectorStatusChange,
       }),
     ]),
     h(ContractWarningOverlay, {
