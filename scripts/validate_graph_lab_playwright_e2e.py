@@ -467,7 +467,7 @@ def run(args: argparse.Namespace) -> int:
                 default_mirror_ready = False
                 for _ in range(40):
                     decision_artifact_state_text = decision_artifact_state_field.inner_text()
-                    if "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | audit:idle | continuity:empty | health:idle | operator:idle" in decision_artifact_state_text:
+                    if "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:idle | audit:idle | continuity:empty | health:idle | operator:idle" in decision_artifact_state_text:
                         default_mirror_ready = True
                         break
                     page.wait_for_timeout(250)
@@ -510,6 +510,7 @@ def run(args: argparse.Namespace) -> int:
                     or "history:expanded" not in artifact_text
                     or "reset:clean" not in artifact_text
                     or "maintenance:idle" not in artifact_text
+                    or "maintenance_clear:idle" not in artifact_text
                     or "audit:idle" not in artifact_text
                     or "continuity:empty" not in artifact_text
                     or "health:idle" not in artifact_text
@@ -530,7 +531,7 @@ def run(args: argparse.Namespace) -> int:
                 if not artifact_clear_last_clear_button.is_disabled():
                     raise AssertionError("artifact inspector clear-last-clear button should be disabled in default state")
                 if (
-                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | audit:idle | continuity:empty | health:idle | operator:idle" not in decision_artifact_state_text
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:idle | audit:idle | continuity:empty | health:idle | operator:idle" not in decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in decision_artifact_state_text
@@ -579,7 +580,7 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "shape.adc:" not in collapsed_from_decision_artifact_text
                         and "artifact_expectation_source:" not in collapsed_from_decision_artifact_text
-                        and "artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed | history:collapsed | reset:required | maintenance:idle | audit:tracking | continuity:full | health:healthy | operator:track" in collapsed_from_decision_mirror_text
+                        and "artifact_inspector_status_badges: layout:customized | probe:default | live:collapsed | history:collapsed | reset:required | maintenance:idle | maintenance_clear:idle | audit:tracking | continuity:full | health:healthy | operator:track" in collapsed_from_decision_mirror_text
                         and "artifact_inspector_last_action:" in collapsed_from_decision_mirror_text
                         and "decision:collapse_evidence" in collapsed_from_decision_mirror_text
                     ):
@@ -618,7 +619,7 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "shape.adc:" in expanded_from_decision_artifact_text
                         and "artifact_expectation_source:" in expanded_from_decision_artifact_text
-                        and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | audit:tracking | continuity:full | health:healthy | operator:track" in expanded_from_decision_mirror_text
+                        and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:idle | audit:tracking | continuity:full | health:healthy | operator:track" in expanded_from_decision_mirror_text
                         and "artifact_inspector_last_action:" in expanded_from_decision_mirror_text
                         and "decision:expand_evidence" in expanded_from_decision_mirror_text
                     ):
@@ -751,7 +752,7 @@ def run(args: argparse.Namespace) -> int:
                 for _ in range(40):
                     reset_decision_artifact_state_text = decision_artifact_state_field.inner_text()
                     if (
-                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | audit:trimmed | continuity:tail_only | health:truncated | operator:clear" in reset_decision_artifact_state_text
+                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:idle | audit:trimmed | continuity:tail_only | health:truncated | operator:clear" in reset_decision_artifact_state_text
                         and "artifact_inspector_layout_state: default" in reset_decision_artifact_state_text
                         and "artifact_inspector_last_action:" in reset_decision_artifact_state_text
                         and "decision:reset_layout" in reset_decision_artifact_state_text
@@ -796,7 +797,7 @@ def run(args: argparse.Namespace) -> int:
                 ):
                     raise AssertionError("artifact inspector reset layout did not restore expanded detail state")
                 if (
-                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | audit:trimmed | continuity:tail_only | health:truncated | operator:clear" not in reset_decision_artifact_state_text
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:idle | audit:trimmed | continuity:tail_only | health:truncated | operator:clear" not in reset_decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in reset_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reset_decision_artifact_state_text
                     or "artifact_inspector_last_action:" not in reset_decision_artifact_state_text
@@ -1628,6 +1629,7 @@ def run(args: argparse.Namespace) -> int:
                     or "history:expanded" not in reloaded_artifact_text
                     or "reset:clean" not in reloaded_artifact_text
                     or "maintenance:marked" not in reloaded_artifact_text
+                    or "maintenance_clear:idle" not in reloaded_artifact_text
                 ):
                     raise AssertionError("artifact inspector persisted fold state did not retain status badges")
                 reloaded_decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
@@ -1646,7 +1648,7 @@ def run(args: argparse.Namespace) -> int:
                 for _ in range(40):
                     reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
                     if (
-                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:marked | audit:idle | continuity:empty | health:idle | operator:idle" in reloaded_decision_artifact_state_text
+                        "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:marked | maintenance_clear:idle | audit:idle | continuity:empty | health:idle | operator:idle" in reloaded_decision_artifact_state_text
                         and "artifact_inspector_layout_state: default" in reloaded_decision_artifact_state_text
                     ):
                         reloaded_mirror_ready = True
@@ -1656,7 +1658,7 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane did not persist mirrored artifact inspector state after reload")
                 reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
                 if (
-                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:marked | audit:idle | continuity:empty | health:idle | operator:idle" not in reloaded_decision_artifact_state_text
+                    "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:marked | maintenance_clear:idle | audit:idle | continuity:empty | health:idle | operator:idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_probe_state: default" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_last_action: seq=0 | idle" not in reloaded_decision_artifact_state_text
@@ -1710,6 +1712,7 @@ def run(args: argparse.Namespace) -> int:
                     if (
                         "maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_artifact_text
                         and "maintenance_last_clear: seq=1 | source=decision_pane | trigger=manual | cleared_action=clear_action_trail" in maintenance_cleared_artifact_text
+                        and "maintenance_clear:recorded" in maintenance_cleared_artifact_text
                         and "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_artifact_text
                         and "maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_artifact_text
                         and "maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_artifact_text
@@ -1718,6 +1721,7 @@ def run(args: argparse.Namespace) -> int:
                         and "maintenance_last_clear_controls: clear=enabled | recommended=clear_record | reason=record_present" in maintenance_cleared_artifact_text
                         and "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear: seq=1 | source=decision_pane | trigger=manual | cleared_action=clear_action_trail" in maintenance_cleared_mirror_text
+                        and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:recorded | audit:idle | continuity:empty | health:idle | operator:idle" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_mirror_text
@@ -1753,10 +1757,12 @@ def run(args: argparse.Namespace) -> int:
                     last_clear_cleared_mirror_text = reloaded_decision_artifact_state_field.inner_text()
                     if (
                         "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in last_clear_cleared_artifact_text
+                        and "maintenance_clear:idle" in last_clear_cleared_artifact_text
                         and "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" in last_clear_cleared_artifact_text
                         and "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" in last_clear_cleared_artifact_text
                         and "maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" in last_clear_cleared_artifact_text
                         and "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in last_clear_cleared_mirror_text
+                        and "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | maintenance_clear:idle | audit:idle | continuity:empty | health:idle | operator:idle" in last_clear_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" in last_clear_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" in last_clear_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" in last_clear_cleared_mirror_text

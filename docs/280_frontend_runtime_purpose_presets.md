@@ -437,6 +437,7 @@ Those mirror controls are now also state-aware:
 - the maintenance controls now also export `recommended` and `reason`, so `Clear Maintenance Marker` can be interpreted as `not_needed` in idle state or `clear_marker` when a provenance marker is present
 - the last-clear controls also export `recommended` and `reason`, so `Clear Last Clear Record` can be interpreted as `not_needed` in idle state or `clear_record` when an acknowledgement provenance record is still retained
 - the inspector status badges now also carry `maintenance:idle` or `maintenance:marked`, so unresolved provenance markers are visible in the chip row and the decision brief without scanning the detailed maintenance fields
+- the inspector status badges now also carry `maintenance_clear:idle` or `maintenance_clear:recorded`, so retained acknowledgement provenance is visible in the chip row before opening the detailed `maintenance_last_clear*` lines
 - the inspector status badges now also carry `audit:idle`, `audit:tracking`, or `audit:trimmed`, plus `continuity:empty`, `continuity:full`, or `continuity:tail_only`, `health:idle`, `health:healthy`, or `health:truncated`, and `operator:idle`, `operator:track`, or `operator:clear`, so overflow, retained-history trust, and the immediate operator posture are visible without reading the text summary
 
 The `Runtime Compare` summary inside the brief now also carries:

@@ -901,6 +901,10 @@ function toneForArtifactInspectorStatusBadge(label) {
     if (text.endsWith("marked")) return "status-warn";
     return "status-neutral";
   }
+  if (text.startsWith("maintenance_clear:")) {
+    if (text.endsWith("recorded")) return "status-warn";
+    return "status-neutral";
+  }
   if (text.startsWith("audit:")) {
     if (text.endsWith("trimmed")) return "status-warn";
     if (text.endsWith("tracking")) return "status-ok";

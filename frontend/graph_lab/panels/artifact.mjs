@@ -60,6 +60,7 @@ function buildArtifactInspectorStatusBadges({
   liveCompareEvidenceExpanded,
   historyArtifactExpectationExpanded,
   maintenanceState,
+  maintenanceLastClearState,
   auditState,
   auditContinuity,
   auditHealth,
@@ -90,6 +91,14 @@ function buildArtifactInspectorStatusBadges({
       label: `maintenance:${String(maintenanceState || "idle").trim() || "idle"}`,
       tone: (
         String(maintenanceState || "").trim() === "marked"
+          ? "status-warn"
+          : "status-neutral"
+      ),
+    },
+    {
+      label: `maintenance_clear:${String(maintenanceLastClearState || "idle").trim() || "idle"}`,
+      tone: (
+        String(maintenanceLastClearState || "").trim() === "recorded"
           ? "status-warn"
           : "status-neutral"
       ),
@@ -421,6 +430,10 @@ function parseArtifactInspectorMaintenanceLastClearFields(value) {
     trigger: String(triggerMatch?.[1] || "idle").trim().toLowerCase() || "idle",
     clearedAction: String(clearedActionMatch?.[1] || "none").trim().toLowerCase() || "none",
   };
+}
+
+function extractArtifactInspectorMaintenanceLastClearState(value) {
+  return parseArtifactInspectorMaintenanceLastClearFields(value).seq > 0 ? "recorded" : "idle";
 }
 
 function extractArtifactInspectorMaintenanceState(value) {
@@ -766,6 +779,7 @@ export function ArtifactInspectorPanel({
       .trim()
       .toLowerCase();
     const maintenanceState = extractArtifactInspectorMaintenanceState(artifactInspectorPrefs);
+    const maintenanceLastClearState = extractArtifactInspectorMaintenanceLastClearState(artifactInspectorPrefs);
     const auditContinuity = extractArtifactInspectorAuditContinuityState(artifactInspectorPrefs);
     const auditHealth = extractArtifactInspectorAuditHealthState(artifactInspectorPrefs);
     const operatorAction = extractArtifactInspectorAuditOperatorBadge(artifactInspectorPrefs);
@@ -775,6 +789,7 @@ export function ArtifactInspectorPanel({
       liveCompareEvidenceExpanded,
       historyArtifactExpectationExpanded,
       maintenanceState,
+      maintenanceLastClearState,
       auditState,
       auditContinuity,
       auditHealth,
