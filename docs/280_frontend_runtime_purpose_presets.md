@@ -240,6 +240,8 @@ It now also mirrors the currently selected history pair's artifact expectation s
 - `Hide/Show History Snapshot`
   - collapses or restores the selected history pair snapshot while keeping the selected pair and summary line visible
 
+Those fold preferences now persist in browser `localStorage`, so a reload keeps the `Artifact Inspector` in the same collapsed/expanded state on the same machine/browser profile.
+
 ## Backend Behavior
 
 Path-based backends now share the same antenna-aware FMCW synth path:

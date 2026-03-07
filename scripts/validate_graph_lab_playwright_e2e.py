@@ -159,6 +159,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_assessment_checked": False,
             "artifact_inspector_expectation_checked": False,
             "artifact_inspector_folds_checked": False,
+            "artifact_inspector_fold_persistence_checked": False,
             "decision_brief_runtime_compare_checked": False,
         },
         "artifacts": {},
@@ -832,6 +833,16 @@ def run(args: argparse.Namespace) -> int:
                         scale="css",
                     )
 
+                artifact_field.get_by_role("button", name="Hide Live Compare Evidence").click()
+                artifact_field.get_by_role("button", name="Hide History Snapshot").click()
+                page.wait_for_timeout(150)
+                collapsed_before_reload_artifact_text = artifact_field.inner_text()
+                if (
+                    "Show Live Compare Evidence" not in collapsed_before_reload_artifact_text
+                    or "Show History Snapshot" not in collapsed_before_reload_artifact_text
+                ):
+                    raise AssertionError("artifact inspector fold controls did not stay collapsed before reload")
+
                 persisted_pair_value = history_select.input_value()
                 page.reload(wait_until="domcontentloaded", timeout=60_000)
                 page.locator("header.topbar").first.wait_for(timeout=60_000)
@@ -860,6 +871,17 @@ def run(args: argparse.Namespace) -> int:
                 if "assessment:" not in reloaded_pinned_quick_text or "fp:" not in reloaded_pinned_quick_text:
                     raise AssertionError("pinned quick action badges did not persist after reload")
                 report["runtime_controls"]["compare_session_persistence_checked"] = True
+                reloaded_artifact_field = field_locator(page, "Artifact Inspector")
+                reloaded_artifact_field.wait_for(timeout=30_000)
+                reloaded_artifact_text = reloaded_artifact_field.inner_text()
+                if (
+                    "Show Live Compare Evidence" not in reloaded_artifact_text
+                    or "Show History Snapshot" not in reloaded_artifact_text
+                ):
+                    raise AssertionError("artifact inspector fold controls did not persist after reload")
+                if "shape.adc:" in reloaded_artifact_text or "artifact_expectation_source:" in reloaded_artifact_text:
+                    raise AssertionError("artifact inspector detail sections unexpectedly reopened after reload")
+                report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
                 report["playwright_runtime_ready"] = True
                 report["e2e_pass"] = True

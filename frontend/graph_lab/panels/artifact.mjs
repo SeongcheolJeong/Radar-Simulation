@@ -3,6 +3,7 @@ import { buildRunCompareSummary } from "../compare_summary.mjs";
 import { normalizeRepoPath } from "../graph_helpers.mjs";
 
 const h = React.createElement;
+const ARTIFACT_INSPECTOR_PREFS_STORAGE_KEY = "graph_lab_artifact_inspector_prefs_v1";
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -80,6 +81,39 @@ function computeProbe(peaks, rowBin, colBin, shape) {
   };
 }
 
+function normalizeArtifactInspectorPrefs(value) {
+  const row = value && typeof value === "object" ? value : {};
+  return {
+    liveCompareEvidenceExpanded: row.liveCompareEvidenceExpanded !== false,
+    historyArtifactExpectationExpanded: row.historyArtifactExpectationExpanded !== false,
+  };
+}
+
+function loadArtifactInspectorPrefs() {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return normalizeArtifactInspectorPrefs({});
+    }
+    const raw = String(window.localStorage.getItem(ARTIFACT_INSPECTOR_PREFS_STORAGE_KEY) || "").trim();
+    if (!raw) {
+      return normalizeArtifactInspectorPrefs({});
+    }
+    return normalizeArtifactInspectorPrefs(JSON.parse(raw));
+  } catch (_) {
+    return normalizeArtifactInspectorPrefs({});
+  }
+}
+
+function saveArtifactInspectorPrefs(value) {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    const prefs = normalizeArtifactInspectorPrefs(value);
+    window.localStorage.setItem(ARTIFACT_INSPECTOR_PREFS_STORAGE_KEY, JSON.stringify(prefs));
+  } catch (_) {
+    // localStorage may be blocked; ignore and continue with in-memory state
+  }
+}
+
 export function ArtifactInspectorPanel({
   graphRunSummary,
   compareGraphRunSummary,
@@ -88,10 +122,7 @@ export function ArtifactInspectorPanel({
   selectedReplayableCompareSessionArtifactExpectationSummaryText,
   selectedReplayableCompareSessionArtifactExpectationText,
 }) {
-  if (!graphRunSummary) {
-    return h("pre", { className: "result-box", key: "aibox_empty" }, "run graph first to inspect artifacts");
-  }
-
+  const hasGraphRunSummary = Boolean(graphRunSummary);
   const runtimeContract = graphRunSummary?.runtime_contract_diagnostics || null;
   const rdShape = normalizeShape(
     graphRunSummary?.radar_map_summary?.rd_shape || graphRunSummary?.quicklook?.rd_shape
@@ -110,8 +141,13 @@ export function ArtifactInspectorPanel({
   const [raPeakSelectText, setRaPeakSelectText] = React.useState("-1");
   const [rdPeakLock, setRdPeakLock] = React.useState(false);
   const [raPeakLock, setRaPeakLock] = React.useState(false);
-  const [liveCompareEvidenceExpanded, setLiveCompareEvidenceExpanded] = React.useState(true);
-  const [historyArtifactExpectationExpanded, setHistoryArtifactExpectationExpanded] = React.useState(true);
+  const [artifactInspectorPrefs, setArtifactInspectorPrefs] = React.useState(() => loadArtifactInspectorPrefs());
+  const liveCompareEvidenceExpanded = normalizeArtifactInspectorPrefs(
+    artifactInspectorPrefs
+  ).liveCompareEvidenceExpanded;
+  const historyArtifactExpectationExpanded = normalizeArtifactInspectorPrefs(
+    artifactInspectorPrefs
+  ).historyArtifactExpectationExpanded;
 
   React.useEffect(() => {
     const primaryRd = rdPeaks[0] || null;
@@ -177,6 +213,28 @@ export function ArtifactInspectorPanel({
   const selectedHistoryArtifactExpectationSummaryLine = String(
     selectedReplayableCompareSessionArtifactExpectationSummaryText || "selected_history_artifact_expectation: -"
   );
+  const toggleLiveCompareEvidenceExpanded = React.useCallback(() => {
+    setArtifactInspectorPrefs((prev) => {
+      const next = normalizeArtifactInspectorPrefs(prev);
+      const updated = {
+        ...next,
+        liveCompareEvidenceExpanded: !next.liveCompareEvidenceExpanded,
+      };
+      saveArtifactInspectorPrefs(updated);
+      return updated;
+    });
+  }, []);
+  const toggleHistoryArtifactExpectationExpanded = React.useCallback(() => {
+    setArtifactInspectorPrefs((prev) => {
+      const next = normalizeArtifactInspectorPrefs(prev);
+      const updated = {
+        ...next,
+        historyArtifactExpectationExpanded: !next.historyArtifactExpectationExpanded,
+      };
+      saveArtifactInspectorPrefs(updated);
+      return updated;
+    });
+  }, []);
 
   const renderProbeSummary = (probe) => {
     const exact = probe.exact;
@@ -194,12 +252,14 @@ export function ArtifactInspectorPanel({
   };
 
   return h("div", { className: "result-box", key: "aibox" }, [
-    h("div", { key: "kpi", style: { marginBottom: "8px" } }, [
-      `paths=${Number(graphRunSummary?.path_summary?.path_count_total || 0)} | `,
-      `adc_shape=${Array.isArray(graphRunSummary?.adc_summary?.shape) ? graphRunSummary.adc_summary.shape.join("x") : "-"} | `,
-      `rd=${Array.isArray(graphRunSummary?.radar_map_summary?.rd_shape) ? graphRunSummary.radar_map_summary.rd_shape.join("x") : "-"} | `,
-      `ra=${Array.isArray(graphRunSummary?.radar_map_summary?.ra_shape) ? graphRunSummary.radar_map_summary.ra_shape.join("x") : "-"}`,
-    ]),
+    hasGraphRunSummary
+      ? h("div", { key: "kpi", style: { marginBottom: "8px" } }, [
+          `paths=${Number(graphRunSummary?.path_summary?.path_count_total || 0)} | `,
+          `adc_shape=${Array.isArray(graphRunSummary?.adc_summary?.shape) ? graphRunSummary.adc_summary.shape.join("x") : "-"} | `,
+          `rd=${Array.isArray(graphRunSummary?.radar_map_summary?.rd_shape) ? graphRunSummary.radar_map_summary.rd_shape.join("x") : "-"} | `,
+          `ra=${Array.isArray(graphRunSummary?.radar_map_summary?.ra_shape) ? graphRunSummary.radar_map_summary.ra_shape.join("x") : "-"}`,
+        ])
+      : h("div", { key: "kpi_empty", style: { marginBottom: "8px", color: "#8fb3c9" } }, "run graph first to inspect artifacts"),
     runtimeContract
       ? h("div", { key: "contract_runtime", style: { marginBottom: "8px", color: "#8fb3c9" } }, [
           `contract_delta(unique/attempt): ${formatSigned(runtimeContract?.delta?.unique_warning_count)}/${formatSigned(runtimeContract?.delta?.attempt_count_total)} | `,
@@ -212,7 +272,7 @@ export function ArtifactInspectorPanel({
         h("button", {
           key: "toggle_live_compare_evidence",
           className: "btn",
-          onClick: () => setLiveCompareEvidenceExpanded((prev) => !prev),
+          onClick: toggleLiveCompareEvidenceExpanded,
         }, liveCompareEvidenceExpanded ? "Hide Live Compare Evidence" : "Show Live Compare Evidence"),
       ]),
       h("div", { key: "diff_summary", style: { marginBottom: liveCompareEvidenceExpanded ? "5px" : "0", color: compareTone } }, liveCompareSummaryText),
@@ -257,7 +317,7 @@ export function ArtifactInspectorPanel({
         h("button", {
           key: "toggle_history_artifact_expectation",
           className: "btn",
-          onClick: () => setHistoryArtifactExpectationExpanded((prev) => !prev),
+          onClick: toggleHistoryArtifactExpectationExpanded,
         }, historyArtifactExpectationExpanded ? "Hide History Snapshot" : "Show History Snapshot"),
       ]),
       h("div", { key: "history_artifact_expectation_pair", style: { marginBottom: "3px", color: "#b9d5e7" } }, String(selectedReplayableCompareSessionText || "selected_history_pair: -")),
