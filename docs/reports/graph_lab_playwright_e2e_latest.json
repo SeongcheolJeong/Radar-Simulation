@@ -1,6 +1,6 @@
 {
   "version": "graph_lab_playwright_e2e_report_v1",
-  "created_at_utc": "2026-03-07T14:09:48Z",
+  "created_at_utc": "2026-03-07T14:22:32Z",
   "require_playwright": true,
   "strict_visual": false,
   "update_baseline": false,
@@ -10,11 +10,12 @@
   "visual": {
     "missing_baseline": [],
     "changed": [
-      "topbar.png",
       "decision_pane.png",
       "artifact_inspector.png"
     ],
-    "matched": []
+    "matched": [
+      "topbar.png"
+    ]
   },
   "runtime_controls": {
     "purpose_presets_checked": [
@@ -43,6 +44,7 @@
     "compare_session_retention_policy_checked": true,
     "compare_session_retention_preserve_pinned_checked": true,
     "compare_session_retention_preserve_saved_checked": true,
+    "compare_session_retention_preview_checked": true,
     "compare_session_clear_all_checked": true,
     "compare_session_transfer_checked": true,
     "compare_session_future_schema_warning_checked": true,

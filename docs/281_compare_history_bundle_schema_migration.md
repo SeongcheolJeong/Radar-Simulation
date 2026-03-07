@@ -86,6 +86,7 @@ Current UI signaling:
   - `Import History` stages the bundle and renders an `import_preview` summary before local history is changed
   - `Apply Import Merge` performs the actual merge
   - `Clear Import Preview` discards the staged import without changing persisted browser state
+  - the staged preview now also renders `retention_pairs(merged_latest/merged_extra/merged_dropped)` so the operator can see which replay pairs would survive the effective retention policy
 
 ## Migration Policy
 

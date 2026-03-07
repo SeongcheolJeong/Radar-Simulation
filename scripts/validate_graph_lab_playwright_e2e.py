@@ -161,6 +161,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_retention_policy_checked": False,
             "compare_session_retention_preserve_pinned_checked": False,
             "compare_session_retention_preserve_saved_checked": False,
+            "compare_session_retention_preview_checked": False,
             "compare_session_clear_all_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_future_schema_warning_checked": False,
@@ -731,6 +732,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare history import preview did not include schema compatibility")
                 if "apply_required=true" not in history_transfer_text_after_import_preview:
                     raise AssertionError("compare history import preview did not expose apply requirement")
+                if "retention_pairs(merged_latest/merged_extra/merged_dropped):" not in history_transfer_text_after_import_preview:
+                    raise AssertionError("compare history import preview did not expose merged retention pair preview")
                 options_after_preview = page.evaluate(
                     """() => {
                         const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
@@ -910,44 +913,38 @@ def run(args: argparse.Namespace) -> int:
 
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()
-                page.wait_for_function(
-                    """() => {
-                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
-                            String(el.textContent || "").includes("Policy Gate Result")
-                        );
-                        const text = String(field ? field.textContent || "" : "");
-                        return (
-                            text.includes("policy_eval_id:")
-                            || text.includes("gate failed")
-                            || text.includes("policy gate failed")
-                        );
-                    }""",
-                    timeout=60_000,
-                )
+                policy_gate_field = field_locator(page, "Policy Gate Result")
+                for _ in range(20):
+                    policy_text = policy_gate_field.inner_text()
+                    if (
+                        "policy_eval_id:" in policy_text
+                        or "gate failed" in policy_text
+                        or "policy gate failed" in policy_text
+                    ):
+                        break
+                    page.wait_for_timeout(500)
 
                 page.get_by_role("button", name="Run Session").click()
-                page.wait_for_function(
-                    """() => {
-                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
-                            String(el.textContent || "").includes("Decision Pane")
-                        );
-                        const text = String(field ? field.textContent || "" : "");
-                        return text.includes("regression_session_id=") || text.includes("regression session completed");
-                    }""",
-                    timeout=60_000,
-                )
+                session_ready = False
+                for _ in range(120):
+                    decision_text = field_locator(page, "Decision Pane").inner_text()
+                    if "regression_session_id=" in decision_text or "regression session completed" in decision_text:
+                        session_ready = True
+                        break
+                    page.wait_for_timeout(500)
+                if not session_ready:
+                    raise AssertionError("regression session completion text did not appear after Run Session")
 
                 page.get_by_role("button", name="Export Session").click()
-                page.wait_for_function(
-                    """() => {
-                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
-                            String(el.textContent || "").includes("Decision Pane")
-                        );
-                        const text = String(field ? field.textContent || "" : "");
-                        return text.includes("regression_export_id=") || text.includes("regression export completed");
-                    }""",
-                    timeout=60_000,
-                )
+                export_ready = False
+                for _ in range(120):
+                    decision_text = field_locator(page, "Decision Pane").inner_text()
+                    if "regression_export_id=" in decision_text or "regression export completed" in decision_text:
+                        export_ready = True
+                        break
+                    page.wait_for_timeout(500)
+                if not export_ready:
+                    raise AssertionError("regression export completion text did not appear after Export Session")
 
                 with page.expect_download(timeout=20_000) as dl_info:
                     page.get_by_role("button", name="Export Brief").click()
@@ -959,6 +956,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include runtime compare summary")
                 if "compare_history_import_preview:" not in brief_text:
                     raise AssertionError("decision brief did not include compact compare history import preview summary")
+                if "retention_pairs(latest/extra/dropped):" not in brief_text:
+                    raise AssertionError("decision brief did not include compare history retention pair preview")
                 if "selected_preset_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include selected preset pair summary")
                 if "## Selected Pair Forecast" not in brief_text or "baseline_forecast:" not in brief_text:
@@ -1267,6 +1266,8 @@ def run(args: argparse.Namespace) -> int:
                         "compare_history_retention_policy: retain_2_preserve_saved | keep_latest=2 | preserve_scope=saved | preserve_pinned=true | preserve_saved=true" in retention_text
                         and "retained_rows=3/3" in retention_text
                         and "extra_saved_rows=1" in retention_text
+                        and "retention_pairs(latest/extra/dropped): Low Current Saved" in retention_text
+                        and "Low Sionna Saved / -" in retention_text
                         and "low_fidelity_radarsimpy_ffd::high_fidelity_sionna_rt" in retained_option_values
                         and retention_option_count >= 2
                     ):
@@ -1278,6 +1279,7 @@ def run(args: argparse.Namespace) -> int:
                         "compare history preserve-saved retention policy did not preserve the custom-labeled pair as expected "
                         f"(option_count={retention_option_count}, option_values={retained_option_values})\n{retention_text}"
                     )
+                report["runtime_controls"]["compare_session_retention_preview_checked"] = True
                 report["runtime_controls"]["compare_session_retention_preserve_saved_checked"] = True
 
                 history_retention_select.select_option("retain_2_preserve_pinned")
@@ -1296,6 +1298,7 @@ def run(args: argparse.Namespace) -> int:
                         and "retained_rows=2/2" in retention_text
                         and "extra_pinned_rows=0" in retention_text
                         and "extra_saved_rows=0" in retention_text
+                        and "retention_pairs(latest/extra/dropped):" in retention_text
                         and "low_fidelity_radarsimpy_ffd::current_config" in retained_option_values
                         and "low_fidelity_radarsimpy_ffd::high_fidelity_sionna_rt" not in retained_option_values
                         and retention_option_count <= 2

@@ -590,6 +590,54 @@ function analyzeCompareSessionRetentionOutcome(entries, pairMetaById, retentionP
   };
 }
 
+function summarizeCompareSessionRetentionRowLabel(row, pairMetaById) {
+  const replayPair = applyCompareReplayPairMeta(getCompareSessionReplayPair(row), pairMetaById);
+  return normalizeCompareSessionField(
+    replayPair?.pairLabel
+    || row?.pairLabel
+    || `${String(row?.baselinePresetId || "-")} -> ${String(row?.targetPresetId || "-")}`,
+    160
+  ) || "-";
+}
+
+function collectCompareSessionRetentionPreview(entries, pairMetaById, retentionPolicy) {
+  const normalizedEntries = sortCompareSessionHistoryEntries(entries).slice(0, COMPARE_SESSION_HISTORY_LIMIT);
+  const keepLatest = Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT);
+  const latestEntries = normalizedEntries.slice(0, keepLatest);
+  const retainedHistory = buildCompareSessionRetainedHistory(normalizedEntries, pairMetaById, retentionPolicy);
+  const latestIds = new Set(latestEntries.map((row) => String(row?.id || "").trim()).filter(Boolean));
+  const retainedIds = new Set(retainedHistory.map((row) => String(row?.id || "").trim()).filter(Boolean));
+  const extraEntries = retainedHistory.filter((row) => !latestIds.has(String(row?.id || "").trim()));
+  const droppedEntries = normalizedEntries.filter((row) => !retainedIds.has(String(row?.id || "").trim()));
+  const mapLabels = (rows) => Array.from(new Set(
+    (Array.isArray(rows) ? rows : [])
+      .map((row) => summarizeCompareSessionRetentionRowLabel(row, pairMetaById))
+      .filter(Boolean)
+  ));
+  return {
+    keepLatest,
+    latestPairLabels: mapLabels(latestEntries),
+    extraPairLabels: mapLabels(extraEntries),
+    droppedPairLabels: mapLabels(droppedEntries),
+    visibleRowCount: normalizedEntries.length,
+    retainedRowCount: retainedHistory.length,
+  };
+}
+
+function buildCompareSessionRetentionPreviewText(entries, pairMetaById, retentionPolicy, prefix = "retention_pairs") {
+  const preview = collectCompareSessionRetentionPreview(entries, pairMetaById, retentionPolicy);
+  const latestLabels = preview.latestPairLabels.length > 0 ? preview.latestPairLabels.join(" | ") : "-";
+  const extraLabels = preview.extraPairLabels.length > 0 ? preview.extraPairLabels.join(" | ") : "-";
+  const droppedLabels = preview.droppedPairLabels.length > 0 ? preview.droppedPairLabels.join(" | ") : "-";
+  const label = String(prefix || "").includes("(")
+    ? String(prefix || "retention_pairs")
+    : `${String(prefix || "retention_pairs")}(latest/extra/dropped)`;
+  return [
+    `${label}: ${latestLabels} / ${extraLabels} / ${droppedLabels}`,
+    `retention_rows(visible/retained): ${Number(preview.visibleRowCount || 0)}/${Number(preview.retainedRowCount || 0)}`,
+  ].join("\n");
+}
+
 function mergeCompareSessionHistoryEntries(existingEntries, importedEntries) {
   const existing = Array.isArray(existingEntries) ? existingEntries : [];
   const incoming = Array.isArray(importedEntries) ? importedEntries : [];
@@ -749,6 +797,7 @@ function buildCompareSessionImportPreviewSummary(
         "schema_compatibility: -",
         `retention_policy(current/imported/effective): ${normalizeCompareSessionRetentionPolicy(currentRetentionPolicy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT)}/-/-`,
         "retention_effect(available/retained/pinned_pairs/extra_pinned_rows): 0/0/0/0",
+        "retention_pairs(merged_latest/merged_extra/merged_dropped): - / - / -",
         "history_merge(existing/imported/new/overlap/merged): 0/0/0/0/0",
         "pair_meta(existing/imported/merged): 0/0/0",
         "artifact_expectations(existing/imported/merged): 0/0/0",
@@ -803,6 +852,12 @@ function buildCompareSessionImportPreviewSummary(
     mergedPairMeta,
     effectiveRetentionPolicy
   );
+  const retentionPreviewText = buildCompareSessionRetentionPreviewText(
+    mergedHistory,
+    mergedPairMeta,
+    effectiveRetentionPolicy,
+    "retention_pairs(merged_latest/merged_extra/merged_dropped)"
+  );
   const selectedReplayPairId = normalizeCompareSessionField(imported.selectedReplayPairId, 192);
   const mergedReplayOptions = buildCompareSessionReplayOptions(mergedState.history, mergedState.pairMetaById);
   const selectedReplayPairAvailable = selectedReplayPairId
@@ -827,6 +882,7 @@ function buildCompareSessionImportPreviewSummary(
       `schema_compatibility: ${importSchema.compatibility}`,
       `retention_policy(current/imported/effective): ${normalizeCompareSessionRetentionPolicy(currentRetentionPolicy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT)}/${importedRetentionPolicy || "unchanged"}/${effectiveRetentionPolicy}`,
       `retention_effect(available/retained/pinned_pairs/extra_pinned_rows): ${Number(retentionOutcome.availableRows || 0)}/${Number(retentionOutcome.retainedRows || 0)}/${Number(retentionOutcome.pinnedPairsRetained || 0)}/${Number(retentionOutcome.extraPinnedRowsRetained || 0)}`,
+      retentionPreviewText,
       `history_merge(existing/imported/new/overlap/merged): ${Number(existingHistory.length || 0)}/${Number(importedHistory.length || 0)}/${Number(newHistoryCount || 0)}/${Number(overlapHistoryCount || 0)}/${Number(mergedState.history.length || 0)}`,
       `pair_meta(existing/imported/merged): ${Number(Object.keys(existingPairMeta).length || 0)}/${Number(Object.keys(importedPairMeta).length || 0)}/${Number(Object.keys(mergedPairMeta).length || 0)}`,
       `artifact_expectations(existing/imported/merged): ${Number(Object.keys(existingArtifactExpectation).length || 0)}/${Number(Object.keys(importedArtifactExpectation).length || 0)}/${Number(Object.keys(mergedArtifactExpectation).length || 0)}`,
@@ -2524,6 +2580,18 @@ export function App() {
     () => summarizeCompareSessionRetentionPolicy(compareSessionRetentionPolicy, compareSessionRetentionOutcome),
     [compareSessionRetentionOutcome, compareSessionRetentionPolicy]
   );
+  const compareSessionRetentionPreviewText = React.useMemo(
+    () => buildCompareSessionRetentionPreviewText(
+      compareSessionHistory,
+      compareReplayPairMetaById,
+      compareSessionRetentionPolicy
+    ),
+    [compareReplayPairMetaById, compareSessionHistory, compareSessionRetentionPolicy]
+  );
+  const compareSessionRetentionPreviewCompactSummaryText = React.useMemo(
+    () => String(compareSessionRetentionPreviewText || "-").split("\n").filter(Boolean)[0] || "retention_pairs(latest/extra/dropped): - / - / -",
+    [compareSessionRetentionPreviewText]
+  );
   const stagedCompareSessionImportSummary = React.useMemo(
     () => buildCompareSessionImportPreviewSummary(
       stagedCompareSessionImport,
@@ -3592,6 +3660,7 @@ export function App() {
       `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
       `compare_session_count: ${Number(compareSessionHistory.length || 0)}`,
       `${compareSessionRetentionPolicySummaryText}`,
+      `${compareSessionRetentionPreviewCompactSummaryText}`,
       `managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `${pinnedCompareQuickActionSummaryText}`,
       `latest_compare_session: ${latestCompareSessionText}`,
@@ -3638,6 +3707,7 @@ export function App() {
     compareGraphRunId,
     compareGraphRunSummary,
     compareSessionRetentionPolicySummaryText,
+    compareSessionRetentionPreviewCompactSummaryText,
     managedCompareReplayPairCount,
     pinnedCompareQuickActionSummaryText,
     runCompareSummary,
@@ -3695,6 +3765,7 @@ export function App() {
       `- ${selectedReplayableCompareSessionMetaText}`,
       `- ${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `- ${compareSessionRetentionPolicySummaryText}`,
+      `- ${compareSessionRetentionPreviewCompactSummaryText}`,
       `- ${compareSessionImportPreviewCompactSummaryText}`,
       `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `- ${pinnedCompareQuickActionSummaryText}`,
@@ -3712,6 +3783,7 @@ export function App() {
       "## Compare Session History",
       "```text",
       compareSessionRetentionPolicySummaryText,
+      compareSessionRetentionPreviewText,
       "",
       compareSessionHistoryText,
       "```",
@@ -3798,6 +3870,8 @@ export function App() {
     compareSessionImportPreviewCompactSummaryText,
     compareSessionImportPreviewText,
     compareSessionRetentionPolicySummaryText,
+    compareSessionRetentionPreviewCompactSummaryText,
+    compareSessionRetentionPreviewText,
     runCompareSummary,
     compareRuntimeDiagnostics.summaryText,
     compareRuntimeSummary.trackLabel,
@@ -4210,6 +4284,7 @@ export function App() {
         compareSessionRetentionPolicy,
         compareSessionRetentionPolicyOptions: COMPARE_SESSION_RETENTION_POLICY_OPTIONS,
         compareSessionRetentionPolicySummaryText,
+        compareSessionRetentionPreviewText,
         compareSessionTransferStatusText,
         compareSessionTransferBadgeRows,
         hasCompareSessionImportPreview: stagedCompareSessionImportSummary.ready === true,

@@ -192,6 +192,7 @@ The same area now supports browser-to-browser transfer:
   - `*_preserve_saved` does the same for any replay pair that is either pinned or has a saved custom label
   - pruning still drops replay-pair metadata and artifact expectation snapshots that no longer have a retained history row
   - the summary line now shows `keep_latest`, `preserve_scope`, `preserve_pinned`, `preserve_saved`, retained-row counts, managed/retained pinned-vs-saved pair counts, and extra retained rows beyond the latest-`N` window
+  - the detail preview now shows `retention_pairs(latest/extra/dropped)` so the operator can see which visible replay pairs are inside the latest window, kept as extra preserved rows, or absent from the retained set
 - `Clear All History`
   - clears compare-session rows, replay-pair metadata, artifact expectation snapshots, and the current staged import preview
   - keeps the currently selected retention policy unchanged
@@ -203,6 +204,7 @@ The same area now supports browser-to-browser transfer:
   - stages a previously exported JSON bundle as a dry-run import preview first
   - shows `import_preview`, merge counts, selected replay-pair availability, and imported pair labels before any local state changes
   - preview also shows `retention_policy(current/imported/effective)`
+  - preview now also shows `retention_pairs(merged_latest/merged_extra/merged_dropped)` for the post-merge retained set
   - requires `Apply Import Merge` to actually merge the previewed bundle into the current browser profile
   - `Clear Import Preview` discards the staged bundle without changing local history
   - restores replayable pairs that were deleted locally, as long as they exist in the imported bundle
