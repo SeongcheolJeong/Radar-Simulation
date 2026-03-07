@@ -185,6 +185,7 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_recent_actions_checked": False,
             "artifact_inspector_audit_overflow_checked": False,
             "artifact_inspector_audit_window_checked": False,
+            "artifact_inspector_audit_health_checked": False,
             "artifact_inspector_clear_action_trail_checked": False,
             "artifact_inspector_badge_export_checked": False,
             "decision_artifact_inspector_state_checked": False,
@@ -468,6 +469,7 @@ def run(args: argparse.Namespace) -> int:
                     or "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in artifact_text
                     or "audit_window: retained_seqs=none | newest=0 | oldest=0 | lost_before=0 | coverage=empty" not in artifact_text
                     or "audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty" not in artifact_text
+                    or "audit_health: idle | trust=empty | recommendation=not_needed" not in artifact_text
                     or "audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" not in artifact_text
                 ):
                     raise AssertionError("artifact inspector did not render default layout status")
@@ -498,6 +500,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in decision_artifact_state_text
                     or "artifact_inspector_audit_window: retained_seqs=none | newest=0 | oldest=0 | lost_before=0 | coverage=empty" not in decision_artifact_state_text
                     or "artifact_inspector_audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty" not in decision_artifact_state_text
+                    or "artifact_inspector_audit_health: idle | trust=empty | recommendation=not_needed" not in decision_artifact_state_text
                     or "artifact_inspector_audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" not in decision_artifact_state_text
                     or "artifact_inspector_audit_controls: clear=disabled | recommended=not_needed | reason=idle" not in decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in decision_artifact_state_text
@@ -718,6 +721,7 @@ def run(args: argparse.Namespace) -> int:
                     or "coverage=tail_only" not in reset_artifact_text
                     or "audit_continuity: partial | retained_span=" not in reset_artifact_text
                     or "continuity=tail_only" not in reset_artifact_text
+                    or "audit_health: truncated | trust=tail_only | recommendation=clear_if_full_history_needed" not in reset_artifact_text
                     or "audit_summary:" not in reset_artifact_text
                     or "state=active" not in reset_artifact_text
                     or "retained=3" not in reset_artifact_text
@@ -740,6 +744,7 @@ def run(args: argparse.Namespace) -> int:
                     or "coverage=tail_only" not in reset_decision_artifact_state_text
                     or "artifact_inspector_audit_continuity: partial | retained_span=" not in reset_decision_artifact_state_text
                     or "continuity=tail_only" not in reset_decision_artifact_state_text
+                    or "artifact_inspector_audit_health: truncated | trust=tail_only | recommendation=clear_if_full_history_needed" not in reset_decision_artifact_state_text
                     or "artifact_inspector_audit_summary:" not in reset_decision_artifact_state_text
                     or "state=active" not in reset_decision_artifact_state_text
                     or "retained=3" not in reset_decision_artifact_state_text
@@ -773,6 +778,7 @@ def run(args: argparse.Namespace) -> int:
                         and "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_window: retained_seqs=none | newest=0 | oldest=0 | lost_before=0 | coverage=empty" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty" in cleared_audit_mirror_text
+                        and "artifact_inspector_audit_health: idle | trust=empty | recommendation=not_needed" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" in cleared_audit_mirror_text
                         and "artifact_inspector_audit_controls: clear=disabled | recommended=not_needed | reason=idle" in cleared_audit_mirror_text
                     ):
@@ -794,6 +800,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["artifact_inspector_recent_actions_checked"] = True
                 report["runtime_controls"]["artifact_inspector_audit_overflow_checked"] = True
                 report["runtime_controls"]["artifact_inspector_audit_window_checked"] = True
+                report["runtime_controls"]["artifact_inspector_audit_health_checked"] = True
                 report["runtime_controls"]["artifact_inspector_clear_action_trail_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_state_checked"] = True
                 report["runtime_controls"]["decision_artifact_inspector_controls_checked"] = True
@@ -1352,6 +1359,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_audit_capacity:" not in brief_text
                     or "artifact_inspector_audit_window:" not in brief_text
                     or "artifact_inspector_audit_continuity:" not in brief_text
+                    or "artifact_inspector_audit_health:" not in brief_text
                     or "artifact_inspector_audit_summary:" not in brief_text
                     or "artifact_inspector_audit_controls:" not in brief_text
                     or "artifact_inspector_controls:" not in brief_text
@@ -1526,6 +1534,7 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_window: retained_seqs=none | newest=0 | oldest=0 | lost_before=0 | coverage=empty" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_continuity: empty | retained_span=none | missing_prefix=none | continuity=empty" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_audit_health: idle | trust=empty | recommendation=not_needed" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_summary: total=0 | retained=0 | trimmed=0 | next_seq=1 | state=empty" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_controls: clear=disabled | recommended=not_needed | reason=idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_controls: collapse=enabled | expand=disabled | reset=disabled" not in reloaded_decision_artifact_state_text
