@@ -184,7 +184,9 @@ def run(args: argparse.Namespace) -> int:
             "artifact_inspector_last_action_checked": False,
             "artifact_inspector_maintenance_action_checked": False,
             "artifact_inspector_maintenance_last_clear_checked": False,
+            "artifact_inspector_maintenance_last_clear_summary_checked": False,
             "artifact_inspector_maintenance_clear_checked": False,
+            "artifact_inspector_maintenance_last_clear_clear_checked": False,
             "artifact_inspector_maintenance_summary_checked": False,
             "artifact_inspector_maintenance_operator_summary_checked": False,
             "artifact_inspector_recent_actions_checked": False,
@@ -452,6 +454,7 @@ def run(args: argparse.Namespace) -> int:
                 artifact_text = artifact_field.inner_text()
                 artifact_apply_recommended_button = artifact_field.get_by_role("button", name="Apply Recommended Audit Action")
                 artifact_clear_maintenance_button = artifact_field.get_by_role("button", name="Clear Maintenance Marker")
+                artifact_clear_last_clear_button = artifact_field.get_by_role("button", name="Clear Last Clear Record")
                 decision_artifact_state_field = field_locator(page, "Inspector State Mirror")
                 decision_artifact_state_field.wait_for(timeout=30_000)
                 decision_collapse_button = decision_artifact_state_field.get_by_role("button", name="Collapse Inspector Evidence")
@@ -460,6 +463,7 @@ def run(args: argparse.Namespace) -> int:
                 decision_apply_recommended_button = decision_artifact_state_field.get_by_role("button", name="Apply Recommended Audit Action")
                 decision_clear_audit_button = decision_artifact_state_field.get_by_role("button", name="Clear Action Trail")
                 decision_clear_maintenance_button = decision_artifact_state_field.get_by_role("button", name="Clear Maintenance Marker")
+                decision_clear_last_clear_button = decision_artifact_state_field.get_by_role("button", name="Clear Last Clear Record")
                 default_mirror_ready = False
                 for _ in range(40):
                     decision_artifact_state_text = decision_artifact_state_field.inner_text()
@@ -483,6 +487,9 @@ def run(args: argparse.Namespace) -> int:
                     or "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" not in artifact_text
                     or "maintenance_operator_summary: idle -> none | because=no_marker" not in artifact_text
                     or "maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" not in artifact_text
+                    or "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" not in artifact_text
+                    or "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" not in artifact_text
+                    or "maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" not in artifact_text
                     or "recent_actions: none" not in artifact_text
                     or "audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in artifact_text
                     or "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in artifact_text
@@ -520,6 +527,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector recommended-audit button should be disabled in default state")
                 if not artifact_clear_maintenance_button.is_disabled():
                     raise AssertionError("artifact inspector clear-maintenance button should be disabled in default state")
+                if not artifact_clear_last_clear_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-last-clear button should be disabled in default state")
                 if (
                     "artifact_inspector_status_badges: layout:default | probe:default | live:expanded | history:expanded | reset:clean | maintenance:idle | audit:idle | continuity:empty | health:idle | operator:idle" not in decision_artifact_state_text
                     or "artifact_inspector_layout_state: default" not in decision_artifact_state_text
@@ -530,6 +539,9 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_operator_summary: idle -> none | because=no_marker" not in decision_artifact_state_text
                     or "artifact_inspector_maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" not in decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" not in decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" not in decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" not in decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in decision_artifact_state_text
                     or "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in decision_artifact_state_text
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in decision_artifact_state_text
@@ -554,6 +566,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision pane recommended-audit button should be disabled in default state")
                 if not decision_clear_maintenance_button.is_disabled():
                     raise AssertionError("decision pane clear-maintenance button should be disabled in default state")
+                if not decision_clear_last_clear_button.is_disabled():
+                    raise AssertionError("decision pane clear-last-clear button should be disabled in default state")
                 if not decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should be disabled in default state")
                 decision_collapse_button.click()
@@ -1450,6 +1464,9 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_maintenance_last_clear:" not in brief_text
                     or "artifact_inspector_maintenance_summary:" not in brief_text
                     or "artifact_inspector_maintenance_operator_summary:" not in brief_text
+                    or "artifact_inspector_maintenance_last_clear_summary:" not in brief_text
+                    or "artifact_inspector_maintenance_last_clear_operator_summary:" not in brief_text
+                    or "artifact_inspector_maintenance_last_clear_controls:" not in brief_text
                     or "artifact_inspector_recent_actions:" not in brief_text
                     or "artifact_inspector_audit_state:" not in brief_text
                     or "artifact_inspector_audit_capacity:" not in brief_text
@@ -1593,6 +1610,9 @@ def run(args: argparse.Namespace) -> int:
                     or "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" not in reloaded_artifact_text
                     or "maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" not in reloaded_artifact_text
                     or "maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" not in reloaded_artifact_text
+                    or "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" not in reloaded_artifact_text
+                    or "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" not in reloaded_artifact_text
+                    or "maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" not in reloaded_artifact_text
                     or "recent_actions: none" not in reloaded_artifact_text
                     or "audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in reloaded_artifact_text
                     or "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in reloaded_artifact_text
@@ -1618,8 +1638,10 @@ def run(args: argparse.Namespace) -> int:
                 reloaded_decision_apply_recommended_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Apply Recommended Audit Action")
                 reloaded_decision_clear_audit_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Clear Action Trail")
                 reloaded_decision_clear_maintenance_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Clear Maintenance Marker")
+                reloaded_decision_clear_last_clear_button = reloaded_decision_artifact_state_field.get_by_role("button", name="Clear Last Clear Record")
                 reloaded_artifact_apply_recommended_button = reloaded_artifact_field.get_by_role("button", name="Apply Recommended Audit Action")
                 reloaded_artifact_clear_maintenance_button = reloaded_artifact_field.get_by_role("button", name="Clear Maintenance Marker")
+                reloaded_artifact_clear_last_clear_button = reloaded_artifact_field.get_by_role("button", name="Clear Last Clear Record")
                 reloaded_mirror_ready = False
                 for _ in range(40):
                     reloaded_decision_artifact_state_text = reloaded_decision_artifact_state_field.inner_text()
@@ -1643,6 +1665,9 @@ def run(args: argparse.Namespace) -> int:
                     or "artifact_inspector_maintenance_summary: marked | marker=present | action=clear_action_trail | source=artifact_panel | trigger=recommended | next_action=clear_marker_if_acknowledged" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_maintenance_controls: clear=enabled | recommended=clear_marker | reason=marker_present" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" not in reloaded_decision_artifact_state_text
+                    or "artifact_inspector_maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_recent_actions: none" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_state: idle | total=0 | retained=0/3 | trimmed=0" not in reloaded_decision_artifact_state_text
                     or "artifact_inspector_audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no" not in reloaded_decision_artifact_state_text
@@ -1671,6 +1696,10 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector clear-maintenance button should remain enabled after reload while maintenance marker exists")
                 if reloaded_decision_clear_maintenance_button.is_disabled():
                     raise AssertionError("decision pane clear-maintenance button should remain enabled after reload while maintenance marker exists")
+                if not reloaded_artifact_clear_last_clear_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-last-clear button should remain disabled while no last-clear record exists")
+                if not reloaded_decision_clear_last_clear_button.is_disabled():
+                    raise AssertionError("decision pane clear-last-clear button should remain disabled while no last-clear record exists")
                 if not reloaded_decision_clear_audit_button.is_disabled():
                     raise AssertionError("decision pane clear-audit button should remain disabled after reload")
                 reloaded_decision_clear_maintenance_button.click()
@@ -1684,11 +1713,17 @@ def run(args: argparse.Namespace) -> int:
                         and "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_artifact_text
                         and "maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_artifact_text
                         and "maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_artifact_text
+                        and "maintenance_last_clear_summary: recorded | record=present | source=decision_pane | trigger=manual | cleared_action=clear_action_trail | next_action=clear_record_if_acknowledged" in maintenance_cleared_artifact_text
+                        and "maintenance_last_clear_operator_summary: recorded -> clear_record_if_acknowledged | because=clear_provenance_present" in maintenance_cleared_artifact_text
+                        and "maintenance_last_clear_controls: clear=enabled | recommended=clear_record | reason=record_present" in maintenance_cleared_artifact_text
                         and "artifact_inspector_maintenance_action: seq=0 | none | source=none | trigger=idle" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_last_clear: seq=1 | source=decision_pane | trigger=manual | cleared_action=clear_action_trail" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_operator_summary: idle -> none | because=no_marker" in maintenance_cleared_mirror_text
                         and "artifact_inspector_maintenance_controls: clear=disabled | recommended=not_needed | reason=idle" in maintenance_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear_summary: recorded | record=present | source=decision_pane | trigger=manual | cleared_action=clear_action_trail | next_action=clear_record_if_acknowledged" in maintenance_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear_operator_summary: recorded -> clear_record_if_acknowledged | because=clear_provenance_present" in maintenance_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear_controls: clear=enabled | recommended=clear_record | reason=record_present" in maintenance_cleared_mirror_text
                     ):
                         maintenance_cleared_ready = True
                         break
@@ -1703,8 +1738,39 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector clear-maintenance button should be disabled after clearing maintenance marker")
                 if not reloaded_decision_clear_maintenance_button.is_disabled():
                     raise AssertionError("decision pane clear-maintenance button should be disabled after clearing maintenance marker")
+                if reloaded_artifact_clear_last_clear_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-last-clear button should be enabled after a last-clear record is created")
+                if reloaded_decision_clear_last_clear_button.is_disabled():
+                    raise AssertionError("decision pane clear-last-clear button should be enabled after a last-clear record is created")
                 report["runtime_controls"]["artifact_inspector_maintenance_clear_checked"] = True
+                report["runtime_controls"]["artifact_inspector_maintenance_last_clear_summary_checked"] = True
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
+
+                reloaded_artifact_clear_last_clear_button.click()
+                last_clear_cleared_ready = False
+                for _ in range(40):
+                    last_clear_cleared_artifact_text = reloaded_artifact_field.inner_text()
+                    last_clear_cleared_mirror_text = reloaded_decision_artifact_state_field.inner_text()
+                    if (
+                        "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in last_clear_cleared_artifact_text
+                        and "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" in last_clear_cleared_artifact_text
+                        and "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" in last_clear_cleared_artifact_text
+                        and "maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" in last_clear_cleared_artifact_text
+                        and "artifact_inspector_maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none" in last_clear_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none" in last_clear_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record" in last_clear_cleared_mirror_text
+                        and "artifact_inspector_maintenance_last_clear_controls: clear=disabled | recommended=not_needed | reason=idle" in last_clear_cleared_mirror_text
+                    ):
+                        last_clear_cleared_ready = True
+                        break
+                    page.wait_for_timeout(250)
+                if not last_clear_cleared_ready:
+                    raise AssertionError("clear last-clear record did not reset maintenance clear provenance state")
+                if not reloaded_artifact_clear_last_clear_button.is_disabled():
+                    raise AssertionError("artifact inspector clear-last-clear button should be disabled after clearing the record")
+                if not reloaded_decision_clear_last_clear_button.is_disabled():
+                    raise AssertionError("decision pane clear-last-clear button should be disabled after clearing the record")
+                report["runtime_controls"]["artifact_inspector_maintenance_last_clear_clear_checked"] = True
 
                 reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")
                 reloaded_preset_pair_field.wait_for(timeout=30_000)

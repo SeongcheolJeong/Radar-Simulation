@@ -409,6 +409,20 @@ function parseArtifactInspectorMaintenanceFields(value) {
   };
 }
 
+function parseArtifactInspectorMaintenanceLastClearFields(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  const text = String(prefs.maintenanceLastClearText || "").trim();
+  const sourceMatch = /\bsource=([a-z_]+)/i.exec(text);
+  const triggerMatch = /\btrigger=([a-z_]+)/i.exec(text);
+  const clearedActionMatch = /\bcleared_action=([a-z_]+)/i.exec(text);
+  return {
+    seq: Math.max(0, Number(prefs.maintenanceClearSeq || 0)),
+    source: String(sourceMatch?.[1] || "none").trim().toLowerCase() || "none",
+    trigger: String(triggerMatch?.[1] || "idle").trim().toLowerCase() || "idle",
+    clearedAction: String(clearedActionMatch?.[1] || "none").trim().toLowerCase() || "none",
+  };
+}
+
 function extractArtifactInspectorMaintenanceState(value) {
   return parseArtifactInspectorMaintenanceFields(value).seq > 0 ? "marked" : "idle";
 }
@@ -429,6 +443,22 @@ function buildArtifactInspectorMaintenanceOperatorSummaryText(value) {
   return "maintenance_operator_summary: marked -> clear_marker_if_acknowledged | because=provenance_marker_present";
 }
 
+function buildArtifactInspectorMaintenanceLastClearSummaryText(value) {
+  const fields = parseArtifactInspectorMaintenanceLastClearFields(value);
+  if (fields.seq <= 0) {
+    return "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none";
+  }
+  return `maintenance_last_clear_summary: recorded | record=present | source=${fields.source} | trigger=${fields.trigger} | cleared_action=${fields.clearedAction} | next_action=clear_record_if_acknowledged`;
+}
+
+function buildArtifactInspectorMaintenanceLastClearOperatorSummaryText(value) {
+  const fields = parseArtifactInspectorMaintenanceLastClearFields(value);
+  if (fields.seq <= 0) {
+    return "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record";
+  }
+  return "maintenance_last_clear_operator_summary: recorded -> clear_record_if_acknowledged | because=clear_provenance_present";
+}
+
 function buildArtifactInspectorMaintenanceLastClearUpdate(value, actionInput) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   const currentFields = parseArtifactInspectorMaintenanceFields(prefs);
@@ -440,6 +470,17 @@ function buildArtifactInspectorMaintenanceLastClearUpdate(value, actionInput) {
   return {
     maintenanceClearSeq: nextSeq,
     maintenanceLastClearText: `maintenance_last_clear: seq=${nextSeq} | source=${source} | trigger=${trigger} | cleared_action=${clearedAction}`,
+  };
+}
+
+function buildArtifactInspectorMaintenanceLastClearControlStateFromValue(value) {
+  const fields = parseArtifactInspectorMaintenanceLastClearFields(value);
+  const clearDisabled = fields.seq <= 0;
+  const recommendation = clearDisabled ? "not_needed" : "clear_record";
+  const reason = clearDisabled ? "idle" : "record_present";
+  return {
+    clearDisabled,
+    text: `maintenance_last_clear_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | reason=${reason}`,
   };
 }
 
@@ -476,6 +517,15 @@ function clearArtifactInspectorMaintenanceActionState(value, actionInput) {
   return {
     ...cleared,
     ...buildArtifactInspectorMaintenanceLastClearUpdate(prefs, actionInput),
+  };
+}
+
+function clearArtifactInspectorMaintenanceLastClearState(value) {
+  const prefs = normalizeArtifactInspectorPrefs(value);
+  return {
+    ...prefs,
+    maintenanceClearSeq: 0,
+    maintenanceLastClearText: "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none",
   };
 }
 
@@ -766,6 +816,18 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorMaintenanceControlStateFromValue(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorMaintenanceLastClearSummaryText = React.useMemo(
+    () => buildArtifactInspectorMaintenanceLastClearSummaryText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
+  const artifactInspectorMaintenanceLastClearOperatorSummaryText = React.useMemo(
+    () => buildArtifactInspectorMaintenanceLastClearOperatorSummaryText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
+  const artifactInspectorMaintenanceLastClearControlState = React.useMemo(
+    () => buildArtifactInspectorMaintenanceLastClearControlStateFromValue(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorRecentActionsText = React.useMemo(
     () => buildArtifactInspectorRecentActionsText(normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries),
     [artifactInspectorPrefs]
@@ -828,6 +890,8 @@ export function ArtifactInspectorPanel({
       maintenanceLastClearText: artifactInspectorMaintenanceLastClearText,
       maintenanceSummaryText: artifactInspectorMaintenanceSummaryText,
       maintenanceOperatorSummaryText: artifactInspectorMaintenanceOperatorSummaryText,
+      maintenanceLastClearSummaryText: artifactInspectorMaintenanceLastClearSummaryText,
+      maintenanceLastClearOperatorSummaryText: artifactInspectorMaintenanceLastClearOperatorSummaryText,
       recentActionsText: artifactInspectorRecentActionsText,
       auditStateText: artifactInspectorAuditStateText,
       auditCapacityText: artifactInspectorAuditCapacityText,
@@ -853,6 +917,8 @@ export function ArtifactInspectorPanel({
     artifactInspectorLastActionText,
     artifactInspectorMaintenanceActionText,
     artifactInspectorMaintenanceLastClearText,
+    artifactInspectorMaintenanceLastClearOperatorSummaryText,
+    artifactInspectorMaintenanceLastClearSummaryText,
     artifactInspectorMaintenanceSummaryText,
     artifactInspectorMaintenanceOperatorSummaryText,
     artifactInspectorRecentActionsText,
@@ -924,6 +990,13 @@ export function ArtifactInspectorPanel({
       return updated;
     });
   }, []);
+  const clearArtifactInspectorMaintenanceLastClear = React.useCallback(() => {
+    setArtifactInspectorPrefs((prev) => {
+      const updated = clearArtifactInspectorMaintenanceLastClearState(prev);
+      saveArtifactInspectorPrefs(updated);
+      return updated;
+    });
+  }, []);
   const applyRecommendedArtifactInspectorAuditAction = React.useCallback(() => {
     if (artifactInspectorAuditControlState.applyRecommendedDisabled) return;
     if (String(artifactInspectorAuditControlState.recommendedAction || "").trim() !== "clear_action_trail") return;
@@ -963,6 +1036,9 @@ export function ArtifactInspectorPanel({
           source: String(command.maintenanceClearSource || "decision_pane").trim() || "decision_pane",
           trigger: String(command.maintenanceClearTrigger || "manual").trim() || "manual",
         });
+      }
+      if (command.clearMaintenanceLastClear === true) {
+        updated = clearArtifactInspectorMaintenanceLastClearState(updated);
       }
       if (String(command?.lastActionLabel || "").trim()) {
         Object.assign(updated, buildArtifactInspectorLastActionUpdate(next, String(command.lastActionLabel).trim()));
@@ -1093,6 +1169,18 @@ export function ArtifactInspectorPanel({
           style: { color: "#8fb3c9" },
         }, artifactInspectorMaintenanceControlState.text),
         h("div", {
+          key: "maintenance_last_clear_summary",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceLastClearSummaryText),
+        h("div", {
+          key: "maintenance_last_clear_operator_summary",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceLastClearOperatorSummaryText),
+        h("div", {
+          key: "maintenance_last_clear_controls",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorMaintenanceLastClearControlState.text),
+        h("div", {
           key: "recent_actions",
           style: { color: "#8fb3c9" },
         }, artifactInspectorRecentActionsText),
@@ -1120,6 +1208,12 @@ export function ArtifactInspectorPanel({
           onClick: clearArtifactInspectorMaintenanceAction,
           disabled: artifactInspectorMaintenanceControlState.clearDisabled === true,
         }, "Clear Maintenance Marker"),
+        h("button", {
+          key: "clear_artifact_inspector_maintenance_last_clear",
+          className: "btn",
+          onClick: clearArtifactInspectorMaintenanceLastClear,
+          disabled: artifactInspectorMaintenanceLastClearControlState.clearDisabled === true,
+        }, "Clear Last Clear Record"),
       ]),
       h("div", { className: "chip-list", key: "artifact_inspector_status_chips" }, (
         Array.isArray(artifactInspectorStatusBadges) && artifactInspectorStatusBadges.length > 0

@@ -871,6 +871,8 @@ function normalizeArtifactInspectorStatusSummary(value) {
     maintenanceLastClearText: normalizeCompareSessionField(row.maintenanceLastClearText, 320) || "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none",
     maintenanceSummaryText: normalizeCompareSessionField(row.maintenanceSummaryText, 320) || "maintenance_summary: idle | marker=none | action=none | source=none | trigger=idle | next_action=none",
     maintenanceOperatorSummaryText: normalizeCompareSessionField(row.maintenanceOperatorSummaryText, 320) || "maintenance_operator_summary: idle -> none | because=no_marker",
+    maintenanceLastClearSummaryText: normalizeCompareSessionField(row.maintenanceLastClearSummaryText, 320) || "maintenance_last_clear_summary: idle | record=none | source=none | trigger=idle | cleared_action=none | next_action=none",
+    maintenanceLastClearOperatorSummaryText: normalizeCompareSessionField(row.maintenanceLastClearOperatorSummaryText, 320) || "maintenance_last_clear_operator_summary: idle -> none | because=no_clear_record",
     recentActionsText: normalizeCompareSessionField(row.recentActionsText, 320) || "recent_actions: none",
     auditStateText: normalizeCompareSessionField(row.auditStateText, 320) || "audit_state: idle | total=0 | retained=0/3 | trimmed=0",
     auditCapacityText: normalizeCompareSessionField(row.auditCapacityText, 320) || "audit_capacity: retained_limit=3 | retained=0 | total=0 | headroom=3 | overflow=no",
@@ -1016,6 +1018,17 @@ function buildArtifactInspectorMaintenanceControlState(maintenanceActionText) {
   return {
     clearDisabled,
     text: `artifact_inspector_maintenance_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | reason=${reason}`,
+  };
+}
+
+function buildArtifactInspectorMaintenanceLastClearControlState(maintenanceLastClearText) {
+  const text = String(maintenanceLastClearText || "").trim();
+  const clearDisabled = !text || text === "maintenance_last_clear: none | source=none | trigger=idle | cleared_action=none";
+  const recommendation = clearDisabled ? "not_needed" : "clear_record";
+  const reason = clearDisabled ? "idle" : "record_present";
+  return {
+    clearDisabled,
+    text: `artifact_inspector_maintenance_last_clear_controls: clear=${clearDisabled ? "disabled" : "enabled"} | recommended=${recommendation} | reason=${reason}`,
   };
 }
 
@@ -2995,6 +3008,22 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.maintenanceOperatorSummaryText]
   );
+  const artifactInspectorDecisionMaintenanceLastClearSummaryText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.maintenanceLastClearSummaryText,
+      "maintenance_last_clear_summary",
+      "artifact_inspector_maintenance_last_clear_summary"
+    ),
+    [artifactInspectorStatusSummary.maintenanceLastClearSummaryText]
+  );
+  const artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText = React.useMemo(
+    () => buildArtifactInspectorDecisionLine(
+      artifactInspectorStatusSummary.maintenanceLastClearOperatorSummaryText,
+      "maintenance_last_clear_operator_summary",
+      "artifact_inspector_maintenance_last_clear_operator_summary"
+    ),
+    [artifactInspectorStatusSummary.maintenanceLastClearOperatorSummaryText]
+  );
   const artifactInspectorDecisionRecentActionsText = React.useMemo(
     () => buildArtifactInspectorDecisionLine(
       artifactInspectorStatusSummary.recentActionsText,
@@ -3092,6 +3121,12 @@ export function App() {
     ),
     [artifactInspectorStatusSummary.maintenanceActionText]
   );
+  const artifactInspectorDecisionMaintenanceLastClearControlState = React.useMemo(
+    () => buildArtifactInspectorMaintenanceLastClearControlState(
+      artifactInspectorStatusSummary.maintenanceLastClearText
+    ),
+    [artifactInspectorStatusSummary.maintenanceLastClearText]
+  );
   const latestCompareSessionText = React.useMemo(
     () => compareSessionHistory.length > 0
       ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
@@ -3164,6 +3199,15 @@ export function App() {
         maintenanceClearTrigger: "manual",
       },
       "artifact inspector maintenance marker cleared from decision pane",
+      "status-ok"
+    );
+  }, [issueArtifactInspectorControlRequest]);
+  const clearArtifactInspectorMaintenanceLastClearFromDecisionPane = React.useCallback(() => {
+    issueArtifactInspectorControlRequest(
+      {
+        clearMaintenanceLastClear: true,
+      },
+      "artifact inspector last-clear record cleared from decision pane",
       "status-ok"
     );
   }, [issueArtifactInspectorControlRequest]);
@@ -4319,6 +4363,9 @@ export function App() {
       `${artifactInspectorDecisionMaintenanceSummaryText}`,
       `${artifactInspectorDecisionMaintenanceOperatorSummaryText}`,
       `${artifactInspectorDecisionMaintenanceControlState.text}`,
+      `${artifactInspectorDecisionMaintenanceLastClearSummaryText}`,
+      `${artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText}`,
+      `${artifactInspectorDecisionMaintenanceLastClearControlState.text}`,
       `${artifactInspectorDecisionRecentActionsText}`,
       `${artifactInspectorDecisionAuditStateText}`,
       `${artifactInspectorDecisionAuditCapacityText}`,
@@ -4380,6 +4427,9 @@ export function App() {
       artifactInspectorDecisionMaintenanceSummaryText,
       artifactInspectorDecisionMaintenanceOperatorSummaryText,
       artifactInspectorDecisionMaintenanceControlState.text,
+      artifactInspectorDecisionMaintenanceLastClearSummaryText,
+      artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
+      artifactInspectorDecisionMaintenanceLastClearControlState.text,
       artifactInspectorDecisionRecentActionsText,
     artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
@@ -4514,6 +4564,9 @@ export function App() {
       artifactInspectorDecisionMaintenanceSummaryText,
       artifactInspectorDecisionMaintenanceOperatorSummaryText,
       artifactInspectorDecisionMaintenanceControlState.text,
+      artifactInspectorDecisionMaintenanceLastClearSummaryText,
+      artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
+      artifactInspectorDecisionMaintenanceLastClearControlState.text,
       artifactInspectorDecisionRecentActionsText,
       artifactInspectorDecisionAuditStateText,
       artifactInspectorDecisionAuditCapacityText,
@@ -4593,7 +4646,10 @@ export function App() {
     artifactInspectorDecisionMaintenanceSummaryText,
     artifactInspectorDecisionMaintenanceOperatorSummaryText,
     artifactInspectorDecisionMaintenanceControlState.text,
-      artifactInspectorDecisionRecentActionsText,
+    artifactInspectorDecisionMaintenanceLastClearSummaryText,
+    artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
+    artifactInspectorDecisionMaintenanceLastClearControlState.text,
+    artifactInspectorDecisionRecentActionsText,
       artifactInspectorDecisionAuditStateText,
     artifactInspectorDecisionAuditCapacityText,
     artifactInspectorDecisionAuditWindowText,
@@ -5053,6 +5109,9 @@ export function App() {
         artifactInspectorDecisionMaintenanceSummaryText,
         artifactInspectorDecisionMaintenanceOperatorSummaryText,
         artifactInspectorDecisionMaintenanceControlState,
+        artifactInspectorDecisionMaintenanceLastClearSummaryText,
+        artifactInspectorDecisionMaintenanceLastClearOperatorSummaryText,
+        artifactInspectorDecisionMaintenanceLastClearControlState,
         artifactInspectorDecisionRecentActionsText,
         artifactInspectorDecisionAuditStateText,
         artifactInspectorDecisionAuditCapacityText,
@@ -5068,6 +5127,7 @@ export function App() {
         applyRecommendedArtifactInspectorAuditActionFromDecisionPane,
         clearArtifactInspectorActionTrailFromDecisionPane,
         clearArtifactInspectorMaintenanceActionFromDecisionPane,
+        clearArtifactInspectorMaintenanceLastClearFromDecisionPane,
         collapseArtifactInspectorEvidenceFromDecisionPane,
         expandArtifactInspectorEvidenceFromDecisionPane,
         resetArtifactInspectorLayoutFromDecisionPane,
