@@ -320,6 +320,17 @@ function buildArtifactInspectorAuditNextActionText(value) {
   return "audit_next_action: keep_tracking | trigger=full_history_retained";
 }
 
+function buildArtifactInspectorAuditOperatorSummaryText(value) {
+  const health = extractArtifactInspectorAuditHealthState(value);
+  const reasonText = String(buildArtifactInspectorAuditHealthReasonText(value) || "").trim();
+  const nextActionText = String(buildArtifactInspectorAuditNextActionText(value) || "").trim();
+  const reasonMatch = /^audit_health_reason:\s*([a-z_]+)/i.exec(reasonText);
+  const nextMatch = /^audit_next_action:\s*([a-z_]+)/i.exec(nextActionText);
+  const reason = String(reasonMatch?.[1] || "unknown").trim().toLowerCase() || "unknown";
+  const nextAction = String(nextMatch?.[1] || "none").trim().toLowerCase() || "none";
+  return `audit_operator_summary: ${health} -> ${nextAction} | because=${reason}`;
+}
+
 function clearArtifactInspectorActionTrailState(value) {
   const prefs = normalizeArtifactInspectorPrefs(value);
   return {
@@ -604,6 +615,10 @@ export function ArtifactInspectorPanel({
     () => buildArtifactInspectorAuditNextActionText(artifactInspectorPrefs),
     [artifactInspectorPrefs]
   );
+  const artifactInspectorAuditOperatorSummaryText = React.useMemo(
+    () => buildArtifactInspectorAuditOperatorSummaryText(artifactInspectorPrefs),
+    [artifactInspectorPrefs]
+  );
   const artifactInspectorHasRecentActions = React.useMemo(
     () => normalizeArtifactInspectorPrefs(artifactInspectorPrefs).recentActionEntries.length > 0,
     [artifactInspectorPrefs]
@@ -623,6 +638,7 @@ export function ArtifactInspectorPanel({
       auditHealthText: artifactInspectorAuditHealthText,
       auditHealthReasonText: artifactInspectorAuditHealthReasonText,
       auditNextActionText: artifactInspectorAuditNextActionText,
+      auditOperatorSummaryText: artifactInspectorAuditOperatorSummaryText,
       auditSummaryText: artifactInspectorAuditSummaryText,
     });
   }, [
@@ -630,6 +646,7 @@ export function ArtifactInspectorPanel({
     artifactInspectorAuditHealthText,
     artifactInspectorAuditHealthReasonText,
     artifactInspectorAuditNextActionText,
+    artifactInspectorAuditOperatorSummaryText,
     artifactInspectorAuditContinuityText,
     artifactInspectorAuditStateText,
     artifactInspectorAuditWindowText,
@@ -797,6 +814,10 @@ export function ArtifactInspectorPanel({
           key: "audit_next_action",
           style: { color: "#8fb3c9" },
         }, artifactInspectorAuditNextActionText),
+        h("div", {
+          key: "audit_operator_summary",
+          style: { color: "#8fb3c9" },
+        }, artifactInspectorAuditOperatorSummaryText),
         h("div", {
           key: "audit_summary",
           style: { color: "#8fb3c9" },
