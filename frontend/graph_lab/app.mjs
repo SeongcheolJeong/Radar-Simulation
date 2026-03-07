@@ -47,6 +47,7 @@ const LAYOUT_MODE_SET = new Set(["triad", "build", "review", "focus"]);
 const DENSITY_MODE_SET = new Set(["comfortable", "compact"]);
 const COMPARE_SESSION_STORAGE_KEY = "graph_lab_compare_session_history_v1";
 const COMPARE_SESSION_HISTORY_LIMIT = 8;
+const COMPARE_REPLAY_PAIR_OPTION_LIMIT = 6;
 
 function formatSigned(value) {
   const n = Number(value || 0);
@@ -85,14 +86,42 @@ function normalizeCompareSessionHistoryEntry(entry, ordinal) {
   };
 }
 
+function makeCompareReplayPairId(baselinePresetId, targetPresetId) {
+  const baseline = normalizeCompareSessionField(baselinePresetId, 96);
+  const target = normalizeCompareSessionField(targetPresetId, 96);
+  if (!baseline || !target) return "";
+  return `${baseline}::${target}`;
+}
+
+function normalizeCompareReplayPairMetaEntry(entry) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  return {
+    customLabel: normalizeCompareSessionField(row.customLabel, 160),
+    pinned: row.pinned === true,
+  };
+}
+
+function normalizeCompareReplayPairMetaMap(metaMap) {
+  const raw = metaMap && typeof metaMap === "object" && !Array.isArray(metaMap) ? metaMap : {};
+  const normalized = {};
+  Object.entries(raw).forEach(([rawId, rawMeta]) => {
+    const pairId = normalizeCompareSessionField(rawId, 192);
+    if (!pairId) return;
+    const meta = normalizeCompareReplayPairMetaEntry(rawMeta);
+    if (!meta.customLabel && meta.pinned !== true) return;
+    normalized[pairId] = meta;
+  });
+  return normalized;
+}
+
 function loadCompareSessionPrefs() {
   try {
     if (typeof window === "undefined" || !window.localStorage) {
-      return { history: [], selectedReplayPairId: "" };
+      return { history: [], selectedReplayPairId: "", pairMetaById: {} };
     }
     const raw = String(window.localStorage.getItem(COMPARE_SESSION_STORAGE_KEY) || "").trim();
     if (!raw) {
-      return { history: [], selectedReplayPairId: "" };
+      return { history: [], selectedReplayPairId: "", pairMetaById: {} };
     }
     const parsed = JSON.parse(raw);
     const history = (Array.isArray(parsed?.history) ? parsed.history : [])
@@ -101,9 +130,10 @@ function loadCompareSessionPrefs() {
     return {
       history,
       selectedReplayPairId: normalizeCompareSessionField(parsed?.selectedReplayPairId, 192),
+      pairMetaById: normalizeCompareReplayPairMetaMap(parsed?.pairMetaById),
     };
   } catch (_) {
-    return { history: [], selectedReplayPairId: "" };
+    return { history: [], selectedReplayPairId: "", pairMetaById: {} };
   }
 }
 
@@ -115,9 +145,10 @@ function saveCompareSessionPrefs(prefs) {
       .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
       .slice(0, COMPARE_SESSION_HISTORY_LIMIT);
     const selectedReplayPairId = normalizeCompareSessionField(payload.selectedReplayPairId, 192);
+    const pairMetaById = normalizeCompareReplayPairMetaMap(payload.pairMetaById);
     window.localStorage.setItem(
       COMPARE_SESSION_STORAGE_KEY,
-      JSON.stringify({ history, selectedReplayPairId })
+      JSON.stringify({ history, selectedReplayPairId, pairMetaById })
     );
   } catch (_) {
     // localStorage may be blocked; ignore and continue with in-memory state
@@ -360,7 +391,42 @@ function buildRuntimeDiagnosticsFallbackFromOverrides(overrides) {
   };
 }
 
-function formatCompareSessionHistoryEntry(entry, ordinal) {
+function getCompareSessionReplayPair(entry) {
+  const row = entry && typeof entry === "object" ? entry : {};
+  const baselinePresetId = String(row.baselinePresetId || "").trim();
+  const targetPresetId = String(row.targetPresetId || "").trim();
+  if (!baselinePresetId || !targetPresetId) {
+    return null;
+  }
+  return {
+    baselinePresetId,
+    targetPresetId,
+    pairId: makeCompareReplayPairId(baselinePresetId, targetPresetId),
+    pairLabel: String(row.pairLabel || `${baselinePresetId} -> ${targetPresetId}`).trim(),
+  };
+}
+
+function applyCompareReplayPairMeta(pair, pairMetaById) {
+  const basePair = pair && typeof pair === "object" ? pair : null;
+  if (!basePair) return null;
+  const pairId = String(basePair.pairId || makeCompareReplayPairId(basePair.baselinePresetId, basePair.targetPresetId)).trim();
+  const metaMap = pairMetaById && typeof pairMetaById === "object" ? pairMetaById : {};
+  const meta = normalizeCompareReplayPairMetaEntry(metaMap[pairId]);
+  const defaultPairLabel = String(
+    basePair.defaultPairLabel || basePair.pairLabel || `${String(basePair.baselinePresetId || "")} -> ${String(basePair.targetPresetId || "")}`
+  ).trim();
+  const customLabel = String(meta.customLabel || "").trim();
+  return {
+    ...basePair,
+    pairId,
+    defaultPairLabel,
+    customLabel,
+    pinned: meta.pinned === true,
+    pairLabel: customLabel || defaultPairLabel,
+  };
+}
+
+function formatCompareSessionHistoryEntry(entry, ordinal, pairMetaById) {
   const row = entry && typeof entry === "object" ? entry : {};
   const indexPrefix = Number.isFinite(Number(ordinal)) && Number(ordinal) > 0 ? `[${Number(ordinal)}] ` : "";
   const parts = [
@@ -368,9 +434,13 @@ function formatCompareSessionHistoryEntry(entry, ordinal) {
     `source=${String(row.source || "-")}`,
     `status=${String(row.status || "-")}`,
   ];
-  const pairLabel = String(row.pairLabel || "").trim();
+  const replayPair = applyCompareReplayPairMeta(getCompareSessionReplayPair(row), pairMetaById);
+  const pairLabel = String(replayPair?.pairLabel || row.pairLabel || "").trim();
   if (pairLabel) {
     parts.push(`pair=${pairLabel}`);
+  }
+  if (replayPair?.pinned === true) {
+    parts.push("pin=yes");
   }
   const phase = String(row.phase || "").trim();
   if (phase) {
@@ -395,36 +465,25 @@ function formatCompareSessionHistoryEntry(entry, ordinal) {
   return parts.join(" | ");
 }
 
-function summarizeCompareSessionHistory(entries) {
+function summarizeCompareSessionHistory(entries, pairMetaById) {
   const rows = Array.isArray(entries) ? entries : [];
   if (rows.length === 0) {
     return "no compare sessions recorded";
   }
-  return rows.slice(0, 6).map((row, idx) => formatCompareSessionHistoryEntry(row, idx + 1)).join("\n");
+  return rows
+    .slice(0, 6)
+    .map((row, idx) => formatCompareSessionHistoryEntry(row, idx + 1, pairMetaById))
+    .join("\n");
 }
 
-function getCompareSessionReplayPair(entry) {
-  const row = entry && typeof entry === "object" ? entry : {};
-  const baselinePresetId = String(row.baselinePresetId || "").trim();
-  const targetPresetId = String(row.targetPresetId || "").trim();
-  if (!baselinePresetId || !targetPresetId) {
-    return null;
-  }
-  return {
-    baselinePresetId,
-    targetPresetId,
-    pairLabel: String(row.pairLabel || `${baselinePresetId} -> ${targetPresetId}`).trim(),
-  };
-}
-
-function buildCompareSessionReplayOptions(entries) {
+function buildCompareSessionReplayOptions(entries, pairMetaById) {
   const rows = Array.isArray(entries) ? entries : [];
   const seen = new Set();
   const options = [];
   rows.forEach((row) => {
-    const pair = getCompareSessionReplayPair(row);
+    const pair = applyCompareReplayPairMeta(getCompareSessionReplayPair(row), pairMetaById);
     if (!pair) return;
-    const key = `${pair.baselinePresetId}::${pair.targetPresetId}`;
+    const key = String(pair.pairId || "").trim();
     if (seen.has(key)) return;
     seen.add(key);
     options.push({
@@ -432,10 +491,20 @@ function buildCompareSessionReplayOptions(entries) {
       baselinePresetId: pair.baselinePresetId,
       targetPresetId: pair.targetPresetId,
       pairLabel: pair.pairLabel,
-      label: `${pair.pairLabel} | ${String(row?.status || "-")} | ${String(row?.source || "-")}`,
+      defaultPairLabel: pair.defaultPairLabel,
+      customLabel: pair.customLabel,
+      pinned: pair.pinned === true,
+      label: `${pair.pinned === true ? "PIN | " : ""}${pair.pairLabel} | ${String(row?.status || "-")} | ${String(row?.source || "-")}`,
+      sortOrder: options.length,
     });
   });
-  return options.slice(0, 6);
+  return options
+    .sort((left, right) => {
+      const pinDelta = Number(Boolean(right?.pinned)) - Number(Boolean(left?.pinned));
+      if (pinDelta !== 0) return pinDelta;
+      return Number(left?.sortOrder || 0) - Number(right?.sortOrder || 0);
+    })
+    .slice(0, COMPARE_REPLAY_PAIR_OPTION_LIMIT);
 }
 
 function isRuntimeBlockedError(message) {
@@ -571,9 +640,13 @@ export function App() {
   const [compareSessionHistory, setCompareSessionHistory] = React.useState(
     () => initialCompareSessionPrefs.history
   );
+  const [compareReplayPairMetaById, setCompareReplayPairMetaById] = React.useState(
+    () => initialCompareSessionPrefs.pairMetaById || {}
+  );
   const [selectedCompareReplayPairId, setSelectedCompareReplayPairId] = React.useState(
     () => initialCompareSessionPrefs.selectedReplayPairId
   );
+  const [selectedCompareReplayPairLabelDraft, setSelectedCompareReplayPairLabelDraft] = React.useState("");
   const [trackCompareBaselinePresetId, setTrackCompareBaselinePresetId] = React.useState(
     RUNTIME_PURPOSE_PRESET_LOW_FIDELITY
   );
@@ -672,7 +745,7 @@ export function App() {
       timestampUtc: new Date().toISOString(),
       ...row,
     };
-    setCompareSessionHistory((prev) => [nextRow, ...(Array.isArray(prev) ? prev : [])].slice(0, 8));
+    setCompareSessionHistory((prev) => [nextRow, ...(Array.isArray(prev) ? prev : [])].slice(0, COMPARE_SESSION_HISTORY_LIMIT));
   }, []);
 
   const resetContractWarnings = React.useCallback(() => {
@@ -1557,26 +1630,30 @@ export function App() {
     trackCompareTargetPresetId,
   ]);
   const compareSessionHistoryText = React.useMemo(
-    () => summarizeCompareSessionHistory(compareSessionHistory),
-    [compareSessionHistory]
+    () => summarizeCompareSessionHistory(compareSessionHistory, compareReplayPairMetaById),
+    [compareReplayPairMetaById, compareSessionHistory]
   );
   const latestCompareSessionText = React.useMemo(
-    () => compareSessionHistory.length > 0 ? formatCompareSessionHistoryEntry(compareSessionHistory[0]) : "-",
-    [compareSessionHistory]
+    () => compareSessionHistory.length > 0
+      ? formatCompareSessionHistoryEntry(compareSessionHistory[0], null, compareReplayPairMetaById)
+      : "-",
+    [compareReplayPairMetaById, compareSessionHistory]
   );
   const latestReplayableCompareSession = React.useMemo(
-    () => compareSessionHistory.map((row) => getCompareSessionReplayPair(row)).find(Boolean) || null,
-    [compareSessionHistory]
+    () => compareSessionHistory
+      .map((row) => applyCompareReplayPairMeta(getCompareSessionReplayPair(row), compareReplayPairMetaById))
+      .find(Boolean) || null,
+    [compareReplayPairMetaById, compareSessionHistory]
   );
   const compareReplayPairOptions = React.useMemo(
-    () => buildCompareSessionReplayOptions(compareSessionHistory),
-    [compareSessionHistory]
+    () => buildCompareSessionReplayOptions(compareSessionHistory, compareReplayPairMetaById),
+    [compareReplayPairMetaById, compareSessionHistory]
   );
   const latestReplayableCompareSessionText = React.useMemo(() => {
     if (!latestReplayableCompareSession) {
       return "latest_replayable_pair: -";
     }
-    return `latest_replayable_pair: ${String(latestReplayableCompareSession.pairLabel || "-")}`;
+    return `latest_replayable_pair: ${String(latestReplayableCompareSession.pairLabel || "-")} | pinned=${latestReplayableCompareSession.pinned === true}`;
   }, [latestReplayableCompareSession]);
   const selectedReplayableCompareSession = React.useMemo(() => {
     const selectedId = String(selectedCompareReplayPairId || "").trim();
@@ -1591,6 +1668,22 @@ export function App() {
     }
     return `selected_history_pair: ${String(selectedReplayableCompareSession.pairLabel || "-")}`;
   }, [selectedReplayableCompareSession]);
+  const selectedReplayableCompareSessionMetaText = React.useMemo(() => {
+    if (!selectedReplayableCompareSession) {
+      return "selected_history_pair_meta: -";
+    }
+    return [
+      `selected_history_pair_meta: pinned=${selectedReplayableCompareSession.pinned === true}`,
+      `custom_label=${String(selectedReplayableCompareSession.customLabel || "-")}`,
+    ].join(" | ");
+  }, [selectedReplayableCompareSession]);
+  const managedCompareReplayPairCount = React.useMemo(
+    () => Object.values(compareReplayPairMetaById || {}).filter((row) => {
+      const meta = normalizeCompareReplayPairMetaEntry(row);
+      return meta.pinned === true || meta.customLabel !== "";
+    }).length,
+    [compareReplayPairMetaById]
+  );
 
   React.useEffect(() => {
     const selectedId = String(selectedCompareReplayPairId || "").trim();
@@ -1603,11 +1696,25 @@ export function App() {
   }, [compareReplayPairOptions, selectedCompareReplayPairId]);
 
   React.useEffect(() => {
+    const nextDraft = String(
+      selectedReplayableCompareSession?.customLabel
+      || selectedReplayableCompareSession?.pairLabel
+      || ""
+    );
+    setSelectedCompareReplayPairLabelDraft(nextDraft);
+  }, [
+    selectedReplayableCompareSession?.customLabel,
+    selectedReplayableCompareSession?.id,
+    selectedReplayableCompareSession?.pairLabel,
+  ]);
+
+  React.useEffect(() => {
     saveCompareSessionPrefs({
       history: compareSessionHistory,
+      pairMetaById: compareReplayPairMetaById,
       selectedReplayPairId: selectedCompareReplayPairId,
     });
-  }, [compareSessionHistory, selectedCompareReplayPairId]);
+  }, [compareReplayPairMetaById, compareSessionHistory, selectedCompareReplayPairId]);
 
   const {
     runGraphViaApi,
@@ -1949,6 +2056,98 @@ export function App() {
     return runCompareSessionReplayPair(selectedReplayableCompareSession);
   }, [runCompareSessionReplayPair, selectedReplayableCompareSession]);
 
+  const saveSelectedCompareSessionPairLabel = React.useCallback(() => {
+    const selectedPair = selectedReplayableCompareSession;
+    if (!selectedPair) {
+      setStatus("no replayable compare session selected", "status-warn");
+      return;
+    }
+    const pairId = String(selectedPair.id || selectedPair.pairId || "").trim();
+    if (!pairId) {
+      setStatus("selected compare session pair id is missing", "status-warn");
+      return;
+    }
+    const nextLabel = normalizeCompareSessionField(selectedCompareReplayPairLabelDraft, 160);
+    setCompareReplayPairMetaById((prev) => {
+      const next = { ...(prev || {}) };
+      const prior = normalizeCompareReplayPairMetaEntry(next[pairId]);
+      const merged = {
+        customLabel: nextLabel,
+        pinned: prior.pinned === true,
+      };
+      if (!merged.customLabel && merged.pinned !== true) {
+        delete next[pairId];
+      } else {
+        next[pairId] = merged;
+      }
+      return next;
+    });
+    setStatus(nextLabel
+      ? `saved selected history pair label: ${nextLabel}`
+      : "cleared selected history pair label",
+    "status-ok");
+  }, [
+    selectedCompareReplayPairLabelDraft,
+    selectedReplayableCompareSession,
+    setStatus,
+  ]);
+
+  const togglePinSelectedCompareSessionPair = React.useCallback(() => {
+    const selectedPair = selectedReplayableCompareSession;
+    if (!selectedPair) {
+      setStatus("no replayable compare session selected", "status-warn");
+      return;
+    }
+    const pairId = String(selectedPair.id || selectedPair.pairId || "").trim();
+    if (!pairId) {
+      setStatus("selected compare session pair id is missing", "status-warn");
+      return;
+    }
+    let nextPinned = false;
+    setCompareReplayPairMetaById((prev) => {
+      const next = { ...(prev || {}) };
+      const prior = normalizeCompareReplayPairMetaEntry(next[pairId]);
+      nextPinned = prior.pinned !== true;
+      const merged = {
+        customLabel: prior.customLabel,
+        pinned: nextPinned,
+      };
+      if (!merged.customLabel && merged.pinned !== true) {
+        delete next[pairId];
+      } else {
+        next[pairId] = merged;
+      }
+      return next;
+    });
+    setStatus(
+      `${nextPinned ? "pinned" : "unpinned"} selected history pair: ${String(selectedPair.pairLabel || "-")}`,
+      "status-ok"
+    );
+  }, [selectedReplayableCompareSession, setStatus]);
+
+  const deleteSelectedCompareSessionPair = React.useCallback(() => {
+    const selectedPair = selectedReplayableCompareSession;
+    if (!selectedPair) {
+      setStatus("no replayable compare session selected", "status-warn");
+      return;
+    }
+    const pairId = String(selectedPair.id || selectedPair.pairId || "").trim();
+    if (!pairId) {
+      setStatus("selected compare session pair id is missing", "status-warn");
+      return;
+    }
+    setCompareSessionHistory((prev) => (Array.isArray(prev) ? prev : []).filter((row) => {
+      const replayPair = getCompareSessionReplayPair(row);
+      return String(replayPair?.pairId || "") !== pairId;
+    }));
+    setCompareReplayPairMetaById((prev) => {
+      const next = { ...(prev || {}) };
+      delete next[pairId];
+      return next;
+    });
+    setStatus(`deleted history pair: ${String(selectedPair.pairLabel || "-")}`, "status-ok");
+  }, [selectedReplayableCompareSession, setStatus]);
+
   const exportDecisionRegressionSession = React.useCallback(async () => {
     const sessionId = String(lastRegressionSession?.session_id || "").trim();
     if (!sessionId) {
@@ -2001,9 +2200,11 @@ export function App() {
       `selected_preset_pair_label: ${trackCompareSelectedPairSummaryText}`,
       `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
       `compare_session_count: ${Number(compareSessionHistory.length || 0)}`,
+      `managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `latest_compare_session: ${latestCompareSessionText}`,
       `${latestReplayableCompareSessionText}`,
       `${selectedReplayableCompareSessionText}`,
+      `${selectedReplayableCompareSessionMetaText}`,
       `current_track: ${runtimeSummary.trackLabel}`,
       `compare_track: ${compareRuntimeSummary.trackLabel}`,
       `current_runtime: ${runtimeDiagnostics.badgeLine}`,
@@ -2039,6 +2240,7 @@ export function App() {
     compareSessionHistory.length,
     compareGraphRunId,
     compareGraphRunSummary,
+    managedCompareReplayPairCount,
     runCompareSummary,
     compareRuntimeDiagnostics.badgeLine,
     compareRuntimeSummary.trackLabel,
@@ -2049,6 +2251,7 @@ export function App() {
     runtimeDiagnostics.badgeLine,
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
+    selectedReplayableCompareSessionMetaText,
     trackCompareBaselinePresetId,
     trackCompareSelectedPairForecastText,
     trackCompareSelectedPairSummaryText,
@@ -2086,6 +2289,8 @@ export function App() {
       `- compare_status: ${String(compareRunStatusText || "-")}`,
       `- ${latestReplayableCompareSessionText}`,
       `- ${selectedReplayableCompareSessionText}`,
+      `- ${selectedReplayableCompareSessionMetaText}`,
+      `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       "",
       "## Selected Pair Forecast",
       "```text",
@@ -2173,6 +2378,8 @@ export function App() {
     runtimeDiagnostics.summaryText,
     runtimeSummary.trackLabel,
     selectedReplayableCompareSessionText,
+    selectedReplayableCompareSessionMetaText,
+    managedCompareReplayPairCount,
     setStatus,
     latestReplayableCompareSessionText,
     trackCompareBaselinePresetId,
@@ -2538,14 +2745,20 @@ export function App() {
         compareReplayPairOptions,
         selectedCompareReplayPairId,
         setSelectedCompareReplayPairId,
+        selectedCompareReplayPairLabelDraft,
+        setSelectedCompareReplayPairLabelDraft,
         latestReplayableCompareSessionText,
         canReplayLatestCompareSession: Boolean(latestReplayableCompareSession),
         applyLatestCompareSessionPair,
         runLatestCompareSessionPair,
         selectedReplayableCompareSessionText,
+        selectedReplayableCompareSessionMetaText,
         canReplaySelectedCompareSession: Boolean(selectedReplayableCompareSession),
         applySelectedCompareSessionPair,
         runSelectedCompareSessionPair,
+        saveSelectedCompareSessionPairLabel,
+        togglePinSelectedCompareSessionPair,
+        deleteSelectedCompareSessionPair,
         runPresetPairTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,

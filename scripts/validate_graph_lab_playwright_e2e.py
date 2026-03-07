@@ -144,6 +144,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_history_checked": False,
             "compare_session_replay_checked": False,
             "compare_session_selector_checked": False,
+            "compare_session_management_checked": False,
             "compare_session_persistence_checked": False,
             "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
@@ -480,6 +481,63 @@ def run(args: argparse.Namespace) -> int:
                 )
                 report["runtime_controls"]["compare_session_selector_checked"] = True
 
+                selected_history_label = "Low Fidelity Saved"
+                history_label_input = history_field.get_by_placeholder("selected pair label")
+                history_label_input.fill(selected_history_label)
+                history_field.get_by_role("button", name="Save Selected Label").click()
+                page.wait_for_function(
+                    """(expectedLabel) => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes(`selected_history_pair: ${String(expectedLabel || "")}`);
+                    }""",
+                    arg=selected_history_label,
+                    timeout=10_000,
+                )
+                history_field.get_by_role("button", name="Pin Selected History Pair").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("selected_history_pair_meta: pinned=true");
+                    }""",
+                    timeout=10_000,
+                )
+                preset_pair_field.get_by_role("button", name="Low -> PO-SBR", exact=True).click()
+                page.wait_for_timeout(100)
+                page.get_by_role("button", name="Use Current as Compare").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("high_fidelity_po_sbr_rt");
+                    }""",
+                    timeout=20_000,
+                )
+                history_select.select_option("low_fidelity_radarsimpy_ffd::high_fidelity_po_sbr_rt")
+                page.wait_for_timeout(100)
+                history_field.get_by_role("button", name="Delete Selected History Pair").click()
+                page.wait_for_function(
+                    """() => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const select = field ? field.querySelector("select") : null;
+                        const options = select ? Array.from(select.querySelectorAll("option")).map((row) => String(row.value || "")) : [];
+                        return !options.includes("low_fidelity_radarsimpy_ffd::high_fidelity_po_sbr_rt");
+                    }""",
+                    timeout=10_000,
+                )
+                history_select.select_option("low_fidelity_radarsimpy_ffd::current_config")
+                page.wait_for_timeout(100)
+                report["runtime_controls"]["compare_session_management_checked"] = True
+
                 page.get_by_role("button", name="Pin Baseline").click()
                 page.get_by_role("button", name="Policy Gate").click()
                 page.wait_for_function(
@@ -530,6 +588,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include latest replayable pair summary")
                 if "selected_history_pair:" not in brief_text:
                     raise AssertionError("decision brief did not include selected history pair summary")
+                if "selected_history_pair_meta:" not in brief_text or "managed_history_pair_count:" not in brief_text:
+                    raise AssertionError("decision brief did not include selected history pair management summary")
                 if "## Compare Assessment" not in brief_text or "assessment:" not in brief_text:
                     raise AssertionError("decision brief did not include compare assessment summary")
                 report["runtime_controls"]["decision_brief_runtime_compare_checked"] = True
@@ -628,6 +688,9 @@ def run(args: argparse.Namespace) -> int:
                 reloaded_history_select = reloaded_history_field.locator("select").first
                 if reloaded_history_select.input_value() != persisted_pair_value:
                     raise AssertionError("compare session history selector did not persist after reload")
+                reloaded_history_text = reloaded_history_field.inner_text()
+                if selected_history_label not in reloaded_history_text or "selected_history_pair_meta: pinned=true" not in reloaded_history_text:
+                    raise AssertionError("compare session history management state did not persist after reload")
                 report["runtime_controls"]["compare_session_persistence_checked"] = True
 
                 report["playwright_runtime_ready"] = True

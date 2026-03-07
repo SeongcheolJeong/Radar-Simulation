@@ -26,14 +26,20 @@ export function DecisionPane({
   compareReplayPairOptions,
   selectedCompareReplayPairId,
   setSelectedCompareReplayPairId,
+  selectedCompareReplayPairLabelDraft,
+  setSelectedCompareReplayPairLabelDraft,
   latestReplayableCompareSessionText,
   canReplayLatestCompareSession,
   applyLatestCompareSessionPair,
   runLatestCompareSessionPair,
   selectedReplayableCompareSessionText,
+  selectedReplayableCompareSessionMetaText,
   canReplaySelectedCompareSession,
   applySelectedCompareSessionPair,
   runSelectedCompareSessionPair,
+  saveSelectedCompareSessionPairLabel,
+  togglePinSelectedCompareSessionPair,
+  deleteSelectedCompareSessionPair,
   runPresetPairTrackCompare,
   exportGateReport,
   exportDecisionRegressionSession,
@@ -131,6 +137,7 @@ export function DecisionPane({
       h("label", { className: "label", key: "decision_compare_session_history_label" }, "Compare Session History"),
       h("div", { className: "hint", key: "decision_compare_session_history_replay_hint" }, String(latestReplayableCompareSessionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_selected_hint" }, String(selectedReplayableCompareSessionText || "-")),
+      h("div", { className: "hint", key: "decision_compare_session_history_meta_hint" }, String(selectedReplayableCompareSessionMetaText || "-")),
       h("select", {
         className: "select",
         value: String(selectedCompareReplayPairId || ""),
@@ -141,6 +148,12 @@ export function DecisionPane({
       ).map((row) =>
         h("option", { key: `decision_compare_history_pair_${String(row?.id || "")}`, value: String(row?.id || "") }, String(row?.label || row?.id || "-"))
       )),
+      h("input", {
+        className: "input",
+        value: String(selectedCompareReplayPairLabelDraft || ""),
+        onChange: (e) => setSelectedCompareReplayPairLabelDraft(String(e.target.value || "")),
+        placeholder: "selected pair label",
+      }),
       h("div", { className: "btn-row", key: "decision_compare_session_history_actions" }, [
         h("button", {
           className: "btn",
@@ -166,6 +179,26 @@ export function DecisionPane({
           onClick: runSelectedCompareSessionPair,
           disabled: !canReplaySelectedCompareSession,
         }, "Run Selected History Pair"),
+      ]),
+      h("div", { className: "btn-row", key: "decision_compare_session_history_manage_row" }, [
+        h("button", {
+          className: "btn",
+          key: "decision_save_selected_history_pair_label",
+          onClick: saveSelectedCompareSessionPairLabel,
+          disabled: !canReplaySelectedCompareSession,
+        }, "Save Selected Label"),
+        h("button", {
+          className: "btn",
+          key: "decision_pin_selected_history_pair",
+          onClick: togglePinSelectedCompareSessionPair,
+          disabled: !canReplaySelectedCompareSession,
+        }, "Pin Selected History Pair"),
+        h("button", {
+          className: "btn",
+          key: "decision_delete_selected_history_pair",
+          onClick: deleteSelectedCompareSessionPair,
+          disabled: !canReplaySelectedCompareSession,
+        }, "Delete Selected History Pair"),
       ]),
       h("pre", { className: "result-box", key: "decision_compare_session_history_box" }, String(compareSessionHistoryText || "-")),
     ]),

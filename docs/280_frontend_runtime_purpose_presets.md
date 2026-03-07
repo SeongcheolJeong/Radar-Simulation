@@ -156,6 +156,20 @@ The history block also provides:
 
 The compare-session history and the selected replayable pair now persist in browser `localStorage`, so a page refresh keeps the recent compare workflow intact on the same machine/browser profile.
 
+It also supports lightweight pair management directly in the Decision Pane:
+
+- `Save Selected Label`
+  - saves a custom label for the currently selected replayable pair
+- `Pin Selected History Pair`
+  - pins the selected pair so it sorts to the top of the replayable pair selector
+- `Delete Selected History Pair`
+  - removes the selected pair and its matching history entries from the local compare-session store
+
+The Decision Summary and exported brief now include:
+
+- `selected_history_pair_meta`
+- `managed_history_pair_count`
+
 The `Artifact Inspector` now also classifies the current-vs-compare pair into:
 
 - `aligned`
