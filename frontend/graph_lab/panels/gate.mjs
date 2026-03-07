@@ -13,6 +13,12 @@ export function DecisionPane({
   runPolicyGateForGraphRun,
   runDecisionRegressionSession,
   runLowVsCurrentTrackCompare,
+  trackCompareBaselinePresetId,
+  setTrackCompareBaselinePresetId,
+  trackCompareTargetPresetId,
+  setTrackCompareTargetPresetId,
+  trackComparePresetOptions,
+  runPresetPairTrackCompare,
   exportGateReport,
   exportDecisionRegressionSession,
   exportDecisionBriefMd,
@@ -58,6 +64,44 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_compare_track_hint" }, `compare_track: ${String(compareTrackLabel || "-")}`),
       h("pre", { className: "result-box", key: "decision_track_workflow_box" }, String(trackCompareGuideText || "-")),
     ]),
+    h("div", { className: "field", key: "decision_preset_pair_compare" }, [
+      h("label", { className: "label", key: "decision_preset_pair_label" }, "Preset Pair Compare"),
+      h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }, key: "decision_preset_pair_grid" }, [
+        h("div", { key: "decision_preset_pair_baseline_col" }, [
+          h("div", { className: "hint", key: "decision_preset_pair_baseline_hint" }, "baseline_preset"),
+          h("select", {
+            className: "select",
+            value: String(trackCompareBaselinePresetId || ""),
+            onChange: (e) => setTrackCompareBaselinePresetId(String(e.target.value || "")),
+          }, (Array.isArray(trackComparePresetOptions) ? trackComparePresetOptions : []).map((row) =>
+            h("option", { key: `decision_compare_baseline_${String(row?.id || "")}`, value: String(row?.id || "") }, String(row?.label || row?.id || "-"))
+          )),
+        ]),
+        h("div", { key: "decision_preset_pair_target_col" }, [
+          h("div", { className: "hint", key: "decision_preset_pair_target_hint" }, "target_preset"),
+          h("select", {
+            className: "select",
+            value: String(trackCompareTargetPresetId || ""),
+            onChange: (e) => setTrackCompareTargetPresetId(String(e.target.value || "")),
+          }, (Array.isArray(trackComparePresetOptions) ? trackComparePresetOptions : []).map((row) =>
+            h("option", { key: `decision_compare_target_${String(row?.id || "")}`, value: String(row?.id || "") }, String(row?.label || row?.id || "-"))
+          )),
+        ]),
+      ]),
+      h("div", { className: "btn-row", key: "decision_preset_pair_row" }, [
+        h("button", {
+          className: "btn",
+          key: "decision_run_preset_pair_compare",
+          onClick: runPresetPairTrackCompare,
+        }, "Run Preset Pair Compare"),
+        h("button", {
+          className: "btn",
+          key: "decision_run_track_compare",
+          onClick: runLowVsCurrentTrackCompare,
+        }, "Run Low -> Current Compare"),
+      ]),
+      h("div", { className: "hint", key: "decision_preset_pair_mode_hint" }, "target_preset=current_config keeps the current runtime inputs and only builds the baseline automatically."),
+    ]),
     h("div", { className: "btn-row", key: "decision_gate_row" }, [
       h("button", {
         className: "btn",
@@ -69,11 +113,6 @@ export function DecisionPane({
         key: "decision_policy_gate",
         onClick: runPolicyGateForGraphRun,
       }, "Policy Gate"),
-      h("button", {
-        className: "btn",
-        key: "decision_run_track_compare",
-        onClick: runLowVsCurrentTrackCompare,
-      }, "Run Low -> Current Compare"),
     ]),
     h("div", { className: "btn-row", key: "decision_session_row" }, [
       h("button", {

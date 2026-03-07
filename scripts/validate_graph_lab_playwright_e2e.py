@@ -139,6 +139,7 @@ def run(args: argparse.Namespace) -> int:
             "advanced_controls_checked": [],
             "runtime_diagnostics_checked": False,
             "compare_workflow_checked": False,
+            "preset_pair_runner_checked": False,
             "track_compare_runner_checked": False,
             "track_compare_runner_result": "",
             "compare_assessment_checked": False,
@@ -335,7 +336,20 @@ def run(args: argparse.Namespace) -> int:
                 )
                 report["runtime_controls"]["compare_workflow_checked"] = True
 
-                page.get_by_role("button", name="Run Low -> Current Compare").click()
+                preset_pair_field = field_locator(page, "Preset Pair Compare")
+                preset_pair_field.wait_for(timeout=30_000)
+                preset_selects = preset_pair_field.locator("select")
+                baseline_select = preset_selects.nth(0)
+                target_select = preset_selects.nth(1)
+                if baseline_select.input_value() != "low_fidelity_radarsimpy_ffd":
+                    raise AssertionError("preset pair baseline default must be low_fidelity_radarsimpy_ffd")
+                if target_select.input_value() != "current_config":
+                    raise AssertionError("preset pair target default must be current_config")
+                baseline_select.select_option("low_fidelity_radarsimpy_ffd")
+                target_select.select_option("current_config")
+                report["runtime_controls"]["preset_pair_runner_checked"] = True
+
+                page.get_by_role("button", name="Run Preset Pair Compare").click()
                 page.wait_for_function(
                     """() => {
                         const text = (document.body && document.body.innerText) || "";

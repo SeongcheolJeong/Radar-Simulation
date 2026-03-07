@@ -80,9 +80,14 @@ The Decision Pane now exposes a lightweight operator workflow for low-vs-high tr
 - `Use Current as Compare`
   - locks the current run as the compare reference
   - keeps that reference pinned while the operator switches runtime presets and runs again
+- `Run Preset Pair Compare`
+  - executes any selected `baseline_preset -> target_preset` pair
+  - default is `low_fidelity_radarsimpy_ffd -> current_config`
+  - when `target_preset` is not `current_config`, the frontend also applies that preset into the runtime panel so the visible controls match the executed target run
 - `Run Low -> Current Compare`
   - executes a low-fidelity `radarsimpy_rt` baseline first
   - then runs the current frontend track and pins the low-fidelity result as compare input
+  - this is now a convenience wrapper over the generic preset-pair runner
   - reports `blocked` when the low-fidelity runtime is unavailable, instead of leaving the UI in an ambiguous state
 - `Track Compare Workflow`
   - shows current/compare track labels
@@ -99,6 +104,14 @@ Practical flow:
 Fast path:
 
 1. Configure the target high-fidelity track.
+2. Click `Run Preset Pair Compare` and keep `baseline_preset=low_fidelity_radarsimpy_ffd`.
+3. Set `target_preset=current_config` to use the current runtime panel as-is, or select a concrete preset to force the target track.
+4. If the low-fidelity runtime is installed, inspect the generated compare pair immediately.
+5. If the UI reports `track_compare_runner_blocked`, install or expose the `radarsimpy` runtime first.
+
+Shortcut:
+
+1. Configure the target high-fidelity track manually.
 2. Click `Run Low -> Current Compare`.
 3. If the low-fidelity runtime is installed, inspect the generated compare pair immediately.
 4. If the UI reports `track_compare_runner_blocked`, install or expose the `radarsimpy` runtime first.
@@ -158,7 +171,7 @@ The repo now auto-discovers a local RadarSimPy runtime for frontend/API workflow
   - staged/import-time license under the runtime package
   - repo-local `external/radarsimpy/src/radarsimpy/license_RadarSimPy_*.lic`
 
-This is what allows `Run Low -> Current Compare` to reach `ready` in the local workspace without manually exporting shell paths first.
+This is what allows `Run Low -> Current Compare` and the default `Run Preset Pair Compare` flow to reach `ready` in the local workspace without manually exporting shell paths first.
 
 ## Decision Brief
 

@@ -1,44 +1,12 @@
 import { React } from "../deps.mjs";
+import {
+  applyRuntimePurposePreset,
+  RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_PO_SBR,
+  RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_SIONNA,
+  RUNTIME_PURPOSE_PRESET_LOW_FIDELITY,
+} from "../runtime_purpose_presets.mjs";
 
 const h = React.createElement;
-const MITSUBA_SAMPLE_SPHERES_JSON = JSON.stringify([
-  {
-    center_m: [22.0, 0.0, 0.0],
-    radius_m: 0.45,
-    velocity_mps: [-1.5, 0.0, 0.0],
-    amp: { re: 1.0, im: 0.0 },
-    range_amp_exponent: 2.0,
-    path_id_prefix: "mitsuba_vehicle_a",
-    material_tag: "vehicle_body",
-    reflection_order: 1,
-  },
-  {
-    center_m: [34.0, 4.0, 0.0],
-    radius_m: 0.65,
-    velocity_mps: [0.0, -0.8, 0.0],
-    amp: { re: 0.7, im: 0.1 },
-    range_amp_exponent: 2.0,
-    path_id_prefix: "mitsuba_vehicle_b",
-    material_tag: "vehicle_body",
-    reflection_order: 1,
-  },
-], null, 2);
-const PO_SBR_SAMPLE_COMPONENTS_JSON = JSON.stringify([
-  {
-    phi_deg: 78.0,
-    theta_deg: 90.0,
-    radial_velocity_mps: -2.0,
-    path_id_prefix: "po_lane_left",
-    material_tag: "guardrail",
-  },
-  {
-    phi_deg: 102.0,
-    theta_deg: 90.0,
-    radial_velocity_mps: 1.5,
-    path_id_prefix: "po_lane_right",
-    material_tag: "vehicle_body",
-  },
-], null, 2);
 
 function isSionnaStyleProvider(runtimeBackendType, runtimeProviderSpec) {
   const backend = String(runtimeBackendType || "").trim().toLowerCase();
@@ -117,62 +85,30 @@ export function RuntimeConfigSection({
   runtimeDiagnosticText,
   runtimeStatusLine,
 }) {
-  const applyMitsubaAdvancedSample = () => {
-    setRuntimeMitsubaEgoOriginText("0,0,0");
-    setRuntimeMitsubaChirpIntervalText("4.0e-5");
-    setRuntimeMitsubaMinRangeText("0.5");
-    setRuntimeMitsubaSpheresJson(MITSUBA_SAMPLE_SPHERES_JSON);
-  };
-
-  const applyPoSbrAdvancedSample = () => {
-    setRuntimePoSbrRepoRoot("external/PO-SBR-Python");
-    setRuntimePoSbrGeometryPath("geometries/plate.obj");
-    setRuntimePoSbrChirpIntervalText("4.0e-5");
-    setRuntimePoSbrBouncesText("2");
-    setRuntimePoSbrRaysPerLambdaText("3.0");
-    setRuntimePoSbrAlphaDegText("180");
-    setRuntimePoSbrPhiDegText("90");
-    setRuntimePoSbrThetaDegText("90");
-    setRuntimePoSbrRadialVelocityText("0.0");
-    setRuntimePoSbrMinRangeText("0.5");
-    setRuntimePoSbrMaterialTag("po_sbr_runtime");
-    setRuntimePoSbrPathIdPrefix("po_sbr_runtime");
-    setRuntimePoSbrComponentsJson(PO_SBR_SAMPLE_COMPONENTS_JSON);
-  };
-
-  const applyLowFidelityPreset = () => {
-    setRuntimeBackendType("radarsimpy_rt");
-    setRuntimeProviderSpec(
-      "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths"
-    );
-    setRuntimeRequiredModulesText("radarsimpy");
-    setRuntimeFailurePolicy("error");
-    setRuntimeSimulationMode("radarsimpy_adc");
-    setRuntimeDevice("cpu");
-  };
-
-  const applyHighFidelitySionnaPreset = () => {
-    setRuntimeBackendType("sionna_rt");
-    setRuntimeProviderSpec(
-      "avxsim.runtime_providers.mitsuba_rt_provider:generate_sionna_like_paths_from_mitsuba"
-    );
-    setRuntimeRequiredModulesText("mitsuba,drjit");
-    setRuntimeFailurePolicy("error");
-    setRuntimeSimulationMode("auto");
-    setRuntimeDevice("gpu");
-    applyMitsubaAdvancedSample();
-  };
-
-  const applyHighFidelityPoSbrPreset = () => {
-    setRuntimeBackendType("po_sbr_rt");
-    setRuntimeProviderSpec(
-      "avxsim.runtime_providers.po_sbr_rt_provider:generate_po_sbr_like_paths_from_posbr"
-    );
-    setRuntimeRequiredModulesText("rtxpy,igl");
-    setRuntimeFailurePolicy("error");
-    setRuntimeSimulationMode("auto");
-    setRuntimeDevice("gpu");
-    applyPoSbrAdvancedSample();
+  const runtimePresetSetters = {
+    setRuntimeBackendType,
+    setRuntimeProviderSpec,
+    setRuntimeRequiredModulesText,
+    setRuntimeFailurePolicy,
+    setRuntimeSimulationMode,
+    setRuntimeDevice,
+    setRuntimeMitsubaEgoOriginText,
+    setRuntimeMitsubaChirpIntervalText,
+    setRuntimeMitsubaMinRangeText,
+    setRuntimeMitsubaSpheresJson,
+    setRuntimePoSbrRepoRoot,
+    setRuntimePoSbrGeometryPath,
+    setRuntimePoSbrChirpIntervalText,
+    setRuntimePoSbrBouncesText,
+    setRuntimePoSbrRaysPerLambdaText,
+    setRuntimePoSbrAlphaDegText,
+    setRuntimePoSbrPhiDegText,
+    setRuntimePoSbrThetaDegText,
+    setRuntimePoSbrRadialVelocityText,
+    setRuntimePoSbrMinRangeText,
+    setRuntimePoSbrMaterialTag,
+    setRuntimePoSbrPathIdPrefix,
+    setRuntimePoSbrComponentsJson,
   };
 
   const applyTdmPreset = () => {
@@ -206,19 +142,19 @@ export function RuntimeConfigSection({
           type: "button",
           className: "btn",
           key: "purpose_low_fidelity",
-          onClick: applyLowFidelityPreset,
+          onClick: () => applyRuntimePurposePreset(RUNTIME_PURPOSE_PRESET_LOW_FIDELITY, runtimePresetSetters),
         }, "Low Fidelity: RadarSimPy + FFD"),
         h("button", {
           type: "button",
           className: "btn",
           key: "purpose_high_fidelity_sionna",
-          onClick: applyHighFidelitySionnaPreset,
+          onClick: () => applyRuntimePurposePreset(RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_SIONNA, runtimePresetSetters),
         }, "High Fidelity: Sionna-style RT"),
         h("button", {
           type: "button",
           className: "btn",
           key: "purpose_high_fidelity_po_sbr",
-          onClick: applyHighFidelityPoSbrPreset,
+          onClick: () => applyRuntimePurposePreset(RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_PO_SBR, runtimePresetSetters),
         }, "High Fidelity: PO-SBR"),
       ]),
       h(
@@ -362,7 +298,7 @@ export function RuntimeConfigSection({
             type: "button",
             className: "btn",
             key: "runtime_mitsuba_sample",
-            onClick: applyMitsubaAdvancedSample,
+            onClick: () => applyRuntimePurposePreset(RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_SIONNA, runtimePresetSetters),
           }, "Load Mitsuba Sample"),
         ]),
         h(
@@ -419,7 +355,7 @@ export function RuntimeConfigSection({
             type: "button",
             className: "btn",
             key: "runtime_po_sbr_sample",
-            onClick: applyPoSbrAdvancedSample,
+            onClick: () => applyRuntimePurposePreset(RUNTIME_PURPOSE_PRESET_HIGH_FIDELITY_PO_SBR, runtimePresetSetters),
           }, "Load PO-SBR Sample"),
         ]),
         h(

@@ -28,6 +28,14 @@ import {
   TopBar,
 } from "./panels.mjs";
 import { buildRunCompareSummary } from "./compare_summary.mjs";
+import {
+  applyRuntimePurposePreset,
+  buildRuntimePurposePresetOverrides,
+  getRuntimePurposePresetLabel,
+  RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG,
+  RUNTIME_PURPOSE_PRESET_LOW_FIDELITY,
+  RUNTIME_PURPOSE_PRESET_OPTIONS,
+} from "./runtime_purpose_presets.mjs";
 import { splitTokenList } from "./runtime_overrides.mjs";
 import { useGateOps } from "./hooks/use_gate_ops.mjs";
 import { useGraphRunOps } from "./hooks/use_graph_run_ops.mjs";
@@ -272,17 +280,6 @@ function summarizeRuntimeDiagnostics(summary, fallbackConfig) {
   };
 }
 
-function buildLowFidelityRuntimeOverrides() {
-  return {
-    runtimeBackendType: "radarsimpy_rt",
-    runtimeProviderSpec: "avxsim.runtime_providers.radarsimpy_rt_provider:generate_radarsimpy_like_paths",
-    runtimeRequiredModulesText: "radarsimpy",
-    runtimeFailurePolicy: "error",
-    runtimeSimulationMode: "radarsimpy_adc",
-    runtimeDevice: "cpu",
-  };
-}
-
 function isRuntimeBlockedError(message) {
   const text = String(message || "").trim().toLowerCase();
   return text.includes("required runtime modules unavailable") || text.includes("runtime provider failed");
@@ -412,6 +409,12 @@ export function App() {
   const [lastRegressionExport, setLastRegressionExport] = React.useState(null);
   const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
   const [trackCompareRunnerStatusText, setTrackCompareRunnerStatusText] = React.useState("-");
+  const [trackCompareBaselinePresetId, setTrackCompareBaselinePresetId] = React.useState(
+    RUNTIME_PURPOSE_PRESET_LOW_FIDELITY
+  );
+  const [trackCompareTargetPresetId, setTrackCompareTargetPresetId] = React.useState(
+    RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG
+  );
   const [templates, setTemplates] = React.useState([]);
   const [statusText, setStatusText] = React.useState("idle");
   const [statusTone, setStatusTone] = React.useState("status-neutral");
@@ -1232,8 +1235,61 @@ export function App() {
     "3. Switch runtime preset or advanced controls for the alternate track.",
     "4. Run Graph (API) again and inspect Artifact Inspector diff.",
     "5. Use Policy Gate / Run Session when the current-vs-compare pair is final.",
-    "6. Or click Run Low -> Current Compare to build the pair automatically.",
+    "6. Or click Run Low -> Current Compare to build the default pair automatically.",
+    "7. Or use Run Preset Pair Compare to execute any preset-to-preset sequence.",
   ].join("\n"), []);
+
+  const applyRuntimePurposePresetToUi = React.useCallback((presetId) => {
+    return applyRuntimePurposePreset(presetId, {
+      setRuntimeBackendType,
+      setRuntimeProviderSpec,
+      setRuntimeRequiredModulesText,
+      setRuntimeFailurePolicy,
+      setRuntimeSimulationMode,
+      setRuntimeDevice,
+      setRuntimeMitsubaEgoOriginText,
+      setRuntimeMitsubaChirpIntervalText,
+      setRuntimeMitsubaMinRangeText,
+      setRuntimeMitsubaSpheresJson,
+      setRuntimePoSbrRepoRoot,
+      setRuntimePoSbrGeometryPath,
+      setRuntimePoSbrChirpIntervalText,
+      setRuntimePoSbrBouncesText,
+      setRuntimePoSbrRaysPerLambdaText,
+      setRuntimePoSbrAlphaDegText,
+      setRuntimePoSbrPhiDegText,
+      setRuntimePoSbrThetaDegText,
+      setRuntimePoSbrRadialVelocityText,
+      setRuntimePoSbrMinRangeText,
+      setRuntimePoSbrMaterialTag,
+      setRuntimePoSbrPathIdPrefix,
+      setRuntimePoSbrComponentsJson,
+    });
+  }, [
+    setRuntimeBackendType,
+    setRuntimeDevice,
+    setRuntimeFailurePolicy,
+    setRuntimeMitsubaChirpIntervalText,
+    setRuntimeMitsubaEgoOriginText,
+    setRuntimeMitsubaMinRangeText,
+    setRuntimeMitsubaSpheresJson,
+    setRuntimePoSbrAlphaDegText,
+    setRuntimePoSbrBouncesText,
+    setRuntimePoSbrChirpIntervalText,
+    setRuntimePoSbrComponentsJson,
+    setRuntimePoSbrGeometryPath,
+    setRuntimePoSbrMaterialTag,
+    setRuntimePoSbrMinRangeText,
+    setRuntimePoSbrPathIdPrefix,
+    setRuntimePoSbrPhiDegText,
+    setRuntimePoSbrRadialVelocityText,
+    setRuntimePoSbrRaysPerLambdaText,
+    setRuntimePoSbrRepoRoot,
+    setRuntimePoSbrThetaDegText,
+    setRuntimeProviderSpec,
+    setRuntimeRequiredModulesText,
+    setRuntimeSimulationMode,
+  ]);
 
   const {
     runGraphViaApi,
@@ -1390,32 +1446,43 @@ export function App() {
     setStatus,
   ]);
 
-  const runLowVsCurrentTrackCompare = React.useCallback(async () => {
-    const targetTrackLabel = String(configuredRuntimeSummary.trackLabel || "-");
+  const runPresetPairTrackCompare = React.useCallback(async (options) => {
+    const opts = options && typeof options === "object" ? options : {};
+    const baselinePresetId = String(
+      opts.baselinePresetId || trackCompareBaselinePresetId || RUNTIME_PURPOSE_PRESET_LOW_FIDELITY
+    ).trim() || RUNTIME_PURPOSE_PRESET_LOW_FIDELITY;
+    const targetPresetId = String(
+      opts.targetPresetId || trackCompareTargetPresetId || RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG
+    ).trim() || RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG;
+    const baselinePresetLabel = getRuntimePurposePresetLabel(baselinePresetId);
+    const targetPresetLabel = targetPresetId === RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG
+      ? String(configuredRuntimeSummary.trackLabel || getRuntimePurposePresetLabel(targetPresetId))
+      : getRuntimePurposePresetLabel(targetPresetId);
     setTrackCompareRunnerStatusText(
-      `track_compare_runner: baseline=low_fidelity | target=${targetTrackLabel} | phase=baseline`
+      `track_compare_runner: mode=preset_pair | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | phase=baseline`
     );
     setDecisionOpsStatusText(
-      `track_compare_runner: baseline=low_fidelity | target=${targetTrackLabel} | phase=baseline`
+      `track_compare_runner: mode=preset_pair | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | phase=baseline`
     );
-    setStatus("running low-vs-current compare...", "status-warn");
+    setStatus(`running preset-pair compare: ${baselinePresetLabel} -> ${targetPresetLabel}`, "status-warn");
 
+    const baselineOverrides = buildRuntimePurposePresetOverrides(baselinePresetId);
     const lowResult = await runGraphViaApi({
       runModeOverride: "sync",
-      tag: "graph_lab_track_compare_low",
-      runtimeOverrides: buildLowFidelityRuntimeOverrides(),
+      tag: `graph_lab_track_compare_${baselinePresetId}`,
+      runtimeOverrides: baselineOverrides || undefined,
     });
     if (!lowResult?.ok || !lowResult?.summary) {
       const lowError = String(lowResult?.error || lowResult?.status || "unknown");
       const blocked = isRuntimeBlockedError(lowError);
       setTrackCompareRunnerStatusText(
-        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=baseline | error=${lowError}`
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: mode=preset_pair | phase=baseline | baseline_preset=${baselinePresetId} | error=${lowError}`
       );
       setDecisionOpsStatusText(
-        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=baseline | error=${lowError}`
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: mode=preset_pair | phase=baseline | baseline_preset=${baselinePresetId} | error=${lowError}`
       );
       setStatus(
-        blocked ? "track compare blocked at low-fidelity baseline" : "track compare failed at low-fidelity baseline",
+        blocked ? `track compare blocked at baseline preset: ${baselinePresetLabel}` : `track compare failed at baseline preset: ${baselinePresetLabel}`,
         blocked ? "status-warn" : "status-err"
       );
       return;
@@ -1429,30 +1496,35 @@ export function App() {
     setCompareRunPinnedManual(true);
     setCompareAutoSkipForRunId("");
     setCompareRunStatusText(
-      `compare_mode=runner_low_fidelity | run=${compareRunId || "-"} | status=${String(lowResult.status || lowResult.summary?.status || "completed")}`
+      `compare_mode=runner_preset_pair | baseline_preset=${baselinePresetId} | run=${compareRunId || "-"} | status=${String(lowResult.status || lowResult.summary?.status || "completed")}`
     );
+    if (targetPresetId !== RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG) {
+      applyRuntimePurposePresetToUi(targetPresetId);
+    }
     setTrackCompareRunnerStatusText(
-      `track_compare_runner: baseline_ready=${compareRunId || "-"} | target=${targetTrackLabel} | phase=current`
+      `track_compare_runner: mode=preset_pair | baseline_ready=${compareRunId || "-"} | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | phase=current`
     );
     setDecisionOpsStatusText(
-      `track_compare_runner: baseline_ready=${compareRunId || "-"} | target=${targetTrackLabel} | phase=current`
+      `track_compare_runner: mode=preset_pair | baseline_ready=${compareRunId || "-"} | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | phase=current`
     );
 
+    const targetOverrides = buildRuntimePurposePresetOverrides(targetPresetId);
     const currentResult = await runGraphViaApi({
       runModeOverride: "sync",
-      tag: "graph_lab_track_compare_current",
+      tag: `graph_lab_track_compare_${targetPresetId}`,
+      runtimeOverrides: targetOverrides || undefined,
     });
     if (!currentResult?.ok || !currentResult?.summary) {
       const currentError = String(currentResult?.error || currentResult?.status || "unknown");
       const blocked = isRuntimeBlockedError(currentError);
       setTrackCompareRunnerStatusText(
-        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=current | compare=${compareRunId || "-"} | error=${currentError}`
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: mode=preset_pair | phase=current | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | compare=${compareRunId || "-"} | error=${currentError}`
       );
       setDecisionOpsStatusText(
-        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: phase=current | compare=${compareRunId || "-"} | error=${currentError}`
+        `${blocked ? "track_compare_runner_blocked" : "track_compare_runner_failed"}: mode=preset_pair | phase=current | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | compare=${compareRunId || "-"} | error=${currentError}`
       );
       setStatus(
-        blocked ? "track compare blocked at current track" : "track compare failed at current track",
+        blocked ? `track compare blocked at target preset: ${targetPresetLabel}` : `track compare failed at target preset: ${targetPresetLabel}`,
         blocked ? "status-warn" : "status-err"
       );
       return;
@@ -1462,18 +1534,28 @@ export function App() {
       currentResult.graphRunId || currentResult.summary?.graph_run_id || currentResult.summary?.run_id || ""
     ).trim();
     setTrackCompareRunnerStatusText(
-      `track_compare_runner=ready | compare=${compareRunId || "-"} | current=${currentRunId || "-"} | target=${targetTrackLabel}`
+      `track_compare_runner=ready | mode=preset_pair | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | compare=${compareRunId || "-"} | current=${currentRunId || "-"}`
     );
     setDecisionOpsStatusText(
-      `track_compare_runner=ready | compare=${compareRunId || "-"} | current=${currentRunId || "-"} | target=${targetTrackLabel}`
+      `track_compare_runner=ready | mode=preset_pair | baseline_preset=${baselinePresetId} | target_preset=${targetPresetId} | compare=${compareRunId || "-"} | current=${currentRunId || "-"}`
     );
-    setStatus(`track compare ready: ${compareRunId || "-"} -> ${currentRunId || "-"}`, "status-ok");
+    setStatus(`track compare ready: ${baselinePresetLabel} -> ${targetPresetLabel}`, "status-ok");
   }, [
     configuredRuntimeSummary.trackLabel,
+    applyRuntimePurposePresetToUi,
     runGraphViaApi,
     setStatus,
+    trackCompareBaselinePresetId,
+    trackCompareTargetPresetId,
     setTrackCompareRunnerStatusText,
   ]);
+
+  const runLowVsCurrentTrackCompare = React.useCallback(async () => {
+    return runPresetPairTrackCompare({
+      baselinePresetId: RUNTIME_PURPOSE_PRESET_LOW_FIDELITY,
+      targetPresetId: RUNTIME_PURPOSE_PRESET_CURRENT_CONFIG,
+    });
+  }, [runPresetPairTrackCompare]);
 
   const exportDecisionRegressionSession = React.useCallback(async () => {
     const sessionId = String(lastRegressionSession?.session_id || "").trim();
@@ -2015,6 +2097,12 @@ export function App() {
         runPolicyGateForGraphRun,
         runDecisionRegressionSession,
         runLowVsCurrentTrackCompare,
+        trackCompareBaselinePresetId,
+        setTrackCompareBaselinePresetId,
+        trackCompareTargetPresetId,
+        setTrackCompareTargetPresetId,
+        trackComparePresetOptions: RUNTIME_PURPOSE_PRESET_OPTIONS,
+        runPresetPairTrackCompare,
         exportGateReport,
         exportDecisionRegressionSession,
         exportDecisionBriefMd,
