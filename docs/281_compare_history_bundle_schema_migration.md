@@ -33,7 +33,11 @@ Field meaning:
 - `history`
   - recent compare-session rows, normalized and capped to the in-app history limit
 - `retention_policy`
-  - active browser retention policy for compare-session history (`retain_2`, `retain_4`, `retain_8`)
+  - active browser retention policy for compare-session history
+  - supported values:
+    - `retain_2`, `retain_4`, `retain_8`
+    - `retain_2_preserve_pinned`, `retain_4_preserve_pinned`, `retain_8_preserve_pinned`
+  - `*_preserve_pinned` keeps the latest `N` rows and then preserves one retained row per pinned replay pair when possible within the app history cap
 - `pair_meta_by_id`
   - replayable pair metadata such as custom label and `pinned`
 - `pair_artifact_expectation_by_id`

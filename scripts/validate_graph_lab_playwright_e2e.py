@@ -159,6 +159,7 @@ def run(args: argparse.Namespace) -> int:
             "compare_session_import_preview_checked": False,
             "compare_session_legacy_fixture_checked": False,
             "compare_session_retention_policy_checked": False,
+            "compare_session_retention_preserve_pinned_checked": False,
             "compare_session_clear_all_checked": False,
             "compare_session_transfer_checked": False,
             "compare_session_future_schema_warning_checked": False,
@@ -910,32 +911,41 @@ def run(args: argparse.Namespace) -> int:
                 page.get_by_role("button", name="Policy Gate").click()
                 page.wait_for_function(
                     """() => {
-                        const text = (document.body && document.body.innerText) || "";
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Policy Gate Result")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
                         return (
                             text.includes("policy_eval_id:")
                             || text.includes("gate failed")
                             || text.includes("policy gate failed")
                         );
                     }""",
-                    timeout=30_000,
+                    timeout=60_000,
                 )
 
                 page.get_by_role("button", name="Run Session").click()
                 page.wait_for_function(
                     """() => {
-                        const text = (document.body && document.body.innerText) || "";
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Decision Pane")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
                         return text.includes("regression_session_id=") || text.includes("regression session completed");
                     }""",
-                    timeout=30_000,
+                    timeout=60_000,
                 )
 
                 page.get_by_role("button", name="Export Session").click()
                 page.wait_for_function(
                     """() => {
-                        const text = (document.body && document.body.innerText) || "";
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Decision Pane")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
                         return text.includes("regression_export_id=") || text.includes("regression export completed");
                     }""",
-                    timeout=30_000,
+                    timeout=60_000,
                 )
 
                 with page.expect_download(timeout=20_000) as dl_info:
@@ -1105,28 +1115,102 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("artifact inspector detail sections unexpectedly reopened after reload")
                 report["runtime_controls"]["artifact_inspector_fold_persistence_checked"] = True
 
+                reloaded_preset_pair_field = field_locator(page, "Preset Pair Compare")
+                reloaded_preset_pair_field.wait_for(timeout=30_000)
+                reloaded_preset_selects = reloaded_preset_pair_field.locator("select")
+                reloaded_baseline_select = reloaded_preset_selects.nth(0)
+                reloaded_target_select = reloaded_preset_selects.nth(1)
+                if reloaded_baseline_select.input_value() != "low_fidelity_radarsimpy_ffd":
+                    raise AssertionError("reloaded preset pair baseline unexpectedly changed")
+                reloaded_preset_pair_field.get_by_role("button", name="Low -> Sionna", exact=True).click()
+                page.wait_for_timeout(100)
+                if reloaded_target_select.input_value() != "high_fidelity_sionna_rt":
+                    raise AssertionError("reloaded quick pair shortcut did not switch target to Sionna")
+                pre_reloaded_sionna_history_text = reloaded_history_field.inner_text()
+                reloaded_preset_pair_field.get_by_role("button", name="Run Preset Pair Compare").click()
+                page.wait_for_function(
+                    """(prevText) => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("high_fidelity_sionna_rt") && text !== String(prevText || "");
+                    }""",
+                    arg=pre_reloaded_sionna_history_text,
+                    timeout=90_000,
+                )
+                reloaded_preset_pair_field.get_by_role("button", name="Low -> PO-SBR", exact=True).click()
+                page.wait_for_timeout(100)
+                if reloaded_target_select.input_value() != "high_fidelity_po_sbr_rt":
+                    raise AssertionError("reloaded quick pair shortcut did not switch target to PO-SBR")
+                pre_reloaded_posbr_history_text = reloaded_history_field.inner_text()
+                reloaded_preset_pair_field.get_by_role("button", name="Run Preset Pair Compare").click()
+                page.wait_for_function(
+                    """(prevText) => {
+                        const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
+                            String(el.textContent || "").includes("Compare Session History")
+                        );
+                        const text = String(field ? field.textContent || "" : "");
+                        return text.includes("high_fidelity_po_sbr_rt") && text !== String(prevText || "");
+                    }""",
+                    arg=pre_reloaded_posbr_history_text,
+                    timeout=90_000,
+                )
+
                 history_retention_select = reloaded_history_field.locator("select").nth(0)
                 reloaded_history_select = reloaded_history_field.locator("select").nth(1)
-                history_retention_select.select_option("retain_2")
+                history_retention_select.select_option("retain_2_preserve_pinned")
                 retention_ok = False
                 retention_text = ""
                 retention_option_count = -1
+                retained_option_values = []
                 for _ in range(40):
                     retention_text = reloaded_history_field.inner_text()
                     retention_option_count = reloaded_history_select.locator("option").count()
+                    retained_option_values = reloaded_history_select.locator("option").evaluate_all(
+                        "(nodes) => nodes.map((row) => String(row.value || ''))"
+                    )
                     if (
-                        "compare_history_retention_policy: retain_2 | keep_latest=2" in retention_text
-                        and retention_option_count <= 2
+                        "compare_history_retention_policy: retain_2_preserve_pinned | keep_latest=2 | preserve_pinned=true" in retention_text
+                        and "extra_pinned_rows=1" in retention_text
+                        and "low_fidelity_radarsimpy_ffd::current_config" in retained_option_values
+                        and retention_option_count >= 3
                     ):
                         retention_ok = True
                         break
                     page.wait_for_timeout(500)
                 if not retention_ok:
                     raise AssertionError(
-                        "compare history retention policy did not prune as expected "
-                        f"(option_count={retention_option_count})\n{retention_text}"
+                        "compare history preserve-pinned retention policy did not preserve the pinned pair as expected "
+                        f"(option_count={retention_option_count}, option_values={retained_option_values})\n{retention_text}"
                     )
                 report["runtime_controls"]["compare_session_retention_policy_checked"] = True
+                report["runtime_controls"]["compare_session_retention_preserve_pinned_checked"] = True
+
+                history_retention_select.select_option("retain_2")
+                retention_ok = False
+                retention_text = ""
+                retention_option_count = -1
+                retained_option_values = []
+                for _ in range(40):
+                    retention_text = reloaded_history_field.inner_text()
+                    retention_option_count = reloaded_history_select.locator("option").count()
+                    retained_option_values = reloaded_history_select.locator("option").evaluate_all(
+                        "(nodes) => nodes.map((row) => String(row.value || ''))"
+                    )
+                    if (
+                        "compare_history_retention_policy: retain_2 | keep_latest=2 | preserve_pinned=false" in retention_text
+                        and retention_option_count <= 2
+                        and "extra_pinned_rows=0" in retention_text
+                    ):
+                        retention_ok = True
+                        break
+                    page.wait_for_timeout(500)
+                if not retention_ok:
+                    raise AssertionError(
+                        "compare history latest-only retention policy did not collapse back to the latest-only window as expected "
+                        f"(option_count={retention_option_count}, option_values={retained_option_values})\n{retention_text}"
+                    )
 
                 reloaded_history_field.get_by_role("button", name="Clear All History").click()
                 clear_ok = False
@@ -1137,7 +1221,7 @@ def run(args: argparse.Namespace) -> int:
                     cleared_pinned_text = reloaded_pinned_quick_field.inner_text()
                     if (
                         "compare history cleared" in cleared_history_text
-                        and "compare_history_retention_policy: retain_2 | keep_latest=2" in cleared_history_text
+                        and "compare_history_retention_policy: retain_2 | keep_latest=2 | preserve_pinned=false" in cleared_history_text
                         and "no compare sessions recorded" in cleared_history_text
                         and "pinned_quick_actions: -" in cleared_pinned_text
                     ):

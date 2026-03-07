@@ -55,8 +55,11 @@ const COMPARE_SESSION_IMPORT_SCHEMA_LEGACY = "legacy_pre_v2";
 const COMPARE_SESSION_RETENTION_POLICY_DEFAULT = "retain_8";
 const COMPARE_SESSION_RETENTION_POLICY_OPTIONS = [
   { id: "retain_2", label: "Keep Latest 2" },
+  { id: "retain_2_preserve_pinned", label: "Keep Latest 2 + Preserve Pinned" },
   { id: "retain_4", label: "Keep Latest 4" },
+  { id: "retain_4_preserve_pinned", label: "Keep Latest 4 + Preserve Pinned" },
   { id: "retain_8", label: "Keep Latest 8" },
+  { id: "retain_8_preserve_pinned", label: "Keep Latest 8 + Preserve Pinned" },
 ];
 
 function formatSigned(value) {
@@ -80,7 +83,14 @@ function normalizeCompareSessionField(value, maxLength) {
 
 function normalizeCompareSessionRetentionPolicy(value, fallback = COMPARE_SESSION_RETENTION_POLICY_DEFAULT) {
   const token = String(value || "").trim().toLowerCase();
-  if (token === "retain_2" || token === "retain_4" || token === "retain_8") {
+  if (
+    token === "retain_2"
+    || token === "retain_2_preserve_pinned"
+    || token === "retain_4"
+    || token === "retain_4_preserve_pinned"
+    || token === "retain_8"
+    || token === "retain_8_preserve_pinned"
+  ) {
     return token;
   }
   return String(fallback || "").trim().toLowerCase();
@@ -88,9 +98,28 @@ function normalizeCompareSessionRetentionPolicy(value, fallback = COMPARE_SESSIO
 
 function getCompareSessionRetentionLimit(policy) {
   const normalized = normalizeCompareSessionRetentionPolicy(policy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT);
-  if (normalized === "retain_2") return 2;
-  if (normalized === "retain_4") return 4;
+  if (normalized.startsWith("retain_2")) return 2;
+  if (normalized.startsWith("retain_4")) return 4;
   return COMPARE_SESSION_HISTORY_LIMIT;
+}
+
+function shouldCompareSessionRetentionPreservePinned(policy) {
+  const normalized = normalizeCompareSessionRetentionPolicy(policy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT);
+  return normalized.endsWith("_preserve_pinned");
+}
+
+function summarizeCompareSessionRetentionPolicy(policy, outcome) {
+  const normalized = normalizeCompareSessionRetentionPolicy(policy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT);
+  const summary = outcome && typeof outcome === "object" ? outcome : {};
+  return [
+    `compare_history_retention_policy: ${normalized}`,
+    `keep_latest=${getCompareSessionRetentionLimit(normalized)}`,
+    `preserve_pinned=${shouldCompareSessionRetentionPreservePinned(normalized)}`,
+    `retained_rows=${Number(summary.retainedRows || 0)}/${Number(summary.availableRows || 0)}`,
+    `managed_pinned_pairs=${Number(summary.pinnedPairsManaged || 0)}`,
+    `retained_pinned_pairs=${Number(summary.pinnedPairsRetained || 0)}`,
+    `extra_pinned_rows=${Number(summary.extraPinnedRowsRetained || 0)}`,
+  ].join(" | ");
 }
 
 function normalizeCompareSessionHistoryEntry(entry, ordinal) {
@@ -442,6 +471,84 @@ function parseCompareSessionTimestampMs(entry) {
   return Number.isFinite(ts) ? ts : 0;
 }
 
+function sortCompareSessionHistoryEntries(entries) {
+  return (Array.isArray(entries) ? entries : [])
+    .map((row, idx) => normalizeCompareSessionHistoryEntry(row, idx))
+    .sort((left, right) => parseCompareSessionTimestampMs(right) - parseCompareSessionTimestampMs(left));
+}
+
+function buildCompareSessionRetainedHistory(entries, pairMetaById, retentionPolicy) {
+  const normalizedEntries = sortCompareSessionHistoryEntries(entries).slice(0, COMPARE_SESSION_HISTORY_LIMIT);
+  const limit = Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT);
+  const latestEntries = normalizedEntries.slice(0, limit);
+  if (!shouldCompareSessionRetentionPreservePinned(retentionPolicy)) {
+    return latestEntries;
+  }
+  const normalizedMeta = normalizeCompareReplayPairMetaMap(pairMetaById);
+  const pinnedPairIds = new Set(
+    Object.entries(normalizedMeta)
+      .filter(([, meta]) => meta?.pinned === true)
+      .map(([pairId]) => String(pairId || "").trim())
+      .filter(Boolean)
+  );
+  if (pinnedPairIds.size === 0) {
+    return latestEntries;
+  }
+  const retainedEntryIds = new Set(latestEntries.map((row) => String(row?.id || "").trim()).filter(Boolean));
+  const retainedPinnedPairIds = new Set(
+    latestEntries
+      .map((row) => String(getCompareSessionReplayPair(row)?.pairId || "").trim())
+      .filter((pairId) => pinnedPairIds.has(pairId))
+  );
+  const extraPinnedEntries = [];
+  normalizedEntries.slice(limit).forEach((row) => {
+    if (latestEntries.length + extraPinnedEntries.length >= COMPARE_SESSION_HISTORY_LIMIT) {
+      return;
+    }
+    const pairId = String(getCompareSessionReplayPair(row)?.pairId || "").trim();
+    const rowId = String(row?.id || "").trim();
+    if (!pairId || !rowId || !pinnedPairIds.has(pairId) || retainedEntryIds.has(rowId) || retainedPinnedPairIds.has(pairId)) {
+      return;
+    }
+    retainedEntryIds.add(rowId);
+    retainedPinnedPairIds.add(pairId);
+    extraPinnedEntries.push(row);
+  });
+  return [...latestEntries, ...extraPinnedEntries];
+}
+
+function analyzeCompareSessionRetentionOutcome(entries, pairMetaById, retentionPolicy) {
+  const normalizedEntries = sortCompareSessionHistoryEntries(entries).slice(0, COMPARE_SESSION_HISTORY_LIMIT);
+  const retainedHistory = buildCompareSessionRetainedHistory(normalizedEntries, pairMetaById, retentionPolicy);
+  const latestIds = new Set(
+    normalizedEntries
+      .slice(0, Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT))
+      .map((row) => String(row?.id || "").trim())
+      .filter(Boolean)
+  );
+  const normalizedMeta = normalizeCompareReplayPairMetaMap(pairMetaById);
+  const managedPinnedPairIds = new Set(
+    Object.entries(normalizedMeta)
+      .filter(([, meta]) => meta?.pinned === true)
+      .map(([pairId]) => String(pairId || "").trim())
+      .filter(Boolean)
+  );
+  const retainedPairIds = new Set(
+    retainedHistory
+      .map((row) => String(getCompareSessionReplayPair(row)?.pairId || "").trim())
+      .filter(Boolean)
+  );
+  return {
+    availableRows: normalizedEntries.length,
+    retainedRows: retainedHistory.length,
+    keepLatest: getCompareSessionRetentionLimit(retentionPolicy),
+    preservePinned: shouldCompareSessionRetentionPreservePinned(retentionPolicy),
+    pinnedPairsManaged: managedPinnedPairIds.size,
+    pinnedPairsRetained: Array.from(managedPinnedPairIds).filter((pairId) => retainedPairIds.has(pairId)).length,
+    extraPinnedRowsRetained: retainedHistory.filter((row) => !latestIds.has(String(row?.id || "").trim())).length,
+  };
+}
+
 function mergeCompareSessionHistoryEntries(existingEntries, importedEntries) {
   const existing = Array.isArray(existingEntries) ? existingEntries : [];
   const incoming = Array.isArray(importedEntries) ? importedEntries : [];
@@ -474,13 +581,15 @@ function buildCompareSessionRetainedState(stateInput) {
     row.retentionPolicy,
     COMPARE_SESSION_RETENTION_POLICY_DEFAULT
   );
-  const limit = Math.min(getCompareSessionRetentionLimit(retentionPolicy), COMPARE_SESSION_HISTORY_LIMIT);
-  const history = (Array.isArray(row.history) ? row.history : [])
-    .map((item, idx) => normalizeCompareSessionHistoryEntry(item, idx))
-    .slice(0, limit);
+  const normalizedPairMetaById = normalizeCompareReplayPairMetaMap(row.pairMetaById);
+  const history = buildCompareSessionRetainedHistory(
+    Array.isArray(row.history) ? row.history : [],
+    normalizedPairMetaById,
+    retentionPolicy
+  );
   const activePairIds = new Set(collectCompareSessionReplayPairIds(history));
   const pairMetaById = {};
-  Object.entries(normalizeCompareReplayPairMetaMap(row.pairMetaById)).forEach(([pairId, meta]) => {
+  Object.entries(normalizedPairMetaById).forEach(([pairId, meta]) => {
     if (activePairIds.has(pairId)) {
       pairMetaById[pairId] = meta;
     }
@@ -598,6 +707,7 @@ function buildCompareSessionImportPreviewSummary(
         "schema_version: -",
         "schema_compatibility: -",
         `retention_policy(current/imported/effective): ${normalizeCompareSessionRetentionPolicy(currentRetentionPolicy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT)}/-/-`,
+        "retention_effect(available/retained/pinned_pairs/extra_pinned_rows): 0/0/0/0",
         "history_merge(existing/imported/new/overlap/merged): 0/0/0/0/0",
         "pair_meta(existing/imported/merged): 0/0/0",
         "artifact_expectations(existing/imported/merged): 0/0/0",
@@ -647,6 +757,11 @@ function buildCompareSessionImportPreviewSummary(
     selectedReplayPairId: normalizeCompareSessionField(imported.selectedReplayPairId, 192),
     retentionPolicy: effectiveRetentionPolicy,
   });
+  const retentionOutcome = analyzeCompareSessionRetentionOutcome(
+    mergedHistory,
+    mergedPairMeta,
+    effectiveRetentionPolicy
+  );
   const selectedReplayPairId = normalizeCompareSessionField(imported.selectedReplayPairId, 192);
   const mergedReplayOptions = buildCompareSessionReplayOptions(mergedState.history, mergedState.pairMetaById);
   const selectedReplayPairAvailable = selectedReplayPairId
@@ -670,6 +785,7 @@ function buildCompareSessionImportPreviewSummary(
       `schema_version: ${importSchema.schemaVersion}`,
       `schema_compatibility: ${importSchema.compatibility}`,
       `retention_policy(current/imported/effective): ${normalizeCompareSessionRetentionPolicy(currentRetentionPolicy, COMPARE_SESSION_RETENTION_POLICY_DEFAULT)}/${importedRetentionPolicy || "unchanged"}/${effectiveRetentionPolicy}`,
+      `retention_effect(available/retained/pinned_pairs/extra_pinned_rows): ${Number(retentionOutcome.availableRows || 0)}/${Number(retentionOutcome.retainedRows || 0)}/${Number(retentionOutcome.pinnedPairsRetained || 0)}/${Number(retentionOutcome.extraPinnedRowsRetained || 0)}`,
       `history_merge(existing/imported/new/overlap/merged): ${Number(existingHistory.length || 0)}/${Number(importedHistory.length || 0)}/${Number(newHistoryCount || 0)}/${Number(overlapHistoryCount || 0)}/${Number(mergedState.history.length || 0)}`,
       `pair_meta(existing/imported/merged): ${Number(Object.keys(existingPairMeta).length || 0)}/${Number(Object.keys(importedPairMeta).length || 0)}/${Number(Object.keys(mergedPairMeta).length || 0)}`,
       `artifact_expectations(existing/imported/merged): ${Number(Object.keys(existingArtifactExpectation).length || 0)}/${Number(Object.keys(importedArtifactExpectation).length || 0)}/${Number(Object.keys(mergedArtifactExpectation).length || 0)}`,
@@ -1469,12 +1585,15 @@ export function App() {
       timestampUtc: new Date().toISOString(),
       ...row,
     };
-    setCompareSessionHistory((prev) => (
-      [nextRow, ...(Array.isArray(prev) ? prev : [])]
-        .map((item, idx) => normalizeCompareSessionHistoryEntry(item, idx))
-        .slice(0, getCompareSessionRetentionLimit(compareSessionRetentionPolicy))
+    setCompareSessionHistory((prev) => buildCompareSessionRetainedHistory(
+      [nextRow, ...(Array.isArray(prev) ? prev : [])],
+      compareReplayPairMetaById,
+      compareSessionRetentionPolicy
     ));
-  }, [compareSessionRetentionPolicy]);
+  }, [
+    compareReplayPairMetaById,
+    compareSessionRetentionPolicy,
+  ]);
 
   const resetContractWarnings = React.useCallback(() => {
     resetContractWarningStore();
@@ -2352,9 +2471,17 @@ export function App() {
     () => summarizeCompareSessionHistory(compareSessionHistory, compareReplayPairMetaById),
     [compareReplayPairMetaById, compareSessionHistory]
   );
+  const compareSessionRetentionOutcome = React.useMemo(
+    () => analyzeCompareSessionRetentionOutcome(
+      compareSessionHistory,
+      compareReplayPairMetaById,
+      compareSessionRetentionPolicy
+    ),
+    [compareReplayPairMetaById, compareSessionHistory, compareSessionRetentionPolicy]
+  );
   const compareSessionRetentionPolicySummaryText = React.useMemo(
-    () => `compare_history_retention_policy: ${compareSessionRetentionPolicy} | keep_latest=${getCompareSessionRetentionLimit(compareSessionRetentionPolicy)}`,
-    [compareSessionRetentionPolicy]
+    () => summarizeCompareSessionRetentionPolicy(compareSessionRetentionPolicy, compareSessionRetentionOutcome),
+    [compareSessionRetentionOutcome, compareSessionRetentionPolicy]
   );
   const stagedCompareSessionImportSummary = React.useMemo(
     () => buildCompareSessionImportPreviewSummary(
@@ -3165,7 +3292,7 @@ export function App() {
       retentionPolicy: nextPolicy,
     });
     setStatus(
-      `compare history retention updated: ${nextPolicy} (keep_latest=${getCompareSessionRetentionLimit(nextPolicy)})`,
+      `compare history retention updated: ${nextPolicy} (keep_latest=${getCompareSessionRetentionLimit(nextPolicy)}, preserve_pinned=${shouldCompareSessionRetentionPreservePinned(nextPolicy)})`,
       "status-ok"
     );
   }, [
