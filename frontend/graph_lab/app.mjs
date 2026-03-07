@@ -965,6 +965,9 @@ function buildCompareSessionImportPreviewSummary(
       `compatibility=${importSchema.compatibility}`,
       `rows=${Number(importedHistory.length || 0)}`,
       `retention=${effectiveRetentionPolicy}`,
+      `selected_pair_retention=${selectedReplayPairId
+        ? `${String(selectedReplayPairRetentionSummary?.state || "missing")}(${Number(selectedReplayPairRetentionSummary?.visibleRows || 0)}/${Number(selectedReplayPairRetentionSummary?.latestRows || 0)}/${Number(selectedReplayPairRetentionSummary?.retainedRows || 0)})`
+        : "unchanged"}`,
       "apply_required=true",
     ].join(" | "),
     previewText: [
@@ -2716,12 +2719,16 @@ export function App() {
   const compareSessionImportPreviewCompactSummaryText = React.useMemo(() => {
     const summary = String(stagedCompareSessionImportSummary?.summaryText || "import_preview: none").trim();
     if (!summary || summary === "import_preview: none") {
-      return "compare_history_import_preview: none";
+      return "compare_history_import_preview: none | selected_pair_retention=unchanged";
     }
     if (summary.startsWith("import_preview:")) {
-      return `compare_history_${summary}`;
+      return summary.includes("selected_pair_retention=")
+        ? `compare_history_${summary}`
+        : `compare_history_${summary} | selected_pair_retention=unchanged`;
     }
-    return `compare_history_import_preview: ${summary}`;
+    return summary.includes("selected_pair_retention=")
+      ? `compare_history_import_preview: ${summary}`
+      : `compare_history_import_preview: ${summary} | selected_pair_retention=unchanged`;
   }, [stagedCompareSessionImportSummary]);
   const compareSessionImportPreviewText = React.useMemo(
     () => String(stagedCompareSessionImportSummary?.previewText || "-"),

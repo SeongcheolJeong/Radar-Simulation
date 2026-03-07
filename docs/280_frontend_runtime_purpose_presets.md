@@ -350,6 +350,7 @@ The `Runtime Compare` summary inside the brief now also carries:
 - `selected_history_pair_retention`
 - `compare_history_import_preview`
   - a compact one-line import-preview summary near the top of the brief so staged import state is visible without scrolling down to the full preview section
+  - now also carries `selected_pair_retention=<state>(visible/latest/retained)` so the selected imported replay pair's retention landing zone is visible even in the compact line
 
 ## Current Scope
 

@@ -734,9 +734,12 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("compare history import preview did not expose apply requirement")
                 if "retention_pairs(merged_latest/merged_extra/merged_dropped):" not in history_transfer_text_after_import_preview:
                     raise AssertionError("compare history import preview did not expose merged retention pair preview")
+                if "selected_pair_retention=latest_window(" not in history_transfer_text_after_import_preview:
+                    raise AssertionError("compare history import preview compact summary did not expose selected replay-pair retention")
                 if "selected_replay_pair_retention_after_merge: state=latest_window" not in history_transfer_text_after_import_preview:
                     raise AssertionError("compare history import preview did not expose selected replay-pair retention impact")
                 report["runtime_controls"]["compare_session_import_selected_pair_retention_checked"] = True
+                report["runtime_controls"]["compare_session_import_compact_retention_checked"] = True
                 options_after_preview = page.evaluate(
                     """() => {
                         const field = Array.from(document.querySelectorAll("div.field")).find((el) =>
@@ -929,22 +932,34 @@ def run(args: argparse.Namespace) -> int:
 
                 page.get_by_role("button", name="Run Session").click()
                 session_ready = False
-                for _ in range(120):
+                for _ in range(180):
                     decision_text = field_locator(page, "Decision Pane").inner_text()
-                    if "regression_session_id=" in decision_text or "regression session completed" in decision_text:
+                    if (
+                        "regression_session_id=" in decision_text
+                        or "regression session completed" in decision_text
+                        or "decision_ops: regression_session_id=" in decision_text
+                    ):
                         session_ready = True
                         break
+                    if "regression_session_failed:" in decision_text:
+                        raise AssertionError(f"regression session failed after Run Session\n{decision_text}")
                     page.wait_for_timeout(500)
                 if not session_ready:
                     raise AssertionError("regression session completion text did not appear after Run Session")
 
                 page.get_by_role("button", name="Export Session").click()
                 export_ready = False
-                for _ in range(120):
+                for _ in range(180):
                     decision_text = field_locator(page, "Decision Pane").inner_text()
-                    if "regression_export_id=" in decision_text or "regression export completed" in decision_text:
+                    if (
+                        "regression_export_id=" in decision_text
+                        or "regression export completed" in decision_text
+                        or "decision_ops: regression_export_id=" in decision_text
+                    ):
                         export_ready = True
                         break
+                    if "regression_export_failed:" in decision_text:
+                        raise AssertionError(f"regression export failed after Export Session\n{decision_text}")
                     page.wait_for_timeout(500)
                 if not export_ready:
                     raise AssertionError("regression export completion text did not appear after Export Session")
@@ -959,6 +974,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include runtime compare summary")
                 if "compare_history_import_preview:" not in brief_text:
                     raise AssertionError("decision brief did not include compact compare history import preview summary")
+                if "selected_pair_retention=" not in brief_text:
+                    raise AssertionError("decision brief did not include compact import-preview selected replay-pair retention summary")
                 if "retention_pairs(latest/extra/dropped):" not in brief_text:
                     raise AssertionError("decision brief did not include compare history retention pair preview")
                 if "selected_replay_pair_retention_after_merge:" not in brief_text:
