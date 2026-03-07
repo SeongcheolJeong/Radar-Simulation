@@ -156,6 +156,11 @@ The history block also provides:
   - the history dropdown options now also show `KEEP:latest` or `KEEP:extra`
   - pinned pairs keep the existing `PIN | ...` prefix, so a preserved pinned row appears as `PIN | KEEP:latest | ...`
   - the selector itself is now grouped into `Latest Window` and `Extra Preserved` sections, so the retained-set structure is visible before selecting a pair
+- retention group hint
+  - when a retention-policy change causes the `Extra Preserved` selector group to appear or disappear, the history panel now emits a short `retention_group_hint`
+  - example transitions:
+    - `Extra Preserved shown under retain_2_preserve_saved`
+    - `Extra Preserved hidden under retain_2_preserve_pinned`
 - `Use Selected History Pair`
   - restores the chosen replayable pair from history into the selector controls
 - `Run Selected History Pair`

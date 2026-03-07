@@ -86,6 +86,7 @@ export function DecisionPane({
   compareSessionRetentionPolicy,
   compareSessionRetentionPolicyOptions,
   compareSessionRetentionPolicySummaryText,
+  compareSessionRetentionGroupHintText,
   compareSessionRetentionPreviewText,
   compareSessionTransferStatusText,
   compareSessionTransferBadgeRows,
@@ -253,6 +254,7 @@ export function DecisionPane({
       h("div", { className: "hint", key: "decision_compare_session_history_meta_hint" }, String(selectedReplayableCompareSessionMetaText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_selected_retention_box" }, String(selectedReplayableCompareSessionRetentionText || "-")),
       h("div", { className: "hint", key: "decision_compare_session_history_retention_hint" }, String(compareSessionRetentionPolicySummaryText || "-")),
+      h("div", { className: "hint", key: "decision_compare_session_history_retention_group_hint" }, String(compareSessionRetentionGroupHintText || "-")),
       h("pre", { className: "result-box", key: "decision_compare_session_history_retention_preview_box" }, String(compareSessionRetentionPreviewText || "-")),
       h("div", { className: "chip-list", key: "decision_compare_session_history_transfer_chips" }, (
         Array.isArray(compareSessionTransferBadgeRows) && compareSessionTransferBadgeRows.length > 0

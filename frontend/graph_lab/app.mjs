@@ -1526,6 +1526,12 @@ function buildCompareSessionReplayOptions(entries, pairMetaById, retentionPolicy
     .slice(0, COMPARE_REPLAY_PAIR_OPTION_LIMIT);
 }
 
+function countCompareReplayPairOptionsByRetentionState(options, state) {
+  return (Array.isArray(options) ? options : []).filter(
+    (row) => String(row?.retentionState || "").trim() === String(state || "").trim()
+  ).length;
+}
+
 function isRuntimeBlockedError(message) {
   const text = String(message || "").trim().toLowerCase();
   return text.includes("required runtime modules unavailable") || text.includes("runtime provider failed");
@@ -1653,6 +1659,11 @@ export function App() {
   );
   const [compareAutoSkipForRunId, setCompareAutoSkipForRunId] = React.useState("");
   const compareSessionImportFileInputRef = React.useRef(null);
+  const compareSessionRetentionSnapshotRef = React.useRef({
+    initialized: false,
+    extraCount: 0,
+    policy: COMPARE_SESSION_RETENTION_POLICY_DEFAULT,
+  });
   const [lastRegressionSession, setLastRegressionSession] = React.useState(null);
   const [lastRegressionExport, setLastRegressionExport] = React.useState(null);
   const [decisionOpsStatusText, setDecisionOpsStatusText] = React.useState("-");
@@ -1662,6 +1673,9 @@ export function App() {
     buildCompareSessionTransferBadges({ direction: "idle" })
   ));
   const [stagedCompareSessionImport, setStagedCompareSessionImport] = React.useState(null);
+  const [compareSessionRetentionGroupHintText, setCompareSessionRetentionGroupHintText] = React.useState(
+    "retention_group_hint: none"
+  );
   const [compareSessionRetentionPolicy, setCompareSessionRetentionPolicy] = React.useState(
     () => initialCompareSessionPrefs.retentionPolicy || COMPARE_SESSION_RETENTION_POLICY_DEFAULT
   );
@@ -2947,6 +2961,62 @@ export function App() {
   );
 
   React.useEffect(() => {
+    const currentPolicy = normalizeCompareSessionRetentionPolicy(
+      compareSessionRetentionPolicy,
+      COMPARE_SESSION_RETENTION_POLICY_DEFAULT
+    );
+    const currentExtraCount = countCompareReplayPairOptionsByRetentionState(compareReplayPairOptions, "retained_extra");
+    const snapshot = compareSessionRetentionSnapshotRef.current || {
+      initialized: false,
+      extraCount: 0,
+      policy: currentPolicy,
+    };
+    if (compareSessionHistory.length === 0 && compareReplayPairOptions.length === 0) {
+      compareSessionRetentionSnapshotRef.current = {
+        initialized: true,
+        extraCount: 0,
+        policy: currentPolicy,
+      };
+      return;
+    }
+    if (snapshot.initialized !== true) {
+      compareSessionRetentionSnapshotRef.current = {
+        initialized: true,
+        extraCount: currentExtraCount,
+        policy: currentPolicy,
+      };
+      return;
+    }
+    const previousExtraCount = Number(snapshot.extraCount || 0);
+    const policyChanged = String(snapshot.policy || "") !== currentPolicy;
+    const extraChanged = previousExtraCount !== currentExtraCount;
+    if (policyChanged || extraChanged) {
+      if (previousExtraCount === 0 && currentExtraCount > 0) {
+        setCompareSessionRetentionGroupHintText(
+          `retention_group_hint: Extra Preserved shown under ${currentPolicy} | previous=${previousExtraCount} | current=${currentExtraCount}`
+        );
+      } else if (previousExtraCount > 0 && currentExtraCount === 0) {
+        setCompareSessionRetentionGroupHintText(
+          `retention_group_hint: Extra Preserved hidden under ${currentPolicy} | previous=${previousExtraCount} | current=${currentExtraCount}`
+        );
+      } else if (policyChanged) {
+        setCompareSessionRetentionGroupHintText(
+          `retention_group_hint: unchanged under ${currentPolicy} | extra_preserved=${currentExtraCount}`
+        );
+      } else {
+        setCompareSessionRetentionGroupHintText(
+          `retention_group_hint: Extra Preserved updated under ${currentPolicy} | previous=${previousExtraCount} | current=${currentExtraCount}`
+        );
+      }
+    }
+    compareSessionRetentionSnapshotRef.current = {
+      initialized: true,
+      extraCount: currentExtraCount,
+      policy: currentPolicy,
+    };
+  }, [compareReplayPairOptions, compareSessionHistory.length, compareSessionRetentionPolicy]);
+
+  React.useEffect(() => {
     const selectedId = String(selectedCompareReplayPairId || "").trim();
     const firstId = String(compareReplayPairOptions[0]?.id || "").trim();
     const hasSelected = selectedId !== ""
@@ -3550,6 +3620,12 @@ export function App() {
     setStagedCompareSessionImport(null);
     setCompareSessionTransferStatusText("compare history cleared");
     setCompareSessionTransferBadgeRows(buildCompareSessionTransferBadges({ direction: "idle" }));
+    setCompareSessionRetentionGroupHintText("retention_group_hint: none");
+    compareSessionRetentionSnapshotRef.current = {
+      initialized: false,
+      extraCount: 0,
+      policy: compareSessionRetentionPolicy,
+    };
     setStatus("compare history cleared", "status-ok");
   }, [applyCompareSessionState, compareSessionRetentionPolicy, setStatus]);
 
@@ -3786,6 +3862,7 @@ export function App() {
       `selected_preset_pair_forecast: ${trackCompareSelectedPairForecastText.split("\n").slice(1).join(" | ")}`,
       `compare_session_count: ${Number(compareSessionHistory.length || 0)}`,
       `${compareSessionRetentionPolicySummaryText}`,
+      `${compareSessionRetentionGroupHintText}`,
       `${compareSessionRetentionPreviewCompactSummaryText}`,
       `managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
       `${pinnedCompareQuickActionSummaryText}`,
@@ -3834,6 +3911,7 @@ export function App() {
     compareGraphRunId,
     compareGraphRunSummary,
     compareSessionRetentionPolicySummaryText,
+    compareSessionRetentionGroupHintText,
     compareSessionRetentionPreviewCompactSummaryText,
     managedCompareReplayPairCount,
     pinnedCompareQuickActionSummaryText,
@@ -3894,6 +3972,7 @@ export function App() {
       `- ${String(selectedReplayableCompareSessionRetentionText || "-").split("\n").join(" | ")}`,
       `- ${selectedReplayableCompareSessionArtifactExpectationSummaryText}`,
       `- ${compareSessionRetentionPolicySummaryText}`,
+      `- ${compareSessionRetentionGroupHintText}`,
       `- ${compareSessionRetentionPreviewCompactSummaryText}`,
       `- ${compareSessionImportPreviewCompactSummaryText}`,
       `- managed_history_pair_count: ${Number(managedCompareReplayPairCount || 0)}`,
@@ -3912,6 +3991,7 @@ export function App() {
       "## Compare Session History",
       "```text",
       compareSessionRetentionPolicySummaryText,
+      compareSessionRetentionGroupHintText,
       compareSessionRetentionPreviewText,
       "",
       selectedReplayableCompareSessionRetentionText,
@@ -4001,6 +4081,7 @@ export function App() {
     compareSessionImportPreviewCompactSummaryText,
     compareSessionImportPreviewText,
     compareSessionRetentionPolicySummaryText,
+    compareSessionRetentionGroupHintText,
     compareSessionRetentionPreviewCompactSummaryText,
     compareSessionRetentionPreviewText,
     runCompareSummary,
@@ -4417,6 +4498,7 @@ export function App() {
         compareSessionRetentionPolicy,
         compareSessionRetentionPolicyOptions: COMPARE_SESSION_RETENTION_POLICY_OPTIONS,
         compareSessionRetentionPolicySummaryText,
+        compareSessionRetentionGroupHintText,
         compareSessionRetentionPreviewText,
         compareSessionTransferStatusText,
         compareSessionTransferBadgeRows,

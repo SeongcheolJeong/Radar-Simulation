@@ -976,6 +976,8 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("decision brief did not include compact compare history import preview summary")
                 if "selected_pair_retention=" not in brief_text:
                     raise AssertionError("decision brief did not include compact import-preview selected replay-pair retention summary")
+                if "retention_group_hint:" not in brief_text:
+                    raise AssertionError("decision brief did not include compare history retention group hint")
                 if "retention_pairs(latest/extra/dropped):" not in brief_text:
                     raise AssertionError("decision brief did not include compare history retention pair preview")
                 if "selected_replay_pair_retention_after_merge:" not in brief_text:
@@ -1296,6 +1298,7 @@ def run(args: argparse.Namespace) -> int:
                     )
                     if (
                         "compare_history_retention_policy: retain_2_preserve_saved | keep_latest=2 | preserve_scope=saved | preserve_pinned=true | preserve_saved=true" in retention_text
+                        and "retention_group_hint: Extra Preserved shown under retain_2_preserve_saved | previous=0 | current=1" in retention_text
                         and "retained_rows=3/3" in retention_text
                         and "extra_saved_rows=1" in retention_text
                         and "retention_pairs(latest/extra/dropped): Low Current Saved" in retention_text
@@ -1336,6 +1339,7 @@ def run(args: argparse.Namespace) -> int:
                 report["runtime_controls"]["compare_session_selected_pair_retention_checked"] = True
                 report["runtime_controls"]["compare_session_replay_option_retention_badges_checked"] = True
                 report["runtime_controls"]["compare_session_replay_option_groups_checked"] = True
+                report["runtime_controls"]["compare_session_replay_option_group_hint_checked"] = True
 
                 history_retention_select.select_option("retain_2_preserve_pinned")
                 retention_ok = False
@@ -1358,6 +1362,7 @@ def run(args: argparse.Namespace) -> int:
                     )
                     if (
                         "compare_history_retention_policy: retain_2_preserve_pinned | keep_latest=2 | preserve_scope=pinned | preserve_pinned=true | preserve_saved=false" in retention_text
+                        and "retention_group_hint: Extra Preserved hidden under retain_2_preserve_pinned | previous=1 | current=0" in retention_text
                         and "retained_rows=2/2" in retention_text
                         and "extra_pinned_rows=0" in retention_text
                         and "extra_saved_rows=0" in retention_text
