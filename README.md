@@ -57,6 +57,28 @@ Detailed breakdown:
 - [프로젝트 구조 및 사용자 매뉴얼 (한국어)](docs/283_project_structure_and_user_manual_ko.md)
 - [Architecture](docs/03_architecture.md)
 
+## Architecture
+
+The core pipeline is organized around stable interfaces so runtime backends can change without breaking downstream ADC/map consumers.
+
+![Project architecture](docs/architecture.png)
+
+Key modules:
+
+- `PathGenerator`
+  - produces `paths_by_chirp`
+- `AntennaModel`
+  - provides complex TX/RX gains
+- `FmcwMultiplexingSynthesizer`
+  - converts radar params, paths, and multiplexing plan into ADC cubes
+- `OutputWriter`
+  - persists `path_list.json`, `adc_cube.npz`, `radar_map.npz`, and optional LGIT output
+
+Dependency rule:
+
+- `PathGenerator -> Synthesizer <- AntennaModel`
+- `OutputWriter` depends on contracts, not generator internals
+
 ## Installation Guides
 
 - [Base Environment](docs/284_install_base_environment.md)
