@@ -73,6 +73,12 @@ Related snapshot guide:
 
 ### Frontend
 
+Need explanation first:
+
+- [Frontend Runtime Purpose Presets](../280_frontend_runtime_purpose_presets.md)
+- [Frontend Dashboard Usage](../116_frontend_dashboard_usage.md)
+- [Project Structure And User Manual](../282_project_structure_and_user_manual.md)
+
 Open these first:
 
 1. `graph_lab_playwright_e2e_latest.json`
@@ -96,6 +102,12 @@ If this checklist fails, open next:
 <a id="radarsimpy-evidence-checklist"></a>
 
 ### RadarSimPy
+
+Need explanation first:
+
+- [RadarSimPy Runtime](../285_install_radarsimpy_runtime.md)
+- [Validation Checkpoints](../04_validation_checkpoints.md)
+- [Scene Backend Golden Path Contract](../251_scene_backend_golden_path_contract.md)
 
 Open these first:
 
@@ -123,6 +135,12 @@ If this checklist fails, open next:
 <a id="po-sbr-evidence-checklist"></a>
 
 ### PO-SBR
+
+Need explanation first:
+
+- [PO-SBR Runtime](../287_install_po_sbr_runtime.md)
+- [Validation Checkpoints](../04_validation_checkpoints.md)
+- [PO-SBR Backend Contract](../103_po_sbr_backend_contract.md)
 
 Open these first:
 
