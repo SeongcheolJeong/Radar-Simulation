@@ -293,6 +293,8 @@ Artifact Inspector 예시:
 ## 관련 문서
 
 - [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md)
+- [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
+- [Graph Lab 버튼 시나리오 가이드](303_graph_lab_button_scenario_guide_ko.md)
 - [Project Structure And User Manual](282_project_structure_and_user_manual.md)
 - [프로젝트 구조 및 사용자 매뉴얼](283_project_structure_and_user_manual_ko.md)
 - [Documentation Index](README.md)

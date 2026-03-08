@@ -322,6 +322,8 @@ Check:
 ## Related Documents
 
 - [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md)
+- [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
+- [Graph Lab 버튼 시나리오 가이드](303_graph_lab_button_scenario_guide_ko.md)
 - [Project Structure And User Manual](282_project_structure_and_user_manual.md)
 - [Documentation Index](README.md)
 - [Generated Reports Index](reports/README.md)

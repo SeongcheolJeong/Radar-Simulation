@@ -3188,12 +3188,17 @@ export function GraphInputsPanel({ model }) {
       h("div", { className: "hint", key: "pollstate" }, `poll_state: ${String(pollStateText || "-")} | polling_active: ${Boolean(pollingActive)}`),
       h("div", { className: "field", key: "tpl" }, [
         h("label", { className: "label", key: "lbl3" }, "Template"),
-        h("div", { className: "btn-row", key: "btnrowtpl" }, [
+        h("div", {
+          className: "btn-row",
+          key: "btnrowtpl",
+          style: { gridTemplateColumns: "minmax(0, 1fr) auto" },
+        }, [
           h("select", {
             className: "select",
             id: "templateSelect",
             defaultValue: "0",
             onChange: (e) => loadTemplateByIndex(Number(e.target.value)),
+            style: { minWidth: 0, width: "100%" },
           }, (templates.length > 0 ? templates : [{ template_id: "none", title: "(none)" }]).map((t, i) =>
             h("option", { value: String(i), key: `tpl_${i}` }, `${t.template_id || i} | ${t.title || "-"}`)
           )),
@@ -13596,8 +13601,8 @@ export function GraphCanvasPanel({
 }) {
   return h("section", { className: "panel panel-center", key: "center" }, [
     h("div", { className: "panel-hd", key: "chd" }, "Graph Canvas"),
-    h("div", { className: "panel-bd", style: { padding: "8px" }, key: "cbd" }, [
-      h("div", { className: "flow-wrap", style: { height: "100%" }, key: "flow" }, [
+    h("div", { className: "panel-bd", style: { padding: "8px", flex: "1 1 auto", overflow: "hidden" }, key: "cbd" }, [
+      h("div", { className: "flow-wrap", style: { height: "100%", flex: "1 1 auto", minHeight: "420px" }, key: "flow" }, [
         h(ReactFlow, {
           nodes,
           edges,

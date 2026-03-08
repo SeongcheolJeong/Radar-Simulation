@@ -3,8 +3,8 @@ export function toFlowNode(node, idx) {
   const nType = String(node && node.type ? node.type : "SceneSource");
   const ui = node && typeof node.ui === "object" ? node.ui : {};
   const pos = ui && typeof ui === "object" && ui.position ? ui.position : null;
-  const px = Number(pos && pos.x);
-  const py = Number(pos && pos.y);
+  const px = Number(pos?.x);
+  const py = Number(pos?.y);
   const col = idx % 4;
   const row = Math.floor(idx / 4);
   const position = {
