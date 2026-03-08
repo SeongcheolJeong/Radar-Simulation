@@ -23,6 +23,9 @@ For generated evidence and outputs, use:
 - detailed manuals:
   - [Project Structure And User Manual](282_project_structure_and_user_manual.md)
   - [프로젝트 구조 및 사용자 매뉴얼](283_project_structure_and_user_manual_ko.md)
+- canonical validation packs:
+  - [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
+  - [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
 
 Use the landing pages for quick routing. Use `282` and `283` when you want the full user manual in English or Korean.
 
@@ -36,6 +39,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | run the classic dashboard | [Frontend Dashboard Usage](116_frontend_dashboard_usage.md) | `scripts/run_web_e2e_dashboard_local.sh` |
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
 | run the fixed release-candidate validation order | [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md) | the scenario commands and evidence files in that pack |
+| read the current release-candidate closure snapshot | [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md) | current stable evidence set and handoff rule |
 | validate paid RadarSimPy production access | [RadarSimPy Runtime](285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | review release-facing evidence | [Generated Reports Index](reports/README.md) | release notes and one-pagers |
 
@@ -204,6 +208,7 @@ Start with:
 
 - [Validation Checkpoints](04_validation_checkpoints.md)
 - [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
+- [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
 - [Parity Metrics Contract](13_parity_metrics_contract.md)
 - [Multi-Backend Parity Harness Contract](92_multi_backend_parity_harness_contract.md)
 - [Scene Backend Golden Path Contract](251_scene_backend_golden_path_contract.md)
@@ -213,6 +218,7 @@ Start with:
 Start with:
 
 - [Generated Reports Index](reports/README.md)
+- [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
 - [Release Notes: RadarSimPy Frontend Multiplexing](279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md)
 - [Release One-Pager](280_release_one_pager_radarsimpy_2026_03_05.md)
 - [Release One-Pager (Korean)](281_release_one_pager_radarsimpy_2026_03_05_ko.md)

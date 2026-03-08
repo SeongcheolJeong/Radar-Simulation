@@ -18,6 +18,8 @@ PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.p
   --output-json docs/reports/canonical_release_candidate_subset_latest.json
 ```
 
+- Korean version: [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
+
 ## How To Use This Pack
 
 - run from the repository root
