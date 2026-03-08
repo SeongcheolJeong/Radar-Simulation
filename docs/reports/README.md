@@ -70,6 +70,12 @@ You should be able to answer:
 - does the frontend/runtime payload contract still match the backend
 - does the quick demo path still produce a usable summary
 
+If this checklist fails, open next:
+
+- `graph_lab_playwright_snapshots/latest/decision_brief.md`
+- `graph_lab_playwright_snapshots/latest/`
+- `frontend_runtime_payload_provider_info_optional_latest.json`
+
 ### RadarSimPy
 
 Open these first:
@@ -88,6 +94,13 @@ Use these to answer:
 - is the wrapper/provider integration still intact
 - does the smoke gate still pass in the current environment
 
+If this checklist fails, open next:
+
+- `radarsimpy_production_release_gate_latest.json`
+- `radarsimpy_readiness_checkpoint_latest.json`
+- `radarsimpy_wrapper_integration_gate_production_latest.json`
+- `radarsimpy_integration_smoke_gate_production_latest.json`
+
 ### PO-SBR
 
 Open these first:
@@ -105,6 +118,13 @@ Use these to answer:
 - what is the current readiness/progress state
 - is the handoff/closure package complete
 - did local-ready regression and baseline drift stay within the accepted envelope
+
+If this checklist fails, open next:
+
+- `po_sbr_progress_snapshot_2026_03_02.json`
+- `po_sbr_operator_handoff_closure_2026_03_01.json`
+- `po_sbr_local_ready_regression_2026_03_01_pc_self.json`
+- `po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json`
 
 ## Common Report Families
 
