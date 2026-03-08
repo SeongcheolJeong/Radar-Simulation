@@ -87,6 +87,11 @@ Use this when you want:
 - a quick API/dashboard smoke path
 - a lightweight presentation view
 
+Related:
+
+- [Frontend Dashboard Usage](docs/116_frontend_dashboard_usage.md)
+- [Classic Dashboard UX Manual](docs/308_classic_dashboard_ux_manual.md)
+
 If either track works, continue with:
 
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)

@@ -232,7 +232,7 @@
       }
     ],
     "metadata": {
-      "scene_id": "frontend_quickstart_2026_03_06",
+      "scene_id": "frontend_quickstart_2026_03_08",
       "backend_type": "analytic_targets",
       "frame_count": 16,
       "tx_schedule": [
@@ -267,6 +267,15 @@
         "doppler_window": "hann",
         "angle_window": "hann",
         "range_bin_limit": 256
+      },
+      "antenna_summary": {
+        "antenna_mode": "isotropic",
+        "ffd_enabled": false,
+        "use_jones_polarization": false,
+        "global_jones_enabled": false,
+        "tx_ffd_file_count": 0,
+        "rx_ffd_file_count": 0,
+        "synth_requires_path": false
       },
       "compensation_summary": {
         "enabled": false,

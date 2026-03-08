@@ -89,6 +89,11 @@ PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099
 - 빠른 API/dashboard smoke path
 - 가벼운 프레젠테이션 화면
 
+관련 문서:
+
+- [Frontend Dashboard Usage](docs/116_frontend_dashboard_usage.md)
+- [Classic Dashboard UX 사용 매뉴얼](docs/309_classic_dashboard_ux_manual_ko.md)
+
 둘 중 하나라도 성공하면 다음 문서로 진행하면 됩니다.
 
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)

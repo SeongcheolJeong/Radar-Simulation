@@ -25,6 +25,8 @@ For generated evidence and outputs, use:
   - [프로젝트 구조 및 사용자 매뉴얼](283_project_structure_and_user_manual_ko.md)
   - [Graph Lab UX Manual](300_graph_lab_ux_manual.md)
   - [Graph Lab UX 사용 매뉴얼](301_graph_lab_ux_manual_ko.md)
+  - [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md)
+  - [Classic Dashboard UX 사용 매뉴얼](309_classic_dashboard_ux_manual_ko.md)
   - [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
   - [Graph Lab 버튼 시나리오 가이드](303_graph_lab_button_scenario_guide_ko.md)
   - [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
@@ -58,6 +60,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | read the Artifact Inspector without the full UI manual | [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md) | the right-panel reading order and healthy signs |
 | follow the shortest live click sequence while the UI is open | [Graph Lab Live Checklist](306_graph_lab_live_checklist.md) | the first-run, compare, and export checklist |
 | run the classic dashboard | [Frontend Dashboard Usage](116_frontend_dashboard_usage.md) | `scripts/run_web_e2e_dashboard_local.sh` |
+| learn the classic dashboard UI | [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md) | the dashboard screen map and button sequences |
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
 | run the fixed release-candidate validation order | [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md) | the scenario commands and evidence files in that pack |
 | decide whether HF-1 belongs in the default release cut | [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md) | current promotion rule for the Sionna-style RT path |
@@ -112,6 +115,8 @@ Start with:
 - [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)
 - [Project Structure And User Manual](282_project_structure_and_user_manual.md)
 - [Generated Reports Index](reports/README.md)
+- [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md)
+- [Classic Dashboard UX 사용 매뉴얼](309_classic_dashboard_ux_manual_ko.md)
 
 Use these when you need the lightweight dashboard shell, a quick demo route, or a simple presentation-oriented frontend path.
 

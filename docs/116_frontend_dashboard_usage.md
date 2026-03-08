@@ -2,77 +2,92 @@
 
 ## Purpose
 
-Use a frontend similar to the provided `radar_map_front.jsx.rtf` layout, wired to current simulation outputs.
+Use this document when you want the simpler dashboard path instead of Graph Lab.
 
-Frontend entry:
+This path is best for:
 
-- `/Users/seongcheoljeong/Documents/Codex_test/frontend/avx_like_dashboard.html`
+- a lightweight demo
+- a quick API/dashboard smoke run
+- a presentation-friendly view of generated outputs
 
-Default data source:
+For the richer operator workflow, use [Graph Lab UX Manual](300_graph_lab_ux_manual.md).
 
-- `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/avx_like_showcase_macos_2026_02_22.json`
+For a button-by-button manual of the classic dashboard, use [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md).
 
-## How To Run
+## Run
 
-1. Start a local static server at repo root:
-
-```bash
-cd /Users/seongcheoljeong/Documents/Codex_test
-python3 -m http.server 8080
-```
-
-2. Open:
-
-- `http://localhost:8080/frontend/avx_like_dashboard.html`
-
-## Quick Example (Recommended)
-
-Generate a fresh analytic demo and launch dashboard in one command:
+Recommended:
 
 ```bash
-cd /Users/seongcheoljeong/Documents/Codex_test
-scripts/run_frontend_demo_local.sh 8080
+PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099
 ```
 
-The script does:
+Open:
 
-1. Builds demo artifacts via:
-   - `/Users/seongcheoljeong/Documents/Codex_test/scripts/build_frontend_demo_example.py`
-2. Writes summary:
-   - `/Users/seongcheoljeong/Documents/Codex_test/docs/reports/frontend_quickstart_v1.json`
-3. Starts local web server and serves:
-   - `http://localhost:8080/frontend/avx_like_dashboard.html?summary=/docs/reports/frontend_quickstart_v1.json`
+- `http://127.0.0.1:8080/frontend/avx_like_dashboard.html?summary=/docs/reports/frontend_quickstart_v1.json&api=http://127.0.0.1:8099`
 
-You can switch summary source by changing query:
+Quick health check:
 
-- `?summary=/docs/reports/avx_like_showcase_macos_2026_02_22.json`
+```bash
+curl http://127.0.0.1:8099/health
+```
+
+## What The Launcher Does
+
+The launcher:
+
+1. builds demo artifacts under `data/demo/frontend_quickstart_v1`
+2. writes `docs/reports/frontend_quickstart_v1.json`
+3. starts the API on `:8099`
+4. starts the static dashboard server on `:8080`
+
+## Main Screen
+
+![Classic dashboard full view](reports/classic_dashboard_snapshots/latest/dashboard_full.png)
+
+Annotated:
+
+![Classic dashboard annotated](reports/classic_dashboard_snapshots/latest/dashboard_full_annotated.png)
 
 ## What The Dashboard Reads
 
 From the summary JSON:
 
-- radar metadata (`fc_hz`, `slope_hz_per_s`, `fs_hz`, chirps/samples, tx/rx)
-- first-chirp path list summary
+- radar metadata
+- first-chirp path summary
 - RD/RA top-peak metadata
-- output contract paths (`path_list.json`, `adc_cube.npz`, `radar_map.npz`)
+- output contract paths
 
-From the demo visual folder (auto-derived):
+From the generated artifact folder:
 
 - `rd_map.png`
 - `ra_map.png`
 - `adc_tx0_rx0.png`
 - `path_scatter_chirp0.png`
 
-## UI Notes
+## Core Buttons
 
-- `Refresh Outputs`: reloads summary JSON and rebinds all views.
-- `Upload JSON`: load another summary file without changing code.
-- `Upload .ffd`: UI context only (no browser-side FFD parsing).
-- Scene viewer uses first-chirp path direction/range.
-- Detection table shows first-chirp paths with computed range/velocity/amplitude dB.
+| Button | Meaning |
+| --- | --- |
+| `Refresh Outputs` | reload summary JSON and refresh the view |
+| `Run Scene on API` | submit the scene to the API backend |
+| `Pin Baseline` | record the current run as baseline |
+| `Compare` | compare reference and candidate runs |
+| `Policy Verdict` | compute decision policy outcome |
+| `Run Regression Session` | execute a multi-candidate regression session |
+| `Refresh History` | reload session/export history |
+| `Export Session` | export the selected regression session |
+| `Review Bundle + Copy Path` | package review evidence and copy the path |
+| `Export Decision Report (.md)` | export a stakeholder-facing report |
 
 ## Known Limits
 
-- Browser cannot execute Python simulation directly; backend run is still CLI-based.
-- Dashboard is a visualization layer on top of generated artifacts.
-- If you open via `file://` instead of `http://`, `fetch` may fail due browser restrictions.
+- browser-side UI is not the simulation engine
+- summary and API data must exist first
+- opening the page via `file://` is not supported
+
+## Related Documents
+
+- [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md)
+- [Classic Dashboard UX Manual (Korean)](309_classic_dashboard_ux_manual_ko.md)
+- [Graph Lab UX Manual](300_graph_lab_ux_manual.md)
