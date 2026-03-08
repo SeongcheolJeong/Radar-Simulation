@@ -184,6 +184,7 @@ Fastest next action:
 
 ## Related Documents
 
+- [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md)
 - [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)
 - [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md)
 - [Classic Dashboard Button Scenario Guide](312_classic_dashboard_button_scenario_guide.md)

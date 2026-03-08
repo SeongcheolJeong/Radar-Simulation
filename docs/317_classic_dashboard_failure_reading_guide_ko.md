@@ -184,6 +184,7 @@ status line을 field 단위로 짧게 보는 cheat sheet가 필요하면 [Classi
 
 ## 관련 문서
 
+- [Frontend 트러블슈팅 맵](331_frontend_troubleshooting_map_ko.md)
 - [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)
 - [Classic Dashboard UX 사용 매뉴얼](309_classic_dashboard_ux_manual_ko.md)
 - [Classic Dashboard 버튼 시나리오 가이드](313_classic_dashboard_button_scenario_guide_ko.md)

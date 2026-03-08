@@ -165,6 +165,7 @@ Fastest next action:
 
 ## Related Documents
 
+- [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md)
 - [Graph Lab UX Manual](300_graph_lab_ux_manual.md)
 - [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
 - [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
