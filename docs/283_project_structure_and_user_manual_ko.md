@@ -12,16 +12,18 @@
 - 목적에 맞는 런타임 트랙 선택
 - 산출물, 리포트, 트러블슈팅 경로 확인
 
-루트 [README.md](../README.md)는 GitHub 첫 화면용 영문 요약 문서로 유지하고, [README_ko.md](../README_ko.md)는 한국어 entry page로 사용합니다. 이 문서는 실제 사용자용 상세 안내서입니다.
+빠른 진입과 문서 라우팅은 아래 문서를 먼저 사용하면 됩니다.
+
+- [README.md](../README.md)
+- [README_ko.md](../README_ko.md)
+- [Documentation Index](README.md)
+- [Generated Reports Index](reports/README.md)
+
+이 문서는 그 다음 단계인 실제 구조, 설치, 실행, 운영 세부사항을 설명하는 상세 안내서입니다.
 
 영문 버전:
 
 - [Project Structure And User Manual](282_project_structure_and_user_manual.md)
-
-문서 허브:
-
-- [Documentation Index](README.md)
-- [Generated Reports Index](reports/README.md)
 
 ## 1. 이 프로젝트는 무엇인가
 
@@ -48,35 +50,21 @@
 
 ## 2. 누가 어떤 entry point를 써야 하는가
 
-### 처음 쓰는 사용자
+출발 지점을 아직 정하지 못했다면 먼저 아래 문서를 보십시오.
 
-먼저 읽을 문서:
+- [README_ko.md](../README_ko.md)
+- [Documentation Index](README.md)
 
-- [README.md](../README.md)
-- 이 문서
+이 매뉴얼은 저장소 구조와 설치/실행 세부사항이 필요할 때 읽으면 됩니다.
 
-### 프론트엔드 오퍼레이터
+빠른 분기:
 
-먼저 볼 것:
-
-- `scripts/run_graph_lab_local.sh`
-- [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md)
-
-### 백엔드 / 검증 개발자
-
-먼저 볼 것:
-
-- `src/avxsim`
-- `scripts/validate_*`
-- `scripts/run_*`
-
-### 유료 RadarSimPy 검증 오퍼레이터
-
-먼저 볼 것:
-
-- `scripts/run_radarsimpy_paid_6m_gate_ci.sh`
-- `scripts/run_radarsimpy_production_release_gate.py`
-- `scripts/run_radarsimpy_readiness_checkpoint.py`
+| 내가 해당하는 경우 | 먼저 볼 것 |
+| --- | --- |
+| 처음 쓰는 사용자 | [README_ko.md](../README_ko.md), 그 다음 이 문서 |
+| 프론트엔드 오퍼레이터 | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) |
+| 백엔드 / 검증 개발자 | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
+| 유료 RadarSimPy 검증 오퍼레이터 | `scripts/run_radarsimpy_paid_6m_gate_ci.sh`, `scripts/run_radarsimpy_production_release_gate.py`, `scripts/run_radarsimpy_readiness_checkpoint.py` |
 
 ## 3. 저장소 구조
 

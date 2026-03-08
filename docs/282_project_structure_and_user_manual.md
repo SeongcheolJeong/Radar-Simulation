@@ -12,12 +12,13 @@ Use it for:
 - choosing the right runtime track
 - locating outputs, reports, and troubleshooting information
 
-The root [README.md](../README.md) should stay short and act as the GitHub landing page. This file is the full manual.
+Use the landing pages and doc index for quick routing:
 
-Documentation hub:
-
+- [README.md](../README.md)
 - [Documentation Index](README.md)
 - [Generated Reports Index](reports/README.md)
+
+Use this manual when you are ready to move past quick routing and need the actual structure, setup, and operating details.
 
 ## 1. What This Project Is
 
@@ -44,35 +45,21 @@ Core contract:
 
 ## 2. Who Should Use Which Entry Point
 
-### New user
-
-Start with:
+Use the quick-routing pages first if you are still deciding where to start:
 
 - [README.md](../README.md)
-- this manual
+- [Documentation Index](README.md)
 
-### Frontend operator
+Use this manual once you need the actual repository map and run/install details.
 
-Start with:
+Quick routing:
 
-- `scripts/run_graph_lab_local.sh`
-- [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md)
-
-### Backend / validation developer
-
-Start with:
-
-- `src/avxsim`
-- `scripts/validate_*`
-- `scripts/run_*`
-
-### Paid RadarSimPy validation operator
-
-Start with:
-
-- `scripts/run_radarsimpy_paid_6m_gate_ci.sh`
-- `scripts/run_radarsimpy_production_release_gate.py`
-- `scripts/run_radarsimpy_readiness_checkpoint.py`
+| If you are... | Start here |
+| --- | --- |
+| a new user | [README.md](../README.md), then this manual |
+| a frontend operator | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) |
+| a backend or validation developer | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
+| a paid RadarSimPy validation operator | `scripts/run_radarsimpy_paid_6m_gate_ci.sh`, `scripts/run_radarsimpy_production_release_gate.py`, `scripts/run_radarsimpy_readiness_checkpoint.py` |
 
 ## 3. Repository Structure
 
