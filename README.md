@@ -22,6 +22,8 @@ Explanation vs evidence:
 - explanation: [Documentation Index](docs/README.md)
 - evidence: [Generated Reports Index](docs/reports/README.md)
 
+<a id="first-10-minutes"></a>
+
 ## First 10 Minutes
 
 Do this once first:
@@ -43,6 +45,8 @@ PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py
 
 Then choose one track:
 
+<a id="graph-lab-track"></a>
+
 ### Track A: Graph Lab
 
 Run:
@@ -61,6 +65,8 @@ Use this when you want:
 - compare workflows
 - artifact inspection
 - decision brief export
+
+<a id="classic-dashboard-track"></a>
 
 ### Track B: Classic Dashboard
 
@@ -115,8 +121,8 @@ Check these reports next:
 
 | If you are... | Start here | Then use |
 | --- | --- | --- |
-| new to the repository | [README.md](README.md) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
-| a frontend operator | [README.md](README.md) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
+| new to the repository | [First 10 Minutes](#first-10-minutes) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
+| a frontend operator | [Track A: Graph Lab](#graph-lab-track) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
 | a backend or validation developer | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
 | validating paid RadarSimPy runtime | [Paid RadarSimPy Production Validation](#paid-radarsimpy-production-validation) | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md), `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | unsure which runtime to install | [Install Onboarding Map](docs/288_install_onboarding_map.md) | the guide chosen by your goal |

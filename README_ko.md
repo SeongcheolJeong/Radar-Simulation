@@ -24,6 +24,8 @@
 - 설명: [Documentation Index](docs/README.md)
 - 증거: [Generated Reports Index](docs/reports/README.md)
 
+<a id="first-10-minutes-ko"></a>
+
 ## 처음 10분
 
 먼저 공통으로 아래를 실행합니다.
@@ -45,6 +47,8 @@ PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py
 
 그 다음 두 경로 중 하나를 고르면 됩니다.
 
+<a id="graph-lab-track-ko"></a>
+
 ### 경로 A: Graph Lab
 
 실행:
@@ -63,6 +67,8 @@ PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101
 - compare workflow
 - artifact inspection
 - decision brief export
+
+<a id="classic-dashboard-track-ko"></a>
 
 ### 경로 B: Classic Dashboard
 
@@ -117,8 +123,8 @@ PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh
 
 | 내가 해당하는 경우 | 먼저 볼 것 | 다음 단계 |
 | --- | --- | --- |
-| 저장소를 처음 보는 사용자 | [README_ko.md](README_ko.md) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
-| frontend operator | [README_ko.md](README_ko.md) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
+| 저장소를 처음 보는 사용자 | [처음 10분](#first-10-minutes-ko) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
+| frontend operator | [경로 A: Graph Lab](#graph-lab-track-ko) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
 | backend / validation 개발자 | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
 | 유료 RadarSimPy runtime 검증 담당 | [유료 RadarSimPy Production Validation](#paid-radarsimpy-production-validation-ko) | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md), `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | 어떤 runtime 설치 경로를 골라야 할지 모름 | [Install Onboarding Map](docs/288_install_onboarding_map.md) | 목적에 맞는 설치 가이드 |
