@@ -16,6 +16,8 @@ If you want a follow-along checklist while the dashboard is open, use [Classic D
 
 If you want button meaning by task instead of a full walkthrough, use [Classic Dashboard Button Scenario Guide](312_classic_dashboard_button_scenario_guide.md).
 
+If you want a fast reading guide for result, compare, regression, and export panels, use [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md).
+
 ## Start The Dashboard
 
 Run:

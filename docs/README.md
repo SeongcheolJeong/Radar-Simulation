@@ -30,6 +30,7 @@ For generated evidence and outputs, use:
   - [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md)
   - [Classic Dashboard 실사용 체크리스트](311_classic_dashboard_live_checklist_ko.md)
   - [Classic Dashboard Button Scenario Guide](312_classic_dashboard_button_scenario_guide.md)
+- [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md)
   - [Classic Dashboard 버튼 시나리오 가이드](313_classic_dashboard_button_scenario_guide_ko.md)
   - [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
   - [Graph Lab 버튼 시나리오 가이드](303_graph_lab_button_scenario_guide_ko.md)

@@ -15,6 +15,8 @@
 
 버튼 의미를 시나리오별로 바로 보고 싶으면 [Classic Dashboard 버튼 시나리오 가이드](313_classic_dashboard_button_scenario_guide_ko.md)를 보면 됩니다.
 
+화면은 채워졌지만 result 영역을 어떻게 읽어야 할지 모르겠으면 [Classic Dashboard Result / Evidence Quick Guide](315_classic_dashboard_result_evidence_quick_guide_ko.md)를 보십시오.
+
 ## Dashboard 열기
 
 실행:

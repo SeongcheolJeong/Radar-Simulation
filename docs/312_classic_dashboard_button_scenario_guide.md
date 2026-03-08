@@ -12,6 +12,8 @@ Use it when:
 
 For the full screen walkthrough, use [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md).
 
+If you pressed the button already and now need help reading the result areas, use [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md).
+
 ## Screen Reference
 
 Full screen:

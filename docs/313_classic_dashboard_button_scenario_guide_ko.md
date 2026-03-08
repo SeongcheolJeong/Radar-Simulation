@@ -12,6 +12,8 @@
 
 전체 화면 설명은 [Classic Dashboard UX 사용 매뉴얼](309_classic_dashboard_ux_manual_ko.md)을 보면 됩니다.
 
+버튼은 눌렀는데 result 영역을 어떻게 읽어야 하는지 모르겠으면 [Classic Dashboard Result / Evidence Quick Guide](315_classic_dashboard_result_evidence_quick_guide_ko.md)를 보십시오.
+
 ## 화면 참고
 
 전체 화면:
