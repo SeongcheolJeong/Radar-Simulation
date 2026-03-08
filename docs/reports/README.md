@@ -128,6 +128,12 @@ Reproduce with:
 - `PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101`
 - `PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099`
 
+Expect refreshed evidence:
+
+- `graph_lab_playwright_e2e_latest.json`
+- `graph_lab_playwright_snapshots/latest/`
+- `frontend_quickstart_v1.json`
+
 <a id="radarsimpy-evidence-checklist"></a>
 
 ### RadarSimPy
@@ -189,6 +195,14 @@ Reproduce with:
 - `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_integration_smoke_gate.py --output-summary-json docs/reports/radarsimpy_integration_smoke_gate_manual.json`
 - `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh`
 
+Expect refreshed evidence:
+
+- `radarsimpy_wrapper_integration_gate_manual.json`
+- `radarsimpy_integration_smoke_gate_manual.json`
+- `radarsimpy_production_release_gate_paid_6m.json`
+- `radarsimpy_readiness_checkpoint_paid_6m.json`
+- `radarsimpy_simulator_reference_parity_paid_6m.json`
+
 <a id="po-sbr-evidence-checklist"></a>
 
 ### PO-SBR
@@ -246,6 +260,11 @@ If this checklist fails, open next:
 Reproduce with:
 
 - `PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --strict`
+
+Expect refreshed evidence:
+
+- `po_sbr_post_change_gate_*.json`
+- `po_sbr_progress_snapshot_manual.json`
 
 ## Common Report Families
 
