@@ -38,6 +38,8 @@
 2. [Graph Lab 실사용 체크리스트](307_graph_lab_live_checklist_ko.md)
 3. [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)
 
+실사용 흐름이 이미 실패한 상태라면 [Frontend 트러블슈팅 맵](331_frontend_troubleshooting_map_ko.md)부터 시작하면 됩니다.
+
 runtime 선택, compare decision, handoff brief가 필요할 때 이 경로를 쓰면 됩니다.
 
 ### Demo / Presentation 사용자

@@ -27,6 +27,7 @@ This page is the top-level routing map for the frontend documentation set.
 | understand dashboard result/status boxes after a run | [Classic Dashboard Document Map](320_classic_dashboard_doc_map.md) | [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md) |
 | diagnose a Graph Lab failure | [Graph Lab Failure Reading Guide](324_graph_lab_failure_reading_guide.md) | [Graph Lab Live Checklist](306_graph_lab_live_checklist.md) |
 | diagnose a classic dashboard failure | [Classic Dashboard Failure Reading Guide](316_classic_dashboard_failure_reading_guide.md) | [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md) |
+| troubleshoot a frontend flow before picking a UI-specific guide | [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md) | the UI-specific failure guide |
 | check which high-fidelity path is interactive right now | [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json) | [Graph Lab Document Map](322_graph_lab_doc_map.md) |
 
 ## Choose By Role
@@ -38,6 +39,8 @@ Start with:
 1. [Graph Lab Document Map](322_graph_lab_doc_map.md)
 2. [Graph Lab Live Checklist](306_graph_lab_live_checklist.md)
 3. [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
+
+If the live flow is already failing, start instead with [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md).
 
 Use this route when you are making runtime choices, compare decisions, and handoff briefs.
 
