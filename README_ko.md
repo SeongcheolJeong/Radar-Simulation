@@ -87,6 +87,8 @@ PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
 
+<a id="paid-radarsimpy-production-validation-ko"></a>
+
 ## 유료 RadarSimPy Production Validation
 
 이 경로는 아래가 준비된 경우에만 사용합니다.
@@ -118,7 +120,7 @@ PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh
 | 저장소를 처음 보는 사용자 | [README_ko.md](README_ko.md) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
 | frontend operator | [README_ko.md](README_ko.md) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
 | backend / validation 개발자 | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
-| 유료 RadarSimPy runtime 검증 담당 | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
+| 유료 RadarSimPy runtime 검증 담당 | [유료 RadarSimPy Production Validation](#paid-radarsimpy-production-validation-ko) | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md), `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | 어떤 runtime 설치 경로를 골라야 할지 모름 | [Install Onboarding Map](docs/288_install_onboarding_map.md) | 목적에 맞는 설치 가이드 |
 
 ## Frontend Preview

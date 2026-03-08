@@ -85,6 +85,8 @@ If either track works, continue with:
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
 
+<a id="paid-radarsimpy-production-validation"></a>
+
 ## Paid RadarSimPy Production Validation
 
 Use this path only when you have:
@@ -116,7 +118,7 @@ Check these reports next:
 | new to the repository | [README.md](README.md) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
 | a frontend operator | [README.md](README.md) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
 | a backend or validation developer | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
-| validating paid RadarSimPy runtime | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
+| validating paid RadarSimPy runtime | [Paid RadarSimPy Production Validation](#paid-radarsimpy-production-validation) | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md), `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | unsure which runtime to install | [Install Onboarding Map](docs/288_install_onboarding_map.md) | the guide chosen by your goal |
 
 ## Frontend Preview
