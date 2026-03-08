@@ -117,6 +117,16 @@ Evidence next:
 - [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist)
 - [PO-SBR Evidence Checklist](reports/README.md#po-sbr-evidence-checklist)
 
+Validator quick verification:
+
+| If you need to verify... | Run this first | Then check |
+| --- | --- | --- |
+| frontend/backend API contract health | `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| Graph Lab browser-level operator flow | `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers PYTHONPATH=src .venv/bin/python scripts/validate_graph_lab_playwright_e2e.py --require-playwright --output-json docs/reports/graph_lab_playwright_e2e_latest.json` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| RadarSimPy wrapper gate only | `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_wrapper_integration_gate.py --output-summary-json docs/reports/radarsimpy_wrapper_integration_gate_manual.json` | [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist) |
+| RadarSimPy smoke gate only | `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_integration_smoke_gate.py --output-summary-json docs/reports/radarsimpy_integration_smoke_gate_manual.json` | [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist) |
+| PO-SBR runtime-affecting closure gate | `PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --strict` | [PO-SBR Evidence Checklist](reports/README.md#po-sbr-evidence-checklist) |
+
 <a id="role-paid-radarsimpy-validator"></a>
 
 ### Paid RadarSimPy Validator
@@ -132,6 +142,14 @@ Use these when you need the production-license path, paid runtime gates, readine
 Evidence next:
 
 - [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist)
+
+Paid RadarSimPy quick verification:
+
+| If you need to verify... | Run this first | Then check |
+| --- | --- | --- |
+| full paid production gate chain | `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh` | [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist) |
+| wrapper integration before the full chain | `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_wrapper_integration_gate.py --output-summary-json docs/reports/radarsimpy_wrapper_integration_gate_manual.json` | [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist) |
+| smoke gate before the full chain | `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_integration_smoke_gate.py --output-summary-json docs/reports/radarsimpy_integration_smoke_gate_manual.json` | [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist) |
 
 ## Installation
 
