@@ -94,6 +94,23 @@ In general:
 - prefer directories named `latest/` when they exist
 - treat dated files as historical records unless you specifically need that run
 
+## Latest vs Dated vs Baseline
+
+| If you see... | Use it when... | Do not treat it as... |
+| --- | --- | --- |
+| `_latest.json` | you want the current stable summary | the full history of all runs |
+| `latest/` | you want the current captured artifacts | the visual reference baseline |
+| dated file like `*_2026_03_02.json` | you are tracing a specific run or regression point | the current default status |
+| `baseline/` | you are maintaining visual regression or comparison references | the newest run result |
+| `baselines/` | you need saved comparison baselines for drift analysis | the primary entry point for current status |
+
+Practical rule:
+
+1. open `_latest.json` first
+2. open `latest/` second if you need screenshots or exported briefs
+3. open dated files only for drift/history
+4. open `baseline/` or `baselines/` only for reference-maintenance work
+
 Examples:
 
 - use `graph_lab_playwright_e2e_latest.json`
