@@ -17,6 +17,16 @@ It includes:
 - runnable validation and gate scripts in `scripts`
 - architecture, workflow, and release documentation in `docs`
 
+## Who Should Use What
+
+| If you are... | Start here | Then use |
+| --- | --- | --- |
+| new to the repository | [README.md](README.md) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
+| a frontend operator | [README.md](README.md) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
+| a backend or validation developer | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
+| validating paid RadarSimPy runtime | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
+| unsure which runtime to install | [Install Onboarding Map](docs/288_install_onboarding_map.md) | the guide chosen by your goal |
+
 ## Frontend Preview
 
 Graph Lab is the main operator UI for runtime selection, compare workflows, artifact inspection, and decision export.

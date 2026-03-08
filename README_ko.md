@@ -19,6 +19,16 @@
 - `scripts`의 launcher / validator / gate
 - `docs`의 구조, 사용법, release 문서
 
+## 누구에게 어떤 경로가 맞는가
+
+| 내가 해당하는 경우 | 먼저 볼 것 | 다음 단계 |
+| --- | --- | --- |
+| 저장소를 처음 보는 사용자 | [README_ko.md](README_ko.md) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
+| frontend operator | [README_ko.md](README_ko.md) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
+| backend / validation 개발자 | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
+| 유료 RadarSimPy runtime 검증 담당 | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
+| 어떤 runtime 설치 경로를 골라야 할지 모름 | [Install Onboarding Map](docs/288_install_onboarding_map.md) | 목적에 맞는 설치 가이드 |
+
 ## Frontend Preview
 
 Graph Lab은 runtime 선택, compare workflow, artifact inspection, decision export를 담당하는 메인 UI입니다.
