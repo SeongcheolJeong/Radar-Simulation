@@ -70,6 +70,15 @@ Related snapshot guide:
 
 ## Current Evidence Checklists
 
+Use each checklist in this order:
+
+1. Open the stable/current evidence files.
+2. Check `Healthy if:` and `Usually unhealthy because:`.
+3. Run `Fastest first check:` if the current state is unclear or failing.
+4. Run `Escalate with:` if the quick check is not enough.
+5. Re-open `Expect refreshed evidence:` and compare the refreshed files.
+6. If still blocked, follow `If this checklist fails, open next:`.
+
 <a id="frontend-evidence-checklist"></a>
 
 ### Frontend
