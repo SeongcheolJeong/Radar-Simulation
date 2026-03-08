@@ -143,6 +143,12 @@ Expect refreshed evidence:
 - `graph_lab_playwright_snapshots/latest/`
 - `frontend_quickstart_v1.json`
 
+Escalate to role:
+
+- [Operator](../README.md#role-operator)
+- [Classic Dashboard User](../README.md#role-classic-dashboard-user)
+- [Developer](../README.md#role-developer)
+
 <a id="radarsimpy-evidence-checklist"></a>
 
 ### RadarSimPy
@@ -212,6 +218,12 @@ Expect refreshed evidence:
 - `radarsimpy_readiness_checkpoint_paid_6m.json`
 - `radarsimpy_simulator_reference_parity_paid_6m.json`
 
+Escalate to role:
+
+- [Developer](../README.md#role-developer)
+- [Validator](../README.md#role-validator)
+- [Paid RadarSimPy Validator](../README.md#role-paid-radarsimpy-validator)
+
 <a id="po-sbr-evidence-checklist"></a>
 
 ### PO-SBR
@@ -274,6 +286,11 @@ Expect refreshed evidence:
 
 - `po_sbr_post_change_gate_*.json`
 - `po_sbr_progress_snapshot_manual.json`
+
+Escalate to role:
+
+- [Developer](../README.md#role-developer)
+- [Validator](../README.md#role-validator)
 
 ## Common Report Families
 
