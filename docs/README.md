@@ -37,6 +37,8 @@ For generated evidence and outputs, use:
   - [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md)
   - [Frontend 트러블슈팅 맵](331_frontend_troubleshooting_map_ko.md)
   - [Frontend Evidence Map](332_frontend_evidence_map.md)
+- [Frontend Evidence Read Order By Role](334_frontend_evidence_read_order_by_role.md)
+- [역할별 Frontend Evidence 읽기 순서](335_frontend_evidence_read_order_by_role_ko.md)
   - [Frontend Evidence 맵](333_frontend_evidence_map_ko.md)
   - [Graph Lab 실사용 체크리스트](307_graph_lab_live_checklist_ko.md)
   - [Graph Lab Document Map](322_graph_lab_doc_map.md)

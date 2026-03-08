@@ -56,6 +56,7 @@ Use this rule:
 - only then move to UI manuals if you need explanation
 
 ## Related Documents
+- [Frontend Evidence Read Order By Role](334_frontend_evidence_read_order_by_role.md)
 
 - [Frontend Document Map](328_frontend_doc_map.md)
 - [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md)

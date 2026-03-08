@@ -56,6 +56,7 @@
 - explanation이 필요할 때만 UI manual로 이동
 
 ## 관련 문서
+- [역할별 Frontend Evidence 읽기 순서](335_frontend_evidence_read_order_by_role_ko.md)
 
 - [Frontend 문서 맵](329_frontend_doc_map_ko.md)
 - [Frontend 트러블슈팅 맵](331_frontend_troubleshooting_map_ko.md)

@@ -34,6 +34,8 @@ If you want a frontend-specific evidence routing page first, read:
 
 - [Frontend Evidence Map](../332_frontend_evidence_map.md)
 - [Frontend Evidence 맵](../333_frontend_evidence_map_ko.md)
+- [Frontend Evidence Read Order By Role](../334_frontend_evidence_read_order_by_role.md)
+- [역할별 Frontend Evidence 읽기 순서](../335_frontend_evidence_read_order_by_role_ko.md)
 
 ## Start Here
 
