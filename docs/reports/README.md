@@ -111,6 +111,10 @@ Fastest first check:
 
 - `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py`
 
+Escalate with:
+
+- `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers PYTHONPATH=src .venv/bin/python scripts/validate_graph_lab_playwright_e2e.py --require-playwright --output-json docs/reports/graph_lab_playwright_e2e_latest.json`
+
 If this checklist fails, open next:
 
 - `graph_lab_playwright_snapshots/latest/decision_brief.md`
@@ -167,6 +171,11 @@ Fastest first check:
 
 - `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_wrapper_integration_gate.py --output-summary-json docs/reports/radarsimpy_wrapper_integration_gate_manual.json`
 
+Escalate with:
+
+- `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_integration_smoke_gate.py --output-summary-json docs/reports/radarsimpy_integration_smoke_gate_manual.json`
+- `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh`
+
 If this checklist fails, open next:
 
 - `radarsimpy_production_release_gate_latest.json`
@@ -222,6 +231,10 @@ Usually unhealthy because:
 Fastest first check:
 
 - `PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --strict`
+
+Escalate with:
+
+- `PYTHONPATH=src .venv/bin/python scripts/show_po_sbr_progress.py --strict-ready --output-json docs/reports/po_sbr_progress_snapshot_manual.json`
 
 If this checklist fails, open next:
 
