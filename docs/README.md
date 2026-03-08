@@ -25,6 +25,38 @@ For generated evidence and outputs, use:
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
 | review release-facing evidence | [Generated Reports Index](reports/README.md) | release notes and one-pagers |
 
+## By Role
+
+### Operator
+
+Start with:
+
+- [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md)
+- [Project Structure And User Manual](282_project_structure_and_user_manual.md)
+- [Generated Reports Index](reports/README.md)
+
+Use these when you need to run the frontend, compare tracks, inspect artifacts, and review current evidence.
+
+### Developer
+
+Start with:
+
+- [Project Structure And User Manual](282_project_structure_and_user_manual.md)
+- [Architecture](03_architecture.md)
+- [Output Contracts](02_output_contracts.md)
+
+Use these when you need repository structure, module boundaries, and implementation contracts before changing code.
+
+### Validator
+
+Start with:
+
+- [Validation Checkpoints](04_validation_checkpoints.md)
+- [Generated Reports Index](reports/README.md)
+- [Scene Backend Golden Path Contract](251_scene_backend_golden_path_contract.md)
+
+Use these when you need pass/fail criteria, current evidence, and stable validation expectations.
+
 ## Installation
 
 Read in this order:
