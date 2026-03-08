@@ -1,11 +1,11 @@
 {
   "version": 1,
   "report_name": "radarsimpy_readiness_checkpoint",
-  "generated_at_utc": "2026-03-08T14:57:47.886840+00:00",
+  "generated_at_utc": "2026-03-08T15:22:28.951552+00:00",
   "workspace_root": "/home/seongcheoljeong/workspace/myproject",
-  "run_id": "2026_03_08T145644_096625Z_6840fe3_pid2511687",
+  "run_id": "2026_03_08T152125_184059Z_ca04665_pid2539485",
   "branch": "main",
-  "head_commit": "6840fe3e63c2f75b52877bce16995e5a010480af",
+  "head_commit": "ca0466599206b9be69607249db7c4e911a365635",
   "with_real_runtime": true,
   "runtime_license_tier": "production",
   "trial_package_root": "/home/seongcheoljeong/workspace/myproject/external/radarsimpy_order_pull_latest/extracted/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU",
@@ -13,11 +13,11 @@
   "license_file": "/home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic",
   "run_runtime_migration": false,
   "require_real_e2e": false,
-  "smoke_gate_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
-  "wrapper_gate_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+  "smoke_gate_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
+  "wrapper_gate_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
   "migration_summary_json": "",
-  "function_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
-  "progress_snapshot_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_progress_snapshot_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+  "function_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
+  "progress_snapshot_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_progress_snapshot_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
   "smoke_gate_status": "ready",
   "wrapper_gate_status": "ready",
   "migration_status": "",
@@ -47,7 +47,7 @@
         "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
         "scripts/run_radarsimpy_integration_smoke_gate.py",
         "--output-summary-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
         "--skip-readiness-runner-validator",
         "--with-real-runtime",
         "--runtime-license-tier",
@@ -61,7 +61,7 @@
       ],
       "returncode": 0,
       "pass": true,
-      "stdout_tail": "RadarSimPy integration smoke gate completed.\n  pass: True\n  pass_count: 19\n  fail_count: 0\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+      "stdout_tail": "RadarSimPy integration smoke gate completed.\n  pass: True\n  pass_count: 19\n  fail_count: 0\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
       "stderr_tail": ""
     },
     "wrapper_gate": {
@@ -69,7 +69,7 @@
         "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
         "scripts/run_radarsimpy_wrapper_integration_gate.py",
         "--output-summary-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
         "--with-real-runtime",
         "--runtime-license-tier",
         "production",
@@ -82,7 +82,7 @@
       ],
       "returncode": 0,
       "pass": true,
-      "stdout_tail": "RadarSimPy wrapper integration gate completed.\n  pass: True\n  pass_count: 16\n  fail_count: 0\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+      "stdout_tail": "RadarSimPy wrapper integration gate completed.\n  pass: True\n  pass_count: 16\n  fail_count: 0\n  output_summary_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
       "stderr_tail": ""
     },
     "migration_stepwise": {
@@ -95,11 +95,11 @@
         "--repo-root",
         "/home/seongcheoljeong/workspace/myproject",
         "--output-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json"
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json"
       ],
       "returncode": 0,
       "pass": true,
-      "stdout_tail": "RadarSimPy function progress\nworkspace_root=/home/seongcheoljeong/workspace/myproject\napi_index_version=15.0.1\nready=True\nsupported=20/20 implemented, missing=0, unexported=0\nexcluded=1, excluded_violations=0\n- radarsimpy.Transmitter: ready\n- radarsimpy.Receiver: ready\n- radarsimpy.Radar: ready\n- radarsimpy.sim_radar: ready\n- radarsimpy.sim_rcs: ready\n- radarsimpy.processing.cfar_ca_1d: ready\n- radarsimpy.processing.cfar_ca_2d: ready\n- radarsimpy.processing.cfar_os_1d: ready\n- radarsimpy.processing.cfar_os_2d: ready\n- radarsimpy.processing.doa_bartlett: ready\n- radarsimpy.processing.doa_capon: ready\n- radarsimpy.processing.doa_esprit: ready\n- radarsimpy.processing.doa_iaa: ready\n- radarsimpy.processing.doa_music: ready\n- radarsimpy.processing.doa_root_music: ready\n- radarsimpy.processing.doppler_fft: ready\n- radarsimpy.processing.range_doppler_fft: ready\n- radarsimpy.processing.range_fft: ready\n- radarsimpy.tools.roc_pd: ready\n- radarsimpy.tools.roc_snr: ready\n- radarsimpy.simulator.sim_lidar: ready (excluded)\nwrote /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+      "stdout_tail": "RadarSimPy function progress\nworkspace_root=/home/seongcheoljeong/workspace/myproject\napi_index_version=15.0.1\nready=True\nsupported=20/20 implemented, missing=0, unexported=0\nexcluded=1, excluded_violations=0\n- radarsimpy.Transmitter: ready\n- radarsimpy.Receiver: ready\n- radarsimpy.Radar: ready\n- radarsimpy.sim_radar: ready\n- radarsimpy.sim_rcs: ready\n- radarsimpy.processing.cfar_ca_1d: ready\n- radarsimpy.processing.cfar_ca_2d: ready\n- radarsimpy.processing.cfar_os_1d: ready\n- radarsimpy.processing.cfar_os_2d: ready\n- radarsimpy.processing.doa_bartlett: ready\n- radarsimpy.processing.doa_capon: ready\n- radarsimpy.processing.doa_esprit: ready\n- radarsimpy.processing.doa_iaa: ready\n- radarsimpy.processing.doa_music: ready\n- radarsimpy.processing.doa_root_music: ready\n- radarsimpy.processing.doppler_fft: ready\n- radarsimpy.processing.range_doppler_fft: ready\n- radarsimpy.processing.range_fft: ready\n- radarsimpy.tools.roc_pd: ready\n- radarsimpy.tools.roc_snr: ready\n- radarsimpy.simulator.sim_lidar: ready (excluded)\nwrote /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
       "stderr_tail": ""
     },
     "progress_snapshot": {
@@ -109,17 +109,17 @@
         "--reports-root",
         "/home/seongcheoljeong/workspace/myproject/docs/reports",
         "--smoke-summary-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
         "--wrapper-summary-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
         "--function-summary-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
         "--output-json",
-        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_progress_snapshot_2026_03_08T145644_096625Z_6840fe3_pid2511687.json"
+        "/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_progress_snapshot_2026_03_08T152125_184059Z_ca04665_pid2539485.json"
       ],
       "returncode": 0,
       "pass": true,
-      "stdout_tail": "RadarSimPy progress snapshot\nworkspace_root=/home/seongcheoljeong/workspace/myproject\noverall_ready=True\nprogress=5/5 ready (100.0%), blocked=0\n- integration_smoke_gate: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json)\n- wrapper_integration_gate: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json)\n- function_api_coverage: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T145644_096625Z_6840fe3_pid2511687.json)\n- migration_stepwise: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/integration_full_real_e2e_2026_03_02_181533/radarsimpy_migration_stepwise_summary.json)\n- real_e2e: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/integration_full_real_e2e_2026_03_02_181533/_status_rollup.json)\nnext_actions:\n- All RadarSimPy integration checks are green.\nwrote /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_progress_snapshot_2026_03_08T145644_096625Z_6840fe3_pid2511687.json",
+      "stdout_tail": "RadarSimPy progress snapshot\nworkspace_root=/home/seongcheoljeong/workspace/myproject\noverall_ready=True\nprogress=5/5 ready (100.0%), blocked=0\n- integration_smoke_gate: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_integration_smoke_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json)\n- wrapper_integration_gate: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_wrapper_integration_gate_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json)\n- function_api_coverage: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_function_progress_checkpoint_2026_03_08T152125_184059Z_ca04665_pid2539485.json)\n- migration_stepwise: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/integration_full_real_e2e_2026_03_02_181533/radarsimpy_migration_stepwise_summary.json)\n- real_e2e: ready (source=/home/seongcheoljeong/workspace/myproject/docs/reports/integration_full_real_e2e_2026_03_02_181533/_status_rollup.json)\nnext_actions:\n- All RadarSimPy integration checks are green.\nwrote /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_progress_snapshot_2026_03_08T152125_184059Z_ca04665_pid2539485.json",
       "stderr_tail": ""
     },
     "report_contract_validator": {

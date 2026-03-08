@@ -1,29 +1,29 @@
 {
   "version": "release_closure_handoff_bundle_v1",
-  "generated_at_utc": "2026-03-08T15:11:34.518508+00:00",
+  "generated_at_utc": "2026-03-08T15:23:34.324738+00:00",
   "repo_root": "/home/seongcheoljeong/workspace/myproject",
   "git": {
-    "head_commit": "edea76cdfb6edc3613abc802c9c7e811fc8eb12d",
-    "head_commit_short": "edea76c",
+    "head_commit": "ca0466599206b9be69607249db7c4e911a365635",
+    "head_commit_short": "ca04665",
     "branch": "main",
-    "status_porcelain": "?? docs/reports/release_closure_handoff_bundle_latest.tar.gz\n?? scripts/build_release_closure_handoff_bundle.py"
+    "status_porcelain": "M docs/294_release_closure_handoff_2026_03_08.md\n M docs/295_release_closure_handoff_2026_03_08_ko.md\n M docs/reports/canonical_release_candidate_subset_latest.json\n M docs/reports/frontend_runtime_payload_provider_info_optional_latest.json\n M docs/reports/frontend_runtime_payload_provider_info_paid_6m.json\n M docs/reports/graph_lab_playwright_e2e_latest.json\n M docs/reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png\n M docs/reports/graph_lab_playwright_snapshots/latest/decision_brief.md\n M docs/reports/graph_lab_playwright_snapshots/latest/left_panel.png\n M docs/reports/graph_lab_playwright_snapshots/latest/page_full.png\n M docs/reports/graph_lab_playwright_snapshots/latest/right_panel.png\n M docs/reports/radarsimpy_layered_parity_production.json\n M docs/reports/radarsimpy_layered_parity_suite_real_runtime.json\n M docs/reports/radarsimpy_layered_parity_suite_trial_latest.json\n M docs/reports/radarsimpy_layered_parity_trial.json\n M docs/reports/radarsimpy_layered_parity_trial_latest.json\n M docs/reports/radarsimpy_production_release_gate_paid_6m.json\n M docs/reports/radarsimpy_production_release_gate_paid_6m_readiness_checkpoint.json\n M docs/reports/radarsimpy_simulator_reference_parity_from_smoke.json\n M docs/reports/radarsimpy_simulator_reference_parity_paid_6m.json\n M docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json\n M docs/reports/radarsimpy_wrapper_integration_gate_real_from_smoke.json\n M docs/reports/release_closure_handoff_bundle_latest.tar.gz\n M docs/reports/scene_backend_parity_po_sbr_rt_latest.json\n?? scripts/run_release_closure_handoff_bundle.sh"
   },
   "bundle_archive": {
     "path": "docs/reports/release_closure_handoff_bundle_latest.tar.gz",
-    "size_bytes": 14754,
-    "sha256": "2ca2d0b6825969d6679d042eaf521e3828827fb217d850e0a467b214c70e855a"
+    "size_bytes": 14865,
+    "sha256": "a120188516293fe1a11e8ea21212034a612e055af76ae2d8c59a5fe907f079e1"
   },
   "file_count": 13,
   "files": [
     {
       "path": "docs/294_release_closure_handoff_2026_03_08.md",
-      "size_bytes": 2966,
-      "sha256": "5cba66b0cc34d2592532aeabdd9fed37f54a4a6e5d51fa6cefc82c44fae865e9"
+      "size_bytes": 3125,
+      "sha256": "889a60ac4d463a6a1d0c9c284dbaca3217c201e9166a28bd8a08df3f0e2a21c0"
     },
     {
       "path": "docs/295_release_closure_handoff_2026_03_08_ko.md",
-      "size_bytes": 3164,
-      "sha256": "1f9ce38e8599b56f8704f8c3b646e8030c95026f8c4cefc56b71e662f36e5850"
+      "size_bytes": 3333,
+      "sha256": "4c936f933eb4a64b4311e9c13763f5db2127c2cc3fe4f4ee98df30809694cd7e"
     },
     {
       "path": "docs/296_release_closure_final_announcement_2026_03_08.md",
@@ -68,7 +68,7 @@
     {
       "path": "docs/reports/canonical_release_candidate_subset_latest.json",
       "size_bytes": 20184,
-      "sha256": "1a89a955ced63f7e7182377ca90b25eec87a9d8962daee366afc644b0346d837"
+      "sha256": "7cc2e88dfd57d278f552ac762763b18b924cf9a8d7e759cc7e77b64617eb86c8"
     },
     {
       "path": "docs/reports/release_announcement_pack_latest.json",

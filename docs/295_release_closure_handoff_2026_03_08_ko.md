@@ -57,6 +57,12 @@ PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.p
   --output-json docs/reports/canonical_release_candidate_subset_latest.json
 ```
 
+frozen handoff package 전체를 한 번에 다시 만들고 검증하려면 아래를 실행합니다.
+
+```bash
+bash scripts/run_release_closure_handoff_bundle.sh
+```
+
 ## Handoff 전에 재검토해야 하는 조건
 
 - canonical subset이 `pass=true`가 아님

@@ -57,6 +57,12 @@ PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.p
   --output-json docs/reports/canonical_release_candidate_subset_latest.json
 ```
 
+Run this when you want the full frozen handoff package refreshed and revalidated in one shot:
+
+```bash
+bash scripts/run_release_closure_handoff_bundle.sh
+```
+
 ## Escalate Before Handoff If
 
 - canonical subset is not `pass=true`
