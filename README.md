@@ -12,6 +12,17 @@ It includes:
 - runnable validation and gate scripts in `scripts`
 - architecture, workflow, and release documentation in `docs`
 
+## Frontend Preview
+
+Graph Lab is the main operator UI for runtime selection, compare workflows, artifact inspection, and decision export.
+
+![Graph Lab frontend preview](docs/reports/graph_lab_playwright_snapshots/latest/page_full.png)
+
+Related:
+
+- [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
+- [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
+
 ## What File Is Best For User Documentation?
 
 Use both:
