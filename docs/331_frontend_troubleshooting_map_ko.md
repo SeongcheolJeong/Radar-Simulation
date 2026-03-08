@@ -66,6 +66,7 @@
 항상 active UI의 failure guide부터 시작하는 것이 맞습니다.
 
 ## 관련 문서
+- [Frontend 문서 체인 Freeze Note](337_frontend_doc_chain_freeze_note_2026_03_08_ko.md)
 
 - [Frontend 문서 맵](329_frontend_doc_map_ko.md)
 - [Graph Lab 문서 맵](323_graph_lab_doc_map_ko.md)

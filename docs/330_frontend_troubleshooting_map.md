@@ -66,6 +66,7 @@ Do not start with:
 Start with the run/failure guide for the active UI first.
 
 ## Related Documents
+- [Frontend Documentation Freeze Note](336_frontend_doc_chain_freeze_note_2026_03_08.md)
 
 - [Frontend Document Map](328_frontend_doc_map.md)
 - [Graph Lab Document Map](322_graph_lab_doc_map.md)

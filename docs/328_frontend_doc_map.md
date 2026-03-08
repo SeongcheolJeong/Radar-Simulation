@@ -74,6 +74,7 @@ Use this rule:
 - if you are still unsure, open the Graph Lab map first because it is the more capable frontend path
 
 ## Related Documents
+- [Frontend Documentation Freeze Note](336_frontend_doc_chain_freeze_note_2026_03_08.md)
 - [Frontend Evidence Read Order By Role](334_frontend_evidence_read_order_by_role.md)
 
 - [Frontend Evidence Map](332_frontend_evidence_map.md)
