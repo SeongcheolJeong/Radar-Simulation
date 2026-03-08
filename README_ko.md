@@ -146,6 +146,7 @@ Graph Lab은 runtime 선택, compare workflow, artifact inspection, decision exp
 
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
 - [Graph Lab UX 사용 매뉴얼](docs/301_graph_lab_ux_manual_ko.md)
+- [Graph Lab 문서 맵](docs/323_graph_lab_doc_map_ko.md)
 - [프로젝트 구조 및 사용자 매뉴얼 (한국어)](docs/283_project_structure_and_user_manual_ko.md)
 
 ## 어떤 문서가 가장 적절한가?

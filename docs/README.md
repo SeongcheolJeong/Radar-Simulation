@@ -42,6 +42,8 @@ For generated evidence and outputs, use:
   - [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)
   - [Graph Lab Live Checklist](306_graph_lab_live_checklist.md)
   - [Graph Lab 실사용 체크리스트](307_graph_lab_live_checklist_ko.md)
+- [Graph Lab Document Map](322_graph_lab_doc_map.md)
+- [Graph Lab 문서 맵](323_graph_lab_doc_map_ko.md)
 - canonical validation packs:
   - [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
   - [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
