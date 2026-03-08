@@ -18,6 +18,8 @@ If you want button meaning by task instead of a full walkthrough, use [Classic D
 
 If you want a fast reading guide for result, compare, regression, and export panels, use [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md).
 
+If you need to diagnose a failed or stale-looking dashboard state, use [Classic Dashboard Failure Reading Guide](316_classic_dashboard_failure_reading_guide.md).
+
 ## Start The Dashboard
 
 Run:

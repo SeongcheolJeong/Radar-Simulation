@@ -16,6 +16,8 @@ If you need button meaning first, use [Classic Dashboard Button Scenario Guide](
 
 If you need the shortest click order, use [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md).
 
+If one of these flows failed, use [Classic Dashboard Failure Reading Guide](316_classic_dashboard_failure_reading_guide.md).
+
 ## Screen Reference
 
 Full layout:

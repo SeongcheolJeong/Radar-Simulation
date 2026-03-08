@@ -17,6 +17,8 @@
 
 화면은 채워졌지만 result 영역을 어떻게 읽어야 할지 모르겠으면 [Classic Dashboard Result / Evidence Quick Guide](315_classic_dashboard_result_evidence_quick_guide_ko.md)를 보십시오.
 
+중간 단계가 실패하면 [Classic Dashboard 실패 읽기 가이드](317_classic_dashboard_failure_reading_guide_ko.md)를 보십시오.
+
 ## Dashboard 열기
 
 실행:

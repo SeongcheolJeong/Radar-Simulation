@@ -17,6 +17,8 @@ If you want button meaning by scenario, use [Classic Dashboard Button Scenario G
 
 If the dashboard is populated but you are not sure how to read the result areas, use [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md).
 
+If one step fails, use [Classic Dashboard Failure Reading Guide](316_classic_dashboard_failure_reading_guide.md).
+
 ## Open The Dashboard
 
 Run:
