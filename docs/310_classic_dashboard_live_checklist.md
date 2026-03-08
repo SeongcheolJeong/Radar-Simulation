@@ -13,6 +13,8 @@ This is the shortest practical checklist for:
 
 For the fuller explanation, use [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md).
 
+If you want button meaning by scenario, use [Classic Dashboard Button Scenario Guide](312_classic_dashboard_button_scenario_guide.md).
+
 ## Open The Dashboard
 
 Run:

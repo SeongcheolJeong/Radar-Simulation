@@ -14,6 +14,8 @@ For the shortest live sequence, use [Frontend Dashboard Usage](116_frontend_dash
 
 If you want a follow-along checklist while the dashboard is open, use [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md).
 
+If you want button meaning by task instead of a full walkthrough, use [Classic Dashboard Button Scenario Guide](312_classic_dashboard_button_scenario_guide.md).
+
 ## Start The Dashboard
 
 Run:
@@ -166,5 +168,7 @@ The dashboard path is usually healthy if:
 
 - [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)
 - [Classic Dashboard UX Manual (Korean)](309_classic_dashboard_ux_manual_ko.md)
+- [Classic Dashboard Button Scenario Guide](312_classic_dashboard_button_scenario_guide.md)
+- [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md)
 - [Graph Lab UX Manual](300_graph_lab_ux_manual.md)
 - [Generated Reports Index](reports/README.md)

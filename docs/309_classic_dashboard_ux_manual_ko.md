@@ -14,6 +14,8 @@
 
 dashboard를 열어 둔 상태에서 바로 따라가려면 [Classic Dashboard 실사용 체크리스트](311_classic_dashboard_live_checklist_ko.md)를 보면 됩니다.
 
+전체 walkthrough보다 버튼 의미를 작업 기준으로 바로 보고 싶으면 [Classic Dashboard 버튼 시나리오 가이드](313_classic_dashboard_button_scenario_guide_ko.md)를 보면 됩니다.
+
 ## Dashboard 실행
 
 실행:
@@ -166,5 +168,7 @@ PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099
 
 - [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)
 - [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md)
+- [Classic Dashboard 버튼 시나리오 가이드](313_classic_dashboard_button_scenario_guide_ko.md)
+- [Classic Dashboard 실사용 체크리스트](311_classic_dashboard_live_checklist_ko.md)
 - [Graph Lab UX 사용 매뉴얼](301_graph_lab_ux_manual_ko.md)
 - [Generated Reports Index](reports/README.md)

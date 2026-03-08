@@ -13,6 +13,8 @@
 
 더 자세한 설명은 [Classic Dashboard UX 사용 매뉴얼](309_classic_dashboard_ux_manual_ko.md)을 보면 됩니다.
 
+버튼 의미를 시나리오별로 바로 보고 싶으면 [Classic Dashboard 버튼 시나리오 가이드](313_classic_dashboard_button_scenario_guide_ko.md)를 보면 됩니다.
+
 ## Dashboard 열기
 
 실행:

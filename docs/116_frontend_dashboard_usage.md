@@ -16,6 +16,8 @@ For a button-by-button manual of the classic dashboard, use [Classic Dashboard U
 
 If you want the shortest click-by-click checklist while the dashboard is open, use [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md).
 
+If you want button meaning by task instead of a full walkthrough, use [Classic Dashboard Button Scenario Guide](312_classic_dashboard_button_scenario_guide.md).
+
 ## Run
 
 Recommended:
