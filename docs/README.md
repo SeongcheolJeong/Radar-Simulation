@@ -40,6 +40,8 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 
 ## By Role
 
+<a id="role-operator"></a>
+
 ### Operator
 
 Start with:
@@ -53,6 +55,8 @@ Use these when you need to run the frontend, compare tracks, inspect artifacts, 
 Evidence next:
 
 - [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist)
+
+<a id="role-classic-dashboard-user"></a>
 
 ### Classic Dashboard User
 
@@ -68,6 +72,8 @@ Evidence next:
 
 - [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist)
 
+<a id="role-developer"></a>
+
 ### Developer
 
 Start with:
@@ -77,6 +83,8 @@ Start with:
 - [Output Contracts](02_output_contracts.md)
 
 Use these when you need repository structure, module boundaries, and implementation contracts before changing code.
+
+<a id="role-validator"></a>
 
 ### Validator
 
@@ -92,6 +100,8 @@ Evidence next:
 
 - [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist)
 - [PO-SBR Evidence Checklist](reports/README.md#po-sbr-evidence-checklist)
+
+<a id="role-paid-radarsimpy-validator"></a>
 
 ### Paid RadarSimPy Validator
 
