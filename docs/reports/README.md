@@ -56,6 +56,8 @@ Related snapshot guide:
 | latest UI evidence | `graph_lab_playwright_snapshots/latest/` | screenshots and exported decision brief |
 | frontend runtime payload contract | `frontend_runtime_payload_provider_info_optional_latest.json` | current optional/runtime contract summary |
 | paid RadarSimPy frontend/runtime contract | `frontend_runtime_payload_provider_info_paid_6m.json` | paid runtime-oriented frontend payload evidence |
+| Sionna-style RT parity evidence | `scene_backend_parity_sionna_rt_latest.json` | current analytic-vs-sionna parity summary |
+| PO-SBR parity evidence | `scene_backend_parity_po_sbr_rt_latest.json` | current analytic-vs-PO-SBR parity summary |
 | latest RadarSimPy overall status | `radarsimpy_final_status_latest.json` | single status-style entry point for RadarSimPy work |
 
 ## By Role From docs/
@@ -317,6 +319,12 @@ Escalate to role:
 - `po_sbr_local_ready_*`
 - `po_sbr_physical_full_track_*`
 - `po_sbr_operator_handoff_closure_*`
+- `scene_backend_parity_po_sbr_rt_*`
+
+### High-Fidelity Backend Parity
+
+- `scene_backend_parity_sionna_rt_*`
+- `scene_backend_parity_po_sbr_rt_*`
 
 ### Integration And Campaign Runs
 

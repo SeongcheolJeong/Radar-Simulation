@@ -1,0 +1,64 @@
+{
+  "report_name": "scene_backend_parity_po_sbr_rt",
+  "generated_at_utc": "2026-03-08T09:02:50.924060+00:00",
+  "case_name": "po_sbr_rt",
+  "output_root": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/scene_backend_parity_po_sbr_rt_latest",
+  "raw_summary_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/scene_backend_parity_po_sbr_rt_latest/scene_backend_parity_summary.json",
+  "reference_scene_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/scene_backend_parity_po_sbr_rt_latest/scenes/scene_analytic_reference.json",
+  "candidate_scene_json": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/scene_backend_parity_po_sbr_rt_latest/scenes/scene_po_sbr_candidate.json",
+  "reference_backend_type": "analytic_targets",
+  "candidate_backend_type": "po_sbr_rt",
+  "reference_radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/scene_backend_parity_po_sbr_rt_latest/reference/radar_map.npz",
+  "candidate_radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/runtime_golden_path/scene_backend_parity_po_sbr_rt_latest/candidate/radar_map.npz",
+  "parity": {
+    "pass": true,
+    "metrics": {
+      "rd_peak_doppler_bin_abs_error": 0.0,
+      "rd_peak_range_bin_abs_error": 0.0,
+      "rd_peak_power_db_abs_error": 0.0,
+      "rd_centroid_doppler_bin_abs_error": 0.0,
+      "rd_centroid_range_bin_abs_error": 0.0,
+      "rd_spread_doppler_rel_error": 0.0,
+      "rd_spread_range_rel_error": 0.0,
+      "rd_shape_nmse": 0.0,
+      "ra_peak_angle_bin_abs_error": 0.0,
+      "ra_peak_range_bin_abs_error": 0.0,
+      "ra_peak_power_db_abs_error": 0.0,
+      "ra_centroid_angle_bin_abs_error": 0.0,
+      "ra_centroid_range_bin_abs_error": 0.0,
+      "ra_spread_angle_rel_error": 0.0,
+      "ra_spread_range_rel_error": 0.0,
+      "ra_shape_nmse": 0.0
+    },
+    "thresholds": {
+      "rd_peak_doppler_bin_abs_error_max": 1.0,
+      "rd_peak_range_bin_abs_error_max": 1.0,
+      "rd_peak_power_db_abs_error_max": 3.0,
+      "rd_centroid_doppler_bin_abs_error_max": 1.5,
+      "rd_centroid_range_bin_abs_error_max": 1.5,
+      "rd_spread_doppler_rel_error_max": 0.35,
+      "rd_spread_range_rel_error_max": 0.35,
+      "rd_shape_nmse_max": 0.25,
+      "ra_peak_angle_bin_abs_error_max": 1.0,
+      "ra_peak_range_bin_abs_error_max": 1.0,
+      "ra_peak_power_db_abs_error_max": 3.0,
+      "ra_centroid_angle_bin_abs_error_max": 1.5,
+      "ra_centroid_range_bin_abs_error_max": 1.5,
+      "ra_spread_angle_rel_error_max": 0.35,
+      "ra_spread_range_rel_error_max": 0.35,
+      "ra_shape_nmse_max": 0.25
+    },
+    "failures": [],
+    "rd_reference_key": "fx_dop_win",
+    "rd_candidate_key": "fx_dop_win",
+    "rd_shape": [
+      64,
+      128
+    ],
+    "ra_shape": [
+      32,
+      128
+    ]
+  },
+  "pass": true
+}

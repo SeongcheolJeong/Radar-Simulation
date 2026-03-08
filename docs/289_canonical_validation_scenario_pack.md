@@ -26,8 +26,8 @@ Use it to answer four questions in a repeatable order:
 | `FE-1` | Graph Lab browser/operator flow | `.venv`, Playwright browsers | `scripts/validate_graph_lab_playwright_e2e.py` | `graph_lab_playwright_e2e_latest.json`, `graph_lab_playwright_snapshots/latest/`, `frontend_quickstart_v1.json` |
 | `FE-2` | frontend runtime payload -> provider info contract | `.venv`, local RadarSimPy runtime assets | `scripts/validate_frontend_runtime_payload_provider_info_optional.py --require-runtime` | `frontend_runtime_payload_provider_info_optional_latest.json` |
 | `RS-1` | trial-runtime layered parity | `.venv`, RadarSimPy trial bundle | `scripts/run_radarsimpy_layered_parity_suite.py --require-runtime-trial` | `radarsimpy_layered_parity_suite_trial_latest.json`, `radarsimpy_layered_parity_trial_latest.json` |
-| `HF-1` | Sionna-style RT parity contract | `.venv` or `.venv-sionna311` | `scripts/validate_scene_backend_parity_sionna_rt.py` | console `pass` only |
-| `HF-2` | PO-SBR parity/readiness path | `.venv` or `.venv-po-sbr` | `scripts/validate_scene_backend_parity_po_sbr_rt.py`, `scripts/run_po_sbr_post_change_gate.py --strict` | `po_sbr_post_change_gate_*.json`, optional `po_sbr_progress_snapshot_manual.json` |
+| `HF-1` | Sionna-style RT parity contract | `.venv` or `.venv-sionna311` | `scripts/run_scene_backend_parity_sionna_rt.py` | `scene_backend_parity_sionna_rt_latest.json` |
+| `HF-2` | PO-SBR parity/readiness path | `.venv` or `.venv-po-sbr` | `scripts/run_scene_backend_parity_po_sbr_rt.py`, `scripts/run_po_sbr_post_change_gate.py --strict` | `scene_backend_parity_po_sbr_rt_latest.json`, `po_sbr_post_change_gate_*.json`, optional `po_sbr_progress_snapshot_manual.json` |
 | `RS-2` | paid RadarSimPy production closure | `.venv`, paid `.lic`, runtime bundle | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` | `radarsimpy_*_paid_6m.json`, `frontend_runtime_payload_provider_info_paid_6m.json` |
 
 ## Recommended Order
@@ -139,20 +139,18 @@ Use this when:
 Run:
 
 ```bash
-PYTHONPATH=src .venv/bin/python scripts/validate_scene_backend_parity_sionna_rt.py
+PYTHONPATH=src .venv/bin/python \
+  scripts/run_scene_backend_parity_sionna_rt.py \
+  --output-json docs/reports/scene_backend_parity_sionna_rt_latest.json
 ```
 
 Expect:
 
-- console output ending with `validate_scene_backend_parity_sionna_rt: pass`
+- `docs/reports/scene_backend_parity_sionna_rt_latest.json`
 
 Pass means:
 
 - the analytic reference scene and the `sionna_rt` candidate scene still satisfy the current parity contract
-
-Note:
-
-- this validator writes temporary artifacts under a temp directory and does not currently publish a stable report file into `docs/reports/`
 
 ### HF-2: PO-SBR Parity And Readiness
 
@@ -165,7 +163,9 @@ Use this when:
 Run:
 
 ```bash
-PYTHONPATH=src .venv/bin/python scripts/validate_scene_backend_parity_po_sbr_rt.py
+PYTHONPATH=src .venv/bin/python \
+  scripts/run_scene_backend_parity_po_sbr_rt.py \
+  --output-json docs/reports/scene_backend_parity_po_sbr_rt_latest.json
 PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --strict
 PYTHONPATH=src .venv/bin/python \
   scripts/show_po_sbr_progress.py \
@@ -175,7 +175,7 @@ PYTHONPATH=src .venv/bin/python \
 
 Expect:
 
-- console output ending with `validate_scene_backend_parity_po_sbr_rt: pass`
+- `docs/reports/scene_backend_parity_po_sbr_rt_latest.json`
 - `docs/reports/po_sbr_progress_snapshot_manual.json`
 - latest `docs/reports/po_sbr_post_change_gate_*.json`
 
@@ -259,8 +259,8 @@ Add `HF-1` when the Sionna-style path is part of the candidate release story.
 
 ## Current Gap
 
-The scenario pack is now defined and bound to concrete commands, but one gap remains:
+The main remaining gap is no longer scenario definition. It is release execution:
 
-- `HF-1` and the parity part of `HF-2` still use temp-dir validators instead of stable `docs/reports/*_latest.json` artifacts
-
-If release packaging needs persistent high-fidelity evidence, promote those parity validators into stable-report runners next.
+- run the release-candidate subset in one controlled pass
+- refresh the resulting stable reports together
+- decide whether `HF-1` is required in the default release story or remains optional
