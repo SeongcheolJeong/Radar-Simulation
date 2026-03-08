@@ -17,6 +17,12 @@ Use this page to find the right report instead of opening old JSON files at rand
   - live in `docs/reports/`
   - are outputs from validators, gates, demos, runtime runs, and release scripts
 
+Quick meaning:
+
+- `manual=explanation`
+- `generated=evidence`
+- `baseline=reference-only`
+
 If you want explanation, read:
 
 - [Documentation Index](../README.md)
