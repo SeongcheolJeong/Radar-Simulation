@@ -16,6 +16,8 @@ This document focuses on `Graph Lab`.
 
 For the lightweight demo shell, use [Frontend Dashboard Usage](116_frontend_dashboard_usage.md).
 
+If you want the shortest click-by-click checklist while the UI is open, use [Graph Lab Live Checklist](306_graph_lab_live_checklist.md).
+
 ## Start Graph Lab
 
 Run:

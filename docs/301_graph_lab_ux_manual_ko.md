@@ -16,6 +16,8 @@
 
 가벼운 demo shell은 [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)를 사용하면 됩니다.
 
+화면을 켜 둔 상태에서 가장 짧은 순서만 따라가려면 [Graph Lab 실사용 체크리스트](307_graph_lab_live_checklist_ko.md)를 사용하면 됩니다.
+
 ## Graph Lab 실행
 
 실행:
