@@ -33,6 +33,8 @@ For generated evidence and outputs, use:
 - [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md)
 - [Classic Dashboard Failure Reading Guide](316_classic_dashboard_failure_reading_guide.md)
 - [Classic Dashboard Status Field Guide](318_classic_dashboard_status_field_guide.md)
+- [Classic Dashboard Document Map](320_classic_dashboard_doc_map.md)
+- [Classic Dashboard 문서 맵](321_classic_dashboard_doc_map_ko.md)
   - [Classic Dashboard 버튼 시나리오 가이드](313_classic_dashboard_button_scenario_guide_ko.md)
   - [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
   - [Graph Lab 버튼 시나리오 가이드](303_graph_lab_button_scenario_guide_ko.md)

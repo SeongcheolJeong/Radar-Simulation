@@ -20,6 +20,8 @@ If you want button meaning by task instead of a full walkthrough, use [Classic D
 
 If you want a quick guide for reading result, compare, regression, and export evidence areas, use [Classic Dashboard Result And Evidence Quick Guide](314_classic_dashboard_result_evidence_quick_guide.md).
 
+If you are not sure which classic dashboard document to open first, use [Classic Dashboard Document Map](320_classic_dashboard_doc_map.md).
+
 ## Run
 
 Recommended:

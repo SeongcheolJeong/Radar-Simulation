@@ -22,6 +22,8 @@ If you need to diagnose a failed or stale-looking dashboard state, use [Classic 
 
 If you want a compact explanation of each status line and export path box, use [Classic Dashboard Status Field Guide](318_classic_dashboard_status_field_guide.md).
 
+If you are not sure which classic dashboard document to open first, use [Classic Dashboard Document Map](320_classic_dashboard_doc_map.md).
+
 ## Start The Dashboard
 
 Run:
