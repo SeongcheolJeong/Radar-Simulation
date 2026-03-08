@@ -138,6 +138,7 @@ Graph Lab is the main operator UI for runtime selection, compare workflows, arti
 Related:
 
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
+- [Graph Lab UX Manual](docs/300_graph_lab_ux_manual.md)
 - [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
 - [프로젝트 개요 및 빠른 시작 (한국어)](README_ko.md)
 
@@ -287,6 +288,7 @@ Graph Lab is the main frontend for interactive operation:
 Related docs:
 
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
+- [Graph Lab UX Manual](docs/300_graph_lab_ux_manual.md)
 - [Frontend Dashboard Usage](docs/116_frontend_dashboard_usage.md)
 
 ### Runtime Tracks
