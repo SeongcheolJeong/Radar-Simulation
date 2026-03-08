@@ -33,6 +33,8 @@ Use both:
 2. `docs/282_project_structure_and_user_manual.md`
    - best place for the full user manual
    - detailed structure, install steps, usage flows, troubleshooting
+3. `docs/283_project_structure_and_user_manual_ko.md`
+   - Korean detailed manual for user onboarding
 
 This repository now uses that structure.
 
@@ -52,6 +54,7 @@ tests/          Test data and fixture-oriented test assets
 Detailed breakdown:
 
 - [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
+- [프로젝트 구조 및 사용자 매뉴얼 (한국어)](docs/283_project_structure_and_user_manual_ko.md)
 - [Architecture](docs/03_architecture.md)
 
 ## Quick Start
@@ -156,6 +159,7 @@ The main pipeline writes:
 Read the full manual here:
 
 - [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
+- [프로젝트 구조 및 사용자 매뉴얼 (한국어)](docs/283_project_structure_and_user_manual_ko.md)
 
 It covers:
 
