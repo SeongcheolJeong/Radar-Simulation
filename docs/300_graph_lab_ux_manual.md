@@ -146,6 +146,7 @@ When `PO-SBR` is selected, read the warning under `Purpose Presets`:
 - use `.venv-po-sbr`
 - expect Linux + NVIDIA
 - prefer `Sionna-style RT` for interactive checks
+- verify the current runtime verdict in [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json)
 
 ### Multiplexing Controls
 
@@ -267,6 +268,7 @@ Use this when you want the standard operator workflow.
 3. Switch to the target high-fidelity path:
    - click `High Fidelity: Sionna-style RT`
    - or click `High Fidelity: PO-SBR`
+   - if uncertain, verify the current recommendation in [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json)
 4. Fill any required advanced runtime inputs if the preset leaves them incomplete.
 5. Click `Run Graph (API)` again.
 6. Read:

@@ -143,6 +143,7 @@ Artifact Inspector 예시:
 - `.venv-po-sbr`로 Graph Lab 실행
 - Linux + NVIDIA 전제
 - interactive check는 먼저 `Sionna-style RT`, full `PO-SBR`는 전용 검증에서 사용
+- 현재 runtime 판단은 [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json)에서 확인
 
 ## 오른쪽 패널: Decision Pane
 
@@ -242,6 +243,7 @@ Artifact Inspector 예시:
 3. target high-fidelity path 선택
    - `High Fidelity: Sionna-style RT`
    - 또는 `High Fidelity: PO-SBR`
+   - 현재 추천 경로가 헷갈리면 [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json) 먼저 확인
 4. 필요하면 advanced runtime 입력 보완
 5. `Run Graph (API)` 다시 실행
 6. 아래를 읽기

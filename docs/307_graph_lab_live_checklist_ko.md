@@ -126,6 +126,10 @@ PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101
 
 interactive check는 먼저 `Sionna-style RT`, full `PO-SBR`는 `.venv-po-sbr`에서의 전용 검증으로 보는 것이 맞습니다.
 
+참고:
+
+- [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json)
+
 ### C3. 다시 실행
 
 클릭:

@@ -126,6 +126,10 @@ Click one:
 
 Use `Sionna-style RT` first for interactive high-fidelity checks. Move to full `PO-SBR` only when Graph Lab is running from `.venv-po-sbr` and you are prepared for a longer run.
 
+Reference:
+
+- [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json)
+
 ### C3. Run Again
 
 Click:
