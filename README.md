@@ -123,6 +123,7 @@ Check these reports next:
 | --- | --- | --- |
 | new to the repository | [First 10 Minutes](#first-10-minutes) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
 | a frontend operator | [Track A: Graph Lab](#graph-lab-track) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
+| a lightweight demo or presentation user | [Track B: Classic Dashboard](#classic-dashboard-track) | `scripts/run_web_e2e_dashboard_local.sh`, `docs/reports/frontend_quickstart_v1.json` |
 | a backend or validation developer | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
 | validating paid RadarSimPy runtime | [Paid RadarSimPy Production Validation](#paid-radarsimpy-production-validation) | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md), `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | unsure which runtime to install | [Install Onboarding Map](docs/288_install_onboarding_map.md) | the guide chosen by your goal |

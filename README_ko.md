@@ -125,6 +125,7 @@ PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh
 | --- | --- | --- |
 | 저장소를 처음 보는 사용자 | [처음 10분](#first-10-minutes-ko) | [Install Onboarding Map](docs/288_install_onboarding_map.md) |
 | frontend operator | [경로 A: Graph Lab](#graph-lab-track-ko) | `scripts/run_graph_lab_local.sh`, [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md) |
+| 가벼운 demo 또는 프레젠테이션 화면이 필요한 사용자 | [경로 B: Classic Dashboard](#classic-dashboard-track-ko) | `scripts/run_web_e2e_dashboard_local.sh`, `docs/reports/frontend_quickstart_v1.json` |
 | backend / validation 개발자 | [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md) | `src/avxsim`, `scripts/validate_*`, `scripts/run_*` |
 | 유료 RadarSimPy runtime 검증 담당 | [유료 RadarSimPy Production Validation](#paid-radarsimpy-production-validation-ko) | [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md), `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | 어떤 runtime 설치 경로를 골라야 할지 모름 | [Install Onboarding Map](docs/288_install_onboarding_map.md) | 목적에 맞는 설치 가이드 |
