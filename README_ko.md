@@ -26,7 +26,7 @@
 
 ## 처음 10분
 
-가장 짧은 성공 경로는 아래입니다.
+먼저 공통으로 아래를 실행합니다.
 
 1. 기본 환경 생성
 
@@ -43,17 +43,46 @@ python -m pip install numpy matplotlib
 PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py
 ```
 
-3. Graph Lab 실행
+그 다음 두 경로 중 하나를 고르면 됩니다.
+
+### 경로 A: Graph Lab
+
+실행:
 
 ```bash
 PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101
 ```
 
-4. 브라우저 열기
+브라우저:
 
 - `http://127.0.0.1:8081/frontend/graph_lab_reactflow.html?api=http://127.0.0.1:8101`
 
-여기까지 성공하면 다음 문서로 진행하면 됩니다.
+이 경로는 아래 목적에 맞습니다.
+
+- runtime 선택
+- compare workflow
+- artifact inspection
+- decision brief export
+
+### 경로 B: Classic Dashboard
+
+실행:
+
+```bash
+PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099
+```
+
+브라우저:
+
+- `http://127.0.0.1:8080/frontend/avx_like_dashboard.html?summary=/docs/reports/frontend_quickstart_v1.json&api=http://127.0.0.1:8099`
+
+이 경로는 아래 목적에 맞습니다.
+
+- 가장 단순한 demo shell
+- 빠른 API/dashboard smoke path
+- 가벼운 프레젠테이션 화면
+
+둘 중 하나라도 성공하면 다음 문서로 진행하면 됩니다.
 
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)

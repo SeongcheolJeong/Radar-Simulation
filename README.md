@@ -24,7 +24,7 @@ Explanation vs evidence:
 
 ## First 10 Minutes
 
-If you want the shortest successful path:
+Do this once first:
 
 1. create the base environment
 
@@ -41,17 +41,46 @@ python -m pip install numpy matplotlib
 PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py
 ```
 
-3. run Graph Lab
+Then choose one track:
+
+### Track A: Graph Lab
+
+Run:
 
 ```bash
 PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101
 ```
 
-4. open:
+Open:
 
 - `http://127.0.0.1:8081/frontend/graph_lab_reactflow.html?api=http://127.0.0.1:8101`
 
-If that works, continue with:
+Use this when you want:
+
+- runtime selection
+- compare workflows
+- artifact inspection
+- decision brief export
+
+### Track B: Classic Dashboard
+
+Run:
+
+```bash
+PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099
+```
+
+Open:
+
+- `http://127.0.0.1:8080/frontend/avx_like_dashboard.html?summary=/docs/reports/frontend_quickstart_v1.json&api=http://127.0.0.1:8099`
+
+Use this when you want:
+
+- the simplest demo shell
+- a quick API/dashboard smoke path
+- a lightweight presentation view
+
+If either track works, continue with:
 
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
