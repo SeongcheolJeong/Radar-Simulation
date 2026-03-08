@@ -101,6 +101,12 @@ Healthy if:
 - `frontend_runtime_payload_provider_info_optional_latest.json` stays consistent with the current backend/runtime contract
 - `frontend_quickstart_v1.json` still represents a usable demo/API path
 
+Usually unhealthy because:
+
+- the browser E2E regressed even though the API is still alive, which usually points at Graph Lab UI flow drift
+- the frontend/runtime payload report no longer matches expectations, which usually points at backend contract or override-builder changes
+- the quick demo summary no longer looks usable, which usually points at local server bootstrap or demo-route wiring problems
+
 If this checklist fails, open next:
 
 - `graph_lab_playwright_snapshots/latest/decision_brief.md`
@@ -147,6 +153,12 @@ Healthy if:
 - `radarsimpy_readiness_checkpoint_latest.json` is ready/pass
 - wrapper integration and integration smoke reports both stay passing
 
+Usually unhealthy because:
+
+- production gate or readiness no longer reports ready/pass, which usually points at runtime availability, license access, or environment drift
+- wrapper integration fails while final status was previously green, which usually points at coupling or provider-contract regressions
+- smoke gate fails after wrapper integration passes, which usually points at runtime execution drift rather than pure wiring
+
 If this checklist fails, open next:
 
 - `radarsimpy_production_release_gate_latest.json`
@@ -192,6 +204,12 @@ Healthy if:
 - the progress snapshot shows required checkpoints ready
 - the operator handoff closure remains complete
 - local-ready regression and baseline drift stay within the accepted envelope
+
+Usually unhealthy because:
+
+- the strict post-change gate stopped passing, which usually points at runtime-affecting contract drift
+- the progress snapshot no longer shows required checkpoints ready, which usually means the closure set is incomplete
+- local-ready regression or baseline drift moved out of envelope, which usually indicates physical-output or acceptance-threshold drift
 
 If this checklist fails, open next:
 
