@@ -100,6 +100,13 @@ If this checklist fails, open next:
 - `graph_lab_playwright_snapshots/latest/`
 - `frontend_runtime_payload_provider_info_optional_latest.json`
 
+Reproduce with:
+
+- `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py`
+- `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers PYTHONPATH=src .venv/bin/python scripts/validate_graph_lab_playwright_e2e.py --require-playwright --output-json docs/reports/graph_lab_playwright_e2e_latest.json`
+- `PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101`
+- `PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099`
+
 <a id="radarsimpy-evidence-checklist"></a>
 
 ### RadarSimPy
@@ -133,6 +140,12 @@ If this checklist fails, open next:
 - `radarsimpy_wrapper_integration_gate_production_latest.json`
 - `radarsimpy_integration_smoke_gate_production_latest.json`
 
+Reproduce with:
+
+- `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_wrapper_integration_gate.py --output-summary-json docs/reports/radarsimpy_wrapper_integration_gate_manual.json`
+- `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_integration_smoke_gate.py --output-summary-json docs/reports/radarsimpy_integration_smoke_gate_manual.json`
+- `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh`
+
 <a id="po-sbr-evidence-checklist"></a>
 
 ### PO-SBR
@@ -165,6 +178,10 @@ If this checklist fails, open next:
 - `po_sbr_operator_handoff_closure_2026_03_01.json`
 - `po_sbr_local_ready_regression_2026_03_01_pc_self.json`
 - `po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json`
+
+Reproduce with:
+
+- `PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --strict`
 
 ## Common Report Families
 
