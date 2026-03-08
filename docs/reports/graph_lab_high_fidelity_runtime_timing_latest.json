@@ -1,0 +1,82 @@
+{
+  "version": "graph_lab_high_fidelity_runtime_timing_v1",
+  "generated_at_utc": "2026-03-08T13:46:31Z",
+  "api_base": "http://127.0.0.1:8101",
+  "template_id": "radar_minimal_v1",
+  "scene_json_path": "/home/seongcheoljeong/workspace/myproject/data/demo/frontend_quickstart_v1/scene_frontend_quickstart.json",
+  "profile": "fast_debug",
+  "interactive_budget_s": 10.0,
+  "po_sbr_wait_budget_s": 30.0,
+  "measures_api_triggered_graph_runs": true,
+  "browser_click_latency_included": false,
+  "api_health": {
+    "ok": true,
+    "repo_root": "/home/seongcheoljeong/workspace/myproject",
+    "store_root": "/home/seongcheoljeong/workspace/myproject/data/web_e2e",
+    "run_count": 0,
+    "comparison_count": 0,
+    "baseline_count": 0,
+    "policy_eval_count": 0,
+    "regression_session_count": 0,
+    "regression_export_count": 0,
+    "graph_template_count": 1,
+    "graph_run_count": 22
+  },
+  "cases": {
+    "high_fidelity_sionna_rt": {
+      "mode": "sync",
+      "graph_run_id": "grun_20260308_134625_5045e97d",
+      "http_status": 200,
+      "status": "completed",
+      "elapsed_wall_s": 0.599,
+      "interactive_budget_s": 10.0,
+      "interactive_ready": true,
+      "summary_json": "/home/seongcheoljeong/workspace/myproject/data/web_e2e/graph_runs/grun_20260308_134625_5045e97d/graph_run_summary.json",
+      "path_list_json": "/home/seongcheoljeong/workspace/myproject/data/web_e2e/graph_runs/grun_20260308_134625_5045e97d/output/path_list.json",
+      "adc_cube_npz": "/home/seongcheoljeong/workspace/myproject/data/web_e2e/graph_runs/grun_20260308_134625_5045e97d/output/adc_cube.npz",
+      "radar_map_npz": "/home/seongcheoljeong/workspace/myproject/data/web_e2e/graph_runs/grun_20260308_134625_5045e97d/output/radar_map.npz",
+      "lgit_customized_output_npz": "/home/seongcheoljeong/workspace/myproject/data/web_e2e/graph_runs/grun_20260308_134625_5045e97d/output/lgit_customized_output.npz",
+      "path_count_total": 48,
+      "adc_shape": [
+        1024,
+        16,
+        2,
+        4
+      ],
+      "rd_shape": [
+        64,
+        256
+      ],
+      "ra_shape": [
+        32,
+        256
+      ]
+    },
+    "high_fidelity_po_sbr_rt": {
+      "mode": "async_timeout_bounded",
+      "graph_run_id": "grun_20260308_134626_bdc84663",
+      "http_status": 202,
+      "status": "failed",
+      "elapsed_wall_s": 5.207,
+      "interactive_budget_s": 10.0,
+      "wait_budget_s": 30.0,
+      "interactive_ready": false,
+      "timed_out": false,
+      "cancel_http_status": null,
+      "recoverable": true,
+      "retry_endpoint": "/api/graph/runs/grun_20260308_134626_bdc84663/retry",
+      "cancel_requested": false,
+      "cancel_reason": null,
+      "failure_type": "ValueError",
+      "failure_message": "po_sbr_rt runtime provider failed: ",
+      "error": "ValueError: po_sbr_rt runtime provider failed: "
+    }
+  },
+  "summary": {
+    "recommended_interactive_high_fidelity_path": "sionna_rt",
+    "sionna_completed": true,
+    "po_sbr_completed": false,
+    "po_sbr_interactive_ready": false,
+    "po_sbr_note": "PO-SBR remains a dedicated-env, longer-running validation path unless this report flips to completed within budget."
+  }
+}

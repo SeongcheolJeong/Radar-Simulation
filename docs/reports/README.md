@@ -54,6 +54,7 @@ Related snapshot guide:
 | quick frontend/demo status | `frontend_quickstart_v1.json` | small summary for local demo/backend wiring |
 | latest browser E2E status | `graph_lab_playwright_e2e_latest.json` | current Graph Lab end-to-end result |
 | latest UI evidence | `graph_lab_playwright_snapshots/latest/` | screenshots and exported decision brief |
+| Graph Lab high-fidelity runtime timing | `graph_lab_high_fidelity_runtime_timing_latest.json` | current frontend/API timing verdict for Sionna-style RT vs PO-SBR |
 | frontend runtime payload contract | `frontend_runtime_payload_provider_info_optional_latest.json` | current optional/runtime contract summary |
 | paid RadarSimPy frontend/runtime contract | `frontend_runtime_payload_provider_info_paid_6m.json` | paid runtime-oriented frontend payload evidence |
 | Sionna-style RT parity evidence | `scene_backend_parity_sionna_rt_latest.json` | current analytic-vs-sionna parity summary |
@@ -96,13 +97,15 @@ Open these first:
 
 1. `graph_lab_playwright_e2e_latest.json`
 2. `graph_lab_playwright_snapshots/latest/`
-3. `frontend_runtime_payload_provider_info_optional_latest.json`
-4. `frontend_quickstart_v1.json`
+3. `graph_lab_high_fidelity_runtime_timing_latest.json`
+4. `frontend_runtime_payload_provider_info_optional_latest.json`
+5. `frontend_quickstart_v1.json`
 
 You should be able to answer:
 
 - does the current browser E2E pass
 - do the latest screenshots and decision brief look correct
+- is the current interactive high-fidelity path still `Sionna-style RT` and not `PO-SBR`
 - does the frontend/runtime payload contract still match the backend
 - does the quick demo path still produce a usable summary
 
@@ -110,12 +113,14 @@ Healthy if:
 
 - `graph_lab_playwright_e2e_latest.json` shows a passing current browser run
 - `graph_lab_playwright_snapshots/latest/` reflects the current UI and exported decision brief
+- `graph_lab_high_fidelity_runtime_timing_latest.json` shows `high_fidelity_sionna_rt` as completed within budget and keeps `PO-SBR` out of the interactive-ready path unless that release story changes
 - `frontend_runtime_payload_provider_info_optional_latest.json` stays consistent with the current backend/runtime contract
 - `frontend_quickstart_v1.json` still represents a usable demo/API path
 
 Usually unhealthy because:
 
 - the browser E2E regressed even though the API is still alive, which usually points at Graph Lab UI flow drift
+- the high-fidelity timing report no longer matches the release story, which usually points at runtime-environment drift or frontend preset changes
 - the frontend/runtime payload report no longer matches expectations, which usually points at backend contract or override-builder changes
 - the quick demo summary no longer looks usable, which usually points at local server bootstrap or demo-route wiring problems
 
@@ -131,12 +136,14 @@ If this checklist fails, open next:
 
 - `graph_lab_playwright_snapshots/latest/decision_brief.md`
 - `graph_lab_playwright_snapshots/latest/`
+- `graph_lab_high_fidelity_runtime_timing_latest.json`
 - `frontend_runtime_payload_provider_info_optional_latest.json`
 
 Reproduce with:
 
 - `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py`
 - `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers PYTHONPATH=src .venv/bin/python scripts/validate_graph_lab_playwright_e2e.py --require-playwright --output-json docs/reports/graph_lab_playwright_e2e_latest.json`
+- `PYTHONPATH=src .venv/bin/python scripts/run_graph_lab_high_fidelity_runtime_timing.py --api-base http://127.0.0.1:8101 --output-json docs/reports/graph_lab_high_fidelity_runtime_timing_latest.json`
 - `PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101`
 - `PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099`
 
@@ -144,6 +151,7 @@ Expect refreshed evidence:
 
 - `graph_lab_playwright_e2e_latest.json`
 - `graph_lab_playwright_snapshots/latest/`
+- `graph_lab_high_fidelity_runtime_timing_latest.json`
 - `frontend_quickstart_v1.json`
 
 Escalate to role:
