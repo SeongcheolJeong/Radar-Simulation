@@ -1,7 +1,7 @@
 {
   "version": 1,
   "report_name": "radarsimpy_production_release_gate",
-  "generated_at_utc": "2026-03-08T10:06:36.811032+00:00",
+  "generated_at_utc": "2026-03-08T10:14:18.498340+00:00",
   "workspace_root": "/home/seongcheoljeong/workspace/myproject",
   "production_gate_status": "ready",
   "allow_blocked": false,
