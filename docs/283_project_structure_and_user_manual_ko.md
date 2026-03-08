@@ -21,6 +21,7 @@
 문서 허브:
 
 - [Documentation Index](README.md)
+- [Generated Reports Index](reports/README.md)
 
 ## 1. 이 프로젝트는 무엇인가
 

@@ -224,6 +224,10 @@ It covers:
 - reports and artifacts
 - troubleshooting
 
+Generated outputs:
+
+- [Generated Reports Index](docs/reports/README.md)
+
 ## Advanced / Production Validation
 
 For paid or production-grade RadarSimPy validation, see:

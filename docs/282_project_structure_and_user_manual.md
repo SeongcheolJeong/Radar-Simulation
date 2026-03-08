@@ -17,6 +17,7 @@ The root [README.md](../README.md) should stay short and act as the GitHub landi
 Documentation hub:
 
 - [Documentation Index](README.md)
+- [Generated Reports Index](reports/README.md)
 
 ## 1. What This Project Is
 

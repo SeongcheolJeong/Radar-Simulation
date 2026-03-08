@@ -64,11 +64,18 @@ If you are new to the repository, start here:
 
 ## Release Notes And Generated Reports
 
+- static docs index: this page
+- generated reports index: [Generated Reports Index](reports/README.md)
 - [Release Notes: RadarSimPy Frontend Multiplexing](279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md)
 - [Release One-Pager](280_release_one_pager_radarsimpy_2026_03_05.md)
 - [Release One-Pager (Korean)](281_release_one_pager_radarsimpy_2026_03_05_ko.md)
 - [Release Announcement Templates](282_release_announcement_templates_2026_03_05.md)
 - generated reports and screenshots: `docs/reports/`
+- stable report entry points:
+  - `docs/reports/frontend_quickstart_v1.json`
+  - `docs/reports/graph_lab_playwright_e2e_latest.json`
+  - `docs/reports/radarsimpy_final_status_latest.json`
+  - `docs/reports/graph_lab_playwright_snapshots/latest/`
 
 ## How To Read The Numbered Docs
 
