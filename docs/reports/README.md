@@ -94,6 +94,13 @@ You should be able to answer:
 - does the frontend/runtime payload contract still match the backend
 - does the quick demo path still produce a usable summary
 
+Healthy if:
+
+- `graph_lab_playwright_e2e_latest.json` shows a passing current browser run
+- `graph_lab_playwright_snapshots/latest/` reflects the current UI and exported decision brief
+- `frontend_runtime_payload_provider_info_optional_latest.json` stays consistent with the current backend/runtime contract
+- `frontend_quickstart_v1.json` still represents a usable demo/API path
+
 If this checklist fails, open next:
 
 - `graph_lab_playwright_snapshots/latest/decision_brief.md`
@@ -133,6 +140,13 @@ Use these to answer:
 - is the wrapper/provider integration still intact
 - does the smoke gate still pass in the current environment
 
+Healthy if:
+
+- `radarsimpy_final_status_latest.json` is green overall
+- `radarsimpy_production_release_gate_latest.json` is ready/pass
+- `radarsimpy_readiness_checkpoint_latest.json` is ready/pass
+- wrapper integration and integration smoke reports both stay passing
+
 If this checklist fails, open next:
 
 - `radarsimpy_production_release_gate_latest.json`
@@ -171,6 +185,13 @@ Use these to answer:
 - what is the current readiness/progress state
 - is the handoff/closure package complete
 - did local-ready regression and baseline drift stay within the accepted envelope
+
+Healthy if:
+
+- the post-change gate is ready/pass
+- the progress snapshot shows required checkpoints ready
+- the operator handoff closure remains complete
+- local-ready regression and baseline drift stay within the accepted envelope
 
 If this checklist fails, open next:
 
