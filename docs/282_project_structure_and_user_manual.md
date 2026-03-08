@@ -469,6 +469,10 @@ Use this when:
 - confirming production parity readiness
 - generating release-facing reports
 
+For the fixed release-candidate run order across frontend, low-fidelity, high-fidelity, and paid production checks, use:
+
+- [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
+
 ## 9. Troubleshooting
 
 ### API does not start

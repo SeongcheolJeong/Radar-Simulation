@@ -35,6 +35,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | run Graph Lab | [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) | `scripts/run_graph_lab_local.sh` |
 | run the classic dashboard | [Frontend Dashboard Usage](116_frontend_dashboard_usage.md) | `scripts/run_web_e2e_dashboard_local.sh` |
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
+| run the fixed release-candidate validation order | [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md) | the scenario commands and evidence files in that pack |
 | validate paid RadarSimPy production access | [RadarSimPy Runtime](285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | review release-facing evidence | [Generated Reports Index](reports/README.md) | release notes and one-pagers |
 
@@ -201,6 +202,7 @@ Start with:
 Start with:
 
 - [Validation Checkpoints](04_validation_checkpoints.md)
+- [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
 - [Parity Metrics Contract](13_parity_metrics_contract.md)
 - [Multi-Backend Parity Harness Contract](92_multi_backend_parity_harness_contract.md)
 - [Scene Backend Golden Path Contract](251_scene_backend_golden_path_contract.md)
