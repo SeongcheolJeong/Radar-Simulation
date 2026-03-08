@@ -1,0 +1,84 @@
+{
+  "version": "release_closure_handoff_bundle_v1",
+  "generated_at_utc": "2026-03-08T15:11:34.518508+00:00",
+  "repo_root": "/home/seongcheoljeong/workspace/myproject",
+  "git": {
+    "head_commit": "edea76cdfb6edc3613abc802c9c7e811fc8eb12d",
+    "head_commit_short": "edea76c",
+    "branch": "main",
+    "status_porcelain": "?? docs/reports/release_closure_handoff_bundle_latest.tar.gz\n?? scripts/build_release_closure_handoff_bundle.py"
+  },
+  "bundle_archive": {
+    "path": "docs/reports/release_closure_handoff_bundle_latest.tar.gz",
+    "size_bytes": 14754,
+    "sha256": "2ca2d0b6825969d6679d042eaf521e3828827fb217d850e0a467b214c70e855a"
+  },
+  "file_count": 13,
+  "files": [
+    {
+      "path": "docs/294_release_closure_handoff_2026_03_08.md",
+      "size_bytes": 2966,
+      "sha256": "5cba66b0cc34d2592532aeabdd9fed37f54a4a6e5d51fa6cefc82c44fae865e9"
+    },
+    {
+      "path": "docs/295_release_closure_handoff_2026_03_08_ko.md",
+      "size_bytes": 3164,
+      "sha256": "1f9ce38e8599b56f8704f8c3b646e8030c95026f8c4cefc56b71e662f36e5850"
+    },
+    {
+      "path": "docs/296_release_closure_final_announcement_2026_03_08.md",
+      "size_bytes": 2128,
+      "sha256": "9c754976c3d3c48c2e808976a1020d0477479705249cf4115a2cfc2bf874901a"
+    },
+    {
+      "path": "docs/297_release_closure_final_announcement_2026_03_08_ko.md",
+      "size_bytes": 2311,
+      "sha256": "e76f225ac77ffb13931d9b1d11917f6a266368c13119ce31e35154849980129a"
+    },
+    {
+      "path": "docs/291_release_candidate_snapshot_2026_03_08.md",
+      "size_bytes": 5621,
+      "sha256": "ff46742da609a75d135e7f1d053e537421a96759b132a850eb2bfda630820b7a"
+    },
+    {
+      "path": "docs/292_release_candidate_snapshot_2026_03_08_ko.md",
+      "size_bytes": 5901,
+      "sha256": "3ec2cad51a62f119ce9d24f34c0c42ee12ad6136dab9b8210f249c6874c8e640"
+    },
+    {
+      "path": "docs/293_hf1_release_requirement_decision_2026_03_08.md",
+      "size_bytes": 1915,
+      "sha256": "8baf8f9dedc26ec747d307d378a49db38ebbd42a94344a45aecbabb195cb0a32"
+    },
+    {
+      "path": "docs/298_release_closure_freeze_note_2026_03_08.md",
+      "size_bytes": 1713,
+      "sha256": "5071fb210cca5d1d8e15849053f0e2ed56b15e45ff745a7275ff25ad6db4045c"
+    },
+    {
+      "path": "docs/299_release_closure_freeze_note_2026_03_08_ko.md",
+      "size_bytes": 1940,
+      "sha256": "f89b3007fdb61577260e65b6d595010390b396f5c2c8a9520982392621a79004"
+    },
+    {
+      "path": "docs/reports/README.md",
+      "size_bytes": 16929,
+      "sha256": "8dc91d306f5911ef992ad7a13bffa3de6faf294378e13ac0ecea99d5c874bee2"
+    },
+    {
+      "path": "docs/reports/canonical_release_candidate_subset_latest.json",
+      "size_bytes": 20184,
+      "sha256": "1a89a955ced63f7e7182377ca90b25eec87a9d8962daee366afc644b0346d837"
+    },
+    {
+      "path": "docs/reports/release_announcement_pack_latest.json",
+      "size_bytes": 5376,
+      "sha256": "3cf1da5d1da3eda4aff5a78d97099a18829b13918d8c2f6b639516528f5d570d"
+    },
+    {
+      "path": "docs/reports/release_announcement_pack_latest.md",
+      "size_bytes": 2180,
+      "sha256": "8ee10d6cdfabdbbe8ad85c99890b12c98ac098e3a28ef4718cc73c9223b5ac06"
+    }
+  ]
+}
