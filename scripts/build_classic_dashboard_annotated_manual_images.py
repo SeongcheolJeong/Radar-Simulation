@@ -123,6 +123,20 @@ def main() -> None:
             (4, "Detection table", (680, 680, 1230, 3290)),
         ],
     )
+    annotate(
+        "dashboard_controls.png",
+        "dashboard_controls_status_annotated.png",
+        "Status Fields",
+        "Read status lines before visuals",
+        [
+            (1, "API run\nstatus", (10, 735, 310, 835)),
+            (2, "Regression history\nstatus + downloads", (10, 1710, 310, 2305)),
+            (3, "Review bundle\nstatus + path", (10, 2308, 310, 2565)),
+            (4, "Decision report\nstatus + file", (10, 2568, 310, 2835)),
+            (5, "Regression gate /\ndecision audit", (10, 2838, 310, 3215)),
+            (6, "Compare / regression\nresult area", (10, 3218, 310, 3298)),
+        ],
+    )
 
 
 if __name__ == "__main__":

@@ -18,6 +18,8 @@ If you need the full screen walkthrough, use [Classic Dashboard UX Manual](308_c
 
 If you need the shortest click path first, use [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md).
 
+If you want a compact meaning-by-field cheat sheet for the status lines, use [Classic Dashboard Status Field Guide](318_classic_dashboard_status_field_guide.md).
+
 ## Screen Reference
 
 Annotated full layout:

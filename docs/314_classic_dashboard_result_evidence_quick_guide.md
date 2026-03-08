@@ -18,6 +18,8 @@ If you need the shortest click order, use [Classic Dashboard Live Checklist](310
 
 If one of these flows failed, use [Classic Dashboard Failure Reading Guide](316_classic_dashboard_failure_reading_guide.md).
 
+If you need a compact meaning-by-field cheat sheet, use [Classic Dashboard Status Field Guide](318_classic_dashboard_status_field_guide.md).
+
 ## Screen Reference
 
 Full layout:
