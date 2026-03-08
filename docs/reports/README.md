@@ -52,6 +52,60 @@ Related snapshot guide:
 | paid RadarSimPy frontend/runtime contract | `frontend_runtime_payload_provider_info_paid_6m.json` | paid runtime-oriented frontend payload evidence |
 | latest RadarSimPy overall status | `radarsimpy_final_status_latest.json` | single status-style entry point for RadarSimPy work |
 
+## Current Evidence Checklists
+
+### Frontend
+
+Open these first:
+
+1. `graph_lab_playwright_e2e_latest.json`
+2. `graph_lab_playwright_snapshots/latest/`
+3. `frontend_runtime_payload_provider_info_optional_latest.json`
+4. `frontend_quickstart_v1.json`
+
+You should be able to answer:
+
+- does the current browser E2E pass
+- do the latest screenshots and decision brief look correct
+- does the frontend/runtime payload contract still match the backend
+- does the quick demo path still produce a usable summary
+
+### RadarSimPy
+
+Open these first:
+
+1. `radarsimpy_final_status_latest.json`
+2. `radarsimpy_production_release_gate_latest.json`
+3. `radarsimpy_readiness_checkpoint_latest.json`
+4. `radarsimpy_progress_snapshot_latest.json`
+5. `radarsimpy_wrapper_integration_gate_production_latest.json`
+6. `radarsimpy_integration_smoke_gate_production_latest.json`
+
+Use these to answer:
+
+- is the current RadarSimPy path green overall
+- did production gate and readiness pass
+- is the wrapper/provider integration still intact
+- does the smoke gate still pass in the current environment
+
+### PO-SBR
+
+Open these first:
+
+1. `po_sbr_post_change_gate_2026_03_02.json`
+2. `po_sbr_progress_snapshot_2026_03_02.json`
+3. `po_sbr_operator_handoff_closure_2026_03_01.json`
+4. `po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json`
+5. `po_sbr_local_ready_regression_2026_03_01_pc_self.json`
+6. `po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json`
+
+Use these to answer:
+
+- is PO-SBR currently allowed past the post-change gate
+- what is the current readiness/progress state
+- is the handoff/closure package complete
+- did local-ready regression and baseline drift stay within the accepted envelope
+
 ## Common Report Families
 
 ### Frontend
