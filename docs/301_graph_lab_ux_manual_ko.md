@@ -149,6 +149,8 @@ Artifact Inspector 예시:
 
 `Decision Pane`은 compare, gate, session, export를 처리하는 영역입니다.
 
+이 영역만 따로 빠르게 읽고 싶다면 [Decision Pane 빠른 읽기 가이드](327_graph_lab_decision_pane_quick_guide_ko.md)를 사용하면 됩니다.
+
 ### Compare 버튼
 
 | 버튼 | 언제 쓰는가 | 결과 |

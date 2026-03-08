@@ -14,6 +14,8 @@
 
 `Artifact Inspector`는 오른쪽 패널에서 `Graph Run Result` 아래에 있습니다.
 
+그 위쪽 compare, gate, session, export 버튼만 따로 보고 싶다면 [Decision Pane 빠른 읽기 가이드](327_graph_lab_decision_pane_quick_guide_ko.md)를 사용하면 됩니다.
+
 안 보이면:
 
 1. `Load #1`

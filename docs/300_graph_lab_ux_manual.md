@@ -160,6 +160,8 @@ When `PO-SBR` is selected, read the warning under `Purpose Presets`:
 
 The `Decision Pane` is where compare, gate, session, and export actions happen.
 
+If you want a shorter read focused only on this area, use [Decision Pane Quick Guide](326_graph_lab_decision_pane_quick_guide.md).
+
 ### Compare Buttons
 
 | Button | Use it when | Result |
@@ -214,6 +216,8 @@ If you need the exact compare-history behavior, use [Frontend Runtime Purpose Pr
 The `Artifact Inspector` is the evidence panel.
 
 For a shorter read focused only on this panel, use [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md).
+
+For the compare, gate, session, and export controls above it, use [Decision Pane Quick Guide](326_graph_lab_decision_pane_quick_guide.md).
 
 Use it to check:
 

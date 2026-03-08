@@ -186,4 +186,5 @@ Do not start from artifact absence. Read the run error first.
 
 - [Graph Lab UX Manual](300_graph_lab_ux_manual.md)
 - [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
+- [Decision Pane Quick Guide](326_graph_lab_decision_pane_quick_guide.md)
 - [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
