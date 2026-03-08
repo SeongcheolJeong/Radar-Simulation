@@ -33,6 +33,8 @@ For generated evidence and outputs, use:
   - [Release Closure Handoff (Korean)](295_release_closure_handoff_2026_03_08_ko.md)
   - [Release Closure Final Announcement](296_release_closure_final_announcement_2026_03_08.md)
   - [Release Closure Final Announcement (Korean)](297_release_closure_final_announcement_2026_03_08_ko.md)
+  - [Release Closure Freeze Note](298_release_closure_freeze_note_2026_03_08.md)
+  - [Release Closure Freeze Note (Korean)](299_release_closure_freeze_note_2026_03_08_ko.md)
 
 Use the landing pages for quick routing. Use `282` and `283` when you want the full user manual in English or Korean.
 
@@ -49,6 +51,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | decide whether HF-1 belongs in the default release cut | [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md) | current promotion rule for the Sionna-style RT path |
 | prepare the final handoff bundle | [Release Closure Handoff](294_release_closure_handoff_2026_03_08.md) | the short release-ready summary and send list |
 | copy the final release-closure announcement | [Release Closure Final Announcement](296_release_closure_final_announcement_2026_03_08.md) | the actual message text for stakeholders |
+| know when to stop adding new closure docs | [Release Closure Freeze Note](298_release_closure_freeze_note_2026_03_08.md) | the frozen document chain and update triggers |
 | read the current release-candidate closure snapshot | [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md) | current stable evidence set and handoff rule |
 | read the current release-candidate closure snapshot in Korean | [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md) | current stable evidence set and handoff rule |
 | validate paid RadarSimPy production access | [RadarSimPy Runtime](285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
@@ -233,6 +236,8 @@ Start with:
 - [Release Closure Handoff (Korean)](295_release_closure_handoff_2026_03_08_ko.md)
 - [Release Closure Final Announcement](296_release_closure_final_announcement_2026_03_08.md)
 - [Release Closure Final Announcement (Korean)](297_release_closure_final_announcement_2026_03_08_ko.md)
+- [Release Closure Freeze Note](298_release_closure_freeze_note_2026_03_08.md)
+- [Release Closure Freeze Note (Korean)](299_release_closure_freeze_note_2026_03_08_ko.md)
 - [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
 - [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
 - [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)

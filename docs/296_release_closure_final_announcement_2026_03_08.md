@@ -4,6 +4,7 @@
 - Audience: internal release stakeholders, validators, operator handoff recipients
 - Snapshot: [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
 - One-page handoff: [Release Closure Handoff](294_release_closure_handoff_2026_03_08.md)
+- Freeze rule: [Release Closure Freeze Note](298_release_closure_freeze_note_2026_03_08.md)
 
 ## Final Message
 

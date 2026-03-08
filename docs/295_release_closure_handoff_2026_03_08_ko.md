@@ -7,6 +7,7 @@
 - HF-1 규칙: [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
 - 바로 사용할 handoff 템플릿: [Release Announcement Templates](282_release_announcement_templates_2026_03_05.md)
 - final announcement: [Release Closure Final Announcement (Korean)](297_release_closure_final_announcement_2026_03_08_ko.md)
+- freeze 규칙: [Release Closure Freeze Note (Korean)](299_release_closure_freeze_note_2026_03_08_ko.md)
 
 ## 현재 컷의 기본 필수 체크
 

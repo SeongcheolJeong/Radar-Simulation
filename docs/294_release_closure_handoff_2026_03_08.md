@@ -7,6 +7,7 @@
 - HF-1 rule: [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
 - Copy-ready handoff templates: [Release Announcement Templates](282_release_announcement_templates_2026_03_05.md)
 - Final announcement: [Release Closure Final Announcement](296_release_closure_final_announcement_2026_03_08.md)
+- Freeze rule: [Release Closure Freeze Note](298_release_closure_freeze_note_2026_03_08.md)
 
 ## Default Required Checks
 

@@ -4,6 +4,7 @@
 - 대상: 내부 release stakeholder, validator, operator handoff 수신자
 - snapshot: [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
 - one-page handoff: [Release Closure Handoff (Korean)](295_release_closure_handoff_2026_03_08_ko.md)
+- freeze 규칙: [Release Closure Freeze Note (Korean)](299_release_closure_freeze_note_2026_03_08_ko.md)
 
 ## 최종 공지 문안
 
