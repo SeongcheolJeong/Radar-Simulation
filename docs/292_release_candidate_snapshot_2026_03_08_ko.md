@@ -5,6 +5,7 @@
 - 영문 snapshot: [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
 - 영문 canonical pack: [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
 - 국문 canonical pack: [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
+- HF-1 결정 문서: [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
 
 ## 현재 결정
 
@@ -14,7 +15,7 @@
   - `RS-1`
   - `HF-2`
   - `RS-2`
-- `HF-1`은 기본값에서는 아직 optional입니다.
+- `HF-1`은 기본값에서는 아직 optional입니다. 자세한 판단 근거는 [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)를 기준으로 합니다.
 - 다음 컷에서 Sionna-style RT 경로가 실제 release story에 포함될 때만 `HF-1`을 추가합니다.
 
 이유:

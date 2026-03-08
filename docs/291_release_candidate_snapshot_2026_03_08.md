@@ -5,6 +5,7 @@
 - Korean snapshot: [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
 - Canonical pack: [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
 - Canonical pack (Korean): [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
+- HF-1 decision: [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
 
 ## Current Decision
 
@@ -14,7 +15,7 @@
   - `RS-1`
   - `HF-2`
   - `RS-2`
-- `HF-1` remains optional by default.
+- `HF-1` remains optional by default. See [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md).
 - Include `HF-1` only when the Sionna-style RT path is explicitly in the release story for that cut.
 
 Reason:

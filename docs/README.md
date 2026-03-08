@@ -42,6 +42,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | run the classic dashboard | [Frontend Dashboard Usage](116_frontend_dashboard_usage.md) | `scripts/run_web_e2e_dashboard_local.sh` |
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
 | run the fixed release-candidate validation order | [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md) | the scenario commands and evidence files in that pack |
+| decide whether HF-1 belongs in the default release cut | [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md) | current promotion rule for the Sionna-style RT path |
 | read the current release-candidate closure snapshot | [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md) | current stable evidence set and handoff rule |
 | read the current release-candidate closure snapshot in Korean | [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md) | current stable evidence set and handoff rule |
 | validate paid RadarSimPy production access | [RadarSimPy Runtime](285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
@@ -222,6 +223,7 @@ Start with:
 Start with:
 
 - [Generated Reports Index](reports/README.md)
+- [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
 - [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
 - [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
 - [Release Notes: RadarSimPy Frontend Multiplexing](279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md)
