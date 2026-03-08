@@ -22,6 +22,40 @@ Explanation vs evidence:
 - explanation: [Documentation Index](docs/README.md)
 - evidence: [Generated Reports Index](docs/reports/README.md)
 
+## First 10 Minutes
+
+If you want the shortest successful path:
+
+1. create the base environment
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install numpy matplotlib
+```
+
+2. validate the backend/API path
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py
+```
+
+3. run Graph Lab
+
+```bash
+PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101
+```
+
+4. open:
+
+- `http://127.0.0.1:8081/frontend/graph_lab_reactflow.html?api=http://127.0.0.1:8101`
+
+If that works, continue with:
+
+- [Install Onboarding Map](docs/288_install_onboarding_map.md)
+- [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
+
 ## Who Should Use What
 
 | If you are... | Start here | Then use |

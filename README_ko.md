@@ -24,6 +24,40 @@
 - 설명: [Documentation Index](docs/README.md)
 - 증거: [Generated Reports Index](docs/reports/README.md)
 
+## 처음 10분
+
+가장 짧은 성공 경로는 아래입니다.
+
+1. 기본 환경 생성
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install numpy matplotlib
+```
+
+2. backend/API 경로 검증
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py
+```
+
+3. Graph Lab 실행
+
+```bash
+PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101
+```
+
+4. 브라우저 열기
+
+- `http://127.0.0.1:8081/frontend/graph_lab_reactflow.html?api=http://127.0.0.1:8101`
+
+여기까지 성공하면 다음 문서로 진행하면 됩니다.
+
+- [Install Onboarding Map](docs/288_install_onboarding_map.md)
+- [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
+
 ## 누구에게 어떤 경로가 맞는가
 
 | 내가 해당하는 경우 | 먼저 볼 것 | 다음 단계 |
