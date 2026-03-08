@@ -21,6 +21,7 @@ Explanation vs evidence:
 
 - explanation: [Documentation Index](docs/README.md)
 - evidence: [Generated Reports Index](docs/reports/README.md)
+- current release closure: [Release Closure Handoff](docs/294_release_closure_handoff_2026_03_08.md)
 
 <a id="first-10-minutes"></a>
 

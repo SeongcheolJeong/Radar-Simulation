@@ -3,6 +3,7 @@
 - Date: March 8, 2026
 - Scope: frontend/operator workflow, trial RadarSimPy parity, PO-SBR parity/readiness, paid RadarSimPy production closure
 - Korean snapshot: [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
+- One-page handoff: [Release Closure Handoff](294_release_closure_handoff_2026_03_08.md)
 - Canonical pack: [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
 - Canonical pack (Korean): [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
 - HF-1 decision: [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
@@ -118,8 +119,9 @@ Treat this snapshot as not release-ready when any of the above flips red or stal
 
 For handoff, send:
 
-1. this snapshot doc
-2. [Generated Reports Index](reports/README.md)
-3. [canonical_release_candidate_subset_latest.json](reports/canonical_release_candidate_subset_latest.json)
+1. [Release Closure Handoff](294_release_closure_handoff_2026_03_08.md)
+2. this snapshot doc
+3. [Generated Reports Index](reports/README.md)
+4. [canonical_release_candidate_subset_latest.json](reports/canonical_release_candidate_subset_latest.json)
 
 That gives explanation, evidence routing, and one stable machine-readable status file.

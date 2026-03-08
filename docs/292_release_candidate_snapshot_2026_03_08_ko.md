@@ -3,6 +3,7 @@
 - 일자: 2026년 3월 8일
 - 범위: frontend/operator workflow, trial RadarSimPy parity, PO-SBR parity/readiness, paid RadarSimPy production closure
 - 영문 snapshot: [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
+- one-page handoff: [Release Closure Handoff (Korean)](295_release_closure_handoff_2026_03_08_ko.md)
 - 영문 canonical pack: [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
 - 국문 canonical pack: [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
 - HF-1 결정 문서: [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
@@ -118,8 +119,9 @@ PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.p
 
 handoff 시에는 아래 3개를 같이 보냅니다.
 
-1. 이 snapshot 문서
-2. [Generated Reports Index](reports/README.md)
-3. [canonical_release_candidate_subset_latest.json](reports/canonical_release_candidate_subset_latest.json)
+1. [Release Closure Handoff (Korean)](295_release_closure_handoff_2026_03_08_ko.md)
+2. 이 snapshot 문서
+3. [Generated Reports Index](reports/README.md)
+4. [canonical_release_candidate_subset_latest.json](reports/canonical_release_candidate_subset_latest.json)
 
 이 조합이면 설명, evidence routing, machine-readable status를 한 번에 전달할 수 있습니다.

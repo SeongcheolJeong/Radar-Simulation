@@ -23,6 +23,7 @@
 
 - 설명: [Documentation Index](docs/README.md)
 - 증거: [Generated Reports Index](docs/reports/README.md)
+- 현재 release closure: [Release Closure Handoff (Korean)](docs/295_release_closure_handoff_2026_03_08_ko.md)
 
 <a id="first-10-minutes-ko"></a>
 
