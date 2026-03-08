@@ -90,6 +90,16 @@ Evidence next:
 - [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist)
 - [PO-SBR Evidence Checklist](reports/README.md#po-sbr-evidence-checklist)
 
+Developer quick verification:
+
+| If you changed... | Run this first | Then check |
+| --- | --- | --- |
+| `frontend/graph_lab`, web orchestrator, or dashboard wiring | `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| Graph Lab browser UX or interaction flow | `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers PYTHONPATH=src .venv/bin/python scripts/validate_graph_lab_playwright_e2e.py --require-playwright --output-json docs/reports/graph_lab_playwright_e2e_latest.json` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| RadarSimPy wrapper/runtime coupling | `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_wrapper_integration_gate.py --output-summary-json docs/reports/radarsimpy_wrapper_integration_gate_manual.json` | [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist) |
+| paid RadarSimPy production path | `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh` | [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist) |
+| PO-SBR runtime-affecting path | `PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --strict` | [PO-SBR Evidence Checklist](reports/README.md#po-sbr-evidence-checklist) |
+
 <a id="role-validator"></a>
 
 ### Validator
