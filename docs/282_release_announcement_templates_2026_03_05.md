@@ -5,6 +5,8 @@
 - Detailed release notes: `docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md`
 - One-page summary (EN): `docs/280_release_one_pager_radarsimpy_2026_03_05.md`
 - One-page summary (KO): `docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md`
+- Release closure handoff (EN): `docs/294_release_closure_handoff_2026_03_08.md`
+- Release closure handoff (KO): `docs/295_release_closure_handoff_2026_03_08_ko.md`
 
 ## Auto-Generate Pack
 
@@ -135,6 +137,86 @@ Radar Simulation Team
 - 상세 노트: docs/279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md
 - 1페이지 요약(EN): docs/280_release_one_pager_radarsimpy_2026_03_05.md
 - 1페이지 요약(KO): docs/281_release_one_pager_radarsimpy_2026_03_05_ko.md
+
+감사합니다.
+Radar Simulation Team
+```
+
+## Release Closure Handoff Template (EN)
+
+Subject:
+`[Handoff] Release Closure Status (2026-03-08)`
+
+Body:
+
+```text
+Hello team,
+
+The current default release-candidate closure is green.
+
+Required checks in the default cut:
+1) FE-1 Graph Lab browser/operator flow
+2) FE-2 frontend runtime payload -> provider info contract
+3) RS-1 trial RadarSimPy layered parity
+4) HF-2 PO-SBR parity/readiness path
+5) RS-2 paid RadarSimPy production closure
+
+Current evidence:
+- canonical subset: pass=true
+- PO-SBR parity: pass=true
+- paid production gate: ready
+- paid readiness checkpoint: ready
+- Graph Lab Playwright/operator path: current
+
+HF-1 rule:
+- HF-1 remains optional by default
+- promote it only when Sionna-style RT is part of the promised release story
+
+Handoff bundle:
+1) docs/294_release_closure_handoff_2026_03_08.md
+2) docs/291_release_candidate_snapshot_2026_03_08.md
+3) docs/reports/README.md
+4) docs/reports/canonical_release_candidate_subset_latest.json
+
+Best regards,
+Radar Simulation Team
+```
+
+## Release Closure Handoff Template (KO)
+
+제목:
+`[Handoff] Release Closure 상태 공유 (2026-03-08)`
+
+본문:
+
+```text
+안녕하세요.
+
+현재 기본 release-candidate closure는 green입니다.
+
+현재 기본 컷의 필수 체크:
+1) FE-1 Graph Lab browser/operator flow
+2) FE-2 frontend runtime payload -> provider info contract
+3) RS-1 trial RadarSimPy layered parity
+4) HF-2 PO-SBR parity/readiness path
+5) RS-2 paid RadarSimPy production closure
+
+현재 evidence:
+- canonical subset: pass=true
+- PO-SBR parity: pass=true
+- paid production gate: ready
+- paid readiness checkpoint: ready
+- Graph Lab Playwright/operator path: current
+
+HF-1 규칙:
+- HF-1은 현재 기본값에서 optional
+- Sionna-style RT가 실제 release story에 포함될 때만 required로 승격
+
+handoff bundle:
+1) docs/295_release_closure_handoff_2026_03_08_ko.md
+2) docs/292_release_candidate_snapshot_2026_03_08_ko.md
+3) docs/reports/README.md
+4) docs/reports/canonical_release_candidate_subset_latest.json
 
 감사합니다.
 Radar Simulation Team

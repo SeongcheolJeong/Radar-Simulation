@@ -5,6 +5,7 @@
 - 범위: frontend/operator workflow, trial RadarSimPy parity, PO-SBR high-fidelity closure, paid RadarSimPy production closure
 - 상세 snapshot: [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
 - HF-1 규칙: [HF-1 Release Requirement Decision](293_hf1_release_requirement_decision_2026_03_08.md)
+- 바로 사용할 handoff 템플릿: [Release Announcement Templates](282_release_announcement_templates_2026_03_05.md)
 
 ## 현재 컷의 기본 필수 체크
 
