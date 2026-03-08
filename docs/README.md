@@ -36,6 +36,8 @@ For generated evidence and outputs, use:
   - [Frontend 문서 맵](329_frontend_doc_map_ko.md)
   - [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md)
   - [Frontend 트러블슈팅 맵](331_frontend_troubleshooting_map_ko.md)
+  - [Frontend Evidence Map](332_frontend_evidence_map.md)
+  - [Frontend Evidence 맵](333_frontend_evidence_map_ko.md)
   - [Graph Lab 실사용 체크리스트](307_graph_lab_live_checklist_ko.md)
   - [Graph Lab Document Map](322_graph_lab_doc_map.md)
   - [Graph Lab 문서 맵](323_graph_lab_doc_map_ko.md)
@@ -80,6 +82,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | learn the Graph Lab UI and button flow | [Graph Lab UX Manual](300_graph_lab_ux_manual.md) | the screenshots and run sequences in that manual |
 | choose between Graph Lab and the classic dashboard | [Frontend Document Map](328_frontend_doc_map.md) | the UI-specific map for the chosen frontend |
 | troubleshoot a frontend flow before diving into UI-specific docs | [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md) | the failure guide for the affected UI |
+| review current frontend evidence before opening UI manuals | [Frontend Evidence Map](332_frontend_evidence_map.md) | the UI-specific evidence files and snapshots |
 | understand Graph Lab buttons by scenario | [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md) | the shortest click path for each task |
 | read the Artifact Inspector without the full UI manual | [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md) | the right-panel reading order and healthy signs |
 | follow the shortest live click sequence while the UI is open | [Graph Lab Live Checklist](306_graph_lab_live_checklist.md) | the first-run, compare, and export checklist |

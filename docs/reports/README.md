@@ -30,6 +30,11 @@ If you want explanation, read:
 
 If you want evidence, read from this folder.
 
+If you want a frontend-specific evidence routing page first, read:
+
+- [Frontend Evidence Map](../332_frontend_evidence_map.md)
+- [Frontend Evidence 맵](../333_frontend_evidence_map_ko.md)
+
 ## Start Here
 
 Most useful stable entry points:

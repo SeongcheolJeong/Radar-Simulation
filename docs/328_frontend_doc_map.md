@@ -75,6 +75,7 @@ Use this rule:
 
 ## Related Documents
 
+- [Frontend Evidence Map](332_frontend_evidence_map.md)
 - [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md)
 - [Documentation Index](README.md)
 - [Generated Reports Index](reports/README.md)
