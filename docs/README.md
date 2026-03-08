@@ -15,6 +15,17 @@ For generated evidence and outputs, use:
 
 - [Generated Reports Index](reports/README.md)
 
+## Language Note
+
+- landing pages:
+  - [English Landing Page](../README.md)
+  - [Korean Landing Page](../README_ko.md)
+- detailed manuals:
+  - [Project Structure And User Manual](282_project_structure_and_user_manual.md)
+  - [프로젝트 구조 및 사용자 매뉴얼](283_project_structure_and_user_manual_ko.md)
+
+Use the landing pages for quick routing. Use `282` and `283` when you want the full user manual in English or Korean.
+
 ## Quick Routing
 
 | If you want to... | Read this first | Then use |
