@@ -19,6 +19,11 @@
 - `scripts`의 launcher / validator / gate
 - `docs`의 구조, 사용법, release 문서
 
+설명 문서 vs 증거 산출물:
+
+- 설명: [Documentation Index](docs/README.md)
+- 증거: [Generated Reports Index](docs/reports/README.md)
+
 ## 누구에게 어떤 경로가 맞는가
 
 | 내가 해당하는 경우 | 먼저 볼 것 | 다음 단계 |
@@ -75,11 +80,11 @@ tests/          fixture와 test data
 - [Documentation Index](docs/README.md)
 - [프로젝트 구조 및 사용자 매뉴얼 (한국어)](docs/283_project_structure_and_user_manual_ko.md)
 - [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
+- [Architecture](docs/03_architecture.md)
 
 생성 리포트 인덱스:
 
 - [Generated Reports Index](docs/reports/README.md)
-- [Architecture](docs/03_architecture.md)
 
 ## 아키텍처
 

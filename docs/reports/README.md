@@ -41,6 +41,17 @@ Related snapshot guide:
 
 - [Graph Lab Playwright Snapshots](graph_lab_playwright_snapshots/README.md)
 
+## Current Stable Report Set
+
+| What you need | Stable entry point | Why start here |
+| --- | --- | --- |
+| quick frontend/demo status | `frontend_quickstart_v1.json` | small summary for local demo/backend wiring |
+| latest browser E2E status | `graph_lab_playwright_e2e_latest.json` | current Graph Lab end-to-end result |
+| latest UI evidence | `graph_lab_playwright_snapshots/latest/` | screenshots and exported decision brief |
+| frontend runtime payload contract | `frontend_runtime_payload_provider_info_optional_latest.json` | current optional/runtime contract summary |
+| paid RadarSimPy frontend/runtime contract | `frontend_runtime_payload_provider_info_paid_6m.json` | paid runtime-oriented frontend payload evidence |
+| latest RadarSimPy overall status | `radarsimpy_final_status_latest.json` | single status-style entry point for RadarSimPy work |
+
 ## Common Report Families
 
 ### Frontend

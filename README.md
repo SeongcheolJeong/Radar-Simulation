@@ -17,6 +17,11 @@ It includes:
 - runnable validation and gate scripts in `scripts`
 - architecture, workflow, and release documentation in `docs`
 
+Explanation vs evidence:
+
+- explanation: [Documentation Index](docs/README.md)
+- evidence: [Generated Reports Index](docs/reports/README.md)
+
 ## Who Should Use What
 
 | If you are... | Start here | Then use |
