@@ -1,12 +1,12 @@
 # Release-Candidate Snapshot
 
-- Date: March 8, 2026
-- Scope: frontend/operator workflow, trial RadarSimPy parity, PO-SBR parity/readiness, paid RadarSimPy production closure
-- Korean snapshot: [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
-- Canonical pack: [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
-- Canonical pack (Korean): [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
+- 일자: 2026년 3월 8일
+- 범위: frontend/operator workflow, trial RadarSimPy parity, PO-SBR parity/readiness, paid RadarSimPy production closure
+- 영문 snapshot: [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
+- 영문 canonical pack: [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
+- 국문 canonical pack: [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
 
-## Current Decision
+## 현재 결정
 
 - default release-candidate subset:
   - `FE-1`
@@ -14,18 +14,18 @@
   - `RS-1`
   - `HF-2`
   - `RS-2`
-- `HF-1` remains optional by default.
-- Include `HF-1` only when the Sionna-style RT path is explicitly in the release story for that cut.
+- `HF-1`은 기본값에서는 아직 optional입니다.
+- 다음 컷에서 Sionna-style RT 경로가 실제 release story에 포함될 때만 `HF-1`을 추가합니다.
 
-Reason:
+이유:
 
-- the default closure path is already green end-to-end
-- `HF-2` is the higher-priority high-fidelity closure path for current operator/runtime work
-- `HF-1` stable evidence exists and is green, but it is not required for the current default cut
+- 현재 기본 closure path가 이미 end-to-end green입니다.
+- 현재 operator/runtime 작업 기준으로는 `HF-2`가 더 우선순위가 높은 high-fidelity closure path입니다.
+- `HF-1` stable evidence도 green이지만, 현재 기본 컷에 필수로 묶을 근거는 아직 없습니다.
 
-## Current Stable Outcome
+## 현재 안정 상태
 
-The current release-candidate subset is green.
+현재 release-candidate subset은 green입니다.
 
 - canonical subset:
   - [canonical_release_candidate_subset_latest.json](reports/canonical_release_candidate_subset_latest.json)
@@ -49,7 +49,7 @@ The current release-candidate subset is green.
 
 ## Stable Evidence Set
 
-Use this set as the current release-candidate evidence bundle.
+현재 release-candidate evidence bundle은 아래 세트를 기준으로 봅니다.
 
 ### Frontend / Operator
 
@@ -68,7 +68,7 @@ Use this set as the current release-candidate evidence bundle.
 
 - [scene_backend_parity_po_sbr_rt_latest.json](reports/scene_backend_parity_po_sbr_rt_latest.json)
 - [scene_backend_parity_sionna_rt_latest.json](reports/scene_backend_parity_sionna_rt_latest.json)
-- latest `po_sbr_post_change_gate_*.json`
+- 최신 `po_sbr_post_change_gate_*.json`
 - [po_sbr_progress_snapshot_release_candidate_latest.json](reports/po_sbr_progress_snapshot_release_candidate_latest.json)
 
 ### Paid RadarSimPy Production
@@ -78,16 +78,16 @@ Use this set as the current release-candidate evidence bundle.
 - [radarsimpy_simulator_reference_parity_paid_6m.json](reports/radarsimpy_simulator_reference_parity_paid_6m.json)
 - [frontend_runtime_payload_provider_info_paid_6m.json](reports/frontend_runtime_payload_provider_info_paid_6m.json)
 
-## How To Refresh This Snapshot
+## 이 Snapshot 갱신 방법
 
-Run:
+실행:
 
 ```bash
 PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.py \
   --output-json docs/reports/canonical_release_candidate_subset_latest.json
 ```
 
-If the release story also includes the Sionna-style RT path:
+release story에 Sionna-style RT path도 포함된다면:
 
 ```bash
 PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.py \
@@ -95,30 +95,30 @@ PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.p
   --output-json docs/reports/canonical_release_candidate_subset_latest.json
 ```
 
-## Pass Interpretation
+## Pass 해석 규칙
 
-Treat this snapshot as healthy when:
+아래 조건을 만족하면 healthy로 봅니다.
 
-- canonical subset stays `pass=true`
-- paid RadarSimPy production gate stays `ready`
-- paid readiness checkpoint stays `ready`
-- PO-SBR parity stays `pass=true`
-- frontend Playwright/operator evidence remains current
+- canonical subset이 계속 `pass=true`
+- paid RadarSimPy production gate가 계속 `ready`
+- paid readiness checkpoint가 계속 `ready`
+- PO-SBR parity가 계속 `pass=true`
+- frontend Playwright/operator evidence가 최신 상태
 
-Treat this snapshot as not release-ready when any of the above flips red or stale.
+위 조건 중 하나라도 red로 바뀌거나 stale이면 release-ready가 아니라고 봅니다.
 
-## Remaining Release-Freeze Tasks
+## 남은 Release-Freeze 작업
 
-1. decide whether `HF-1` is default-required for the next cut
-2. avoid adding more workflow micro-features unless they unblock validation
-3. keep refreshing the same stable evidence set instead of creating parallel ad-hoc reports
+1. 다음 컷에서 `HF-1`을 기본 필수로 올릴지 결정
+2. validation을 열어주지 않는 workflow micro-feature 추가는 지양
+3. ad-hoc report를 늘리지 말고 같은 stable evidence set만 계속 갱신
 
-## Recommended Handoff Rule
+## 권장 Handoff 규칙
 
-For handoff, send:
+handoff 시에는 아래 3개를 같이 보냅니다.
 
-1. this snapshot doc
+1. 이 snapshot 문서
 2. [Generated Reports Index](reports/README.md)
 3. [canonical_release_candidate_subset_latest.json](reports/canonical_release_candidate_subset_latest.json)
 
-That gives explanation, evidence routing, and one stable machine-readable status file.
+이 조합이면 설명, evidence routing, machine-readable status를 한 번에 전달할 수 있습니다.

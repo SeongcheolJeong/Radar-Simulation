@@ -26,6 +26,9 @@ For generated evidence and outputs, use:
 - canonical validation packs:
   - [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
   - [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
+- release-candidate snapshots:
+  - [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
+  - [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
 
 Use the landing pages for quick routing. Use `282` and `283` when you want the full user manual in English or Korean.
 
@@ -40,6 +43,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
 | run the fixed release-candidate validation order | [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md) | the scenario commands and evidence files in that pack |
 | read the current release-candidate closure snapshot | [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md) | current stable evidence set and handoff rule |
+| read the current release-candidate closure snapshot in Korean | [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md) | current stable evidence set and handoff rule |
 | validate paid RadarSimPy production access | [RadarSimPy Runtime](285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | review release-facing evidence | [Generated Reports Index](reports/README.md) | release notes and one-pagers |
 
@@ -219,6 +223,7 @@ Start with:
 
 - [Generated Reports Index](reports/README.md)
 - [Release-Candidate Snapshot](291_release_candidate_snapshot_2026_03_08.md)
+- [Release-Candidate Snapshot (Korean)](292_release_candidate_snapshot_2026_03_08_ko.md)
 - [Release Notes: RadarSimPy Frontend Multiplexing](279_release_notes_radarsimpy_frontend_multiplexing_2026_03_05.md)
 - [Release One-Pager](280_release_one_pager_radarsimpy_2026_03_05.md)
 - [Release One-Pager (Korean)](281_release_one_pager_radarsimpy_2026_03_05_ko.md)
