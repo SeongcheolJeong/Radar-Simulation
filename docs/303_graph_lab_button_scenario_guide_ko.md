@@ -26,6 +26,8 @@ Artifact 영역:
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
+오른쪽 패널만 빠르게 읽고 싶으면 [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)를 보면 됩니다.
+
 ## 시나리오 1: canvas에 graph만 먼저 보고 싶다
 
 언제:
@@ -246,5 +248,6 @@ Artifact 영역:
 
 - [Graph Lab UX 사용 매뉴얼](301_graph_lab_ux_manual_ko.md)
 - [Graph Lab UX Manual](300_graph_lab_ux_manual.md)
+- [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)
 - [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md)
 - [Generated Reports Index](reports/README.md)

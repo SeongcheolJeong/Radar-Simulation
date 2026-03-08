@@ -74,6 +74,8 @@ Artifact Inspector example:
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
+If you only need the practical reading order for the right panel, use [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md).
+
 ## Left Panel: Graph Setup And Runtime
 
 ### Graph Setup Buttons
@@ -185,6 +187,8 @@ If you need the exact compare-history behavior, use [Frontend Runtime Purpose Pr
 ## Right Panel: Artifact Inspector
 
 The `Artifact Inspector` is the evidence panel.
+
+For a shorter read focused only on this panel, use [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md).
 
 Use it to check:
 

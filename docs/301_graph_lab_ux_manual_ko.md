@@ -73,6 +73,8 @@ Artifact Inspector 예시:
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
+오른쪽 패널만 빠르게 읽고 싶으면 [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)를 사용하면 됩니다.
+
 ## 왼쪽 패널: Graph Setup과 Runtime
 
 ### Graph Setup 버튼
@@ -172,6 +174,8 @@ Artifact Inspector 예시:
 ## 오른쪽 패널: Artifact Inspector
 
 `Artifact Inspector`는 evidence 확인용 패널입니다.
+
+이 패널만 짧게 읽고 싶으면 [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)를 사용하면 됩니다.
 
 여기서 보는 것:
 

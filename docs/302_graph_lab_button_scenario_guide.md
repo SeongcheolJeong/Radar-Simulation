@@ -26,6 +26,8 @@ Artifact area:
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
+If you want only the right-panel reading order, use [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md).
+
 ## Scenario 1: I Just Want To See A Graph On The Canvas
 
 Use this when the canvas is empty and you only want a known-good template.
@@ -303,5 +305,6 @@ Buttons:
 
 - [Graph Lab UX Manual](300_graph_lab_ux_manual.md)
 - [Graph Lab UX Manual (Korean)](301_graph_lab_ux_manual_ko.md)
+- [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
 - [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md)
 - [Generated Reports Index](reports/README.md)

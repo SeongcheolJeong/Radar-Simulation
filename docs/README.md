@@ -27,6 +27,8 @@ For generated evidence and outputs, use:
   - [Graph Lab UX 사용 매뉴얼](301_graph_lab_ux_manual_ko.md)
   - [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
   - [Graph Lab 버튼 시나리오 가이드](303_graph_lab_button_scenario_guide_ko.md)
+  - [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
+  - [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)
 - canonical validation packs:
   - [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md)
   - [정식 검증 시나리오 팩](290_canonical_validation_scenario_pack_ko.md)
@@ -51,6 +53,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | run Graph Lab | [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) | `scripts/run_graph_lab_local.sh` |
 | learn the Graph Lab UI and button flow | [Graph Lab UX Manual](300_graph_lab_ux_manual.md) | the screenshots and run sequences in that manual |
 | understand Graph Lab buttons by scenario | [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md) | the shortest click path for each task |
+| read the Artifact Inspector without the full UI manual | [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md) | the right-panel reading order and healthy signs |
 | run the classic dashboard | [Frontend Dashboard Usage](116_frontend_dashboard_usage.md) | `scripts/run_web_e2e_dashboard_local.sh` |
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
 | run the fixed release-candidate validation order | [Canonical Validation Scenario Pack](289_canonical_validation_scenario_pack.md) | the scenario commands and evidence files in that pack |
@@ -76,6 +79,8 @@ Start with:
 - [Graph Lab UX 사용 매뉴얼](301_graph_lab_ux_manual_ko.md)
 - [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md)
 - [Graph Lab 버튼 시나리오 가이드](303_graph_lab_button_scenario_guide_ko.md)
+- [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
+- [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)
 - [Project Structure And User Manual](282_project_structure_and_user_manual.md)
 - [Generated Reports Index](reports/README.md)
 
