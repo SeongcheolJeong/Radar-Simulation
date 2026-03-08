@@ -47,6 +47,10 @@ Full layout:
 
 ![Graph Lab full layout](reports/graph_lab_playwright_snapshots/latest/page_full.png)
 
+Annotated layout:
+
+![Graph Lab full layout annotated](reports/graph_lab_playwright_snapshots/latest/page_full_annotated.png)
+
 Main areas:
 
 1. Left panel
@@ -70,11 +74,19 @@ Decision Pane example:
 
 ![Decision Pane](reports/graph_lab_playwright_snapshots/latest/decision_pane.png)
 
+Annotated Decision Pane:
+
+![Decision Pane annotated](reports/graph_lab_playwright_snapshots/latest/decision_pane_annotated.png)
+
 Artifact Inspector example:
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
 If you only need the practical reading order for the right panel, use [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md).
+
+Annotated Artifact Inspector:
+
+![Artifact Inspector annotated](reports/graph_lab_playwright_snapshots/latest/artifact_inspector_annotated.png)
 
 ## Left Panel: Graph Setup And Runtime
 

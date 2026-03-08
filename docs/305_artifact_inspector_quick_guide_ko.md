@@ -24,6 +24,10 @@
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
+번호 마커가 들어간 예시:
+
+![Artifact Inspector annotated](reports/graph_lab_playwright_snapshots/latest/artifact_inspector_annotated.png)
+
 ## 읽는 순서
 
 다음 순서로 읽으면 됩니다.

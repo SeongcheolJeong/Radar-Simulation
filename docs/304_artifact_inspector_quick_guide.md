@@ -24,6 +24,10 @@ Example:
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
+Annotated example:
+
+![Artifact Inspector annotated](reports/graph_lab_playwright_snapshots/latest/artifact_inspector_annotated.png)
+
 ## Read Order
 
 Read the panel in this order:

@@ -47,6 +47,10 @@ curl http://127.0.0.1:8101/health
 
 ![Graph Lab 전체 화면](reports/graph_lab_playwright_snapshots/latest/page_full.png)
 
+번호 마커가 들어간 전체 화면:
+
+![Graph Lab 전체 화면 annotated](reports/graph_lab_playwright_snapshots/latest/page_full_annotated.png)
+
 주요 영역:
 
 1. 왼쪽 패널
@@ -69,11 +73,19 @@ Decision Pane 예시:
 
 ![Decision Pane](reports/graph_lab_playwright_snapshots/latest/decision_pane.png)
 
+번호 마커가 들어간 Decision Pane:
+
+![Decision Pane annotated](reports/graph_lab_playwright_snapshots/latest/decision_pane_annotated.png)
+
 Artifact Inspector 예시:
 
 ![Artifact Inspector](reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png)
 
 오른쪽 패널만 빠르게 읽고 싶으면 [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)를 사용하면 됩니다.
+
+번호 마커가 들어간 Artifact Inspector:
+
+![Artifact Inspector annotated](reports/graph_lab_playwright_snapshots/latest/artifact_inspector_annotated.png)
 
 ## 왼쪽 패널: Graph Setup과 Runtime
 
