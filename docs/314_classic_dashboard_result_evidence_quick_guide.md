@@ -30,6 +30,10 @@ Main result area:
 
 ![Classic dashboard main](reports/classic_dashboard_snapshots/latest/dashboard_main.png)
 
+Annotated main result area:
+
+![Classic dashboard main annotated](reports/classic_dashboard_snapshots/latest/dashboard_main_annotated.png)
+
 ## Read In This Order
 
 1. `runtime badge` in the header

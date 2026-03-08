@@ -111,6 +111,18 @@ def main() -> None:
             (4, "Policy tuning and\nscenario parameters", (8, 2310, 312, 3280)),
         ],
     )
+    annotate(
+        "dashboard_main.png",
+        "dashboard_main_annotated.png",
+        "Result Areas",
+        "Read these panes in order",
+        [
+            (1, "Scene viewer", (8, 8, 780, 650)),
+            (2, "Metrics", (810, 8, 1230, 520)),
+            (3, "Radar map", (8, 680, 660, 3290)),
+            (4, "Detection table", (680, 680, 1230, 3290)),
+        ],
+    )
 
 
 if __name__ == "__main__":
