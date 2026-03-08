@@ -32,8 +32,10 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | --- | --- | --- |
 | understand the repository | [Project Structure And User Manual](282_project_structure_and_user_manual.md) | [Architecture](03_architecture.md) |
 | install only what you need | [Install Onboarding Map](288_install_onboarding_map.md) | one of `284` to `287` |
-| run the frontend | [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) | `scripts/run_graph_lab_local.sh` |
+| run Graph Lab | [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) | `scripts/run_graph_lab_local.sh` |
+| run the classic dashboard | [Frontend Dashboard Usage](116_frontend_dashboard_usage.md) | `scripts/run_web_e2e_dashboard_local.sh` |
 | validate backend/runtime behavior | [Validation Checkpoints](04_validation_checkpoints.md) | validators and gates in `scripts/` |
+| validate paid RadarSimPy production access | [RadarSimPy Runtime](285_install_radarsimpy_runtime.md) | `scripts/run_radarsimpy_paid_6m_gate_ci.sh` |
 | review release-facing evidence | [Generated Reports Index](reports/README.md) | release notes and one-pagers |
 
 ## By Role
@@ -47,6 +49,16 @@ Start with:
 - [Generated Reports Index](reports/README.md)
 
 Use these when you need to run the frontend, compare tracks, inspect artifacts, and review current evidence.
+
+### Classic Dashboard User
+
+Start with:
+
+- [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)
+- [Project Structure And User Manual](282_project_structure_and_user_manual.md)
+- [Generated Reports Index](reports/README.md)
+
+Use these when you need the lightweight dashboard shell, a quick demo route, or a simple presentation-oriented frontend path.
 
 ### Developer
 
@@ -67,6 +79,16 @@ Start with:
 - [Scene Backend Golden Path Contract](251_scene_backend_golden_path_contract.md)
 
 Use these when you need pass/fail criteria, current evidence, and stable validation expectations.
+
+### Paid RadarSimPy Validator
+
+Start with:
+
+- [RadarSimPy Runtime](285_install_radarsimpy_runtime.md)
+- [Validation Checkpoints](04_validation_checkpoints.md)
+- [Generated Reports Index](reports/README.md)
+
+Use these when you need the production-license path, paid runtime gates, readiness checks, and final RadarSimPy evidence.
 
 ## Installation
 
