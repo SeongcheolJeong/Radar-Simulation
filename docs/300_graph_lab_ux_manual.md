@@ -139,7 +139,13 @@ Most important controls:
 | --- | --- |
 | `Low Fidelity: RadarSimPy + FFD` | fast baseline and compare reference |
 | `High Fidelity: Sionna-style RT` | optional ray-tracing-oriented path |
-| `High Fidelity: PO-SBR` | current default high-fidelity release path |
+| `High Fidelity: PO-SBR` | full PO-SBR closure path; can be long-running |
+
+When `PO-SBR` is selected, read the warning under `Purpose Presets`:
+
+- use `.venv-po-sbr`
+- expect Linux + NVIDIA
+- prefer `Sionna-style RT` for interactive checks
 
 ### Multiplexing Controls
 
@@ -259,8 +265,8 @@ Use this when you want the standard operator workflow.
 2. Pin it as compare:
    - click `Use Current as Compare`
 3. Switch to the target high-fidelity path:
-   - click `High Fidelity: PO-SBR`
-   - or click `High Fidelity: Sionna-style RT`
+   - click `High Fidelity: Sionna-style RT`
+   - or click `High Fidelity: PO-SBR`
 4. Fill any required advanced runtime inputs if the preset leaves them incomplete.
 5. Click `Run Graph (API)` again.
 6. Read:

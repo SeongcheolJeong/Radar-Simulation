@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Expose two practical implementation tracks in the frontend so operators can choose by purpose instead of manually rebuilding backend/runtime fields every time:
+Expose practical implementation tracks in the frontend so operators can choose by purpose instead of manually rebuilding backend/runtime fields every time:
 
 - low-fidelity path: `RadarSimPy + FFD`
 - high-fidelity path: `ray-tracing backend`
@@ -55,6 +55,13 @@ The runtime panel now exposes provider-specific advanced sections when the selec
   - `PO-SBR Geometry Path`
   - chirp/bounce/rays and angle controls
   - `PO-SBR Components JSON`
+
+The runtime panel also shows a PO-SBR-specific warning when `po_sbr_rt` is selected:
+
+- launch Graph Lab with `.venv-po-sbr`
+- expect Linux + NVIDIA
+- prefer `High Fidelity: Sionna-style RT` for interactive high-fidelity checks
+- keep `High Fidelity: PO-SBR` for closure-grade or longer-running validation
 
 The purpose preset buttons also load sample values for these sections so a user does not start from an invalid empty runtime payload.
 

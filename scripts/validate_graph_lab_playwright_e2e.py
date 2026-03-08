@@ -335,7 +335,7 @@ def run(args: argparse.Namespace) -> int:
                     raise AssertionError("sionna preset did not load Mitsuba spheres sample")
                 report["runtime_controls"]["advanced_controls_checked"].append("sionna_rt")
 
-                page.get_by_role("button", name="High Fidelity: PO-SBR").click()
+                page.get_by_role("button", name="High Fidelity: PO-SBR", exact=True).click()
                 page.wait_for_timeout(100)
                 if runtime_backend_select.input_value() != "po_sbr_rt":
                     raise AssertionError("po-sbr preset did not set runtime backend to po_sbr_rt")
@@ -358,6 +358,9 @@ def run(args: argparse.Namespace) -> int:
                 if "po_lane_left" not in po_sbr_components.input_value():
                     raise AssertionError("po-sbr preset did not load components sample")
                 report["runtime_controls"]["advanced_controls_checked"].append("po_sbr_rt")
+                po_sbr_warning_text = field_locator(page, "Purpose Presets").inner_text()
+                if ".venv-po-sbr" not in po_sbr_warning_text or "Sionna-style RT" not in po_sbr_warning_text:
+                    raise AssertionError("po-sbr warning hint did not render dedicated-env / interactive guidance")
 
                 tx_ffd_area.fill("/tmp/tx0.ffd\n/tmp/tx1.ffd")
                 rx_ffd_area.fill("/tmp/rx0.ffd\n/tmp/rx1.ffd")

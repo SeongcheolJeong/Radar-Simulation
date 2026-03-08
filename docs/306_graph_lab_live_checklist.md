@@ -121,10 +121,10 @@ Expected:
 
 Click one:
 
-1. `High Fidelity: PO-SBR`
-2. `High Fidelity: Sionna-style RT`
+1. `High Fidelity: Sionna-style RT`
+2. `High Fidelity: PO-SBR`
 
-Use `PO-SBR` unless you explicitly need the Sionna-style path.
+Use `Sionna-style RT` first for interactive high-fidelity checks. Move to full `PO-SBR` only when Graph Lab is running from `.venv-po-sbr` and you are prepared for a longer run.
 
 ### C3. Run Again
 

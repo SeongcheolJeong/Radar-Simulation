@@ -136,7 +136,13 @@ Artifact Inspector 예시:
 | --- | --- |
 | `Low Fidelity: RadarSimPy + FFD` | 빠른 baseline 및 compare 기준 |
 | `High Fidelity: Sionna-style RT` | 선택적 ray-tracing 지향 경로 |
-| `High Fidelity: PO-SBR` | 현재 release 기준 기본 high-fidelity 경로 |
+| `High Fidelity: PO-SBR` | full PO-SBR closure 경로; 오래 걸릴 수 있음 |
+
+`PO-SBR`를 선택하면 `Purpose Presets` 아래 경고를 같이 봐야 합니다.
+
+- `.venv-po-sbr`로 Graph Lab 실행
+- Linux + NVIDIA 전제
+- interactive check는 먼저 `Sionna-style RT`, full `PO-SBR`는 전용 검증에서 사용
 
 ## 오른쪽 패널: Decision Pane
 
@@ -234,8 +240,8 @@ Artifact Inspector 예시:
    - `Run Graph (API)`
 2. `Use Current as Compare` 클릭
 3. target high-fidelity path 선택
-   - `High Fidelity: PO-SBR`
-   - 또는 `High Fidelity: Sionna-style RT`
+   - `High Fidelity: Sionna-style RT`
+   - 또는 `High Fidelity: PO-SBR`
 4. 필요하면 advanced runtime 입력 보완
 5. `Run Graph (API)` 다시 실행
 6. 아래를 읽기

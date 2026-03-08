@@ -162,6 +162,11 @@ export function RuntimeConfigSection({
         { className: "hint", key: "runtime_purpose_hint" },
         "Low fidelity uses RadarSimPy runtime; when FFD files are set, the repo synth applies antenna patterns on the returned paths. High fidelity maps to the Sionna-style or PO-SBR ray-tracing providers available in this repo."
       ),
+      showPoSbrAdvanced ? h(
+        "div",
+        { className: "hint", key: "runtime_po_sbr_runtime_warning" },
+        "PO-SBR requires Linux + NVIDIA + the dedicated .venv-po-sbr environment. The full PO-SBR preset is long-running; prefer Sionna-style RT for interactive high-fidelity checks and reserve PO-SBR for dedicated validation runs."
+      ) : null,
     ]),
     h("div", { className: "field", key: "runtime_backend" }, [
       h("label", { className: "label", key: "lbl_runtime_backend" }, "Runtime Backend"),
@@ -361,7 +366,7 @@ export function RuntimeConfigSection({
         h(
           "div",
           { className: "hint", key: "runtime_po_sbr_hint" },
-          "Repo root is resolved relative to the current working directory. Geometry path is resolved relative to that repo root when not absolute."
+          "Repo root is resolved relative to the current working directory. Geometry path is resolved relative to that repo root when not absolute. Use the full sample for closure-grade runs under .venv-po-sbr; prefer Sionna-style RT for interactive checks."
         ),
       ]),
       h("div", { className: "btn-row", key: "runtime_po_sbr_paths_row" }, [
