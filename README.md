@@ -85,6 +85,30 @@ If either track works, continue with:
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
 
+## Paid RadarSimPy Production Validation
+
+Use this path only when you have:
+
+- the RadarSimPy runtime installed
+- a paid `.lic` file or equivalent production access
+
+Start with:
+
+- [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md)
+
+Run:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh
+```
+
+Check these reports next:
+
+- `docs/reports/radarsimpy_production_release_gate_latest.json`
+- `docs/reports/radarsimpy_readiness_checkpoint_latest.json`
+- `docs/reports/radarsimpy_wrapper_integration_gate_production_latest.json`
+- `docs/reports/radarsimpy_integration_smoke_gate_production_latest.json`
+
 ## Who Should Use What
 
 | If you are... | Start here | Then use |

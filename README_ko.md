@@ -87,6 +87,30 @@ PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099
 - [Install Onboarding Map](docs/288_install_onboarding_map.md)
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
 
+## 유료 RadarSimPy Production Validation
+
+이 경로는 아래가 준비된 경우에만 사용합니다.
+
+- RadarSimPy runtime 설치 완료
+- 유료 `.lic` 또는 동등한 production 접근 권한 확보
+
+먼저 볼 문서:
+
+- [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md)
+
+실행:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_paid_6m_gate_ci.sh
+```
+
+다음 리포트를 확인하면 됩니다.
+
+- `docs/reports/radarsimpy_production_release_gate_latest.json`
+- `docs/reports/radarsimpy_readiness_checkpoint_latest.json`
+- `docs/reports/radarsimpy_wrapper_integration_gate_production_latest.json`
+- `docs/reports/radarsimpy_integration_smoke_gate_production_latest.json`
+
 ## 누구에게 어떤 경로가 맞는가
 
 | 내가 해당하는 경우 | 먼저 볼 것 | 다음 단계 |
