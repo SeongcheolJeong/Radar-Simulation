@@ -63,6 +63,12 @@ frozen handoff package 전체를 한 번에 다시 만들고 검증하려면 아
 bash scripts/run_release_closure_handoff_bundle.sh
 ```
 
+evidence를 다시 만들 필요 없이 전달 직전 최종 전달 상태만 확인하려면 아래를 실행합니다.
+
+```bash
+bash scripts/run_release_closure_handoff_pre_send_check.sh
+```
+
 ## Handoff 전에 재검토해야 하는 조건
 
 - canonical subset이 `pass=true`가 아님

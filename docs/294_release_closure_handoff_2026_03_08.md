@@ -63,6 +63,12 @@ Run this when you want the full frozen handoff package refreshed and revalidated
 bash scripts/run_release_closure_handoff_bundle.sh
 ```
 
+Run this immediately before sending the handoff bundle if you only need a final delivery check without rebuilding evidence:
+
+```bash
+bash scripts/run_release_closure_handoff_pre_send_check.sh
+```
+
 ## Escalate Before Handoff If
 
 - canonical subset is not `pass=true`
