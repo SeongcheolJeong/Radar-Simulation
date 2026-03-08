@@ -12,6 +12,8 @@
 
 전체 화면 설명은 [Graph Lab UX 사용 매뉴얼](301_graph_lab_ux_manual_ko.md)을 사용하면 됩니다.
 
+run 또는 compare 흐름이 실패했다면 [Graph Lab 실패 읽기 가이드](325_graph_lab_failure_reading_guide_ko.md)를 보십시오.
+
 ## 화면 참고
 
 전체 화면:

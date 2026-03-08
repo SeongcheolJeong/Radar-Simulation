@@ -20,6 +20,8 @@
 
 어느 Graph Lab 문서부터 열어야 할지 모르겠으면 [Graph Lab 문서 맵](323_graph_lab_doc_map_ko.md)를 보십시오.
 
+실패부터 읽는 흐름이 필요하면 [Graph Lab 실패 읽기 가이드](325_graph_lab_failure_reading_guide_ko.md)를 보십시오.
+
 ## Graph Lab 실행
 
 실행:

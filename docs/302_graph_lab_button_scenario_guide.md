@@ -12,6 +12,8 @@ Use it when:
 
 For the full screen walkthrough, use [Graph Lab UX Manual](300_graph_lab_ux_manual.md).
 
+If a run or compare flow failed, use [Graph Lab Failure Reading Guide](324_graph_lab_failure_reading_guide.md).
+
 ## Screen Reference
 
 Full screen:

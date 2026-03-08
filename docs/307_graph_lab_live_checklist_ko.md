@@ -13,6 +13,8 @@
 
 전체 설명은 [Graph Lab UX 사용 매뉴얼](301_graph_lab_ux_manual_ko.md)을 보면 됩니다.
 
+중간 단계가 실패하면 [Graph Lab 실패 읽기 가이드](325_graph_lab_failure_reading_guide_ko.md)를 보십시오.
+
 ## Graph Lab 열기
 
 실행:

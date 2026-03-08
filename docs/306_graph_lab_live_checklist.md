@@ -13,6 +13,8 @@ This is not the full manual. It is the shortest practical checklist for:
 
 For the full explanation, use [Graph Lab UX Manual](300_graph_lab_ux_manual.md).
 
+If one step fails, use [Graph Lab Failure Reading Guide](324_graph_lab_failure_reading_guide.md).
+
 ## Open Graph Lab
 
 Run:

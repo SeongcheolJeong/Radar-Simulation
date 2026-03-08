@@ -20,6 +20,8 @@ If you want the shortest click-by-click checklist while the UI is open, use [Gra
 
 If you are not sure which Graph Lab document to open first, use [Graph Lab Document Map](322_graph_lab_doc_map.md).
 
+If you need a failure-first reading flow, use [Graph Lab Failure Reading Guide](324_graph_lab_failure_reading_guide.md).
+
 ## Start Graph Lab
 
 Run:
