@@ -20,6 +20,7 @@ It includes:
 Explanation vs evidence:
 
 - explanation: [Documentation Index](docs/README.md)
+- frontend docs: [Frontend Document Map](docs/328_frontend_doc_map.md)
 - evidence: [Generated Reports Index](docs/reports/README.md)
 - current release closure: [Release Closure Handoff](docs/294_release_closure_handoff_2026_03_08.md)
 

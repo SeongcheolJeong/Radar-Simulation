@@ -67,6 +67,7 @@ classic dashboard 문서를 써야 하는 것은 알지만, 어느 문서부터 
 
 ## 관련 문서
 
+- [Frontend 문서 맵](329_frontend_doc_map_ko.md)
 - [Documentation Index](README.md)
 - [Generated Reports Index](reports/README.md)
 - [Graph Lab UX Manual](301_graph_lab_ux_manual_ko.md)

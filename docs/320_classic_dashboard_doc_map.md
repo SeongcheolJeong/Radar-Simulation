@@ -67,6 +67,7 @@ This page is the routing map for the classic dashboard documentation set.
 
 ## Related Documents
 
+- [Frontend Document Map](328_frontend_doc_map.md)
 - [Documentation Index](README.md)
 - [Generated Reports Index](reports/README.md)
 - [Graph Lab UX Manual](300_graph_lab_ux_manual.md)

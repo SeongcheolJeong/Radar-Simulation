@@ -32,6 +32,8 @@ For generated evidence and outputs, use:
   - [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md)
   - [Artifact Inspector 빠른 읽기 가이드](305_artifact_inspector_quick_guide_ko.md)
   - [Graph Lab Live Checklist](306_graph_lab_live_checklist.md)
+  - [Frontend Document Map](328_frontend_doc_map.md)
+  - [Frontend 문서 맵](329_frontend_doc_map_ko.md)
   - [Graph Lab 실사용 체크리스트](307_graph_lab_live_checklist_ko.md)
   - [Graph Lab Document Map](322_graph_lab_doc_map.md)
   - [Graph Lab 문서 맵](323_graph_lab_doc_map_ko.md)
@@ -74,6 +76,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | install only what you need | [Install Onboarding Map](288_install_onboarding_map.md) | one of `284` to `287` |
 | run Graph Lab | [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) | `scripts/run_graph_lab_local.sh` |
 | learn the Graph Lab UI and button flow | [Graph Lab UX Manual](300_graph_lab_ux_manual.md) | the screenshots and run sequences in that manual |
+| choose between Graph Lab and the classic dashboard | [Frontend Document Map](328_frontend_doc_map.md) | the UI-specific map for the chosen frontend |
 | understand Graph Lab buttons by scenario | [Graph Lab Button Scenario Guide](302_graph_lab_button_scenario_guide.md) | the shortest click path for each task |
 | read the Artifact Inspector without the full UI manual | [Artifact Inspector Quick Guide](304_artifact_inspector_quick_guide.md) | the right-panel reading order and healthy signs |
 | follow the shortest live click sequence while the UI is open | [Graph Lab Live Checklist](306_graph_lab_live_checklist.md) | the first-run, compare, and export checklist |

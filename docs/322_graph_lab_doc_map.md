@@ -64,6 +64,7 @@ This page is the routing map for the Graph Lab documentation set.
 
 ## Related Documents
 
+- [Frontend Document Map](328_frontend_doc_map.md)
 - [Documentation Index](README.md)
 - [Generated Reports Index](reports/README.md)
 - [Classic Dashboard Document Map](320_classic_dashboard_doc_map.md)
