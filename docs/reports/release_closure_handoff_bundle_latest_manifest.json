@@ -1,17 +1,17 @@
 {
   "version": "release_closure_handoff_bundle_v1",
-  "generated_at_utc": "2026-03-08T15:33:14.884830+00:00",
+  "generated_at_utc": "2026-03-08T15:41:11.702236+00:00",
   "repo_root": "/home/seongcheoljeong/workspace/myproject",
   "git": {
-    "head_commit": "4af5b4c3cdd3cf9218a209e6f0d5359fea35d5c0",
-    "head_commit_short": "4af5b4c",
+    "head_commit": "0eb1d941a14dfb93483afc6809596db73642c3f9",
+    "head_commit_short": "0eb1d94",
     "branch": "main",
-    "status_porcelain": "M docs/294_release_closure_handoff_2026_03_08.md\n M docs/295_release_closure_handoff_2026_03_08_ko.md\n M docs/reports/release_closure_handoff_bundle_latest.tar.gz"
+    "status_porcelain": "M docs/reports/canonical_release_candidate_subset_latest.json\n M docs/reports/frontend_runtime_payload_provider_info_optional_latest.json\n M docs/reports/frontend_runtime_payload_provider_info_paid_6m.json\n M docs/reports/graph_lab_playwright_e2e_latest.json\n M docs/reports/graph_lab_playwright_snapshots/latest/artifact_inspector.png\n M docs/reports/graph_lab_playwright_snapshots/latest/decision_brief.md\n M docs/reports/graph_lab_playwright_snapshots/latest/left_panel.png\n M docs/reports/graph_lab_playwright_snapshots/latest/page_full.png\n M docs/reports/graph_lab_playwright_snapshots/latest/right_panel.png\n M docs/reports/radarsimpy_layered_parity_production.json\n M docs/reports/radarsimpy_layered_parity_suite_real_runtime.json\n M docs/reports/radarsimpy_layered_parity_suite_trial_latest.json\n M docs/reports/radarsimpy_layered_parity_trial.json\n M docs/reports/radarsimpy_layered_parity_trial_latest.json\n M docs/reports/radarsimpy_production_release_gate_paid_6m.json\n M docs/reports/radarsimpy_production_release_gate_paid_6m_readiness_checkpoint.json\n M docs/reports/radarsimpy_simulator_reference_parity_from_smoke.json\n M docs/reports/radarsimpy_simulator_reference_parity_paid_6m.json\n M docs/reports/radarsimpy_simulator_reference_parity_real_runtime.json\n M docs/reports/radarsimpy_wrapper_integration_gate_real_from_smoke.json\n M docs/reports/release_closure_handoff_bundle_latest.tar.gz\n M docs/reports/scene_backend_parity_po_sbr_rt_latest.json"
   },
   "bundle_archive": {
     "path": "docs/reports/release_closure_handoff_bundle_latest.tar.gz",
-    "size_bytes": 14968,
-    "sha256": "df13cb50c91d0e68cd51eeb4e3f63ab766e00823d0f80f100e361902ceb5eff7"
+    "size_bytes": 14958,
+    "sha256": "ef1bbcb51d090c7e82eb55eb601a7a086b99bb933217be3b82ea24f9b42c1c5a"
   },
   "file_count": 13,
   "files": [
@@ -68,7 +68,7 @@
     {
       "path": "docs/reports/canonical_release_candidate_subset_latest.json",
       "size_bytes": 20184,
-      "sha256": "7cc2e88dfd57d278f552ac762763b18b924cf9a8d7e759cc7e77b64617eb86c8"
+      "sha256": "d23fc9ffdff42e3bf877cd92dafceb71ad3c1cc25e6920a00040398457e209ab"
     },
     {
       "path": "docs/reports/release_announcement_pack_latest.json",
