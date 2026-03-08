@@ -64,6 +64,7 @@ Related snapshot guide:
 | --- | --- | --- | --- |
 | Operator | [Frontend Evidence Checklist](#frontend-evidence-checklist) | `graph_lab_playwright_snapshots/latest/decision_brief.md` | [Operator](../README.md#role-operator) |
 | Classic Dashboard User | [Frontend Evidence Checklist](#frontend-evidence-checklist) | `frontend_quickstart_v1.json` | [Classic Dashboard User](../README.md#role-classic-dashboard-user) |
+| Developer | [Frontend Evidence Checklist](#frontend-evidence-checklist), [RadarSimPy Evidence Checklist](#radarsimpy-evidence-checklist), or [PO-SBR Evidence Checklist](#po-sbr-evidence-checklist) | the checklist that matches the subsystem you changed | [Developer](../README.md#role-developer) |
 | Validator | [RadarSimPy Evidence Checklist](#radarsimpy-evidence-checklist) or [PO-SBR Evidence Checklist](#po-sbr-evidence-checklist) | the subsystem-specific `_latest` or dated report | [Validator](../README.md#role-validator) |
 | Paid RadarSimPy Validator | [RadarSimPy Evidence Checklist](#radarsimpy-evidence-checklist) | `radarsimpy_production_release_gate_latest.json` | [Paid RadarSimPy Validator](../README.md#role-paid-radarsimpy-validator) |
 
