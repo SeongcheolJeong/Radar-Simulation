@@ -107,6 +107,10 @@ Usually unhealthy because:
 - the frontend/runtime payload report no longer matches expectations, which usually points at backend contract or override-builder changes
 - the quick demo summary no longer looks usable, which usually points at local server bootstrap or demo-route wiring problems
 
+Fastest first check:
+
+- `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py`
+
 If this checklist fails, open next:
 
 - `graph_lab_playwright_snapshots/latest/decision_brief.md`
@@ -159,6 +163,10 @@ Usually unhealthy because:
 - wrapper integration fails while final status was previously green, which usually points at coupling or provider-contract regressions
 - smoke gate fails after wrapper integration passes, which usually points at runtime execution drift rather than pure wiring
 
+Fastest first check:
+
+- `PYTHONPATH=src .venv/bin/python scripts/run_radarsimpy_wrapper_integration_gate.py --output-summary-json docs/reports/radarsimpy_wrapper_integration_gate_manual.json`
+
 If this checklist fails, open next:
 
 - `radarsimpy_production_release_gate_latest.json`
@@ -210,6 +218,10 @@ Usually unhealthy because:
 - the strict post-change gate stopped passing, which usually points at runtime-affecting contract drift
 - the progress snapshot no longer shows required checkpoints ready, which usually means the closure set is incomplete
 - local-ready regression or baseline drift moved out of envelope, which usually indicates physical-output or acceptance-threshold drift
+
+Fastest first check:
+
+- `PYTHONPATH=src .venv/bin/python scripts/run_po_sbr_post_change_gate.py --strict`
 
 If this checklist fails, open next:
 
