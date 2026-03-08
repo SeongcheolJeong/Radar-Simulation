@@ -189,6 +189,7 @@ tests/
 
 분리된 설치 가이드:
 
+- [Install Onboarding Map](288_install_onboarding_map.md)
 - [Install Guide: Base Environment](284_install_base_environment.md)
 - [Install Guide: RadarSimPy Runtime](285_install_radarsimpy_runtime.md)
 - [Install Guide: Sionna-Style RT Runtime](286_install_sionna_style_rt_runtime.md)

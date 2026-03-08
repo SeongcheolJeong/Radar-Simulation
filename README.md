@@ -87,6 +87,7 @@ Dependency rule:
 
 ## Installation Guides
 
+- [Install Onboarding Map](docs/288_install_onboarding_map.md)
 - [Base Environment](docs/284_install_base_environment.md)
 - [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md)
 - [Sionna-Style RT Runtime](docs/286_install_sionna_style_rt_runtime.md)
