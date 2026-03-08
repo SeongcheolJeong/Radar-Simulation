@@ -12,6 +12,8 @@
 
 가장 짧은 실행 순서는 [Frontend Dashboard Usage](116_frontend_dashboard_usage.md)를 보면 됩니다.
 
+dashboard를 열어 둔 상태에서 바로 따라가려면 [Classic Dashboard 실사용 체크리스트](311_classic_dashboard_live_checklist_ko.md)를 보면 됩니다.
+
 ## Dashboard 실행
 
 실행:

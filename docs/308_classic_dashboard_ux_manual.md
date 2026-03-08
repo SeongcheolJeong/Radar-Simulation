@@ -12,6 +12,8 @@ Use it when you want:
 
 For the shortest live sequence, use [Frontend Dashboard Usage](116_frontend_dashboard_usage.md).
 
+If you want a follow-along checklist while the dashboard is open, use [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md).
+
 ## Start The Dashboard
 
 Run:

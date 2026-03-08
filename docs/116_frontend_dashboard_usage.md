@@ -14,6 +14,8 @@ For the richer operator workflow, use [Graph Lab UX Manual](300_graph_lab_ux_man
 
 For a button-by-button manual of the classic dashboard, use [Classic Dashboard UX Manual](308_classic_dashboard_ux_manual.md).
 
+If you want the shortest click-by-click checklist while the dashboard is open, use [Classic Dashboard Live Checklist](310_classic_dashboard_live_checklist.md).
+
 ## Run
 
 Recommended:
