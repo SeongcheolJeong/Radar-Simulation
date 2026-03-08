@@ -1,11 +1,96 @@
 {
   "report_name": "frontend_runtime_payload_provider_info_optional",
-  "generated_at_utc": "2026-03-05T22:01:57.304337+00:00",
-  "require_runtime": false,
-  "runtime_available": false,
-  "skipped": true,
-  "skip_reason": "RuntimeError: missing required RadarSimPy module: No module named 'radarsimpy'",
+  "generated_at_utc": "2026-03-08T09:21:44.587309+00:00",
+  "require_runtime": true,
+  "runtime_available": true,
+  "skipped": false,
+  "skip_reason": null,
   "pass": true,
-  "cases": [],
+  "cases": [
+    {
+      "case_id": "frontend_runtime_tdm",
+      "pass": true,
+      "expected_mode": "tdm",
+      "observed_mode": "tdm",
+      "expected_active_tx_per_chirp": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "observed_active_tx_per_chirp": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "expected_plan_source": "runtime_input",
+      "observed_plan_source": "runtime_input",
+      "observed_pulse_amp_shape": [
+        2,
+        4
+      ],
+      "observed_pulse_phs_deg_shape": [
+        2,
+        4
+      ]
+    },
+    {
+      "case_id": "frontend_runtime_bpm",
+      "pass": true,
+      "expected_mode": "bpm",
+      "observed_mode": "bpm",
+      "expected_active_tx_per_chirp": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "observed_active_tx_per_chirp": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "expected_plan_source": "runtime_input",
+      "observed_plan_source": "runtime_input",
+      "observed_pulse_amp_shape": [
+        2,
+        4
+      ],
+      "observed_pulse_phs_deg_shape": [
+        2,
+        4
+      ]
+    },
+    {
+      "case_id": "frontend_runtime_custom",
+      "pass": true,
+      "expected_mode": "custom",
+      "observed_mode": "custom",
+      "expected_active_tx_per_chirp": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "observed_active_tx_per_chirp": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "expected_plan_source": "runtime_input.tx_multiplexing_plan",
+      "observed_plan_source": "runtime_input.tx_multiplexing_plan",
+      "observed_pulse_amp_shape": [
+        2,
+        4
+      ],
+      "observed_pulse_phs_deg_shape": [
+        2,
+        4
+      ]
+    }
+  ],
   "error": null
 }

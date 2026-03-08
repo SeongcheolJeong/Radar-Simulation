@@ -1,0 +1,43 @@
+{
+  "report_name": "po_sbr_operator_handoff_closure",
+  "generated_at_utc": "2026-03-08T09:22:43.446365+00:00",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "branch": "main",
+  "head_commit": "269ace50f8fb7dea1bc2c1e76aa3e56a7252f15c",
+  "frontend_timeline_import_audit": {
+    "milestones": [
+      "M17.97",
+      "M17.98",
+      "M17.99",
+      "M17.100",
+      "M17.101"
+    ],
+    "validator_status": "pass",
+    "api_regression_status": "pass"
+  },
+  "merged_full_track": {
+    "checkpoint_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json",
+    "ready": true,
+    "matrix_status": "ready",
+    "full_track_status": "ready",
+    "gate_lock_status": "ready",
+    "realism_gate_candidate_status": "ready",
+    "generated_from_head_commit": "269ace50f8fb7dea1bc2c1e76aa3e56a7252f15c",
+    "merged_readiness_commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6",
+    "validation_status": "pass"
+  },
+  "avx_developer_gate": {
+    "summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_avx_developer_gate_2026_03_08.json",
+    "matrix_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/avx_export_benchmark_matrix_2026_03_08_developer_gate/summary.json",
+    "status": "ready",
+    "physics_worse_count": 0,
+    "function_better_count": 7,
+    "total_profiles": 7
+  },
+  "em_solver_packaging_policy": {
+    "policy_json": "/home/seongcheoljeong/workspace/myproject/docs/em_solver_packaging_policy.json",
+    "reference_locks_md": "/home/seongcheoljeong/workspace/myproject/external/reference-locks.md",
+    "validator_status": "pass"
+  },
+  "overall_status": "ready"
+}

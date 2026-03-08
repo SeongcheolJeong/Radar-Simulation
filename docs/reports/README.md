@@ -58,6 +58,7 @@ Related snapshot guide:
 | paid RadarSimPy frontend/runtime contract | `frontend_runtime_payload_provider_info_paid_6m.json` | paid runtime-oriented frontend payload evidence |
 | Sionna-style RT parity evidence | `scene_backend_parity_sionna_rt_latest.json` | current analytic-vs-sionna parity summary |
 | PO-SBR parity evidence | `scene_backend_parity_po_sbr_rt_latest.json` | current analytic-vs-PO-SBR parity summary |
+| release-candidate subset closure | `canonical_release_candidate_subset_latest.json` | current cross-track subset execution summary |
 | latest RadarSimPy overall status | `radarsimpy_final_status_latest.json` | single status-style entry point for RadarSimPy work |
 
 ## By Role From docs/

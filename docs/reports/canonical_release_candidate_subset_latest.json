@@ -1,0 +1,169 @@
+{
+  "report_name": "canonical_release_candidate_subset",
+  "generated_at_utc": "2026-03-08T09:24:52.246672+00:00",
+  "with_sionna": false,
+  "step_count": 8,
+  "pass_count": 8,
+  "fail_count": 0,
+  "pass": true,
+  "steps": [
+    {
+      "step_id": "FE-1A",
+      "description": "frontend/backend API orchestrator health",
+      "run": {
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+          "scripts/validate_web_e2e_orchestrator_api.py"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "validate_web_e2e_orchestrator_api: pass",
+        "stderr_tail": "127.0.0.1 - - [08/Mar/2026 18:21:05] \"GET /health HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:05] \"GET /api/profiles HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:05] \"GET /api/graph/templates HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:05] \"POST /api/graph/validate HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:05] \"POST /api/graph/validate HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:06] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:06] \"GET /api/graph/runs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:06] \"GET /api/graph/runs/grun_20260308_092105_77f48170 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:06] \"GET /api/graph/runs/grun_20260308_092105_77f48170/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:06] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:06] \"GET /api/graph/runs/grun_20260308_092106_a5dabd04/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:07] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:07] \"GET /api/graph/runs/grun_20260308_092106_24291bc1/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:07] \"POST /api/graph/runs?async=1 HTTP/1.1\" 202 -\n127.0.0.1 - - [08/Mar/2026 18:21:07] \"POST /api/graph/runs/grun_20260308_092107_a0a77ba7/cancel HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:07] \"GET /api/graph/runs/grun_20260308_092107_a0a77ba7 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:07] \"POST /api/graph/runs/grun_20260308_092107_a0a77ba7/retry?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:07] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:08] \"POST /api/graph/runs/grun_20260308_092107_da9ff911/retry?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:08] \"POST /api/baselines HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:08] \"POST /api/compare/policy HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:08] \"POST /api/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:08] \"GET /api/runs/run_20260308_092108_d96d99ab HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:08] \"GET /api/runs/run_20260308_092108_d96d99ab/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:08] \"GET /api/runs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"POST /api/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"POST /api/compare HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"GET /api/comparisons HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"GET /api/comparisons/cmp_20260308_092109_f71ca15f HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"POST /api/baselines HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"GET /api/baselines HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"GET /api/baselines/validate_baseline HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"POST /api/compare/policy HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"GET /api/policy-evals HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:09] \"GET /api/policy-evals/cpol_20260308_092109_c181b030 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"POST /api/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"POST /api/compare/policy HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"POST /api/regression-sessions HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"GET /api/regression-sessions HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"GET /api/regression-sessions/validate_session HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"POST /api/regression-exports HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"GET /api/regression-exports HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:10] \"GET /api/regression-exports/validate_export HTTP/1.1\" 200 -"
+      },
+      "refreshed_evidence": [
+        "docs/reports/frontend_quickstart_v1.json"
+      ]
+    },
+    {
+      "step_id": "FE-1B",
+      "description": "Graph Lab browser/operator E2E",
+      "run": {
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+          "scripts/validate_graph_lab_playwright_e2e.py",
+          "--require-playwright",
+          "--output-json",
+          "docs/reports/graph_lab_playwright_e2e_latest.json"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy/src/radarsimpy/license_RadarSimPy_10760.lic\nvalidate_graph_lab_playwright_e2e: pass",
+        "stderr_tail": "127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab_reactflow.html?api=http://127.0.0.1:45953&scene=/tmp/graph_lab_playwright_e2e_ewk7x1wf/scene.json&baseline_id=playwright_baseline HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/main.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/deps.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/app.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/contracts.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/compare_summary.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/api_client.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/graph_helpers.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/runtime_purpose_presets.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/panels.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/hooks/use_graph_run_ops.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/runtime_overrides.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/hooks/use_gate_ops.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/run_monitor.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/panels/gate.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/panels/audit.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/panels/runtime.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/constants.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:11] \"GET /frontend/graph_lab/panels/artifact.mjs HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:13] \"GET /api/graph/templates HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:14] \"OPTIONS /api/graph/runs?async=0 HTTP/1.1\" 204 -\n127.0.0.1 - - [08/Mar/2026 18:21:15] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:15] \"GET /api/graph/runs/grun_20260308_092114_7c6653e7/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:15] \"GET /api/graph/runs HTTP/1.1\" 200 -\nRadarSimCpp: No license file path provided. Running in free tier mode.\n127.0.0.1 - - [08/Mar/2026 18:21:16] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:16] \"GET /api/graph/runs/grun_20260308_092116_8ddf15a0/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:17] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:17] \"GET /api/graph/runs/grun_20260308_092116_a68cd2f0/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:20] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:20] \"GET /api/graph/runs/grun_20260308_092119_8e7c8ee6/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:20] \"OPTIONS /api/graph/runs?async=0 HTTP/1.1\" 204 -\n127.0.0.1 - - [08/Mar/2026 18:21:20] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:20] \"GET /api/graph/runs/grun_20260308_092119_3213bcd6/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:21] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:21] \"GET /api/graph/runs/grun_20260308_092120_3d6e2e25/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"GET /api/graph/runs/grun_20260308_092120_8cdd3b66/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"GET /api/graph/runs/grun_20260308_092120_6d00421d/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"OPTIONS /api/baselines HTTP/1.1\" 204 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"POST /api/baselines HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"OPTIONS /api/compare/policy HTTP/1.1\" 204 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"POST /api/compare/policy HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:22] \"GET /api/graph/runs/grun_20260308_092122_966cd680/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:32] \"OPTIONS /api/regression-sessions HTTP/1.1\" 204 -\n127.0.0.1 - - [08/Mar/2026 18:21:32] \"POST /api/regression-sessions HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:33] \"OPTIONS /api/regression-exports HTTP/1.1\" 204 -\n127.0.0.1 - - [08/Mar/2026 18:21:33] \"POST /api/regression-exports HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:35] \"GET /frontend/graph_lab_reactflow.html?api=http%3A%2F%2F127.0.0.1%3A45953&scene=%2Ftmp%2Fgraph_lab_playwright_e2e_ewk7x1wf%2Fscene.json&baseline_id=playwright_baseline&view=triad&density=comfortable HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:35] \"GET /api/graph/templates HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:36] \"OPTIONS /api/graph/runs?async=0 HTTP/1.1\" 204 -\n127.0.0.1 - - [08/Mar/2026 18:21:37] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:37] \"GET /api/graph/runs/grun_20260308_092136_604c8c3c/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:37] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:37] \"GET /api/graph/runs/grun_20260308_092137_c8c466c1/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:39] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:39] \"GET /api/graph/runs/grun_20260308_092138_755b7680/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:39] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:39] \"GET /api/graph/runs/grun_20260308_092139_3e7c97e5/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:41] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:41] \"GET /api/graph/runs/grun_20260308_092140_e4624ee6/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:41] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:41] \"GET /api/graph/runs/grun_20260308_092140_83e2af45/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:42] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:42] \"GET /api/graph/runs/grun_20260308_092141_e3deb3de/summary HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:42] \"POST /api/graph/runs?async=0 HTTP/1.1\" 200 -\n127.0.0.1 - - [08/Mar/2026 18:21:42] \"GET /api/graph/runs/grun_20260308_092141_fd8970b6/summary HTTP/1.1\" 200 -"
+      },
+      "refreshed_evidence": [
+        "docs/reports/graph_lab_playwright_e2e_latest.json",
+        "docs/reports/graph_lab_playwright_snapshots/latest/"
+      ]
+    },
+    {
+      "step_id": "FE-2",
+      "description": "frontend runtime payload -> provider info contract",
+      "run": {
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+          "scripts/validate_frontend_runtime_payload_provider_info_optional.py",
+          "--require-runtime",
+          "--output-json",
+          "docs/reports/frontend_runtime_payload_provider_info_optional_latest.json"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "RadarSimCpp: Loaded license from /home/seongcheoljeong/workspace/myproject/external/radarsimpy/src/radarsimpy/license_RadarSimPy_10760.lic\nvalidate_frontend_runtime_payload_provider_info_optional: pass\ncase_count=3",
+        "stderr_tail": "RadarSimCpp: No license file path provided. Running in free tier mode."
+      },
+      "refreshed_evidence": [
+        "docs/reports/frontend_runtime_payload_provider_info_optional_latest.json"
+      ]
+    },
+    {
+      "step_id": "RS-1",
+      "description": "trial-runtime layered parity suite",
+      "run": {
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+          "scripts/run_radarsimpy_layered_parity_suite.py",
+          "--output-json",
+          "docs/reports/radarsimpy_layered_parity_suite_trial_latest.json",
+          "--trial-output-json",
+          "docs/reports/radarsimpy_layered_parity_trial_latest.json",
+          "--require-runtime-trial"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "RadarSimPy layered parity suite completed.\n  pass: True\n  pass_count: 1\n  fail_count: 0\n  required_fail_count: 0\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_layered_parity_suite_trial_latest.json",
+        "stderr_tail": ""
+      },
+      "refreshed_evidence": [
+        "docs/reports/radarsimpy_layered_parity_suite_trial_latest.json",
+        "docs/reports/radarsimpy_layered_parity_trial_latest.json"
+      ]
+    },
+    {
+      "step_id": "HF-2A",
+      "description": "PO-SBR parity report",
+      "run": {
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+          "scripts/run_scene_backend_parity_po_sbr_rt.py",
+          "--output-json",
+          "docs/reports/scene_backend_parity_po_sbr_rt_latest.json"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "run_scene_backend_parity_po_sbr_rt: done\npass=True\noutput_json=/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_parity_po_sbr_rt_latest.json",
+        "stderr_tail": ""
+      },
+      "refreshed_evidence": [
+        "docs/reports/scene_backend_parity_po_sbr_rt_latest.json"
+      ]
+    },
+    {
+      "step_id": "HF-2B",
+      "description": "PO-SBR strict post-change gate",
+      "run": {
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+          "scripts/run_po_sbr_post_change_gate.py",
+          "--strict"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "wrote /home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_post_change_gate_2026_03_08.json\nclosure_required=True\nclosure_status=pass\noverall_status=ready",
+        "stderr_tail": ""
+      },
+      "refreshed_evidence": [
+        "docs/reports/po_sbr_post_change_gate_*.json"
+      ]
+    },
+    {
+      "step_id": "HF-2C",
+      "description": "PO-SBR strict progress snapshot",
+      "run": {
+        "cmd": [
+          "/home/seongcheoljeong/workspace/myproject/.venv/bin/python",
+          "scripts/show_po_sbr_progress.py",
+          "--strict-ready",
+          "--output-json",
+          "docs/reports/po_sbr_progress_snapshot_release_candidate_latest.json"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "PO-SBR progress snapshot\nworkspace_root=/home/seongcheoljeong/workspace/myproject\noverall_ready=True\nprogress=6/6 ready (100.0%), blocked=0, missing=0\n- merged_checkpoint: ready (required=True, source=/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_merged_checkpoint_2026_03_01.json)\n- operator_handoff_closure: ready (required=True, source=/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_operator_handoff_closure_2026_03_08.json)\n- post_change_gate: ready (required=True, source=/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_post_change_gate_2026_03_08.json)\n- myproject_readiness_checkpoint: ready (required=False, source=/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_myproject_readiness_checkpoint_2026_03_02_6c25dc5.json)\n- myproject_local_ready: ready (required=True, source=/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_regression_2026_03_01_pc_self.json)\n- myproject_baseline_drift: ready (required=True, source=/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_local_ready_baseline_drift_2026_03_01_pc_self.json)\n- local_pre_push_hook: ready (required=True, source=-)\nnext_actions:\n- All readiness checks are green. Continue feature development; pre-push gate will enforce closure policy.\nwrote /home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_progress_snapshot_release_candidate_latest.json",
+        "stderr_tail": ""
+      },
+      "refreshed_evidence": [
+        "docs/reports/po_sbr_progress_snapshot_release_candidate_latest.json"
+      ]
+    },
+    {
+      "step_id": "RS-2",
+      "description": "paid RadarSimPy production closure",
+      "run": {
+        "cmd": [
+          "bash",
+          "scripts/run_radarsimpy_paid_6m_gate_ci.sh"
+        ],
+        "returncode": 0,
+        "pass": true,
+        "stdout_tail": "[1/4] production release gate\nRadarSimPy production release gate completed.\n  production_gate_status: ready\n  selected_license_file: /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\n  checkpoint_output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_paid_6m_readiness_checkpoint.json\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_production_release_gate_paid_6m.json\n[2/4] readiness checkpoint\nRadarSimPy readiness checkpoint completed.\n  overall_status: ready\n  smoke_gate_status: ready\n  wrapper_gate_status: ready\n  migration_status: skipped\n  function_status: ready\n  report_contract_validator_pass: True\n  progress_overall_ready: True\n  output_json: /home/seongcheoljeong/workspace/myproject/docs/reports/radarsimpy_readiness_checkpoint_paid_6m.json\n[3/4] simulator reference parity\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_radarsimpy_simulator_reference_parity_optional: pass\nrd_range_peak_ref=93, rd_range_peak_fallback=93, diff=0\nrd_doppler_peak_ref=7, rd_doppler_peak_fallback=8, diff=1\nrd_norm_corr_global=0.224043\nrd_norm_corr_aligned=0.669125\nrd_norm_corr_log_aligned=0.667037\nalignment_shift=(-1, 0)\n[4/4] frontend runtime payload -> provider info contract\nRadarSimCpp: Loaded license from /home/seongcheoljeong/Documents/license_RadarSimPy_10760.lic\nvalidate_frontend_runtime_payload_provider_info_optional: pass\ncase_count=3\nrun_radarsimpy_paid_6m_gate_ci: done",
+        "stderr_tail": "RadarSimCpp: No license file path provided. Running in free tier mode.\nRadarSimCpp: No license file path provided. Running in free tier mode."
+      },
+      "refreshed_evidence": [
+        "docs/reports/radarsimpy_production_release_gate_paid_6m.json",
+        "docs/reports/radarsimpy_readiness_checkpoint_paid_6m.json",
+        "docs/reports/radarsimpy_simulator_reference_parity_paid_6m.json",
+        "docs/reports/frontend_runtime_payload_provider_info_paid_6m.json"
+      ]
+    }
+  ]
+}

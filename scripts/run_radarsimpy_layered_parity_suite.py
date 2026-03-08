@@ -15,6 +15,8 @@ from typing import Any, Dict, List, Mapping
 DEFAULT_TRIAL_PACKAGE_ROOT = "external/radarsimpy_trial/Ubuntu24_x86_64_CPU/Ubuntu24_x86_64_CPU"
 DEFAULT_LIBCOMPAT_DIR = "external/radarsimpy_trial/libcompat/usr/lib/x86_64-linux-gnu"
 RADARSIMPY_LICENSE_FILE_ENV = "RADARSIMPY_LICENSE_FILE"
+RADARSIMPY_PACKAGE_ROOT_ENV = "RADARSIMPY_PACKAGE_ROOT"
+RADARSIMPY_LIBCOMPAT_DIR_ENV = "RADARSIMPY_LIBCOMPAT_DIR"
 
 
 def parse_args() -> argparse.Namespace:
@@ -127,7 +129,11 @@ def _stage_license_for_import_time_lookup(
         result["error"] = f"radarsimpy package directory missing: {pkg_dir}"
         return result
 
-    staged = pkg_dir / "license_RadarSimPy_env.lic"
+    staged_name = src.name
+    lower_name = staged_name.lower()
+    if (not lower_name.startswith("license_radarsimpy")) or (not lower_name.endswith(".lic")):
+        staged_name = "license_RadarSimPy_import.lic"
+    staged = pkg_dir / staged_name
     result["staged_path"] = str(staged)
     if staged.exists():
         try:
@@ -213,6 +219,7 @@ def main() -> None:
             trial_pkg_root = (repo_root / trial_pkg_root).resolve()
         env["PYTHONPATH"] = f"{env['PYTHONPATH']}{os.pathsep}{trial_pkg_root}"
         trial_pkg_root_text = str(trial_pkg_root)
+        env[RADARSIMPY_PACKAGE_ROOT_ENV] = trial_pkg_root_text
 
     if libcompat_dir_text != "":
         libcompat_dir = Path(libcompat_dir_text).expanduser()
@@ -220,6 +227,7 @@ def main() -> None:
             libcompat_dir = (repo_root / libcompat_dir).resolve()
         env["LD_LIBRARY_PATH"] = f"{libcompat_dir}{os.pathsep}{env.get('LD_LIBRARY_PATH', '')}"
         libcompat_dir_text = str(libcompat_dir)
+        env[RADARSIMPY_LIBCOMPAT_DIR_ENV] = libcompat_dir_text
 
     if license_file_text != "":
         license_file = Path(license_file_text).expanduser()

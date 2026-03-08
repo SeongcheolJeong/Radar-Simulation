@@ -1,10 +1,10 @@
 {
   "version": 3,
   "date_utc": "2026-03-01",
-  "workspace_root": "/home/seongcheoljeong/workspace/Radar-Simulation",
-  "branch": "codex/hybrid-adapter-real-parser",
-  "upstream": "origin/codex/hybrid-adapter-real-parser",
-  "generated_from_head_commit": "0f907eac98331d0759338a163c8a19ee71667b8d",
+  "workspace_root": "/home/seongcheoljeong/workspace/myproject",
+  "branch": "main",
+  "upstream": "origin/main",
+  "generated_from_head_commit": "269ace50f8fb7dea1bc2c1e76aa3e56a7252f15c",
   "merged_readiness_commit": "406146de8e2f7f8504b93f0811f88c01093cc3b6",
   "merged_readiness_pr": {
     "number": 4,
@@ -26,9 +26,9 @@
     }
   },
   "artifacts": {
-    "matrix_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json",
-    "bundle_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json",
-    "gate_lock_summary_json": "/home/seongcheoljeong/workspace/Radar-Simulation/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3.json"
+    "matrix_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/scene_backend_kpi_scenario_matrix_local_2026_03_01_fresh.json",
+    "bundle_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_bundle_local_2026_03_01_fresh.json",
+    "gate_lock_summary_json": "/home/seongcheoljeong/workspace/myproject/docs/reports/po_sbr_physical_full_track_gate_lock_local_2026_03_01_fresh3.json"
   },
   "status": {
     "matrix_status": "ready",

@@ -11,6 +11,13 @@ Use it to answer four questions in a repeatable order:
 3. Do the high-fidelity backends still satisfy their contract/parity checks?
 4. Does the paid RadarSimPy production path still pass end-to-end?
 
+One-command runner:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_canonical_release_candidate_subset.py \
+  --output-json docs/reports/canonical_release_candidate_subset_latest.json
+```
+
 ## How To Use This Pack
 
 - run from the repository root
@@ -257,10 +264,12 @@ Run:
 
 Add `HF-1` when the Sionna-style path is part of the candidate release story.
 
+The one-command runner above executes this subset by default, with `HF-1` optional via `--with-sionna`.
+
 ## Current Gap
 
-The main remaining gap is no longer scenario definition. It is release execution:
+The main remaining gap is no longer scenario definition or runner wiring. It is release freeze:
 
-- run the release-candidate subset in one controlled pass
-- refresh the resulting stable reports together
+- keep the release-candidate subset green as the default closure path
 - decide whether `HF-1` is required in the default release story or remains optional
+- cut a release-candidate snapshot from the refreshed stable reports
