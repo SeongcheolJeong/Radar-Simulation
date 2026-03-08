@@ -1,5 +1,10 @@
 # AVX Radar Simulation Workbench
 
+Language:
+
+- [English](README.md)
+- [한국어](README_ko.md)
+
 This repository is a radar simulation workbench for developing and validating FMCW radar pipelines with two practical runtime tracks:
 
 - low fidelity: `RadarSimPy + FFD`
@@ -22,6 +27,7 @@ Related:
 
 - [Frontend Runtime Purpose Presets](docs/280_frontend_runtime_purpose_presets.md)
 - [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
+- [프로젝트 개요 및 빠른 시작 (한국어)](README_ko.md)
 
 ## What File Is Best For User Documentation?
 

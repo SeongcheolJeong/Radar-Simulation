@@ -12,7 +12,7 @@
 - 목적에 맞는 런타임 트랙 선택
 - 산출물, 리포트, 트러블슈팅 경로 확인
 
-루트 [README.md](../README.md)는 GitHub 첫 화면용 요약 문서로 유지하고, 이 문서는 실제 사용자용 상세 안내서로 사용합니다.
+루트 [README.md](../README.md)는 GitHub 첫 화면용 영문 요약 문서로 유지하고, [README_ko.md](../README_ko.md)는 한국어 entry page로 사용합니다. 이 문서는 실제 사용자용 상세 안내서입니다.
 
 영문 버전:
 
