@@ -183,6 +183,13 @@ These are not all required for base usage.
 
 ## 4. Installation
 
+Split install guides:
+
+- [Install Guide: Base Environment](284_install_base_environment.md)
+- [Install Guide: RadarSimPy Runtime](285_install_radarsimpy_runtime.md)
+- [Install Guide: Sionna-Style RT Runtime](286_install_sionna_style_rt_runtime.md)
+- [Install Guide: PO-SBR Runtime](287_install_po_sbr_runtime.md)
+
 ### 4.1 Base Installation
 
 Recommended minimum environment for local demo/frontend use:

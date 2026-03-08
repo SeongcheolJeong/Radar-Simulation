@@ -187,6 +187,13 @@ tests/
 
 ## 4. 설치 방법
 
+분리된 설치 가이드:
+
+- [Install Guide: Base Environment](284_install_base_environment.md)
+- [Install Guide: RadarSimPy Runtime](285_install_radarsimpy_runtime.md)
+- [Install Guide: Sionna-Style RT Runtime](286_install_sionna_style_rt_runtime.md)
+- [Install Guide: PO-SBR Runtime](287_install_po_sbr_runtime.md)
+
 ### 4.1 기본 설치
 
 로컬 demo/frontend 사용 기준 최소 권장 환경:
