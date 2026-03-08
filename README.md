@@ -54,6 +54,10 @@ Use both:
 
 This repository now uses that structure.
 
+Documentation hub:
+
+- [Documentation Index](docs/README.md)
+
 ## Repository Structure
 
 ```text
@@ -69,6 +73,7 @@ tests/          Test data and fixture-oriented test assets
 
 Detailed breakdown:
 
+- [Documentation Index](docs/README.md)
 - [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
 - [프로젝트 구조 및 사용자 매뉴얼 (한국어)](docs/283_project_structure_and_user_manual_ko.md)
 - [Architecture](docs/03_architecture.md)
@@ -102,6 +107,7 @@ Dependency rule:
 - [RadarSimPy Runtime](docs/285_install_radarsimpy_runtime.md)
 - [Sionna-Style RT Runtime](docs/286_install_sionna_style_rt_runtime.md)
 - [PO-SBR Runtime](docs/287_install_po_sbr_runtime.md)
+- [Documentation Index](docs/README.md)
 
 ## Quick Start
 
@@ -204,6 +210,7 @@ The main pipeline writes:
 
 Read the full manual here:
 
+- [Documentation Index](docs/README.md)
 - [Project Structure And User Manual](docs/282_project_structure_and_user_manual.md)
 - [프로젝트 구조 및 사용자 매뉴얼 (한국어)](docs/283_project_structure_and_user_manual_ko.md)
 

@@ -14,6 +14,10 @@ Use it for:
 
 The root [README.md](../README.md) should stay short and act as the GitHub landing page. This file is the full manual.
 
+Documentation hub:
+
+- [Documentation Index](README.md)
+
 ## 1. What This Project Is
 
 This project is an AVX-style radar simulation workbench centered on a stable pipeline:
@@ -185,6 +189,7 @@ These are not all required for base usage.
 
 Split install guides:
 
+- [Documentation Index](README.md)
 - [Install Onboarding Map](288_install_onboarding_map.md)
 - [Install Guide: Base Environment](284_install_base_environment.md)
 - [Install Guide: RadarSimPy Runtime](285_install_radarsimpy_runtime.md)
