@@ -50,6 +50,10 @@ Start with:
 
 Use these when you need to run the frontend, compare tracks, inspect artifacts, and review current evidence.
 
+Evidence next:
+
+- [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist)
+
 ### Classic Dashboard User
 
 Start with:
@@ -59,6 +63,10 @@ Start with:
 - [Generated Reports Index](reports/README.md)
 
 Use these when you need the lightweight dashboard shell, a quick demo route, or a simple presentation-oriented frontend path.
+
+Evidence next:
+
+- [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist)
 
 ### Developer
 
@@ -80,6 +88,11 @@ Start with:
 
 Use these when you need pass/fail criteria, current evidence, and stable validation expectations.
 
+Evidence next:
+
+- [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist)
+- [PO-SBR Evidence Checklist](reports/README.md#po-sbr-evidence-checklist)
+
 ### Paid RadarSimPy Validator
 
 Start with:
@@ -89,6 +102,10 @@ Start with:
 - [Generated Reports Index](reports/README.md)
 
 Use these when you need the production-license path, paid runtime gates, readiness checks, and final RadarSimPy evidence.
+
+Evidence next:
+
+- [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist)
 
 ## Installation
 

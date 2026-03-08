@@ -58,7 +58,18 @@ Related snapshot guide:
 | paid RadarSimPy frontend/runtime contract | `frontend_runtime_payload_provider_info_paid_6m.json` | paid runtime-oriented frontend payload evidence |
 | latest RadarSimPy overall status | `radarsimpy_final_status_latest.json` | single status-style entry point for RadarSimPy work |
 
+## By Role From docs/
+
+| If you came here as... | Start with this checklist | Then open |
+| --- | --- | --- |
+| Operator | [Frontend Evidence Checklist](#frontend-evidence-checklist) | `graph_lab_playwright_snapshots/latest/decision_brief.md` |
+| Classic Dashboard User | [Frontend Evidence Checklist](#frontend-evidence-checklist) | `frontend_quickstart_v1.json` |
+| Validator | [RadarSimPy Evidence Checklist](#radarsimpy-evidence-checklist) or [PO-SBR Evidence Checklist](#po-sbr-evidence-checklist) | the subsystem-specific `_latest` or dated report |
+| Paid RadarSimPy Validator | [RadarSimPy Evidence Checklist](#radarsimpy-evidence-checklist) | `radarsimpy_production_release_gate_latest.json` |
+
 ## Current Evidence Checklists
+
+<a id="frontend-evidence-checklist"></a>
 
 ### Frontend
 
@@ -81,6 +92,8 @@ If this checklist fails, open next:
 - `graph_lab_playwright_snapshots/latest/decision_brief.md`
 - `graph_lab_playwright_snapshots/latest/`
 - `frontend_runtime_payload_provider_info_optional_latest.json`
+
+<a id="radarsimpy-evidence-checklist"></a>
 
 ### RadarSimPy
 
@@ -106,6 +119,8 @@ If this checklist fails, open next:
 - `radarsimpy_readiness_checkpoint_latest.json`
 - `radarsimpy_wrapper_integration_gate_production_latest.json`
 - `radarsimpy_integration_smoke_gate_production_latest.json`
+
+<a id="po-sbr-evidence-checklist"></a>
 
 ### PO-SBR
 
