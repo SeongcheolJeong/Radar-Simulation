@@ -56,6 +56,14 @@ Evidence next:
 
 - [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist)
 
+Operator quick verification:
+
+| If you need to... | Run this first | Then check |
+| --- | --- | --- |
+| launch Graph Lab locally | `PY_BIN=.venv/bin/python scripts/run_graph_lab_local.sh 8081 8101` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| validate the frontend/backend API path | `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| validate Graph Lab browser flow end-to-end | `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers PYTHONPATH=src .venv/bin/python scripts/validate_graph_lab_playwright_e2e.py --require-playwright --output-json docs/reports/graph_lab_playwright_e2e_latest.json` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+
 <a id="role-classic-dashboard-user"></a>
 
 ### Classic Dashboard User
@@ -71,6 +79,14 @@ Use these when you need the lightweight dashboard shell, a quick demo route, or 
 Evidence next:
 
 - [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist)
+
+Classic Dashboard quick verification:
+
+| If you need to... | Run this first | Then check |
+| --- | --- | --- |
+| launch the classic dashboard locally | `PY_BIN=.venv/bin/python scripts/run_web_e2e_dashboard_local.sh 8080 8099` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| validate the dashboard/backend API path | `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py` | [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist) |
+| review the lightweight demo summary | `PYTHONPATH=src .venv/bin/python scripts/validate_web_e2e_orchestrator_api.py` | `docs/reports/frontend_quickstart_v1.json` |
 
 <a id="role-developer"></a>
 
