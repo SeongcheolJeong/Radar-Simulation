@@ -84,6 +84,7 @@ Use the landing pages for quick routing. Use `282` and `283` when you want the f
 | install only what you need | [Install Onboarding Map](288_install_onboarding_map.md) | one of `284` to `287` |
 | run Graph Lab | [Frontend Runtime Purpose Presets](280_frontend_runtime_purpose_presets.md) | `scripts/run_graph_lab_local.sh` |
 | learn the Graph Lab UI and button flow | [Graph Lab UX Manual](300_graph_lab_ux_manual.md) | the screenshots and run sequences in that manual |
+| understand how this simulator is positioned against plain RadarSimPy and Ansys AVx | [Our Project vs. RadarSimPy vs. Ansys AVx](340_our_project_vs_radarsimpy_vs_ansys_avx.md) | the physics ladder and comparison table in that document |
 | choose between Graph Lab and the classic dashboard | [Frontend Document Map](328_frontend_doc_map.md) | the UI-specific map for the chosen frontend |
 | troubleshoot a frontend flow before diving into UI-specific docs | [Frontend Troubleshooting Map](330_frontend_troubleshooting_map.md) | the failure guide for the affected UI |
 | review current frontend evidence before opening UI manuals | [Frontend Evidence Map](332_frontend_evidence_map.md) | the UI-specific evidence files and snapshots |
@@ -186,6 +187,11 @@ Evidence next:
 - [Frontend Evidence Checklist](reports/README.md#frontend-evidence-checklist)
 - [RadarSimPy Evidence Checklist](reports/README.md#radarsimpy-evidence-checklist)
 - [PO-SBR Evidence Checklist](reports/README.md#po-sbr-evidence-checklist)
+
+Positioning next:
+
+- [Our Project vs. RadarSimPy vs. Ansys AVx](340_our_project_vs_radarsimpy_vs_ansys_avx.md)
+- [우리 프로젝트 vs RadarSimPy vs Ansys AVx](341_our_project_vs_radarsimpy_vs_ansys_avx_ko.md)
 
 Developer quick verification:
 
