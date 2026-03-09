@@ -148,6 +148,8 @@ When `PO-SBR` is selected, read the warning under `Purpose Presets`:
 - prefer `Sionna-style RT` for interactive checks
 - verify the current runtime verdict in [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json)
 
+If you want the backend execution sequence behind these presets, read [Graph Lab Low/High Fidelity Execution Flow](338_graph_lab_low_high_fidelity_execution_flow.md).
+
 ### Multiplexing Controls
 
 | Mode | Use it when |
@@ -281,6 +283,8 @@ Use this when you want the standard operator workflow.
    - `Artifact Inspector`
 7. If the pair is final, click `Policy Gate`.
 8. Then click `Run Session` and `Export Brief`.
+
+If you want to understand what happens internally during this sequence, read [Graph Lab Low/High Fidelity Execution Flow](338_graph_lab_low_high_fidelity_execution_flow.md).
 
 Fast path:
 

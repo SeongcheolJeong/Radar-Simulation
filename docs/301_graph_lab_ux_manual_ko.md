@@ -145,6 +145,8 @@ Artifact Inspector 예시:
 - interactive check는 먼저 `Sionna-style RT`, full `PO-SBR`는 전용 검증에서 사용
 - 현재 runtime 판단은 [graph_lab_high_fidelity_runtime_timing_latest.json](reports/graph_lab_high_fidelity_runtime_timing_latest.json)에서 확인
 
+이 preset들이 backend에서 실제로 어떤 순서로 실행되는지 알고 싶다면 [Graph Lab Low/High Fidelity 실행 흐름](339_graph_lab_low_high_fidelity_execution_flow_ko.md)을 같이 읽으면 됩니다.
+
 ## 오른쪽 패널: Decision Pane
 
 `Decision Pane`은 compare, gate, session, export를 처리하는 영역입니다.
@@ -254,6 +256,8 @@ Artifact Inspector 예시:
    - `Artifact Inspector`
 7. pair가 최종이면 `Policy Gate`
 8. 이어서 `Run Session`, `Export Brief`
+
+이 순서에서 내부 backend 실행 흐름까지 이해하려면 [Graph Lab Low/High Fidelity 실행 흐름](339_graph_lab_low_high_fidelity_execution_flow_ko.md)을 같이 읽으면 됩니다.
 
 빠른 경로:
 
